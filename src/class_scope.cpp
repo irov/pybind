@@ -52,4 +52,11 @@ namespace pybind
 
 		return it_find->second;		
 	}
+	//////////////////////////////////////////////////////////////////////////
+	bool class_scope::has_class_scope( const type_info & _info )
+	{
+		TMapTypeScope::iterator it_find = s_mapTypeScope.find( _info.name() );
+
+		return it_find != s_mapTypeScope.end();
+	}
 }

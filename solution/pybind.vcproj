@@ -191,6 +191,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\def.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\extract.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\from_py_to_cpp_parser.cpp"
 				>
 			</File>
@@ -200,10 +208,6 @@
 			</File>
 			<File
 				RelativePath="..\src\method_proxy.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\module.cpp"
 				>
 			</File>
 			<File
@@ -241,7 +245,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\pybind\def.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\pybind\exports.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\pybind\extract.hpp"
 				>
 			</File>
 			<File
@@ -258,10 +270,6 @@
 			</File>
 			<File
 				RelativePath="..\pybind\method_proxy.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\pybind\module.hpp"
 				>
 			</File>
 			<File

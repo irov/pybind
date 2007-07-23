@@ -1,7 +1,7 @@
 #	include "pybind/class_type.hpp"
 #	include "pybind/class_scope.hpp"
 
-#	include "pybind/module.hpp"
+#	include "pybind/system.hpp"
 
 #	include "pybind/config.hpp"
 
@@ -50,15 +50,29 @@ namespace pybind
 		0,                         /* tp_alloc */
 		0,                 /* tp_new */
 	};
+
+	static void py_dealloc( PyObject * _obj )
+	{
+		_obj->ob_type->tp_free( _obj );
+	}
+
 	//////////////////////////////////////////////////////////////////////////
 	class_type_scope::class_type_scope(
 		const char * _name, 
-		module_ * _module,
+		PyObject * _module,
 		newfunc _pynew,
 		destructor _pydestructor)
-		: m_module( _module )
-		, m_type( py_empty_type )
+		: m_type( py_empty_type )
 	{
+		if( _module == 0 )
+		{
+			m_module = get_currentmodule();
+		}
+		else
+		{
+			m_module = _module;
+		}
+
 		m_type.tp_name = _name;
 		m_type.tp_basicsize = sizeof( py_class_type );
 		m_type.tp_doc = "Embedding class from cpp";
@@ -66,7 +80,8 @@ namespace pybind
 		m_type.tp_dealloc = _pydestructor;
 		m_type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
 
-		m_type_holder;
+		m_type_holder = m_type;
+		m_type_holder.tp_dealloc = &py_dealloc;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::add_method( const PyMethodDef & md )
@@ -74,7 +89,7 @@ namespace pybind
 		m_vectorMethodDef.push_back( md );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_type_scope::set_module( module_ * _module )
+	void class_type_scope::set_module( PyObject * _module )
 	{
 		m_module = _module;
 	}
@@ -87,7 +102,7 @@ namespace pybind
 			_basescope->m_vectorMethodDef.end() );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_type_scope::setup_type( const type_info & _info )
+	void class_type_scope::setup_type()
 	{
 		PyMethodDef md = {0};
 
@@ -102,9 +117,17 @@ namespace pybind
 
 		class_scope::reg_class_type( &m_type );
 
-		class_scope::reg_class_scope( _info, this );
+		PyModule_AddObject( m_module, m_type.tp_name, (PyObject*)&m_type );
+	}
 
-		m_module->addObject( m_type.tp_name, (PyObject*)&m_type );			
+	PyObject * class_type_scope::create_holder( void * _impl )
+	{
+		py_class_type *self = 
+			(py_class_type *)m_type_holder.tp_alloc( &m_type_holder, 0 );
+
+		self->impl = _impl;
+
+		return (PyObject*)self;
 	}
 
 }

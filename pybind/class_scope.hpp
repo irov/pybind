@@ -18,5 +18,6 @@ namespace pybind
 
 		static void reg_class_scope( const type_info & _info, class_type_scope * _scope );
 		static class_type_scope * get_class_scope( const type_info & _info );
+		static bool has_class_scope( const type_info & _info );
 	};
 }

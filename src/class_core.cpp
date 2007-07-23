@@ -14,22 +14,34 @@ namespace pybind
 	static TListClassType s_listClassType;
 	//////////////////////////////////////////////////////////////////////////
 	class_type_scope * class_core::create_new_type_scope( 
+		const type_info & _info,
 		const char * _name, 
-		module_ * _module,
+		PyObject * _module,
 		pybind_newfunc _pynew,
 		pybind_destructor _pydestructor)
 	{
 		s_listClassType.push_back( class_type_scope( _name, _module, _pynew, _pydestructor ) );
 
-		return &s_listClassType.back();
+		class_type_scope * t_scope = &s_listClassType.back();
+
+		class_scope::reg_class_scope( _info, t_scope );
+
+		return t_scope;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_core::set_module( class_type_scope * m_type_scope, module_ * _module )
+	PyObject * class_core::create_holder( const type_info & _info, void * _impl )
 	{
-		m_type_scope->set_module( _module );
+		class_type_scope * t_scope = class_scope::get_class_scope( _info );
+
+		return t_scope->create_holder( _impl );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_core::def_method( const char * _name, PyCFunction pyfunc, int _arity, class_type_scope * _scope )
+	void class_core::set_module( class_type_scope * _scope, PyObject * _module )
+	{
+		_scope->set_module( _module );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void class_core::def_method( const char * _name, PyCFunction pyfunc, int _arity, const type_info & _info )
 	{
 		PyMethodDef md = {
 			_name,
@@ -38,7 +50,9 @@ namespace pybind
 			"Embedding method cpp"
 		};
 
-		_scope->add_method( md );
+		class_type_scope * scope = class_scope::get_class_scope( _info );
+
+		scope->add_method( md );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_core::add_method_from_scope( class_type_scope * _scope, class_type_scope * _basescope )
@@ -46,9 +60,11 @@ namespace pybind
 		_scope->add_method_from_scope( _basescope );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_core::end_method( const type_info & _info, class_type_scope * _scope )
+	void class_core::end_method( const type_info & _info )
 	{
-		_scope->setup_type( _info );
+		class_type_scope * scope = class_scope::get_class_scope( _info );
+
+		scope->setup_type();
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * class_core::new_impl( PyTypeObject * _type, PyObject * _args, void * _impl )

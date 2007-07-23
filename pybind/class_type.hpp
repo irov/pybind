@@ -18,18 +18,20 @@ namespace pybind
 	public:
 		class_type_scope(
 			const char * _name, 
-			module_ * _module,
+			PyObject * _module,
 			newfunc _pynew,
 			destructor _pydestructor
 			);
 
 	public:
 		void add_method( const PyMethodDef & md );
-		void set_module( module_ * _module );
+		void set_module( PyObject * _module );
 
 		void add_method_from_scope( class_type_scope * _basescope );
 
-		void setup_type( const type_info & _info );
+		PyObject * create_holder( void * _impl );
+
+		void setup_type();
 
 	public:
 		typedef std::vector< PyMethodDef > TVectorPyMethodDef;
@@ -37,7 +39,7 @@ namespace pybind
 		TVectorPyMethodDef m_vectorMethodDef;
 		PyTypeObject m_type;
 		PyTypeObject m_type_holder;
-		module_ * m_module;
+		PyObject * m_module;
 	};
 
 	

@@ -9,7 +9,7 @@ namespace pybind
 {
 	namespace detail
 	{
-		void * py_class_type_value( PyObject * _arg )
+		void * py_class_type_value( const type_info & _info, PyObject * _arg )
 		{
 			PyTypeObject * type = (PyTypeObject *)PyObject_Type( _arg );
 

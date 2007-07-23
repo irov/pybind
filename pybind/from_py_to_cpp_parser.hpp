@@ -1,6 +1,7 @@
 #	pragma once
 
 #	include "pybind/exports.hpp"
+#	include "class_core.hpp"
 
 #	include <string>
 
@@ -17,7 +18,7 @@ namespace pybind
 
 	namespace detail
 	{
-		PYBIND_API void * py_class_type_value( PyObject * _arg );
+		PYBIND_API void * py_class_type_value( const type_info & _info, PyObject * _arg );
 		
 		PYBIND_API bool bool_value( PyObject * _arg );
 		PYBIND_API int int_value( PyObject * _arg );
@@ -37,14 +38,33 @@ namespace pybind
 	{
 		static T value( PyObject * _arg )
 		{
-			return (T)detail::py_class_type_value( _arg );
+			return (T)detail::py_class_type_value( class_info<T>(), _arg );
 
 			return 0;
 		}
 
 		static PyObject * wrapp( T _value )
 		{
-			return 0;
+			const type_info & info = class_info<T>();
+
+			if( class_scope::has_class_scope( info ) )
+			{
+				return class_core::create_holder( info, _value );
+			}
+		}
+	};
+
+	template<>
+	struct from_py_to_cpp_parser<PyObject *>
+	{
+		static PyObject * value( PyObject * _arg )
+		{
+			return _arg;
+		}
+
+		static PyObject * wrapp( PyObject * _value )
+		{
+			return _value;
 		}
 	};
 
