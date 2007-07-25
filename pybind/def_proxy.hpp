@@ -1,6 +1,6 @@
 #	pragma once
 
-#	include "pybind/method_call.hpp"
+#	include "pybind/def_call.hpp"
 
 namespace pybind
 {
@@ -12,33 +12,29 @@ namespace pybind
 	}
 
 	template<class C, class F>
-	class method_proxy
+	class def_proxy
 	{
 	public:
-		static void init( F f )
+		static void init( const char * _name, F f )
 		{
 			m_f = f;
 		}
 
-		template<class F, F f>
-		struct method0
+		static PyObject * 
+			call( py_class_type * _self )
 		{
-			static PyObject * 
-				call( py_class_type * _self )
-			{
-				C* impl = (C*)detail::class_type_impl( _self );
-	
-				PyObject *ret = method_call<C,F>::call( impl, f, 0 );
+			C* impl = (C*)detail::class_type_impl( _self );
 
-				return ret;
-			}
+			PyObject *ret = method_call<C,F>::call( impl, f, 0 );
+
+			return ret;
 		}
 
 		template<class F>
 		method0<F> def_method0()
 
 
-		template<class F, F f>
+			template<class F, F f>
 		static PyObject * 
 			method1( py_class_type * _self, PyObject * _args )
 		{
@@ -50,7 +46,7 @@ namespace pybind
 		}
 
 	private:
-		static F m_f;
+		static std::map<const char *, F> m_f;
 	};
 
 	template<class C, class F>

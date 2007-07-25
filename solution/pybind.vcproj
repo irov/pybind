@@ -249,6 +249,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\pybind\def_parser.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\pybind\def_proxy.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\pybind\exports.hpp"
 				>
 			</File>
