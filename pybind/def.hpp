@@ -18,13 +18,13 @@ namespace pybind
 	}
 
 	template<class F>
-	void def( const char * _name, F f, PyObject * _module = 0 )
+	void def( const char * _name, F _cfunc, PyObject * _module = 0 )
 	{
 		typedef typename def_parser<F>::result f_info;
 
 		detail::def_function(
 			_name,
-			(pybind_callback)f,
+			(pybind_callback)_cfunc,
 			( f_info::arity > 0 ) ? (pybind_cfunction)&def_proxy<F>::method1 : (pybind_cfunction)&def_proxy<F>::method0,
 			f_info::arity,
 			_module

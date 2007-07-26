@@ -28,6 +28,10 @@ namespace pybind
 		}
 	};
 
+	pybind::class_<Foo, pybind::bases<Boo,Foo>>("Foo")
+		.def("inc", &Foo::inc )
+		.end();
+
 	template<class C, class B = bases<void,void,void,void>, class A = base_alloc >
 	class PYBIND_API class_
 	{
