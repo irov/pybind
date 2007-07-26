@@ -195,6 +195,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\def_proxy.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\extract.cpp"
 				>
 			</File>
@@ -249,11 +253,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\pybind\def_call.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\pybind\def_core.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\pybind\def_parser.hpp"
 				>
 			</File>
 			<File
 				RelativePath="..\pybind\def_proxy.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\pybind\def_type.hpp"
 				>
 			</File>
 			<File
@@ -286,6 +302,10 @@
 			</File>
 			<File
 				RelativePath="..\pybind\system.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\pybind\types.hpp"
 				>
 			</File>
 		</Filter>

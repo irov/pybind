@@ -140,6 +140,21 @@ namespace pybind
 		Py_DECREF( _obj );
 	}
 
+	PyObject * ret_none()
+	{
+		Py_RETURN_NONE;
+	}
+
+	PyObject * ret_true()
+	{
+		Py_RETURN_TRUE;
+	}
+
+	PyObject * ret_false()
+	{
+		Py_RETURN_FALSE;
+	}
+
 	bool has_attr( PyObject * _obj, const char * _attr )
 	{
 		return PyObject_HasAttrString( _obj, _attr ) == 1;

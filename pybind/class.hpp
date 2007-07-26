@@ -10,11 +10,29 @@
 
 namespace pybind
 {	
-	template<class C, class B = bases<void,void,void,void> >
+	struct base_alloc
+	{
+		template<class C>
+		static void * new_()
+		{
+			return new C();
+		}
+	};
+
+	struct interface
+	{
+		template<class C>
+		static void * new_()
+		{
+			return 0;
+		}
+	};
+
+	template<class C, class B = bases<void,void,void,void>, class A = base_alloc >
 	class PYBIND_API class_
 	{
 	public:
-		class_( const char * _name, PyObject * _module )
+		class_( const char * _name, PyObject * _module = 0 )
 		{
 			class_core::create_new_type_scope( 
 				class_info<C>(),
@@ -35,7 +53,7 @@ namespace pybind
 		template<class F>
 		class_ & def( const char * _name, F f )
 		{		
-			typedef typename method_parser<C,F>::result f_info;
+			typedef typename method_parser<F>::result f_info;
 
 			method_proxy<C,F>::init( f );
 
@@ -64,7 +82,7 @@ namespace pybind
 		static PyObject *
 			new_( PyTypeObject * _type, PyObject * _args, PyObject * _kwds )
 		{
-			return class_core::new_impl( _type, _args, (void *) new C );
+			return class_core::new_impl( _type, _args, A::new_<C>() );
 		}
 
 		static void 
@@ -84,12 +102,5 @@ namespace pybind
 		{
 			return class_scope::get_class_scope( class_info<C>() );
 		}
-
-	protected:
-		static class_type_scope * m_type_scope;
 	};
-
-	template<class C, class B>
-	class_type_scope * class_<C,B>::m_type_scope = 0;
-
 }

@@ -1,5 +1,7 @@
 #	pragma once
 
+#	include "exports.hpp"
+
 #	include <stdarg.h>
 
 extern "C" 
@@ -10,47 +12,48 @@ extern "C"
 
 namespace pybind
 {
-	void initialize();
-	void finalize();
+	PYBIND_API void initialize();
+	PYBIND_API void finalize();
 
-	void check_error();
+	PYBIND_API void check_error();
 
-	PyObject * module_import( const char * _name );
-	PyObject * module_init( const char * _name );
-	PyObject * module_dict( PyObject * _module );
-	void module_addobject( PyObject * _module, const char * _name, PyObject * _obj );
+	PYBIND_API PyObject * module_import( const char * _name );
+	PYBIND_API PyObject * module_init( const char * _name );
+	PYBIND_API PyObject * module_dict( PyObject * _module );
+	PYBIND_API void module_addobject( PyObject * _module, const char * _name, PyObject * _obj );
 
-	void set_currentmodule( PyObject * _module );
-	PyObject * get_currentmodule();
+	PYBIND_API void set_currentmodule( PyObject * _module );
+	PYBIND_API PyObject * get_currentmodule();
 
-	PyObject * call( PyObject * _obj, const char * _format, ... );
-	PyObject * call_method( PyObject * _obj, const char * _method, const char * _format, ... );
+	PYBIND_API PyObject * call( PyObject * _obj, const char * _format, ... );
+	PYBIND_API PyObject * call_method( PyObject * _obj, const char * _method, const char * _format, ... );
 	
-	PyObject * call_va( PyObject * _obj, const char * _format, va_list );
-	PyObject * call_method_va( PyObject * _obj, const char * _method, const char * _format, va_list );
+	PYBIND_API PyObject * call_va( PyObject * _obj, const char * _format, va_list );
+	PYBIND_API PyObject * call_method_va( PyObject * _obj, const char * _method, const char * _format, va_list );
 	
+	PYBIND_API PyObject * exec( const char * _code, PyObject * _global = 0, PyObject * _local = 0 );
+	PYBIND_API PyObject * exec_file( const char * _filename, PyObject * _global = 0, PyObject * _local = 0 );
+
+	PYBIND_API void set_syspath( const char * _path );
+
+	PYBIND_API void incref( PyObject * _obj );
+	PYBIND_API void decref( PyObject * _obj );
+
+	PYBIND_API PyObject * ret_none();
+	PYBIND_API PyObject * ret_true();
+	PYBIND_API PyObject * ret_false();
+
+	PYBIND_API bool has_attr( PyObject * _obj, const char * _attr );
+	PYBIND_API PyObject * get_attr( PyObject * _obj, const char * _attr );
+
+	PYBIND_API bool check_type( PyObject * _obj );
 	
+	PYBIND_API bool list_check( PyObject * _obj );
+	PYBIND_API size_t list_size( PyObject * _obj );
+	PYBIND_API PyObject * list_getitem( PyObject * _obj, size_t _it );
 
-	PyObject * exec( const char * _code, PyObject * _global, PyObject * _local );
-	PyObject * exec_file( const char * _filename, PyObject * _global, PyObject * _local );
+	PYBIND_API bool dict_check( PyObject * _obj );
+	PYBIND_API bool dict_next( PyObject * _dict, size_t *_pos, PyObject ** _key, PyObject ** _value );
 
-	void set_syspath( const char * _path );
-
-	void incref( PyObject * _obj );
-	void decref( PyObject * _obj );
-
-	bool has_attr( PyObject * _obj, const char * _attr );
-	PyObject * get_attr( PyObject * _obj, const char * _attr );
-
-	bool check_type( PyObject * _obj );
-	
-	
-	bool list_check( PyObject * _obj );
-	size_t list_size( PyObject * _obj );
-	PyObject * list_getitem( PyObject * _obj, size_t _it );
-
-	bool dict_check( PyObject * _obj );
-	bool dict_next( PyObject * _dict, size_t *_pos, PyObject ** _key, PyObject ** _value );
-
-	void exception_filter();
+	PYBIND_API void exception_filter();
 }

@@ -18,7 +18,7 @@ namespace pybind
 	}
 
 
-	template<class C0, class C1 = void, class C2 = void, class C3 = void>
+	template<class C0 = void, class C1 = void, class C2 = void, class C3 = void>
 	class bases
 	{
 	public:

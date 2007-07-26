@@ -11,8 +11,6 @@ namespace pybind
 		void * impl;
 	};
 
-	class module_;
-
 	class class_type_scope
 	{
 	public:

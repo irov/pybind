@@ -20,31 +20,21 @@ namespace pybind
 			m_f = f;
 		}
 
-		template<class F, F f>
-		struct method0
+		static PyObject * 
+			method0( py_class_type * _self )
 		{
-			static PyObject * 
-				call( py_class_type * _self )
-			{
-				C* impl = (C*)detail::class_type_impl( _self );
-	
-				PyObject *ret = method_call<C,F>::call( impl, f, 0 );
+			C* impl = (C*)detail::class_type_impl( _self );
+			PyObject *ret = method_call<C,F>::call( impl, m_f, 0 );
 
-				return ret;
-			}
+			return ret;
 		}
 
-		template<class F>
-		method0<F> def_method0()
-
-
-		template<class F, F f>
 		static PyObject * 
 			method1( py_class_type * _self, PyObject * _args )
 		{
 			C* impl = (C*)detail::class_type_impl( _self );
 
-			PyObject *ret = method_call<C,F>::call( impl, f, _args );
+			PyObject *ret = method_call<C,F>::call( impl, m_f, _args );
 
 			return ret;
 		}

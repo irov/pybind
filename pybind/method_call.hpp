@@ -15,7 +15,7 @@ namespace pybind
 	template<class C, class F>
 	struct method_call
 	{
-		typedef typename method_parser<C,F>::result f_info;
+		typedef typename method_parser<F>::result f_info;
 		typedef typename f_info::ret_type Ret;
 
 		static PyObject * call( C * _obj, F f, PyObject * _arg )
