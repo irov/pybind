@@ -3,6 +3,8 @@
 #	include "pybind/system.hpp"
 #	include "pybind/type_cast.hpp"
 
+#	include <exception>
+
 namespace pybind
 {
 	namespace detail

@@ -5,7 +5,6 @@
 #	include "pybind/class_core.hpp"
 #	include "pybind/method_parser.hpp"
 #	include "pybind/method_proxy.hpp"
-#	include "pybind/method_static.hpp"
 #	include "pybind/type_cast.hpp"
 
 namespace pybind
