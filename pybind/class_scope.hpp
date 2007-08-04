@@ -1,5 +1,7 @@
 #	pragma once
 
+#	include "pybind/exports.hpp"
+
 extern "C" 
 { 
 	struct _typeobject; 
@@ -10,7 +12,7 @@ namespace pybind
 {
 	class class_type_scope;
 
-	class class_scope
+	class PYBIND_API class_scope
 	{
 	public:
 		static void reg_class_type( PyTypeObject * _type );

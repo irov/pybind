@@ -8,6 +8,7 @@
 namespace pybind
 {
 	class class_type_scope;
+	class method_proxy_interface;
 
 	namespace detail
 	{
@@ -17,17 +18,25 @@ namespace pybind
 			typedef T type;
 		};
 
+		template<> struct rv_pointer< PyObject * >{ typedef PyObject * type; };
+
 		template<class T> struct rv_pointer<T *>{	typedef typename rv_pointer<T>::type type;	};
 		template<class T> struct rv_pointer<const T *>{	typedef typename rv_pointer<T>::type type;	};
+
+		template<class T> struct rv_pointer<T &>{	typedef typename rv_pointer<T>::type type;	};
+		template<class T> struct rv_pointer<const T &>{	typedef typename rv_pointer<T>::type type;	};
+
+		PYBIND_API void * get_class( PyObject * _obj );
+		PYBIND_API void * check_registred_class( PyObject * _obj, const type_info & _info );
 	}
 
 	template<class T>
 	const type_info & class_info()
 	{
-		return typeid( detail::rv_pointer<T> );
+		return typeid( T );
 	}
 
-	class class_core
+	class PYBIND_API class_core
 	{
 	public:
 		static class_type_scope * create_new_type_scope( 
@@ -44,7 +53,7 @@ namespace pybind
 
 		static void def_method( 
 			const char * _name, 
-			pybind_cfunction pyfunc, 
+			method_proxy_interface * _ifunc, 
 			int _arity, 
 			const type_info & _info );
 
@@ -59,9 +68,7 @@ namespace pybind
 			add_method_from_scope(  _scope, _basescope );
 		}
 
-		static void end_method( const type_info & _info );		
-
-		static PyObject * new_impl( PyTypeObject * _type, PyObject * _args, void * _impl );
+		static PyObject * new_impl( PyTypeObject * _type, PyObject * _args, void * _impl, const type_info & _tinfo );
 		static void * dealloc_impl( PyObject * _obj );
 	};
 }

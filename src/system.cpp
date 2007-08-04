@@ -28,6 +28,12 @@ namespace pybind
 	{
 		char *n = const_cast<char *>(_name); 
 		PyObject * module = PyImport_ImportModule( n );
+
+		if( module == 0 )
+		{
+			check_error();
+		}
+
 		return module;
 	}
 
@@ -128,6 +134,8 @@ namespace pybind
 	void set_syspath( const char * _path )
 	{
 		PySys_SetPath( const_cast< char * >( _path ) );
+
+		check_error();
 	}
 
 	void incref( PyObject * _obj )

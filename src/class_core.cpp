@@ -9,6 +9,28 @@
 
 namespace pybind
 {
+	namespace detail
+	{
+		void * get_class( PyObject * _obj )
+		{
+			py_class_type * self = (py_class_type *)_obj;
+			return self->impl;
+		}
+
+		void * check_registred_class( PyObject * _obj, const type_info & _info )
+		{
+			PyObject * py_type = PyObject_Type( _obj );
+
+			class_type_scope * type_scope = class_scope::get_class_scope( _info );
+
+			if( PyType_IsSubtype( (PyTypeObject *)py_type, &type_scope->m_type ) )
+			{
+				return get_class( _obj );
+			}
+
+			return 0;
+		}
+	}
 	//////////////////////////////////////////////////////////////////////////
 	typedef std::list<class_type_scope> TListClassType;
 	static TListClassType s_listClassType;
@@ -20,9 +42,11 @@ namespace pybind
 		pybind_newfunc _pynew,
 		pybind_destructor _pydestructor)
 	{
-		s_listClassType.push_back( class_type_scope( _name, _module, _pynew, _pydestructor ) );
+		s_listClassType.push_back( class_type_scope() );
 
 		class_type_scope * t_scope = &s_listClassType.back();
+
+		t_scope->setup(  _name, _module, _pynew, _pydestructor );
 
 		class_scope::reg_class_scope( _info, t_scope );
 
@@ -41,33 +65,20 @@ namespace pybind
 		_scope->set_module( _module );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_core::def_method( const char * _name, PyCFunction pyfunc, int _arity, const type_info & _info )
+	void class_core::def_method( const char * _name, method_proxy_interface * _ifunc, int _arity, const type_info & _info )
 	{
-		PyMethodDef md = {
-			_name,
-			pyfunc,
-			METH_CLASS | ( _arity ) ? METH_VARARGS : METH_NOARGS,
-			"Embedding method cpp"
-		};
-
 		class_type_scope * scope = class_scope::get_class_scope( _info );
 
-		scope->add_method( md );
+		scope->add_method( _name, _ifunc, _arity );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_core::add_method_from_scope( class_type_scope * _scope, class_type_scope * _basescope )
 	{
 		_scope->add_method_from_scope( _basescope );
 	}
-	//////////////////////////////////////////////////////////////////////////
-	void class_core::end_method( const type_info & _info )
-	{
-		class_type_scope * scope = class_scope::get_class_scope( _info );
 
-		scope->setup_type();
-	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * class_core::new_impl( PyTypeObject * _type, PyObject * _args, void * _impl )
+	PyObject * class_core::new_impl( PyTypeObject * _type, PyObject * _args, void * _impl, const type_info & _tinfo )
 	{
 		py_class_type *self = 
 			(py_class_type *)_type->tp_alloc( _type, 0 );
@@ -76,6 +87,10 @@ namespace pybind
 		{
 			self->impl = _impl;
 		}
+
+		class_type_scope * scope = class_scope::get_class_scope( _tinfo );
+
+		scope->setup_method( self );
 
 		return (PyObject *)self;
 	}

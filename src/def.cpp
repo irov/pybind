@@ -66,6 +66,13 @@ namespace pybind
 
 			}
 
+			def_type_scope( const def_type_scope & _scope )
+				: m_type( _scope.m_type )
+				, m_method( _scope.m_method )
+			{
+
+			}
+
 		public:
 			void setup( const char * _name, pybind_callback f, pybind_cfunction _cfunc, int _hasargs, PyObject * _module )
 			{
@@ -90,7 +97,7 @@ namespace pybind
 
 				self->f = f;
 
-				PyObject *py_func = PyCFunction_NewEx( &m_method, (PyObject*)self, _module );
+				PyObject *py_func = PyCFunction_New( &m_method, (PyObject*)self );
 				//		Py_DECREF( self );
 				//		Py_DECREF( _module );
 

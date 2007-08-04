@@ -57,12 +57,69 @@ namespace pybind
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	class_type_scope::class_type_scope(
+	class_type_scope::class_type_scope()
+		: m_type( py_empty_type )
+	{
+	}
+
+	static int _pyinitproc(PyObject * _self, PyObject *_args, PyObject *)
+	{
+		py_class_type * ct = (py_class_type*)_self;
+		
+		PyObject * py_dict = PyObject_GetAttrString( (PyObject *)_self, "__dict__");
+
+		return 1;
+	}
+
+	static PyObject* instance_get_dict(PyObject* op, void*)
+	{
+		py_class_type* inst = (py_class_type*)op;
+		Py_INCREF( inst->dict );
+		return inst->dict;
+	}
+
+	static int instance_set_dict(PyObject* op, PyObject* dict, void*)
+	{
+		py_class_type* inst = (py_class_type*)op;
+		Py_DECREF( inst->dict );
+		inst->dict = dict;
+		Py_INCREF( dict );
+		return 0;
+	}
+
+	static PyGetSetDef instance_getsets[] = {
+		{"__dict__",  instance_get_dict,  instance_set_dict, NULL, 0},
+		{0, 0, 0, 0, 0}
+	};
+
+	static int
+		class_setattro(PyObject *obj, PyObject *name, PyObject* value)
+	{
+		py_class_type* inst = (py_class_type*)obj;
+
+		int res = PyDict_SetItem( inst->dict, name, value );
+
+		if( res )
+		{
+			 check_error();
+		}
+
+		return res;
+	}
+
+	static PyObject *
+		class_getattro(PyObject *obj, PyObject *name )
+	{
+		py_class_type* inst = (py_class_type*)obj;
+
+		return PyDict_GetItem( inst->dict, name );
+	}
+
+	void class_type_scope::setup(
 		const char * _name, 
 		PyObject * _module,
 		newfunc _pynew,
 		destructor _pydestructor)
-		: m_type( py_empty_type )
 	{
 		if( _module == 0 )
 		{
@@ -77,16 +134,62 @@ namespace pybind
 		m_type.tp_basicsize = sizeof( py_class_type );
 		m_type.tp_doc = "Embedding class from cpp";
 		m_type.tp_new = _pynew;
+		m_type.tp_init = &_pyinitproc;
 		m_type.tp_dealloc = _pydestructor;
 		m_type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
+		m_type.tp_getset = instance_getsets;
+		m_type.tp_setattro = &class_setattro;
+		m_type.tp_getattro = &class_getattro;
+		
 
 		m_type_holder = m_type;
 		m_type_holder.tp_dealloc = &py_dealloc;
+
+		if( PyType_Ready(&m_type) < 0 )
+		{
+			printf("invalid embedding class '%s' \n", m_type.tp_name );					
+		}
+
+		if( PyType_Ready(&m_type_holder) < 0 )
+		{
+			printf("invalid embedding class holder '%s' \n", m_type_holder.tp_name );					
+		}
+
+		class_scope::reg_class_type( &m_type );
+
+		PyModule_AddObject( m_module, m_type.tp_name, (PyObject*)&m_type );
 	}
-	//////////////////////////////////////////////////////////////////////////
-	void class_type_scope::add_method( const PyMethodDef & md )
+
+	static PyObject * method_call_callback0( PyObject * _method )
 	{
-		m_vectorMethodDef.push_back( md );
+		py_method_type * md = (py_method_type *)_method;
+		//py_method_type * md = (py_method_type *)PyMethod_Function(_method);
+		//py_class_type * self = (py_class_type *)PyMethod_Self(_method);
+
+		return md->ifunc->call( md->impl );
+	}
+
+	static PyObject * method_call_callback1( PyObject * _method, PyObject * _args )
+	{
+		py_method_type * md = (py_method_type *)_method;
+		//py_method_type * md_self  = (py_method_type *)_method;
+		//py_method_type * md = (py_method_type *)PyMethod_Function(_method);
+		//py_class_type * self = (py_class_type *)PyMethod_Self(_method);
+
+		return md->ifunc->call( md->impl, _args );
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::add_method( const char * _name, method_proxy_interface * _ifunc, int _arity )
+	{
+		pybind_cfunction cf = (_arity)? 
+			(pybind_cfunction)&method_call_callback1:
+			(pybind_cfunction)&method_call_callback0;
+
+		m_methods.push_back( method_type_scope() );
+
+		method_type_scope & method = m_methods.back();
+		method.setup( &m_type, _name, _ifunc, cf, _arity );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::set_module( PyObject * _module )
@@ -96,36 +199,43 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::add_method_from_scope( class_type_scope * _basescope )
 	{
-		m_vectorMethodDef.insert( 
-			m_vectorMethodDef.end(), 
-			_basescope->m_vectorMethodDef.begin(), 
-			_basescope->m_vectorMethodDef.end() );
+		m_methods.insert( 
+			m_methods.end(), 
+			_basescope->m_methods.begin(), 
+			_basescope->m_methods.end() );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_type_scope::setup_type()
+	void class_type_scope::setup_method( py_class_type * _self )
 	{
-		PyMethodDef md = {0};
+		_self->dict = PyDict_New();
 
-		m_vectorMethodDef.push_back( md );
-
-		m_type.tp_methods = &m_vectorMethodDef.front();
-
-		if( PyType_Ready(&m_type) < 0 )
+		for( TMethodFunction::iterator
+			it = m_methods.begin(),
+			it_end = m_methods.end();
+		it != it_end;
+		++it)
 		{
-			printf("invalid embedding class '%s' \n", m_type.tp_name );					
+			//PyObject * py_method = PyMethod_New( method.m_mdfunc, (PyObject*)_self, (PyObject *)&m_type );
+
+			PyObject * py_method = it->instance( _self );
+
+			int res = PyObject_SetAttrString( (PyObject*)_self, it->m_name, py_method );
+
+			if( res )
+			{
+				check_error();
+			}
 		}
-
-		class_scope::reg_class_type( &m_type );
-
-		PyModule_AddObject( m_module, m_type.tp_name, (PyObject*)&m_type );
 	}
-
+	//////////////////////////////////////////////////////////////////////////
 	PyObject * class_type_scope::create_holder( void * _impl )
 	{
 		py_class_type *self = 
 			(py_class_type *)m_type_holder.tp_alloc( &m_type_holder, 0 );
 
 		self->impl = _impl;
+
+		setup_method( self );
 
 		return (PyObject*)self;
 	}

@@ -11,38 +11,44 @@ namespace pybind
 		PYBIND_API void * class_type_impl( py_class_type * _class_type );
 	}
 
-	template<class C, class F>
-	class method_proxy
+	class method_proxy_interface
 	{
 	public:
-		static void init( F f )
-		{
-			m_f = f;
-		}
+		virtual ~method_proxy_interface(){};
 
-		static PyObject * 
-			method0( py_class_type * _self )
-		{
-			C* impl = (C*)detail::class_type_impl( _self );
-			PyObject *ret = method_call<C,F>::call( impl, m_f, 0 );
-
-			return ret;
-		}
-
-		static PyObject * 
-			method1( py_class_type * _self, PyObject * _args )
-		{
-			C* impl = (C*)detail::class_type_impl( _self );
-
-			PyObject *ret = method_call<C,F>::call( impl, m_f, _args );
-
-			return ret;
-		}
-
-	private:
-		static F m_f;
+	public:
+		virtual PyObject * call( void * _self ) = 0;
+		virtual PyObject * call( void * _self, PyObject * _args ) = 0;
 	};
 
 	template<class C, class F>
-	F method_proxy<C,F>::m_f;
+	class method_proxy
+		: public method_proxy_interface
+	{
+	public:
+		method_proxy( const char * _name, F f )
+		: m_name( _name )
+		, fn( f )
+		{
+		}
+
+	public:
+		PyObject * call( void * _self ) override
+		{
+			C* impl = (C*)_self;
+			PyObject *ret = method_call<C,F>::call( impl, fn, 0 );
+			return ret;
+		}
+
+		PyObject * call( void * _self, PyObject * _args ) override
+		{
+			C* impl = (C*)_self;
+			PyObject *ret = method_call<C,F>::call( impl, fn, _args );
+			return ret;
+		}
+
+	protected:
+		const char * m_name;
+		F fn;
+	};
 }

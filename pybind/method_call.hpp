@@ -2,7 +2,7 @@
 
 #	include "pybind/exports.hpp"
 #	include "pybind/method_parser.hpp"
-#	include "pybind/from_py_to_cpp_parser.hpp"
+#	include "pybind/types.hpp"
 
 namespace pybind
 {
@@ -28,7 +28,7 @@ namespace pybind
 		{
 			R result = call_impl<f_info::arity>( _obj, f, _arg );
 
-			return from_py_to_cpp_parser< R >::wrapp( result );
+			return ptr( result );
 		}
 
 		template<>
@@ -45,29 +45,26 @@ namespace pybind
 		template<>
 		static Ret call_impl<0>( C * _obj, F f, PyObject * _arg )
 		{
-			return (impl->*f)();
+			return (_obj->*f)();
 		}	
 
 		template<>
 		static Ret call_impl<1>( C * _obj, F f, PyObject * _arg )
 		{
-			typedef from_py_to_cpp_parser< typename f_info::param1 > parser1;
-
 			PyObject * _arg1 = detail::getarg( _arg, 0 );
+		
+			typename f_info::param1 param1 = extract<typename f_info::param1>( _arg1 );
 
-			return (_obj->*f)( parser1::value( _arg1 ) );
+			return (_obj->*f)( param1 );
 		}	
 
 		template<>
 		static Ret call_impl<2>( C * _obj, F f, PyObject * _arg )
 		{
-			typedef from_py_to_cpp_parser< typename f_info::param1 > parser1;
-			typedef from_py_to_cpp_parser< typename f_info::param2 > parser2;
-
 			PyObject * _arg1 = detail::getarg( _arg, 0 );
 			PyObject * _arg2 = detail::getarg( _arg, 1 );
 
-			return (_obj->*f)( parser1::value( _arg1 ) , parser2::value( _arg2 ) );
+			return (_obj->*f)( extract<typename f_info::param1>( _arg1 ) , extract<typename f_info::param2>( _arg2 ) );
 		}	
 	};
 }

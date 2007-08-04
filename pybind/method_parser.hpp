@@ -15,6 +15,7 @@ namespace pybind
 		struct types< R (C::*)() >
 		{
 			typedef R ret_type;
+			typedef C class_type;
 
 			static const size_t arity = 0;
 		};
@@ -23,6 +24,7 @@ namespace pybind
 		struct types< R (C::*)() const>
 		{
 			typedef R ret_type;
+			typedef C class_type;
 
 			static const size_t arity = 0;
 		};
@@ -31,6 +33,8 @@ namespace pybind
 		struct types< R (C::*)(P1) >
 		{
 			typedef R ret_type;
+			typedef C class_type;
+
 			typedef P1 param1;
 
 			static const size_t arity = 1;
@@ -40,6 +44,8 @@ namespace pybind
 		struct types< R (C::*)(P1) const >
 		{
 			typedef R ret_type;
+			typedef C class_type;
+
 			typedef P1 param1;
 
 			static const size_t arity = 1;
@@ -49,6 +55,8 @@ namespace pybind
 		struct types< R (C::*)(P1, P2) >
 		{
 			typedef R ret_type;
+			typedef C class_type;
+
 			typedef P1 param1;
 			typedef P2 param2;
 
@@ -59,6 +67,8 @@ namespace pybind
 		struct types< R (C::*)(P1, P2) const>
 		{
 			typedef R ret_type;
+			typedef C class_type;
+
 			typedef P1 param1;
 			typedef P2 param2;
 
@@ -69,6 +79,8 @@ namespace pybind
 		struct types< R (C::*)(P1, P2, P3) >
 		{
 			typedef R ret_type;
+			typedef C class_type;
+
 			typedef P1 param1;
 			typedef P2 param2;
 			typedef P3 param3;
@@ -80,6 +92,8 @@ namespace pybind
 		struct types< R (C::*)(P1, P2, P3) const>
 		{
 			typedef R ret_type;
+			typedef C class_type;
+
 			typedef P1 param1;
 			typedef P2 param2;
 			typedef P3 param3;
@@ -91,6 +105,8 @@ namespace pybind
 		struct types< R (C::*)(P1, P2, P3, P4) >
 		{
 			typedef R ret_type;
+			typedef C class_type;
+
 			typedef P1 param1;
 			typedef P2 param2;
 			typedef P3 param3;
@@ -103,6 +119,8 @@ namespace pybind
 		struct types< R (C::*)(P1, P2, P3, P4) const>
 		{
 			typedef R ret_type;
+			typedef C class_type;
+
 			typedef P1 param1;
 			typedef P2 param2;
 			typedef P3 param3;
