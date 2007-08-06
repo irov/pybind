@@ -12,21 +12,8 @@ namespace pybind
 
 	namespace detail
 	{
-		template<class T>
-		struct rv_pointer
-		{
-			typedef T type;
-		};
-
-		template<> struct rv_pointer< PyObject * >{ typedef PyObject * type; };
-
-		template<class T> struct rv_pointer<T *>{	typedef typename rv_pointer<T>::type type;	};
-		template<class T> struct rv_pointer<const T *>{	typedef typename rv_pointer<T>::type type;	};
-
-		template<class T> struct rv_pointer<T &>{	typedef typename rv_pointer<T>::type type;	};
-		template<class T> struct rv_pointer<const T &>{	typedef typename rv_pointer<T>::type type;	};
-
 		PYBIND_API void * get_class( PyObject * _obj );
+		PYBIND_API class_type_scope * get_class_scope( PyObject * _obj );
 		PYBIND_API void * check_registred_class( PyObject * _obj, const type_info & _info );
 	}
 
@@ -57,6 +44,15 @@ namespace pybind
 			int _arity, 
 			const type_info & _info );
 
+		template<class C, class B>
+		static void add_bases()
+		{
+			class_type_scope * _scope = class_scope::get_class_scope( class_info<C>() );
+			class_type_scope * _basescope = class_scope::get_class_scope( class_info<B>() );
+
+			_scope->add_bases( _basescope );
+		}
+
 		static void add_method_from_scope( class_type_scope * _scope, class_type_scope * _basescope );
 
 		template<class C, class B>
@@ -67,6 +63,22 @@ namespace pybind
 			
 			add_method_from_scope(  _scope, _basescope );
 		}
+
+		static void add_meta_cast_to_scope( class_type_scope * _scope, const char * _name, pybind_metacast cast );
+
+		template<class C, class B>
+		static void add_meta_cast( pybind_metacast cast)
+		{
+			class_type_scope * _scope = class_scope::get_class_scope( class_info<C>() );
+
+			const type_info & tinfo = class_info<B>();
+
+			const char * name = tinfo.name();
+
+			add_meta_cast_to_scope( _scope, name, cast );			
+		}
+
+		static void * meta_cast( void * _impl, class_type_scope * _scope, const char * _name );
 
 		static PyObject * new_impl( PyTypeObject * _type, PyObject * _args, void * _impl, const type_info & _tinfo );
 		static void * dealloc_impl( PyObject * _obj );

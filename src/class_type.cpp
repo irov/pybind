@@ -178,7 +178,11 @@ namespace pybind
 
 		return md->ifunc->call( md->impl, _args );
 	}
-
+	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::set_module( PyObject * _module )
+	{
+		m_module = _module;
+	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::add_method( const char * _name, method_proxy_interface * _ifunc, int _arity )
 	{
@@ -192,17 +196,58 @@ namespace pybind
 		method.setup( &m_type, _name, _ifunc, cf, _arity );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_type_scope::set_module( PyObject * _module )
+	void class_type_scope::add_bases( class_type_scope * _scope )
 	{
-		m_module = _module;
+		m_bases.push_back( _scope );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::add_method_from_scope( class_type_scope * _basescope )
 	{
 		m_methods.insert( 
 			m_methods.end(), 
-			_basescope->m_methods.begin(), 
+			_basescope->m_methods.begin(),
 			_basescope->m_methods.end() );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::add_meta_cast( const char * _name, pybind_metacast cast )
+	{
+		m_metacast[ _name ] = cast;
+	}
+	static void add_meta_cast_from_scope_impl( class_type_scope * _self, class_type_scope * _base )
+	{
+		for( TMapMetaCast::iterator 
+			it = _base->m_metacast.begin(),
+			it_end = _base->m_metacast.end();
+		it != it_end;
+		++it)
+		{
+			_self.m_metacast.insert( *it );
+		}
+
+		for each( class_type_scope * scope in _base->m_bases )
+		{
+			add_meta_cast_from_scope_impl( _self, scope );
+		}
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::setup_meta_cast_from_scope()
+	{
+		for each( class_type_scope * scope in m_bases )
+		{
+			add_meta_cast_from_scope_impl( this, scope );
+		}
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void * class_type_scope::metacast( const char * _name, void * _impl )
+	{
+		TMapMetaCast::iterator it_find = m_metacast.find( _name );
+
+		if( it_find == m_metacast.end() )
+		{
+			return 0;
+		}
+
+		return it_find->second( _impl );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::setup_method( py_class_type * _self )
@@ -234,6 +279,7 @@ namespace pybind
 			(py_class_type *)m_type_holder.tp_alloc( &m_type_holder, 0 );
 
 		self->impl = _impl;
+		self->scope = this;
 
 		setup_method( self );
 

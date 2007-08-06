@@ -131,4 +131,18 @@ namespace pybind
 			return PyString_FromStringAndSize( _value.c_str(), _value.size() );
 		}
 	}s_extract_string_type;
+
+	static struct extract_pyobject_type
+		: public type_cast_result<PyObject *>
+	{
+		void apply( PyObject * _obj ) override
+		{
+			m_valid = true;
+			m_result = _obj;
+		}
+		PyObject * wrapp( PyObject * _value ) override
+		{
+			return _value;
+		}
+	}s_extract_pyobject_type;
 }

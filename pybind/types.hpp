@@ -14,6 +14,8 @@ extern "C"
 
 namespace pybind
 {
+	typedef void * (*pybind_metacast)( void * );
+
 	typedef void (*pybind_callback)();
 	typedef PyObject * (*pybind_cfunction)(PyObject *, PyObject *);
 	typedef PyObject * (*pybind_newfunc)(PyTypeObject *, PyObject *, PyObject *);

@@ -83,6 +83,15 @@ namespace pybind
 				return type_down_cast_find<const T &,T>::find();
 			}
 		};
+
+		//template<class T>
+		//struct type_down_cast<T const &>
+		//{
+		//	static type_cast * find()
+		//	{
+		//		return type_down_cast_find<T const &,T>::find();
+		//	}
+		//};
 	}
 
 	class type_cast

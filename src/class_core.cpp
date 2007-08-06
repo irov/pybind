@@ -11,12 +11,19 @@ namespace pybind
 {
 	namespace detail
 	{
+		//////////////////////////////////////////////////////////////////////////
 		void * get_class( PyObject * _obj )
 		{
 			py_class_type * self = (py_class_type *)_obj;
 			return self->impl;
 		}
-
+		//////////////////////////////////////////////////////////////////////////
+		class_type_scope * get_class_scope( PyObject * _obj )
+		{
+			py_class_type * self = (py_class_type *)_obj;
+			return self->scope;
+		}
+		//////////////////////////////////////////////////////////////////////////
 		void * check_registred_class( PyObject * _obj, const type_info & _info )
 		{
 			PyObject * py_type = PyObject_Type( _obj );
@@ -76,21 +83,30 @@ namespace pybind
 	{
 		_scope->add_method_from_scope( _basescope );
 	}
-
+	//////////////////////////////////////////////////////////////////////////
+	void class_core::add_meta_cast_to_scope( class_type_scope * _scope, const char * _name, pybind_metacast cast )
+	{
+		_scope->add_meta_cast( _name, cast );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void * class_core::meta_cast( void * _impl, class_type_scope * _scope, const char * _name )
+	{
+		return _scope->metacast( _name, _impl );
+	}
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * class_core::new_impl( PyTypeObject * _type, PyObject * _args, void * _impl, const type_info & _tinfo )
 	{
 		py_class_type *self = 
 			(py_class_type *)_type->tp_alloc( _type, 0 );
 
+		class_type_scope * scope = class_scope::get_class_scope( _tinfo );
+
 		if( self != NULL )
 		{
 			self->impl = _impl;
+			self->scope = scope;
+			scope->setup_method( self );
 		}
-
-		class_type_scope * scope = class_scope::get_class_scope( _tinfo );
-
-		scope->setup_method( self );
 
 		return (PyObject *)self;
 	}
