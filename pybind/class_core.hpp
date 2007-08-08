@@ -44,15 +44,6 @@ namespace pybind
 			int _arity, 
 			const type_info & _info );
 
-		template<class C, class B>
-		static void add_bases()
-		{
-			class_type_scope * _scope = class_scope::get_class_scope( class_info<C>() );
-			class_type_scope * _basescope = class_scope::get_class_scope( class_info<B>() );
-
-			_scope->add_bases( _basescope );
-		}
-
 		static void add_method_from_scope( class_type_scope * _scope, class_type_scope * _basescope );
 
 		template<class C, class B>
@@ -64,18 +55,19 @@ namespace pybind
 			add_method_from_scope(  _scope, _basescope );
 		}
 
-		static void add_meta_cast_to_scope( class_type_scope * _scope, const char * _name, pybind_metacast cast );
+		static void add_base_to_scope( class_type_scope * _scope, const char * _name, class_type_scope * _base, pybind_metacast cast );
 
 		template<class C, class B>
-		static void add_meta_cast( pybind_metacast cast)
+		static void add_base( pybind_metacast cast)
 		{
 			class_type_scope * _scope = class_scope::get_class_scope( class_info<C>() );
+			class_type_scope * _basescope = class_scope::get_class_scope( class_info<B>() );
 
-			const type_info & tinfo = class_info<B>();
+			const type_info & tinfo = class_info<B*>();
 
 			const char * name = tinfo.name();
 
-			add_meta_cast_to_scope( _scope, name, cast );			
+			add_base_to_scope( _scope, name, _basescope, cast );			
 		}
 
 		static void * meta_cast( void * _impl, class_type_scope * _scope, const char * _name );

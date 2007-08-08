@@ -32,6 +32,8 @@ namespace pybind
 			destructor _pydestructor);
 
 	public:
+		const char * getName();
+
 		void set_module( PyObject * _module );
 
 		void add_bases( class_type_scope * _scope );
@@ -39,8 +41,7 @@ namespace pybind
 		void add_method( const char * _name, method_proxy_interface * _ifunc, int _arity );
 		void add_method_from_scope( class_type_scope * _basescope );
 
-		void add_meta_cast( const char * _name, pybind_metacast cast );
-		void add_meta_cast_from_scope( class_type_scope * _basescope );
+		void add_base( const char * _name, class_type_scope * _base, pybind_metacast _cast );
 
 		PyObject * create_holder( void * _impl );
 		void * metacast( const char * name, void * _impl );
@@ -48,15 +49,12 @@ namespace pybind
 		void setup_method( py_class_type * _self );
 
 	public:		
-		typedef std::list<class_type_scope *> TListBases;
-		TListBases m_bases;
-
 		typedef std::list<method_type_scope> TMethodFunction;
 		TMethodFunction m_methods;
 	
-		typedef std::map<std::string, pybind_metacast> TMapMetaCast;
-
-		TMapMetaCast m_metacast;
+		typedef std::pair<class_type_scope *, pybind_metacast> TPairMetacast;
+		typedef std::map<std::string, TPairMetacast> TMapBases;
+		TMapBases m_bases;
 
 		PyTypeObject m_type;
 		PyTypeObject m_type_holder;

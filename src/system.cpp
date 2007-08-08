@@ -95,6 +95,7 @@ namespace pybind
 
 	PyObject * call_va( PyObject * _obj, const char * _format, va_list _va )
 	{
+		Py_INCREF( _obj );
 		PyObject * result = PyObject_CallObject( _obj, Py_VaBuildValue( _format, _va ) );
 		return result;
 	}

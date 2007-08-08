@@ -71,31 +71,33 @@ namespace pybind
 		return 1;
 	}
 
-	static PyObject* instance_get_dict(PyObject* op, void*)
-	{
-		py_class_type* inst = (py_class_type*)op;
-		Py_INCREF( inst->dict );
-		return inst->dict;
-	}
+	//static PyObject* instance_get_dict(PyObject* op, void*)
+	//{
+	//	py_class_type* inst = (py_class_type*)op;
+	//	Py_INCREF( inst->dict );
+	//	return inst->dict;
+	//}
 
-	static int instance_set_dict(PyObject* op, PyObject* dict, void*)
-	{
-		py_class_type* inst = (py_class_type*)op;
-		Py_DECREF( inst->dict );
-		inst->dict = dict;
-		Py_INCREF( dict );
-		return 0;
-	}
+	//static int instance_set_dict(PyObject* op, PyObject* dict, void*)
+	//{
+	//	py_class_type* inst = (py_class_type*)op;
+	//	Py_DECREF( inst->dict );
+	//	inst->dict = dict;
+	//	Py_INCREF( dict );
+	//	return 0;
+	//}
 
-	static PyGetSetDef instance_getsets[] = {
-		{"__dict__",  instance_get_dict,  instance_set_dict, NULL, 0},
-		{0, 0, 0, 0, 0}
-	};
+	//static PyGetSetDef instance_getsets[] = {
+	//	{"__dict__",  instance_get_dict,  instance_set_dict, NULL, 0},
+	//	{0, 0, 0, 0, 0}
+	//};
 
 	static int
 		class_setattro(PyObject *obj, PyObject *name, PyObject* value)
 	{
 		py_class_type* inst = (py_class_type*)obj;
+
+		char *str = PyString_AsString( name );
 
 		int res = PyDict_SetItem( inst->dict, name, value );
 
@@ -112,6 +114,10 @@ namespace pybind
 	{
 		py_class_type* inst = (py_class_type*)obj;
 
+		char * str = PyString_AsString( name );
+
+		Py_INCREF( obj );
+		
 		return PyDict_GetItem( inst->dict, name );
 	}
 
@@ -137,7 +143,7 @@ namespace pybind
 		m_type.tp_init = &_pyinitproc;
 		m_type.tp_dealloc = _pydestructor;
 		m_type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
-		m_type.tp_getset = instance_getsets;
+		//m_type.tp_getset = instance_getsets;
 		m_type.tp_setattro = &class_setattro;
 		m_type.tp_getattro = &class_getattro;
 		
@@ -163,19 +169,12 @@ namespace pybind
 	static PyObject * method_call_callback0( PyObject * _method )
 	{
 		py_method_type * md = (py_method_type *)_method;
-		//py_method_type * md = (py_method_type *)PyMethod_Function(_method);
-		//py_class_type * self = (py_class_type *)PyMethod_Self(_method);
-
 		return md->ifunc->call( md->impl );
 	}
 
 	static PyObject * method_call_callback1( PyObject * _method, PyObject * _args )
 	{
 		py_method_type * md = (py_method_type *)_method;
-		//py_method_type * md_self  = (py_method_type *)_method;
-		//py_method_type * md = (py_method_type *)PyMethod_Function(_method);
-		//py_class_type * self = (py_class_type *)PyMethod_Self(_method);
-
 		return md->ifunc->call( md->impl, _args );
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -186,19 +185,14 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::add_method( const char * _name, method_proxy_interface * _ifunc, int _arity )
 	{
+		m_methods.push_back( method_type_scope() );
+		method_type_scope & method = m_methods.back();
+
 		pybind_cfunction cf = (_arity)? 
 			(pybind_cfunction)&method_call_callback1:
 			(pybind_cfunction)&method_call_callback0;
 
-		m_methods.push_back( method_type_scope() );
-
-		method_type_scope & method = m_methods.back();
 		method.setup( &m_type, _name, _ifunc, cf, _arity );
-	}
-	//////////////////////////////////////////////////////////////////////////
-	void class_type_scope::add_bases( class_type_scope * _scope )
-	{
-		m_bases.push_back( _scope );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::add_method_from_scope( class_type_scope * _basescope )
@@ -209,45 +203,35 @@ namespace pybind
 			_basescope->m_methods.end() );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_type_scope::add_meta_cast( const char * _name, pybind_metacast cast )
+	void class_type_scope::add_base( const char * _name, class_type_scope * _base, pybind_metacast _cast )
 	{
-		m_metacast[ _name ] = cast;
-	}
-	static void add_meta_cast_from_scope_impl( class_type_scope * _self, class_type_scope * _base )
-	{
-		for( TMapMetaCast::iterator 
-			it = _base->m_metacast.begin(),
-			it_end = _base->m_metacast.end();
-		it != it_end;
-		++it)
-		{
-			_self.m_metacast.insert( *it );
-		}
-
-		for each( class_type_scope * scope in _base->m_bases )
-		{
-			add_meta_cast_from_scope_impl( _self, scope );
-		}
-	}
-	//////////////////////////////////////////////////////////////////////////
-	void class_type_scope::setup_meta_cast_from_scope()
-	{
-		for each( class_type_scope * scope in m_bases )
-		{
-			add_meta_cast_from_scope_impl( this, scope );
-		}
+		m_bases[ _name ] = std::make_pair( _base, _cast );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void * class_type_scope::metacast( const char * _name, void * _impl )
 	{
-		TMapMetaCast::iterator it_find = m_metacast.find( _name );
+		TMapBases::iterator it_find = m_bases.find( _name );
 
-		if( it_find == m_metacast.end() )
+		if( it_find == m_bases.end() )
 		{
+			for( TMapBases::iterator 
+				it = m_bases.begin(),
+				it_end = m_bases.end();
+			it != it_end;
+			++it)
+			{
+				TPairMetacast & pair = it->second;
+				void * down_impl = pair.second(_impl);
+				if( void * result = pair.first->metacast( _name, down_impl ) )
+				{
+					return result;
+				}
+			}
+
 			return 0;
 		}
 
-		return it_find->second( _impl );
+		return it_find->second.second( _impl );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::setup_method( py_class_type * _self )

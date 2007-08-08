@@ -66,17 +66,22 @@ namespace pybind
 
 			setup_bases();
 			setup_method_from_base();
-			setup_meta_cast();
+		}
+
+		template<class B>
+		static void * meta_cast( void * _ptr )
+		{
+			return static_cast<B*>(static_cast<C*>(_ptr));
 		}
 
 		void setup_bases()
 		{
 			int arity = B::base_arity;
 
-			if( arity-- > 0 )class_core::add_bases<C, B::base0>();
-			if( arity-- > 0 )class_core::add_bases<C, B::base1>();
-			if( arity-- > 0 )class_core::add_bases<C, B::base2>();
-			if( arity-- > 0 )class_core::add_bases<C, B::base3>();
+			if( arity-- > 0 )class_core::add_base<C, B::base0>(&meta_cast<B::base0>);
+			if( arity-- > 0 )class_core::add_base<C, B::base1>(&meta_cast<B::base1>);
+			if( arity-- > 0 )class_core::add_base<C, B::base2>(&meta_cast<B::base2>);
+			if( arity-- > 0 )class_core::add_base<C, B::base3>(&meta_cast<B::base3>);
 		}
 
 		void setup_method_from_base()
@@ -89,21 +94,7 @@ namespace pybind
 			if( arity-- > 0 )class_core::add_method_from_base<C, B::base3>();
 		}
 
-		template<class B>
-		static void * meta_cast( void * _ptr )
-		{
-			return static_cast<B*>(static_cast<C*>(_ptr));
-		}
 
-		void setup_meta_cast()
-		{
-			int arity = B::base_arity;
-
-			if( arity-- > 0 )class_core::add_meta_cast<C, B::base0>(&meta_cast<B::base0>);
-			if( arity-- > 0 )class_core::add_meta_cast<C, B::base1>(&meta_cast<B::base1>);
-			if( arity-- > 0 )class_core::add_meta_cast<C, B::base2>(&meta_cast<B::base2>);
-			if( arity-- > 0 )class_core::add_meta_cast<C, B::base3>(&meta_cast<B::base3>);
-		}
 
 		template<class F>
 		base_ & def( const char * _name, F f )
@@ -158,12 +149,19 @@ namespace pybind
 			void * impl = detail::get_class( _obj );
 			class_type_scope * scope = detail::get_class_scope( _obj );
 
-			const type_info & tinfo = class_info<C *>();
-			const char * name = tinfo.name();
+			const type_info & cur_tinfo = class_info<C>();
+			class_type_scope * cur_scope = class_scope::get_class_scope( cur_tinfo );
 
-			void * result = class_core::meta_cast( impl, scope, name );
+			void * result = 0;
 
-			m_result = static_cast<C*>(result);
+			if( cur_scope != scope )
+			{
+				const type_info & tinfo = class_info<C *>();
+				const char * name = tinfo.name();
+				impl = class_core::meta_cast( impl, scope, name );
+			}
+
+			m_result = static_cast<C*>(impl);
 		}
 
 		PyObject * wrapp( C * _class )

@@ -53,7 +53,7 @@ namespace pybind
 
 		class_type_scope * t_scope = &s_listClassType.back();
 
-		t_scope->setup(  _name, _module, _pynew, _pydestructor );
+		t_scope->setup( _name, _module, _pynew, _pydestructor );
 
 		class_scope::reg_class_scope( _info, t_scope );
 
@@ -84,9 +84,9 @@ namespace pybind
 		_scope->add_method_from_scope( _basescope );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_core::add_meta_cast_to_scope( class_type_scope * _scope, const char * _name, pybind_metacast cast )
+	void class_core::add_base_to_scope( class_type_scope * _scope, const char * _name, class_type_scope * _base, pybind_metacast cast )
 	{
-		_scope->add_meta_cast( _name, cast );
+		_scope->add_base( _name, _base, cast );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void * class_core::meta_cast( void * _impl, class_type_scope * _scope, const char * _name )
