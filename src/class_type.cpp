@@ -71,26 +71,27 @@ namespace pybind
 		return 1;
 	}
 
-	//static PyObject* instance_get_dict(PyObject* op, void*)
-	//{
-	//	py_class_type* inst = (py_class_type*)op;
-	//	Py_INCREF( inst->dict );
-	//	return inst->dict;
-	//}
+	static PyObject* instance_get_dict(PyObject* op, void*)
+	{
+		py_class_type* inst = (py_class_type*)op;
+		Py_INCREF( inst->dict );
+		return inst->dict;
+	}
 
-	//static int instance_set_dict(PyObject* op, PyObject* dict, void*)
-	//{
-	//	py_class_type* inst = (py_class_type*)op;
-	//	Py_DECREF( inst->dict );
-	//	inst->dict = dict;
-	//	Py_INCREF( dict );
-	//	return 0;
-	//}
+	static int instance_set_dict(PyObject* op, PyObject* dict, void*)
+	{
+		py_class_type* inst = (py_class_type*)op;
+		PyObject* last = inst->dict;
+		inst->dict = dict;
+		Py_DECREF( last );
+		Py_INCREF( dict );
+		return 0;
+	}
 
-	//static PyGetSetDef instance_getsets[] = {
-	//	{"__dict__",  instance_get_dict,  instance_set_dict, NULL, 0},
-	//	{0, 0, 0, 0, 0}
-	//};
+	static PyGetSetDef instance_getsets[] = {
+		{"__dict__",  instance_get_dict,  instance_set_dict, NULL, 0},
+		{0, 0, 0, 0, 0}
+	};
 
 	static int
 		class_setattro(PyObject *obj, PyObject *name, PyObject* value)
@@ -98,6 +99,8 @@ namespace pybind
 		py_class_type* inst = (py_class_type*)obj;
 
 		char *str = PyString_AsString( name );
+
+		Py_INCREF( value );
 
 		int res = PyDict_SetItem( inst->dict, name, value );
 
@@ -116,9 +119,16 @@ namespace pybind
 
 		char * str = PyString_AsString( name );
 
-		Py_INCREF( obj );
-		
-		return PyDict_GetItem( inst->dict, name );
+		if( PyObject * item = PyDict_GetItem( inst->dict, name ) )
+		{
+			Py_INCREF( item );
+
+			return item;
+
+		}
+
+		PyObject * pResult = PyObject_GenericGetAttr( obj, name );
+		return pResult;
 	}
 
 	void class_type_scope::setup(
@@ -143,7 +153,7 @@ namespace pybind
 		m_type.tp_init = &_pyinitproc;
 		m_type.tp_dealloc = _pydestructor;
 		m_type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
-		//m_type.tp_getset = instance_getsets;
+		m_type.tp_getset = instance_getsets;
 		m_type.tp_setattro = &class_setattro;
 		m_type.tp_getattro = &class_getattro;
 		
@@ -245,7 +255,6 @@ namespace pybind
 		++it)
 		{
 			//PyObject * py_method = PyMethod_New( method.m_mdfunc, (PyObject*)_self, (PyObject *)&m_type );
-
 			PyObject * py_method = it->instance( _self );
 
 			int res = PyObject_SetAttrString( (PyObject*)_self, it->m_name, py_method );

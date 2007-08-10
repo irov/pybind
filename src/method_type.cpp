@@ -58,14 +58,14 @@ namespace pybind
 	method_type_scope::method_type_scope()
 		: m_type( py_empty_type )
 		, m_name( 0 )
-		, m_self( 0 )
+		, m_interface( 0 )
 	{
 
 	}
 
 	method_type_scope::method_type_scope( const method_type_scope & _scope )
 		: m_name( _scope.m_name )
-		, m_self( _scope.m_self )
+		, m_interface( _scope.m_interface )
 		, m_method( _scope.m_method )
 		, m_type( _scope.m_type )
 	{
@@ -79,6 +79,7 @@ namespace pybind
 		int _hasargs )
 	{
 		m_name =  _name;
+		m_interface = _ifunc;
 
 		m_type.tp_name = _name;
 		m_type.tp_basicsize = sizeof( py_method_type );
@@ -95,17 +96,17 @@ namespace pybind
 		m_method.ml_meth = _cfunc;
 		m_method.ml_flags = METH_CLASS | ( _hasargs ) ? METH_VARARGS : METH_NOARGS;
 		m_method.ml_doc = "Embedding function cpp";
-
-		m_self = 
-			(py_method_type *)m_type.tp_alloc( &m_type, 0 );
-
-		m_self->ifunc = _ifunc;
 	}
 
 	PyObject * method_type_scope::instance( py_class_type * _obj )
 	{
-		m_self->impl = _obj->impl;
-		return PyCFunction_New( &m_method, (PyObject*)m_self );
+		py_method_type * self = 
+			(py_method_type *)m_type.tp_alloc( &m_type, 0 );
+
+		self->ifunc = m_interface;
+		self->impl = _obj->impl;
+
+		return PyCFunction_New( &m_method, (PyObject*)self );
 		//		Py_DECREF( self );
 		//		Py_DECREF( _module );
 	}

@@ -33,7 +33,7 @@ namespace pybind
 		const char * m_name;
 
 	protected:
-		py_method_type * m_self;
+		method_proxy_interface * m_interface;
 		PyMethodDef m_method;
 		PyTypeObject m_type;
 	};

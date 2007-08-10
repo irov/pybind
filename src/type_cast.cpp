@@ -69,6 +69,25 @@ namespace pybind
 		}
 	}s_extract_int_type;
 
+	static struct extract_unsigned_int_type
+		: public type_cast_result<unsigned int>
+	{
+		void apply( PyObject * _obj ) override
+		{
+			m_valid = false;
+			if( PyInt_Check( _obj ) )
+			{
+				m_result = PyInt_AsUnsignedLongMask( _obj );
+				m_valid = true;
+			}
+		}
+
+		PyObject * wrapp( unsigned int _value ) override
+		{
+			return PyInt_FromLong( _value );
+		}
+	}s_extract_unsigned_int_type;
+
 	static struct extract_float_type
 		: public type_cast_result<float>
 	{
