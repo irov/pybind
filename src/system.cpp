@@ -95,23 +95,24 @@ namespace pybind
 
 	PyObject * call_va( PyObject * _obj, const char * _format, va_list _va )
 	{
-		Py_INCREF( _obj );
-		PyObject * result = PyObject_CallObject( _obj, Py_VaBuildValue( _format, _va ) );
+//		Py_INCREF( _obj );
+		PyObject * value = Py_VaBuildValue( _format, _va );
+		PyObject * result = PyObject_CallObject( _obj, value );
+		Py_DECREF( value );
 		return result;
 	}
 
 	PyObject * call_method_va( PyObject * _obj, const char * _method, const char * _format, va_list _va )
 	{
-		if( PyObject_HasAttrString( _obj, _method ) != 1 )
-		{
-			return 0;
-		}
-
 		PyObject * method = PyObject_GetAttrString( _obj, _method );
 
-		PyObject * result = call_va( method, _format, _va );
+		if( method == 0 )
+		{
+			Py_RETURN_NONE;
+		}
 
-		return result;
+		PyObject * result = call_va( method, _format, _va );
+		return result;		
 	}
 
 	PyObject * exec( const char * _code, PyObject * _global, PyObject * _local )
@@ -129,6 +130,7 @@ namespace pybind
 			_filename,
 			Py_file_input,
 			_global, _local );
+
 		return result;
 	}
 

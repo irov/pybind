@@ -258,6 +258,7 @@ namespace pybind
 			PyObject * py_method = it->instance( _self );
 
 			int res = PyObject_SetAttrString( (PyObject*)_self, it->m_name, py_method );
+			Py_DECREF( py_method );
 
 			if( res )
 			{
