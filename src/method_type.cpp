@@ -92,6 +92,8 @@ namespace pybind
 			printf("invalid embedding class '%s' \n", m_type.tp_name );					
 		}
 
+		Py_DECREF( &m_type );
+
 		m_method.ml_name = _name;
 		m_method.ml_meth = _cfunc;
 		m_method.ml_flags = METH_CLASS | ( _hasargs ) ? METH_VARARGS : METH_NOARGS;
@@ -106,8 +108,9 @@ namespace pybind
 		self->ifunc = m_interface;
 		self->impl = _obj->impl;
 
-		return PyCFunction_New( &m_method, (PyObject*)self );
-		//		Py_DECREF( self );
-		//		Py_DECREF( _module );
+		PyObject * py_function = PyCFunction_New( &m_method, (PyObject*)self );
+		Py_DECREF( self );
+
+		return py_function;
 	}
 }

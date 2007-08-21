@@ -53,7 +53,11 @@ namespace pybind
 
 	static void py_dealloc( PyObject * _obj )
 	{
-		_obj->ob_type->tp_free( _obj );
+		py_class_type * self = (py_class_type *)_obj;
+
+//		Py_DECREF( self->dict );
+
+		_obj->ob_type->tp_free( _obj );		
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -65,9 +69,6 @@ namespace pybind
 	static int _pyinitproc(PyObject * _self, PyObject *_args, PyObject *)
 	{
 		py_class_type * ct = (py_class_type*)_self;
-		
-		PyObject * py_dict = PyObject_GetAttrString( (PyObject *)_self, "__dict__");
-
 		return 1;
 	}
 
@@ -84,7 +85,7 @@ namespace pybind
 		PyObject* last = inst->dict;
 		inst->dict = dict;
 		Py_DECREF( last );
-		Py_INCREF( dict );
+		//Py_INCREF( dict );
 		return 0;
 	}
 
@@ -98,15 +99,20 @@ namespace pybind
 	{
 		py_class_type* inst = (py_class_type*)obj;
 
-		char *str = PyString_AsString( name );
+		std::string szName = PyString_AsString( name );
 
-		Py_INCREF( value );
+		if( szName == "setImageIndex1" )
+		{
+			szName = "";
+		}
 
 		int res = PyDict_SetItem( inst->dict, name, value );
+		Py_DECREF( value );
 
 		if( res )
 		{
-			 check_error();
+			Py_DECREF( name );
+			check_error();
 		}
 
 		return res;
@@ -117,17 +123,16 @@ namespace pybind
 	{
 		py_class_type* inst = (py_class_type*)obj;
 
-		char * str = PyString_AsString( name );
+		PyObject * item = PyDict_GetItem( inst->dict, name );
 
-		if( PyObject * item = PyDict_GetItem( inst->dict, name ) )
+		if( item )
 		{
 			Py_INCREF( item );
-
 			return item;
-
 		}
 
 		PyObject * pResult = PyObject_GenericGetAttr( obj, name );
+
 		return pResult;
 	}
 
@@ -159,6 +164,7 @@ namespace pybind
 		
 
 		m_type_holder = m_type;
+		m_type_holder.tp_new = 0;
 		m_type_holder.tp_dealloc = &py_dealloc;
 
 		if( PyType_Ready(&m_type) < 0 )
@@ -257,11 +263,12 @@ namespace pybind
 			//PyObject * py_method = PyMethod_New( method.m_mdfunc, (PyObject*)_self, (PyObject *)&m_type );
 			PyObject * py_method = it->instance( _self );
 
-			int res = PyObject_SetAttrString( (PyObject*)_self, it->m_name, py_method );
+			if( PyObject_SetAttrString( (PyObject*)_self, it->m_name, py_method ) == -1 )
+			{
+				Py_DECREF( py_method );
+				Py_DECREF( _self );
 			Py_DECREF( py_method );
 
-			if( res )
-			{
 				check_error();
 			}
 		}
@@ -272,10 +279,14 @@ namespace pybind
 		py_class_type *self = 
 			(py_class_type *)m_type_holder.tp_alloc( &m_type_holder, 0 );
 
+		//Py_DECREF( &m_type_holder );
+
 		self->impl = _impl;
 		self->scope = this;
 
 		setup_method( self );
+
+		//Py_INCREF( self );
 
 		return (PyObject*)self;
 	}

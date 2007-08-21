@@ -26,6 +26,12 @@ namespace pybind
 			{
 				return new C(_impl);
 			}
+
+			template<class C>
+			static void delete_( C * _impl )
+			{
+				delete _impl;
+			}
 		};
 
 		struct interface
@@ -41,9 +47,15 @@ namespace pybind
 			{
 				return 0;
 			}
+
+			template<class C>
+			static void delete_( C * _impl )
+			{
+			}
 		};
 	}
 
+	typedef bases<void,void,void,void> no_bases;
 
 	template<class C, class B = bases<void,void,void,void>, class A = allocator::base_alloc >
 	class base_
@@ -101,8 +113,31 @@ namespace pybind
 		{
 			typedef typename method_parser<F>::result t_info;
 
+			struct delete_holder
+			{
+				~delete_holder()
+				{
+					for each( method_proxy_interface * ptr in m_listProxyMethod )
+					{
+						delete ptr;
+					}
+				}
+
+				void add( method_proxy_interface * _ptr )
+				{
+					m_listProxyMethod.push_back( _ptr );
+				}
+
+				typedef std::list<method_proxy_interface *> TListProxyMethod;
+				TListProxyMethod m_listProxyMethod;
+			};
+
+			static delete_holder s_proxyDeleter;
+
 			method_proxy_interface * ifunc =
 				new method_proxy<C,F>(_name, f);
+
+			s_proxyDeleter.add( ifunc );
 
 			class_core::def_method(
 				_name,
@@ -130,7 +165,7 @@ namespace pybind
 			dealloc_( PyObject * self )
 		{
 			C * obj = (C*)class_core::dealloc_impl( self );
-			delete obj;
+			A::delete_(obj);
 		}
 
 		static class_type_scope * scope()
@@ -183,7 +218,8 @@ namespace pybind
 
 		PyObject * wrapp( C _class )
 		{
-			return class_core::create_holder( class_info<C>(), (void *) A::new_<C>( _class ) );
+			return 0;
+			//return class_core::create_holder( class_info<C>(), (void *) A::new_<C>( _class ) );
 		}
 	};
 

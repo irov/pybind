@@ -71,9 +71,37 @@ namespace pybind
 	}
 
 	template<class T>
+	PyObject * wrapp( PyObject * _type, T * _impl )
+	{
+		
+	}
+
+	template<class T>
 	PyObject * ptr( T _value )
 	{
 		type_cast * etype = detail::type_down_cast<T>::find();
+
+		if( etype == 0 )
+		{
+			throw std::exception("invalid ptr type");
+		}
+
+		type_cast_result<T> * etype_impl = static_cast<type_cast_result<T> *>(etype);
+
+		PyObject * result = etype_impl->wrapp( _value );
+
+		if( result == 0 )
+		{
+			ret_none();
+		}
+
+		return result;
+	}
+
+	template<class T>
+	PyObject * ptr( T _value, const type_info & _tinfo )
+	{
+		type_cast * etype = detail::find_type_info_extract( _tinfo );
 
 		if( etype == 0 )
 		{

@@ -13,6 +13,7 @@ namespace pybind
 
 	void finalize()
 	{
+		PyImport_Cleanup();
 		Py_Finalize();
 	}
 
@@ -149,6 +150,11 @@ namespace pybind
 	void decref( PyObject * _obj )
 	{
 		Py_DECREF( _obj );
+	}
+	
+	size_t refcount( PyObject * _obj )
+	{
+		return _obj->ob_refcnt;
 	}
 
 	PyObject * ret_none()
