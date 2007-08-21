@@ -89,8 +89,34 @@ namespace pybind
 		return 0;
 	}
 
+	static PyObject* instance_get_methods( PyObject* op, void* )
+	{
+		py_class_type* inst = (py_class_type*)op;
+		Py_INCREF( inst->dict );
+		return inst->dict;
+	}
+
+	static PyObject* instance_get_members( PyObject* op, void* )
+	{
+		py_class_type* inst = (py_class_type*)op;
+		Py_INCREF( inst->dict );
+		return inst->dict;
+	}
+
+	static int instance_set_methods(PyObject* op, PyObject* dict, void*)
+	{
+		return 0;
+	}
+
+	static int instance_set_members(PyObject* op, PyObject* dict, void*)
+	{
+		return 0;
+	}
+
 	static PyGetSetDef instance_getsets[] = {
 		{"__dict__",  instance_get_dict,  instance_set_dict, NULL, 0},
+		{"__methods__",  instance_get_methods,  instance_set_methods, NULL, 0},
+		{"__members__",  instance_get_members,  instance_set_members, NULL, 0},
 		{0, 0, 0, 0, 0}
 	};
 
@@ -267,7 +293,6 @@ namespace pybind
 			{
 				Py_DECREF( py_method );
 				Py_DECREF( _self );
-			Py_DECREF( py_method );
 
 				check_error();
 			}
