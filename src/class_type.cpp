@@ -103,20 +103,8 @@ namespace pybind
 		return inst->dict;
 	}
 
-	static int instance_set_methods(PyObject* op, PyObject* dict, void*)
-	{
-		return 0;
-	}
-
-	static int instance_set_members(PyObject* op, PyObject* dict, void*)
-	{
-		return 0;
-	}
-
 	static PyGetSetDef instance_getsets[] = {
 		{"__dict__",  instance_get_dict,  instance_set_dict, NULL, 0},
-		{"__methods__",  instance_get_methods,  instance_set_methods, NULL, 0},
-		{"__members__",  instance_get_members,  instance_set_members, NULL, 0},
 		{0, 0, 0, 0, 0}
 	};
 
@@ -124,13 +112,6 @@ namespace pybind
 		class_setattro(PyObject *obj, PyObject *name, PyObject* value)
 	{
 		py_class_type* inst = (py_class_type*)obj;
-
-		std::string szName = PyString_AsString( name );
-
-		if( szName == "setImageIndex1" )
-		{
-			szName = "";
-		}
 
 		int res = PyDict_SetItem( inst->dict, name, value );
 		Py_DECREF( value );

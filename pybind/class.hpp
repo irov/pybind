@@ -66,14 +66,14 @@ namespace pybind
 		virtual void setup_extract() = 0;
 
 	public:
-		base_( const char * _name, PyObject * _module = 0 )
+		base_( const char * _name, pybind_newfunc _pynew, pybind_destructor _pydestructor, PyObject * _module )
 		{
 			class_core::create_new_type_scope( 
 				class_info<C>(),
 				_name, 
 				_module, 
-				&new_, 
-				&dealloc_ 
+				_pynew, 
+				_pydestructor 
 				);
 
 			setup_bases();
@@ -236,7 +236,26 @@ namespace pybind
 
 	public:
 		class_( const char * _name, PyObject * _module = 0 )
-			: base_( _name, _module )
+			: base_( _name, &base_<C,B,A>::new_, &base_<C,B,A>::dealloc_, _module )
+		{
+			setup_extract();
+		}
+	};
+
+	template<class C, class B = bases<void,void,void,void>, class A = allocator::base_alloc >
+	class proxy_
+		: public base_<C,B, A>
+	{
+	protected:
+		void setup_extract() override
+		{
+			static extract_class_type_ptr<C> s_registartor_ptr;
+			static extract_class_type_ref<C,A> s_registartor_ref;
+		}
+
+	public:
+		proxy_( const char * _name, PyObject * _module = 0 )
+			: base_( _name, &base_<C,B,A>::new_, &base_<C,B,A>::dealloc_only_python, _module )
 		{
 			setup_extract();
 		}
@@ -254,7 +273,7 @@ namespace pybind
 
 	public:
 		interface_( const char * _name, PyObject * _module = 0 )
-			: base_( _name, _module )
+			: base_( _name, &base_<C,B, allocator::interface>::new_, &base_<C,B, allocator::interface>::dealloc_, _module )
 		{
 			setup_extract();
 		}
