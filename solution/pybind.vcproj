@@ -191,19 +191,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\constructor.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\def.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\src\def_proxy.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\extract.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\from_py_to_cpp_parser.cpp"
 				>
 			</File>
 			<File
@@ -215,7 +211,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\method_type.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\system.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\type_cast.cpp"
 				>
 			</File>
 		</Filter>
@@ -249,15 +253,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\pybind\constructor.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\pybind\def.hpp"
 				>
 			</File>
 			<File
 				RelativePath="..\pybind\def_call.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\pybind\def_core.hpp"
 				>
 			</File>
 			<File
@@ -281,10 +285,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\pybind\from_py_to_cpp_parser.hpp"
-				>
-			</File>
-			<File
 				RelativePath="..\pybind\method_call.hpp"
 				>
 			</File>
@@ -297,11 +297,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\pybind\method_type.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\pybind\pybind.hpp"
 				>
 			</File>
 			<File
 				RelativePath="..\pybind\system.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\pybind\type_cast.hpp"
 				>
 			</File>
 			<File
