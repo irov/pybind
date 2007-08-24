@@ -52,6 +52,7 @@ namespace pybind
 		void * metacast( const char * name, void * _impl );
 
 		void setup_method( py_class_type * _self );
+		void update_method_self( py_class_type * _self, void * _impl );
 
 	public:		
 		typedef std::list<method_type_scope> TMethodFunction;

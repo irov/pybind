@@ -83,12 +83,6 @@ namespace pybind
 	}
 
 	template<class T>
-	PyObject * wrapp( PyObject * _type, T * _impl )
-	{
-		
-	}
-
-	template<class T>
 	PyObject * ptr( T _value )
 	{
 		type_cast * etype = detail::type_down_cast<T>::find();

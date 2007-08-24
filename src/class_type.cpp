@@ -121,8 +121,10 @@ namespace pybind
 	{
 		py_class_type* inst = (py_class_type*)obj;
 
+		char * sz = PyString_AsString( name );
+
 		int res = PyDict_SetItem( inst->dict, name, value );
-		Py_DECREF( value );
+		//Py_DECREF( value );
 
 		if( res )
 		{
@@ -286,7 +288,6 @@ namespace pybind
 		it != it_end;
 		++it)
 		{
-			//PyObject * py_method = PyMethod_New( method.m_mdfunc, (PyObject*)_self, (PyObject *)&m_type );
 			PyObject * py_method = it->instance( _self );
 
 			if( PyObject_SetAttrString( (PyObject*)_self, it->m_name, py_method ) == -1 )
@@ -296,6 +297,21 @@ namespace pybind
 
 				check_error();
 			}
+		}
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::update_method_self( py_class_type * _self, void * _impl )
+	{
+		for( TMethodFunction::iterator
+			it = m_methods.begin(),
+			it_end = m_methods.end();
+		it != it_end;
+		++it)
+		{
+			PyObject * py_object = PyObject_GetAttrString( (PyObject*)_self, it->m_name );
+			PyCFunctionObject * py_function = (PyCFunctionObject *)py_object;
+			py_method_type * py_method = (py_method_type *)py_function->m_self;
+			py_method->impl = _impl;
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////

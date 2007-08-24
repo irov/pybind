@@ -266,5 +266,4 @@ namespace pybind
 			setup_extract();
 		}
 	};
-
 }
