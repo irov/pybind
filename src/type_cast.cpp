@@ -42,6 +42,21 @@ namespace pybind
 				m_result = (_obj == Py_True);
 				m_valid = true;
 			}
+			else if( PyInt_Check( _obj ) )
+			{
+				m_result = (PyInt_AsLong( _obj ) != 0);
+				m_valid = true;
+			}
+			else if( PyLong_Check( _obj ) )
+			{
+				m_result = ( PyLong_AsLong( _obj ) != 0 );
+				m_valid = true;
+			}
+			else if( PyFloat_Check( _obj ) )
+			{
+				m_result = ( int(PyFloat_AsDouble( _obj )) != 0 );
+				m_valid = true;
+			}
 		}
 
 		PyObject * wrapp( bool _value ) override
@@ -59,6 +74,16 @@ namespace pybind
 			if( PyInt_Check( _obj ) )
 			{
 				m_result = PyInt_AsLong( _obj );
+				m_valid = true;
+			}
+			else if( PyLong_Check( _obj ) )
+			{
+				m_result = (int)PyLong_AsLong( _obj );
+				m_valid = true;
+			}
+			else if( PyFloat_Check( _obj ) )
+			{
+				m_result = (int)PyFloat_AsDouble( _obj );
 				m_valid = true;
 			}
 		}
@@ -80,6 +105,16 @@ namespace pybind
 				m_result = PyInt_AsUnsignedLongMask( _obj );
 				m_valid = true;
 			}
+			else if( PyLong_Check( _obj ) )
+			{
+				m_result = (unsigned int)PyLong_AsUnsignedLong( _obj );
+				m_valid = true;
+			}
+			else if( PyFloat_Check( _obj ) )
+			{
+				m_result = (unsigned int)PyFloat_AsDouble( _obj );
+				m_valid = true;
+			}
 		}
 
 		PyObject * wrapp( unsigned int _value ) override
@@ -99,6 +134,16 @@ namespace pybind
 				m_result = (float)PyFloat_AsDouble( _obj );
 				m_valid = true;
 			}
+			else if( PyLong_Check( _obj ) )
+			{
+				m_result = (float)PyLong_AsLong( _obj );
+				m_valid = true;
+			}
+			else if( PyInt_Check( _obj ) )
+			{
+				m_result = (float)PyInt_AsLong( _obj );
+				m_valid = true;
+			}
 		}
 
 		PyObject * wrapp( float _value ) override
@@ -116,6 +161,16 @@ namespace pybind
 			if( PyFloat_Check( _obj ) )
 			{
 				m_result = PyFloat_AsDouble( _obj );
+				m_valid = true;
+			}
+			else if( PyLong_Check( _obj ) )
+			{
+				m_result = (float)PyLong_AsLong( _obj );
+				m_valid = true;
+			}
+			else if( PyInt_Check( _obj ) )
+			{
+				m_result = (float)PyInt_AsLong( _obj );
 				m_valid = true;
 			}
 		}

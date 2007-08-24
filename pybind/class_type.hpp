@@ -11,6 +11,7 @@
 namespace pybind
 {
 	class class_type_scope;
+	class constructor;
 
 	struct py_class_type{
 		PyObject_HEAD
@@ -23,6 +24,7 @@ namespace pybind
 	{
 	public:
 		class_type_scope();
+		~class_type_scope();
 
 	public:
 		void class_type_scope::setup(
@@ -35,6 +37,9 @@ namespace pybind
 		const char * getName();
 
 		void set_module( PyObject * _module );
+
+		void * construct( PyObject * _args );
+		void def_init( constructor * _ctr );
 
 		void add_bases( class_type_scope * _scope );
 
@@ -55,6 +60,8 @@ namespace pybind
 		typedef std::pair<class_type_scope *, pybind_metacast> TPairMetacast;
 		typedef std::map<std::string, TPairMetacast> TMapBases;
 		TMapBases m_bases;
+
+		constructor * m_constructor;
 
 		PyTypeObject m_type;
 		PyTypeObject m_type_holder;

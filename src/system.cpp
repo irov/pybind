@@ -209,10 +209,25 @@ namespace pybind
 
 	bool dict_next( PyObject * _dict, size_t *_pos, PyObject ** _key, PyObject ** _value )
 	{
-		Py_ssize_t ps;
+		Py_ssize_t ps = (Py_ssize_t)(*_pos);
 		int res = PyDict_Next( _dict, &ps, _key, _value );
 		*_pos = (size_t)ps;
 		return res == 1;
+	}
+
+	bool tuple_check( PyObject * _tuple )
+	{
+		return PyTuple_Check( _tuple ) == 1;
+	}
+
+	size_t tuple_size( PyObject * _tuple )
+	{
+		return PyTuple_Size( _tuple );
+	}
+
+	PyObject * tuple_getitem( PyObject * _tuple, size_t _it )
+	{
+		return PyTuple_GetItem( _tuple, _it );
 	}
 
 	void exception_filter()

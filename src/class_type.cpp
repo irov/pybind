@@ -1,5 +1,6 @@
 #	include "pybind/class_type.hpp"
 #	include "pybind/class_scope.hpp"
+#	include "pybind/constructor.hpp"
 
 #	include "pybind/system.hpp"
 
@@ -63,7 +64,14 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	class_type_scope::class_type_scope()
 		: m_type( py_empty_type )
+		, m_constructor( 0 )
 	{
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	class_type_scope::~class_type_scope()
+	{
+		delete m_constructor;
 	}
 
 	static int _pyinitproc(PyObject * _self, PyObject *_args, PyObject *)
@@ -224,6 +232,17 @@ namespace pybind
 			m_methods.end(), 
 			_basescope->m_methods.begin(),
 			_basescope->m_methods.end() );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void * class_type_scope::construct( PyObject * _args )
+	{
+		return m_constructor->call( _args );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::def_init( constructor * _ctr )
+	{
+		delete m_constructor;
+		m_constructor = _ctr;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::add_base( const char * _name, class_type_scope * _base, pybind_metacast _cast )

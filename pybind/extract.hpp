@@ -39,7 +39,7 @@ namespace pybind
 		template<class T>
 		struct extract_check<const T &>
 		{
-			static const T & extract( PyObject * _obj )
+			static T extract( PyObject * _obj )
 			{
 				const type_info & tinfo = typeid(T);
 
@@ -65,7 +65,19 @@ namespace pybind
 	}
 
 	template<class T>
-	T extract( PyObject * _obj )
+	struct extract_return
+	{
+		typedef T type;
+	};
+
+	template<class T>
+	struct extract_return<const T &>
+	{
+		typedef T type;
+	};
+
+	template<class T>
+	typename extract_return<T>::type extract( PyObject * _obj )
 	{
 		return detail::extract_check<T>::extract( _obj );
 	}

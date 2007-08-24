@@ -67,6 +67,16 @@ namespace pybind
 		return t_scope->create_holder( _impl );
 	}
 	//////////////////////////////////////////////////////////////////////////
+	void class_core::def_init( class_type_scope * _scope, constructor * _ctr )
+	{
+		_scope->def_init( _ctr );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void * class_core::construct( class_type_scope * _scope, PyObject * _args )
+	{
+		return _scope->construct( _args );
+	}
+	//////////////////////////////////////////////////////////////////////////
 	void class_core::set_module( class_type_scope * _scope, PyObject * _module )
 	{
 		_scope->set_module( _module );

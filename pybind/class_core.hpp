@@ -2,6 +2,7 @@
 
 #	include "pybind/class_scope.hpp"
 
+#	include "pybind/constructor.hpp"
 #	include "pybind/exports.hpp"
 #	include "pybind/types.hpp"
 
@@ -36,7 +37,10 @@ namespace pybind
 
 		static PyObject * create_holder( const type_info & _info, void * _impl );
 
-		static void set_module( class_type_scope * m_type_scope, PyObject * _module );
+		static void def_init( class_type_scope * _scope, constructor * _ctr );
+		static void * construct( class_type_scope * _scope, PyObject * _args );
+
+		static void set_module( class_type_scope * _scope, PyObject * _module );
 
 		static void def_method( 
 			const char * _name, 

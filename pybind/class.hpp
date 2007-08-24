@@ -11,53 +11,9 @@
 
 namespace pybind
 {	
-	namespace allocator
-	{
-		struct base_alloc
-		{
-			template<class C>
-			static void * new_()
-			{
-				return new C;
-			}
-
-			template<class C>
-			static void * new_( const C & _impl )
-			{
-				return new C(_impl);
-			}
-
-			template<class C>
-			static void delete_( C * _impl )
-			{
-				delete _impl;
-			}
-		};
-
-		struct interface
-		{
-			template<class C>
-			static void * new_()
-			{
-				return 0;
-			}
-
-			template<class C>
-			static void * new_( const C & _impl )
-			{
-				return 0;
-			}
-
-			template<class C>
-			static void delete_( C * _impl )
-			{
-			}
-		};
-	}
-
 	typedef bases<void,void,void,void> no_bases;
 
-	template<class C, class B = bases<void,void,void,void>, class A = allocator::base_alloc >
+	template<class C, class B = bases<void,void,void,void> >
 	class base_
 	{
 	public:
@@ -106,7 +62,16 @@ namespace pybind
 			if( arity-- > 0 )class_core::add_method_from_base<C, B::base3>();
 		}
 
+		template<class C0, class C1, class C2, class C3>
+		base_ & def( const init<C0,C1,C2,C3> & _init )
+		{
+			constructor * ctr = 
+				new constructor_params<C, init<C0,C1,C2,C3> >();
 
+			class_core::def_init( scope(), ctr );
+
+			return *this;
+		}
 
 		template<class F>
 		base_ & def( const char * _name, F f )
@@ -149,10 +114,23 @@ namespace pybind
 			return *this;
 		}
 
+
+		static PyObject *
+			new_interface( PyTypeObject * _type, PyObject * _args, PyObject * _kwds )
+		{
+			return class_core::new_impl( _type, _args, 0, class_info<C>() );
+		}
+		
+
 		static PyObject *
 			new_( PyTypeObject * _type, PyObject * _args, PyObject * _kwds )
 		{
-			return class_core::new_impl( _type, _args, A::new_<C>(), class_info<C>() );
+			C * obj = (C*)class_core::construct( scope(), _args );
+
+			//list_check( _args );
+			//C * obj = new C;/*A::new_<C>();*/
+
+			return class_core::new_impl( _type, _args, obj, class_info<C>() );
 		}
 
 		static void 
@@ -165,7 +143,7 @@ namespace pybind
 			dealloc_( PyObject * self )
 		{
 			C * obj = (C*)class_core::dealloc_impl( self );
-			A::delete_(obj);
+			delete obj;
 		}
 
 		static class_type_scope * scope()
@@ -205,7 +183,7 @@ namespace pybind
 		}
 	};
 
-	template<class C, class A>
+	template<class C>
 	struct extract_class_type_ref
 		: public type_cast_result<C>
 	{
@@ -223,47 +201,57 @@ namespace pybind
 		}
 	};
 
-	template<class C, class B = bases<void,void,void,void>, class A = allocator::base_alloc >
+	template<class C, class B = bases<void,void,void,void> >
 	class class_
-		: public base_<C,B, A>
+		: public base_<C,B>
 	{
 	protected:
 		void setup_extract() override
 		{
 			static extract_class_type_ptr<C> s_registartor_ptr;
-			static extract_class_type_ref<C,A> s_registartor_ref;
+			static extract_class_type_ref<C> s_registartor_ref;
 		}
 
 	public:
 		class_( const char * _name, PyObject * _module = 0 )
-			: base_( _name, &base_<C,B,A>::new_, &base_<C,B,A>::dealloc_, _module )
+			: base_( _name, &base_<C,B>::new_, &base_<C,B>::dealloc_, _module )
 		{
 			setup_extract();
+
+			constructor * empty_ctr = 
+				new constructor_params<C, init<> >();
+
+			class_core::def_init( scope(), empty_ctr );
 		}
 	};
 
-	template<class C, class B = bases<void,void,void,void>, class A = allocator::base_alloc >
+	template<class C, class B = bases<void,void,void,void> >
 	class proxy_
-		: public base_<C,B, A>
+		: public base_<C,B>
 	{
 	protected:
 		void setup_extract() override
 		{
 			static extract_class_type_ptr<C> s_registartor_ptr;
-			static extract_class_type_ref<C,A> s_registartor_ref;
+			static extract_class_type_ref<C> s_registartor_ref;
 		}
 
 	public:
 		proxy_( const char * _name, PyObject * _module = 0 )
-			: base_( _name, &base_<C,B,A>::new_, &base_<C,B,A>::dealloc_only_python, _module )
+			: base_( _name, &base_<C,B>::new_, &base_<C,B>::dealloc_only_python, _module )
 		{
 			setup_extract();
+
+			constructor * empty_ctr = 
+				new constructor_params<C, init<> >();
+
+			class_core::def_init( scope(), empty_ctr );
 		}
 	};
 
 	template<class C, class B = bases<void,void,void,void>>
 	class interface_
-		: public base_<C,B, allocator::interface>
+		: public base_<C,B>
 	{
 	protected:
 		void setup_extract() override
@@ -273,7 +261,7 @@ namespace pybind
 
 	public:
 		interface_( const char * _name, PyObject * _module = 0 )
-			: base_( _name, &base_<C,B, allocator::interface>::new_, &base_<C,B, allocator::interface>::dealloc_, _module )
+			: base_( _name, &base_<C,B>::new_interface, &base_<C,B>::dealloc_only_python, _module )
 		{
 			setup_extract();
 		}

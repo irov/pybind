@@ -53,8 +53,12 @@ namespace pybind
 	PYBIND_API size_t list_size( PyObject * _obj );
 	PYBIND_API PyObject * list_getitem( PyObject * _obj, size_t _it );
 
-	PYBIND_API bool dict_check( PyObject * _obj );
+	PYBIND_API bool dict_check( PyObject * _dict );
 	PYBIND_API bool dict_next( PyObject * _dict, size_t *_pos, PyObject ** _key, PyObject ** _value );
+
+	PYBIND_API bool tuple_check( PyObject * _tuple );
+	PYBIND_API size_t tuple_size( PyObject * _tuple );
+	PYBIND_API PyObject * tuple_getitem( PyObject * _tuple, size_t _it );
 
 	PYBIND_API void exception_filter();
 }
