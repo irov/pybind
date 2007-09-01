@@ -77,6 +77,8 @@ namespace pybind
 
 		PyObject * result = call_va( _obj, _format, valist );
 
+		check_error();
+
 		va_end( valist ); 
 
 		return result;
@@ -89,6 +91,8 @@ namespace pybind
 
 		PyObject * result = call_method_va( _obj, _method, _format, valist );
 
+		check_error();
+
 		va_end( valist ); 
 
 		return result;
@@ -99,6 +103,9 @@ namespace pybind
 //		Py_INCREF( _obj );
 		PyObject * value = Py_VaBuildValue( _format, _va );
 		PyObject * result = PyObject_CallObject( _obj, value );
+
+		check_error();
+
 		Py_DECREF( value );
 		return result;
 	}
@@ -113,12 +120,18 @@ namespace pybind
 		}
 
 		PyObject * result = call_va( method, _format, _va );
+
+		check_error();
+
 		return result;		
 	}
 
 	PyObject * exec( const char * _code, PyObject * _global, PyObject * _local )
 	{
 		PyObject* result = PyRun_String( _code, Py_file_input, _global, _local);
+
+		check_error();
+
 		return result; 
 	}
 
@@ -131,6 +144,8 @@ namespace pybind
 			_filename,
 			Py_file_input,
 			_global, _local );
+
+		check_error();
 
 		return result;
 	}
