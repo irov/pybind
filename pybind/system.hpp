@@ -61,4 +61,9 @@ namespace pybind
 	PYBIND_API PyObject * tuple_getitem( PyObject * _tuple, size_t _it );
 
 	PYBIND_API void exception_filter();
+
+	namespace convert
+	{
+		PYBIND_API bool to_bool( PyObject * _bool );
+	}
 }

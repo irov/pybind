@@ -273,4 +273,17 @@ namespace pybind
 			PyErr_Print();
 		}
 	}
+
+	namespace convert
+	{
+		bool to_bool( PyObject * _bool )
+		{
+			if( PyBool_Check( _bool ) )
+			{
+				return _bool == Py_True;
+			}
+
+			return false;
+		}
+	}
 }
