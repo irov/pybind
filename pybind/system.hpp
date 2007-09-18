@@ -65,5 +65,8 @@ namespace pybind
 	namespace convert
 	{
 		PYBIND_API bool to_bool( PyObject * _bool );
+
+		PYBIND_API bool is_string( PyObject * _string );
+		PYBIND_API const char * to_string( PyObject * _string );
 	}
 }

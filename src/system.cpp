@@ -276,6 +276,7 @@ namespace pybind
 
 	namespace convert
 	{
+		//////////////////////////////////////////////////////////////////////////
 		bool to_bool( PyObject * _bool )
 		{
 			if( PyBool_Check( _bool ) )
@@ -284,6 +285,21 @@ namespace pybind
 			}
 
 			return false;
+		}
+		//////////////////////////////////////////////////////////////////////////
+		bool is_string( PyObject * _string )
+		{
+			if( PyString_Check( _string ) == 1 )
+			{
+				return true;
+			}
+
+			return false;
+		}
+		//////////////////////////////////////////////////////////////////////////
+		const char * to_string( PyObject * _string )
+		{
+			return PyString_AsString( _string );
 		}
 	}
 }
