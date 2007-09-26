@@ -29,7 +29,8 @@ namespace pybind
 
 				if( etype_impl->is_valid() == false )
 				{
-					throw std::exception("invalid extract type");
+					pybind::check_error();
+					throw std::exception("bad extract cast");
 				}
 
 				return etype_impl->result();
