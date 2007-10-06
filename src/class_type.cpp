@@ -155,10 +155,13 @@ namespace pybind
 
 	void class_type_scope::setup(
 		const char * _name, 
+		const char * _type,
 		PyObject * _module,
 		newfunc _pynew,
 		destructor _pydestructor)
 	{
+		m_type_name = _type;
+
 		if( _module == 0 )
 		{
 			m_module = get_currentmodule();
@@ -199,16 +202,21 @@ namespace pybind
 		PyModule_AddObject( m_module, m_type.tp_name, (PyObject*)&m_type );
 	}
 
+	const char * class_type_scope::getName() const
+	{
+		return m_type_name;
+	}
+
 	static PyObject * method_call_callback0( PyObject * _method )
 	{
 		py_method_type * md = (py_method_type *)_method;
-		return md->ifunc->call( md->impl );
+		return md->ifunc->call( md->impl, md->scope );
 	}
 
 	static PyObject * method_call_callback1( PyObject * _method, PyObject * _args )
 	{
 		py_method_type * md = (py_method_type *)_method;
-		return md->ifunc->call( md->impl, _args );
+		return md->ifunc->call( md->impl, md->scope, _args );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::set_module( PyObject * _module )
@@ -319,6 +327,23 @@ namespace pybind
 	{
 		py_class_type *self = 
 			(py_class_type *)m_type_holder.tp_alloc( &m_type_holder, 0 );
+
+		//Py_DECREF( &m_type_holder );
+
+		self->impl = _impl;
+		self->scope = this;
+
+		setup_method( self );
+
+		//Py_INCREF( self );
+
+		return (PyObject*)self;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * class_type_scope::create_impl( void * _impl )
+	{
+		py_class_type *self = 
+			(py_class_type *)m_type.tp_alloc( &m_type, 0 );
 
 		//Py_DECREF( &m_type_holder );
 

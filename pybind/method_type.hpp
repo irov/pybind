@@ -11,7 +11,10 @@ namespace pybind
 		PyObject_HEAD
 		method_proxy_interface * ifunc;
 		void * impl;
+		class_type_scope * scope;
 	};
+
+	struct py_class_type;
 
 	class method_type_scope
 	{

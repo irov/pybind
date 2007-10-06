@@ -27,15 +27,15 @@ namespace pybind
 		~class_type_scope();
 
 	public:
-		void class_type_scope::setup(
+		void setup(
 			const char * _name, 
+			const char * _type,
 			PyObject * _module,
 			newfunc _pynew,
 			destructor _pydestructor);
 
 	public:
-		const char * getName();
-
+		const char * getName() const;
 		void set_module( PyObject * _module );
 
 		void * construct( PyObject * _args );
@@ -49,6 +49,8 @@ namespace pybind
 		void add_base( const char * _name, class_type_scope * _base, pybind_metacast _cast );
 
 		PyObject * create_holder( void * _impl );
+		PyObject * create_impl( void * _impl );
+
 		void * metacast( const char * name, void * _impl );
 
 		void setup_method( py_class_type * _self );
@@ -64,6 +66,7 @@ namespace pybind
 
 		constructor * m_constructor;
 
+		const char * m_type_name;
 		PyTypeObject m_type;
 		PyTypeObject m_type_holder;
 		PyObject * m_module;

@@ -36,6 +36,7 @@ namespace pybind
 			);
 
 		static PyObject * create_holder( const type_info & _info, void * _impl );
+		static PyObject * create_impl( const type_info & _info, void * _impl );
 		static void wrapp_holder( PyObject * _obj, void * _impl );
 
 		static void def_init( class_type_scope * _scope, constructor * _ctr );

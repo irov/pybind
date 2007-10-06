@@ -6,9 +6,16 @@ namespace pybind
 {
 	namespace detail
 	{
-		void * class_type_impl( py_class_type * _class_type )
+		void * meta_cast_scope( void * _self, const char * _scope_name, const char * _name, class_type_scope * scope )
 		{
-			return _class_type->impl;
+			const char * class_name = scope->getName();
+
+			if( strcmp( class_name , _scope_name ) == 0 )
+			{
+				return _self;
+			}	
+			
+			return scope->metacast( _name, _self );			
 		}
 	}
 }

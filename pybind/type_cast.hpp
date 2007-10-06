@@ -97,7 +97,22 @@ namespace pybind
 	class type_cast
 	{
 	public:
+		type_cast()
+			: m_valid( false )
+		{
+		}
+
+	public:
 		virtual void apply( PyObject * _obj ) = 0;
+
+	public:
+		bool is_valid() const
+		{
+			return m_valid;
+		}
+
+	protected:
+		bool m_valid;
 	};
 
 
@@ -112,10 +127,10 @@ namespace pybind
 	template<class T> 
 	class type_cast_result
 		: public type_cast
-	{
+		{
 	public:
 		type_cast_result()
-			: m_valid( false )
+			: type_cast()
 		{
 			registration_type_cast<T>( this );
 		}
@@ -124,11 +139,6 @@ namespace pybind
 		virtual PyObject * wrapp( T t ) = 0;
 
 	public:
-		bool is_valid() const
-		{
-			return m_valid;
-		}
-
 		T result()
 		{	
 			return m_result; 
@@ -140,7 +150,6 @@ namespace pybind
 		}
 
 	protected:
-		bool m_valid;
 		T m_result;		
 	};
 
@@ -150,7 +159,7 @@ namespace pybind
 	{
 	public:
 		type_cast_result()
-			: m_valid( false )
+			: type_cast( false )
 		{
 			registration_type_cast<T>( this );
 		}
@@ -159,11 +168,6 @@ namespace pybind
 		virtual PyObject * wrapp( T t ) = 0;
 
 	public:
-		bool is_valid() const
-		{
-			return m_valid;
-		}
-
 		const T & result()
 		{	
 			return m_result; 
@@ -175,7 +179,6 @@ namespace pybind
 		}
 
 	protected:
-		bool m_valid;
 		T m_result;		
 	};
 }

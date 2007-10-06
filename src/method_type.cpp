@@ -107,6 +107,7 @@ namespace pybind
 
 		self->ifunc = m_interface;
 		self->impl = _obj->impl;
+		self->scope = _obj->scope;
 
 		PyObject * py_function = PyCFunction_New( &m_method, (PyObject*)self );
 		Py_DECREF( self );

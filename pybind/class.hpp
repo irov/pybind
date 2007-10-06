@@ -100,7 +100,7 @@ namespace pybind
 			static delete_holder s_proxyDeleter;
 
 			method_proxy_interface * ifunc =
-				new method_proxy<C,F>(_name, f);
+				new method_proxy<t_info::class_type, F>(_name, f);
 
 			s_proxyDeleter.add( ifunc );
 
@@ -159,6 +159,7 @@ namespace pybind
 		void apply( PyObject * _obj ) override
 		{
 			m_valid = true;
+
 			void * impl = detail::get_class( _obj );
 			class_type_scope * scope = detail::get_class_scope( _obj );
 
@@ -196,8 +197,8 @@ namespace pybind
 
 		PyObject * wrapp( C _class )
 		{
-			return 0;
-			//return class_core::create_holder( class_info<C>(), (void *) A::new_<C>( _class ) );
+			//return 0;			
+			return class_core::create_impl( class_info<C>(), (void *)new C(_class) );
 		}
 	};
 
@@ -253,17 +254,23 @@ namespace pybind
 	class interface_
 		: public base_<C,B>
 	{
+	public:
+		typedef extract_class_type_ptr<C> extract_ptr_type;
+
+	public:
+		interface_( const char * _name, bool external_extract = false, PyObject * _module = 0 )
+			: base_( _name, &base_<C,B>::new_interface, &base_<C,B>::dealloc_only_python, _module )
+		{
+			if( external_extract )
+			{
+				setup_extract();
+			}
+		}
+
 	protected:
 		void setup_extract() override
 		{
-			static extract_class_type_ptr<C> s_registartor_ptr;
-		}
-
-	public:
-		interface_( const char * _name, PyObject * _module = 0 )
-			: base_( _name, &base_<C,B>::new_interface, &base_<C,B>::dealloc_only_python, _module )
-		{
-			setup_extract();
+			static extract_ptr_type s_registartor_ptr;
 		}
 	};
 }

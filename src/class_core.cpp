@@ -53,7 +53,8 @@ namespace pybind
 
 		class_type_scope * t_scope = &s_listClassType.back();
 
-		t_scope->setup( _name, _module, _pynew, _pydestructor );
+		const char * type_name = _info.name();
+		t_scope->setup( _name, type_name, _module, _pynew, _pydestructor );
 
 		class_scope::reg_class_scope( _info, t_scope );
 
@@ -65,6 +66,13 @@ namespace pybind
 		class_type_scope * t_scope = class_scope::get_class_scope( _info );
 
 		return t_scope->create_holder( _impl );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * class_core::create_impl( const type_info & _info, void * _impl )
+	{
+		class_type_scope * t_scope = class_scope::get_class_scope( _info );
+
+		return t_scope->create_impl( _impl );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_core::wrapp_holder( PyObject * _obj, void * _impl )

@@ -4,11 +4,11 @@
 
 namespace pybind
 {
-	struct py_class_type;
+	class class_type_scope;
 
 	namespace detail
 	{
-		PYBIND_API void * class_type_impl( py_class_type * _class_type );
+		PYBIND_API void * meta_cast_scope( void * _self, const char * _scope_name, const char * _class_name, class_type_scope * scope );
 	}
 
 	class method_proxy_interface
@@ -17,8 +17,8 @@ namespace pybind
 		virtual ~method_proxy_interface(){};
 
 	public:
-		virtual PyObject * call( void * _self ) = 0;
-		virtual PyObject * call( void * _self, PyObject * _args ) = 0;
+		virtual PyObject * call( void * _self, class_type_scope * scope ) = 0;
+		virtual PyObject * call( void * _self, class_type_scope * scope, PyObject * _args ) = 0;
 	};
 
 	template<class C, class F>
@@ -27,28 +27,35 @@ namespace pybind
 	{
 	public:
 		method_proxy( const char * _name, F f )
-		: m_name( _name )
-		, fn( f )
+		: m_fn_name( _name )
+		, m_fn( f )
 		{
+			const type_info & class_info = typeid(C*);
+			m_class_name = class_info.name();
+
+			const type_info & scope_info = typeid(C);
+			m_scope_name = scope_info.name();
 		}
 
 	public:
-		PyObject * call( void * _self ) override
+		PyObject * call( void * _self, class_type_scope * _scope ) override
 		{
-			C* impl = (C*)_self;
-			PyObject *ret = method_call<C,F>::call( impl, fn, 0 );
+			C * impl = (C*)detail::meta_cast_scope( _self, m_scope_name, m_class_name, _scope );
+			PyObject *ret = method_call<C,F>::call( impl, m_fn, 0 );
 			return ret;
 		}
 
-		PyObject * call( void * _self, PyObject * _args ) override
+		PyObject * call( void * _self, class_type_scope * _scope, PyObject * _args ) override
 		{
-			C* impl = (C*)_self;
-			PyObject *ret = method_call<C,F>::call( impl, fn, _args );
+			C * impl = (C*)detail::meta_cast_scope( _self, m_scope_name, m_class_name, _scope );
+			PyObject *ret = method_call<C,F>::call( impl, m_fn, _args );
 			return ret;
 		}
 
 	protected:
-		const char * m_name;
-		F fn;
+		const char * m_fn_name;
+		const char * m_class_name;
+		const char * m_scope_name;
+		F m_fn;
 	};
 }
