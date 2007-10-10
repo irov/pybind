@@ -156,7 +156,7 @@ namespace pybind
 	struct extract_class_type_ptr
 		: public type_cast_result<C *>
 	{
-		void apply( PyObject * _obj ) override
+		C * apply( PyObject * _obj ) override
 		{
 			m_valid = true;
 
@@ -175,7 +175,7 @@ namespace pybind
 				impl = class_core::meta_cast( impl, scope, name );
 			}
 
-			m_result = static_cast<C*>(impl);
+			return static_cast<C*>(impl);
 		}
 
 		PyObject * wrapp( C * _class )
@@ -188,11 +188,11 @@ namespace pybind
 	struct extract_class_type_ref
 		: public type_cast_result<C>
 	{
-		void apply( PyObject * _obj ) override
+		C apply( PyObject * _obj ) override
 		{
 			m_valid = true;
 			void * impl = detail::get_class( _obj );
-			m_result = *static_cast<C*>(impl);
+			return *static_cast<C*>(impl);
 		}
 
 		PyObject * wrapp( C _class )
@@ -206,23 +206,26 @@ namespace pybind
 	class class_
 		: public base_<C,B>
 	{
-	protected:
-		void setup_extract() override
-		{
-			static extract_class_type_ptr<C> s_registartor_ptr;
-			static extract_class_type_ref<C> s_registartor_ref;
-		}
-
 	public:
-		class_( const char * _name, PyObject * _module = 0 )
+		class_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
 			: base_( _name, &base_<C,B>::new_, &base_<C,B>::dealloc_, _module )
 		{
-			setup_extract();
+			if( external_extract )
+			{
+				setup_extract();
+			}
 
 			constructor * empty_ctr = 
 				new constructor_params<C, init<> >();
 
 			class_core::def_init( scope(), empty_ctr );
+		}
+
+	protected:
+		void setup_extract() override
+		{
+			static extract_class_type_ptr<C> s_registartor_ptr;
+			static extract_class_type_ref<C> s_registartor_ref;
 		}
 	};
 
@@ -238,10 +241,13 @@ namespace pybind
 		}
 
 	public:
-		proxy_( const char * _name, PyObject * _module = 0 )
+		proxy_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
 			: base_( _name, &base_<C,B>::new_, &base_<C,B>::dealloc_only_python, _module )
 		{
-			setup_extract();
+			if( external_extract )
+			{
+				setup_extract();
+			}
 
 			constructor * empty_ctr = 
 				new constructor_params<C, init<> >();
@@ -258,7 +264,7 @@ namespace pybind
 		typedef extract_class_type_ptr<C> extract_ptr_type;
 
 	public:
-		interface_( const char * _name, bool external_extract = false, PyObject * _module = 0 )
+		interface_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
 			: base_( _name, &base_<C,B>::new_interface, &base_<C,B>::dealloc_only_python, _module )
 		{
 			if( external_extract )

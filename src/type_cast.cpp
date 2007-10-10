@@ -9,20 +9,24 @@ namespace pybind
 	namespace detail
 	{
 		typedef std::map<std::string, type_cast *> TMapExtractTypes;
-		static TMapExtractTypes s_mapExtractTypes;
+		static TMapExtractTypes & mapExtractTypesInstance()
+		{
+			static TMapExtractTypes s_mapExtractTypes;
+			return s_mapExtractTypes;
+		}
 
 		void register_type_info_extract( const type_info & _info, type_cast * _type )
 		{
 			const char * name = _info.name();
-			s_mapExtractTypes[ name ] = _type;
+			mapExtractTypesInstance()[ name ] = _type;
 		}
 
 		type_cast * find_type_info_extract( const type_info & _info )
 		{
 			const char * name = _info.name();
-			TMapExtractTypes::iterator it_find = s_mapExtractTypes.find( name );
+			TMapExtractTypes::iterator it_find = mapExtractTypesInstance().find( name );
 
-			if( it_find == s_mapExtractTypes.end() )
+			if( it_find == mapExtractTypesInstance().end() )
 			{
 				return 0;
 			}
@@ -34,29 +38,32 @@ namespace pybind
 	static struct extract_bool_type
 		: public type_cast_result<bool>
 	{
-		void apply( PyObject * _obj ) override
+		bool apply( PyObject * _obj ) override
 		{
 			m_valid = false;
+
 			if( PyBool_Check( _obj ) )
 			{
-				m_result = (_obj == Py_True);
 				m_valid = true;
+				return (_obj == Py_True);				
 			}
 			else if( PyInt_Check( _obj ) )
 			{
-				m_result = (PyInt_AsLong( _obj ) != 0);
 				m_valid = true;
+				return (PyInt_AsLong( _obj ) != 0);
 			}
 			else if( PyLong_Check( _obj ) )
 			{
-				m_result = ( PyLong_AsLong( _obj ) != 0 );
 				m_valid = true;
+				return ( PyLong_AsLong( _obj ) != 0 );				
 			}
 			else if( PyFloat_Check( _obj ) )
 			{
-				m_result = ( int(PyFloat_AsDouble( _obj )) != 0 );
 				m_valid = true;
+				return ( int(PyFloat_AsDouble( _obj )) != 0 );
 			}
+
+			return false;
 		}
 
 		PyObject * wrapp( bool _value ) override
@@ -68,24 +75,27 @@ namespace pybind
 	static struct extract_int_type
 		: public type_cast_result<int>
 	{
-		void apply( PyObject * _obj ) override
+		int apply( PyObject * _obj ) override
 		{
 			m_valid = false;
+
 			if( PyInt_Check( _obj ) )
 			{
-				m_result = PyInt_AsLong( _obj );
 				m_valid = true;
+				return PyInt_AsLong( _obj );
 			}
 			else if( PyLong_Check( _obj ) )
 			{
-				m_result = (int)PyLong_AsLong( _obj );
 				m_valid = true;
+				return (int)PyLong_AsLong( _obj );
 			}
 			else if( PyFloat_Check( _obj ) )
 			{
-				m_result = (int)PyFloat_AsDouble( _obj );
 				m_valid = true;
+				return (int)PyFloat_AsDouble( _obj );				
 			}
+
+			return 0;
 		}
 
 		PyObject * wrapp( int _value ) override
@@ -97,24 +107,26 @@ namespace pybind
 	static struct extract_unsigned_int_type
 		: public type_cast_result<unsigned int>
 	{
-		void apply( PyObject * _obj ) override
+		unsigned int apply( PyObject * _obj ) override
 		{
 			m_valid = false;
 			if( PyInt_Check( _obj ) )
 			{
-				m_result = PyInt_AsUnsignedLongMask( _obj );
 				m_valid = true;
+				return PyInt_AsUnsignedLongMask( _obj );
 			}
 			else if( PyLong_Check( _obj ) )
-			{
-				m_result = (unsigned int)PyLong_AsUnsignedLong( _obj );
+			{				
 				m_valid = true;
+				return (unsigned int)PyLong_AsUnsignedLong( _obj );
 			}
 			else if( PyFloat_Check( _obj ) )
-			{
-				m_result = (unsigned int)PyFloat_AsDouble( _obj );
+			{				
 				m_valid = true;
+				return (unsigned int)PyFloat_AsDouble( _obj );
 			}
+
+			return 0;
 		}
 
 		PyObject * wrapp( unsigned int _value ) override
@@ -126,24 +138,26 @@ namespace pybind
 	static struct extract_float_type
 		: public type_cast_result<float>
 	{
-		void apply( PyObject * _obj ) override
+		float apply( PyObject * _obj ) override
 		{
 			m_valid = false;
 			if( PyFloat_Check( _obj ) )
 			{
-				m_result = (float)PyFloat_AsDouble( _obj );
 				m_valid = true;
+				return (float)PyFloat_AsDouble( _obj );
 			}
 			else if( PyLong_Check( _obj ) )
 			{
-				m_result = (float)PyLong_AsLong( _obj );
 				m_valid = true;
+				return (float)PyLong_AsLong( _obj );
 			}
 			else if( PyInt_Check( _obj ) )
 			{
-				m_result = (float)PyInt_AsLong( _obj );
 				m_valid = true;
+				return (float)PyInt_AsLong( _obj );
 			}
+
+			return 0.f;
 		}
 
 		PyObject * wrapp( float _value ) override
@@ -155,24 +169,26 @@ namespace pybind
 	static struct extract_double_type
 		: public type_cast_result<double>
 	{
-		void apply( PyObject * _obj ) override
+		double apply( PyObject * _obj ) override
 		{
 			m_valid = false;
 			if( PyFloat_Check( _obj ) )
 			{
-				m_result = PyFloat_AsDouble( _obj );
 				m_valid = true;
+				return PyFloat_AsDouble( _obj );				
 			}
 			else if( PyLong_Check( _obj ) )
 			{
-				m_result = (float)PyLong_AsLong( _obj );
 				m_valid = true;
+				return (float)PyLong_AsLong( _obj );				
 			}
 			else if( PyInt_Check( _obj ) )
 			{
-				m_result = (float)PyInt_AsLong( _obj );
 				m_valid = true;
+				return (float)PyInt_AsLong( _obj );				
 			}
+
+			return 0.0;
 		}
 		PyObject * wrapp( double _value ) override
 		{
@@ -183,22 +199,25 @@ namespace pybind
 	static struct extract_string_type
 		: public type_cast_result<std::string>
 	{
-		void apply( PyObject * _obj ) override
+		std::string apply( PyObject * _obj ) override
 		{
 			m_valid = false;
+
 			if( PyString_Check( _obj ) )
 			{
+				m_valid = true;
 				char * str = PyString_AsString( _obj );
 				if( str )
 				{
-					m_result = str;
+					return std::string(str);
 				}
 				else
 				{
-					m_result = "";
-				}
-				m_valid = true;
+					return std::string();
+				}				
 			}
+
+			return std::string();
 		}
 		PyObject * wrapp( std::string _value ) override
 		{
@@ -209,10 +228,10 @@ namespace pybind
 	static struct extract_pyobject_type
 		: public type_cast_result<PyObject *>
 	{
-		void apply( PyObject * _obj ) override
+		PyObject * apply( PyObject * _obj ) override
 		{
 			m_valid = true;
-			m_result = _obj;
+			return _obj;
 		}
 		PyObject * wrapp( PyObject * _value ) override
 		{

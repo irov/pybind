@@ -25,7 +25,7 @@ namespace pybind
 
 				type_cast_result<T> * etype_impl = static_cast<type_cast_result<T> *>(etype);
 
-				etype_impl->apply( _obj );
+				T t = etype_impl->apply( _obj );
 
 				if( etype_impl->is_valid() == false )
 				{
@@ -33,7 +33,7 @@ namespace pybind
 					throw std::exception("bad extract cast");
 				}
 
-				return etype_impl->result();
+				return t;
 			}
 		};
 
@@ -53,14 +53,14 @@ namespace pybind
 
 				type_cast_result<const T &> * etype_impl = static_cast<type_cast_result<const T &> *>(etype);
 
-				etype_impl->apply( _obj );
+				T t = etype_impl->apply( _obj );
 
 				if( etype_impl->is_valid() == false )
 				{
 					throw std::exception("invalid extract type");
 				}
 
-				return etype_impl->result();
+				return t;
 			}
 		};
 	}
@@ -106,23 +106,9 @@ namespace pybind
 	}
 
 	template<class T>
-	PyObject * ptr( T _value, const type_info & _tinfo )
+	PyObject * class_holder( T * _value )
 	{
-		type_cast * etype = detail::find_type_info_extract( _tinfo );
-
-		if( etype == 0 )
-		{
-			throw std::exception("invalid ptr type");
-		}
-
-		type_cast_result<T> * etype_impl = static_cast<type_cast_result<T> *>(etype);
-
-		PyObject * result = etype_impl->wrapp( _value );
-
-		if( result == 0 )
-		{
-			ret_none();
-		}
+		PyObject * result = class_core::create_holder( typeid(T), _value );
 
 		return result;
 	}

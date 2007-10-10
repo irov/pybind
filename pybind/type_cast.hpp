@@ -16,7 +16,7 @@ namespace pybind
 		struct type_down_cast_find
 		{
 			static type_cast * find()
-			{
+			{  
 				const type_info & tinfo =  typeid(T);
 
 				type_cast * etype = find_type_info_extract( tinfo );
@@ -83,16 +83,17 @@ namespace pybind
 				return type_down_cast_find<const T &,T>::find();
 			}
 		};
-
-		//template<class T>
-		//struct type_down_cast<T const &>
-		//{
-		//	static type_cast * find()
-		//	{
-		//		return type_down_cast_find<T const &,T>::find();
-		//	}
-		//};
 	}
+
+
+	template<class T>
+	void registration_type_cast( type_cast * _type )
+	{
+		const type_info & tinfo = typeid(T);
+
+		detail::register_type_info_extract( tinfo, _type );
+	}
+
 
 	class type_cast
 	{
@@ -101,9 +102,6 @@ namespace pybind
 			: m_valid( false )
 		{
 		}
-
-	public:
-		virtual void apply( PyObject * _obj ) = 0;
 
 	public:
 		bool is_valid() const
@@ -115,19 +113,10 @@ namespace pybind
 		bool m_valid;
 	};
 
-
-	template<class T>
-	void registration_type_cast( type_cast * _type )
-	{
-		const type_info & tinfo = typeid(T);
-
-		detail::register_type_info_extract( tinfo, _type );
-	}
-
 	template<class T> 
 	class type_cast_result
 		: public type_cast
-		{
+	{
 	public:
 		type_cast_result()
 			: type_cast()
@@ -137,20 +126,7 @@ namespace pybind
 
 	public:
 		virtual PyObject * wrapp( T t ) = 0;
-
-	public:
-		T result()
-		{	
-			return m_result; 
-		}
-
-		const T result() const 
-		{ 
-			return m_result; 
-		}
-
-	protected:
-		T m_result;		
+		virtual T apply( PyObject * _obj ) = 0;
 	};
 
 	template<class T> 
@@ -166,19 +142,7 @@ namespace pybind
 
 	public:
 		virtual PyObject * wrapp( T t ) = 0;
+		virtual T apply( PyObject * _obj ) = 0;
 
-	public:
-		const T & result()
-		{	
-			return m_result; 
-		}
-
-		const T & result() const 
-		{ 
-			return m_result; 
-		}
-
-	protected:
-		T m_result;		
 	};
 }
