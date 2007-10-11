@@ -135,6 +135,39 @@ namespace pybind
 		}
 	}s_extract_unsigned_int_type;
 
+
+	static struct extract_size_t_type
+		: public type_cast_result<size_t>
+	{
+		size_t apply( PyObject * _obj ) override
+		{
+			m_valid = false;
+			if( PyInt_Check( _obj ) )
+			{
+				m_valid = true;
+				return (size_t)PyInt_AsUnsignedLongMask( _obj );
+			}
+			else if( PyLong_Check( _obj ) )
+			{				
+				m_valid = true;
+				return (size_t)PyLong_AsUnsignedLong( _obj );
+			}
+			else if( PyFloat_Check( _obj ) )
+			{				
+				m_valid = true;
+				return (size_t)PyFloat_AsDouble( _obj );
+			}
+
+			return 0;
+		}
+
+		PyObject * wrapp( size_t _value ) override
+		{
+			return PyInt_FromLong( (long)_value );
+		}
+	}s_extract_size_t_type;
+	
+
 	static struct extract_float_type
 		: public type_cast_result<float>
 	{

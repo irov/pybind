@@ -114,6 +114,11 @@ namespace pybind
 			return *this;
 		}
 
+		template<class A>
+		base_ & attr( const char * _name, A a )
+		{
+			return *this;
+		}
 
 		static PyObject *
 			new_interface( PyTypeObject * _type, PyObject * _args, PyObject * _kwds )
