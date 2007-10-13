@@ -64,7 +64,41 @@ namespace pybind
 			PyObject * _arg1 = detail::getarg( _arg, 0 );
 			PyObject * _arg2 = detail::getarg( _arg, 1 );
 
-			return (_obj->*f)( extract<typename f_info::param1>( _arg1 ) , extract<typename f_info::param2>( _arg2 ) );
+			return (_obj->*f)( 
+				extract<typename f_info::param1>( _arg1 ), 
+				extract<typename f_info::param2>( _arg2 ) 
+				);
 		}	
+
+		template<>
+		static Ret call_impl<3>( C * _obj, F f, PyObject * _arg )
+		{
+			PyObject * _arg1 = detail::getarg( _arg, 0 );
+			PyObject * _arg2 = detail::getarg( _arg, 1 );
+			PyObject * _arg3 = detail::getarg( _arg, 2 );
+
+			return (_obj->*f)( 
+				extract<typename f_info::param1>( _arg1 ), 
+				extract<typename f_info::param2>( _arg2 ),
+				extract<typename f_info::param3>( _arg3 )
+				);
+		}	
+
+		template<>
+		static Ret call_impl<4>( C * _obj, F f, PyObject * _arg )
+		{
+			PyObject * _arg1 = detail::getarg( _arg, 0 );
+			PyObject * _arg2 = detail::getarg( _arg, 1 );
+			PyObject * _arg3 = detail::getarg( _arg, 2 );
+			PyObject * _arg4 = detail::getarg( _arg, 3 );
+
+			return (_obj->*f)( 
+				extract<typename f_info::param1>( _arg1 ), 
+				extract<typename f_info::param2>( _arg2 ),
+				extract<typename f_info::param3>( _arg3 ),
+				extract<typename f_info::param4>( _arg4 )
+				);
+		}	
+
 	};
 }
