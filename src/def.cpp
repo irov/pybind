@@ -110,8 +110,24 @@ namespace pybind
 			PyTypeObject m_type;
 		};
 
-		typedef std::list<def_type_scope> TListTypeObject;
-		TListTypeObject s_listTypeObject;
+		
+		static class GarbageTypeObjects
+		{
+		public:
+			void push_back( const def_type_scope & scope )
+			{
+				m_listTypeObject.push_back( scope );
+			}
+
+			def_type_scope & back()
+			{
+				return m_listTypeObject.back();
+			}
+
+		protected:
+			typedef std::list<def_type_scope> TListTypeObject;
+			TListTypeObject m_listTypeObject;
+		} s_garbageTypeObjects;
 
 		void def_function( const char * _name, pybind_callback f, pybind_cfunction _cfunc, int _hasargs, PyObject * _module )
 		{
@@ -120,8 +136,8 @@ namespace pybind
 				_module = get_currentmodule();
 			}
 
-			s_listTypeObject.push_back(def_type_scope());
-			def_type_scope & cfunc_type = s_listTypeObject.back();
+			s_garbageTypeObjects.push_back(def_type_scope());
+			def_type_scope & cfunc_type = s_garbageTypeObjects.back();
 				
 			cfunc_type.setup( _name, f, _cfunc, _hasargs, _module );
 		}
