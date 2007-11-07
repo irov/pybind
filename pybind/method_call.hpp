@@ -20,7 +20,7 @@ namespace pybind
 
 		static PyObject * call( C * _obj, F f, PyObject * _arg )
 		{
-			return call_ret_impl<typename f_info::ret_type>( _obj, f, _arg );
+			return call_ret_impl<Ret>( _obj, f, _arg );
 		}
 
 		template<class R>
@@ -28,7 +28,7 @@ namespace pybind
 		{
 			R result = call_impl<f_info::arity>( _obj, f, _arg );
 
-			return ptr( result );
+			return ptr<R>( result );
 		}
 
 		template<>

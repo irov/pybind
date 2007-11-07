@@ -141,7 +141,7 @@ namespace pybind
 		static void 
 			dealloc_only_python( PyObject * self )
 		{
-			class_core::dealloc_impl( self );
+			C * obj = (C*)class_core::dealloc_impl( self );
 		}
 
 		static void
