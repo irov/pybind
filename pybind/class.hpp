@@ -82,9 +82,13 @@ namespace pybind
 			{
 				~delete_holder()
 				{
-					for each( method_proxy_interface * ptr in m_listProxyMethod )
+					for( TListProxyMethod::iterator
+						it = m_listProxyMethod.begin(),
+						it_end = m_listProxyMethod.end();
+					it != it_end;
+					++it)
 					{
-						delete ptr;
+						delete *it;
 					}
 				}
 
