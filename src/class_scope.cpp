@@ -1,7 +1,7 @@
 #	include "pybind/class_scope.hpp"
 #	include "pybind/class_type.hpp"
 
-#	include "pybind/config.hpp"
+#	include "config/python.hpp"
 
 #	include <list>
 #	include <map>

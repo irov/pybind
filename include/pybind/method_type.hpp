@@ -3,7 +3,8 @@
 #	include "pybind/method_proxy.hpp"
 
 #	include "pybind/types.hpp"
-#	include "pybind/config.hpp"
+
+#	include "config/python.hpp"
 
 namespace pybind
 {

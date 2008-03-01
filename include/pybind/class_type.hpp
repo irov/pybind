@@ -1,6 +1,6 @@
 #	pragma once
 
-#	include "pybind/config.hpp"
+#	include "config/python.hpp"
 
 #	include "method_type.hpp"
 

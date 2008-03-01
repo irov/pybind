@@ -4,7 +4,7 @@
 
 #	include "pybind/system.hpp"
 
-#	include "pybind/config.hpp"
+#	include "config/python.hpp"
 
 #	include <list>
 

@@ -1,6 +1,6 @@
 #	include "pybind/method_call.hpp"
 
-#	include "pybind/config.hpp"
+#	include "config/python.hpp"
 
 namespace pybind
 {

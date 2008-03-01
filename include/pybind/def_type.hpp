@@ -1,7 +1,7 @@
 #	pragma once
 
 #	include "pybind/types.hpp"
-#	include "pybind/config.hpp"
+#	include "config/python.hpp"
 
 namespace pybind
 {
