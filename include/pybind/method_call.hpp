@@ -100,5 +100,23 @@ namespace pybind
 				);
 		}	
 
+		template<>
+		static Ret call_impl<5>( C * _obj, F f, PyObject * _arg )
+		{
+			PyObject * _arg1 = detail::getarg( _arg, 0 );
+			PyObject * _arg2 = detail::getarg( _arg, 1 );
+			PyObject * _arg3 = detail::getarg( _arg, 2 );
+			PyObject * _arg4 = detail::getarg( _arg, 3 );
+			PyObject * _arg5 = detail::getarg( _arg, 4 );
+
+			return (_obj->*f)( 
+				extract<typename f_info::param1>( _arg1 ), 
+				extract<typename f_info::param2>( _arg2 ),
+				extract<typename f_info::param3>( _arg3 ),
+				extract<typename f_info::param4>( _arg4 ),
+				extract<typename f_info::param5>( _arg5 )
+				);
+		}	
+
 	};
 }

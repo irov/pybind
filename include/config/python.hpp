@@ -1,3 +1,3 @@
 #	pragma once
 
-#	include "../../Python/Include/Python.h"
+#	include "../../Python-2.5.2/Include/Python.h"

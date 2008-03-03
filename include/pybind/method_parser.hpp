@@ -129,6 +129,36 @@ namespace pybind
 			static const size_t arity = 4;
 		};
 
+		template<class R, class C, class P1, class P2, class P3, class P4, class P5>
+		struct types< R (C::*)(P1, P2, P3, P4, P5) >
+		{
+			typedef R ret_type;
+			typedef C class_type;
+
+			typedef P1 param1;
+			typedef P2 param2;
+			typedef P3 param3;
+			typedef P4 param4;
+			typedef P5 param5;
+
+			static const size_t arity = 5;
+		};
+
+		template<class R, class C, class P1, class P2, class P3, class P4, class P5>
+		struct types< R (C::*)(P1, P2, P3, P4, P5) const>
+		{
+			typedef R ret_type;
+			typedef C class_type;
+
+			typedef P1 param1;
+			typedef P2 param2;
+			typedef P3 param3;
+			typedef P4 param4;
+			typedef P5 param5;
+
+			static const size_t arity = 5;
+		};
+
 		typedef types<F> result;
 	};
 }

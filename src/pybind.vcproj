@@ -451,11 +451,11 @@
 			Name="Config"
 			>
 			<File
-				RelativePath="..\config\config.hpp"
+				RelativePath="..\include\config\config.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\config\python.hpp"
+				RelativePath="..\include\config\python.hpp"
 				>
 			</File>
 		</Filter>
