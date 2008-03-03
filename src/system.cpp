@@ -222,6 +222,11 @@ namespace pybind
 		return PyDict_Check( _obj ) == 1;
 	}
 
+	bool dict_set( PyObject * _dict, const char * _name, PyObject * _value )
+	{
+		return PyDict_SetItemString( _dict, _name, _value ) == 0;
+	}
+
 	bool dict_next( PyObject * _dict, size_t *_pos, PyObject ** _key, PyObject ** _value )
 	{
 		Py_ssize_t ps = (Py_ssize_t)(*_pos);

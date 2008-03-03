@@ -95,7 +95,7 @@ namespace pybind
 
 		type_cast_result<T> * etype_impl = static_cast<type_cast_result<T> *>(etype);
 
-		PyObject * result = etype_impl->wrapp( _value );
+		PyObject * result = etype_impl->wrap( _value );
 
 		if( result == 0 )
 		{

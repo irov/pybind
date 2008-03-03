@@ -354,6 +354,10 @@
 				RelativePath=".\type_cast.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\wrap_base.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Include Files"
@@ -444,6 +448,10 @@
 			</File>
 			<File
 				RelativePath="..\include\pybind\types.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\include\pybind\wrap_base.hpp"
 				>
 			</File>
 		</Filter>

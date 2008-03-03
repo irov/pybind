@@ -31,8 +31,8 @@ namespace pybind
 	PYBIND_API PyObject * call_va( PyObject * _obj, const char * _format, va_list );
 	PYBIND_API PyObject * call_method_va( PyObject * _obj, const char * _method, const char * _format, va_list );
 	
-	PYBIND_API PyObject * exec( const char * _code, PyObject * _global = 0, PyObject * _local = 0 );
-	PYBIND_API PyObject * exec_file( const char * _filename, PyObject * _global = 0, PyObject * _local = 0 );
+	PYBIND_API PyObject * exec( const char * _code, PyObject * _global, PyObject * _local );
+	PYBIND_API PyObject * exec_file( const char * _filename, PyObject * _global, PyObject * _local );
 
 	PYBIND_API void set_syspath( const char * _path );
 
@@ -54,6 +54,7 @@ namespace pybind
 	PYBIND_API PyObject * list_getitem( PyObject * _obj, size_t _it );
 
 	PYBIND_API bool dict_check( PyObject * _dict );
+	PYBIND_API bool dict_set( PyObject * _dict, const char * _name, PyObject * _value );
 	PYBIND_API bool dict_next( PyObject * _dict, size_t *_pos, PyObject ** _key, PyObject ** _value );
 
 	PYBIND_API bool tuple_check( PyObject * _tuple );

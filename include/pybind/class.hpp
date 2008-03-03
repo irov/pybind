@@ -187,7 +187,7 @@ namespace pybind
 			return static_cast<C*>(impl);
 		}
 
-		PyObject * wrapp( C * _class )
+		PyObject * wrap( C * _class )
 		{
 			return class_core::create_holder( class_info<C>(), (void *)_class );
 		}
@@ -204,7 +204,7 @@ namespace pybind
 			return *static_cast<C*>(impl);
 		}
 
-		PyObject * wrapp( C _class )
+		PyObject * wrap( C _class )
 		{
 			//return 0;			
 			return class_core::create_impl( class_info<C>(), (void *)new C(_class) );

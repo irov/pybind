@@ -2,6 +2,7 @@
 
 #	include "pybind/exports.hpp"
 #	include "pybind/types.hpp"
+#	include "pybind/wrap_base.hpp"
 
 namespace pybind
 {
@@ -41,6 +42,15 @@ namespace pybind
 
 		template<>
 		struct type_down_cast<void>
+		{
+			static type_cast * find()
+			{
+				return 0;
+			}
+		};
+
+		template<>
+		struct type_down_cast<wrap_base *>
 		{
 			static type_cast * find()
 			{
@@ -125,7 +135,7 @@ namespace pybind
 		}
 
 	public:
-		virtual PyObject * wrapp( T t ) = 0;
+		virtual PyObject * wrap( T t ) = 0;
 		virtual T apply( PyObject * _obj ) = 0;
 	};
 
@@ -141,7 +151,7 @@ namespace pybind
 		}
 
 	public:
-		virtual PyObject * wrapp( T t ) = 0;
+		virtual PyObject * wrap( T t ) = 0;
 		virtual T apply( PyObject * _obj ) = 0;
 
 	};

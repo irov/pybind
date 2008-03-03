@@ -66,7 +66,7 @@ namespace pybind
 			return false;
 		}
 
-		PyObject * wrapp( bool _value ) override
+		PyObject * wrap( bool _value ) override
 		{
 			return PyBool_FromLong( _value );
 		}
@@ -98,7 +98,7 @@ namespace pybind
 			return 0;
 		}
 
-		PyObject * wrapp( int _value ) override
+		PyObject * wrap( int _value ) override
 		{
 			return PyInt_FromLong( _value );
 		}
@@ -129,7 +129,7 @@ namespace pybind
 			return 0;
 		}
 
-		PyObject * wrapp( unsigned int _value ) override
+		PyObject * wrap( unsigned int _value ) override
 		{
 			return PyInt_FromLong( _value );
 		}
@@ -161,7 +161,7 @@ namespace pybind
 			return 0;
 		}
 
-		PyObject * wrapp( size_t _value ) override
+		PyObject * wrap( size_t _value ) override
 		{
 			return PyInt_FromLong( (long)_value );
 		}
@@ -193,7 +193,7 @@ namespace pybind
 			return 0.f;
 		}
 
-		PyObject * wrapp( float _value ) override
+		PyObject * wrap( float _value ) override
 		{
 			return PyFloat_FromDouble( _value );
 		}
@@ -223,7 +223,7 @@ namespace pybind
 
 			return 0.0;
 		}
-		PyObject * wrapp( double _value ) override
+		PyObject * wrap( double _value ) override
 		{
 			return PyFloat_FromDouble( _value );
 		}
@@ -252,7 +252,7 @@ namespace pybind
 
 			return std::string();
 		}
-		PyObject * wrapp( std::string _value ) override
+		PyObject * wrap( std::string _value ) override
 		{
 			return PyString_FromStringAndSize( _value.c_str(), _value.size() );
 		}
@@ -266,7 +266,7 @@ namespace pybind
 			m_valid = true;
 			return _obj;
 		}
-		PyObject * wrapp( PyObject * _value ) override
+		PyObject * wrap( PyObject * _value ) override
 		{
 			return _value;
 		}
