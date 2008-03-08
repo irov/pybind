@@ -352,7 +352,7 @@ namespace pybind
 
 		setup_method( self );
 
-		//Py_INCREF( self );
+		Py_INCREF( self );
 
 		return (PyObject*)self;
 	}
