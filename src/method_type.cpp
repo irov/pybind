@@ -50,7 +50,7 @@ namespace pybind
 	{
 		py_method_type * mt = (py_method_type *)(_obj);
 
-		delete mt->ifunc;
+		//delete mt->ifunc;
 
 		mt->ob_type->tp_free( mt );		
 	}

@@ -1,7 +1,6 @@
 #	pragma once
 
 #	include "pybind/types.hpp"
-#	include <string>
 
 namespace pybind
 {
@@ -11,12 +10,9 @@ namespace pybind
 		wrap_base();
 
 	public:
-		PyObject * call( const std::string & _method, const std::string & format, ... );
-
-	public:
-		void wrap( PyObject * _wrapp );
+		void callMethod( const char * _method, const char * _format, ... );
 
 	protected:
-		PyObject * m_impl;
+		PyObject * m_pyImpl;
 	};
 }

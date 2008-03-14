@@ -121,10 +121,10 @@ namespace pybind
 	{
 		py_class_type* inst = (py_class_type*)obj;
 
-		char * sz = PyString_AsString( name );
+		//char * sz = PyString_AsString( name );
 
 		int res = PyDict_SetItem( inst->dict, name, value );
-		//Py_DECREF( value );
+		Py_DECREF( value );
 
 		if( res )
 		{
@@ -238,10 +238,13 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::add_method_from_scope( class_type_scope * _basescope )
 	{
-		m_methods.insert( 
-			m_methods.end(), 
-			_basescope->m_methods.begin(),
-			_basescope->m_methods.end() );
+		if( _basescope )
+		{
+			m_methods.insert( 
+				m_methods.end(), 
+				_basescope->m_methods.begin(),
+				_basescope->m_methods.end() );
+		}
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void * class_type_scope::construct( PyObject * _args )
@@ -335,8 +338,6 @@ namespace pybind
 
 		setup_method( self );
 
-		//Py_INCREF( self );
-
 		return (PyObject*)self;
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -351,8 +352,6 @@ namespace pybind
 		self->scope = this;
 
 		setup_method( self );
-
-		Py_INCREF( self );
 
 		return (PyObject*)self;
 	}

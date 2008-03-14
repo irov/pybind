@@ -1,31 +1,26 @@
 #	include "pybind/wrap_base.hpp"
-
 #	include "pybind/system.hpp"
+
+#	include <stdarg.h>
 
 namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
 	wrap_base::wrap_base()
-		: m_impl(0)
+		: m_pyImpl(0)
 	{
+		
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * wrap_base::call( const std::string & _method, const std::string & _format, ... )
+	void wrap_base::callMethod( const char * _method, const char * _format, ... )
 	{
 		va_list valist;
 		va_start(valist, _format);
 
-		PyObject * result = call_method_va( m_impl, _method.c_str(), _format.c_str(), valist );
-		
+		PyObject * result = call_method_va( m_pyImpl, _method, _format, valist );
+
 		check_error();
 
 		va_end( valist );
-
-		return result;
-	}
-	//////////////////////////////////////////////////////////////////////////
-	void wrap_base::wrap( PyObject * _wrapp )
-	{
-		m_impl = _wrapp;
 	}
 }

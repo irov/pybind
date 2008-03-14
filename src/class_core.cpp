@@ -75,7 +75,7 @@ namespace pybind
 		return t_scope->create_impl( _impl );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_core::wrap_holder( PyObject * _obj, void * _impl )
+	void class_core::wrapp_holder( PyObject * _obj, void * _impl )
 	{
 		py_class_type * self = (py_class_type*)_obj;
 		self->scope->update_method_self( self, _impl );
@@ -106,7 +106,10 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void class_core::add_method_from_scope( class_type_scope * _scope, class_type_scope * _basescope )
 	{
-		_scope->add_method_from_scope( _basescope );
+		if( _scope )
+		{
+			_scope->add_method_from_scope( _basescope );
+		}
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_core::add_base_to_scope( class_type_scope * _scope, const char * _name, class_type_scope * _base, pybind_metacast cast )
@@ -141,9 +144,9 @@ namespace pybind
 		py_class_type * self = (py_class_type *)(_obj);
 		void * impl = self->impl;
 
-		self->ob_type->tp_free( (PyObject*)self );
+		Py_DECREF( self->dict );
 
-		//Py_DECREF( self->dict );
+		self->ob_type->tp_free( (PyObject*)self );
 
 		return impl;		
 	}
