@@ -71,6 +71,11 @@ namespace pybind
 	{
 
 	}
+
+	method_type_scope::~method_type_scope()
+	{
+		//delete m_interface;
+	}
 	
 	void method_type_scope::setup( PyTypeObject * _class, 
 		const char * _name, 

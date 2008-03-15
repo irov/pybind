@@ -23,6 +23,7 @@ namespace pybind
 		method_type_scope();
 
 		method_type_scope( const method_type_scope & _scope );
+		~method_type_scope();
 
 		void setup( PyTypeObject * _class, 
 			const char * _name, 
