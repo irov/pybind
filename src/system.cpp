@@ -25,6 +25,22 @@ namespace pybind
 		}
 	}
 
+	void setStdErrorHandle( PyObject * _handle )
+	{
+		PyObject * sysModule = PyImport_AddModule( "sys" );
+
+		PyObject_SetAttrString( sysModule,
+			"stderr", _handle );
+	}
+
+	void setStdOutHandle( PyObject * _handle )
+	{
+		PyObject * sysModule = PyImport_AddModule( "sys" );
+
+		PyObject_SetAttrString( sysModule,
+			"stdout", _handle );
+	}
+
 	PyObject * module_import( const char * _name )
 	{
 		char *n = const_cast<char *>(_name); 

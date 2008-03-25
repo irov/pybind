@@ -223,10 +223,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\include\pybind\config.hpp"
-				>
-			</File>
-			<File
 				RelativePath="..\include\pybind\constructor.hpp"
 				>
 			</File>
