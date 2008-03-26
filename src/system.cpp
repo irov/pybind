@@ -166,6 +166,15 @@ namespace pybind
 		return result;
 	}
 
+	PyObject * compile_string( const char * _string, const char * _file )
+	{
+		PyObject* result = Py_CompileString( _string, _file, Py_file_input );
+
+		check_error();
+
+		return result;
+	}
+
 	void set_syspath( const char * _path )
 	{
 		PySys_SetPath( const_cast< char * >( _path ) );

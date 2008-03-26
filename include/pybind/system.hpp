@@ -35,6 +35,7 @@ namespace pybind
 	PYBIND_API PyObject * call_va( PyObject * _obj, const char * _format, va_list );
 	PYBIND_API PyObject * call_method_va( PyObject * _obj, const char * _method, const char * _format, va_list );
 	
+	PYBIND_API PyObject * compile_string( const char * _string, const char * _file );
 	PYBIND_API PyObject * exec( const char * _code, PyObject * _global, PyObject * _local );
 	PYBIND_API PyObject * exec_file( const char * _filename, PyObject * _global, PyObject * _local );
 
