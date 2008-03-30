@@ -38,12 +38,14 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void class_scope::reg_class_scope( const type_info & _info, class_type_scope * _scope )
 	{
-		s_mapTypeScope[ _info.name() ] = _scope;
+		const char * info_name = _info.name();
+		s_mapTypeScope[ info_name ] = _scope;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	class_type_scope * class_scope::get_class_scope( const type_info & _info )
 	{
-		TMapTypeScope::iterator it_find = s_mapTypeScope.find( _info.name() );
+		const char * info_name = _info.name();
+		TMapTypeScope::iterator it_find = s_mapTypeScope.find( info_name );
 
 		if( it_find == s_mapTypeScope.end() )
 		{

@@ -66,6 +66,7 @@ namespace pybind
 	PYBIND_API size_t tuple_size( PyObject * _tuple );
 	PYBIND_API PyObject * tuple_getitem( PyObject * _tuple, size_t _it );
 
+	PYBIND_API void error_message( const char * _message, ... );
 	PYBIND_API void exception_filter();
 
 	namespace convert

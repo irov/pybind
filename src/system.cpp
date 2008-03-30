@@ -275,6 +275,19 @@ namespace pybind
 		return PyTuple_GetItem( _tuple, _it );
 	}
 
+	void error_message( const char * _message, ... )
+	{
+		va_list valist;
+		va_start(valist, _message);
+
+		char buffer[1024];
+		vsprintf( buffer, _message, valist );
+
+		PyErr_SetString( PyExc_TypeError, buffer );
+
+		va_end( valist ); 
+	}
+
 	void exception_filter()
 	{
 		try

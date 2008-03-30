@@ -22,6 +22,17 @@ namespace pybind
 		template<class R>
 		static PyObject * call_ret_impl( F f, PyObject * _arg )
 		{
+			size_t arg_size = tuple_size(_arg);
+			if( arg_size != f_info::arity )
+			{
+				error_message("invalid function call args is not equal %d != %d\n"
+					, arg_size
+					, f_info::arity
+					);
+
+				return ret_none();
+			}
+
 			R result = call_impl<f_info::arity>( f, _arg );
 
 			return ptr( result );
