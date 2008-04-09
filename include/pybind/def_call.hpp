@@ -4,8 +4,6 @@
 #	include "pybind/def_parser.hpp"
 #	include "pybind/extract.hpp"
 
-#	include "pybind/method_call.hpp"
-
 namespace pybind
 {
 	template<class F>

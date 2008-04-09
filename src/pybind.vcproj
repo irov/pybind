@@ -183,6 +183,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\functor.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\functor_proxy.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\method_call.cpp"
 				>
 			</File>
@@ -260,6 +268,18 @@
 			</File>
 			<File
 				RelativePath="..\include\pybind\extract.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\include\pybind\functor.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\include\pybind\functor_proxy.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\include\pybind\functor_type.hpp"
 				>
 			</File>
 			<File
