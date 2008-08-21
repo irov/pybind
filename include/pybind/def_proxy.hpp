@@ -17,7 +17,7 @@ namespace pybind
 			method0( PyObject * _self )
 		{
 			pybind_callback f = detail::extract_from_py_function( _self );
-	
+
 			PyObject *ret = def_call<F>::call( (F)f, 0 );
 
 			return ret;
@@ -34,3 +34,4 @@ namespace pybind
 		}
 	};
 }
+

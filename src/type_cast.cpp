@@ -230,6 +230,31 @@ namespace pybind
 		}
 	}s_extract_double_type;
 
+	static struct extract_cchar_type
+		: public type_cast_result<const char *>
+	{
+		const char * apply( PyObject * _obj ) override
+		{
+			m_valid = false;
+
+			if( PyString_Check( _obj ) )
+			{
+				m_valid = true;
+				char * str = PyString_AsString( _obj );
+				if( str )
+				{
+					return const_cast<const char *>(str);
+				}		
+			}
+
+			return 0;
+		}
+		PyObject * wrap( const char * _value ) override
+		{
+			return PyString_FromString( _value );
+		}
+	}s_extract_cchar_type;
+
 	static struct extract_string_type
 		: public type_cast_result<std::string>
 	{
@@ -245,10 +270,6 @@ namespace pybind
 				{
 					return std::string(str);
 				}
-				else
-				{
-					return std::string();
-				}				
 			}
 
 			return std::string();

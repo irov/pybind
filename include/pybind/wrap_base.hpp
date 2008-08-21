@@ -16,3 +16,4 @@ namespace pybind
 		PyObject * m_pyImpl;
 	};
 }
+

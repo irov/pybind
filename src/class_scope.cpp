@@ -25,13 +25,20 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	PyTypeObject * class_scope::find_sub_type( PyTypeObject * _subtype )
 	{
-		for each( PyTypeObject * type in s_listTypeDef )
+		for (TListTypeDef::iterator it = s_listTypeDef.begin(); it != s_listTypeDef.end(); ++it)
 		{
-			if( PyType_IsSubtype( type, _subtype ) )
+			if( PyType_IsSubtype( *it, _subtype ) )
 			{
-				return type;
+				return (*it);
 			}
 		}
+//		for each( PyTypeObject * type in s_listTypeDef )
+//		{
+//			if( PyType_IsSubtype( type, _subtype ) )
+//			{
+//				return type;
+//			}
+//		}
 
 		return 0;
 	}

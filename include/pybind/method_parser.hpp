@@ -1,7 +1,17 @@
 #	pragma once
 
+#	include <cstddef>
+
+using std::size_t;
+
 namespace pybind
 {
+	template<class T>
+	struct external_type_cast
+	{
+		typedef T Type;
+	};
+
 	template<class F>
 	struct method_parser
 	{
@@ -35,7 +45,7 @@ namespace pybind
 			typedef R ret_type;
 			typedef C class_type;
 
-			typedef P1 param1;
+			typedef typename external_type_cast<P1>::Type param1;
 
 			static const size_t arity = 1;
 		};
@@ -46,7 +56,7 @@ namespace pybind
 			typedef R ret_type;
 			typedef C class_type;
 
-			typedef P1 param1;
+			typedef typename external_type_cast<P1>::Type param1;
 
 			static const size_t arity = 1;
 		};
@@ -57,8 +67,8 @@ namespace pybind
 			typedef R ret_type;
 			typedef C class_type;
 
-			typedef P1 param1;
-			typedef P2 param2;
+			typedef typename external_type_cast<P1>::Type param1;
+			typedef typename external_type_cast<P2>::Type param2;
 
 			static const size_t arity = 2;
 		};
@@ -69,8 +79,8 @@ namespace pybind
 			typedef R ret_type;
 			typedef C class_type;
 
-			typedef P1 param1;
-			typedef P2 param2;
+			typedef typename external_type_cast<P1>::Type param1;
+			typedef typename external_type_cast<P2>::Type param2;
 
 			static const size_t arity = 2;
 		};
@@ -81,9 +91,9 @@ namespace pybind
 			typedef R ret_type;
 			typedef C class_type;
 
-			typedef P1 param1;
-			typedef P2 param2;
-			typedef P3 param3;
+			typedef typename external_type_cast<P1>::Type param1;
+			typedef typename external_type_cast<P2>::Type param2;
+			typedef typename external_type_cast<P3>::Type param3;
 
 			static const size_t arity = 3;
 		};
@@ -94,9 +104,9 @@ namespace pybind
 			typedef R ret_type;
 			typedef C class_type;
 
-			typedef P1 param1;
-			typedef P2 param2;
-			typedef P3 param3;
+			typedef typename external_type_cast<P1>::Type param1;
+			typedef typename external_type_cast<P2>::Type param2;
+			typedef typename external_type_cast<P3>::Type param3;
 
 			static const size_t arity = 3;
 		};
@@ -107,10 +117,10 @@ namespace pybind
 			typedef R ret_type;
 			typedef C class_type;
 
-			typedef P1 param1;
-			typedef P2 param2;
-			typedef P3 param3;
-			typedef P4 param4;
+			typedef typename external_type_cast<P1>::Type param1;
+			typedef typename external_type_cast<P2>::Type param2;
+			typedef typename external_type_cast<P3>::Type param3;
+			typedef typename external_type_cast<P4>::Type param4;
 
 			static const size_t arity = 4;
 		};
@@ -121,10 +131,10 @@ namespace pybind
 			typedef R ret_type;
 			typedef C class_type;
 
-			typedef P1 param1;
-			typedef P2 param2;
-			typedef P3 param3;
-			typedef P4 param4;
+			typedef typename external_type_cast<P1>::Type param1;
+			typedef typename external_type_cast<P2>::Type param2;
+			typedef typename external_type_cast<P3>::Type param3;
+			typedef typename external_type_cast<P4>::Type param4;
 
 			static const size_t arity = 4;
 		};
@@ -135,11 +145,11 @@ namespace pybind
 			typedef R ret_type;
 			typedef C class_type;
 
-			typedef P1 param1;
-			typedef P2 param2;
-			typedef P3 param3;
-			typedef P4 param4;
-			typedef P5 param5;
+			typedef typename external_type_cast<P1>::Type param1;
+			typedef typename external_type_cast<P2>::Type param2;
+			typedef typename external_type_cast<P3>::Type param3;
+			typedef typename external_type_cast<P4>::Type param4;
+			typedef typename external_type_cast<P5>::Type param5;
 
 			static const size_t arity = 5;
 		};
@@ -150,11 +160,11 @@ namespace pybind
 			typedef R ret_type;
 			typedef C class_type;
 
-			typedef P1 param1;
-			typedef P2 param2;
-			typedef P3 param3;
-			typedef P4 param4;
-			typedef P5 param5;
+			typedef typename external_type_cast<P1>::Type param1;
+			typedef typename external_type_cast<P2>::Type param2;
+			typedef typename external_type_cast<P3>::Type param3;
+			typedef typename external_type_cast<P4>::Type param4;
+			typedef typename external_type_cast<P5>::Type param5;
 
 			static const size_t arity = 5;
 		};
@@ -162,3 +172,4 @@ namespace pybind
 		typedef types<F> result;
 	};
 }
+

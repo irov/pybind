@@ -1,5 +1,9 @@
 #	pragma once
 
+#	include <cstddef>
+
+using std::size_t;
+
 namespace pybind
 {
 	template<class F>
@@ -74,6 +78,8 @@ namespace pybind
 			static const size_t arity = 5;
 		};
 
+
 		typedef types<F> result;
 	};
 }
+

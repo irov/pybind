@@ -7,6 +7,8 @@
 #	include "pybind/method_proxy.hpp"
 #	include "pybind/type_cast.hpp"
 
+#	include <list>
+
 #	include <typeinfo>
 
 namespace pybind
@@ -36,30 +38,30 @@ namespace pybind
 			setup_method_from_base();
 		}
 
-		template<class B>
+		template<class BB>
 		static void * meta_cast( void * _ptr )
 		{
-			return static_cast<B*>(static_cast<C*>(_ptr));
+			return static_cast<BB*>(static_cast<C*>(_ptr));
 		}
 
 		void setup_bases()
 		{
 			int arity = B::base_arity;
 
-			if( arity-- > 0 )class_core::add_base<C, B::base0>(&meta_cast<B::base0>);
-			if( arity-- > 0 )class_core::add_base<C, B::base1>(&meta_cast<B::base1>);
-			if( arity-- > 0 )class_core::add_base<C, B::base2>(&meta_cast<B::base2>);
-			if( arity-- > 0 )class_core::add_base<C, B::base3>(&meta_cast<B::base3>);
+			if( arity-- > 0 )class_core::add_base<C, typename B::base0>(&meta_cast<typename B::base0>);
+			if( arity-- > 0 )class_core::add_base<C, typename B::base1>(&meta_cast<typename B::base1>);
+			if( arity-- > 0 )class_core::add_base<C, typename B::base2>(&meta_cast<typename B::base2>);
+			if( arity-- > 0 )class_core::add_base<C, typename B::base3>(&meta_cast<typename B::base3>);
 		}
 
 		void setup_method_from_base()
 		{
 			int arity = B::base_arity;
 
-			if( arity-- > 0 )class_core::add_method_from_base<C, B::base0>();
-			if( arity-- > 0 )class_core::add_method_from_base<C, B::base1>();
-			if( arity-- > 0 )class_core::add_method_from_base<C, B::base2>();
-			if( arity-- > 0 )class_core::add_method_from_base<C, B::base3>();
+			if( arity-- > 0 )class_core::add_method_from_base<C, typename B::base0>();
+			if( arity-- > 0 )class_core::add_method_from_base<C, typename B::base1>();
+			if( arity-- > 0 )class_core::add_method_from_base<C, typename B::base2>();
+			if( arity-- > 0 )class_core::add_method_from_base<C, typename B::base3>();
 		}
 
 		template<class C0, class C1, class C2, class C3>
@@ -104,7 +106,7 @@ namespace pybind
 			static delete_holder s_proxyDeleter;
 
 			method_proxy_interface * ifunc =
-				new method_proxy<t_info::class_type, F>(_name, f);
+				new method_proxy<typename t_info::class_type, F>(_name, f);
 
 			s_proxyDeleter.add( ifunc );
 
@@ -167,7 +169,7 @@ namespace pybind
 	{
 		C * apply( PyObject * _obj ) override
 		{
-			m_valid = true;
+			type_cast_result<C *>::m_valid = true;
 
 			void * impl = detail::get_class( _obj );
 			class_type_scope * scope = detail::get_class_scope( _obj );
@@ -187,7 +189,7 @@ namespace pybind
 			return static_cast<C*>(impl);
 		}
 
-		PyObject * wrap( C * _class )
+		PyObject * wrap( C * _class ) override
 		{
 			return class_core::create_holder( class_info<C>(), (void *)_class );
 		}
@@ -199,7 +201,7 @@ namespace pybind
 	{
 		C apply( PyObject * _obj ) override
 		{
-			m_valid = true;
+			type_cast_result<C>::m_valid = true;
 			void * impl = detail::get_class( _obj );
 			return *static_cast<C*>(impl);
 		}
@@ -217,7 +219,7 @@ namespace pybind
 	{
 	public:
 		class_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
-			: base_( _name, &base_<C,B>::new_, &base_<C,B>::dealloc_, _module )
+			: base_<C,B>( _name, &base_<C,B>::new_, &base_<C,B>::dealloc_, _module )
 		{
 			if( external_extract )
 			{
@@ -227,7 +229,7 @@ namespace pybind
 			constructor * empty_ctr = 
 				new constructor_params<C, init<> >();
 
-			class_core::def_init( scope(), empty_ctr );
+			class_core::def_init( base_<C,B>::scope(), empty_ctr );
 		}
 
 	protected:
@@ -251,7 +253,7 @@ namespace pybind
 
 	public:
 		proxy_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
-			: base_( _name, &base_<C,B>::new_, &base_<C,B>::dealloc_only_python, _module )
+			: base_<C,B>( _name, &base_<C,B>::new_, &base_<C,B>::dealloc_only_python, _module )
 		{
 			if( external_extract )
 			{
@@ -261,11 +263,11 @@ namespace pybind
 			constructor * empty_ctr = 
 				new constructor_params<C, init<> >();
 
-			class_core::def_init( scope(), empty_ctr );
+			class_core::def_init( base_<C,B>::scope(), empty_ctr );
 		}
 	};
 
-	template<class C, class B = bases<void,void,void,void>>
+	template<class C, class B = bases<void,void,void,void> >
 	class interface_
 		: public base_<C,B>
 	{
@@ -274,7 +276,7 @@ namespace pybind
 
 	public:
 		interface_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
-			: base_( _name, &base_<C,B>::new_interface, &base_<C,B>::dealloc_only_python, _module )
+			: base_<C,B>( _name, &base_<C,B>::new_interface, &base_<C,B>::dealloc_only_python, _module )
 		{
 			if( external_extract )
 			{
@@ -289,3 +291,4 @@ namespace pybind
 		}
 	};
 }
+

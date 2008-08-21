@@ -11,3 +11,4 @@ namespace pybind
 		functor_proxy_interface * proxy;
 	};
 }
+

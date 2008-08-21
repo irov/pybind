@@ -1,16 +1,10 @@
 #	include "pybind/constructor.hpp"
 #	include "pybind/system.hpp"
 
+#	include <stdio.h>
+
 namespace pybind
 {
-	namespace detail
-	{
-		//////////////////////////////////////////////////////////////////////////
-		PyObject * getarg( PyObject * _args, size_t _it )
-		{
-			return tuple_getitem( _args, _it );
-		}
-	}
 	//////////////////////////////////////////////////////////////////////////
 	constructor::constructor( size_t _arity )
 		: m_arity(_arity)
@@ -33,6 +27,11 @@ namespace pybind
 
 		if( m_arity != args_arity )
 		{
+			printf("construct have %d args, but you call %d params"
+				, m_arity
+				, args_arity
+				);
+
 			return false;
 		}
 

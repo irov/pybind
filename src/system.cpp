@@ -11,10 +11,22 @@ namespace pybind
 		Py_Initialize();
 	}
 
+	void initialize_ts()
+	{
+		Py_Initialize();
+		PyEval_InitThreads();
+		PyEval_SaveThread();
+	}
+
 	void finalize()
 	{
 		PyImport_Cleanup();
 		Py_Finalize();
+	}
+
+	bool is_initialized()
+	{
+		return (Py_IsInitialized() != 0);
 	}
 
 	void check_error()
@@ -85,7 +97,6 @@ namespace pybind
 		return s_current_module;
 	}
 
-
 	PyObject * call( PyObject * _obj, const char * _format, ... )
 	{
 		va_list valist;
@@ -102,6 +113,7 @@ namespace pybind
 
 	PyObject * call_method( PyObject * _obj, const char * _method, const char * _format, ... )
 	{
+
 		va_list valist;
 		va_start(valist, _format);
 
@@ -111,6 +123,51 @@ namespace pybind
 
 		va_end( valist ); 
 
+		return result;
+	}
+
+	PyObject * call_ne( PyObject * _obj, const char * _format, ... )
+	{
+		PyErr_Clear();
+		va_list valist;
+		va_start(valist, _format);
+
+		PyObject * result = call_va( _obj, _format, valist );
+
+		check_error();
+
+		va_end( valist ); 
+
+		return result;
+	}
+
+	PyObject * call_ts( PyObject * _obj, const char * _format, ... )
+	{
+		va_list valist;
+		va_start(valist, _format);
+
+		PyGILState_STATE _state = PyGILState_Ensure();
+		PyObject * result = call_va( _obj, _format, valist );
+
+		check_error();
+
+		PyGILState_Release(_state);
+
+		va_end( valist ); 
+
+		return result;
+	}
+
+	PyObject * call_method_ts( PyObject * _obj, const char * _method, const char * _format, ... )
+	{
+		va_list valist;
+		va_start(valist, _format);
+
+		PyGILState_STATE _state = PyGILState_Ensure();
+		PyObject * result = call_method_va( _obj, _method, _format, valist );
+		PyGILState_Release(_state);
+
+		va_end( valist );
 		return result;
 	}
 
@@ -175,6 +232,11 @@ namespace pybind
 		return result;
 	}
 
+	const char * get_syspath()
+	{
+		return Py_GetPath();
+	}
+
 	void set_syspath( const char * _path )
 	{
 		PySys_SetPath( const_cast< char * >( _path ) );
@@ -222,6 +284,11 @@ namespace pybind
 		return PyObject_GetAttrString( _obj, _attr );
 	}
 
+	bool set_attr( PyObject * _obj, const char * _attr, PyObject * _value )
+	{
+		return PyObject_SetAttrString( _obj, _attr, _value ) != -1;
+	}
+
 	bool check_type( PyObject * _obj )
 	{
 		return PyType_Check( _obj ) == 1;
@@ -245,6 +312,11 @@ namespace pybind
 	bool dict_check( PyObject * _obj )
 	{
 		return PyDict_Check( _obj ) == 1;
+	}
+
+	int list_appenditem( PyObject * _obj, PyObject * _item )
+	{
+		return PyList_Append( _obj, _item );
 	}
 
 	bool dict_set( PyObject * _dict, const char * _name, PyObject * _value )
@@ -279,13 +351,34 @@ namespace pybind
 	{
 		va_list valist;
 		va_start(valist, _message);
-
 		char buffer[1024];
 		vsprintf( buffer, _message, valist );
 
 		PyErr_SetString( PyExc_TypeError, buffer );
 
 		va_end( valist ); 
+	}
+
+	bool tuple_setitem( PyObject * _tuple, size_t _it, PyObject * _value )
+	{
+		return PyTuple_SetItem( _tuple, _it, _value ) == 0;
+	}
+
+	bool tuple_resize( PyObject ** _ptuple, size_t _it )
+	{
+		return _PyTuple_Resize( _ptuple, _it ) == 0;
+	}
+
+	PyObject * tuple_new( size_t _it )
+	{
+		return PyTuple_New(_it);
+	}
+
+	PyObject * build_value( const char * _format, ... )
+	{
+		va_list valist;
+		va_start(valist, _format);
+		return Py_VaBuildValue( _format, valist );
 	}
 
 	void exception_filter()
@@ -356,3 +449,4 @@ namespace pybind
 		}
 	}
 }
+

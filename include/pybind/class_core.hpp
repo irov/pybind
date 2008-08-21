@@ -81,4 +81,13 @@ namespace pybind
 		static PyObject * new_impl( PyTypeObject * _type, PyObject * _args, void * _impl, const type_info & _tinfo );
 		static void * dealloc_impl( PyObject * _obj );
 	};
+
+	template<class T>
+	PyObject * class_holder( T * _value )
+	{
+		PyObject * result = class_core::create_holder( typeid(T), _value );
+
+		return result;
+	}
 }
+

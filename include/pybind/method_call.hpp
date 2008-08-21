@@ -3,28 +3,153 @@
 #	include "pybind/exports.hpp"
 #	include "pybind/method_parser.hpp"
 #	include "pybind/types.hpp"
+#	include "pybind/system.hpp"
+#	include "pybind/extract.hpp"
 
 namespace pybind
 {
-	namespace detail
+	template<class C, class F,class Ret, int i>
+	struct method_call_impl
 	{
-		PYBIND_API PyObject * return_none();
-		PYBIND_API PyObject * getarg( PyObject * _args, int _item);
-	}
+		static Ret call( C * _obj, F f, PyObject * _arg );
+	};
+
+	template<class C, class F,class Ret>
+	struct method_call_impl<C,F,Ret,0>
+	{
+		static Ret call( C * _obj, F f, PyObject * _arg )
+		{
+			return (_obj->*f)();
+		}
+	};
+
+	template<class C, class F,class Ret>
+	struct method_call_impl<C,F,Ret,1>
+	{
+		typedef typename method_parser<F>::result f_info;
+
+		static Ret call( C * _obj, F f, PyObject * _arg )
+		{
+			PyObject * _arg1 = tuple_getitem( _arg, 0 );
+
+			return (_obj->*f)( 
+				extract<typename f_info::param1>( _arg1 ) 
+				);
+		}
+	};
+
+	template<class C, class F,class Ret>
+	struct method_call_impl<C,F,Ret,2>
+	{
+		typedef typename method_parser<F>::result f_info;
+
+		static Ret call( C * _obj, F f, PyObject * _arg )
+		{
+			PyObject * _arg1 = tuple_getitem( _arg, 0 );
+			PyObject * _arg2 = tuple_getitem( _arg, 1 );
+
+			return (_obj->*f)( 
+				extract<typename f_info::param1>( _arg1 ), 
+				extract<typename f_info::param2>( _arg2 ) 
+				);
+		}	
+	};
+
+	template<class C, class F,class Ret>
+	struct method_call_impl<C,F,Ret,3>
+	{
+		typedef typename method_parser<F>::result f_info;
+
+		static Ret call( C * _obj, F f, PyObject * _arg )
+		{
+			PyObject * _arg1 = tuple_getitem( _arg, 0 );
+			PyObject * _arg2 = tuple_getitem( _arg, 1 );
+			PyObject * _arg3 = tuple_getitem( _arg, 2 );
+
+			return (_obj->*f)( 
+				extract<typename f_info::param1>( _arg1 ), 
+				extract<typename f_info::param2>( _arg2 ),
+				extract<typename f_info::param3>( _arg3 )
+				);
+		}	
+	};
+
+	template<class C, class F,class Ret>
+	struct method_call_impl<C,F,Ret,4>
+	{
+		typedef typename method_parser<F>::result f_info;
+
+		static Ret call( C * _obj, F f, PyObject * _arg )
+		{
+			PyObject * _arg1 = tuple_getitem( _arg, 0 );
+			PyObject * _arg2 = tuple_getitem( _arg, 1 );
+			PyObject * _arg3 = tuple_getitem( _arg, 2 );
+			PyObject * _arg4 = tuple_getitem( _arg, 3 );
+
+			return (_obj->*f)( 
+				extract<typename f_info::param1>( _arg1 ), 
+				extract<typename f_info::param2>( _arg2 ),
+				extract<typename f_info::param3>( _arg3 ),
+				extract<typename f_info::param4>( _arg4 )
+				);
+		}
+	};
+
+	template<class C, class F,class Ret>
+	struct method_call_impl<C,F,Ret,5>
+	{
+		typedef typename method_parser<F>::result f_info;
+
+		static Ret call( C * _obj, F f, PyObject * _arg )
+		{
+			PyObject * _arg1 = tuple_getitem( _arg, 0 );
+			PyObject * _arg2 = tuple_getitem( _arg, 1 );
+			PyObject * _arg3 = tuple_getitem( _arg, 2 );
+			PyObject * _arg4 = tuple_getitem( _arg, 3 );
+			PyObject * _arg5 = tuple_getitem( _arg, 4 );
+
+			return (_obj->*f)( 
+				extract<typename f_info::param1>( _arg1 ), 
+				extract<typename f_info::param2>( _arg2 ),
+				extract<typename f_info::param3>( _arg3 ),
+				extract<typename f_info::param4>( _arg4 ),
+				extract<typename f_info::param5>( _arg5 )
+				);
+		}
+	};
+
+	template<class C, class F,class Ret>
+	struct method_call_ret_impl
+	{
+		typedef typename method_parser<F>::result f_info;
+
+		static PyObject * call( C * _obj, F f, PyObject * _arg )
+		{
+			Ret result = method_call_impl<C,F,Ret,f_info::arity>::call( _obj, f, _arg );
+
+			return ptr<Ret>( result );
+		}
+	};
+
+	template<class C, class F>
+	struct method_call_ret_impl<C,F,void>
+	{
+		typedef typename method_parser<F>::result f_info;
+
+		static PyObject * call( C * _obj, F f, PyObject * _arg )
+		{
+			method_call_impl<C,F,void,f_info::arity>::call( _obj, f, _arg );
+
+			return ret_none();
+		}
+	};
 
 	template<class C, class F>
 	struct method_call
 	{
 		typedef typename method_parser<F>::result f_info;
-		typedef typename f_info::ret_type Ret;
 
 		static PyObject * call( C * _obj, F f, PyObject * _arg )
-		{
-			return call_ret_impl<Ret>( _obj, f, _arg );
-		}
-
-		template<class R>
-		static PyObject * call_ret_impl( C * _obj, F f, PyObject * _arg )
 		{
 			if( f_info::arity > 0 )
 			{
@@ -40,97 +165,8 @@ namespace pybind
 				}
 			}
 
-			R result = call_impl<f_info::arity>( _obj, f, _arg );
-
-			return ptr<R>( result );
+			return method_call_ret_impl<C,F,typename f_info::ret_type>::call( _obj, f, _arg );
 		}
-
-		template<>
-		static PyObject * call_ret_impl<void>( C * _obj, F f, PyObject * _arg )
-		{
-			call_impl<f_info::arity>( _obj, f, _arg );
-
-			return detail::return_none();
-		}
-
-		template<int i>
-		static Ret call_impl( C * _obj, F f, PyObject * _arg );
-
-		template<>
-		static Ret call_impl<0>( C * _obj, F f, PyObject * _arg )
-		{
-			return (_obj->*f)();
-		}	
-
-		template<>
-		static Ret call_impl<1>( C * _obj, F f, PyObject * _arg )
-		{
-			PyObject * _arg1 = detail::getarg( _arg, 0 );
-		
-			typename f_info::param1 param1 = extract<typename f_info::param1>( _arg1 );
-
-			return (_obj->*f)( param1 );
-		}	
-
-		template<>
-		static Ret call_impl<2>( C * _obj, F f, PyObject * _arg )
-		{
-			PyObject * _arg1 = detail::getarg( _arg, 0 );
-			PyObject * _arg2 = detail::getarg( _arg, 1 );
-
-			return (_obj->*f)( 
-				extract<typename f_info::param1>( _arg1 ), 
-				extract<typename f_info::param2>( _arg2 ) 
-				);
-		}	
-
-		template<>
-		static Ret call_impl<3>( C * _obj, F f, PyObject * _arg )
-		{
-			PyObject * _arg1 = detail::getarg( _arg, 0 );
-			PyObject * _arg2 = detail::getarg( _arg, 1 );
-			PyObject * _arg3 = detail::getarg( _arg, 2 );
-
-			return (_obj->*f)( 
-				extract<typename f_info::param1>( _arg1 ), 
-				extract<typename f_info::param2>( _arg2 ),
-				extract<typename f_info::param3>( _arg3 )
-				);
-		}	
-
-		template<>
-		static Ret call_impl<4>( C * _obj, F f, PyObject * _arg )
-		{
-			PyObject * _arg1 = detail::getarg( _arg, 0 );
-			PyObject * _arg2 = detail::getarg( _arg, 1 );
-			PyObject * _arg3 = detail::getarg( _arg, 2 );
-			PyObject * _arg4 = detail::getarg( _arg, 3 );
-
-			return (_obj->*f)( 
-				extract<typename f_info::param1>( _arg1 ), 
-				extract<typename f_info::param2>( _arg2 ),
-				extract<typename f_info::param3>( _arg3 ),
-				extract<typename f_info::param4>( _arg4 )
-				);
-		}	
-
-		template<>
-		static Ret call_impl<5>( C * _obj, F f, PyObject * _arg )
-		{
-			PyObject * _arg1 = detail::getarg( _arg, 0 );
-			PyObject * _arg2 = detail::getarg( _arg, 1 );
-			PyObject * _arg3 = detail::getarg( _arg, 2 );
-			PyObject * _arg4 = detail::getarg( _arg, 3 );
-			PyObject * _arg5 = detail::getarg( _arg, 4 );
-
-			return (_obj->*f)( 
-				extract<typename f_info::param1>( _arg1 ), 
-				extract<typename f_info::param2>( _arg2 ),
-				extract<typename f_info::param3>( _arg3 ),
-				extract<typename f_info::param4>( _arg4 ),
-				extract<typename f_info::param5>( _arg5 )
-				);
-		}	
-
 	};
 }
+

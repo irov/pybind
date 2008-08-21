@@ -22,10 +22,84 @@ namespace pybind
 		size_t m_arity;
 	};
 
-	namespace detail
+	template<class C, class P, int i>
+	struct call_ctr_impl
 	{
-		PyObject * getarg( PyObject * _args, size_t _it );
-	}
+		static C * call_ctr( PyObject * _args );
+	};
+
+	template<class C, class P>
+	struct call_ctr_impl<C, P, 0>
+	{
+		static C * call_ctr( PyObject * _args )
+		{
+			return new C();	
+		}
+	};
+
+	template<class C, class P>
+	struct call_ctr_impl<C, P, 1>
+	{
+		static C * call_ctr( PyObject * _args )
+		{
+			PyObject * arg0 = tuple_getitem( _args, 0 );
+
+			typename P::param0 param0 = extract<typename P::param0>( arg0 );
+
+			return new C( param0 );
+		}
+	};
+
+	template<class C, class P>
+	struct call_ctr_impl<C, P, 2>
+	{
+		static C * call_ctr( PyObject * _args )
+		{
+			PyObject * arg0 = tuple_getitem( _args, 0 );
+			PyObject * arg1 = tuple_getitem( _args, 1 );
+
+			typename P::param0 param0 = extract<typename P::param0>( arg0 );
+			typename P::param1 param1 = extract<typename P::param1>( arg1 );
+
+			return new C( param0, param1 );
+		}
+	};
+
+	template<class C, class P>
+	struct call_ctr_impl<C, P, 3>
+	{
+		static C * call_ctr( PyObject * _args )
+		{
+			PyObject * arg0 = tuple_getitem( _args, 0 );
+			PyObject * arg1 = tuple_getitem( _args, 1 );
+			PyObject * arg2 = tuple_getitem( _args, 2 );
+
+			typename P::param0 param0 = extract<typename P::param0>( arg0 );
+			typename P::param1 param1 = extract<typename P::param1>( arg1 );
+			typename P::param2 param2 = extract<typename P::param2>( arg2 );
+
+			return new C( param0, param1, param2 );
+		}
+	};
+
+	template<class C, class P>
+	struct call_ctr_impl<C, P, 4>
+	{
+		static C * call_ctr( PyObject * _args )
+		{
+			PyObject * arg0 = tuple_getitem( _args, 0 );
+			PyObject * arg1 = tuple_getitem( _args, 1 );
+			PyObject * arg2 = tuple_getitem( _args, 2 );
+			PyObject * arg3 = tuple_getitem( _args, 3 );
+
+			typename P::param0 param0 = extract<typename P::param0>( arg0 );
+			typename P::param1 param1 = extract<typename P::param1>( arg1 );
+			typename P::param2 param2 = extract<typename P::param2>( arg2 );
+			typename P::param3 param3 = extract<typename P::param3>( arg3 );
+
+			return new C( param0, param1, param2, param3 );
+		}
+	};
 
 	template<class C, class P>
 	class constructor_params
@@ -45,69 +119,8 @@ namespace pybind
 				return 0;
 			}
 
-			return call_ctr<P::base_arity>( _args );
+			return call_ctr_impl<C, P, P::base_arity>::call_ctr( _args );
 		}
-
-		template<int i>
-		static C * call_ctr( PyObject * _args );
-
-		template<>
-		static C * call_ctr<0>( PyObject * _args )
-		{
-			return new C();	
-		}
-
-		template<>
-		static C * call_ctr<1>( PyObject * _args )
-		{
-			PyObject * arg0 = detail::getarg( _args, 0 );
-
-			typename P::param0 param0 = extract<typename P::param0>( arg0 );
-			
-			return new C( param0 );
-		}
-
-		template<>
-		static C * call_ctr<2>( PyObject * _args )
-		{
-			PyObject * arg0 = detail::getarg( _args, 0 );
-			PyObject * arg1 = detail::getarg( _args, 1 );
-
-			typename P::param0 param0 = extract<typename P::param0>( arg0 );
-			typename P::param1 param1 = extract<typename P::param1>( arg1 );
-
-			return new C( param0, param1 );
-		}
-
-		template<>
-		static C * call_ctr<3>( PyObject * _args )
-		{
-			PyObject * arg0 = detail::getarg( _args, 0 );
-			PyObject * arg1 = detail::getarg( _args, 1 );
-			PyObject * arg2 = detail::getarg( _args, 2 );
-
-			typename P::param0 param0 = extract<typename P::param0>( arg0 );
-			typename P::param1 param1 = extract<typename P::param1>( arg1 );
-			typename P::param2 param2 = extract<typename P::param2>( arg2 );
-
-			return new C( param0, param1, param2 );
-		}
-
-		template<>
-		static C * call_ctr<4>( PyObject * _args )
-		{
-			PyObject * arg0 = detail::getarg( _args, 0 );
-			PyObject * arg1 = detail::getarg( _args, 1 );
-			PyObject * arg2 = detail::getarg( _args, 2 );
-			PyObject * arg3 = detail::getarg( _args, 3 );
-
-			typename P::param0 param0 = extract<typename P::param0>( arg0 );
-			typename P::param1 param1 = extract<typename P::param1>( arg1 );
-			typename P::param2 param2 = extract<typename P::param2>( arg2 );
-			typename P::param3 param3 = extract<typename P::param3>( arg3 );
-
-			return new C( param0, param1, param2, param3 );
-		}
-
 	};
 }
+

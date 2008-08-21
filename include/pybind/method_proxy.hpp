@@ -1,6 +1,7 @@
 #	pragma once
 
 #	include "pybind/method_call.hpp"
+#	include "config/python.hpp"
 
 namespace pybind
 {
@@ -59,3 +60,4 @@ namespace pybind
 		F m_fn;
 	};
 }
+

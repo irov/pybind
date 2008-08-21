@@ -112,7 +112,7 @@ namespace pybind
 	}
 
 	static PyGetSetDef instance_getsets[] = {
-		{"__dict__",  instance_get_dict,  instance_set_dict, NULL, 0},
+		{"__dict__", instance_get_dict, instance_set_dict, NULL, 0},
 		{0, 0, 0, 0, 0}
 	};
 
@@ -129,6 +129,16 @@ namespace pybind
 			Py_DECREF( name );
 			check_error();
 		}
+		else
+		{
+			//this hack is made for setting hook
+			PyObject * setattr = PyDict_GetItemString( inst->dict, "__setattr__" );	
+			if ( setattr )
+			{
+				PyObject * result = call( setattr, "(OO)", name, value );
+				Py_DECREF( result );
+			}
+		}
 
 		return res;
 	}
@@ -138,18 +148,48 @@ namespace pybind
 	{
 		py_class_type* inst = (py_class_type*)obj;
 
-		PyObject * item = PyDict_GetItem( inst->dict, name );
+		PyObject * attr = PyDict_GetItem( inst->dict, name );	
 
-		if( item )
+		if( attr )
 		{
 			Py_INCREF( obj );
-			Py_INCREF( item );
-			return item;
+			Py_INCREF( attr );
+			return attr;
 		}
 
-		PyObject * pResult = PyObject_GenericGetAttr( obj, name );
+		attr = PyObject_GenericGetAttr( obj, name );
 
-		return pResult;
+		if( attr == 0 )
+		{
+			PyObject * getattr = PyDict_GetItemString( inst->dict, "__getattr__" );
+			if ( getattr )
+			{
+				PyObject * getattr_item = call_ne( getattr, "(O)", name );
+
+				if( getattr_item != Py_None )
+				{
+					attr = getattr_item;
+				}
+			}
+		}
+
+		return attr;
+	}
+
+	static PyObject *
+		class_call(PyObject *obj, PyObject *args, PyObject *keyvalues)
+	{
+		py_class_type* inst = (py_class_type*)obj;
+
+		PyObject * caller = PyDict_GetItemString( inst->dict, "__call__" );
+		if (!caller) 
+		{
+			PyErr_SetString(PyExc_TypeError, "Object is not defined");
+			return NULL;
+		}
+		if (keyvalues)
+			return call( caller, "(OOO)", obj, args, keyvalues );
+		return call( caller, "(OO)", obj, args );
 	}
 
 	void class_type_scope::setup(
@@ -180,6 +220,7 @@ namespace pybind
 		m_type.tp_getset = instance_getsets;
 		m_type.tp_setattro = &class_setattro;
 		m_type.tp_getattro = &class_getattro;
+		m_type.tp_call = &class_call;
 		
 
 		m_type_holder = m_type;

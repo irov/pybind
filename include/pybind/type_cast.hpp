@@ -2,7 +2,9 @@
 
 #	include "pybind/exports.hpp"
 #	include "pybind/types.hpp"
-#	include "pybind/wrap_base.hpp"
+#	include <typeinfo>
+
+using std::type_info;
 
 namespace pybind
 {
@@ -12,6 +14,8 @@ namespace pybind
 	{
 		PYBIND_API void register_type_info_extract( const type_info & _info, type_cast * _type );
 		PYBIND_API type_cast * find_type_info_extract( const type_info & _info );
+
+		template<class T> struct type_down_cast;
 
 		template<class T, class B>
 		struct type_down_cast_find
@@ -42,15 +46,6 @@ namespace pybind
 
 		template<>
 		struct type_down_cast<void>
-		{
-			static type_cast * find()
-			{
-				return 0;
-			}
-		};
-
-		template<>
-		struct type_down_cast<wrap_base *>
 		{
 			static type_cast * find()
 			{
@@ -156,3 +151,4 @@ namespace pybind
 
 	};
 }
+

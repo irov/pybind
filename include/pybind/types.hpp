@@ -21,3 +21,4 @@ namespace pybind
 	typedef PyObject * (*pybind_newfunc)(PyTypeObject *, PyObject *, PyObject *);
 	typedef void (*pybind_destructor)(PyObject *);
 }
+

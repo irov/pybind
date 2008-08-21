@@ -23,7 +23,7 @@ namespace pybind
 		typedef typename method_parser<F>::result t_info;
 
 		functor_proxy_interface * imethod =
-			new functor_proxy<t_info::class_type, F>(_name, _self, _method);
+			new functor_proxy<typename t_info::class_type, F>(_name, _self, _method);
 
 		detail::def_functor(
 			_name,
@@ -35,3 +35,4 @@ namespace pybind
 	}
 
 }
+

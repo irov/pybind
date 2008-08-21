@@ -1,5 +1,9 @@
 #	pragma once
 
+#	include <typeinfo>
+
+using std::type_info;
+
 #	include "pybind/exports.hpp"
 
 extern "C" 
@@ -23,3 +27,4 @@ namespace pybind
 		static bool has_class_scope( const type_info & _info );
 	};
 }
+
