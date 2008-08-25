@@ -447,6 +447,11 @@ namespace pybind
 		{
 			return PyString_AsString( _string );
 		}
+		//////////////////////////////////////////////////////////////////////////
+		const wchar_t * to_unicode( PyObject * _unicode )
+		{
+			return PyUnicode_AsUnicode( _unicode );
+		}
 	}
 }
 

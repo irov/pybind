@@ -97,6 +97,8 @@ namespace pybind
 
 		PYBIND_API bool is_string( PyObject * _string );
 		PYBIND_API const char * to_string( PyObject * _string );
+
+		PYBIND_API const wchar_t * to_unicode( PyObject * _unicode );
 	}
 }
 
