@@ -303,7 +303,7 @@ namespace pybind
 
 				const char * encoding = PyUnicode_GetDefaultEncoding();
 
-				PyObject * unicode = PyUnicode_Decode( str, size, encoding, 0 );
+				PyObject * unicode = PyUnicode_Decode( str, size, "mbcs", 0 );
 
 				wchar_t * unicode_str = PyUnicode_AsUnicode( unicode );
 
