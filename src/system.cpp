@@ -196,6 +196,8 @@ namespace pybind
 
 		check_error();
 
+		Py_DECREF( method );
+
 		return result;		
 	}
 
