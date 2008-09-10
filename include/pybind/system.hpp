@@ -34,18 +34,26 @@ namespace pybind
 	PYBIND_API void set_currentmodule( PyObject * _module );
 	PYBIND_API PyObject * get_currentmodule();
 
-	PYBIND_API PyObject * call( PyObject * _obj, const char * _format, ... );
-	PYBIND_API PyObject * call_ne( PyObject * _obj, const char * _format, ... );
-	PYBIND_API PyObject * call_ts( PyObject * _obj, const char * _format, ... );
+	PYBIND_API PyObject * ask( PyObject * _obj, const char * _format, ... );
+	PYBIND_API PyObject * ask_ne( PyObject * _obj, const char * _format, ... );
+	PYBIND_API PyObject * ask_ts( PyObject * _obj, const char * _format, ... );
 
-	PYBIND_API PyObject * call_method( PyObject * _obj, const char * _method, const char * _format, ... );
-	PYBIND_API PyObject * call_method_ts( PyObject * _obj, const char * _method, const char * _format, ... );
+	PYBIND_API PyObject * ask_method( PyObject * _obj, const char * _method, const char * _format, ... );
+	PYBIND_API PyObject * ask_method_ts( PyObject * _obj, const char * _method, const char * _format, ... );
 
+	PYBIND_API PyObject * ask_va( PyObject * _obj, const char * _format, va_list );
+	PYBIND_API PyObject * ask_method_va( PyObject * _obj, const char * _method, const char * _format, va_list );
+
+	PYBIND_API void call( PyObject * _obj, const char * _format, ... );
+	PYBIND_API void call_ne( PyObject * _obj, const char * _format, ... );
+	PYBIND_API void call_ts( PyObject * _obj, const char * _format, ... );
+
+	PYBIND_API void call_method( PyObject * _obj, const char * _method, const char * _format, ... );
+	PYBIND_API void call_method_ts( PyObject * _obj, const char * _method, const char * _format, ... );
 	
-	PYBIND_API PyObject * call_va( PyObject * _obj, const char * _format, va_list );
-	PYBIND_API PyObject * call_method_va( PyObject * _obj, const char * _method, const char * _format, va_list );
-	
-	
+	PYBIND_API void call_va( PyObject * _obj, const char * _format, va_list );
+	PYBIND_API void call_method_va( PyObject * _obj, const char * _method, const char * _format, va_list );
+		
 	PYBIND_API PyObject * compile_string( const char * _string, const char * _file );
 	PYBIND_API PyObject * exec( const char * _code, PyObject * _global = 0, PyObject * _local = 0 );
 	PYBIND_API PyObject * exec_file( const char * _filename, PyObject * _global = 0, PyObject * _local = 0 );
@@ -97,7 +105,6 @@ namespace pybind
 
 		PYBIND_API bool is_string( PyObject * _string );
 		PYBIND_API const char * to_string( PyObject * _string );
-
 		PYBIND_API const wchar_t * to_unicode( PyObject * _unicode );
 	}
 }
