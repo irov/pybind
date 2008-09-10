@@ -267,13 +267,13 @@ namespace pybind
 	void call_va( PyObject * _obj, const char * _format, va_list _va )
 	{
 		PyObject * res = ask_va( _obj, _format, _va );
-		Py_DECREF( res );
+		Py_XDECREF( res );
 	}
 
 	void call_method_va( PyObject * _obj, const char * _method, const char * _format, va_list _va )
 	{
 		PyObject * res = ask_method_va( _obj, _method, _format, _va );
-		Py_DECREF( res );
+		Py_XDECREF( res );
 	}
 
 	PyObject * exec( const char * _code, PyObject * _global, PyObject * _local )
