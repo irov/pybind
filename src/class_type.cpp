@@ -124,19 +124,22 @@ namespace pybind
 		int res = PyDict_SetItem( inst->dict, name, value );
 		//Py_DECREF( value );
 
-		if( res )
+		if( res == 0 )
 		{
-			Py_DECREF( name );
-			check_error();
-		}
-		else
-		{
+			//Py_DECREF( name );
+			//Py_DECREF( value );
+
 			//this hack is made for setting hook
 			PyObject * setattr = PyDict_GetItemString( inst->dict, "__setattr__" );	
 			if ( setattr )
 			{
 				call( setattr, "(OO)", name, value );
-			}
+				Py_DECREF( setattr );
+			}			
+		}
+		else
+		{			
+			check_error();
 		}
 
 		return res;
@@ -344,11 +347,13 @@ namespace pybind
 
 			if( PyObject_SetAttrString( (PyObject*)_self, it->m_name, py_method ) == -1 )
 			{
-				Py_DECREF( py_method );
+				//Py_DECREF( py_method );
 				Py_DECREF( _self );
 
 				check_error();
 			}
+
+			Py_DECREF( py_method );
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////
