@@ -230,55 +230,71 @@ namespace pybind
 		}
 	}s_extract_double_type;
 
-	static struct extract_cchar_type
-		: public type_cast_result<const char *>
-	{
-		const char * apply( PyObject * _obj ) override
-		{
-			m_valid = false;
+  static struct extract_cchar_type
+          : public type_cast_result<const char *>
+     {
+          const char * apply( PyObject * _obj ) override
+          {
+               m_valid = false;
 
-			if( PyString_Check( _obj ) )
-			{
-				m_valid = true;
-				char * str = PyString_AsString( _obj );
-				if( str )
-				{
-					return const_cast<const char *>(str);
-				}		
-			}
+               if( PyString_Check( _obj ) )
+               {
+                    m_valid = true;
+                    /*char * str = PyString_AsString( _obj );
+                    if( str )
+                    {
+                         return const_cast<const char *>(str);
+                    }*/          
+                    PyObject* pyUTF8 = PyUnicode_FromEncodedObject( _obj, "mbcs", NULL );
+                    char* utf8 = PyString_AsString( PyUnicode_AsUTF8String( pyUTF8 ) );
+                    Py_DECREF( pyUTF8 );
 
-			return 0;
-		}
-		PyObject * wrap( const char * _value ) override
-		{
-			return PyString_FromString( _value );
-		}
-	}s_extract_cchar_type;
+                    if( utf8 )
+                    {
+                         return const_cast<const char*>( utf8 );
+                    }
+               }
 
-	static struct extract_string_type
-		: public type_cast_result<std::string>
-	{
-		std::string apply( PyObject * _obj ) override
-		{
-			m_valid = false;
+               return 0;
+          }
+          PyObject * wrap( const char * _value ) override
+          {
+               return PyString_FromString( _value );
+          }
+     }s_extract_cchar_type;
 
-			if( PyString_Check( _obj ) )
-			{
-				m_valid = true;
-				char * str = PyString_AsString( _obj );
-				if( str )
-				{
-					return std::string(str);
-				}
-			}
+     static struct extract_string_type
+          : public type_cast_result<std::string>
+     {
+          std::string apply( PyObject * _obj ) override
+          {
+               m_valid = false;
+               if( PyString_Check( _obj ) )
+               {
+                    m_valid = true;
+                    //char * str = PyString_AsString( _obj );
 
-			return std::string();
-		}
-		PyObject * wrap( std::string _value ) override
-		{
-			return PyString_FromStringAndSize( _value.c_str(), _value.size() );
-		}
-	}s_extract_string_type;
+                    /*if( str )
+                    {
+                         return std::string(str);
+                    }*/
+                    PyObject* pyUTF8 = PyUnicode_FromEncodedObject( _obj, "mbcs", NULL );
+                    char* utf8 = PyString_AsString( PyUnicode_AsUTF8String( pyUTF8 ) );
+                    Py_DECREF( pyUTF8 );
+
+                    if( utf8 )
+                    {
+                         return std::string( utf8 );
+                    }
+               }
+
+               return std::string();
+          }
+          PyObject * wrap( std::string _value ) override
+          {
+               return PyString_FromStringAndSize( _value.c_str(), _value.size() );
+          }
+     }s_extract_string_type;
 
 	static struct extract_wstring_type
 		: public type_cast_result<std::wstring>
