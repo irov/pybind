@@ -276,7 +276,7 @@ namespace pybind
 				char * ch_buff;
 				Py_ssize_t ch_size;
 
-				if( PyString_AsStringAndSize( _obj, &ch_buff, &ch_size ) == 1 )
+				if( PyString_AsStringAndSize( _obj, &ch_buff, &ch_size ) == 0 )
 				{
 					return std::string( ch_buff, ch_size );
 				}
@@ -289,7 +289,7 @@ namespace pybind
 				char * ch_buff;
 				Py_ssize_t ch_size;
 
-				if( PyString_AsStringAndSize( strObj, &ch_buff, &ch_size ) == 1 )
+				if( PyString_AsStringAndSize( strObj, &ch_buff, &ch_size ) == 0 )
 				{
 					return std::string( ch_buff, ch_size );
 				}
