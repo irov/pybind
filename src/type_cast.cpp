@@ -327,7 +327,7 @@ namespace pybind
 
 				PyObject * unicode = PyUnicode_Decode( str, size, "mbcs", 0 );
 
-				wchar_t * unicode_str = PyUnicode_AsUnicode( unicode );
+				Py_UNICODE * unicode_str = PyUnicode_AsUnicode( unicode );
 
 				if( unicode_str == 0 )
 				{
