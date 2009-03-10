@@ -424,6 +424,12 @@ namespace pybind
 		return PyTuple_GetItem( _tuple, _it );
 	}
 
+	const char * object_to_string( PyObject * _obj )
+	{
+		PyObject * repr = PyObject_Repr( _obj );
+		return PyString_AS_STRING( repr );
+	}
+
 	void error_message( const char * _message, ... )
 	{
 		va_list valist;

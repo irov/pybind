@@ -20,7 +20,13 @@ namespace pybind
 
 				if( etype == 0 )
 				{
-					throw std::exception();
+					const char * type_name = tinfo.name();
+
+					pybind::error_message( "extract invalid find cast for %s"
+						, type_name
+						);
+
+					return T();
 				}
 
 				type_cast_result<T> * etype_impl = static_cast<type_cast_result<T> *>(etype);
@@ -30,7 +36,16 @@ namespace pybind
 				if( etype_impl->is_valid() == false )
 				{
 					pybind::check_error();
-					throw std::exception();
+
+					const char * repr = pybind::object_to_string( _obj );
+					const char * type_name = tinfo.name();
+
+					pybind::error_message( "extract from %s to %s"
+						, repr
+						, type_name
+						);
+
+					return T();
 				}
 
 				return t;

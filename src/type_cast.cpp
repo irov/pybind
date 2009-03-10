@@ -240,19 +240,18 @@ namespace pybind
 			if( PyString_Check( _obj ) )
 			{
 				m_valid = true;
-				/*char * str = PyString_AsString( _obj );
+				char * str = PyString_AsString( _obj );
 				if( str )
 				{
-				return const_cast<const char *>(str);
-				}*/          
-				PyObject* pyUTF8 = PyUnicode_FromEncodedObject( _obj, "mbcs", NULL );
-				char* utf8 = PyString_AsString( PyUnicode_AsUTF8String( pyUTF8 ) );
-				Py_DECREF( pyUTF8 );
-
-				if( utf8 )
-				{
-					return const_cast<const char*>( utf8 );
-				}
+					return const_cast<const char *>(str);
+				}          
+				//PyObject* pyUTF8 = PyUnicode_FromEncodedObject( _obj, "mbcs", NULL );
+				//char* utf8 = PyString_AsString( PyUnicode_AsUTF8String( pyUTF8 ) );
+				//Py_DECREF( pyUTF8 );
+				//if( utf8 )
+				//{
+				//	return const_cast<const char*>( utf8 );
+				//}
 			}
 
 			return 0;
