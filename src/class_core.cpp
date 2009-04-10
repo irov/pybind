@@ -30,7 +30,7 @@ namespace pybind
 
 			class_type_scope * type_scope = class_scope::get_class_scope( _info );
 
-			if( PyType_IsSubtype( (PyTypeObject *)py_type, &type_scope->m_type ) )
+			if( PyType_IsSubtype( (PyTypeObject *)py_type, type_scope->m_type ) )
 			{
 				return get_class( _obj );
 			}
@@ -39,8 +39,22 @@ namespace pybind
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////
-	typedef std::list<class_type_scope> TListClassType;
+	typedef std::list<class_type_scope *> TListClassType;
 	static TListClassType s_listClassType;
+	//////////////////////////////////////////////////////////////////////////
+	void class_core::finialize()
+	{
+		for( TListClassType::iterator
+			it = s_listClassType.begin(),
+			it_end = s_listClassType.end();
+		it != it_end;
+		++it )
+		{
+			delete *it;
+		}
+
+		s_listClassType.clear();
+	}
 	//////////////////////////////////////////////////////////////////////////
 	class_type_scope * class_core::create_new_type_scope( 
 		const type_info & _info,
@@ -49,14 +63,14 @@ namespace pybind
 		pybind_newfunc _pynew,
 		pybind_destructor _pydestructor)
 	{
-		s_listClassType.push_back( class_type_scope() );
-
-		class_type_scope * t_scope = &s_listClassType.back();
+		class_type_scope * t_scope = new class_type_scope();
 
 		const char * type_name = _info.name();
 		t_scope->setup( _name, type_name, _module, _pynew, _pydestructor );
 
 		class_scope::reg_class_scope( _info, t_scope );
+
+		s_listClassType.push_back( t_scope );
 
 		return t_scope;
 	}

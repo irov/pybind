@@ -17,6 +17,9 @@ namespace pybind
 			PyObject * _module );
 	}
 
+	void initialize_functor();
+	void finialize_functor();
+
 	template<class C, class F>
 	void functor( const char * _name, C * _self, F _method, PyObject * _module = 0 )
 	{

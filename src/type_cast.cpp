@@ -18,7 +18,8 @@ namespace pybind
 		void register_type_info_extract( const type_info & _info, type_cast * _type )
 		{
 			const char * name = _info.name();
-			mapExtractTypesInstance()[ name ] = _type;
+			TMapExtractTypes & types = mapExtractTypesInstance();
+			types[ name ] = _type;
 		}
 
 		type_cast * find_type_info_extract( const type_info & _info )

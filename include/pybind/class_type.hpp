@@ -57,8 +57,9 @@ namespace pybind
 		void update_method_self( py_class_type * _self, void * _impl );
 
 	public:		
-		typedef std::list<method_type_scope> TMethodFunction;
+		typedef std::list<method_type_scope *> TMethodFunction;
 		TMethodFunction m_methods;
+		TMethodFunction m_methodsBase;
 	
 		typedef std::pair<class_type_scope *, pybind_metacast> TPairMetacast;
 		typedef std::map<std::string, TPairMetacast> TMapBases;
@@ -67,8 +68,10 @@ namespace pybind
 		constructor * m_constructor;
 
 		const char * m_type_name;
-		PyTypeObject m_type;
-		PyTypeObject m_type_holder;
+
+		PyTypeObject * m_type;
+		PyTypeObject * m_type_holder;
+
 		PyObject * m_module;
 	};
 

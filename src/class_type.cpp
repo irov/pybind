@@ -10,60 +10,19 @@
 
 namespace pybind
 {
-	static PyTypeObject py_empty_type = {
-		PyObject_HEAD_INIT(NULL)
-		0,                         /*ob_size*/
-		0,				           /*tp_name*/
-		0,				           /*tp_basicsize*/
-		0,                         /*tp_itemsize*/
-		0, /*tp_dealloc*/
-		0,                         /*tp_print*/
-		0,                         /*tp_getattr*/
-		0,                         /*tp_setattr*/
-		0,                         /*tp_compare*/
-		0,                         /*tp_repr*/
-		0,                         /*tp_as_number*/
-		0,                         /*tp_as_sequence*/
-		0,                         /*tp_as_mapping*/
-		0,                         /*tp_hash */
-		0,                         /*tp_call*/
-		0,                         /*tp_str*/
-		0,                         /*tp_getattro*/
-		0,                         /*tp_setattro*/
-		0,                         /*tp_as_buffer*/
-		0, /*tp_flags*/
-		0,           /* tp_doc */
-		0,		               /* tp_traverse */
-		0,		               /* tp_clear */
-		0,		               /* tp_richcompare */
-		0,		               /* tp_weaklistoffset */
-		0,		               /* tp_iter */
-		0,		               /* tp_iternext */
-		0,             /* tp_methods */
-		0,             /* tp_members */
-		0,           /* tp_getset */
-		0,                         /* tp_base */
-		0,                         /* tp_dict */
-		0,                         /* tp_descr_get */
-		0,                         /* tp_descr_set */
-		0,                         /* tp_dictoffset */
-		0,      /* tp_init */
-		0,                         /* tp_alloc */
-		0,                 /* tp_new */
-	};
-
 	static void py_dealloc( PyObject * _obj )
 	{
 		py_class_type * self = (py_class_type *)_obj;
 
-//		Py_DECREF( self->dict );
+		Py_DECREF( self->dict );
 
 		_obj->ob_type->tp_free( _obj );		
 	}
 
 	//////////////////////////////////////////////////////////////////////////
 	class_type_scope::class_type_scope()
-		: m_type( py_empty_type )
+		: m_type( 0 )
+		, m_type_holder( 0 )
 		, m_constructor( 0 )
 	{
 	}
@@ -71,6 +30,21 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	class_type_scope::~class_type_scope()
 	{
+		for( TMethodFunction::iterator
+			it = m_methods.begin(),
+			it_end = m_methods.end();
+		it != it_end;
+		++it )
+		{
+			delete *it;
+		}
+
+		m_methods.clear();
+		m_methodsBase.clear();
+
+		//delete m_type;
+		//delete m_type_holder;
+
 		delete m_constructor;
 	}
 
@@ -122,23 +96,9 @@ namespace pybind
 		py_class_type* inst = (py_class_type*)obj;
 
 		int res = PyDict_SetItem( inst->dict, name, value );
-		//Py_DECREF( value );
 
-		if( res == 0 )
+		if( res )
 		{
-			//Py_DECREF( name );
-			//Py_DECREF( value );
-
-			//this hack is made for setting hook
-			PyObject * setattr = PyDict_GetItemString( inst->dict, "__setattr__" );	
-			if ( setattr )
-			{
-				call( setattr, "(OO)", name, value );
-				Py_DECREF( setattr );
-			}			
-		}
-		else
-		{			
 			check_error();
 		}
 
@@ -160,24 +120,6 @@ namespace pybind
 		}
 
 		attr = PyObject_GenericGetAttr( obj, name );
-
-		if( attr == 0 )
-		{
-			PyObject * getattr = PyDict_GetItemString( inst->dict, "__getattr__" );
-			if ( getattr )
-			{
-				PyObject * getattr_item = ask_ne( getattr, "(O)", name );
-
-				if( getattr_item != Py_None )
-				{
-					attr = getattr_item;
-				}
-				else
-				{
-					Py_DECREF( getattr_item );
-				}
-			}
-		}
 
 		return attr;
 	}
@@ -217,36 +159,70 @@ namespace pybind
 			m_module = _module;
 		}
 
-		m_type.tp_name = _name;
-		m_type.tp_basicsize = sizeof( py_class_type );
-		m_type.tp_doc = "Embedding class from cpp";
-		m_type.tp_new = _pynew;
-		m_type.tp_init = &_pyinitproc;
-		m_type.tp_dealloc = _pydestructor;
-		m_type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
-		m_type.tp_getset = instance_getsets;
-		m_type.tp_setattro = &class_setattro;
-		m_type.tp_getattro = &class_getattro;
-		m_type.tp_call = &class_call;
-		
-
-		m_type_holder = m_type;
-		m_type_holder.tp_new = 0;
-		m_type_holder.tp_dealloc = &py_dealloc;
-
-		if( PyType_Ready(&m_type) < 0 )
 		{
-			printf("invalid embedding class '%s' \n", m_type.tp_name );					
+			//PyObject * type_args = Py_BuildValue( "sOO", _name, PyTuple_Pack( 1, &PyBaseObject_Type ), PyDict_New() );
+			//m_type = (PyTypeObject*)PyType_Type.tp_new( &PyType_Type, type_args, 0 );
+			//Py_DECREF( type_args );
+
+			m_type = new PyTypeObject();
+
+			//m_type = (PyTypeObject*)PyType_GenericAlloc( &PyType_Type, 0 );
+
+			m_type->tp_name = _name;
+			m_type->tp_basicsize = sizeof( py_class_type );
+			//m_type->tp_doc = class_type_doc;
+			m_type->tp_new = _pynew;
+			m_type->tp_init = &_pyinitproc;
+			m_type->tp_dealloc = _pydestructor;
+			m_type->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE /*| Py_TPFLAGS_HEAPTYPE*/;
+			m_type->tp_getset = instance_getsets;
+			m_type->tp_setattro = &class_setattro;
+			m_type->tp_getattro = &class_getattro;
+			m_type->tp_call = &class_call;
+			m_type->tp_dictoffset = offsetof( py_class_type, dict );
+
+			if( PyType_Ready( m_type ) < 0 )
+			{
+				printf("invalid embedding class '%s' \n", m_type->tp_name );					
+			}
+
+			Py_INCREF( m_type );
 		}
 
-		if( PyType_Ready(&m_type_holder) < 0 )
 		{
-			printf("invalid embedding class holder '%s' \n", m_type_holder.tp_name );					
+			//PyObject * type_args = Py_BuildValue( "sOO", _name, PyTuple_Pack( 1, &PyBaseObject_Type ), PyDict_New() );
+			//m_type_holder = (PyTypeObject*)PyType_Type.tp_new( &PyType_Type, type_args, 0 );
+			//Py_DECREF( type_args );
+
+			//m_type_holder = (PyTypeObject*)PyType_GenericAlloc( &PyType_Type, 0 );
+
+			m_type_holder = new PyTypeObject();
+
+			m_type_holder->tp_name = _name;
+			m_type_holder->tp_basicsize = sizeof( py_class_type );
+			//m_type_holder->tp_doc = class_type_holder_doc;
+			m_type_holder->tp_new = 0;
+			m_type_holder->tp_init = &_pyinitproc;
+			m_type_holder->tp_dealloc = &py_dealloc;
+			m_type_holder->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE /*| Py_TPFLAGS_HEAPTYPE*/;
+			m_type_holder->tp_getset = instance_getsets;
+			m_type_holder->tp_setattro = &class_setattro;
+			m_type_holder->tp_getattro = &class_getattro;
+			m_type_holder->tp_call = &class_call;
+			m_type_holder->tp_dictoffset = offsetof( py_class_type, dict );
+
+			if( PyType_Ready( m_type_holder ) < 0 )
+			{
+				printf("invalid embedding class holder '%s' \n", m_type_holder->tp_name );					
+			}
+
+			Py_INCREF( m_type_holder );
 		}
 
-		class_scope::reg_class_type( &m_type );
+		class_scope::reg_class_type( m_type );
 
-		PyModule_AddObject( m_module, m_type.tp_name, (PyObject*)&m_type );
+		PyModule_AddObject( m_module, m_type->tp_name, (PyObject*)m_type );
+		//Py_DECREF( m_type );
 	}
 
 	const char * class_type_scope::getName() const
@@ -273,22 +249,28 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::add_method( const char * _name, method_proxy_interface * _ifunc, int _arity )
 	{
-		m_methods.push_back( method_type_scope() );
-		method_type_scope & method = m_methods.back();
+		method_type_scope * method = new method_type_scope();
 
 		pybind_cfunction cf = (_arity)? 
 			(pybind_cfunction)&method_call_callback1:
 			(pybind_cfunction)&method_call_callback0;
 
-		method.setup( &m_type, _name, _ifunc, cf, _arity );
+		method->setup( m_type, _name, _ifunc, cf, _arity );
+
+		m_methods.push_back( method );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::add_method_from_scope( class_type_scope * _basescope )
 	{
-		m_methods.insert( 
-			m_methods.end(), 
+		m_methodsBase.insert( 
+			m_methodsBase.end(), 
 			_basescope->m_methods.begin(),
 			_basescope->m_methods.end() );
+
+		m_methodsBase.insert( 
+			m_methodsBase.end(), 
+			_basescope->m_methodsBase.begin(),
+			_basescope->m_methodsBase.end() );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void * class_type_scope::construct( PyObject * _args )
@@ -343,9 +325,32 @@ namespace pybind
 		it != it_end;
 		++it)
 		{
-			PyObject * py_method = it->instance( _self );
+			method_type_scope * method_type = *it;
 
-			if( PyObject_SetAttrString( (PyObject*)_self, it->m_name, py_method ) == -1 )
+			PyObject * py_method = method_type->instance( _self );
+
+			if( PyDict_SetItemString( _self->dict, method_type->m_name, py_method ) == -1 )
+			{
+				//Py_DECREF( py_method );
+				Py_DECREF( _self );
+
+				check_error();
+			}
+
+			Py_DECREF( py_method );
+		}
+
+		for( TMethodFunction::iterator
+			it = m_methodsBase.begin(),
+			it_end = m_methodsBase.end();
+		it != it_end;
+		++it)
+		{
+			method_type_scope * method_type = *it;
+
+			PyObject * py_method = method_type->instance( _self );
+
+			if( PyDict_SetItemString( _self->dict, method_type->m_name, py_method ) == -1 )
 			{
 				//Py_DECREF( py_method );
 				Py_DECREF( _self );
@@ -365,17 +370,34 @@ namespace pybind
 		it != it_end;
 		++it)
 		{
-			PyObject * py_object = PyObject_GetAttrString( (PyObject*)_self, it->m_name );
+			method_type_scope * method_type = *it;
+
+			PyObject * py_object = PyDict_GetItemString( _self->dict, method_type->m_name );
 			PyCFunctionObject * py_function = (PyCFunctionObject *)py_object;
 			py_method_type * py_method = (py_method_type *)py_function->m_self;
 			py_method->impl = _impl;
+			Py_DECREF( py_object );
+		}
+
+		for( TMethodFunction::iterator
+			it = m_methodsBase.begin(),
+			it_end = m_methodsBase.end();
+		it != it_end;
+		++it)
+		{
+			method_type_scope * method_type = *it;
+
+			PyObject * py_object = PyDict_GetItemString( _self->dict, method_type->m_name );
+			PyCFunctionObject * py_function = (PyCFunctionObject *)py_object;
+			py_method_type * py_method = (py_method_type *)py_function->m_self;
+			py_method->impl = _impl;
+			Py_DECREF( py_object );
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * class_type_scope::create_holder( void * _impl )
 	{
-		py_class_type *self = 
-			(py_class_type *)m_type_holder.tp_alloc( &m_type_holder, 0 );
+		py_class_type *self = (py_class_type *)PyType_GenericAlloc( m_type_holder, 0 );
 
 		//Py_DECREF( &m_type_holder );
 
@@ -392,7 +414,7 @@ namespace pybind
 	PyObject * class_type_scope::create_impl( void * _impl )
 	{
 		py_class_type *self = 
-			(py_class_type *)m_type.tp_alloc( &m_type, 0 );
+			(py_class_type *)PyType_GenericAlloc( m_type, 0 );
 
 		//Py_DECREF( &m_type_holder );
 

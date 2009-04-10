@@ -35,6 +35,8 @@ namespace pybind
 			pybind_destructor _pydestructor
 			);
 
+		static void finialize();
+
 		static PyObject * create_holder( const type_info & _info, void * _impl );
 		static PyObject * create_impl( const type_info & _info, void * _impl );
 		static void wrap_holder( PyObject * _obj, void * _impl );

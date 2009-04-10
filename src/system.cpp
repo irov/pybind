@@ -1,4 +1,8 @@
 #	include "pybind/system.hpp"
+#	include "pybind/class_core.hpp"
+#	include "pybind/method_type.hpp"
+#	include "pybind/def.hpp"
+#	include "pybind/functor.hpp"
 
 #	include "config/python.hpp"
 
@@ -9,19 +13,29 @@ namespace pybind
 	void initialize()
 	{
 		Py_Initialize();
+
+		initialize_method();
+		initialize_def();
+		initialize_functor();
 	}
 
 	void initialize_ts()
 	{
-		Py_Initialize();
+		initialize();	
+
 		PyEval_InitThreads();
 		PyEval_SaveThread();
 	}
 
 	void finalize()
 	{
-		PyImport_Cleanup();
 		Py_Finalize();
+
+		class_core::finialize();		
+		
+		finialize_method();
+		finialize_def();
+		finialize_functor();
 	}
 
 	bool is_initialized()
@@ -323,12 +337,12 @@ namespace pybind
 
 	void incref( PyObject * _obj )
 	{
-		Py_INCREF( _obj );
+		Py_XINCREF( _obj );
 	}
 
 	void decref( PyObject * _obj )
 	{
-		Py_DECREF( _obj );
+		Py_XDECREF( _obj );
 	}
 	
 	size_t refcount( PyObject * _obj )
@@ -363,7 +377,16 @@ namespace pybind
 
 	bool set_attr( PyObject * _obj, const char * _attr, PyObject * _value )
 	{
-		return PyObject_SetAttrString( _obj, _attr, _value ) != -1;
+		int res = PyObject_SetAttrString( _obj, _attr, _value );
+		
+		if( res == -1 )
+		{
+			check_error();
+		}
+
+		Py_XDECREF( _value );
+
+		return res != -1;
 	}
 
 	bool check_type( PyObject * _obj )

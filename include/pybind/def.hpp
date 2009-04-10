@@ -17,6 +17,9 @@ namespace pybind
 			PyObject * _module );
 	}
 
+	void initialize_def();
+	void finialize_def();
+
 	template<class F>
 	void def( const char * _name, F _cfunc, PyObject * _module = 0 )
 	{

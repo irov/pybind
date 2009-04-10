@@ -17,13 +17,17 @@ namespace pybind
 
 	struct py_class_type;
 
+	void initialize_method();
+	void finialize_method();
+
 	class method_type_scope
 	{
 	public:
 		method_type_scope();
+		~method_type_scope();
 
-		method_type_scope( const method_type_scope & _scope );
 
+	public:
 		void setup( PyTypeObject * _class, 
 			const char * _name, 
 			method_proxy_interface * _ifunc, 
@@ -39,7 +43,6 @@ namespace pybind
 	protected:
 		method_proxy_interface * m_interface;
 		PyMethodDef m_method;
-		PyTypeObject m_type;
 	};
 }
 
