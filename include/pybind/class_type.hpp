@@ -56,6 +56,8 @@ namespace pybind
 		void setup_method( py_class_type * _self );
 		void update_method_self( py_class_type * _self, void * _impl );
 
+		void unwrap( py_class_type * _self );
+
 	public:		
 		typedef std::list<method_type_scope *> TMethodFunction;
 		TMethodFunction m_methods;

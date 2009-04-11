@@ -4,8 +4,6 @@
 #	include "pybind/types.hpp"
 #	include <typeinfo>
 
-using std::type_info;
-
 namespace pybind
 {
 	class type_cast;
@@ -22,7 +20,7 @@ namespace pybind
 		{
 			static type_cast * find()
 			{  
-				const type_info & tinfo =  typeid(T);
+				const std::type_info & tinfo =  typeid(T);
 
 				type_cast * etype = find_type_info_extract( tinfo );
 
@@ -94,7 +92,7 @@ namespace pybind
 	template<class T>
 	void registration_type_cast( type_cast * _type )
 	{
-		const type_info & tinfo = typeid(T);
+		const std::type_info & tinfo = typeid(T);
 
 		detail::register_type_info_extract( tinfo, _type );
 	}

@@ -43,13 +43,13 @@ namespace pybind
 		return 0;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_scope::reg_class_scope( const type_info & _info, class_type_scope * _scope )
+	void class_scope::reg_class_scope( const std::type_info & _info, class_type_scope * _scope )
 	{
 		const char * info_name = _info.name();
 		s_mapTypeScope[ info_name ] = _scope;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	class_type_scope * class_scope::get_class_scope( const type_info & _info )
+	class_type_scope * class_scope::get_class_scope( const std::type_info & _info )
 	{
 		const char * info_name = _info.name();
 		TMapTypeScope::iterator it_find = s_mapTypeScope.find( info_name );
@@ -62,7 +62,7 @@ namespace pybind
 		return it_find->second;		
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool class_scope::has_class_scope( const type_info & _info )
+	bool class_scope::has_class_scope( const std::type_info & _info )
 	{
 		TMapTypeScope::iterator it_find = s_mapTypeScope.find( _info.name() );
 

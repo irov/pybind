@@ -15,11 +15,11 @@ namespace pybind
 	{
 		PYBIND_API void * get_class( PyObject * _obj );
 		PYBIND_API class_type_scope * get_class_scope( PyObject * _obj );
-		PYBIND_API void * check_registred_class( PyObject * _obj, const type_info & _info );
+		PYBIND_API void * check_registred_class( PyObject * _obj, const std::type_info & _info );
 	}
 
 	template<class T>
-	const type_info & class_info()
+	const std::type_info & class_info()
 	{
 		return typeid( T );
 	}
@@ -28,7 +28,7 @@ namespace pybind
 	{
 	public:
 		static class_type_scope * create_new_type_scope( 
-			const type_info & _info,
+			const std::type_info & _info,
 			const char * _name, 
 			PyObject * _module,
 			pybind_newfunc _pynew,
@@ -37,8 +37,8 @@ namespace pybind
 
 		static void finialize();
 
-		static PyObject * create_holder( const type_info & _info, void * _impl );
-		static PyObject * create_impl( const type_info & _info, void * _impl );
+		static PyObject * create_holder( const std::type_info & _info, void * _impl );
+		static PyObject * create_impl( const std::type_info & _info, void * _impl );
 		static void wrap_holder( PyObject * _obj, void * _impl );
 
 		static void def_init( class_type_scope * _scope, constructor * _ctr );
@@ -50,7 +50,7 @@ namespace pybind
 			const char * _name, 
 			method_proxy_interface * _ifunc, 
 			int _arity, 
-			const type_info & _info );
+			const std::type_info & _info );
 
 		static void add_method_from_scope( class_type_scope * _scope, class_type_scope * _basescope );
 
@@ -71,7 +71,7 @@ namespace pybind
 			class_type_scope * _scope = class_scope::get_class_scope( class_info<C>() );
 			class_type_scope * _basescope = class_scope::get_class_scope( class_info<B>() );
 
-			const type_info & tinfo = class_info<B*>();
+			const std::type_info & tinfo = class_info<B*>();
 
 			const char * name = tinfo.name();
 
@@ -80,7 +80,7 @@ namespace pybind
 
 		static void * meta_cast( void * _impl, class_type_scope * _scope, const char * _name );
 
-		static PyObject * new_impl( PyTypeObject * _type, PyObject * _args, void * _impl, const type_info & _tinfo );
+		static PyObject * new_impl( PyTypeObject * _type, PyObject * _args, void * _impl, const std::type_info & _tinfo );
 		static void * dealloc_impl( PyObject * _obj );
 	};
 

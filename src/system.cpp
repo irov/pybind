@@ -4,6 +4,8 @@
 #	include "pybind/def.hpp"
 #	include "pybind/functor.hpp"
 
+#	include "pybind/class_type.hpp"
+
 #	include "config/python.hpp"
 
 #	include <stdexcept>
@@ -399,12 +401,12 @@ namespace pybind
 		return PyList_Check( _obj ) == 1;
 	}
 
-	size_t list_size( PyObject * _obj )
+	std::size_t list_size( PyObject * _obj )
 	{
-		return (size_t) PyList_Size( _obj );
+		return (std::size_t) PyList_Size( _obj );
 	}
 
-	PyObject * list_getitem( PyObject * _obj, size_t _it )
+	PyObject * list_getitem( PyObject * _obj, std::size_t _it )
 	{
 		return PyList_GetItem( _obj, _it );
 	}
@@ -424,11 +426,11 @@ namespace pybind
 		return PyDict_SetItemString( _dict, _name, _value ) == 0;
 	}
 
-	bool dict_next( PyObject * _dict, size_t *_pos, PyObject ** _key, PyObject ** _value )
+	bool dict_next( PyObject * _dict, std::size_t *_pos, PyObject ** _key, PyObject ** _value )
 	{
 		Py_ssize_t ps = (Py_ssize_t)(*_pos);
 		int res = PyDict_Next( _dict, &ps, _key, _value );
-		*_pos = (size_t)ps;
+		*_pos = (std::size_t)ps;
 		return res == 1;
 	}
 
@@ -442,7 +444,7 @@ namespace pybind
 		return PyTuple_Size( _tuple );
 	}
 
-	PyObject * tuple_getitem( PyObject * _tuple, size_t _it )
+	PyObject * tuple_getitem( PyObject * _tuple, std::size_t _it )
 	{
 		return PyTuple_GetItem( _tuple, _it );
 	}
@@ -465,17 +467,17 @@ namespace pybind
 		va_end( valist ); 
 	}
 
-	bool tuple_setitem( PyObject * _tuple, size_t _it, PyObject * _value )
+	bool tuple_setitem( PyObject * _tuple, std::size_t _it, PyObject * _value )
 	{
 		return PyTuple_SetItem( _tuple, _it, _value ) == 0;
 	}
 
-	bool tuple_resize( PyObject ** _ptuple, size_t _it )
+	bool tuple_resize( PyObject ** _ptuple, std::size_t _it )
 	{
 		return _PyTuple_Resize( _ptuple, _it ) == 0;
 	}
 
-	PyObject * tuple_new( size_t _it )
+	PyObject * tuple_new( std::size_t _it )
 	{
 		return PyTuple_New(_it);
 	}
@@ -515,6 +517,13 @@ namespace pybind
 		{
 			PyErr_Print();
 		}
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void unwrap( PyObject * _value )
+	{
+		py_class_type * self = (py_class_type *)_value;
+		self->scope->unwrap( self );
 	}
 
 	namespace convert

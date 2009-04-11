@@ -2,8 +2,6 @@
 
 #	include <cstddef>
 
-using std::size_t;
-
 namespace pybind
 {
 	template<class F>
@@ -20,7 +18,7 @@ namespace pybind
 		{
 			typedef R ret_type;
 
-			static const size_t arity = 0;
+			static const std::size_t arity = 0;
 		};
 
 		template<class R, class P1>
@@ -29,7 +27,7 @@ namespace pybind
 			typedef R ret_type;
 			typedef P1 param1;
 
-			static const size_t arity = 1;
+			static const std::size_t arity = 1;
 		};
 
 		template<class R, class P1, class P2>
@@ -39,7 +37,7 @@ namespace pybind
 			typedef P1 param1;
 			typedef P2 param2;
 
-			static const size_t arity = 2;
+			static const std::size_t arity = 2;
 		};
 
 		template<class R, class P1, class P2, class P3>
@@ -50,7 +48,7 @@ namespace pybind
 			typedef P2 param2;
 			typedef P3 param3;
 
-			static const size_t arity = 3;
+			static const std::size_t arity = 3;
 		};
 
 		template<class R, class P1, class P2, class P3, class P4>
@@ -62,7 +60,7 @@ namespace pybind
 			typedef P3 param3;
 			typedef P4 param4;
 
-			static const size_t arity = 4;
+			static const std::size_t arity = 4;
 		};
 
 		template<class R, class P1, class P2, class P3, class P4, class P5>
@@ -75,7 +73,7 @@ namespace pybind
 			typedef P4 param4;
 			typedef P5 param5;
 
-			static const size_t arity = 5;
+			static const std::size_t arity = 5;
 		};
 
 

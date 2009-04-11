@@ -15,14 +15,14 @@ namespace pybind
 			return s_mapExtractTypes;
 		}
 
-		void register_type_info_extract( const type_info & _info, type_cast * _type )
+		void register_type_info_extract( const std::type_info & _info, type_cast * _type )
 		{
 			const char * name = _info.name();
 			TMapExtractTypes & types = mapExtractTypesInstance();
 			types[ name ] = _type;
 		}
 
-		type_cast * find_type_info_extract( const type_info & _info )
+		type_cast * find_type_info_extract( const std::type_info & _info )
 		{
 			const char * name = _info.name();
 			TMapExtractTypes & types = mapExtractTypesInstance();
@@ -139,7 +139,7 @@ namespace pybind
 
 
 	static struct extract_size_t_type
-		: public type_cast_result<size_t>
+		: public type_cast_result<std::size_t>
 	{
 		size_t apply( PyObject * _obj ) override
 		{
@@ -147,23 +147,23 @@ namespace pybind
 			if( PyInt_Check( _obj ) )
 			{
 				m_valid = true;
-				return (size_t)PyInt_AsUnsignedLongMask( _obj );
+				return (std::size_t)PyInt_AsUnsignedLongMask( _obj );
 			}
 			else if( PyLong_Check( _obj ) )
 			{				
 				m_valid = true;
-				return (size_t)PyLong_AsUnsignedLong( _obj );
+				return (std::size_t)PyLong_AsUnsignedLong( _obj );
 			}
 			else if( PyFloat_Check( _obj ) )
 			{				
 				m_valid = true;
-				return (size_t)PyFloat_AsDouble( _obj );
+				return (std::size_t)PyFloat_AsDouble( _obj );
 			}
 
 			return 0;
 		}
 
-		PyObject * wrap( size_t _value ) override
+		PyObject * wrap( std::size_t _value ) override
 		{
 			return PyInt_FromLong( (long)_value );
 		}

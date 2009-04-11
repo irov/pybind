@@ -90,10 +90,35 @@ namespace pybind
 		{0, 0, 0, 0, 0}
 	};
 
+	static void traceback_error( const char * _msg )
+	{
+		PyErr_SetString( PyExc_RuntimeError, _msg );
+		PyObject *error = PyErr_Occurred();
+		if( error )
+		{
+			PyErr_Print();
+
+			PyObject *ptype, *pvalue, *ptraceback;
+			PyErr_Fetch(&ptype, &pvalue, &ptraceback);
+
+			PyObject * sysModule = PyImport_AddModule( "sys" );
+			PyObject * handle = PyObject_GetAttrString( sysModule, "stderr" );
+
+			PyTraceBack_Print( ptraceback, handle );			
+		}
+	}
+
 	static int
 		class_setattro(PyObject *obj, PyObject *name, PyObject* value)
 	{
 		py_class_type* inst = (py_class_type*)obj;
+
+		if( inst->impl == 0 )
+		{
+			traceback_error( "class_setattro: unbind object" );
+
+			return -1;
+		}
 
 		int res = PyDict_SetItem( inst->dict, name, value );
 
@@ -109,6 +134,12 @@ namespace pybind
 		class_getattro(PyObject *obj, PyObject *name )
 	{
 		py_class_type* inst = (py_class_type*)obj;
+
+		if( inst->impl == 0 )
+		{
+			traceback_error( "class_getattro: unbind object" );
+			return 0;
+		}
 
 		PyObject * attr = PyDict_GetItem( inst->dict, name );	
 
@@ -128,6 +159,12 @@ namespace pybind
 		class_call(PyObject *obj, PyObject *args, PyObject *keyvalues)
 	{
 		py_class_type* inst = (py_class_type*)obj;
+
+		if( inst->impl == 0 )
+		{
+			traceback_error( "class_call: unbind object" );
+			return 0;
+		}
 
 		PyObject * caller = PyDict_GetItemString( inst->dict, "__call__" );
 		if (!caller) 
@@ -233,12 +270,26 @@ namespace pybind
 	static PyObject * method_call_callback0( PyObject * _method )
 	{
 		py_method_type * md = (py_method_type *)_method;
+
+		if( md->impl == 0 )
+		{
+			traceback_error( "method_call_callback0: unbind object" );
+			return 0;
+		}
+
 		return md->ifunc->call( md->impl, md->scope );
 	}
 
 	static PyObject * method_call_callback1( PyObject * _method, PyObject * _args )
 	{
 		py_method_type * md = (py_method_type *)_method;
+
+		if( md->impl == 0 )
+		{
+			traceback_error( "method_call_callback1: unbind object" );
+			return 0;
+		}
+
 		return md->ifunc->call( md->impl, md->scope, _args );
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -315,6 +366,13 @@ namespace pybind
 		return it_find->second.second( _impl );
 	}
 	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::unwrap( py_class_type * _self )
+	{
+		_self->impl = 0;
+
+		this->update_method_self( _self, 0 );
+	}
+	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::setup_method( py_class_type * _self )
 	{
 		_self->dict = PyDict_New();
@@ -376,7 +434,6 @@ namespace pybind
 			PyCFunctionObject * py_function = (PyCFunctionObject *)py_object;
 			py_method_type * py_method = (py_method_type *)py_function->m_self;
 			py_method->impl = _impl;
-			Py_DECREF( py_object );
 		}
 
 		for( TMethodFunction::iterator
@@ -391,7 +448,6 @@ namespace pybind
 			PyCFunctionObject * py_function = (PyCFunctionObject *)py_object;
 			py_method_type * py_method = (py_method_type *)py_function->m_self;
 			py_method->impl = _impl;
-			Py_DECREF( py_object );
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////

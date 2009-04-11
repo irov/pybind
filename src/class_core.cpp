@@ -24,7 +24,7 @@ namespace pybind
 			return self->scope;
 		}
 		//////////////////////////////////////////////////////////////////////////
-		void * check_registred_class( PyObject * _obj, const type_info & _info )
+		void * check_registred_class( PyObject * _obj, const std::type_info & _info )
 		{
 			PyObject * py_type = PyObject_Type( _obj );
 
@@ -57,7 +57,7 @@ namespace pybind
 	}
 	//////////////////////////////////////////////////////////////////////////
 	class_type_scope * class_core::create_new_type_scope( 
-		const type_info & _info,
+		const std::type_info & _info,
 		const char * _name, 
 		PyObject * _module,
 		pybind_newfunc _pynew,
@@ -75,14 +75,14 @@ namespace pybind
 		return t_scope;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * class_core::create_holder( const type_info & _info, void * _impl )
+	PyObject * class_core::create_holder( const std::type_info & _info, void * _impl )
 	{
 		class_type_scope * t_scope = class_scope::get_class_scope( _info );
 
 		return t_scope->create_holder( _impl );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * class_core::create_impl( const type_info & _info, void * _impl )
+	PyObject * class_core::create_impl( const std::type_info & _info, void * _impl )
 	{
 		class_type_scope * t_scope = class_scope::get_class_scope( _info );
 
@@ -111,7 +111,7 @@ namespace pybind
 		_scope->set_module( _module );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_core::def_method( const char * _name, method_proxy_interface * _ifunc, int _arity, const type_info & _info )
+	void class_core::def_method( const char * _name, method_proxy_interface * _ifunc, int _arity, const std::type_info & _info )
 	{
 		class_type_scope * scope = class_scope::get_class_scope( _info );
 
@@ -136,7 +136,7 @@ namespace pybind
 		return _scope->metacast( _name, _impl );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * class_core::new_impl( PyTypeObject * _type, PyObject * _args, void * _impl, const type_info & _tinfo )
+	PyObject * class_core::new_impl( PyTypeObject * _type, PyObject * _args, void * _impl, const std::type_info & _tinfo )
 	{
 		py_class_type *self = 
 			(py_class_type *)_type->tp_alloc( _type, 0 );

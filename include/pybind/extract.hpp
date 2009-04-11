@@ -14,7 +14,7 @@ namespace pybind
 		{
 			static T extract( PyObject * _obj )
 			{
-				const type_info & tinfo = typeid(T);
+				const std::type_info & tinfo = typeid(T);
 
 				type_cast * etype = type_down_cast<T>::find();
 
@@ -57,7 +57,7 @@ namespace pybind
 		{
 			static T extract( PyObject * _obj )
 			{
-				const type_info & tinfo = typeid(T);
+				const std::type_info & tinfo = typeid(T);
 
 				type_cast * etype = type_down_cast<T>::find();
 

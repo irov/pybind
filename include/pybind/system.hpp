@@ -2,8 +2,6 @@
 
 #	include <cstddef>
 
-using std::size_t;
-
 #	include "exports.hpp"
 
 #	include <stdarg.h>
@@ -63,7 +61,7 @@ namespace pybind
 
 	PYBIND_API void incref( PyObject * _obj );
 	PYBIND_API void decref( PyObject * _obj );
-	PYBIND_API size_t refcount( PyObject * _obj );
+	PYBIND_API std::size_t refcount( PyObject * _obj );
 
 	PYBIND_API PyObject * ret_none();
 	PYBIND_API PyObject * ret_true();
@@ -76,25 +74,27 @@ namespace pybind
 	PYBIND_API bool check_type( PyObject * _obj );
 	
 	PYBIND_API bool list_check( PyObject * _obj );
-	PYBIND_API size_t list_size( PyObject * _obj );
-	PYBIND_API PyObject * list_getitem( PyObject * _obj, size_t _it );
+	PYBIND_API std::size_t list_size( PyObject * _obj );
+	PYBIND_API PyObject * list_getitem( PyObject * _obj, std::size_t _it );
 	PYBIND_API int list_appenditem( PyObject * _obj, PyObject * _item );
 
 	PYBIND_API bool dict_check( PyObject * _dict );
 	PYBIND_API bool dict_set( PyObject * _dict, const char * _name, PyObject * _value );
-	PYBIND_API bool dict_next( PyObject * _dict, size_t *_pos, PyObject ** _key, PyObject ** _value );
+	PYBIND_API bool dict_next( PyObject * _dict, std::size_t *_pos, PyObject ** _key, PyObject ** _value );
 
-	PYBIND_API PyObject * tuple_new( size_t _it );
+	PYBIND_API PyObject * tuple_new( std::size_t _it );
 	PYBIND_API bool tuple_check( PyObject * _tuple );
-	PYBIND_API size_t tuple_size( PyObject * _tuple );
-	PYBIND_API PyObject * tuple_getitem( PyObject * _tuple, size_t _it );
-	PYBIND_API bool tuple_setitem( PyObject * _tuple, size_t _it, PyObject * _value );
-	PYBIND_API bool tuple_resize( PyObject ** _ptuple, size_t _it );
+	PYBIND_API std::size_t tuple_size( PyObject * _tuple );
+	PYBIND_API PyObject * tuple_getitem( PyObject * _tuple, std::size_t _it );
+	PYBIND_API bool tuple_setitem( PyObject * _tuple, std::size_t _it, PyObject * _value );
+	PYBIND_API bool tuple_resize( PyObject ** _ptuple, std::size_t _it );
 
 
 	PYBIND_API const char * object_to_string( PyObject * _obj );
 	PYBIND_API void error_message( const char * _message, ... );
 	PYBIND_API PyObject * build_value( const char * _format, ... );
+
+	PYBIND_API void unwrap( PyObject * _value );
 
 	PYBIND_API void exception_filter();
 

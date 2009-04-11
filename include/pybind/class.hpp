@@ -174,14 +174,14 @@ namespace pybind
 			void * impl = detail::get_class( _obj );
 			class_type_scope * scope = detail::get_class_scope( _obj );
 
-			const type_info & cur_tinfo = class_info<C>();
+			const std::type_info & cur_tinfo = class_info<C>();
 			class_type_scope * cur_scope = class_scope::get_class_scope( cur_tinfo );
 
 			void * result = 0;
 
 			if( cur_scope != scope )
 			{
-				const type_info & tinfo = class_info<C *>();
+				const std::type_info & tinfo = class_info<C *>();
 				const char * name = tinfo.name();
 				impl = class_core::meta_cast( impl, scope, name );
 			}
