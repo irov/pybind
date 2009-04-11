@@ -68,7 +68,7 @@ namespace pybind
 
 				type_cast_result<const T &> * etype_impl = static_cast<type_cast_result<const T &> *>(etype);
 
-				T t = etype_impl->apply( _obj );
+				const T& t = etype_impl->apply( _obj );
 
 				if( etype_impl->is_valid() == false )
 				{
