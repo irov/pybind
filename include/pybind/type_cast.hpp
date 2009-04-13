@@ -10,8 +10,8 @@ namespace pybind
 
 	namespace detail
 	{
-		PYBIND_API void register_type_info_extract( const type_info & _info, type_cast * _type );
-		PYBIND_API type_cast * find_type_info_extract( const type_info & _info );
+		PYBIND_API void register_type_info_extract( const std::type_info & _info, type_cast * _type );
+		PYBIND_API type_cast * find_type_info_extract( const std::type_info & _info );
 
 		template<class T> struct type_down_cast;
 
