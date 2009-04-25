@@ -161,7 +161,7 @@ namespace pybind
 						, f_info::arity
 						);
 
-					return ret_none();
+					return 0;
 				}
 			}
 

@@ -463,6 +463,8 @@ namespace pybind
 		vsprintf( buffer, _message, valist );
 
 		PyErr_SetString( PyExc_TypeError, buffer );
+//		PyErr_Print();
+//		PyErr_Clear();
 
 		va_end( valist ); 
 	}
