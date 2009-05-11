@@ -156,7 +156,7 @@ namespace pybind
 				size_t arg_size = tuple_size(_arg);
 				if( arg_size != f_info::arity )
 				{
-					error_message("invalid function call args is not equal %d != %d\n"
+					error_message("invalid method call args is not equal %d != %d\n"
 						, arg_size
 						, f_info::arity
 						);
