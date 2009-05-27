@@ -455,6 +455,24 @@ namespace pybind
 		return PyString_AS_STRING( repr );
 	}
 
+	static void traceback_error( const char * _msg )
+	{
+		PyErr_SetString( PyExc_RuntimeError, _msg );
+		PyObject *error = PyErr_Occurred();
+		if( error )
+		{
+			PyErr_Print();
+
+			PyObject *ptype, *pvalue, *ptraceback;
+			PyErr_Fetch(&ptype, &pvalue, &ptraceback);
+
+			PyObject * sysModule = PyImport_AddModule( "sys" );
+			PyObject * handle = PyObject_GetAttrString( sysModule, "stderr" );
+
+			PyTraceBack_Print( ptraceback, handle );			
+		}
+	}
+
 	void error_message( const char * _message, ... )
 	{
 		va_list valist;
@@ -462,9 +480,7 @@ namespace pybind
 		char buffer[1024];
 		vsprintf( buffer, _message, valist );
 
-		PyErr_SetString( PyExc_TypeError, buffer );
-//		PyErr_Print();
-//		PyErr_Clear();
+		traceback_error( buffer );
 
 		va_end( valist ); 
 	}

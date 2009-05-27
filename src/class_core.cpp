@@ -35,6 +35,11 @@ namespace pybind
 				return get_class( _obj );
 			}
 
+			if( PyType_IsSubtype( (PyTypeObject *)py_type, type_scope->m_type_holder ) )
+			{
+				return get_class( _obj );
+			}
+
 			return 0;
 		}
 	}

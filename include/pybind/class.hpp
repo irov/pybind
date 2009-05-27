@@ -202,7 +202,23 @@ namespace pybind
 		C apply( PyObject * _obj ) override
 		{
 			type_cast_result<C>::m_valid = true;
-			void * impl = detail::get_class( _obj );
+
+			const std::type_info & tinfo = class_info<C>();
+
+			void * impl = detail::check_registred_class( _obj, tinfo );
+
+			if( impl == 0 )
+			{
+				const char * repr = pybind::object_to_string( _obj );
+				const char * type_name = tinfo.name();
+				pybind::error_message( "extract from %s to %s"
+					, repr
+					, type_name
+					);
+
+				return C();
+			}
+
 			return *static_cast<C*>(impl);
 		}
 

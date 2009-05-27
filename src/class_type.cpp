@@ -90,23 +90,7 @@ namespace pybind
 		{0, 0, 0, 0, 0}
 	};
 
-	static void traceback_error( const char * _msg )
-	{
-		PyErr_SetString( PyExc_RuntimeError, _msg );
-		PyObject *error = PyErr_Occurred();
-		if( error )
-		{
-			PyErr_Print();
 
-			PyObject *ptype, *pvalue, *ptraceback;
-			PyErr_Fetch(&ptype, &pvalue, &ptraceback);
-
-			PyObject * sysModule = PyImport_AddModule( "sys" );
-			PyObject * handle = PyObject_GetAttrString( sysModule, "stderr" );
-
-			PyTraceBack_Print( ptraceback, handle );			
-		}
-	}
 
 	static int
 		class_setattro(PyObject *obj, PyObject *name, PyObject* value)
@@ -115,7 +99,7 @@ namespace pybind
 
 		if( inst->impl == 0 )
 		{
-			traceback_error( "class_setattro: unbind object" );
+			error_message( "class_setattro: unbind object" );
 
 			return -1;
 		}
@@ -137,7 +121,7 @@ namespace pybind
 
 		if( inst->impl == 0 )
 		{
-			traceback_error( "class_getattro: unbind object" );
+			error_message( "class_getattro: unbind object" );
 			return 0;
 		}
 
@@ -162,7 +146,7 @@ namespace pybind
 
 		if( inst->impl == 0 )
 		{
-			traceback_error( "class_call: unbind object" );
+			error_message( "class_call: unbind object" );
 			return 0;
 		}
 
@@ -273,7 +257,7 @@ namespace pybind
 
 		if( md->impl == 0 )
 		{
-			traceback_error( "method_call_callback0: unbind object" );
+			error_message( "method_call_callback0: unbind object" );
 			return 0;
 		}
 
@@ -286,7 +270,7 @@ namespace pybind
 
 		if( md->impl == 0 )
 		{
-			traceback_error( "method_call_callback1: unbind object" );
+			error_message( "method_call_callback1: unbind object" );
 			return 0;
 		}
 
