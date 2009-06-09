@@ -163,7 +163,8 @@ namespace pybind
 		py_class_type * self = (py_class_type *)(_obj);
 		void * impl = self->impl;
 
-		Py_DECREF( self->dict );
+		Py_XDECREF( self->dict );
+		self->dict = 0;
 
 		_obj->ob_type->tp_free( (PyObject*)self );
 

@@ -14,9 +14,10 @@ namespace pybind
 	{
 		py_class_type * self = (py_class_type *)_obj;
 
-		Py_DECREF( self->dict );
+		Py_XDECREF( self->dict );
+		self->dict = 0;
 
-		_obj->ob_type->tp_free( _obj );		
+		_obj->ob_type->tp_free( _obj );
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -338,7 +339,10 @@ namespace pybind
 	{
 		_self->impl = 0;
 
-		this->update_method_self( _self, 0 );
+		//this->update_method_self( _self, 0 );
+
+		Py_XDECREF( _self->dict );
+		_self->dict = 0;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::setup_method( py_class_type * _self )
