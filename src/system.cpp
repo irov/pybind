@@ -188,8 +188,7 @@ namespace pybind
 	}
 
 	PyObject * ask_va( PyObject * _obj, const char * _format, va_list _va )
-	{
-		//		Py_INCREF( _obj );
+	{		
 		PyObject * value = Py_VaBuildValue( _format, _va );
 		PyObject * result = PyObject_CallObject( _obj, value );
 

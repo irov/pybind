@@ -71,26 +71,10 @@ namespace pybind
 		return 0;
 	}
 
-	static PyObject* instance_get_methods( PyObject* op, void* )
-	{
-		py_class_type* inst = (py_class_type*)op;
-		Py_INCREF( inst->dict );
-		return inst->dict;
-	}
-
-	static PyObject* instance_get_members( PyObject* op, void* )
-	{
-		py_class_type* inst = (py_class_type*)op;
-		Py_INCREF( inst->dict );
-		return inst->dict;
-	}
-
 	static PyGetSetDef instance_getsets[] = {
 		{"__dict__", instance_get_dict, instance_set_dict, NULL, 0},
 		{0, 0, 0, 0, 0}
 	};
-
-
 
 	static int
 		class_setattro(PyObject *obj, PyObject *name, PyObject* value)

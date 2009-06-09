@@ -165,7 +165,7 @@ namespace pybind
 
 		Py_DECREF( self->dict );
 
-		self->ob_type->tp_free( (PyObject*)self );
+		_obj->ob_type->tp_free( (PyObject*)self );
 
 		return impl;		
 	}
