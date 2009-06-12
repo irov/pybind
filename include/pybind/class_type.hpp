@@ -64,7 +64,7 @@ namespace pybind
 		TMethodFunction m_methodsBase;
 	
 		typedef std::pair<class_type_scope *, pybind_metacast> TPairMetacast;
-		typedef std::map<std::string, TPairMetacast> TMapBases;
+		typedef std::map<const char *, TPairMetacast> TMapBases;
 		TMapBases m_bases;
 
 		constructor * m_constructor;

@@ -8,7 +8,8 @@ namespace pybind
 {
 	namespace detail
 	{
-		typedef std::map<std::string, type_cast *> TMapExtractTypes;
+		typedef std::map<const char *, type_cast *> TMapExtractTypes;
+
 		static TMapExtractTypes & mapExtractTypesInstance()
 		{
 			static TMapExtractTypes s_mapExtractTypes;
