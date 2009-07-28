@@ -38,12 +38,16 @@ namespace pybind
 		{
 			PyObject *ret = method_call<C,F>::call( m_self, m_fn, 0 );
 			return ret;
+
+			return 0;			
 		}
 
 		PyObject * call( PyObject * _args ) override
 		{
 			PyObject *ret = method_call<C,F>::call( m_self, m_fn, _args );
 			return ret;
+
+			return 0;	
 		}
 
 	public:

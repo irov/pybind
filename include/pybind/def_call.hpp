@@ -176,7 +176,15 @@ namespace pybind
 				}
 			}
 
-			return def_call_ret_impl<F,typename f_info::ret_type>::call( f, _arg );
+			try
+			{
+				return def_call_ret_impl<F,typename f_info::ret_type>::call( f, _arg );
+			}
+			catch( const pybind_exception & )
+			{
+			}
+
+			return 0;
 		}
 	};
 }

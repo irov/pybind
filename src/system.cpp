@@ -12,6 +12,11 @@
 
 namespace pybind
 {
+	void throw_exception()
+	{
+		throw pybind_exception();
+	}
+
 	void initialize()
 	{
 		Py_Initialize();

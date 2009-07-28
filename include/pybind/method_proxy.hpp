@@ -42,6 +42,7 @@ namespace pybind
 		PyObject * call( void * _self, class_type_scope * _scope ) override
 		{
 			C * impl = (C*)detail::meta_cast_scope( _self, m_scope_name, m_class_name, _scope );
+			
 			PyObject *ret = method_call<C,F>::call( impl, m_fn, 0 );
 			return ret;
 		}
@@ -49,6 +50,7 @@ namespace pybind
 		PyObject * call( void * _self, class_type_scope * _scope, PyObject * _args ) override
 		{
 			C * impl = (C*)detail::meta_cast_scope( _self, m_scope_name, m_class_name, _scope );
+
 			PyObject *ret = method_call<C,F>::call( impl, m_fn, _args );
 			return ret;
 		}

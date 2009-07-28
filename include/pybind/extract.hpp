@@ -26,7 +26,7 @@ namespace pybind
 						, type_name
 						);
 
-					return T();
+					throw_exception();
 				}
 
 				type_cast_result<T> * etype_impl = static_cast<type_cast_result<T> *>(etype);
@@ -45,7 +45,7 @@ namespace pybind
 						, type_name
 						);
 
-					return T();
+					throw_exception();
 				}
 
 				return t;
@@ -69,7 +69,7 @@ namespace pybind
 						, type_name
 						);
 
-					return T();
+					throw_exception();
 				}
 
 				type_cast_result<const T &> * etype_impl = static_cast<type_cast_result<const T &> *>(etype);
@@ -88,7 +88,7 @@ namespace pybind
 						, type_name
 						);
 
-					return T();
+					throw_exception();
 				}
 
 				return t;
@@ -115,13 +115,35 @@ namespace pybind
 	}
 
 	template<class T>
+	typename extract_return<T>::type extract_nt( PyObject * _obj )
+	{
+		try
+		{
+			return detail::extract_check<T>::extract( _obj );
+		}
+		catch( const pybind_exception & )
+		{
+		}
+
+		return 0;
+	}
+
+	template<class T>
+	typename extract_return<T>::type extract_item( PyObject * _obj, std::size_t _it )
+	{
+		PyObject * item = tuple_getitem( _obj, 0 );
+		return detail::extract_check<T>::extract( item );
+	}
+
+
+	template<class T>
 	PyObject * ptr( T _value )
 	{
 		type_cast * etype = detail::type_down_cast<T>::find();
 
 		if( etype == 0 )
 		{
-			ret_none();
+			throw_exception();
 		}
 
 		type_cast_result<T> * etype_impl = static_cast<type_cast_result<T> *>(etype);
@@ -130,7 +152,7 @@ namespace pybind
 
 		if( result == 0 )
 		{
-			ret_none();
+			throw_exception();
 		}
 
 		return result;

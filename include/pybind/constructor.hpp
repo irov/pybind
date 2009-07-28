@@ -119,7 +119,15 @@ namespace pybind
 				return 0;
 			}
 
-			return call_ctr_impl<C, P, P::base_arity>::call_ctr( _args );
+			try
+			{
+				return call_ctr_impl<C, P, P::base_arity>::call_ctr( _args );
+			}
+			catch( const pybind_exception & )
+			{
+			}
+
+			return 0;
 		}
 	};
 }

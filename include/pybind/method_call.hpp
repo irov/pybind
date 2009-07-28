@@ -126,7 +126,6 @@ namespace pybind
 		static PyObject * call( C * _obj, F f, PyObject * _arg )
 		{
 			Ret result = method_call_impl<C,F,Ret,f_info::arity>::call( _obj, f, _arg );
-
 			return ptr<Ret>( result );
 		}
 	};
@@ -139,7 +138,6 @@ namespace pybind
 		static PyObject * call( C * _obj, F f, PyObject * _arg )
 		{
 			method_call_impl<C,F,void,f_info::arity>::call( _obj, f, _arg );
-
 			return ret_none();
 		}
 	};
@@ -165,7 +163,15 @@ namespace pybind
 				}
 			}
 
-			return method_call_ret_impl<C,F,typename f_info::ret_type>::call( _obj, f, _arg );
+			try
+			{
+				return method_call_ret_impl<C,F,typename f_info::ret_type>::call( _obj, f, _arg );
+			}
+			catch( const pybind_exception & )
+			{
+			}
+
+			return 0;			
 		}
 	};
 }

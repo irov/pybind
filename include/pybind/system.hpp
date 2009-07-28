@@ -14,6 +14,13 @@ extern "C"
 
 namespace pybind
 {
+	class pybind_exception
+	{
+
+	};
+
+	PYBIND_API void throw_exception();
+
 	PYBIND_API void initialize();
 	PYBIND_API void initialize_ts();
 	PYBIND_API void finalize();
