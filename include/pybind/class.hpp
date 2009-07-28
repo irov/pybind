@@ -169,7 +169,7 @@ namespace pybind
 	{
 		C * apply( PyObject * _obj ) override
 		{
-			if( detail::is_class( _obj ) = false )
+			if( detail::is_class( _obj ) == false )
 			{
 				return 0;
 			}
