@@ -171,6 +171,11 @@ namespace pybind
 		{
 			if( detail::is_class( _obj ) == false )
 			{
+				const char * repr = pybind::object_to_string( _obj );
+				pybind::error_message( "extract from %s"
+					, repr
+					);
+
 				return 0;
 			}
 
@@ -206,9 +211,14 @@ namespace pybind
 	{
 		C apply( PyObject * _obj ) override
 		{
-			if( detail::is_class( _obj ) = false )
+			if( detail::is_class( _obj ) == false )
 			{
-				return 0;
+				const char * repr = pybind::object_to_string( _obj );
+				pybind::error_message( "extract from %s"
+					, repr
+					);
+
+				return C();
 			}
 
 			type_cast_result<C>::m_valid = true;
