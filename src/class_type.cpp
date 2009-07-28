@@ -347,7 +347,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool class_type_scope::is_class( PyTypeObject * _type )
 	{
-		return _type->tp_init == &_pyinitproc;
+		return _type->tp_setattro == &class_setattro;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::setup_method( py_class_type * _self )
