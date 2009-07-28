@@ -14,6 +14,7 @@ namespace pybind
 	namespace detail
 	{
 		PYBIND_API void * get_class( PyObject * _obj );
+		PYBIND_API bool is_class( PyObject * _obj );
 		PYBIND_API class_type_scope * get_class_scope( PyObject * _obj );
 		PYBIND_API void * check_registred_class( PyObject * _obj, const std::type_info & _info );
 	}

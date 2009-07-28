@@ -169,6 +169,11 @@ namespace pybind
 	{
 		C * apply( PyObject * _obj ) override
 		{
+			if( detail::is_class( _obj ) = false )
+			{
+				return 0;
+			}
+
 			type_cast_result<C *>::m_valid = true;
 
 			void * impl = detail::get_class( _obj );
@@ -201,6 +206,11 @@ namespace pybind
 	{
 		C apply( PyObject * _obj ) override
 		{
+			if( detail::is_class( _obj ) = false )
+			{
+				return 0;
+			}
+
 			type_cast_result<C>::m_valid = true;
 
 			const std::type_info & tinfo = class_info<C>();

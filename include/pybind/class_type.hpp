@@ -58,6 +58,8 @@ namespace pybind
 
 		void unwrap( py_class_type * _self );
 
+		static bool is_class( PyTypeObject * _type );
+
 	public:		
 		typedef std::list<method_type_scope *> TMethodFunction;
 		TMethodFunction m_methods;

@@ -345,6 +345,11 @@ namespace pybind
 		_self->dict = 0;
 	}
 	//////////////////////////////////////////////////////////////////////////
+	bool class_type_scope::is_class( PyTypeObject * _type )
+	{
+		return _type->tp_init == &_pyinitproc;
+	}
+	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::setup_method( py_class_type * _self )
 	{
 		_self->dict = PyDict_New();

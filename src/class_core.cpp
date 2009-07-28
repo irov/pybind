@@ -18,6 +18,11 @@ namespace pybind
 			return self->impl;
 		}
 		//////////////////////////////////////////////////////////////////////////
+		bool is_class( PyObject * _obj )
+		{
+			return class_type_scope::is_class( _obj->ob_type );
+		}
+		//////////////////////////////////////////////////////////////////////////
 		class_type_scope * get_class_scope( PyObject * _obj )
 		{
 			py_class_type * self = (py_class_type *)_obj;
