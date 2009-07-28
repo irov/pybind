@@ -176,7 +176,7 @@ namespace pybind
 					, repr
 					);
 
-				return 0;
+				throw_exception();
 			}
 
 			type_cast_result<C *>::m_valid = true;
@@ -218,7 +218,7 @@ namespace pybind
 					, repr
 					);
 
-				return C();
+				throw_exception();
 			}
 
 			type_cast_result<C>::m_valid = true;
@@ -236,7 +236,7 @@ namespace pybind
 					, type_name
 					);
 
-				return C();
+				throw_exception();
 			}
 
 			return *static_cast<C*>(impl);

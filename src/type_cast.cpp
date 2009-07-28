@@ -1,5 +1,6 @@
 #	include "pybind/type_cast.hpp"
 #	include "config/python.hpp"
+#	include "pybind/system.hpp"
 
 #	include <map>
 #	include <string>
@@ -296,6 +297,8 @@ namespace pybind
 				}
 			}
 
+			throw_exception();
+
 			return std::string();
 		}
 		PyObject * wrap( std::string _value ) override
@@ -332,7 +335,7 @@ namespace pybind
 
 				if( unicode_str == 0 )
 				{
-					return std::wstring();
+					throw_exception();
 				}
 
 				return std::wstring(unicode_str);
@@ -345,7 +348,7 @@ namespace pybind
 
 				if( unicode_str == 0 )
 				{
-					return std::wstring();
+					throw_exception();
 				}
 
 				return std::wstring(unicode_str);
