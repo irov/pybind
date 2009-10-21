@@ -307,61 +307,61 @@ namespace pybind
 		}
 	}s_extract_string_type;
 
-	static struct extract_wstring_type
-		: public type_cast_result<std::wstring>
-	{
-		std::wstring apply( PyObject * _obj ) override
-		{
-			m_valid = false;
+	//static struct extract_wstring_type
+	//	: public type_cast_result<std::wstring>
+	//{
+	//	std::wstring apply( PyObject * _obj ) override
+	//	{
+	//		m_valid = false;
 
-			if( PyString_Check( _obj ) )
-			{
-				m_valid = true;
+	//		if( PyString_Check( _obj ) )
+	//		{
+	//			m_valid = true;
 
-				char * str = PyString_AsString( _obj );
+	//			char * str = PyString_AsString( _obj );
 
-				if( str == 0 )
-				{
-					return std::wstring();
-				}
+	//			if( str == 0 )
+	//			{
+	//				return std::wstring();
+	//			}
 
-				Py_ssize_t size = PyString_Size( _obj );
+	//			Py_ssize_t size = PyString_Size( _obj );
 
-				const char * encoding = PyUnicode_GetDefaultEncoding();
+	//			const char * encoding = PyUnicode_GetDefaultEncoding();
 
-				PyObject * unicode = PyUnicode_Decode( str, size, "mbcs", 0 );
+	//			PyObject * unicode = PyUnicode_Decode( str, size, "mbcs", 0 );
 
-				Py_UNICODE * unicode_str = PyUnicode_AsUnicode( unicode );
+	//			Py_UNICODE * unicode_str = PyUnicode_AsUnicode( unicode );
 
-				if( unicode_str == 0 )
-				{
-					throw_exception();
-				}
+	//			if( unicode_str == 0 )
+	//			{
+	//				throw_exception();
+	//			}
 
-				return std::wstring(unicode_str);
-			}
-			else if ( PyUnicode_Check( _obj ) )
-			{
-				m_valid = true;
+	//			return std::wstring(unicode_str);
+	//		}
+	//		else if ( PyUnicode_Check( _obj ) )
+	//		{
+	//			m_valid = true;
 
-				wchar_t * unicode_str = PyUnicode_AsUnicode( _obj );
+	//			wchar_t * unicode_str = PyUnicode_AsUnicode( _obj );
 
-				if( unicode_str == 0 )
-				{
-					throw_exception();
-				}
+	//			if( unicode_str == 0 )
+	//			{
+	//				throw_exception();
+	//			}
 
-				return std::wstring(unicode_str);
-			}
+	//			return std::wstring(unicode_str);
+	//		}
 
-			return std::wstring();
-		}
+	//		return std::wstring();
+	//	}
 
-		PyObject * wrap( std::wstring _value ) override
-		{
-			return PyUnicode_FromWideChar( _value.c_str(), _value.size() );
-		}
-	}s_extract_wstring_type;
+	//	PyObject * wrap( std::wstring _value ) override
+	//	{
+	//		return PyUnicode_FromWideChar( _value.c_str(), _value.size() );
+	//	}
+	//}s_extract_wstring_type;
 
 	static struct extract_pyobject_type
 		: public type_cast_result<PyObject *>
