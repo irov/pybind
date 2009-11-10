@@ -80,6 +80,7 @@ namespace pybind
 
 	PYBIND_API bool check_type( PyObject * _obj );
 	
+	PYBIND_API PyObject * list_new( std::size_t _size );
 	PYBIND_API bool list_check( PyObject * _obj );
 	PYBIND_API std::size_t list_size( PyObject * _obj );
 	PYBIND_API PyObject * list_getitem( PyObject * _obj, std::size_t _it );

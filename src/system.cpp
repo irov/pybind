@@ -400,6 +400,11 @@ namespace pybind
 		return PyType_Check( _obj ) == 1;
 	}
 
+	PyObject * list_new( std::size_t _size )
+	{
+		return PyList_New( _size );
+	}
+
 	bool list_check( PyObject * _obj )
 	{
 		return PyList_Check( _obj ) == 1;
