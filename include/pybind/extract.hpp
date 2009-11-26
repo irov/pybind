@@ -22,7 +22,7 @@ namespace pybind
 				{
 					const char * type_name = tinfo.name();
 
-					pybind::error_message( "extract invalid find cast for %s"
+					pybind::error_message( "extract invalid find cast for %.256s"
 						, type_name
 						);
 
@@ -37,13 +37,15 @@ namespace pybind
 				{
 					pybind::check_error();
 
-					const char * repr = pybind::object_to_string( _obj );
-					const char * type_name = tinfo.name();
-
-					pybind::error_message( "extract from %s to %s"
-						, repr
-						, type_name
-						);
+					if( const char * repr = pybind::object_to_string( _obj ) )
+					{
+						const char * type_name = tinfo.name();
+	
+						pybind::error_message( "extract from %.256s to %.256s"
+							, repr
+							, type_name
+							);
+					}
 
 					throw_exception();
 				}
@@ -65,7 +67,7 @@ namespace pybind
 				{
 					const char * type_name = tinfo.name();
 
-					pybind::error_message( "extract invalid find cast for %s"
+					pybind::error_message( "extract invalid find cast for %.256s"
 						, type_name
 						);
 
@@ -80,15 +82,17 @@ namespace pybind
 				{
 					pybind::check_error();
 
-					const char * repr = pybind::object_to_string( _obj );
-					const char * type_name = tinfo.name();
+					if( const char * repr = pybind::object_to_string( _obj ) )
+					{
+						const char * type_name = tinfo.name();
+	
+						pybind::error_message( "extract from %.256s to %.256s"
+							, repr
+							, type_name
+							);
 
-					pybind::error_message( "extract from %s to %s"
-						, repr
-						, type_name
-						);
-
-					throw_exception();
+						throw_exception();
+					}
 				}
 
 				return t;

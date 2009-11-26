@@ -171,10 +171,12 @@ namespace pybind
 		{
 			if( detail::is_class( _obj ) == false )
 			{
-				const char * repr = pybind::object_to_string( _obj );
-				pybind::error_message( "extract from %s"
-					, repr
-					);
+				if( const char * repr = pybind::object_to_string( _obj ) )
+				{
+					pybind::error_message( "extract from %.256s"
+						, repr
+						);
+				}
 
 				throw_exception();
 			}
@@ -213,10 +215,12 @@ namespace pybind
 		{
 			if( detail::is_class( _obj ) == false )
 			{
-				const char * repr = pybind::object_to_string( _obj );
-				pybind::error_message( "extract from %s"
-					, repr
-					);
+				if( const char * repr = pybind::object_to_string( _obj ) )
+				{
+					pybind::error_message( "extract from %.256s"
+						, repr
+						);
+				}
 
 				throw_exception();
 			}
@@ -229,12 +233,14 @@ namespace pybind
 
 			if( impl == 0 )
 			{
-				const char * repr = pybind::object_to_string( _obj );
-				const char * type_name = tinfo.name();
-				pybind::error_message( "extract from %s to %s"
-					, repr
-					, type_name
-					);
+				if( const char * repr = pybind::object_to_string( _obj ) )
+				{
+					const char * type_name = tinfo.name();
+					pybind::error_message( "extract from %.128s to %.128s"
+						, repr
+						, type_name
+						);
+				}
 
 				throw_exception();
 			}

@@ -461,6 +461,12 @@ namespace pybind
 	const char * object_to_string( PyObject * _obj )
 	{
 		PyObject * repr = PyObject_Repr( _obj );
+		
+		if( repr == 0 )
+		{
+			return 0;
+		}
+
 		return PyString_AS_STRING( repr );
 	}
 
