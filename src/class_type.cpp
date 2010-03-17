@@ -43,10 +43,10 @@ namespace pybind
 		m_methods.clear();
 		m_methodsBase.clear();
 
-		//delete m_type;
-		//delete m_type_holder;
-
 		delete m_constructor;
+
+		delete m_type;
+		delete m_type_holder;		
 	}
 
 	static int _pyinitproc(PyObject * _self, PyObject *_args, PyObject *)
@@ -186,6 +186,8 @@ namespace pybind
 			m_type->tp_getattro = &class_getattro;
 			m_type->tp_call = &class_call;
 			m_type->tp_dictoffset = offsetof( py_class_type, dict );
+			m_type->tp_base = &PyBaseObject_Type;
+			m_type->tp_bases = PyTuple_Pack( 1, &PyBaseObject_Type ); 
 
 			if( PyType_Ready( m_type ) < 0 )
 			{
