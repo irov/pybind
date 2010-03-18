@@ -115,17 +115,19 @@ namespace pybind
 			return 0;
 		}
 
-		PyObject * attr = PyDict_GetItem( inst->dict, name );	
-
-		if( attr )
+		if( PyObject * generic_attr = PyObject_GenericGetAttr( obj, name ) )
 		{
-			//Py_INCREF( obj );
-			Py_INCREF( attr );
-			return attr;
+			return generic_attr;
 		}
 
-		attr = PyObject_GenericGetAttr( obj, name );
+		PyObject * attr = PyDict_GetItem( inst->dict, name );	
 
+		if( attr == 0)
+		{
+			return 0;
+		}
+
+		Py_INCREF( attr );
 		return attr;
 	}
 
