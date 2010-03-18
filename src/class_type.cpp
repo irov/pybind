@@ -89,6 +89,11 @@ namespace pybind
 			return -1;
 		}
 
+		if( PyObject_GenericSetAttr( obj, name, value ) == 1 )
+		{
+			return 1;
+		}
+
 		int res = PyDict_SetItem( inst->dict, name, value );
 
 		if( res )
@@ -177,6 +182,7 @@ namespace pybind
 			m_type->tp_name = _name;
 			m_type->tp_basicsize = sizeof( py_class_type );
 			//m_type->tp_doc = class_type_doc;
+			m_type->tp_alloc = PyType_GenericAlloc;
 			m_type->tp_new = _pynew;
 			m_type->tp_init = &_pyinitproc;
 			m_type->tp_dealloc = _pydestructor;
@@ -209,6 +215,7 @@ namespace pybind
 			m_type_holder->tp_name = _name;
 			m_type_holder->tp_basicsize = sizeof( py_class_type );
 			//m_type_holder->tp_doc = class_type_holder_doc;
+			m_type_holder->tp_alloc = PyType_GenericAlloc;
 			m_type_holder->tp_new = 0;
 			m_type_holder->tp_init = &_pyinitproc;
 			m_type_holder->tp_dealloc = &py_dealloc;
@@ -218,6 +225,8 @@ namespace pybind
 			m_type_holder->tp_getattro = &class_getattro;
 			m_type_holder->tp_call = &class_call;
 			m_type_holder->tp_dictoffset = offsetof( py_class_type, dict );
+			m_type_holder->tp_base = &PyBaseObject_Type;
+			m_type_holder->tp_bases = PyTuple_Pack( 1, &PyBaseObject_Type ); 
 
 			if( PyType_Ready( m_type_holder ) < 0 )
 			{
