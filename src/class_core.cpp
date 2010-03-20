@@ -121,7 +121,7 @@ namespace pybind
 		_scope->set_module( _module );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_core::def_method( const char * _name, method_proxy_interface * _ifunc, int _arity, const std::type_info & _info )
+	void class_core::def_method( const char * _name, method_adapter_interface * _ifunc, int _arity, const std::type_info & _info )
 	{
 		class_type_scope * scope = class_scope::get_class_scope( _info );
 

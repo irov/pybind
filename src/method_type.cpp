@@ -27,7 +27,7 @@ namespace pybind
 	
 	void method_type_scope::setup( PyTypeObject * _class, 
 		const char * _name, 
-		method_proxy_interface * _ifunc, 
+		method_adapter_interface * _ifunc, 
 		pybind_cfunction _cfunc, 
 		int _hasargs )
 	{

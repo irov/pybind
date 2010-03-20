@@ -316,7 +316,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\def_proxy.cpp"
+				RelativePath=".\def_adapter.cpp"
 				>
 			</File>
 			<File
@@ -328,7 +328,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\method_proxy.cpp"
+				RelativePath=".\method_adapter.cpp"
 				>
 			</File>
 			<File
@@ -384,15 +384,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\include\pybind\def_adapter.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\include\pybind\def_call.hpp"
 				>
 			</File>
 			<File
 				RelativePath="..\include\pybind\def_parser.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\include\pybind\def_proxy.hpp"
 				>
 			</File>
 			<File
@@ -420,6 +420,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\include\pybind\method_adapter.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\include\pybind\method_call.hpp"
 				>
 			</File>
@@ -428,7 +432,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\include\pybind\method_proxy.hpp"
+				RelativePath="..\include\pybind\method_proxy_call.hpp"
 				>
 			</File>
 			<File

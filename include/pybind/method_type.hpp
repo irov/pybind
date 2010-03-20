@@ -1,6 +1,6 @@
 #	pragma once
 
-#	include "pybind/method_proxy.hpp"
+#	include "pybind/method_adapter.hpp"
 
 #	include "pybind/types.hpp"
 
@@ -10,7 +10,7 @@ namespace pybind
 {
 	struct py_method_type{
 		PyObject_HEAD
-		method_proxy_interface * ifunc;
+		method_adapter_interface * ifunc;
 		void * impl;
 		class_type_scope * scope;
 	};
@@ -30,7 +30,7 @@ namespace pybind
 	public:
 		void setup( PyTypeObject * _class, 
 			const char * _name, 
-			method_proxy_interface * _ifunc, 
+			method_adapter_interface * _ifunc, 
 			pybind_cfunction _cfunc, 
 			int _hasargs );
 
@@ -41,7 +41,7 @@ namespace pybind
 		const char * m_name;
 
 	protected:
-		method_proxy_interface * m_interface;
+		method_adapter_interface * m_interface;
 		PyMethodDef m_method;
 	};
 }

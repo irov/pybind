@@ -1,4 +1,4 @@
-#	include "pybind/def_proxy.hpp"
+#	include "pybind/def_adapter.hpp"
 #	include "pybind/def_type.hpp"
 
 namespace pybind

@@ -3,7 +3,7 @@
 #	include "pybind/types.hpp"
 
 #	include "pybind/def_parser.hpp"
-#	include "pybind/def_proxy.hpp"
+#	include "pybind/def_adapter.hpp"
 
 namespace pybind
 {
@@ -28,7 +28,7 @@ namespace pybind
 		detail::def_function(
 			_name,
 			(pybind_callback)_cfunc,
-			( f_info::arity > 0 ) ? (pybind_cfunction)&def_proxy<F>::method1 : (pybind_cfunction)&def_proxy<F>::method0,
+			( f_info::arity > 0 ) ? (pybind_cfunction)&def_adapter<F>::method1 : (pybind_cfunction)&def_adapter<F>::method0,
 			f_info::arity,
 			_module
 			);

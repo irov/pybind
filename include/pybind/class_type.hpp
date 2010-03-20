@@ -43,7 +43,7 @@ namespace pybind
 
 		void add_bases( class_type_scope * _scope );
 
-		void add_method( const char * _name, method_proxy_interface * _ifunc, int _arity );
+		void add_method( const char * _name, method_adapter_interface * _ifunc, int _arity );
 		void add_method_from_scope( class_type_scope * _basescope );
 
 		void add_base( const char * _name, class_type_scope * _base, pybind_metacast _cast );

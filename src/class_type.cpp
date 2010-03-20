@@ -280,7 +280,7 @@ namespace pybind
 		m_module = _module;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_type_scope::add_method( const char * _name, method_proxy_interface * _ifunc, int _arity )
+	void class_type_scope::add_method( const char * _name, method_adapter_interface * _ifunc, int _arity )
 	{
 		method_type_scope * method = new method_type_scope();
 

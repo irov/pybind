@@ -4,7 +4,7 @@
 
 #	include "pybind/class_core.hpp"
 #	include "pybind/method_parser.hpp"
-#	include "pybind/method_proxy.hpp"
+#	include "pybind/method_adapter.hpp"
 #	include "pybind/type_cast.hpp"
 
 #	include <list>
@@ -13,9 +13,9 @@
 
 namespace pybind
 {	
-	typedef bases<void,void,void,void> no_bases;
+	typedef bases<void,void,void,void,void,void> no_bases;
 
-	template<class C, class B = bases<void,void,void,void> >
+	template<class C, class B = no_bases>
 	class base_
 	{
 	public:
@@ -52,6 +52,8 @@ namespace pybind
 			if( arity-- > 0 )class_core::add_base<C, typename B::base1>(&meta_cast<typename B::base1>);
 			if( arity-- > 0 )class_core::add_base<C, typename B::base2>(&meta_cast<typename B::base2>);
 			if( arity-- > 0 )class_core::add_base<C, typename B::base3>(&meta_cast<typename B::base3>);
+			if( arity-- > 0 )class_core::add_base<C, typename B::base4>(&meta_cast<typename B::base4>);
+			if( arity-- > 0 )class_core::add_base<C, typename B::base5>(&meta_cast<typename B::base5>);
 		}
 
 		void setup_method_from_base()
@@ -62,13 +64,15 @@ namespace pybind
 			if( arity-- > 0 )class_core::add_method_from_base<C, typename B::base1>();
 			if( arity-- > 0 )class_core::add_method_from_base<C, typename B::base2>();
 			if( arity-- > 0 )class_core::add_method_from_base<C, typename B::base3>();
+			if( arity-- > 0 )class_core::add_method_from_base<C, typename B::base4>();
+			if( arity-- > 0 )class_core::add_method_from_base<C, typename B::base5>();
 		}
 
-		template<class C0, class C1, class C2, class C3>
-		base_ & def( const init<C0,C1,C2,C3> & _init )
+		template<class C0, class C1, class C2, class C3, class C4, class C5>
+		base_ & def( const init<C0,C1,C2,C3,C4,C5> & _init )
 		{
 			constructor * ctr = 
-				new constructor_params<C, init<C0,C1,C2,C3> >();
+				new constructor_params<C, init<C0,C1,C2,C3,C4,C5> >();
 
 			class_core::def_init( scope(), ctr );
 
@@ -94,19 +98,64 @@ namespace pybind
 					}
 				}
 
-				void add( method_proxy_interface * _ptr )
+				void add( method_adapter_interface * _ptr )
 				{
 					m_listProxyMethod.push_back( _ptr );
 				}
 
-				typedef std::list<method_proxy_interface *> TListProxyMethod;
+				typedef std::list<method_adapter_interface *> TListProxyMethod;
 				TListProxyMethod m_listProxyMethod;
 			};
 
 			static delete_holder s_proxyDeleter;
 
-			method_proxy_interface * ifunc =
-				new method_proxy<typename t_info::class_type, F>(_name, f);
+			method_adapter_interface * ifunc =
+				new method_adapter<typename t_info::class_type, F>(_name, f);
+
+			s_proxyDeleter.add( ifunc );
+
+			class_core::def_method(
+				_name,
+				ifunc,
+				t_info::arity,
+				class_info<C>()
+				);
+
+			return *this;
+		}
+
+		template<class P, class F>
+		base_ & def_proxy( const char * _name, P * _proxy, F f )
+		{
+			typedef typename method_parser<F>::result t_info;
+
+			struct delete_holder
+			{
+				~delete_holder()
+				{
+					for( TListProxyMethod::iterator
+						it = m_listProxyMethod.begin(),
+						it_end = m_listProxyMethod.end();
+					it != it_end;
+					++it)
+					{
+						delete *it;
+					}
+				}
+
+				void add( method_adapter_interface * _ptr )
+				{
+					m_listProxyMethod.push_back( _ptr );
+				}
+
+				typedef std::list<method_adapter_interface *> TListProxyMethod;
+				TListProxyMethod m_listProxyMethod;
+			};
+
+			static delete_holder s_proxyDeleter;
+
+			method_adapter_interface * ifunc =
+				new proxy_method_adapter<C, P, F>(_name, _proxy, f);
 
 			s_proxyDeleter.add( ifunc );
 
@@ -255,7 +304,7 @@ namespace pybind
 		}
 	};
 
-	template<class C, class B = bases<void,void,void,void> >
+	template<class C, class B = no_bases>
 	class class_
 		: public base_<C,B>
 	{
@@ -282,7 +331,7 @@ namespace pybind
 		}
 	};
 
-	template<class C, class B = bases<void,void,void,void> >
+	template<class C, class B = no_bases>
 	class proxy_
 		: public base_<C,B>
 	{
@@ -309,7 +358,7 @@ namespace pybind
 		}
 	};
 
-	template<class C, class B = bases<void,void,void,void> >
+	template<class C, class B = no_bases>
 	class interface_
 		: public base_<C,B>
 	{

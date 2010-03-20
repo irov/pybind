@@ -1,4 +1,4 @@
-#	include "pybind/method_proxy.hpp"
+#	include "pybind/method_adapter.hpp"
 
 #	include "pybind/class_type.hpp"
 

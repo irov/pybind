@@ -9,7 +9,7 @@
 namespace pybind
 {
 	class class_type_scope;
-	class method_proxy_interface;
+	class method_adapter_interface;
 
 	namespace detail
 	{
@@ -49,7 +49,7 @@ namespace pybind
 
 		static void def_method( 
 			const char * _name, 
-			method_proxy_interface * _ifunc, 
+			method_adapter_interface * _ifunc, 
 			int _arity, 
 			const std::type_info & _info );
 
