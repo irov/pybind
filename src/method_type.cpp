@@ -14,32 +14,25 @@ namespace pybind
 
 		mt->ob_type->tp_free( mt );		
 	}
-
-	method_type_scope::method_type_scope()
-		: m_name( 0 )
-		, m_interface( 0 )
-	{
-	}
-
-	method_type_scope::~method_type_scope()
-	{
-	}
-	
-	void method_type_scope::setup( PyTypeObject * _class, 
+	//////////////////////////////////////////////////////////////////////////
+	method_type_scope::method_type_scope( PyTypeObject * _class, 
 		const char * _name, 
 		method_adapter_interface * _ifunc, 
 		pybind_cfunction _cfunc, 
 		int _hasargs )
+		: m_name(_name)
+		, m_interface(_ifunc)
 	{
-		m_name =  _name;
-		m_interface = _ifunc;
-
 		m_method.ml_name = _name;
 		m_method.ml_meth = _cfunc;
 		m_method.ml_flags = METH_CLASS | ( _hasargs ) ? METH_VARARGS : METH_NOARGS;
 		m_method.ml_doc = "Embedding function cpp";
 	}
-
+	//////////////////////////////////////////////////////////////////////////
+	method_type_scope::~method_type_scope()
+	{
+	}
+	//////////////////////////////////////////////////////////////////////////
 	PyObject * method_type_scope::instance( py_class_type * _obj )
 	{
 		py_method_type * self = (py_method_type *)PyType_GenericAlloc( s_method_type, 0 );
@@ -53,7 +46,7 @@ namespace pybind
 
 		return py_function;
 	}
-
+	//////////////////////////////////////////////////////////////////////////
 	void initialize_method()
 	{
 		s_method_type = new PyTypeObject();
@@ -68,7 +61,7 @@ namespace pybind
 			printf("invalid embedding class '%s' \n", s_method_type->tp_name );
 		}
 	}
-
+	//////////////////////////////////////////////////////////////////////////
 	void finialize_method()
 	{
 		delete s_method_type;

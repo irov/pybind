@@ -46,6 +46,8 @@ namespace pybind
 		void add_method( const char * _name, method_adapter_interface * _ifunc, int _arity );
 		void add_method_from_scope( class_type_scope * _basescope );
 
+		void add_member( const char * _name, member_adapter_interface * _imember );
+
 		void add_base( const char * _name, class_type_scope * _base, pybind_metacast _cast );
 
 		PyObject * create_holder( void * _impl );
@@ -53,17 +55,21 @@ namespace pybind
 
 		void * metacast( const char * name, void * _impl );
 
-		void setup_method( py_class_type * _self );
-		void update_method_self( py_class_type * _self, void * _impl );
+		void setup_attributes( py_class_type * _self );
+		void update_attributes_self( py_class_type * _self, void * _impl );
 
 		void unwrap( py_class_type * _self );
 
 		static bool is_class( PyTypeObject * _type );
 
 	public:		
-		typedef std::list<method_type_scope *> TMethodFunction;
-		TMethodFunction m_methods;
-		TMethodFunction m_methodsBase;
+		typedef std::list<method_type_scope *> TMethods;
+		TMethods m_methods;
+		TMethods m_methodsBase;
+
+		typedef std::list<member_type_scope *> TMembers;
+		TMembers m_members;
+		TMembers m_membersBase;
 	
 		typedef std::pair<class_type_scope *, pybind_metacast> TPairMetacast;
 		typedef std::map<const char *, TPairMetacast> TMapBases;

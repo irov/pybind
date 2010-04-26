@@ -23,21 +23,19 @@ namespace pybind
 	class method_type_scope
 	{
 	public:
-		method_type_scope();
-		~method_type_scope();
-
-
-	public:
-		void setup( PyTypeObject * _class, 
+		method_type_scope( PyTypeObject * _class, 
 			const char * _name, 
 			method_adapter_interface * _ifunc, 
 			pybind_cfunction _cfunc, 
 			int _hasargs );
 
+		~method_type_scope();
+
+
+	public:
 		PyObject * instance( py_class_type * _obj );
 		
 	public:
-		//PyObject * m_mdfunc;
 		const char * m_name;
 
 	protected:

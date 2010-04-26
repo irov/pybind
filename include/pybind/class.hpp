@@ -169,9 +169,45 @@ namespace pybind
 			return *this;
 		}
 
-		template<class A>
-		base_ & attr( const char * _name, A a )
+		template<class C, class A>
+		base_ & def_props( const char * _name, A C:: * a )
 		{
+			struct delete_holder
+			{
+				~delete_holder()
+				{
+					for( TListProxyMemebers::iterator
+						it = m_listProxyMembers.begin(),
+						it_end = m_listProxyMembers.end();
+					it != it_end;
+					++it)
+					{
+						delete *it;
+					}
+				}
+
+				void add( method_adapter_interface * _ptr )
+				{
+					m_listProxyMembers.push_back( _ptr );
+				}
+
+				typedef std::list<member_adapter_interface *> TListProxyMemebers;
+				TListProxyMemebers m_listProxyMembers;
+			};
+
+			static delete_holder s_proxyDeleter;
+
+			member_adapter_interface * imember =
+				new member_adapter<C, A>(_name, a);
+
+			s_proxyDeleter.add( imember );
+
+			class_core::def_member(
+				_name,
+				imember,
+				class_info<C>()
+				);
+
 			return *this;
 		}
 

@@ -31,7 +31,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	class_type_scope::~class_type_scope()
 	{
-		for( TMethodFunction::iterator
+		for( TMethods::iterator
 			it = m_methods.begin(),
 			it_end = m_methods.end();
 		it != it_end;
@@ -40,8 +40,14 @@ namespace pybind
 			delete *it;
 		}
 
-		m_methods.clear();
-		m_methodsBase.clear();
+		for( TMembers::iterator
+			it = m_members.begin(),
+			it_end = m_members.end();
+		it != it_end;
+		++it )
+		{
+			delete *it;
+		}
 
 		delete m_constructor;
 
@@ -282,13 +288,11 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::add_method( const char * _name, method_adapter_interface * _ifunc, int _arity )
 	{
-		method_type_scope * method = new method_type_scope();
-
 		pybind_cfunction cf = (_arity)? 
 			(pybind_cfunction)&method_call_callback1:
-			(pybind_cfunction)&method_call_callback0;
+		(pybind_cfunction)&method_call_callback0;
 
-		method->setup( m_type, _name, _ifunc, cf, _arity );
+		method_type_scope * method = new method_type_scope( m_type, _name, _ifunc, cf, _arity );
 
 		m_methods.push_back( method );
 	}
@@ -304,6 +308,26 @@ namespace pybind
 			m_methodsBase.end(), 
 			_basescope->m_methodsBase.begin(),
 			_basescope->m_methodsBase.end() );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::add_member( const char * _name, member_adapter_interface * _imember )
+	{
+		member_type_scope * member = new member_type_scope( _name, _imember );
+
+		m_members.push_back( member );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::add_member_from_scope( class_type_scope * _basescope )
+	{
+		m_membersBase.insert( 
+			m_membersBase.end(), 
+			_basescope->m_members.begin(),
+			_basescope->m_members.end() );
+
+		m_membersBase.insert( 
+			m_membersBase.end(), 
+			_basescope->m_membersBase.begin(),
+			_basescope->m_membersBase.end() );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void * class_type_scope::construct( PyObject * _args )
@@ -352,7 +376,7 @@ namespace pybind
 	{
 		_self->impl = 0;
 
-		//this->update_method_self( _self, 0 );
+		//this->update_attributes_self( _self, 0 );
 
 		Py_XDECREF( _self->dict );
 		_self->dict = 0;
@@ -363,11 +387,11 @@ namespace pybind
 		return _type->tp_setattro == &class_setattro;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_type_scope::setup_method( py_class_type * _self )
+	void class_type_scope::setup_attributes( py_class_type * _self )
 	{
 		_self->dict = PyDict_New();
 
-		for( TMethodFunction::iterator
+		for( TMethods::iterator
 			it = m_methods.begin(),
 			it_end = m_methods.end();
 		it != it_end;
@@ -388,7 +412,7 @@ namespace pybind
 			Py_DECREF( py_method );
 		}
 
-		for( TMethodFunction::iterator
+		for( TMethods::iterator
 			it = m_methodsBase.begin(),
 			it_end = m_methodsBase.end();
 		it != it_end;
@@ -408,11 +432,51 @@ namespace pybind
 
 			Py_DECREF( py_method );
 		}
+
+		for( TMembers::iterator
+			it = m_members.begin(),
+			it_end = m_members.end();
+		it != it_end;
+		++it)
+		{
+			member_type_scope * member_type = *it;
+
+			PyObject * py_member = member_type->instance( _self );
+
+			if( PyDict_SetItemString( _self->dict, method_type->m_name, py_member ) == -1 )
+			{
+				Py_DECREF( _self );
+
+				check_error();
+			}
+
+			Py_DECREF( py_member );
+		}
+
+		for( TMethods::iterator
+			it = m_methodsBase.begin(),
+			it_end = m_methodsBase.end();
+		it != it_end;
+		++it)
+		{
+			member_type_scope * member_type = *it;
+
+			PyObject * py_member = member_type->instance( _self );
+
+			if( PyDict_SetItemString( _self->dict, method_type->m_name, py_member ) == -1 )
+			{
+				Py_DECREF( _self );
+
+				check_error();
+			}
+
+			Py_DECREF( py_member );
+		}
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_type_scope::update_method_self( py_class_type * _self, void * _impl )
+	void class_type_scope::update_attributes_self( py_class_type * _self, void * _impl )
 	{
-		for( TMethodFunction::iterator
+		for( TMethods::iterator
 			it = m_methods.begin(),
 			it_end = m_methods.end();
 		it != it_end;
@@ -426,7 +490,35 @@ namespace pybind
 			py_method->impl = _impl;
 		}
 
-		for( TMethodFunction::iterator
+		for( TMethods::iterator
+			it = m_methodsBase.begin(),
+			it_end = m_methodsBase.end();
+		it != it_end;
+		++it)
+		{
+			method_type_scope * method_type = *it;
+
+			PyObject * py_object = PyDict_GetItemString( _self->dict, method_type->m_name );
+			PyCFunctionObject * py_function = (PyCFunctionObject *)py_object;
+			py_method_type * py_method = (py_method_type *)py_function->m_self;
+			py_method->impl = _impl;
+		}
+
+		for( TMembers::iterator
+			it = m_members.begin(),
+			it_end = m_members.end();
+		it != it_end;
+		++it)
+		{
+			member_type_scope * member_type = *it;
+
+			PyObject * py_object = PyDict_GetItemString( _self->dict, member_type->m_name );
+			PyGetSetDescrObject * py_function = (PyGetSetDescrObject *)py_object;
+			py_method_type * py_method = (py_method_type *)py_function->m_self;
+			py_method->impl = _impl;
+		}
+
+		for( TMethods::iterator
 			it = m_methodsBase.begin(),
 			it_end = m_methodsBase.end();
 		it != it_end;
@@ -450,7 +542,7 @@ namespace pybind
 		self->impl = _impl;
 		self->scope = this;
 
-		setup_method( self );
+		setup_attributes( self );
 
 		//Py_INCREF( self );
 
@@ -467,7 +559,7 @@ namespace pybind
 		self->impl = _impl;
 		self->scope = this;
 
-		setup_method( self );
+		setup_attributes( self );
 
 		//Py_INCREF( self );
 

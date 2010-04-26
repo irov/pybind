@@ -102,7 +102,7 @@ namespace pybind
 	void class_core::wrap_holder( PyObject * _obj, void * _impl )
 	{
 		py_class_type * self = (py_class_type*)_obj;
-		self->scope->update_method_self( self, _impl );
+		self->scope->update_attributes_self( self, _impl );
 		self->impl = _impl;
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -126,6 +126,13 @@ namespace pybind
 		class_type_scope * scope = class_scope::get_class_scope( _info );
 
 		scope->add_method( _name, _ifunc, _arity );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void class_core::def_member( const char * _name, member_adapter_interface * _imember, const std::type_info & _info )
+	{
+		class_type_scope * scope = class_scope::get_class_scope( _info );
+
+		scope->add_member( _name, _imember );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_core::add_method_from_scope( class_type_scope * _scope, class_type_scope * _basescope )
@@ -157,7 +164,7 @@ namespace pybind
 		{
 			self->impl = _impl;
 			self->scope = scope;
-			scope->setup_method( self );
+			scope->setup_attributes( self );
 		}
 
 		return (PyObject *)self;

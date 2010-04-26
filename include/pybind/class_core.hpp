@@ -64,6 +64,11 @@ namespace pybind
 			add_method_from_scope(  _scope, _basescope );
 		}
 
+		static void def_member(
+			const char * _name,
+			member_adapter_interface * _imember,
+			const std::type_info & _info );
+
 		static void add_base_to_scope( class_type_scope * _scope, const char * _name, class_type_scope * _base, pybind_metacast cast );
 
 		template<class C, class B>

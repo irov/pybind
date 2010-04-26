@@ -328,6 +328,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\member_type.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\method_adapter.cpp"
 				>
 			</File>
@@ -417,6 +421,14 @@
 			</File>
 			<File
 				RelativePath="..\include\pybind\functor_type.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\include\pybind\member_adapter.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\include\pybind\member_type.hpp"
 				>
 			</File>
 			<File
