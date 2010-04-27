@@ -5,6 +5,7 @@
 #	include "pybind/class_core.hpp"
 #	include "pybind/method_parser.hpp"
 #	include "pybind/method_adapter.hpp"
+#	include "pybind/member_adapter.hpp"
 #	include "pybind/type_cast.hpp"
 
 #	include <list>
@@ -154,14 +155,14 @@ namespace pybind
 
 			static delete_holder s_proxyDeleter;
 
-			method_adapter_interface * ifunc =
+			method_adapter_interface * iadpter =
 				new proxy_method_adapter<C, P, F>(_name, _proxy, f);
 
-			s_proxyDeleter.add( ifunc );
+			s_proxyDeleter.add( iadpter );
 
 			class_core::def_method(
 				_name,
-				ifunc,
+				iadpter,
 				t_info::arity,
 				class_info<C>()
 				);
@@ -169,8 +170,8 @@ namespace pybind
 			return *this;
 		}
 
-		template<class C, class A>
-		base_ & def_props( const char * _name, A C:: * a )
+		template<class A>
+		base_ & def_member( const char * _name, A C:: * a )
 		{
 			struct delete_holder
 			{
@@ -186,7 +187,7 @@ namespace pybind
 					}
 				}
 
-				void add( method_adapter_interface * _ptr )
+				void add( member_adapter_interface * _ptr )
 				{
 					m_listProxyMembers.push_back( _ptr );
 				}
@@ -197,14 +198,56 @@ namespace pybind
 
 			static delete_holder s_proxyDeleter;
 
-			member_adapter_interface * imember =
+			member_adapter_interface * iadpter =
 				new member_adapter<C, A>(_name, a);
 
-			s_proxyDeleter.add( imember );
+			s_proxyDeleter.add( iadpter );
 
 			class_core::def_member(
 				_name,
-				imember,
+				iadpter,
+				class_info<C>()
+				);
+
+			return *this;
+		}
+
+		template<class FG, class FS>
+		base_ & def_property( const char * _name, FG _get, FS _set )
+		{
+			struct delete_holder
+			{
+				~delete_holder()
+				{
+					for( TListProxyMemebers::iterator
+						it = m_listProxyMembers.begin(),
+						it_end = m_listProxyMembers.end();
+					it != it_end;
+					++it)
+					{
+						delete *it;
+					}
+				}
+
+				void add( member_adapter_interface * _ptr )
+				{
+					m_listProxyMembers.push_back( _ptr );
+				}
+
+				typedef std::list<member_adapter_interface *> TListProxyMemebers;
+				TListProxyMemebers m_listProxyMembers;
+			};
+
+			static delete_holder s_proxyDeleter;
+
+			member_adapter_interface * iadpter =
+				new member_adapter_property<C, FG, FS>(_name, _get, _set);
+
+			s_proxyDeleter.add( iadpter );
+
+			class_core::def_member(
+				_name,
+				iadpter,
 				class_info<C>()
 				);
 

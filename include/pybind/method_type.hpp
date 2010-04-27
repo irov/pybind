@@ -10,7 +10,7 @@ namespace pybind
 {
 	struct py_method_type{
 		PyObject_HEAD
-		method_adapter_interface * ifunc;
+		method_adapter_interface * iadapter;
 		void * impl;
 		class_type_scope * scope;
 	};
@@ -18,13 +18,11 @@ namespace pybind
 	struct py_class_type;
 
 	void initialize_method();
-	void finialize_method();
 
 	class method_type_scope
 	{
 	public:
-		method_type_scope( PyTypeObject * _class, 
-			const char * _name, 
+		method_type_scope( const char * _name, 
 			method_adapter_interface * _ifunc, 
 			pybind_cfunction _cfunc, 
 			int _hasargs );

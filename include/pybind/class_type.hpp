@@ -1,8 +1,8 @@
 #	pragma once
-
+ 
 #	include "config/python.hpp"
 
-#	include "method_type.hpp"
+#	include "pybind/types.hpp"
 
 #	include <list>
 #	include <map>
@@ -11,6 +11,13 @@
 namespace pybind
 {
 	class class_type_scope;
+	class method_type_scope;
+	class member_type_scope;
+
+	class method_adapter_interface;
+	class member_adapter_interface;
+	
+
 	class constructor;
 
 	struct py_class_type{
@@ -47,6 +54,7 @@ namespace pybind
 		void add_method_from_scope( class_type_scope * _basescope );
 
 		void add_member( const char * _name, member_adapter_interface * _imember );
+		void add_member_from_scope( class_type_scope * _basescope );
 
 		void add_base( const char * _name, class_type_scope * _base, pybind_metacast _cast );
 

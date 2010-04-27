@@ -1,6 +1,7 @@
 #	include "pybind/system.hpp"
 #	include "pybind/class_core.hpp"
 #	include "pybind/method_type.hpp"
+#	include "pybind/member_type.hpp"
 #	include "pybind/def.hpp"
 #	include "pybind/functor.hpp"
 
@@ -22,6 +23,7 @@ namespace pybind
 		Py_Initialize();
 
 		initialize_method();
+		initialize_member();
 		initialize_def();
 		initialize_functor();
 	}
@@ -40,7 +42,6 @@ namespace pybind
 
 		class_core::finialize();		
 		
-		finialize_method();
 		finialize_def();
 		finialize_functor();
 	}

@@ -4,19 +4,49 @@
 
 namespace pybind
 {
+	static PyTypeObject s_member_type;
 	//////////////////////////////////////////////////////////////////////////
-	member_type_scope::member_type_scope( PyTypeObject * _class, 
-		const char * _name, 
-		method_adapter_interface * _ifunc, 
-		pybind_cfunction _cfunc, 
-		int _hasargs )
+	static void py_dealloc( PyObject * _obj )
+	{
+		py_member_type * mt = (py_member_type *)(_obj);
+
+		//delete mt->ifunc;
+
+		mt->ob_type->tp_free( mt );		
+	}
+	//////////////////////////////////////////////////////////////////////////
+	static PyObject * py_getmethod( PyObject * _self, PyObject * _args )
+	{
+		//PyObject * obj = PyTuple_GetItem( _args, 0 );
+
+		py_member_type * mt = (py_member_type *)(_self);
+		return mt->iadpter->get( mt->impl, mt->scope );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	static PyObject * py_setmethod( PyObject * _self, PyObject * _args )
+	{
+		//PyObject * obj = PyTuple_GetItem( _args, 0 );
+		PyObject * value = PyTuple_GetItem( _args, 1 );
+
+		py_member_type * mt = (py_member_type *)(_self);
+		mt->iadpter->set( mt->impl, value, mt->scope );
+
+		Py_RETURN_NONE;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	member_type_scope::member_type_scope( const char * _name, member_adapter_interface * _ifunc )
 		: m_name(_name)
 		, m_interface(_ifunc)
 	{
-		m_member.ml_name = _name;
-		m_method.ml_meth = _cfunc;
-		m_method.ml_flags = METH_CLASS | ( _hasargs ) ? METH_VARARGS : METH_NOARGS;
-		m_method.ml_doc = "Embedding function cpp";
+		m_getmethod.ml_name = "getmethod";
+		m_getmethod.ml_meth = &py_getmethod;
+		m_getmethod.ml_flags = METH_CLASS | METH_VARARGS;
+		m_getmethod.ml_doc = "Embedding function cpp";
+
+		m_setmethod.ml_name = "setmethod";
+		m_setmethod.ml_meth = &py_setmethod;
+		m_setmethod.ml_flags = METH_CLASS | METH_VARARGS;
+		m_setmethod.ml_doc = "Embedding function cpp";	
 	}
 	//////////////////////////////////////////////////////////////////////////
 	member_type_scope::~member_type_scope()
@@ -25,9 +55,34 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * member_type_scope::instance( py_class_type * _obj )
 	{
-		PyGetSetDef m_member;
-		PyObject * props = PyDescr_NewGetSet( (PyTypeObject *)_obj, &m_member );
+		py_member_type * py_member = (py_member_type *)PyType_GenericAlloc( &s_member_type, 0 );
 
-		return props;
+		py_member->iadpter = m_interface;
+		py_member->impl = _obj->impl;
+		py_member->scope = _obj->scope;
+
+		PyObject * py_get = PyCFunction_New( &m_getmethod, (PyObject*)py_member );
+		PyObject * py_set = PyCFunction_New( &m_setmethod, (PyObject*)py_member );
+
+		Py_DECREF( py_member );
+
+		PyObject * py_result = PyObject_CallFunction( (PyObject*)&PyProperty_Type, "OOss", py_get, py_set, 0, "member_type_scope");		
+		Py_DECREF( py_get );
+		Py_DECREF( py_set );
+
+		return py_result;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void initialize_member()
+	{
+		s_member_type.tp_name = "member_type_scope";
+		s_member_type.tp_basicsize = sizeof( py_member_type );
+		s_member_type.tp_dealloc = &py_dealloc;
+		s_member_type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
+
+		if( PyType_Ready( &s_member_type ) < 0 )
+		{
+			printf("invalid embedding class '%s' \n", s_member_type.tp_name );
+		}
 	}
 }

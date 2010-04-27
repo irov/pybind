@@ -1,5 +1,7 @@
 #	include "pybind/class_type.hpp"
 #	include "pybind/class_scope.hpp"
+#	include "pybind/method_type.hpp"
+#	include "pybind/member_type.hpp"
 #	include "pybind/constructor.hpp"
 
 #	include "pybind/system.hpp"
@@ -265,7 +267,7 @@ namespace pybind
 			return 0;
 		}
 
-		return md->ifunc->call( md->impl, md->scope );
+		return md->iadapter->call( md->impl, md->scope );
 	}
 
 	static PyObject * method_call_callback1( PyObject * _method, PyObject * _args )
@@ -278,7 +280,7 @@ namespace pybind
 			return 0;
 		}
 
-		return md->ifunc->call( md->impl, md->scope, _args );
+		return md->iadapter->call( md->impl, md->scope, _args );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::set_module( PyObject * _module )
@@ -292,7 +294,7 @@ namespace pybind
 			(pybind_cfunction)&method_call_callback1:
 		(pybind_cfunction)&method_call_callback0;
 
-		method_type_scope * method = new method_type_scope( m_type, _name, _ifunc, cf, _arity );
+		method_type_scope * method = new method_type_scope( _name, _ifunc, cf, _arity );
 
 		m_methods.push_back( method );
 	}
@@ -443,19 +445,26 @@ namespace pybind
 
 			PyObject * py_member = member_type->instance( _self );
 
-			if( PyDict_SetItemString( _self->dict, method_type->m_name, py_member ) == -1 )
+			if( PyDict_SetItemString( m_type->tp_dict, member_type->m_name, py_member ) == -1 )
 			{
 				Py_DECREF( _self );
 
 				check_error();
 			}
 
+			if( PyDict_SetItemString( m_type_holder->tp_dict, member_type->m_name, py_member ) == -1 )
+			{
+				Py_DECREF( _self );
+
+				check_error();
+			}			
+
 			Py_DECREF( py_member );
 		}
 
-		for( TMethods::iterator
-			it = m_methodsBase.begin(),
-			it_end = m_methodsBase.end();
+		for( TMembers::iterator
+			it = m_membersBase.begin(),
+			it_end = m_membersBase.end();
 		it != it_end;
 		++it)
 		{
@@ -463,7 +472,14 @@ namespace pybind
 
 			PyObject * py_member = member_type->instance( _self );
 
-			if( PyDict_SetItemString( _self->dict, method_type->m_name, py_member ) == -1 )
+			if( PyDict_SetItemString( m_type->tp_dict, member_type->m_name, py_member ) == -1 )
+			{
+				Py_DECREF( _self );
+
+				check_error();
+			}
+
+			if( PyDict_SetItemString( m_type_holder->tp_dict, member_type->m_name, py_member ) == -1 )
 			{
 				Py_DECREF( _self );
 
@@ -513,22 +529,20 @@ namespace pybind
 			member_type_scope * member_type = *it;
 
 			PyObject * py_object = PyDict_GetItemString( _self->dict, member_type->m_name );
-			PyGetSetDescrObject * py_function = (PyGetSetDescrObject *)py_object;
-			py_method_type * py_method = (py_method_type *)py_function->m_self;
+			py_member_type * py_method = (py_member_type *)py_object;
 			py_method->impl = _impl;
 		}
 
-		for( TMethods::iterator
-			it = m_methodsBase.begin(),
-			it_end = m_methodsBase.end();
+		for( TMembers::iterator
+			it = m_membersBase.begin(),
+			it_end = m_membersBase.end();
 		it != it_end;
 		++it)
 		{
-			method_type_scope * method_type = *it;
+			member_type_scope * member_type = *it;
 
-			PyObject * py_object = PyDict_GetItemString( _self->dict, method_type->m_name );
-			PyCFunctionObject * py_function = (PyCFunctionObject *)py_object;
-			py_method_type * py_method = (py_method_type *)py_function->m_self;
+			PyObject * py_object = PyDict_GetItemString( _self->dict, member_type->m_name );
+			py_member_type * py_method = (py_member_type *)py_object;
 			py_method->impl = _impl;
 		}
 	}

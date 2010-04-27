@@ -10,6 +10,7 @@ namespace pybind
 {
 	class class_type_scope;
 	class method_adapter_interface;
+	class member_adapter_interface;
 
 	namespace detail
 	{
