@@ -4,6 +4,7 @@
 
 #	include "pybind/method_call.hpp"
 #	include "pybind/method_proxy_call.hpp"
+#	include "pybind/function_proxy_call.hpp"
 
 
 namespace pybind
@@ -62,11 +63,11 @@ namespace pybind
 	};
 
 	template<class C, class P, class F>
-	class proxy_method_adapter
+	class method_adapter_proxy_member
 		: public method_adapter_interface
 	{
 	public:
-		proxy_method_adapter( const char * _name, P * _proxy, F f )
+		method_adapter_proxy_member( const char * _name, P * _proxy, F f )
 			: m_fn_name(_name)
 			, m_proxy(_proxy)
 			, m_fn(f)
@@ -81,7 +82,7 @@ namespace pybind
 	public:
 		PyObject * call( void * _self, class_type_scope * _scope ) override
 		{
-			return proxy_method_adapter::call( _self, _scope, 0 );
+			return this->call( _self, _scope, 0 );
 		}
 
 		PyObject * call( void * _self, class_type_scope * _scope, PyObject * _args ) override
@@ -95,6 +96,44 @@ namespace pybind
 	protected:
 		const char * m_fn_name;
 		P * m_proxy;
+		F m_fn;
+
+		const char * m_class_name;
+		const char * m_scope_name;
+	};
+
+	template<class C, class F>
+	class method_adapter_proxy_function
+		: public method_adapter_interface
+	{
+	public:
+		method_adapter_proxy_function( const char * _name, F f )
+			: m_fn_name(_name)
+			, m_fn(f)
+		{
+			const std::type_info & class_info = typeid(C*);
+			m_class_name = class_info.name();
+
+			const std::type_info & scope_info = typeid(C);
+			m_scope_name = scope_info.name();
+		}
+
+	public:
+		PyObject * call( void * _self, class_type_scope * _scope ) override
+		{
+			return this->call( _self, _scope, 0 );
+		}
+
+		PyObject * call( void * _self, class_type_scope * _scope, PyObject * _args ) override
+		{
+			C * impl = (C*)detail::meta_cast_scope( _self, m_scope_name, m_class_name, _scope );
+
+			PyObject *ret = function_proxy_call<C,F>::call( impl, m_fn, _args );
+			return ret;
+		}
+
+	protected:
+		const char * m_fn_name;
 		F m_fn;
 
 		const char * m_class_name;

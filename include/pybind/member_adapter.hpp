@@ -89,10 +89,11 @@ namespace pybind
 		{
 			C * obj = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_name, m_class_name, _scope ) );
 
-			typedef typename method_parser<FS>::result f_info;
-			typedef typename f_info::param1 param1;
+			typedef typename function_parser<FS>::result f_info;
 				
-			(obj->*m_set)(pybind::extract<param1>( _args ));
+			(obj->*m_set)(
+				pybind::extract<typename f_info::param0>( _args )
+				);
 
 			return 1;
 		}

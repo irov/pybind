@@ -2,7 +2,7 @@
 
 #	include "pybind/types.hpp"
 
-#	include "pybind/def_parser.hpp"
+#	include "pybind/function_parser.hpp"
 #	include "pybind/def_adapter.hpp"
 
 namespace pybind
@@ -23,7 +23,7 @@ namespace pybind
 	template<class F>
 	void def( const char * _name, F _cfunc, PyObject * _module = 0 )
 	{
-		typedef typename def_parser<F>::result f_info;
+		typedef typename function_parser<F>::result f_info;
 
 		detail::def_function(
 			_name,

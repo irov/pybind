@@ -23,7 +23,7 @@ namespace pybind
 	class functor_proxy
 		: public functor_proxy_interface
 	{
-		typedef typename method_parser<F>::result f_info;
+		typedef typename function_parser<F>::result f_info;
 
 	public:
 		functor_proxy( const char * _name, C * _self, F f  )

@@ -4,7 +4,7 @@
 #	include "pybind/bases.hpp"
 
 #	include "pybind/class_core.hpp"
-#	include "pybind/method_parser.hpp"
+#	include "pybind/function_parser.hpp"
 #	include "pybind/method_adapter.hpp"
 #	include "pybind/member_adapter.hpp"
 #	include "pybind/repr_adapter.hpp"
@@ -84,38 +84,33 @@ namespace pybind
 
 		template<class F>
 		base_ & def( const char * _name, F f )
-		{
-			typedef typename method_parser<F>::result t_info;
-
-			struct delete_holder
-			{
-				~delete_holder()
-				{
-					for( TListProxyMethod::iterator
-						it = m_listProxyMethod.begin(),
-						it_end = m_listProxyMethod.end();
-					it != it_end;
-					++it)
-					{
-						delete *it;
-					}
-				}
-
-				void add( method_adapter_interface * _ptr )
-				{
-					m_listProxyMethod.push_back( _ptr );
-				}
-
-				typedef std::list<method_adapter_interface *> TListProxyMethod;
-				TListProxyMethod m_listProxyMethod;
-			};
-
-			static delete_holder s_proxyDeleter;
-
+		{			
 			method_adapter_interface * ifunc =
-				new method_adapter<typename t_info::class_type, F>(_name, f);
+				new method_adapter<C, F>(_name, f);
 
-			s_proxyDeleter.add( ifunc );
+			s_adapterDeleter.add( ifunc );
+
+			typedef typename function_parser<F>::result t_info;
+
+			class_core::def_method(
+				_name,
+				ifunc,
+				t_info::arity,
+				class_info<C>()
+				);
+
+			return *this;
+		}
+
+		template<class F>
+		base_ & def_static( const char * _name, F f )
+		{			
+			method_adapter_interface * ifunc =
+				new method_adapter_proxy_function<C, F>(_name, f);
+
+			s_adapterDeleter.add( ifunc );
+
+			typedef typename function_parser<F>::result t_info;
 
 			class_core::def_method(
 				_name,
@@ -128,14 +123,14 @@ namespace pybind
 		}
 
 		template<class P, class F>
-		base_ & def_proxy( const char * _name, P * _proxy, F f )
+		base_ & def_static( const char * _name, P * _proxy, F f )
 		{
 			method_adapter_interface * iadpter =
-				new proxy_method_adapter<C, P, F>(_name, _proxy, f);
+				new method_adapter_proxy_member<C, P, F>(_name, _proxy, f);
 
 			s_adapterDeleter.add( iadpter );
 
-			typedef typename method_parser<F>::result t_info;
+			typedef typename function_parser<F>::result t_info;
 
 			class_core::def_method(
 				_name,

@@ -400,10 +400,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\include\pybind\def_parser.hpp"
-				>
-			</File>
-			<File
 				RelativePath="..\include\pybind\def_type.hpp"
 				>
 			</File>
@@ -413,6 +409,14 @@
 			</File>
 			<File
 				RelativePath="..\include\pybind\extract.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\include\pybind\function_parser.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\include\pybind\function_proxy_call.hpp"
 				>
 			</File>
 			<File
@@ -445,10 +449,6 @@
 			</File>
 			<File
 				RelativePath="..\include\pybind\method_call.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\include\pybind\method_parser.hpp"
 				>
 			</File>
 			<File
