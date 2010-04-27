@@ -1,6 +1,6 @@
 #	pragma once
 
-#	include "config/python.hpp"
+#	include "pybind/adapter_interface.hpp"
 
 #	include "pybind/method_adapter.hpp"
 #	include "pybind/class_core.hpp"
@@ -8,10 +8,8 @@
 namespace pybind
 {
 	class member_adapter_interface
+		: public adapter_interface
 	{
-	public:
-		virtual ~member_adapter_interface(){};
-
 	public:
 		virtual PyObject * get( void * _self, class_type_scope * _scope ) = 0;
 		virtual int set( void * _self, PyObject * _args, class_type_scope * _scope ) = 0;

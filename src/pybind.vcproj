@@ -360,6 +360,10 @@
 			Name="Include Files"
 			>
 			<File
+				RelativePath="..\include\pybind\adapter_interface.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\include\pybind\bases.hpp"
 				>
 			</File>
@@ -424,6 +428,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\include\pybind\helper.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\include\pybind\member_adapter.hpp"
 				>
 			</File>
@@ -457,6 +465,10 @@
 			</File>
 			<File
 				RelativePath="..\include\pybind\pybind.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\include\pybind\repr_adapter.hpp"
 				>
 			</File>
 			<File

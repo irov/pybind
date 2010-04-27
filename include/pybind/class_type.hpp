@@ -16,6 +16,7 @@ namespace pybind
 
 	class method_adapter_interface;
 	class member_adapter_interface;
+	class repr_adapter_interface;
 	
 
 	class constructor;
@@ -56,6 +57,8 @@ namespace pybind
 		void add_member( const char * _name, member_adapter_interface * _imember );
 		void add_member_from_scope( class_type_scope * _basescope );
 
+		void add_repr( repr_adapter_interface * _irepr );
+
 		void add_base( const char * _name, class_type_scope * _base, pybind_metacast _cast );
 
 		PyObject * create_holder( void * _impl );
@@ -84,6 +87,7 @@ namespace pybind
 		TMapBases m_bases;
 
 		constructor * m_constructor;
+		repr_adapter_interface * m_repr;
 
 		const char * m_type_name;
 

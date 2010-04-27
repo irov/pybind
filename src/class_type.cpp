@@ -2,6 +2,7 @@
 #	include "pybind/class_scope.hpp"
 #	include "pybind/method_type.hpp"
 #	include "pybind/member_type.hpp"
+#	include "pybind/repr_adapter.hpp"
 #	include "pybind/constructor.hpp"
 
 #	include "pybind/system.hpp"
@@ -24,9 +25,10 @@ namespace pybind
 
 	//////////////////////////////////////////////////////////////////////////
 	class_type_scope::class_type_scope()
-		: m_type( 0 )
-		, m_type_holder( 0 )
-		, m_constructor( 0 )
+		: m_type(0)
+		, m_type_holder(0)
+		, m_constructor(0)
+		, m_repr(0)
 	{
 	}
 
@@ -162,6 +164,20 @@ namespace pybind
 		return ask( caller, "(OO)", obj, args );
 	}
 
+	//////////////////////////////////////////////////////////////////////////
+	static PyObject * class_reprfunc( PyObject * _obj )
+	{
+		py_class_type* inst = (py_class_type*)_obj;
+
+		if( inst->impl == 0 )
+		{
+			error_message( "class_call: unbind object" );
+			return 0;
+		}
+
+		return inst->scope->m_repr->repr( inst->impl, inst->scope );
+	}
+	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::setup(
 		const char * _name, 
 		const char * _type,
@@ -200,7 +216,7 @@ namespace pybind
 			m_type->tp_getset = instance_getsets;
 			m_type->tp_setattro = &class_setattro;
 			m_type->tp_getattro = &class_getattro;
-			m_type->tp_call = &class_call;
+			m_type->tp_call = &class_call;			
 			m_type->tp_dictoffset = offsetof( py_class_type, dict );
 			m_type->tp_base = &PyBaseObject_Type;
 			m_type->tp_bases = PyTuple_Pack( 1, &PyBaseObject_Type ); 
@@ -330,6 +346,14 @@ namespace pybind
 			m_membersBase.end(), 
 			_basescope->m_membersBase.begin(),
 			_basescope->m_membersBase.end() );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::add_repr( repr_adapter_interface * _irepr )
+	{
+		m_repr = _irepr;
+
+		m_type->tp_repr = &class_reprfunc;
+		m_type_holder->tp_repr = &class_reprfunc;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void * class_type_scope::construct( PyObject * _args )

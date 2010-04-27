@@ -1,8 +1,10 @@
 #	pragma once
 
+#	include "pybind/adapter_interface.hpp"
+
 #	include "pybind/method_call.hpp"
 #	include "pybind/method_proxy_call.hpp"
-#	include "config/python.hpp"
+
 
 namespace pybind
 {
@@ -14,10 +16,8 @@ namespace pybind
 	}
 
 	class method_adapter_interface
+		: public adapter_interface
 	{
-	public:
-		virtual ~method_adapter_interface(){};
-
 	public:
 		virtual PyObject * call( void * _self, class_type_scope * scope ) = 0;
 		virtual PyObject * call( void * _self, class_type_scope * scope, PyObject * _args ) = 0;

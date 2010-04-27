@@ -121,18 +121,25 @@ namespace pybind
 		_scope->set_module( _module );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_core::def_method( const char * _name, method_adapter_interface * _ifunc, int _arity, const std::type_info & _info )
+	void class_core::def_method( const char * _name, method_adapter_interface * _iadapter, int _arity, const std::type_info & _info )
 	{
 		class_type_scope * scope = class_scope::get_class_scope( _info );
 
-		scope->add_method( _name, _ifunc, _arity );
+		scope->add_method( _name, _iadapter, _arity );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_core::def_member( const char * _name, member_adapter_interface * _imember, const std::type_info & _info )
+	void class_core::def_member( const char * _name, member_adapter_interface * _iadapter, const std::type_info & _info )
 	{
 		class_type_scope * scope = class_scope::get_class_scope( _info );
 
-		scope->add_member( _name, _imember );
+		scope->add_member( _name, _iadapter );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void class_core::def_repr( repr_adapter_interface * _iadapter, const std::type_info & _info )
+	{
+		class_type_scope * scope = class_scope::get_class_scope( _info );
+
+		scope->add_repr( _iadapter );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_core::add_method_from_scope( class_type_scope * _scope, class_type_scope * _basescope )
@@ -140,6 +147,14 @@ namespace pybind
 		if( _scope )
 		{
 			_scope->add_method_from_scope( _basescope );
+		}
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void class_core::add_member_from_scope( class_type_scope * _scope, class_type_scope * _basescope )
+	{
+		if( _scope )
+		{
+			_scope->add_member_from_scope( _basescope );
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////

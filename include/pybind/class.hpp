@@ -1,11 +1,13 @@
 #	pragma once
 
+#	include "pybind/helper.hpp"
 #	include "pybind/bases.hpp"
 
 #	include "pybind/class_core.hpp"
 #	include "pybind/method_parser.hpp"
 #	include "pybind/method_adapter.hpp"
 #	include "pybind/member_adapter.hpp"
+#	include "pybind/repr_adapter.hpp"
 #	include "pybind/type_cast.hpp"
 
 #	include <list>
@@ -61,12 +63,12 @@ namespace pybind
 		{
 			int arity = B::base_arity;
 
-			if( arity-- > 0 )class_core::add_method_from_base<C, typename B::base0>();
-			if( arity-- > 0 )class_core::add_method_from_base<C, typename B::base1>();
-			if( arity-- > 0 )class_core::add_method_from_base<C, typename B::base2>();
-			if( arity-- > 0 )class_core::add_method_from_base<C, typename B::base3>();
-			if( arity-- > 0 )class_core::add_method_from_base<C, typename B::base4>();
-			if( arity-- > 0 )class_core::add_method_from_base<C, typename B::base5>();
+			if( arity-- > 0 )class_core::add_attribute_from_base<C, typename B::base0>();
+			if( arity-- > 0 )class_core::add_attribute_from_base<C, typename B::base1>();
+			if( arity-- > 0 )class_core::add_attribute_from_base<C, typename B::base2>();
+			if( arity-- > 0 )class_core::add_attribute_from_base<C, typename B::base3>();
+			if( arity-- > 0 )class_core::add_attribute_from_base<C, typename B::base4>();
+			if( arity-- > 0 )class_core::add_attribute_from_base<C, typename B::base5>();
 		}
 
 		template<class C0, class C1, class C2, class C3, class C4, class C5>
@@ -128,37 +130,12 @@ namespace pybind
 		template<class P, class F>
 		base_ & def_proxy( const char * _name, P * _proxy, F f )
 		{
-			typedef typename method_parser<F>::result t_info;
-
-			struct delete_holder
-			{
-				~delete_holder()
-				{
-					for( TListProxyMethod::iterator
-						it = m_listProxyMethod.begin(),
-						it_end = m_listProxyMethod.end();
-					it != it_end;
-					++it)
-					{
-						delete *it;
-					}
-				}
-
-				void add( method_adapter_interface * _ptr )
-				{
-					m_listProxyMethod.push_back( _ptr );
-				}
-
-				typedef std::list<method_adapter_interface *> TListProxyMethod;
-				TListProxyMethod m_listProxyMethod;
-			};
-
-			static delete_holder s_proxyDeleter;
-
 			method_adapter_interface * iadpter =
 				new proxy_method_adapter<C, P, F>(_name, _proxy, f);
 
-			s_proxyDeleter.add( iadpter );
+			s_adapterDeleter.add( iadpter );
+
+			typedef typename method_parser<F>::result t_info;
 
 			class_core::def_method(
 				_name,
@@ -173,35 +150,10 @@ namespace pybind
 		template<class A>
 		base_ & def_member( const char * _name, A C:: * a )
 		{
-			struct delete_holder
-			{
-				~delete_holder()
-				{
-					for( TListProxyMemebers::iterator
-						it = m_listProxyMembers.begin(),
-						it_end = m_listProxyMembers.end();
-					it != it_end;
-					++it)
-					{
-						delete *it;
-					}
-				}
-
-				void add( member_adapter_interface * _ptr )
-				{
-					m_listProxyMembers.push_back( _ptr );
-				}
-
-				typedef std::list<member_adapter_interface *> TListProxyMemebers;
-				TListProxyMemebers m_listProxyMembers;
-			};
-
-			static delete_holder s_proxyDeleter;
-
 			member_adapter_interface * iadpter =
 				new member_adapter<C, A>(_name, a);
 
-			s_proxyDeleter.add( iadpter );
+			s_adapterDeleter.add( iadpter );
 
 			class_core::def_member(
 				_name,
@@ -215,40 +167,31 @@ namespace pybind
 		template<class FG, class FS>
 		base_ & def_property( const char * _name, FG _get, FS _set )
 		{
-			struct delete_holder
-			{
-				~delete_holder()
-				{
-					for( TListProxyMemebers::iterator
-						it = m_listProxyMembers.begin(),
-						it_end = m_listProxyMembers.end();
-					it != it_end;
-					++it)
-					{
-						delete *it;
-					}
-				}
-
-				void add( member_adapter_interface * _ptr )
-				{
-					m_listProxyMembers.push_back( _ptr );
-				}
-
-				typedef std::list<member_adapter_interface *> TListProxyMemebers;
-				TListProxyMemebers m_listProxyMembers;
-			};
-
-			static delete_holder s_proxyDeleter;
-
 			member_adapter_interface * iadpter =
 				new member_adapter_property<C, FG, FS>(_name, _get, _set);
 
-			s_proxyDeleter.add( iadpter );
+			s_adapterDeleter.add( iadpter );
 
 			class_core::def_member(
 				_name,
 				iadpter,
 				class_info<C>()
+				);
+
+			return *this;
+		}
+
+		template<class F>
+		base_ & def_repr( F _repr )
+		{
+			repr_adapter_interface * iadpter =
+				new repr_adapter<C, F>( _repr );
+
+			s_adapterDeleter.add( iadpter );
+
+			class_core::def_repr( 
+				iadpter, 
+				class_info<C>() 
 				);
 
 			return *this;
@@ -289,7 +232,13 @@ namespace pybind
 		{
 			return class_scope::get_class_scope( class_info<C>() );
 		}
+
+	protected:
+		static helper::delete_holder<adapter_interface> s_adapterDeleter;
 	};
+
+	template<class C, class B>
+	helper::delete_holder<adapter_interface> base_<C,B>::s_adapterDeleter;
 
 	template<class C> 
 	struct extract_class_type_ptr
