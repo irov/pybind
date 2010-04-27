@@ -175,7 +175,7 @@ namespace pybind
 			return 0;
 		}
 
-		return inst->scope->m_repr->repr( inst->impl, inst->scope );
+		return inst->scope->m_repr->repr( _obj, inst->impl, inst->scope );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::setup(

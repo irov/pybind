@@ -10,7 +10,7 @@ namespace pybind
 		: public adapter_interface
 	{
 	public:
-		virtual PyObject * repr( void * _self, class_type_scope * _scope ) = 0;
+		virtual PyObject * repr( PyObject * _obj, void * _self, class_type_scope * _scope ) = 0;
 	};
 	//////////////////////////////////////////////////////////////////////////
 	template<class C, class F>
@@ -29,11 +29,11 @@ namespace pybind
 		}
 
 	public:
-		PyObject * repr( void * _self, class_type_scope * _scope ) override
+		PyObject * repr( PyObject * _obj, void * _self, class_type_scope * _scope ) override
 		{
-			C * obj = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_name, m_class_name, _scope ) );
+			C * inst = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_name, m_class_name, _scope ) );
 
-			std::string repr = (*m_repr)( obj );
+			std::string repr = (*m_repr)( _obj, inst );
 
 			return pybind::ptr( repr );
 		}
