@@ -35,12 +35,7 @@ namespace pybind
 
 			class_type_scope * type_scope = class_scope::get_class_scope( _info );
 
-			if( PyType_IsSubtype( (PyTypeObject *)py_type, type_scope->m_type ) )
-			{
-				return get_class( _obj );
-			}
-
-			if( PyType_IsSubtype( (PyTypeObject *)py_type, type_scope->m_type_holder ) )
+			if( PyType_IsSubtype( (PyTypeObject *)py_type, &type_scope->m_pytypeobject ) )
 			{
 				return get_class( _obj );
 			}
@@ -68,21 +63,24 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	class_type_scope * class_core::create_new_type_scope( 
 		const std::type_info & _info,
-		const char * _name, 
-		PyObject * _module,
-		pybind_newfunc _pynew,
-		pybind_destructor _pydestructor)
+		const char * _name )
 	{
-		class_type_scope * t_scope = new class_type_scope();
-
 		const char * type_name = _info.name();
-		t_scope->setup( _name, type_name, _module, _pynew, _pydestructor );
+		class_type_scope * t_scope = new class_type_scope( _name, type_name );
 
 		class_scope::reg_class_scope( _info, t_scope );
-
 		s_listClassType.push_back( t_scope );
 
 		return t_scope;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void class_core::setup_new_type_scope( 
+		class_type_scope * _scope,
+		PyObject * _module,
+		pybind_newfunc _pynew,
+		pybind_destructor _pydestructor )
+	{
+		_scope->setup( _module, _pynew, _pydestructor );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * class_core::create_holder( const std::type_info & _info, void * _impl )
@@ -102,7 +100,6 @@ namespace pybind
 	void class_core::wrap_holder( PyObject * _obj, void * _impl )
 	{
 		py_class_type * self = (py_class_type*)_obj;
-		self->scope->update_attributes_self( self, _impl );
 		self->impl = _impl;
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -142,22 +139,6 @@ namespace pybind
 		scope->add_repr( _iadapter );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_core::add_method_from_scope( class_type_scope * _scope, class_type_scope * _basescope )
-	{
-		if( _scope )
-		{
-			_scope->add_method_from_scope( _basescope );
-		}
-	}
-	//////////////////////////////////////////////////////////////////////////
-	void class_core::add_member_from_scope( class_type_scope * _scope, class_type_scope * _basescope )
-	{
-		if( _scope )
-		{
-			_scope->add_member_from_scope( _basescope );
-		}
-	}
-	//////////////////////////////////////////////////////////////////////////
 	void class_core::add_base_to_scope( class_type_scope * _scope, const char * _name, class_type_scope * _base, pybind_metacast cast )
 	{
 		_scope->add_base( _name, _base, cast );
@@ -179,7 +160,6 @@ namespace pybind
 		{
 			self->impl = _impl;
 			self->scope = scope;
-			scope->setup_attributes( self );
 		}
 
 		return (PyObject *)self;
@@ -189,9 +169,6 @@ namespace pybind
 	{
 		py_class_type * self = (py_class_type *)(_obj);
 		void * impl = self->impl;
-
-		Py_XDECREF( self->dict );
-		self->dict = 0;
 
 		_obj->ob_type->tp_free( (PyObject*)self );
 

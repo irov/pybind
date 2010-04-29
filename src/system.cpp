@@ -22,8 +22,9 @@ namespace pybind
 	{
 		Py_Initialize();
 
-		initialize_method();
-		initialize_member();
+		initialize_methods();
+		initialize_members();
+		initialize_classes();
 		initialize_def();
 		initialize_functor();
 	}

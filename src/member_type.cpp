@@ -15,21 +15,24 @@ namespace pybind
 		mt->ob_type->tp_free( mt );		
 	}
 	//////////////////////////////////////////////////////////////////////////
-	static PyObject * py_getmethod( PyObject * _self, PyObject * _args )
+	static PyObject * py_getmethod( PyObject * _member, PyObject * _args )
 	{
-		//PyObject * obj = PyTuple_GetItem( _args, 0 );
+		PyObject * py_self = PyTuple_GetItem( _args, 0 );
 
-		py_member_type * mt = (py_member_type *)(_self);
-		return mt->iadpter->get( mt->impl, mt->scope );
+		py_class_type * ct = (py_class_type *)py_self;
+		py_member_type * mt = (py_member_type *)_member;
+
+		return mt->iadpter->get( ct->impl, ct->scope );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	static PyObject * py_setmethod( PyObject * _self, PyObject * _args )
+	static PyObject * py_setmethod( PyObject * _member, PyObject * _args )
 	{
-		//PyObject * obj = PyTuple_GetItem( _args, 0 );
-		PyObject * value = PyTuple_GetItem( _args, 1 );
+		PyObject * py_self = PyTuple_GetItem( _args, 0 );
+		PyObject * py_value = PyTuple_GetItem( _args, 1 );
 
-		py_member_type * mt = (py_member_type *)(_self);
-		mt->iadpter->set( mt->impl, value, mt->scope );
+		py_class_type * ct = (py_class_type *)py_self;
+		py_member_type * mt = (py_member_type *)(_member);
+		mt->iadpter->set( ct->impl, py_value, ct->scope );
 
 		Py_RETURN_NONE;
 	}
@@ -53,13 +56,11 @@ namespace pybind
 	{
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * member_type_scope::instance( py_class_type * _obj )
+	PyObject * member_type_scope::instance()
 	{
 		py_member_type * py_member = (py_member_type *)PyType_GenericAlloc( &s_member_type, 0 );
 
 		py_member->iadpter = m_interface;
-		py_member->impl = _obj->impl;
-		py_member->scope = _obj->scope;
 
 		PyObject * py_get = PyCFunction_New( &m_getmethod, (PyObject*)py_member );
 		PyObject * py_set = PyCFunction_New( &m_setmethod, (PyObject*)py_member );
@@ -73,7 +74,7 @@ namespace pybind
 		return py_result;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void initialize_member()
+	void initialize_members()
 	{
 		s_member_type.tp_name = "member_type_scope";
 		s_member_type.tp_basicsize = sizeof( py_member_type );

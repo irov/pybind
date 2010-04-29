@@ -32,11 +32,16 @@ namespace pybind
 	public:
 		static class_type_scope * create_new_type_scope( 
 			const std::type_info & _info,
-			const char * _name, 
+			const char * _name
+			);
+
+		static void setup_new_type_scope( 
+			class_type_scope * _scope,
 			PyObject * _module,
 			pybind_newfunc _pynew,
 			pybind_destructor _pydestructor
 			);
+
 
 		static void finialize();
 
@@ -55,19 +60,6 @@ namespace pybind
 			int _arity, 
 			const std::type_info & _info );
 
-		static void add_method_from_scope( class_type_scope * _scope, class_type_scope * _basescope );
-		static void add_member_from_scope( class_type_scope * _scope, class_type_scope * _basescope );
-
-		template<class C, class B>
-		static void add_attribute_from_base()
-		{
-			class_type_scope * _scope = class_scope::get_class_scope( class_info<C>() );
-			class_type_scope * _basescope = class_scope::get_class_scope( class_info<B>() );
-			
-			add_method_from_scope(  _scope, _basescope );
-			add_member_from_scope(  _scope, _basescope );
-		}
-
 		static void def_member(
 			const char * _name,
 			member_adapter_interface * _iadapter,
@@ -79,17 +71,16 @@ namespace pybind
 
 		static void add_base_to_scope( class_type_scope * _scope, const char * _name, class_type_scope * _base, pybind_metacast cast );
 
-		template<class C, class B>
-		static void add_base( pybind_metacast cast)
+		template<class B>
+		static void add_base( class_type_scope * _scope, pybind_metacast cast)
 		{
-			class_type_scope * _scope = class_scope::get_class_scope( class_info<C>() );
-			class_type_scope * _basescope = class_scope::get_class_scope( class_info<B>() );
+			class_type_scope * basescope = class_scope::get_class_scope( class_info<B>() );
 
 			const std::type_info & tinfo = class_info<B*>();
 
 			const char * name = tinfo.name();
 
-			add_base_to_scope( _scope, name, _basescope, cast );			
+			add_base_to_scope( _scope, name, basescope, cast );			
 		}
 
 		static void * meta_cast( void * _impl, class_type_scope * _scope, const char * _name );

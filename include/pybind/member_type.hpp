@@ -11,13 +11,7 @@ namespace pybind
 	struct py_member_type{
 		PyObject_HEAD
 		member_adapter_interface * iadpter;
-		void * impl;
-		class_type_scope * scope;
 	};
-
-	struct py_class_type;
-
-	void initialize_member();
 
 	class member_type_scope
 	{
@@ -27,7 +21,7 @@ namespace pybind
 		~member_type_scope();
 
 	public:
-		PyObject * instance( py_class_type * _obj );
+		PyObject * instance();
 
 	public:
 		const char * m_name;
@@ -37,5 +31,7 @@ namespace pybind
 		PyMethodDef m_getmethod;
 		PyMethodDef m_setmethod;
 	};
+
+	void initialize_members();
 }
 
