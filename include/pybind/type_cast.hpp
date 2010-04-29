@@ -113,6 +113,9 @@ namespace pybind
 		}
 
 	protected:
+		void * type_info_cast( PyObject * _obj, const std::type_info & _tinfo, const std::type_info & _tptrinfo );
+
+	protected:
 		bool m_valid;
 	};
 
@@ -146,7 +149,6 @@ namespace pybind
 	public:
 		virtual PyObject * wrap( T t ) = 0;
 		virtual T apply( PyObject * _obj ) = 0;
-
 	};
 }
 

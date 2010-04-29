@@ -1,4 +1,7 @@
 #	include "pybind/type_cast.hpp"
+#	include "pybind/class_core.hpp"
+#	include "pybind/class_type.hpp"
+
 #	include "config/python.hpp"
 #	include "pybind/system.hpp"
 
@@ -38,7 +41,40 @@ namespace pybind
 			return it_find->second;
 		}
 	}
+	//////////////////////////////////////////////////////////////////////////
+	void * type_cast::type_info_cast( PyObject * _obj, const std::type_info & _tinfo, const std::type_info & _tptrinfo )
+	{
+		if( detail::is_class( _obj ) == false )
+		{
+			if( const char * repr = pybind::object_to_string( _obj ) )
+			{
+				pybind::error_message( "extract from %.256s"
+					, repr
+					);
+			}
 
+			throw_exception();
+		}
+
+		m_valid = true;
+
+		void * impl = detail::get_class_impl( _obj );
+		class_type_scope * scope = detail::get_class_scope( _obj );
+
+		class_type_scope * cur_scope = detail::get_class_type_scope( _tinfo );
+
+		void * result = 0;
+
+		if( cur_scope != scope )
+		{
+			const std::type_info & tinfo = _tptrinfo;
+			const char * name = tinfo.name();
+			impl = class_core::meta_cast( impl, scope, name );
+		}
+
+		return impl;
+	}
+	//////////////////////////////////////////////////////////////////////////
 	static struct extract_bool_type
 		: public type_cast_result<bool>
 	{

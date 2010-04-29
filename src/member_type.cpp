@@ -19,10 +19,12 @@ namespace pybind
 	{
 		PyObject * py_self = PyTuple_GetItem( _args, 0 );
 
-		py_class_type * ct = (py_class_type *)py_self;
 		py_member_type * mt = (py_member_type *)_member;
 
-		return mt->iadpter->get( ct->impl, ct->scope );
+		void * impl = detail::get_class_impl( py_self );
+		class_type_scope * scope = detail::get_class_scope( py_self );
+
+		return mt->iadpter->get( impl, scope );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	static PyObject * py_setmethod( PyObject * _member, PyObject * _args )
@@ -30,9 +32,12 @@ namespace pybind
 		PyObject * py_self = PyTuple_GetItem( _args, 0 );
 		PyObject * py_value = PyTuple_GetItem( _args, 1 );
 
-		py_class_type * ct = (py_class_type *)py_self;
 		py_member_type * mt = (py_member_type *)(_member);
-		mt->iadpter->set( ct->impl, py_value, ct->scope );
+
+		void * impl = detail::get_class_impl( py_self );
+		class_type_scope * scope = detail::get_class_scope( py_self );
+
+		mt->iadpter->set( impl, py_value, scope );
 
 		Py_RETURN_NONE;
 	}

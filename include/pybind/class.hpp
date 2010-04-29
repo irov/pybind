@@ -4,6 +4,7 @@
 #	include "pybind/bases.hpp"
 
 #	include "pybind/class_core.hpp"
+#	include "pybind/class_type.hpp"
 #	include "pybind/function_parser.hpp"
 #	include "pybind/method_adapter.hpp"
 #	include "pybind/member_adapter.hpp"
@@ -21,9 +22,10 @@ namespace pybind
 	template<class C, class B = no_bases>
 	class base_
 	{
-	public:
+	protected:
 		typedef B bases_type;
 
+	public:
 		virtual void setup_extract() = 0;
 
 	public:
@@ -183,7 +185,7 @@ namespace pybind
 		static PyObject *
 			new_interface( PyTypeObject * _type, PyObject * _args, PyObject * _kwds )
 		{
-			return class_core::new_impl( _type, _args, 0, class_info<C>() );
+			return detail::alloc_class( _type, _args, 0, class_info<C>() );
 		}
 		
 
@@ -192,28 +194,25 @@ namespace pybind
 		{
 			C * obj = (C*)class_core::construct( scope(), _args );
 
-			//list_check( _args );
-			//C * obj = new C;/*A::new_<C>();*/
-
-			return class_core::new_impl( _type, _args, obj, class_info<C>() );
+			return detail::alloc_class( _type, _args, obj, class_info<C>() );
 		}
 
 		static void 
 			dealloc_only_python( PyObject * self )
 		{
-			C * obj = (C*)class_core::dealloc_impl( self );
+			C * obj = (C*)detail::dealloc_class( self );
 		}
 
 		static void
 			dealloc_( PyObject * self )
 		{
-			C * obj = (C*)class_core::dealloc_impl( self );
+			C * obj = (C*)detail::dealloc_class( self );
 			delete obj;
 		}
 
 		static class_type_scope * scope()
 		{
-			return class_scope::get_class_scope( class_info<C>() );
+			return detail::get_class_type_scope( class_info<C>() );
 		}
 
 	protected:
@@ -229,34 +228,10 @@ namespace pybind
 	{
 		C * apply( PyObject * _obj ) override
 		{
-			if( detail::is_class( _obj ) == false )
-			{
-				if( const char * repr = pybind::object_to_string( _obj ) )
-				{
-					pybind::error_message( "extract from %.256s"
-						, repr
-						);
-				}
+			const std::type_info & tinfo = class_info<C>();
+			const std::type_info & tptrinfo = class_info<C *>();
 
-				throw_exception();
-			}
-
-			type_cast_result<C *>::m_valid = true;
-
-			void * impl = detail::get_class( _obj );
-			class_type_scope * scope = detail::get_class_scope( _obj );
-
-			const std::type_info & cur_tinfo = class_info<C>();
-			class_type_scope * cur_scope = class_scope::get_class_scope( cur_tinfo );
-
-			void * result = 0;
-
-			if( cur_scope != scope )
-			{
-				const std::type_info & tinfo = class_info<C *>();
-				const char * name = tinfo.name();
-				impl = class_core::meta_cast( impl, scope, name );
-			}
+			void * impl = type_cast::type_info_cast( _obj, tinfo, tptrinfo );
 
 			return static_cast<C*>(impl);
 		}

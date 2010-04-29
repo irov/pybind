@@ -1,7 +1,6 @@
 #	pragma once
  
-#	include "config/python.hpp"
-
+#	include "pybind/exports.hpp"
 #	include "pybind/types.hpp"
 
 #	include <list>
@@ -20,12 +19,26 @@ namespace pybind
 	
 	class constructor;
 
-	struct py_class_type{
-		PyObject_HEAD
-		void * impl;
-		bool holder;
-		class_type_scope * scope;
-	};
+	namespace detail
+	{
+		PYBIND_API bool is_class( PyObject * _obj );
+		PYBIND_API void * get_class_impl( PyObject * _obj );
+		PYBIND_API class_type_scope * get_class_scope( PyObject * _obj );
+		PYBIND_API void * unwrap( PyObject * _obj );
+		PYBIND_API void wrap( PyObject * _obj, void * _impl );
+
+		PYBIND_API void * check_registred_class( PyObject * _obj, const std::type_info & _info );
+
+		PYBIND_API PyObject * alloc_class( PyTypeObject * _type, PyObject * _args, void * _impl, const std::type_info & _tinfo );
+		PYBIND_API void * dealloc_class( PyObject * _obj );
+
+		PYBIND_API void reg_class_type( PyTypeObject * _type );
+		PYBIND_API PyTypeObject * find_sub_type( PyTypeObject * _subtype );
+
+		PYBIND_API void reg_class_type_scope( const std::type_info & _info, class_type_scope * _scope );
+		PYBIND_API class_type_scope * get_class_type_scope( const std::type_info & _info );
+		PYBIND_API bool has_class_type_scope( const std::type_info & _info );
+	}
 
 	class class_type_scope
 	{
@@ -34,7 +47,7 @@ namespace pybind
 		~class_type_scope();
 
 	public:
-		void setup( PyObject * _module, newfunc _pynew, destructor _pydestructor );
+		void setup( PyObject * _module, pybind_newfunc _pynew, pybind_destructor _pydestructor );
 
 	public:
 		const char * get_name() const;
@@ -56,10 +69,7 @@ namespace pybind
 		PyObject * create_impl( void * _impl );
 
 		void * metacast( const char * name, void * _impl );
-
-		void unwrap( py_class_type * _self );
-
-		static bool is_class( PyTypeObject * _type );
+		void unwrap( PyObject * _obj );
 
 	public:		
 		typedef std::list<method_type_scope *> TMethods;
@@ -73,13 +83,13 @@ namespace pybind
 		TMapBases m_bases;
 
 		constructor * m_pyconstructor;
-		destructor m_pydestructor;
+		pybind_destructor m_pydestructor;
 		repr_adapter_interface * m_repr;
 
 		const char * m_name;
 		const char * m_type;
 
-		PyTypeObject m_pytypeobject;
+		PyTypeObject * m_pytypeobject;
 
 		PyObject * m_module;
 	};

@@ -21,9 +21,11 @@ namespace pybind
 	static PyObject * descr_call2( PyObject * _obj, PyObject * _args , PyObject * _kwds )
 	{
 		py_method_caller_type * mct = (py_method_caller_type *)_obj;
-		py_class_type * ct = (py_class_type *)mct->self;
 
-		return mct->iadapter->call( ct->impl, ct->scope, _args );
+		void * impl = detail::get_class_impl( mct->self );
+		class_type_scope * scope = detail::get_class_scope( mct->self );
+
+		return mct->iadapter->call( impl, scope, _args );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	static PyTypeObject s_method_caller_type = {

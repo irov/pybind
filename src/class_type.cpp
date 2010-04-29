@@ -1,18 +1,21 @@
 #	include "pybind/class_type.hpp"
-#	include "pybind/class_scope.hpp"
 #	include "pybind/method_type.hpp"
 #	include "pybind/member_type.hpp"
 #	include "pybind/repr_adapter.hpp"
 #	include "pybind/constructor.hpp"
 
 #	include "pybind/system.hpp"
-
 #	include "config/python.hpp"
-
-#	include <list>
 
 namespace pybind
 {
+	//////////////////////////////////////////////////////////////////////////
+	struct py_class_type{
+		PyObject_HEAD
+		void * impl;
+		bool holder;
+		class_type_scope * scope;
+	};
 	//////////////////////////////////////////////////////////////////////////
 	static PyTypeObject s_class_base_type = {
 		PyVarObject_HEAD_INIT(&PyType_Type, 0)
@@ -51,6 +54,134 @@ namespace pybind
 		0,					/* tp_descr_set */
 	};
 	//////////////////////////////////////////////////////////////////////////
+	namespace detail
+	{
+		//////////////////////////////////////////////////////////////////////////
+		typedef std::list< PyTypeObject * > TListTypeDef;
+		typedef std::map< std::string, class_type_scope * > TMapTypeScope;
+		//////////////////////////////////////////////////////////////////////////
+		static TListTypeDef s_listTypeDef;
+		static TMapTypeScope s_mapTypeScope;
+		//////////////////////////////////////////////////////////////////////////
+		void * get_class_impl( PyObject * _obj )
+		{
+			py_class_type * self = (py_class_type *)_obj;
+			return self->impl;
+		}
+		//////////////////////////////////////////////////////////////////////////
+		class_type_scope * get_class_scope( PyObject * _obj )
+		{
+			py_class_type * self = (py_class_type *)_obj;
+			return self->scope;
+		}
+		//////////////////////////////////////////////////////////////////////////
+		void * unwrap( PyObject * _obj )
+		{
+			py_class_type * self = (py_class_type *)_obj;
+			
+			void * return_impl = self->impl;
+			self->impl = 0;
+
+			return return_impl;
+		}
+		//////////////////////////////////////////////////////////////////////////
+		void wrap( PyObject * _obj, void * _impl )
+		{
+			py_class_type * self = (py_class_type*)_obj;
+			self->impl = _impl;
+		}
+		//////////////////////////////////////////////////////////////////////////
+		bool is_class( PyObject * _obj )
+		{
+			return PyType_IsSubtype( _obj->ob_type, &s_class_base_type ) == 1;
+		}
+		//////////////////////////////////////////////////////////////////////////
+		void * check_registred_class( PyObject * _obj, const std::type_info & _info )
+		{
+			PyObject * py_type = PyObject_Type( _obj );
+
+			class_type_scope * type_scope = get_class_type_scope( _info );
+
+			if( PyType_IsSubtype( (PyTypeObject *)py_type, type_scope->m_pytypeobject ) )
+			{
+				return get_class_impl( _obj );
+			}
+
+			return 0;
+		}
+		//////////////////////////////////////////////////////////////////////////
+		PyObject * alloc_class( PyTypeObject * _type, PyObject * _args, void * _impl, const std::type_info & _tinfo )
+		{
+			py_class_type *self = 
+				(py_class_type *)_type->tp_alloc( _type, 0 );
+
+			class_type_scope * scope = get_class_type_scope( _tinfo );
+
+			if( self != NULL )
+			{
+				self->impl = _impl;
+				self->scope = scope;
+				self->holder = false;
+			}
+
+			return (PyObject *)self;
+		}
+		//////////////////////////////////////////////////////////////////////////
+		void * dealloc_class( PyObject * _obj )
+		{
+			py_class_type * self = (py_class_type *)(_obj);
+			void * impl = self->impl;
+
+			_obj->ob_type->tp_free( (PyObject*)self );
+
+			return impl;		
+		}
+		//////////////////////////////////////////////////////////////////////////
+		void reg_class_type( PyTypeObject * _type )
+		{
+			s_listTypeDef.push_back( _type );
+		}
+		//////////////////////////////////////////////////////////////////////////
+		PyTypeObject * find_sub_type( PyTypeObject * _subtype )
+		{
+			for (TListTypeDef::iterator it = s_listTypeDef.begin(); it != s_listTypeDef.end(); ++it)
+			{
+				if( PyType_IsSubtype( *it, _subtype ) )
+				{
+					return (*it);
+				}
+			}
+
+			return 0;
+		}
+		//////////////////////////////////////////////////////////////////////////
+		void reg_class_type_scope( const std::type_info & _info, class_type_scope * _scope )
+		{
+			const char * info_name = _info.name();
+			s_mapTypeScope[ info_name ] = _scope;
+		}
+		//////////////////////////////////////////////////////////////////////////
+		class_type_scope * get_class_type_scope( const std::type_info & _info )
+		{
+			const char * info_name = _info.name();
+			TMapTypeScope::iterator it_find = s_mapTypeScope.find( info_name );
+
+			if( it_find == s_mapTypeScope.end() )
+			{
+				return 0;
+			}
+
+			return it_find->second;		
+		}
+		//////////////////////////////////////////////////////////////////////////
+		bool has_class_type_scope( const std::type_info & _info )
+		{
+			TMapTypeScope::iterator it_find = s_mapTypeScope.find( _info.name() );
+
+			return it_find != s_mapTypeScope.end();
+		}
+	}
+	//////////////////////////////////////////////////////////////////////////
 	static void py_dealloc( PyObject * _obj )
 	{
 		py_class_type * self = (py_class_type *)_obj;
@@ -83,10 +214,9 @@ namespace pybind
 		, m_type(_type_name)
 		, m_pyconstructor(0)
 		, m_pydestructor(0)
+		, m_pytypeobject(0)
 		, m_repr(0)
 	{
-		PyTypeObject clear_type = {0};
-		m_pytypeobject = clear_type;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	class_type_scope::~class_type_scope()
@@ -110,6 +240,9 @@ namespace pybind
 		}
 
 		delete m_pyconstructor;
+
+		Py_XDECREF( m_pytypeobject );
+		delete m_pytypeobject;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::setup( PyObject * _module, newfunc _pynew, destructor _pydestructor )
@@ -122,20 +255,22 @@ namespace pybind
 		{
 			m_module = _module;
 		}
+		
+		m_pytypeobject = new PyTypeObject();
 
 		m_pydestructor = _pydestructor;
 
-		m_pytypeobject.tp_name = m_name;
-		m_pytypeobject.tp_basicsize = sizeof( py_class_type );
-		m_pytypeobject.tp_new = _pynew;
-		m_pytypeobject.tp_dealloc = &py_dealloc;
-		m_pytypeobject.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE /*| Py_TPFLAGS_HEAPTYPE*/;
+		m_pytypeobject->tp_name = m_name;
+		m_pytypeobject->tp_basicsize = sizeof( py_class_type );
+		m_pytypeobject->tp_new = _pynew;
+		m_pytypeobject->tp_dealloc = &py_dealloc;
+		m_pytypeobject->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE /*| Py_TPFLAGS_HEAPTYPE*/;
 
 		if( m_bases.empty() )
 		{
 			Py_INCREF(&s_class_base_type);
-			m_pytypeobject.tp_base = &s_class_base_type;
-			m_pytypeobject.tp_bases = PyTuple_Pack( 1, &s_class_base_type );
+			m_pytypeobject->tp_base = &s_class_base_type;
+			m_pytypeobject->tp_bases = PyTuple_Pack( 1, &s_class_base_type );
 		}
 		else
 		{
@@ -149,24 +284,24 @@ namespace pybind
 			it != it_end;
 			++it)
 			{
-				PyTypeObject * py_base = &it->second.first->m_pytypeobject;
+				PyTypeObject * py_base = it->second.first->m_pytypeobject;
 				PyTuple_SetItem( py_bases, index++, (PyObject*)py_base );
 			}
 
-			m_pytypeobject.tp_bases = py_bases;
-			m_pytypeobject.tp_base = (PyTypeObject*)PyTuple_GetItem( py_bases, 0 );
+			m_pytypeobject->tp_bases = py_bases;
+			m_pytypeobject->tp_base = (PyTypeObject*)PyTuple_GetItem( py_bases, 0 );
 		}
 
-		if( PyType_Ready( &m_pytypeobject ) < 0 )
+		if( PyType_Ready( m_pytypeobject ) < 0 )
 		{
-			printf("invalid embedding class '%s' \n", m_pytypeobject.tp_name );					
+			printf("invalid embedding class '%s' \n", m_pytypeobject->tp_name );					
 		}
 
-		Py_INCREF( &m_pytypeobject );
+		Py_INCREF( m_pytypeobject );
 
-		class_scope::reg_class_type( &m_pytypeobject );
+		detail::reg_class_type( m_pytypeobject );
 
-		PyModule_AddObject( m_module, m_pytypeobject.tp_name, (PyObject*)&m_pytypeobject );
+		PyModule_AddObject( m_module, m_pytypeobject->tp_name, (PyObject*)m_pytypeobject );
 		//Py_DECREF( m_pytypeobject );
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -186,9 +321,9 @@ namespace pybind
 
 		m_methods.push_back( method );
 
-		PyObject * py_type_method = method->instance( &m_pytypeobject );
+		PyObject * py_type_method = method->instance( m_pytypeobject );
 
-		if( PyDict_SetItemString( m_pytypeobject.tp_dict, _name, py_type_method ) == -1 )
+		if( PyDict_SetItemString( m_pytypeobject->tp_dict, _name, py_type_method ) == -1 )
 		{
 			check_error();
 		}
@@ -204,7 +339,7 @@ namespace pybind
 
 		PyObject * py_member = member->instance();
 
-		if( PyDict_SetItemString( m_pytypeobject.tp_dict, member->m_name, py_member ) == -1 )
+		if( PyDict_SetItemString( m_pytypeobject->tp_dict, member->m_name, py_member ) == -1 )
 		{
 			check_error();
 		}
@@ -216,7 +351,7 @@ namespace pybind
 	{
 		m_repr = _irepr;
 
-		m_pytypeobject.tp_repr = &py_reprfunc;
+		m_pytypeobject->tp_repr = &py_reprfunc;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void * class_type_scope::construct( PyObject * _args )
@@ -261,19 +396,9 @@ namespace pybind
 		return it_find->second.second( _impl );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_type_scope::unwrap( py_class_type * _self )
-	{
-		_self->impl = 0;
-	}
-	//////////////////////////////////////////////////////////////////////////
-	bool class_type_scope::is_class( PyTypeObject * _type )
-	{
-		return PyType_IsSubtype( _type, &s_class_base_type ) == 1;
-	}
-	//////////////////////////////////////////////////////////////////////////
 	PyObject * class_type_scope::create_holder( void * _impl )
 	{
-		py_class_type *self = (py_class_type *)PyType_GenericAlloc( &m_pytypeobject, 0 );
+		py_class_type *self = (py_class_type *)PyType_GenericAlloc( m_pytypeobject, 0 );
 
 		self->impl = _impl;
 		self->scope = this;
@@ -285,7 +410,7 @@ namespace pybind
 	PyObject * class_type_scope::create_impl( void * _impl )
 	{
 		py_class_type *self = 
-			(py_class_type *)PyType_GenericAlloc( &m_pytypeobject, 0 );
+			(py_class_type *)PyType_GenericAlloc( m_pytypeobject, 0 );
 
 		self->impl = _impl;
 		self->scope = this;

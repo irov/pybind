@@ -300,10 +300,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\class_scope.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\class_type.cpp"
 				>
 			</File>
@@ -373,10 +369,6 @@
 			</File>
 			<File
 				RelativePath="..\include\pybind\class_core.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\include\pybind\class_scope.hpp"
 				>
 			</File>
 			<File

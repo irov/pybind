@@ -1,6 +1,4 @@
 #	include "pybind/class_core.hpp"
-
-#	include "pybind/class_scope.hpp"
 #	include "pybind/class_type.hpp"
 
 #	include "config/python.hpp"
@@ -9,40 +7,6 @@
 
 namespace pybind
 {
-	namespace detail
-	{
-		//////////////////////////////////////////////////////////////////////////
-		void * get_class( PyObject * _obj )
-		{
-			py_class_type * self = (py_class_type *)_obj;
-			return self->impl;
-		}
-		//////////////////////////////////////////////////////////////////////////
-		bool is_class( PyObject * _obj )
-		{
-			return class_type_scope::is_class( _obj->ob_type );
-		}
-		//////////////////////////////////////////////////////////////////////////
-		class_type_scope * get_class_scope( PyObject * _obj )
-		{
-			py_class_type * self = (py_class_type *)_obj;
-			return self->scope;
-		}
-		//////////////////////////////////////////////////////////////////////////
-		void * check_registred_class( PyObject * _obj, const std::type_info & _info )
-		{
-			PyObject * py_type = PyObject_Type( _obj );
-
-			class_type_scope * type_scope = class_scope::get_class_scope( _info );
-
-			if( PyType_IsSubtype( (PyTypeObject *)py_type, &type_scope->m_pytypeobject ) )
-			{
-				return get_class( _obj );
-			}
-
-			return 0;
-		}
-	}
 	//////////////////////////////////////////////////////////////////////////
 	typedef std::list<class_type_scope *> TListClassType;
 	static TListClassType s_listClassType;
@@ -66,12 +30,12 @@ namespace pybind
 		const char * _name )
 	{
 		const char * type_name = _info.name();
-		class_type_scope * t_scope = new class_type_scope( _name, type_name );
+		class_type_scope * scope = new class_type_scope( _name, type_name );
 
-		class_scope::reg_class_scope( _info, t_scope );
-		s_listClassType.push_back( t_scope );
+		detail::reg_class_type_scope( _info, scope );
+		s_listClassType.push_back( scope );
 
-		return t_scope;
+		return scope;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_core::setup_new_type_scope( 
@@ -85,22 +49,21 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * class_core::create_holder( const std::type_info & _info, void * _impl )
 	{
-		class_type_scope * t_scope = class_scope::get_class_scope( _info );
+		class_type_scope * t_scope = detail::get_class_type_scope( _info );
 
 		return t_scope->create_holder( _impl );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * class_core::create_impl( const std::type_info & _info, void * _impl )
 	{
-		class_type_scope * t_scope = class_scope::get_class_scope( _info );
+		class_type_scope * t_scope = detail::get_class_type_scope( _info );
 
 		return t_scope->create_impl( _impl );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_core::wrap_holder( PyObject * _obj, void * _impl )
 	{
-		py_class_type * self = (py_class_type*)_obj;
-		self->impl = _impl;
+		detail::wrap( _obj, _impl );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_core::def_init( class_type_scope * _scope, constructor * _ctr )
@@ -120,58 +83,34 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void class_core::def_method( const char * _name, method_adapter_interface * _iadapter, int _arity, const std::type_info & _info )
 	{
-		class_type_scope * scope = class_scope::get_class_scope( _info );
+		class_type_scope * scope = detail::get_class_type_scope( _info );
 
 		scope->add_method( _name, _iadapter, _arity );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_core::def_member( const char * _name, member_adapter_interface * _iadapter, const std::type_info & _info )
 	{
-		class_type_scope * scope = class_scope::get_class_scope( _info );
+		class_type_scope * scope = detail::get_class_type_scope( _info );
 
 		scope->add_member( _name, _iadapter );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_core::def_repr( repr_adapter_interface * _iadapter, const std::type_info & _info )
 	{
-		class_type_scope * scope = class_scope::get_class_scope( _info );
+		class_type_scope * scope = detail::get_class_type_scope( _info );
 
 		scope->add_repr( _iadapter );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_core::add_base_to_scope( class_type_scope * _scope, const char * _name, class_type_scope * _base, pybind_metacast cast )
+	void class_core::add_base_to_scope( class_type_scope * _scope, const char * _name, const std::type_info & _base, pybind_metacast cast )
 	{
-		_scope->add_base( _name, _base, cast );
+		class_type_scope * basescope = detail::get_class_type_scope( _base );
+
+		_scope->add_base( _name, basescope, cast );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void * class_core::meta_cast( void * _impl, class_type_scope * _scope, const char * _name )
 	{
 		return _scope->metacast( _name, _impl );
-	}
-	//////////////////////////////////////////////////////////////////////////
-	PyObject * class_core::new_impl( PyTypeObject * _type, PyObject * _args, void * _impl, const std::type_info & _tinfo )
-	{
-		py_class_type *self = 
-			(py_class_type *)_type->tp_alloc( _type, 0 );
-
-		class_type_scope * scope = class_scope::get_class_scope( _tinfo );
-
-		if( self != NULL )
-		{
-			self->impl = _impl;
-			self->scope = scope;
-		}
-
-		return (PyObject *)self;
-	}
-	//////////////////////////////////////////////////////////////////////////
-	void * class_core::dealloc_impl( PyObject * _obj )
-	{
-		py_class_type * self = (py_class_type *)(_obj);
-		void * impl = self->impl;
-
-		_obj->ob_type->tp_free( (PyObject*)self );
-
-		return impl;		
 	}
 }
