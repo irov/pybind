@@ -78,8 +78,7 @@ namespace pybind
 
 	PyObject * module_import( const char * _name )
 	{
-		char *n = const_cast<char *>(_name); 
-		PyObject * module = PyImport_ImportModule( n );
+		PyObject * module = PyImport_ImportModule( _name );
 
 		if( module == 0 )
 		{
