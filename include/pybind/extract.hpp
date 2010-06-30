@@ -132,6 +132,21 @@ namespace pybind
 		return 0;
 	}
 
+	
+	template<class T>
+	typename extract_return<T>::type extract_ptr_nt( PyObject * _obj )
+	{
+		try
+		{
+			return detail::extract_check<T>::extract( _obj );
+		}
+		catch( const pybind_exception & )
+		{
+		}
+
+		return 0;
+	}
+
 	template<class T>
 	typename extract_return<T>::type extract_item( PyObject * _obj, std::size_t _it )
 	{

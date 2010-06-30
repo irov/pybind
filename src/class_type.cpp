@@ -209,6 +209,23 @@ namespace pybind
 		return inst->scope->m_repr->repr( _obj, inst->impl, inst->scope );
 	}
 	//////////////////////////////////////////////////////////////////////////
+	static PyObject * py_getattro( PyObject * _obj, PyObject * _name )
+	{
+		py_class_type* inst = (py_class_type*)_obj;
+
+		if( inst->impl == 0 )
+		{
+			error_message( "class_call: unbind object" );
+			return 0;
+		}
+
+		PyObject * attr = PyTuple_Pack( 1, _name );
+		PyObject * res = inst->scope->m_getattro->call( inst->impl, inst->scope, attr );
+		Py_DECREF( attr );
+
+		return res;
+	}
+	//////////////////////////////////////////////////////////////////////////
 	class_type_scope::class_type_scope( const char * _name, const char * _type_name )
 		: m_name(_name)
 		, m_type(_type_name)
@@ -216,6 +233,7 @@ namespace pybind
 		, m_pydestructor(0)
 		, m_pytypeobject(0)
 		, m_repr(0)
+		, m_getattro(0)
 	{
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -352,6 +370,13 @@ namespace pybind
 		m_repr = _irepr;
 
 		m_pytypeobject->tp_repr = &py_reprfunc;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::add_getattro( method_adapter_interface * _igetattro )
+	{
+		m_getattro = _igetattro;
+
+		m_pytypeobject->tp_getattro = &py_getattro;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void * class_type_scope::construct( PyObject * _args )

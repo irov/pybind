@@ -20,7 +20,6 @@ namespace pybind
 		: public adapter_interface
 	{
 	public:
-		virtual PyObject * call( void * _self, class_type_scope * scope ) = 0;
 		virtual PyObject * call( void * _self, class_type_scope * scope, PyObject * _args ) = 0;
 	};
 
@@ -41,11 +40,6 @@ namespace pybind
 		}
 
 	public:
-		PyObject * call( void * _self, class_type_scope * _scope ) override
-		{
-			return method_adapter::call( _self, _scope, 0 );
-		}
-
 		PyObject * call( void * _self, class_type_scope * _scope, PyObject * _args ) override
 		{
 			C * impl = (C*)detail::meta_cast_scope( _self, m_scope_name, m_class_name, _scope );
@@ -119,11 +113,6 @@ namespace pybind
 		}
 
 	public:
-		PyObject * call( void * _self, class_type_scope * _scope ) override
-		{
-			return this->call( _self, _scope, 0 );
-		}
-
 		PyObject * call( void * _self, class_type_scope * _scope, PyObject * _args ) override
 		{
 			C * impl = (C*)detail::meta_cast_scope( _self, m_scope_name, m_class_name, _scope );

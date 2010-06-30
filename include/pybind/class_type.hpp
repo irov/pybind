@@ -62,6 +62,7 @@ namespace pybind
 		void add_member_from_scope( class_type_scope * _basescope );
 
 		void add_repr( repr_adapter_interface * _irepr );
+		void add_getattro( method_adapter_interface * _igetattro );
 
 		void add_base( const char * _name, class_type_scope * _base, pybind_metacast _cast );
 
@@ -84,7 +85,9 @@ namespace pybind
 
 		constructor * m_pyconstructor;
 		pybind_destructor m_pydestructor;
+
 		repr_adapter_interface * m_repr;
+		method_adapter_interface * m_getattro;
 
 		const char * m_name;
 		const char * m_type;
