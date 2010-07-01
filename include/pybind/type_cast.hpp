@@ -134,21 +134,5 @@ namespace pybind
 		virtual PyObject * wrap( T t ) = 0;
 		virtual T apply( PyObject * _obj ) = 0;
 	};
-
-	template<class T> 
-	class type_cast_result<const T &>
-		: public type_cast
-	{
-	public:
-		type_cast_result()
-			: type_cast( false )
-		{
-			registration_type_cast<T>( this );
-		}
-
-	public:
-		virtual PyObject * wrap( T t ) = 0;
-		virtual T apply( PyObject * _obj ) = 0;
-	};
 }
 

@@ -28,9 +28,8 @@ namespace pybind
 		: public method_adapter_interface
 	{
 	public:
-		method_adapter( const char * _name, F f )
-		: m_fn_name( _name )
-		, m_fn( f )
+		method_adapter( F f )
+		: m_fn( f )
 		{
 			const std::type_info & class_info = typeid(C*);
 			m_class_name = class_info.name();
@@ -49,7 +48,6 @@ namespace pybind
 		}
 
 	protected:
-		const char * m_fn_name;
 		F m_fn;
 
 		const char * m_class_name;
@@ -61,9 +59,8 @@ namespace pybind
 		: public method_adapter_interface
 	{
 	public:
-		method_adapter_proxy_member( const char * _name, P * _proxy, F f )
-			: m_fn_name(_name)
-			, m_proxy(_proxy)
+		method_adapter_proxy_member( P * _proxy, F f )
+			: m_proxy(_proxy)
 			, m_fn(f)
 		{
 			const std::type_info & class_info = typeid(C*);
@@ -88,7 +85,6 @@ namespace pybind
 		}
 
 	protected:
-		const char * m_fn_name;
 		P * m_proxy;
 		F m_fn;
 
@@ -101,9 +97,8 @@ namespace pybind
 		: public method_adapter_interface
 	{
 	public:
-		method_adapter_proxy_function( const char * _name, F f )
-			: m_fn_name(_name)
-			, m_fn(f)
+		method_adapter_proxy_function( F f )
+			: m_fn(f)
 		{
 			const std::type_info & class_info = typeid(C*);
 			m_class_name = class_info.name();
@@ -122,7 +117,6 @@ namespace pybind
 		}
 
 	protected:
-		const char * m_fn_name;
 		F m_fn;
 
 		const char * m_class_name;

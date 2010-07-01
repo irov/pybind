@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../include;D:\projects\Menge\dependencies\python\PC;D:\projects\Menge\dependencies\python\Include"
+				AdditionalIncludeDirectories="../include;D:\projects\Mengine\dependencies\python\PC;D:\projects\Mengine\dependencies\python\Include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;Py_NO_ENABLE_SHARED"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"

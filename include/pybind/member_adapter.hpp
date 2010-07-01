@@ -21,8 +21,7 @@ namespace pybind
 	{
 	public:
 		member_adapter( const char * _name, A C:: * _member )
-			: m_name(_name)
-			, m_member(_member)
+			: m_member(_member)
 		{
 			const std::type_info & class_info = typeid(C*);
 			m_class_name = class_info.name();
@@ -51,7 +50,6 @@ namespace pybind
 		}
 
 	protected:
-		const char * m_name;
 		A C:: * m_member;
 
 		const char * m_class_name;
@@ -63,9 +61,8 @@ namespace pybind
 		: public member_adapter_interface
 	{
 	public:
-		member_adapter_property( const char * _name, FG _get, FS _set )
-			: m_name(_name)
-			, m_get(_get)
+		member_adapter_property( FG _get, FS _set )
+			: m_get(_get)
 			, m_set(_set)
 		{
 			const std::type_info & class_info = typeid(C*);
@@ -99,8 +96,6 @@ namespace pybind
 		}
 
 	protected:
-		const char * m_name;
-
 		FG m_get;
 		FS m_set;
 
@@ -113,9 +108,8 @@ namespace pybind
 		: public member_adapter_interface
 	{
 	public:
-		member_adapter_property_static( const char * _name, FG _get, FS _set )
-			: m_name(_name)
-			, m_get(_get)
+		member_adapter_property_static( FG _get, FS _set )
+			: m_get(_get)
 			, m_set(_set)
 		{
 			const std::type_info & class_info = typeid(C*);
@@ -149,8 +143,6 @@ namespace pybind
 		}
 
 	protected:
-		const char * m_name;
-
 		FG m_get;
 		FS m_set;
 

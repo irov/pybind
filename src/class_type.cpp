@@ -17,6 +17,73 @@ namespace pybind
 		class_type_scope * scope;
 	};
 	//////////////////////////////////////////////////////////////////////////
+	static void py_dealloc( PyObject * _obj )
+	{
+		py_class_type * self = (py_class_type *)_obj;
+
+		if( self->holder )
+		{			
+			_obj->ob_type->tp_free( _obj );
+		}
+		else
+		{
+			self->scope->m_pydestructor( _obj );
+		}
+	}
+	//////////////////////////////////////////////////////////////////////////
+	static PyObject * py_reprfunc( PyObject * _obj )
+	{
+		py_class_type* inst = (py_class_type*)_obj;
+
+		if( inst->impl == 0 )
+		{
+			error_message( "class_call: unbind object" );
+			return 0;
+		}
+
+		return inst->scope->m_repr->repr( _obj, inst->impl, inst->scope );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	static PyObject * py_getattro( PyObject * _obj, PyObject * _key )
+	{
+		py_class_type* inst = (py_class_type*)_obj;
+
+		if( inst->impl == 0 )
+		{
+			error_message( "class_call: unbind object" );
+			return 0;
+		}
+
+		PyObject * attr = PyTuple_Pack( 1, _key );
+		PyObject * res = inst->scope->m_getattro->call( inst->impl, inst->scope, attr );
+		Py_DECREF( attr );
+
+		return res;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	static PyObject * py_subscript( PyObject * _obj, PyObject * _key )
+	{
+		py_class_type* inst = (py_class_type*)_obj;
+
+		if( inst->impl == 0 )
+		{
+			error_message( "class_call: unbind object" );
+			return 0;
+		}
+
+		PyObject * attr = PyTuple_Pack( 1, _key );
+		PyObject * res = inst->scope->m_getmap->call( inst->impl, inst->scope, attr );
+		Py_DECREF( attr );
+
+		return res;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	static PyMappingMethods py_as_mapping = {
+		(lenfunc)0,		/* mp_length */
+		(binaryfunc)py_subscript,		/* mp_subscript */
+		(objobjargproc)0,	/* mp_ass_subscript */
+	};
+	//////////////////////////////////////////////////////////////////////////
 	static PyTypeObject s_class_base_type = {
 		PyVarObject_HEAD_INIT(&PyType_Type, 0)
 		"pybind_class_base_type",
@@ -182,50 +249,6 @@ namespace pybind
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////
-	static void py_dealloc( PyObject * _obj )
-	{
-		py_class_type * self = (py_class_type *)_obj;
-
-		if( self->holder )
-		{			
-			_obj->ob_type->tp_free( _obj );
-		}
-		else
-		{
-			self->scope->m_pydestructor( _obj );
-		}
-	}
-	//////////////////////////////////////////////////////////////////////////
-	static PyObject * py_reprfunc( PyObject * _obj )
-	{
-		py_class_type* inst = (py_class_type*)_obj;
-
-		if( inst->impl == 0 )
-		{
-			error_message( "class_call: unbind object" );
-			return 0;
-		}
-
-		return inst->scope->m_repr->repr( _obj, inst->impl, inst->scope );
-	}
-	//////////////////////////////////////////////////////////////////////////
-	static PyObject * py_getattro( PyObject * _obj, PyObject * _name )
-	{
-		py_class_type* inst = (py_class_type*)_obj;
-
-		if( inst->impl == 0 )
-		{
-			error_message( "class_call: unbind object" );
-			return 0;
-		}
-
-		PyObject * attr = PyTuple_Pack( 1, _name );
-		PyObject * res = inst->scope->m_getattro->call( inst->impl, inst->scope, attr );
-		Py_DECREF( attr );
-
-		return res;
-	}
-	//////////////////////////////////////////////////////////////////////////
 	class_type_scope::class_type_scope( const char * _name, const char * _type_name )
 		: m_name(_name)
 		, m_type(_type_name)
@@ -234,6 +257,7 @@ namespace pybind
 		, m_pytypeobject(0)
 		, m_repr(0)
 		, m_getattro(0)
+		, m_getmap(0)
 	{
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -377,6 +401,13 @@ namespace pybind
 		m_getattro = _igetattro;
 
 		m_pytypeobject->tp_getattro = &py_getattro;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::add_getmap( method_adapter_interface * _igetmap )
+	{
+		m_getmap = _igetmap;
+
+		m_pytypeobject->tp_as_mapping = &py_as_mapping;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void * class_type_scope::construct( PyObject * _args )

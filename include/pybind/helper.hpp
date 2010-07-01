@@ -9,7 +9,7 @@ namespace pybind
 		template<class T>
 		struct delete_holder
 		{
-			typedef std::list<T *> TList;
+ 			typedef std::list<T *> TList;
 			~delete_holder()
 			{
 				for( typename TList::iterator

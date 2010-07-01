@@ -76,7 +76,7 @@ namespace pybind
 		base_ & def( const char * _name, F f )
 		{			
 			method_adapter_interface * ifunc =
-				new method_adapter<C, F>(_name, f);
+				new method_adapter<C, F>(f);
 
 			s_adapterDeleter.add( ifunc );
 
@@ -96,7 +96,7 @@ namespace pybind
 		base_ & def_static( const char * _name, F f )
 		{			
 			method_adapter_interface * ifunc =
-				new method_adapter_proxy_function<C, F>(_name, f);
+				new method_adapter_proxy_function<C, F>(f);
 
 			s_adapterDeleter.add( ifunc );
 
@@ -153,7 +153,7 @@ namespace pybind
 		base_ & def_property( const char * _name, FG _get, FS _set )
 		{
 			member_adapter_interface * iadpter =
-				new member_adapter_property<C, FG, FS>(_name, _get, _set);
+				new member_adapter_property<C, FG, FS>(_get, _set);
 
 			s_adapterDeleter.add( iadpter );
 
@@ -170,7 +170,7 @@ namespace pybind
 		base_ & def_property_static( const char * _name, FG _get, FS _set )
 		{
 			member_adapter_interface * iadpter =
-				new member_adapter_property_static<C, FG, FS>(_name, _get, _set);
+				new member_adapter_property_static<C, FG, FS>( _get, _set);
 
 			s_adapterDeleter.add( iadpter );
 
@@ -203,11 +203,27 @@ namespace pybind
 		base_ & def_getattro( F _attro )
 		{
 			method_adapter_interface * iadpter =
-				new method_adapter<C, F>( "__getattr__", _attro );
+				new method_adapter<C, F>( _attro );
 
 			s_adapterDeleter.add( iadpter );
 
 			class_core::def_getattro( 
+				iadpter, 
+				class_info<C>() 
+				);
+
+			return *this;
+		}
+
+		template<class F>
+		base_ & def_getmap( F _map )
+		{
+			method_adapter_interface * iadpter =
+				new method_adapter<C, F>( _map );
+
+			s_adapterDeleter.add( iadpter );
+
+			class_core::def_getmap( 
 				iadpter, 
 				class_info<C>() 
 				);
