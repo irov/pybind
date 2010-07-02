@@ -100,14 +100,16 @@ namespace pybind
 	template<class T>
 	PyObject * ptr( T _value )
 	{
-		type_cast * etype = detail::type_down_cast<T>::find();
+		typedef typename detail::extract_return<T>::type T_WOCR;
+
+		type_cast * etype = detail::type_down_cast<T_WOCR>::find();
 
 		if( etype == 0 )
 		{
 			throw_exception();
 		}
 
-		type_cast_result<T> * etype_impl = static_cast<type_cast_result<T> *>(etype);
+		type_cast_result<T_WOCR> * etype_impl = static_cast<type_cast_result<T_WOCR> *>(etype);
 
 		PyObject * result = etype_impl->wrap( _value );
 
