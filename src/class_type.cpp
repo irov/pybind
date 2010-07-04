@@ -124,8 +124,8 @@ namespace pybind
 	namespace detail
 	{
 		//////////////////////////////////////////////////////////////////////////
-		typedef std::list< PyTypeObject * > TListTypeDef;
-		typedef std::map< std::string, class_type_scope * > TMapTypeScope;
+		typedef std::list<PyTypeObject *> TListTypeDef;
+		typedef std::map<const char *, class_type_scope *> TMapTypeScope;
 		//////////////////////////////////////////////////////////////////////////
 		static TListTypeDef s_listTypeDef;
 		static TMapTypeScope s_mapTypeScope;
