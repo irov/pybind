@@ -11,7 +11,7 @@ namespace pybind
 	typedef std::list<class_type_scope *> TListClassType;
 	static TListClassType s_listClassType;
 	//////////////////////////////////////////////////////////////////////////
-	void class_core::finialize()
+	void class_core::finalize()
 	{
 		for( TListClassType::iterator
 			it = s_listClassType.begin(),

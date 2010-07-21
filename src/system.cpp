@@ -41,10 +41,10 @@ namespace pybind
 	{
 		Py_Finalize();
 
-		class_core::finialize();		
+		class_core::finalize();		
 		
-		finialize_def();
-		finialize_functor();
+		finalize_def();
+		finalize_functor();
 	}
 
 	bool is_initialized()

@@ -94,7 +94,7 @@ namespace pybind
 		}
 	}
 
-	void finialize_def()
+	void finalize_def()
 	{
 		delete s_def_type;
 	}

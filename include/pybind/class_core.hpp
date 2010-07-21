@@ -33,7 +33,7 @@ namespace pybind
 			);
 
 
-		static void finialize();
+		static void finalize();
 
 		static PyObject * create_holder( const std::type_info & _info, void * _impl );
 		static PyObject * create_impl( const std::type_info & _info, void * _impl );

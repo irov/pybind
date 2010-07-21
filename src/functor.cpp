@@ -93,7 +93,7 @@ namespace pybind
 		}
 	}
 
-	void finialize_functor()
+	void finalize_functor()
 	{
 		delete s_functor_type;
 	}
