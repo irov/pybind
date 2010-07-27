@@ -344,7 +344,7 @@ namespace pybind
 		: public base_<C,B>
 	{
 	public:
-		class_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
+		class_( const char * _name, PyObject * _module, bool external_extract = true )
 			: base_<C,B>( _name, &base_<C,B>::new_, &base_<C,B>::dealloc_, _module )
 		{
 			if( external_extract )
@@ -378,7 +378,7 @@ namespace pybind
 		}
 
 	public:
-		proxy_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
+		proxy_( const char * _name, PyObject * _module, bool external_extract = true )
 			: base_<C,B>( _name, &base_<C,B>::new_, &base_<C,B>::dealloc_only_python, _module )
 		{
 			if( external_extract )
@@ -401,7 +401,7 @@ namespace pybind
 		typedef extract_class_type_ptr<C> extract_ptr_type;
 
 	public:
-		interface_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
+		interface_( const char * _name, PyObject * _module, bool external_extract = true )
 			: base_<C,B>( _name, &base_<C,B>::new_interface, &base_<C,B>::dealloc_only_python, _module )
 		{
 			if( external_extract )

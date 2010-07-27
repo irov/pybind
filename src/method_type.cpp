@@ -18,6 +18,13 @@ namespace pybind
 		PyObject * self;
 	};
 	//////////////////////////////////////////////////////////////////////////
+	static void descr_destr( PyObject * _obj )
+	{
+		py_method_caller_type * mct = (py_method_caller_type *)_obj;
+
+		Py_DECREF( mct->self );
+	}
+	//////////////////////////////////////////////////////////////////////////
 	static PyObject * descr_call2( PyObject * _obj, PyObject * _args , PyObject * _kwds )
 	{
 		py_method_caller_type * mct = (py_method_caller_type *)_obj;
@@ -33,7 +40,7 @@ namespace pybind
 		"pybind_method_caller_type",
 		sizeof(py_method_caller_type),
 		0,
-		0,					/* tp_dealloc */
+		(destructor)descr_destr,					/* tp_dealloc */
 		0,					/* tp_print */
 		0,					/* tp_getattr */
 		0,					/* tp_setattr */
@@ -102,6 +109,8 @@ namespace pybind
 
 		py_method_caller_type * mct = (py_method_caller_type *)PyType_GenericAlloc( &s_method_caller_type, 0 );
 		mct->iadapter = descr->iadapter;
+
+		Py_INCREF(obj);
 		mct->self = obj;
 
 		return (PyObject*)mct;
