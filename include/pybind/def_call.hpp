@@ -151,18 +151,16 @@ namespace pybind
 
 		static PyObject * call( F f, PyObject * _arg )
 		{
-			if( f_info::arity > 0 )
-			{
-				size_t arg_size = tuple_size(_arg);
-				if( arg_size != f_info::arity )
-				{
-					error_message("invalid function call args is not equal %d != %d\n"
-						, arg_size
-						, f_info::arity
-						);
+			size_t arg_size = (_arg)?tuple_size(_arg):0;
 
-					return 0;
-				}
+			if( arg_size != f_info::arity )
+			{
+				error_message("invalid function call args is not equal %d != %d\n"
+					, arg_size
+					, f_info::arity
+					);
+
+				return 0;
 			}
 
 			try

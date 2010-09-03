@@ -10,7 +10,6 @@ namespace pybind
 		virtual ~functor_proxy_interface(){};
 
 	public:
-		virtual PyObject * call() = 0;
 		virtual PyObject * call( PyObject * _args ) = 0;
 	};
 
@@ -34,31 +33,18 @@ namespace pybind
 		}
 
 	public:
-		PyObject * call() override
-		{
-			PyObject *ret = method_call<C,F>::call( m_self, m_fn, 0 );
-			return ret;
-
-			return 0;			
-		}
-
 		PyObject * call( PyObject * _args ) override
 		{
 			PyObject *ret = method_call<C,F>::call( m_self, m_fn, _args );
-			return ret;
-
-			return 0;	
+			
+			return ret;	
 		}
 
 	public:
 		static PyObject * 
 			method0( PyObject * _self )
 		{
-			functor_proxy_interface * f = detail::extract_from_py_functor( _self );
-
-			PyObject * ret = f->call();
-
-			return ret;
+			return functor_proxy::method1( _self, 0 );
 		}
 
 		static PyObject * 
