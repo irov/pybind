@@ -65,6 +65,7 @@ namespace pybind
 	{
 		py_member_type * py_member = (py_member_type *)PyType_GenericAlloc( &s_member_type, 0 );
 
+		py_member->name = m_name;
 		py_member->iadpter = m_interface;
 
 		PyObject * py_get = PyCFunction_New( &m_getmethod, (PyObject*)py_member );

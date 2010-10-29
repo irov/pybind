@@ -10,6 +10,8 @@ namespace pybind
 {
 	struct py_member_type{
 		PyObject_HEAD
+
+		const char * name;
 		member_adapter_interface * iadpter;
 	};
 
