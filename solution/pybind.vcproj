@@ -296,59 +296,59 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\class_core.cpp"
+				RelativePath="..\src\class_core.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\class_type.cpp"
+				RelativePath="..\src\class_type.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\constructor.cpp"
+				RelativePath="..\src\constructor.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\def.cpp"
+				RelativePath="..\src\def.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\def_adapter.cpp"
+				RelativePath="..\src\def_adapter.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\functor.cpp"
+				RelativePath="..\src\functor.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\functor_proxy.cpp"
+				RelativePath="..\src\functor_proxy.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\member_type.cpp"
+				RelativePath="..\src\member_type.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\method_adapter.cpp"
+				RelativePath="..\src\method_adapter.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\method_type.cpp"
+				RelativePath="..\src\method_type.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\mutex.cpp"
+				RelativePath="..\src\mutex.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\system.cpp"
+				RelativePath="..\src\system.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\type_cast.cpp"
+				RelativePath="..\src\type_cast.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\wrap_base.cpp"
+				RelativePath="..\src\wrap_base.cpp"
 				>
 			</File>
 		</Filter>
@@ -377,6 +377,10 @@
 			</File>
 			<File
 				RelativePath="..\include\pybind\constructor.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\include\pybind\convert_adapter.hpp"
 				>
 			</File>
 			<File

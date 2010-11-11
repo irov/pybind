@@ -15,6 +15,7 @@ namespace pybind
 
 	class method_adapter_interface;
 	class member_adapter_interface;
+	class convert_adapter_interface;
 	class repr_adapter_interface;
 	
 	class constructor;
@@ -33,11 +34,9 @@ namespace pybind
 		PYBIND_API void * dealloc_class( PyObject * _obj );
 
 		PYBIND_API void reg_class_type( PyTypeObject * _type );
-		PYBIND_API PyTypeObject * find_sub_type( PyTypeObject * _subtype );
 
 		PYBIND_API void reg_class_type_scope( const std::type_info & _info, class_type_scope * _scope );
 		PYBIND_API class_type_scope * get_class_type_scope( const std::type_info & _info );
-		PYBIND_API bool has_class_type_scope( const std::type_info & _info );
 	}
 
 	class class_type_scope
@@ -60,6 +59,9 @@ namespace pybind
 
 		void add_member( const char * _name, member_adapter_interface * _imember );
 		void add_member_from_scope( class_type_scope * _basescope );
+
+		void add_convert( convert_adapter_interface * _iconvert );
+		convert_adapter_interface * get_convert();
 
 		void add_repr( repr_adapter_interface * _irepr );
 		void add_getattro( method_adapter_interface * _igetattro );
@@ -87,6 +89,7 @@ namespace pybind
 		constructor * m_pyconstructor;
 		pybind_destructor m_pydestructor;
 
+		convert_adapter_interface * m_convert;
 		repr_adapter_interface * m_repr;
 		method_adapter_interface * m_getattro;
 		method_adapter_interface * m_getmap;

@@ -75,17 +75,33 @@ namespace pybind
 		template<class F>
 		base_ & def( const char * _name, F f )
 		{			
-			method_adapter_interface * ifunc =
-				new method_adapter<C, F>(f);
+			method_adapter_interface * iadapter =
+				new method_adapter<C, F>(f, _name);
 
-			s_adapterDeleter.add( ifunc );
+			s_adapterDeleter.add( iadapter );
 
 			typedef typename function_parser<F>::result t_info;
 
 			class_core::def_method(
 				_name,
-				ifunc,
+				iadapter,
 				t_info::arity,
+				class_info<C>()
+				);
+
+			return *this;
+		}
+
+		template<class F>
+		base_ & def_convert( F f )
+		{
+			convert_adapter_interface * iadapter =
+				new convert_adapter<F>(f);
+
+			s_adapterDeleter.add( iadapter );
+
+			class_core::def_convert(
+				iadapter,
 				class_info<C>()
 				);
 
@@ -95,16 +111,16 @@ namespace pybind
 		template<class F>
 		base_ & def_static( const char * _name, F f )
 		{			
-			method_adapter_interface * ifunc =
-				new method_adapter_proxy_function<C, F>(f);
+			method_adapter_interface * iadapter =
+				new method_adapter_proxy_function<C, F>(f, _name);
 
-			s_adapterDeleter.add( ifunc );
+			s_adapterDeleter.add( iadapter );
 
 			typedef typename function_parser<F>::result t_info;
 
 			class_core::def_method(
 				_name,
-				ifunc,
+				iadapter,
 				t_info::arity,
 				class_info<C>()
 				);
@@ -200,10 +216,10 @@ namespace pybind
 		}
 
 		template<class F>
-		base_ & def_getattro( F _attro )
+		base_ & def_getattro( F _fn )
 		{
 			method_adapter_interface * iadpter =
-				new method_adapter<C, F>( _attro );
+				new method_adapter<C, F>(_fn, "getattro");
 
 			s_adapterDeleter.add( iadpter );
 
@@ -216,10 +232,10 @@ namespace pybind
 		}
 
 		template<class F>
-		base_ & def_getmap( F _map )
+		base_ & def_getmap( F _fn )
 		{
 			method_adapter_interface * iadpter =
-				new method_adapter<C, F>( _map );
+				new method_adapter<C, F>(_fn, "getmap");
 
 			s_adapterDeleter.add( iadpter );
 
@@ -280,7 +296,7 @@ namespace pybind
 			const std::type_info & tinfo = class_info<C>();
 			const std::type_info & tptrinfo = class_info<C *>();
 
-			void * impl = type_cast::type_info_cast( _obj, tinfo, tptrinfo );
+			impl = type_cast::type_info_cast( _obj, tinfo, tptrinfo );
 
 			return static_cast<C*>(impl);
 		}

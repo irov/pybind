@@ -2,6 +2,8 @@
 #	include "pybind/class_core.hpp"
 #	include "pybind/class_type.hpp"
 
+#	include "pybind/convert_adapter.hpp"
+
 #	include "config/python.hpp"
 #	include "pybind/system.hpp"
 
@@ -44,24 +46,41 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void * type_cast::type_info_cast( PyObject * _obj, const std::type_info & _tinfo, const std::type_info & _tptrinfo )
 	{
+		class_type_scope * cur_scope = detail::get_class_type_scope( _tinfo );
+
 		if( detail::is_class( _obj ) == false )
 		{
-			if( const char * repr = pybind::object_to_string( _obj ) )
+			convert_adapter_interface * convert = cur_scope->get_convert();
+			
+			if( convert == 0 )
 			{
-				pybind::error_message( "extract from %.256s"
-					, repr
-					);
+				if( const char * repr = pybind::object_to_string( _obj ) )
+				{
+					pybind::error_message( "invalid extract %s from %.256s"
+						, _tinfo.name()
+						, repr
+						);
+				}
+				else
+				{
+					pybind::error_message( "invalid extract %s from unknown object type %s"
+						, _tinfo.name()
+						, _obj->ob_type->tp_name
+						);
+				}
+	
+				throw_exception();
 			}
 
-			throw_exception();
+			void * impl = convert->convert( _obj );
+
+			return impl;
 		}
 
 		m_valid = true;
 
 		void * impl = detail::get_class_impl( _obj );
 		class_type_scope * scope = detail::get_class_scope( _obj );
-
-		class_type_scope * cur_scope = detail::get_class_type_scope( _tinfo );
 
 		void * result = 0;
 

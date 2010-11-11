@@ -7,7 +7,8 @@ namespace pybind
 {
 	struct py_function_type{
 		PyObject_HEAD
-			pybind_callback f;
+		pybind_callback f;
+		const char * name;
 	};
 }
 

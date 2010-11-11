@@ -130,6 +130,11 @@ namespace pybind
 		static TListTypeDef s_listTypeDef;
 		static TMapTypeScope s_mapTypeScope;
 		//////////////////////////////////////////////////////////////////////////
+		bool is_class( PyObject * _obj )
+		{
+			return PyType_IsSubtype( _obj->ob_type, &s_class_base_type ) == 1;
+		}
+		//////////////////////////////////////////////////////////////////////////
 		void * get_class_impl( PyObject * _obj )
 		{
 			py_class_type * self = (py_class_type *)_obj;
@@ -156,11 +161,6 @@ namespace pybind
 		{
 			py_class_type * self = (py_class_type*)_obj;
 			self->impl = _impl;
-		}
-		//////////////////////////////////////////////////////////////////////////
-		bool is_class( PyObject * _obj )
-		{
-			return PyType_IsSubtype( _obj->ob_type, &s_class_base_type ) == 1;
 		}
 		//////////////////////////////////////////////////////////////////////////
 		void * check_registred_class( PyObject * _obj, const std::type_info & _info )
@@ -209,19 +209,6 @@ namespace pybind
 			s_listTypeDef.push_back( _type );
 		}
 		//////////////////////////////////////////////////////////////////////////
-		PyTypeObject * find_sub_type( PyTypeObject * _subtype )
-		{
-			for (TListTypeDef::iterator it = s_listTypeDef.begin(); it != s_listTypeDef.end(); ++it)
-			{
-				if( PyType_IsSubtype( *it, _subtype ) )
-				{
-					return (*it);
-				}
-			}
-
-			return 0;
-		}
-		//////////////////////////////////////////////////////////////////////////
 		void reg_class_type_scope( const std::type_info & _info, class_type_scope * _scope )
 		{
 			const char * info_name = _info.name();
@@ -240,13 +227,6 @@ namespace pybind
 
 			return it_find->second;		
 		}
-		//////////////////////////////////////////////////////////////////////////
-		bool has_class_type_scope( const std::type_info & _info )
-		{
-			TMapTypeScope::iterator it_find = s_mapTypeScope.find( _info.name() );
-
-			return it_find != s_mapTypeScope.end();
-		}
 	}
 	//////////////////////////////////////////////////////////////////////////
 	class_type_scope::class_type_scope( const char * _name, const char * _type_name )
@@ -255,6 +235,7 @@ namespace pybind
 		, m_pyconstructor(0)
 		, m_pydestructor(0)
 		, m_pytypeobject(0)
+		, m_convert(0)
 		, m_repr(0)
 		, m_getattro(0)
 		, m_getmap(0)
@@ -387,6 +368,16 @@ namespace pybind
 		}
 
 		Py_DECREF( py_member );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::add_convert( convert_adapter_interface * _iconvert )
+	{
+		m_convert = _iconvert;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	convert_adapter_interface * class_type_scope::get_convert()
+	{
+		return m_convert;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::add_repr( repr_adapter_interface * _irepr )

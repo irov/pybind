@@ -30,6 +30,7 @@ namespace pybind
 				py_function_type *self = (py_function_type *)PyType_GenericAlloc( s_def_type, 0 );
 
 				self->f = f;
+				self->name = _name;
 
 				PyObject *py_func = PyCFunction_New( &m_method, (PyObject*)self );
 				Py_DECREF( self );

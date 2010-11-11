@@ -7,6 +7,8 @@
 namespace pybind
 {
 	class class_type_scope;
+
+	class convert_adapter_interface;
 	class method_adapter_interface;
 	class member_adapter_interface;
 	class repr_adapter_interface;
@@ -43,6 +45,10 @@ namespace pybind
 		static void * construct( class_type_scope * _scope, PyObject * _args );
 
 		static void set_module( class_type_scope * _scope, PyObject * _module );
+
+		static void def_convert(
+			convert_adapter_interface * _iadapter,
+			const std::type_info & _info );
 
 		static void def_method( 
 			const char * _name, 

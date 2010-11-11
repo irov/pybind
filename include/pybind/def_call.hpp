@@ -149,13 +149,14 @@ namespace pybind
 	{
 		typedef typename function_parser<F>::result f_info;
 
-		static PyObject * call( F f, PyObject * _arg )
+		static PyObject * call( const char * _name, F f, PyObject * _arg )
 		{
 			size_t arg_size = (_arg)?tuple_size(_arg):0;
 
 			if( arg_size != f_info::arity )
 			{
-				error_message("invalid function call args is not equal %d != %d\n"
+				error_message("invalid function call '%s' args is not equal %d != %d\n"
+					, _name
 					, arg_size
 					, f_info::arity
 					);
