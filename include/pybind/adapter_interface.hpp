@@ -12,9 +12,9 @@ namespace pybind
 		};
 	};
 
-	template<class C>
+	template<class C, class B = adapter_interface>
 	class class_adapter_interface
-		: public adapter_interface
+		: public B
 	{
 	protected:
 		class_adapter_interface()

@@ -13,6 +13,9 @@ namespace pybind
 		PYBIND_API void register_type_info_extract( const std::type_info & _info, type_cast * _type );
 		PYBIND_API type_cast * find_type_info_extract( const std::type_info & _info );
 
+		PYBIND_API void error_invalid_extract( PyObject * _obj, const std::type_info & _tinfo );
+		PYBIND_API bool convert_object( PyObject * _obj, const std::type_info & _tinfo, void * _place );
+
 		template<class T> struct type_down_cast;
 
 		template<class T, class B>
@@ -113,7 +116,7 @@ namespace pybind
 		}
 
 	protected:
-		void * type_info_cast( PyObject * _obj, const std::type_info & _tinfo, const std::type_info & _tptrinfo );
+		bool type_info_cast( PyObject * _obj, const std::type_info & _tinfo, const std::type_info & _tptrinfo, void ** _impl );
 
 	protected:
 		bool m_valid;

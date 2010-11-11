@@ -8,7 +8,7 @@ namespace pybind
 		: public adapter_interface
 	{
 	public:
-		virtual void * convert( PyObject * _obj ) = 0;
+		virtual bool convert( PyObject * _obj, void * _place ) = 0;
 	};
 	//////////////////////////////////////////////////////////////////////////
 	template<class F>
@@ -22,11 +22,11 @@ namespace pybind
 		}
 
 	public:
-		void * convert( PyObject * _obj ) override
+		virtual bool convert( PyObject * _obj, void * _place ) override
 		{
-			void * obj = (*m_convert)( _obj );
+			bool result = (*m_convert)( _obj, _place );
 
-			return obj;
+			return result;
 		}
 
 	protected:

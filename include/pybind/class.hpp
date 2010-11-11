@@ -6,8 +6,10 @@
 #	include "pybind/class_core.hpp"
 #	include "pybind/class_type.hpp"
 #	include "pybind/function_parser.hpp"
+
 #	include "pybind/method_adapter.hpp"
 #	include "pybind/member_adapter.hpp"
+#	include "pybind/convert_adapter.hpp"
 #	include "pybind/repr_adapter.hpp"
 #	include "pybind/type_cast.hpp"
 
@@ -296,7 +298,13 @@ namespace pybind
 			const std::type_info & tinfo = class_info<C>();
 			const std::type_info & tptrinfo = class_info<C *>();
 
-			impl = type_cast::type_info_cast( _obj, tinfo, tptrinfo );
+			void * impl;
+			if( type_cast::type_info_cast( _obj, tinfo, tptrinfo, &impl ) == false )
+			{
+				detail::error_invalid_extract( _obj, tinfo );
+				
+				throw_exception();
+			}
 
 			return static_cast<C*>(impl);
 		}
@@ -313,37 +321,23 @@ namespace pybind
 	{
 		C apply( PyObject * _obj ) override
 		{
-			if( detail::is_class( _obj ) == false )
-			{
-				if( const char * repr = pybind::object_to_string( _obj ) )
-				{
-					pybind::error_message( "extract from %.256s"
-						, repr
-						);
-				}
-
-				throw_exception();
-			}
-
-			type_cast_result<C>::m_valid = true;
-
 			const std::type_info & tinfo = class_info<C>();
+			const std::type_info & tptrinfo = class_info<C *>();
 
-			void * impl = detail::check_registred_class( _obj, tinfo );
-
-			if( impl == 0 )
+			void * impl;
+			if( type_cast::type_info_cast( _obj, tinfo, tptrinfo, &impl ) == false )
 			{
-				if( const char * repr = pybind::object_to_string( _obj ) )
+				C temp;
+				if( detail::convert_object( _obj, tinfo, &temp ) == false )
 				{
-					const char * type_name = tinfo.name();
-					pybind::error_message( "extract from %.128s to %.128s"
-						, repr
-						, type_name
-						);
+					detail::error_invalid_extract( _obj, tinfo );
+
+					throw_exception();
 				}
 
-				throw_exception();
+				return temp;
 			}
+
 
 			return *static_cast<C*>(impl);
 		}

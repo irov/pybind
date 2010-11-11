@@ -25,7 +25,7 @@ namespace pybind
 
 	template<class C, class F>
 	class method_adapter_helper
-		: public class_adapter_interface<C>
+		: public class_adapter_interface<C, method_adapter_interface>
 	{
 	public:
 		method_adapter_helper( F _fn, const char * _tag )
