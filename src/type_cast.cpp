@@ -309,18 +309,9 @@ namespace pybind
 			if( PyString_Check( _obj ) )
 			{
 				m_valid = true;
-				char * str = PyString_AsString( _obj );
-				if( str )
-				{
-					return const_cast<const char *>(str);
-				}          
-				//PyObject* pyUTF8 = PyUnicode_FromEncodedObject( _obj, "mbcs", NULL );
-				//char* utf8 = PyString_AsString( PyUnicode_AsUTF8String( pyUTF8 ) );
-				//Py_DECREF( pyUTF8 );
-				//if( utf8 )
-				//{
-				//	return const_cast<const char*>( utf8 );
-				//}
+				const char * str = PyString_AS_STRING( _obj );
+
+				return str;
 			}
 
 			return 0;
@@ -341,36 +332,33 @@ namespace pybind
 			if( PyString_Check( _obj ) )
 			{
 				m_valid = true;
-				char * ch_buff;
-				Py_ssize_t ch_size;
-
-				if( PyString_AsStringAndSize( _obj, &ch_buff, &ch_size ) == 0 )
-				{
-					return std::string( ch_buff, ch_size );
-				}
+				
+				const char * ch_buff = PyString_AsString(_obj);
+				Py_ssize_t ch_size = PyString_Size(_obj);
+				
+				return std::string( ch_buff, ch_size );
 			}
 			else if( PyUnicode_Check( _obj ) )
 			{
 				m_valid = true;
+
 				PyObject* strObj = PyUnicode_AsUTF8String( _obj );
 
-				char * ch_buff;
-				Py_ssize_t ch_size;
+				const char * ch_buff = PyString_AsString(strObj);
+				Py_ssize_t ch_size = PyString_Size(strObj);
 
-				if( PyString_AsStringAndSize( strObj, &ch_buff, &ch_size ) == 0 )
-				{
-					return std::string( ch_buff, ch_size );
-				}
+				return std::string( ch_buff, ch_size );
 			}
-
-			throw_exception();
 
 			return std::string();
 		}
+
 		PyObject * wrap( std::string _value ) override
 		{
 			return PyString_FromStringAndSize( _value.c_str(), _value.size() );
 		}
+
+
 	}s_extract_string_type;
 
 	//static struct extract_wstring_type

@@ -69,7 +69,7 @@ namespace pybind
 			method_adapter_interface * _iadapter,
 			const std::type_info & _info );
 
-		static void def_getmap(
+		static void def_mapping(
 			method_adapter_interface * _iadapter,
 			const std::type_info & _info );
 

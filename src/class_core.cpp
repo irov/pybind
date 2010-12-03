@@ -115,11 +115,11 @@ namespace pybind
 		scope->add_getattro( _iadapter );		
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_core::def_getmap( method_adapter_interface * _iadapter, const std::type_info & _info )
+	void class_core::def_mapping( method_adapter_interface * _iadapter, const std::type_info & _info )
 	{
 		class_type_scope * scope = detail::get_class_type_scope( _info );
 
-		scope->add_getmap( _iadapter );
+		scope->add_mapping( _iadapter );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_core::add_base_to_scope( class_type_scope * _scope, const char * _name, const std::type_info & _base, pybind_metacast cast )

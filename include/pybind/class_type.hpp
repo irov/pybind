@@ -65,7 +65,7 @@ namespace pybind
 
 		void add_repr( repr_adapter_interface * _irepr );
 		void add_getattro( method_adapter_interface * _igetattro );
-		void add_getmap( method_adapter_interface * _igetmap );
+		void add_mapping( method_adapter_interface * _imapping );
 
 		void add_base( const char * _name, class_type_scope * _base, pybind_metacast _cast );
 
@@ -92,7 +92,7 @@ namespace pybind
 		convert_adapter_interface * m_convert;
 		repr_adapter_interface * m_repr;
 		method_adapter_interface * m_getattro;
-		method_adapter_interface * m_getmap;
+		method_adapter_interface * m_mapping;
 
 		const char * m_name;
 		const char * m_type;

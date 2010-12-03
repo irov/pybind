@@ -102,10 +102,18 @@ namespace pybind
 	{
 		typedef typename detail::extract_return<T>::type T_WOCR;
 
+		const std::type_info & tinfo = typeid(T_WOCR);
+
 		type_cast * etype = detail::type_down_cast<T_WOCR>::find();
 
 		if( etype == 0 )
 		{
+			const char * type_name = tinfo.name();
+
+			pybind::error_message( "ptr invalid find cast for %.256s"
+				, type_name
+				);
+
 			throw_exception();
 		}
 
@@ -115,6 +123,12 @@ namespace pybind
 
 		if( result == 0 )
 		{
+			const char * type_name = tinfo.name();
+
+			pybind::error_message( "ptr invalid wrap %.256s"
+				, type_name
+				);
+
 			throw_exception();
 		}
 

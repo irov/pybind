@@ -34,7 +34,7 @@ namespace pybind
 		base_( const char * _name, pybind_newfunc _pynew, pybind_destructor _pydestructor, PyObject * _module )
 		{
 			class_type_scope * scope = class_core::create_new_type_scope( class_info<C>(), _name);
-			
+
 			setup_bases( scope );
 
 			class_core::setup_new_type_scope( 
@@ -234,14 +234,14 @@ namespace pybind
 		}
 
 		template<class F>
-		base_ & def_getmap( F _fn )
+		base_ & def_mapping( F _fn )
 		{
 			method_adapter_interface * iadpter =
 				new method_adapter<C, F>(_fn, "getmap");
 
 			s_adapterDeleter.add( iadpter );
 
-			class_core::def_getmap( 
+			class_core::def_mapping( 
 				iadpter, 
 				class_info<C>() 
 				);
@@ -254,7 +254,7 @@ namespace pybind
 		{
 			return detail::alloc_class( _type, _args, 0, class_info<C>() );
 		}
-		
+
 
 		static PyObject *
 			new_( PyTypeObject * _type, PyObject * _args, PyObject * _kwds )
@@ -295,6 +295,8 @@ namespace pybind
 	{
 		C * apply( PyObject * _obj ) override
 		{
+			m_valid = true;
+
 			const std::type_info & tinfo = class_info<C>();
 			const std::type_info & tptrinfo = class_info<C *>();
 
@@ -302,8 +304,10 @@ namespace pybind
 			if( type_cast::type_info_cast( _obj, tinfo, tptrinfo, &impl ) == false )
 			{
 				detail::error_invalid_extract( _obj, tinfo );
-				
-				throw_exception();
+
+				m_valid = false;
+
+				return 0;
 			}
 
 			return static_cast<C*>(impl);
@@ -321,6 +325,8 @@ namespace pybind
 	{
 		C apply( PyObject * _obj ) override
 		{
+			m_valid = true;
+
 			const std::type_info & tinfo = class_info<C>();
 			const std::type_info & tptrinfo = class_info<C *>();
 
@@ -332,7 +338,7 @@ namespace pybind
 				{
 					detail::error_invalid_extract( _obj, tinfo );
 
-					throw_exception();
+					m_valid = false;
 				}
 
 				return temp;

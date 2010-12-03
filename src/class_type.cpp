@@ -72,7 +72,7 @@ namespace pybind
 		}
 
 		PyObject * attr = PyTuple_Pack( 1, _key );
-		PyObject * res = inst->scope->m_getmap->call( inst->impl, inst->scope, attr );
+		PyObject * res = inst->scope->m_mapping->call( inst->impl, inst->scope, attr );
 		Py_DECREF( attr );
 
 		return res;
@@ -238,7 +238,7 @@ namespace pybind
 		, m_convert(0)
 		, m_repr(0)
 		, m_getattro(0)
-		, m_getmap(0)
+		, m_mapping(0)
 	{
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -394,9 +394,9 @@ namespace pybind
 		m_pytypeobject->tp_getattro = &py_getattro;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_type_scope::add_getmap( method_adapter_interface * _igetmap )
+	void class_type_scope::add_mapping( method_adapter_interface * _imapping )
 	{
-		m_getmap = _igetmap;
+		m_mapping = _imapping;
 
 		m_pytypeobject->tp_as_mapping = &py_as_mapping;
 	}
@@ -421,26 +421,26 @@ namespace pybind
 	{
 		TMapBases::iterator it_find = m_bases.find( _name );
 
-		if( it_find == m_bases.end() )
+		if( it_find != m_bases.end() )
 		{
-			for( TMapBases::iterator 
-				it = m_bases.begin(),
-				it_end = m_bases.end();
-			it != it_end;
-			++it)
+			return it_find->second.second( _impl );
+		}
+		
+		for( TMapBases::iterator 
+			it = m_bases.begin(),
+			it_end = m_bases.end();
+		it != it_end;
+		++it)
+		{
+			TPairMetacast & pair = it->second;
+			void * down_impl = pair.second(_impl);
+			if( void * result = pair.first->metacast( _name, down_impl ) )
 			{
-				TPairMetacast & pair = it->second;
-				void * down_impl = pair.second(_impl);
-				if( void * result = pair.first->metacast( _name, down_impl ) )
-				{
-					return result;
-				}
+				return result;
 			}
-
-			return 0;
 		}
 
-		return it_find->second.second( _impl );
+		return 0;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * class_type_scope::create_holder( void * _impl )
