@@ -13,8 +13,8 @@ namespace pybind
 	struct py_class_type{
 		PyObject_HEAD
 		void * impl;
-		bool holder;
 		class_type_scope * scope;
+		bool holder;
 	};
 	//////////////////////////////////////////////////////////////////////////
 	static void py_dealloc( PyObject * _obj )
