@@ -295,7 +295,7 @@ namespace pybind
 	{
 		C * apply( PyObject * _obj ) override
 		{
-			m_valid = true;
+			this->setValid( true );
 
 			const std::type_info & tinfo = class_info<C>();
 			const std::type_info & tptrinfo = class_info<C *>();
@@ -305,7 +305,7 @@ namespace pybind
 			{
 				detail::error_invalid_extract( _obj, tinfo );
 
-				m_valid = false;
+				this->setValid( false );
 
 				return 0;
 			}
@@ -325,7 +325,7 @@ namespace pybind
 	{
 		C apply( PyObject * _obj ) override
 		{
-			m_valid = true;
+			this->setValid( true );
 
 			const std::type_info & tinfo = class_info<C>();
 			const std::type_info & tptrinfo = class_info<C *>();
@@ -338,7 +338,7 @@ namespace pybind
 				{
 					detail::error_invalid_extract( _obj, tinfo );
 
-					m_valid = false;
+					this->setValid( false );
 				}
 
 				return temp;

@@ -1,6 +1,7 @@
 #	pragma once
 
 #	include "config/python.hpp"
+#	include <typeinfo>
 
 namespace pybind
 {
@@ -24,6 +25,17 @@ namespace pybind
 
 			const std::type_info & scope_info = typeid(C);
 			m_scope_name = scope_info.name();
+		}
+
+	protected:
+		const char * getClassName() const
+		{
+			return m_class_name;
+		}
+
+		const char * getScopeName() const
+		{
+			return m_scope_name;
 		}
 
 	protected:

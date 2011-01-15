@@ -110,6 +110,11 @@ namespace pybind
 		}
 
 	public:
+		void setValid( bool _value )
+		{
+			m_valid = _value;
+		}
+
 		bool is_valid() const
 		{
 			return m_valid;

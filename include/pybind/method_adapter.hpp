@@ -6,6 +6,7 @@
 #	include "pybind/method_proxy_call.hpp"
 #	include "pybind/function_proxy_call.hpp"
 
+#	include <typeinfo>
 
 namespace pybind
 {
@@ -35,8 +36,19 @@ namespace pybind
 		}
 
 	protected:
+		const char * getTag() const
+		{
+			return m_tag;
+		}
+
+		F getFn() const
+		{
+			return m_fn;
+		}
+
+	protected:
 		F m_fn;
-		const char * m_tag;	
+		const char * m_tag;
 	};
 
 	template<class C, class F>
@@ -52,9 +64,14 @@ namespace pybind
 	public:
 		PyObject * call( void * _self, class_type_scope * _scope, PyObject * _args ) override
 		{
-			C * impl = (C*)detail::meta_cast_scope( _self, m_scope_name, m_class_name, _scope );
+			const char * scopeName = this->getScopeName();
+			const char * className = this->getClassName();
+			const char * tag = this->getTag();
+			F fn = this->getFn();
 
-			PyObject *ret = method_call<C,F>::call( impl, m_fn, _args, m_tag );
+			C * impl = (C*)detail::meta_cast_scope( _self, scopeName, className, _scope );
+
+			PyObject *ret = method_call<C,F>::call( impl, fn, _args, tag );
 			return ret;
 		}		
 	};
@@ -78,9 +95,14 @@ namespace pybind
 
 		PyObject * call( void * _self, class_type_scope * _scope, PyObject * _args ) override
 		{
-			C * impl = (C*)detail::meta_cast_scope( _self, m_scope_name, m_class_name, _scope );
+			const char * scopeName = this->getScopeName();
+			const char * className = this->getClassName();
+			const char * tag = this->getTag();
+			F fn = this->getFn();
 
-			PyObject *ret = method_proxy_call<P,C,F>::call( m_proxy, impl, m_fn, _args, m_tag );
+			C * impl = (C*)detail::meta_cast_scope( _self, scopeName, className, _scope );
+
+			PyObject *ret = method_proxy_call<P,C,F>::call( m_proxy, impl, fn, _args, tag );
 			return ret;
 		}
 
@@ -101,9 +123,14 @@ namespace pybind
 	public:
 		PyObject * call( void * _self, class_type_scope * _scope, PyObject * _args ) override
 		{
-			C * impl = (C*)detail::meta_cast_scope( _self, m_scope_name, m_class_name, _scope );
+			const char * scopeName = this->getScopeName();
+			const char * className = this->getClassName();
+			const char * tag = this->getTag();
+			F fn = this->getFn();
 
-			PyObject *ret = function_proxy_call<C,F>::call( impl, m_fn, _args, m_tag );
+			C * impl = (C*)detail::meta_cast_scope( _self, scopeName, className, _scope );
+
+			PyObject *ret = function_proxy_call<C,F>::call( impl, fn, _args, tag );
 			return ret;
 		}
 	};
