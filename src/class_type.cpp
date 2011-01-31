@@ -55,7 +55,7 @@ namespace pybind
 		}
 
 		PyObject * attr = PyTuple_Pack( 1, _key );
-		PyObject * res = inst->scope->m_getattro->call( inst->impl, inst->scope, attr );
+		PyObject * res = inst->scope->m_getattro->call( inst->impl, inst->scope, attr, 0 );
 		Py_DECREF( attr );
 
 		return res;
@@ -72,7 +72,7 @@ namespace pybind
 		}
 
 		PyObject * attr = PyTuple_Pack( 1, _key );
-		PyObject * res = inst->scope->m_mapping->call( inst->impl, inst->scope, attr );
+		PyObject * res = inst->scope->m_mapping->call( inst->impl, inst->scope, attr, 0 );
 		Py_DECREF( attr );
 
 		return res;
