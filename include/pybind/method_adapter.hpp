@@ -21,7 +21,7 @@ namespace pybind
 		: public adapter_interface
 	{
 	public:
-		virtual PyObject * call( void * _self, class_type_scope * scope, PyObject * _args ) = 0;
+		virtual PyObject * call( void * _self, class_type_scope * scope, PyObject * _args, PyObject * _kwds ) = 0;
 	};
 
 	template<class C, class F>
@@ -62,7 +62,7 @@ namespace pybind
 		}
 
 	public:
-		PyObject * call( void * _self, class_type_scope * _scope, PyObject * _args ) override
+		PyObject * call( void * _self, class_type_scope * _scope, PyObject * _args, PyObject * _kwds ) override
 		{
 			const char * scopeName = this->getScopeName();
 			const char * className = this->getClassName();
@@ -88,12 +88,7 @@ namespace pybind
 		}
 
 	public:
-		PyObject * call( void * _self, class_type_scope * _scope ) override
-		{
-			return this->call( _self, _scope, 0 );
-		}
-
-		PyObject * call( void * _self, class_type_scope * _scope, PyObject * _args ) override
+		PyObject * call( void * _self, class_type_scope * _scope, PyObject * _args, PyObject * _kwds ) override
 		{
 			const char * scopeName = this->getScopeName();
 			const char * className = this->getClassName();
@@ -121,7 +116,7 @@ namespace pybind
 		}
 
 	public:
-		PyObject * call( void * _self, class_type_scope * _scope, PyObject * _args ) override
+		PyObject * call( void * _self, class_type_scope * _scope, PyObject * _args, PyObject * _kwds ) override
 		{
 			const char * scopeName = this->getScopeName();
 			const char * className = this->getClassName();
@@ -131,6 +126,32 @@ namespace pybind
 			C * impl = (C*)detail::meta_cast_scope( _self, scopeName, className, _scope );
 
 			PyObject *ret = function_proxy_call<C,F>::call( impl, fn, _args, tag );
+			return ret;
+		}
+	};
+
+	template<class C, class F>
+	class method_adapter_native
+		: public method_adapter_helper<C,F>
+	{
+	public:
+		method_adapter_native( F _fn, const char * _tag )
+			: method_adapter_helper<C,F>(_fn, _tag)
+		{
+		}
+
+	public:
+		PyObject * call( void * _self, class_type_scope * _scope, PyObject * _args, PyObject * _kwds ) override
+		{
+			const char * scopeName = this->getScopeName();
+			const char * className = this->getClassName();
+			const char * tag = this->getTag();
+			F fn = this->getFn();
+
+			C * impl = (C*)detail::meta_cast_scope( _self, scopeName, className, _scope );
+
+			PyObject * ret = (impl->*fn)( _args, _kwds );
+
 			return ret;
 		}
 	};

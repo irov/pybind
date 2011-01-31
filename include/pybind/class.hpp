@@ -95,6 +95,26 @@ namespace pybind
 		}
 
 		template<class F>
+		base_ & def_native( const char * _name, F f )
+		{			
+			method_adapter_interface * iadapter =
+				new method_adapter_native<C, F>(f, _name);
+
+			s_adapterDeleter.add( iadapter );
+
+			typedef typename function_parser<F>::result t_info;
+
+			class_core::def_method(
+				_name,
+				iadapter,
+				t_info::arity,
+				class_info<C>()
+				);
+
+			return *this;
+		}
+
+		template<class F>
 		base_ & def_convert( F f )
 		{
 			convert_adapter_interface * iadapter =

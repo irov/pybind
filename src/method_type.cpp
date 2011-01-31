@@ -32,7 +32,7 @@ namespace pybind
 		void * impl = detail::get_class_impl( mct->self );
 		class_type_scope * scope = detail::get_class_scope( mct->self );
 
-		return mct->iadapter->call( impl, scope, _args );
+		return mct->iadapter->call( impl, scope, _args, _kwds );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	static PyTypeObject s_method_caller_type = {
