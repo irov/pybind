@@ -120,6 +120,13 @@ namespace pybind
 		return s_current_module;
 	}
 
+	PyObject * ask_native( PyObject * _obj, PyObject * _args )
+	{
+		PyObject * result = PyObject_CallObject( _obj, _args );
+
+		return result;
+	}
+
 	PyObject * ask( PyObject * _obj, const char * _format, ... )
 	{
 		va_list valist;
@@ -136,7 +143,6 @@ namespace pybind
 
 	PyObject * ask_method( PyObject * _obj, const char * _method, const char * _format, ... )
 	{
-
 		va_list valist;
 		va_start(valist, _format);
 
@@ -197,7 +203,7 @@ namespace pybind
 	PyObject * ask_va( PyObject * _obj, const char * _format, va_list _va )
 	{		
 		PyObject * value = Py_VaBuildValue( _format, _va );
-		PyObject * result = PyObject_CallObject( _obj, value );
+		PyObject * result = ask_native( _obj, value );
 
 		check_error();
 
@@ -221,6 +227,12 @@ namespace pybind
 		Py_DECREF( method );
 
 		return result;		
+	}
+
+	void call_native( PyObject * _obj, PyObject * _args )
+	{
+		PyObject * res = ask_native( _obj, _args );
+		Py_XDECREF( res );
 	}
 
 	void call( PyObject * _obj, const char * _format, ... )
@@ -437,6 +449,11 @@ namespace pybind
 		return PyDict_SetItemString( _dict, _name, _value ) == 0;
 	}
 
+	PyObject * dict_get( PyObject * _dict, const char * _name )
+	{
+		return PyDict_GetItemString( _dict, _name );
+	}
+
 	bool dict_next( PyObject * _dict, std::size_t *_pos, PyObject ** _key, PyObject ** _value )
 	{
 		Py_ssize_t ps = (Py_ssize_t)(*_pos);
@@ -521,7 +538,14 @@ namespace pybind
 	{
 		va_list valist;
 		va_start(valist, _format);
-		PyObject * value = Py_VaBuildValue( _format, valist );
+		PyObject * value = build_value_va( _format, valist );
+		return value;
+	}
+
+	PyObject * build_value_va( const char * _format, va_list _va )
+	{
+		PyObject * value = Py_VaBuildValue( _format, _va );
+
 		return value;
 	}
 

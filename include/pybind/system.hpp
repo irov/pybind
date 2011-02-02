@@ -38,6 +38,8 @@ namespace pybind
 	PYBIND_API void set_currentmodule( PyObject * _module );
 	PYBIND_API PyObject * get_currentmodule();
 
+	PYBIND_API PyObject * ask_native( PyObject * _obj, PyObject * _args );
+
 	PYBIND_API PyObject * ask( PyObject * _obj, const char * _format, ... );
 	PYBIND_API PyObject * ask_ne( PyObject * _obj, const char * _format, ... );
 	PYBIND_API PyObject * ask_ts( PyObject * _obj, const char * _format, ... );
@@ -48,6 +50,8 @@ namespace pybind
 	PYBIND_API PyObject * ask_va( PyObject * _obj, const char * _format, va_list );
 	PYBIND_API PyObject * ask_method_va( PyObject * _obj, const char * _method, const char * _format, va_list );
 
+	PYBIND_API void call_native( PyObject * _obj, PyObject * _args );
+	
 	PYBIND_API void call( PyObject * _obj, const char * _format, ... );
 	PYBIND_API void call_ne( PyObject * _obj, const char * _format, ... );
 	PYBIND_API void call_ts( PyObject * _obj, const char * _format, ... );
@@ -87,6 +91,7 @@ namespace pybind
 
 	PYBIND_API bool dict_check( PyObject * _dict );
 	PYBIND_API bool dict_set( PyObject * _dict, const char * _name, PyObject * _value );
+	PYBIND_API PyObject * dict_get( PyObject * _dict, const char * _name );
 	PYBIND_API bool dict_next( PyObject * _dict, std::size_t *_pos, PyObject ** _key, PyObject ** _value );
 
 	PYBIND_API PyObject * tuple_new( std::size_t _it );
@@ -100,6 +105,8 @@ namespace pybind
 	PYBIND_API const char * object_to_string( PyObject * _obj );
 	PYBIND_API void error_message( const char * _message, ... );
 	PYBIND_API PyObject * build_value( const char * _format, ... );
+	PYBIND_API PyObject * build_value_va( const char * _format, va_list _va );
+
 
 	PYBIND_API void unwrap( PyObject * _value );
 
