@@ -124,6 +124,8 @@ namespace pybind
 	{
 		PyObject * result = PyObject_CallObject( _obj, _args );
 
+		check_error();
+
 		return result;
 	}
 
@@ -133,8 +135,6 @@ namespace pybind
 		va_start(valist, _format);
 
 		PyObject * result = ask_va( _obj, _format, valist );
-
-		check_error();
 
 		va_end( valist ); 
 
@@ -147,8 +147,6 @@ namespace pybind
 		va_start(valist, _format);
 
 		PyObject * result = ask_method_va( _obj, _method, _format, valist );
-
-		check_error();
 
 		va_end( valist ); 
 
@@ -163,8 +161,6 @@ namespace pybind
 
 		PyObject * result = ask_va( _obj, _format, valist );
 
-		check_error();
-
 		va_end( valist ); 
 
 		return result;
@@ -177,9 +173,6 @@ namespace pybind
 
 		PyGILState_STATE _state = PyGILState_Ensure();
 		PyObject * result = ask_va( _obj, _format, valist );
-
-		check_error();
-
 		PyGILState_Release(_state);
 
 		va_end( valist ); 
@@ -205,9 +198,8 @@ namespace pybind
 		PyObject * value = Py_VaBuildValue( _format, _va );
 		PyObject * result = ask_native( _obj, value );
 
-		check_error();
-
 		Py_DECREF( value );
+
 		return result;
 	}
 
@@ -221,8 +213,6 @@ namespace pybind
 		}
 
 		PyObject * result = ask_va( method, _format, _va );
-
-		check_error();
 
 		Py_DECREF( method );
 
@@ -242,8 +232,6 @@ namespace pybind
 
 		call_va( _obj, _format, valist );
 
-		check_error();
-
 		va_end( valist ); 
 	}
 
@@ -254,8 +242,6 @@ namespace pybind
 		va_start(valist, _format);
 
 		call_method_va( _obj, _method, _format, valist );
-
-		check_error();
 
 		va_end( valist ); 
 	}
@@ -268,8 +254,7 @@ namespace pybind
 
 		call_va( _obj, _format, valist );
 
-		check_error();
-
+	
 		va_end( valist ); 
 	}
 
@@ -280,7 +265,6 @@ namespace pybind
 
 		PyGILState_STATE _state = PyGILState_Ensure();
 		call_va( _obj, _format, valist );
-		check_error();
 		PyGILState_Release(_state);
 
 		va_end( valist ); 
