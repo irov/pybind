@@ -100,6 +100,11 @@ namespace pybind
 			impl = class_core::meta_cast( impl, scope, name );
 		}
 
+		if( impl == 0 )
+		{
+			return false;
+		}
+
 		*_impl = impl;
 
 		return true;
