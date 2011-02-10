@@ -88,6 +88,13 @@ namespace pybind
 		m_valid = true;
 
 		void * impl = detail::get_class_impl( _obj );
+
+		if( impl == 0 )
+		{
+			error_message( "type_info_cast: unbind object" );
+			return 0;
+		}
+
 		class_type_scope * scope = detail::get_class_scope( _obj );
 		class_type_scope * cur_scope = detail::get_class_type_scope( _tinfo );
 

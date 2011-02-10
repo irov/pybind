@@ -30,6 +30,13 @@ namespace pybind
 		py_method_caller_type * mct = (py_method_caller_type *)_obj;
 
 		void * impl = detail::get_class_impl( mct->self );
+
+		if( impl == 0 )
+		{
+			error_message( "method_call: unbind object" );
+			return 0;
+		}
+
 		class_type_scope * scope = detail::get_class_scope( mct->self );
 
 		return mct->iadapter->call( impl, scope, _args, _kwds );

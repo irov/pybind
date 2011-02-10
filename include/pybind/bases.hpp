@@ -18,7 +18,7 @@ namespace pybind
 	}
 
 
-	template<class C0 = void, class C1 = void, class C2 = void, class C3 = void, class C4 = void, class C5 = void>
+	template<class C0 = void, class C1 = void, class C2 = void, class C3 = void, class C4 = void, class C5 = void, class C6 = void>
 	class bases
 	{
 	public:
@@ -28,6 +28,7 @@ namespace pybind
 		typedef C3 base3;
 		typedef C4 base4;
 		typedef C5 base5;
+		typedef C6 base6;
 
 		static const int base_arity =
 			detail::is_void<C0>::result + 
@@ -35,13 +36,14 @@ namespace pybind
 			detail::is_void<C2>::result + 
 			detail::is_void<C3>::result + 
 			detail::is_void<C4>::result + 
-			detail::is_void<C5>::result; 
+			detail::is_void<C5>::result + 
+			detail::is_void<C6>::result; 
 	};
 
 
-	template<class C0 = void, class C1 = void, class C2 = void, class C3 = void, class C4 = void, class C5 = void>
+	template<class C0 = void, class C1 = void, class C2 = void, class C3 = void, class C4 = void, class C5 = void, class C6 = void>
 	class init
-		: public bases<C0,C1,C2,C3,C4,C5>
+		: public bases<C0,C1,C2,C3,C4,C5,C6>
 	{
 	public:
 		typedef C0 param0;
@@ -50,6 +52,7 @@ namespace pybind
 		typedef C3 param3;
 		typedef C4 param4;
 		typedef C5 param5;
+		typedef C6 param6;
 	};
 }
 

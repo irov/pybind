@@ -22,6 +22,13 @@ namespace pybind
 		py_member_type * mt = (py_member_type *)_member;
 
 		void * impl = detail::get_class_impl( py_self );
+
+		if( impl == 0 )
+		{
+			error_message( "py_getmethod: unbind object" );
+			return 0;
+		}
+
 		class_type_scope * scope = detail::get_class_scope( py_self );
 
 		return mt->iadpter->get( impl, scope );
@@ -35,6 +42,13 @@ namespace pybind
 		py_member_type * mt = (py_member_type *)(_member);
 
 		void * impl = detail::get_class_impl( py_self );
+
+		if( impl == 0 )
+		{
+			error_message( "py_setmethod: unbind object" );
+			return 0;
+		}
+
 		class_type_scope * scope = detail::get_class_scope( py_self );
 
 		mt->iadpter->set( impl, py_value, scope );
