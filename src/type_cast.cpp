@@ -325,6 +325,12 @@ namespace pybind
 
 				return str;
 			}
+			else if( _obj == Py_None )
+			{
+				m_valud = true;
+
+				return 0;
+			}
 
 			return 0;
 		}
@@ -360,6 +366,12 @@ namespace pybind
 				Py_ssize_t ch_size = PyString_Size(strObj);
 
 				return std::string( ch_buff, ch_size );
+			}
+			else if( _obj == Py_None )
+			{
+				m_valid = true;
+
+				return std::string();
 			}
 
 			return std::string();
