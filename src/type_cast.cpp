@@ -327,7 +327,7 @@ namespace pybind
 			}
 			else if( _obj == Py_None )
 			{
-				m_valud = true;
+				m_valid = true;
 
 				return 0;
 			}
