@@ -61,6 +61,8 @@ namespace pybind
 			if( arity-- > 0 )class_core::add_base<typename B::base3>(_scope, &meta_cast<typename B::base3>);
 			if( arity-- > 0 )class_core::add_base<typename B::base4>(_scope, &meta_cast<typename B::base4>);
 			if( arity-- > 0 )class_core::add_base<typename B::base5>(_scope, &meta_cast<typename B::base5>);
+			if( arity-- > 0 )class_core::add_base<typename B::base6>(_scope, &meta_cast<typename B::base6>);
+			if( arity-- > 0 )class_core::add_base<typename B::base7>(_scope, &meta_cast<typename B::base7>);
 		}
 
 		template<class C0, class C1, class C2, class C3, class C4, class C5>
