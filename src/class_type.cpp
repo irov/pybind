@@ -118,7 +118,6 @@ namespace pybind
 
 			PyObject * py_holder = _holder ? Py_True : Py_False;
 			PyObject_SetAttrString( _obj, "__pybind_object_holder", py_holder );
-			Py_DECREF( py_holder );
 		}
 		//////////////////////////////////////////////////////////////////////////
 		bool is_holder( PyObject * _obj )
