@@ -1,6 +1,5 @@
 #	pragma once
 
-#	include "pybind/helper.hpp"
 #	include "pybind/bases.hpp"
 
 #	include "pybind/class_core.hpp"
@@ -31,7 +30,7 @@ namespace pybind
 		virtual void setup_extract() = 0;
 
 	public:
-		base_( const char * _name, pybind_newfunc _pynew, pybind_destructor _pydestructor, PyObject * _module )
+		base_( const char * _name, pybind_new _pynew, pybind_destructor _pydestructor, PyObject * _module )
 		{
 			class_type_scope * scope = class_core::create_new_type_scope( class_info<C>(), _name);
 
@@ -82,8 +81,6 @@ namespace pybind
 			method_adapter_interface * iadapter =
 				new method_adapter<C, F>(f, _name);
 
-			s_adapterDeleter.add( iadapter );
-
 			typedef typename function_parser<F>::result t_info;
 
 			class_core::def_method(
@@ -101,8 +98,6 @@ namespace pybind
 		{			
 			method_adapter_interface * iadapter =
 				new method_adapter_native<C, F>(f, _name);
-
-			s_adapterDeleter.add( iadapter );
 
 			typedef typename function_parser<F>::result t_info;
 
@@ -122,8 +117,6 @@ namespace pybind
 			convert_adapter_interface * iadapter =
 				new convert_adapter<F>(f);
 
-			s_adapterDeleter.add( iadapter );
-
 			class_core::def_convert(
 				iadapter,
 				class_info<C>()
@@ -137,8 +130,6 @@ namespace pybind
 		{			
 			method_adapter_interface * iadapter =
 				new method_adapter_proxy_function<C, F>(f, _name);
-
-			s_adapterDeleter.add( iadapter );
 
 			typedef typename function_parser<F>::result t_info;
 
@@ -158,8 +149,6 @@ namespace pybind
 			method_adapter_interface * iadpter =
 				new method_adapter_proxy_member<C, P, F>(_name, _proxy, f);
 
-			s_adapterDeleter.add( iadpter );
-
 			typedef typename function_parser<F>::result t_info;
 
 			class_core::def_method(
@@ -178,8 +167,6 @@ namespace pybind
 			member_adapter_interface * iadpter =
 				new member_adapter<C, A>(_name, a);
 
-			s_adapterDeleter.add( iadpter );
-
 			class_core::def_member(
 				_name,
 				iadpter,
@@ -194,8 +181,6 @@ namespace pybind
 		{
 			member_adapter_interface * iadpter =
 				new member_adapter_property<C, FG, FS>(_get, _set);
-
-			s_adapterDeleter.add( iadpter );
 
 			class_core::def_member(
 				_name,
@@ -212,8 +197,6 @@ namespace pybind
 			member_adapter_interface * iadpter =
 				new member_adapter_property_static<C, FG, FS>( _get, _set);
 
-			s_adapterDeleter.add( iadpter );
-
 			class_core::def_member(
 				_name,
 				iadpter,
@@ -229,8 +212,6 @@ namespace pybind
 			repr_adapter_interface * iadpter =
 				new repr_adapter<C, F>( _repr );
 
-			s_adapterDeleter.add( iadpter );
-
 			class_core::def_repr( 
 				iadpter, 
 				class_info<C>() 
@@ -244,8 +225,6 @@ namespace pybind
 		{
 			method_adapter_interface * iadpter =
 				new method_adapter<C, F>(_fn, "getattro");
-
-			s_adapterDeleter.add( iadpter );
 
 			class_core::def_getattro( 
 				iadpter, 
@@ -261,8 +240,6 @@ namespace pybind
 			method_adapter_interface * iadpter =
 				new method_adapter<C, F>(_fn, "getmap");
 
-			s_adapterDeleter.add( iadpter );
-
 			class_core::def_mapping( 
 				iadpter, 
 				class_info<C>() 
@@ -271,31 +248,30 @@ namespace pybind
 			return *this;
 		}
 
-		static PyObject *
-			new_interface( PyTypeObject * _type, PyObject * _args, PyObject * _kwds )
+		static void *
+			new_interface( pybind::class_type_scope * _scope, PyObject * _args, PyObject * _kwds )
 		{
-			return detail::alloc_class( _type, _args, 0, class_info<C>() );
+			return 0;
 		}
 
 
-		static PyObject *
-			new_( PyTypeObject * _type, PyObject * _args, PyObject * _kwds )
+		static void *
+			new_( pybind::class_type_scope * _scope, PyObject * _args, PyObject * _kwds )
 		{
-			C * obj = (C*)class_core::construct( scope(), _args );
+			void * impl = class_core::construct( scope(), _args );
 
-			return detail::alloc_class( _type, _args, obj, class_info<C>() );
+			return impl;
 		}
 
 		static void 
-			dealloc_only_python( PyObject * self )
+			dealloc_only_python( void * impl )
 		{
-			C * obj = (C*)detail::dealloc_class( self );
 		}
 
 		static void
-			dealloc_( PyObject * self )
+			dealloc_( void * impl )
 		{
-			C * obj = (C*)detail::dealloc_class( self );
+			C * obj = static_cast<C*>(impl);
 			delete obj;
 		}
 
@@ -303,13 +279,7 @@ namespace pybind
 		{
 			return detail::get_class_type_scope( class_info<C>() );
 		}
-
-	protected:
-		static helper::delete_holder<adapter_interface> s_adapterDeleter;
 	};
-
-	template<class C, class B>
-	helper::delete_holder<adapter_interface> base_<C,B>::s_adapterDeleter;
 
 	template<class C> 
 	struct extract_class_type_ptr
@@ -347,8 +317,6 @@ namespace pybind
 	{
 		C apply( PyObject * _obj ) override
 		{
-			this->setValid( true );
-
 			const std::type_info & tinfo = class_info<C>();
 			const std::type_info & tptrinfo = class_info<C *>();
 
@@ -362,10 +330,15 @@ namespace pybind
 
 					this->setValid( false );
 				}
+				else
+				{
+					this->setValid( true );
+				}
 
 				return temp;
 			}
 
+			this->setValid( true );
 
 			return *static_cast<C*>(impl);
 		}

@@ -37,7 +37,7 @@ namespace pybind
 			return 0;
 		}
 
-		class_type_scope * scope = detail::get_class_scope( mct->self );
+		class_type_scope * scope = detail::get_class_scope( mct->self->ob_type );
 
 		return mct->iadapter->call( impl, scope, _args, _kwds );
 	}
@@ -142,12 +142,22 @@ namespace pybind
 	//	return 0;
 	//}
 	//////////////////////////////////////////////////////////////////////////
+	static void descr_destr2( PyObject * _obj )
+	{
+		py_method_generator_type * mgt = (py_method_generator_type *)_obj;
+
+		delete mgt->iadapter;
+
+		Py_DECREF( mgt->classtype );
+		Py_DECREF( mgt->methodname );
+	}
+	//////////////////////////////////////////////////////////////////////////
 	static PyTypeObject s_method_generator_type = {
 		PyVarObject_HEAD_INIT(&PyType_Type, 0)
 		"pybind_method_generator_type",
 		sizeof(py_method_generator_type),
 		0,
-		0,					/* tp_dealloc */
+		(destructor)descr_destr2,					/* tp_dealloc */
 		0,					/* tp_print */
 		0,					/* tp_getattr */
 		0,					/* tp_setattr */
@@ -178,27 +188,27 @@ namespace pybind
 		(descrgetfunc)method_get,		/* tp_descr_get */
 		0,					/* tp_descr_set */
 	};
+	////////////////////////////////////////////////////////////////////////////
+	//method_type_scope::method_type_scope( const char * _name, method_adapter_interface * _ifunc )
+	//	: m_name(_name)
+	//	, m_interface(_ifunc)
+	//{
+	//}
+	////////////////////////////////////////////////////////////////////////////
+	//method_type_scope::~method_type_scope()
+	//{
+	//}
 	//////////////////////////////////////////////////////////////////////////
-	method_type_scope::method_type_scope( const char * _name, method_adapter_interface * _ifunc )
-		: m_name(_name)
-		, m_interface(_ifunc)
-	{
-	}
-	//////////////////////////////////////////////////////////////////////////
-	method_type_scope::~method_type_scope()
-	{
-	}
-	//////////////////////////////////////////////////////////////////////////
-	PyObject * method_type_scope::instance( PyTypeObject * _type )
+	PyObject * method_type_scope::instance( const char * _name, method_adapter_interface * _ifunc, PyTypeObject * _type )
 	{
 		py_method_generator_type * self = (py_method_generator_type *)PyType_GenericAlloc( &s_method_generator_type, 0 );
 
-		self->iadapter = m_interface;
+		self->iadapter = _ifunc;
 
 		Py_XINCREF( _type );
 		self->classtype = _type;
 
-		self->methodname = PyString_InternFromString( m_name );
+		self->methodname = PyString_InternFromString( _name );
 		
 		return (PyObject*)self;
 	}
@@ -214,5 +224,11 @@ namespace pybind
 		{
 			printf("invalid embedding class '%s' \n", s_method_caller_type.tp_name );
 		}
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void finalize_methods()
+	{
+		Py_DECREF( &s_method_generator_type );
+		Py_DECREF( &s_method_caller_type );
 	}
 }

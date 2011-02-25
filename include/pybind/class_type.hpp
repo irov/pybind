@@ -24,14 +24,13 @@ namespace pybind
 	{
 		PYBIND_API bool is_class( PyObject * _obj );
 		PYBIND_API void * get_class_impl( PyObject * _obj );
-		PYBIND_API class_type_scope * get_class_scope( PyObject * _obj );
+		PYBIND_API class_type_scope * get_class_scope( PyTypeObject * _obj );
 		PYBIND_API void * unwrap( PyObject * _obj );
-		PYBIND_API void wrap( PyObject * _obj, void * _impl );
+		PYBIND_API void wrap( PyObject * _obj, void * _impl, bool _holder );
 
 		PYBIND_API void * check_registred_class( PyObject * _obj, const std::type_info & _info );
 
-		PYBIND_API PyObject * alloc_class( PyTypeObject * _type, PyObject * _args, void * _impl, const std::type_info & _tinfo );
-		PYBIND_API void * dealloc_class( PyObject * _obj );
+		PYBIND_API PyObject * alloc_class( PyTypeObject * _type, PyObject * _args, PyObject * _kwds, void * _impl, bool _holder );
 
 		PYBIND_API void reg_class_type( PyTypeObject * _type );
 
@@ -46,7 +45,7 @@ namespace pybind
 		~class_type_scope();
 
 	public:
-		void setup( PyObject * _module, pybind_newfunc _pynew, pybind_destructor _pydestructor );
+		void setup( PyObject * _module, pybind_new _pynew, pybind_destructor _pydestructor );
 
 	public:
 		const char * get_name() const;
@@ -75,18 +74,23 @@ namespace pybind
 		void * metacast( const char * name, void * _impl );
 		void unwrap( PyObject * _obj );
 
-	public:		
-		typedef std::list<method_type_scope *> TMethods;
-		TMethods m_methods;
+		void incref();
+		void decref();
 
-		typedef std::list<member_type_scope *> TMembers;
-		TMembers m_members;
+	public:
+		typedef std::list<const char *> TVectorMembers;
+		TVectorMembers m_members;
+
+		typedef std::list<const char *> TVectorMethods;
+		TVectorMethods m_methods;
 	
 		typedef std::pair<class_type_scope *, pybind_metacast> TPairMetacast;
 		typedef std::map<const char *, TPairMetacast> TMapBases;
 		TMapBases m_bases;
 
 		constructor * m_pyconstructor;
+		
+		pybind_new m_pynew;
 		pybind_destructor m_pydestructor;
 
 		convert_adapter_interface * m_convert;
@@ -100,8 +104,11 @@ namespace pybind
 		PyTypeObject * m_pytypeobject;
 
 		PyObject * m_module;
+
+		int m_ref;
 	};
 
 	void initialize_classes();	
+	void finalize_classes();
 }
 

@@ -30,8 +30,8 @@ namespace pybind
 		static void setup_new_type_scope( 
 			class_type_scope * _scope,
 			PyObject * _module,
-			pybind_newfunc _pynew,
-			pybind_destructor _pydestructor
+			pybind::pybind_new _pynew,
+			pybind::pybind_destructor _pydestructor
 			);
 
 

@@ -11,19 +11,20 @@ namespace pybind
 	class method_type_scope
 	{
 	public:
-		method_type_scope( const char * _name, method_adapter_interface * _ifunc );
-		~method_type_scope();
+		//method_type_scope( const char * _name, method_adapter_interface * _ifunc );
+		//~method_type_scope();
 
 	public:
-		PyObject * instance( PyTypeObject * _type );
+		static PyObject * instance( const char * _name, method_adapter_interface * _ifunc, PyTypeObject * _type );
 		
-	public:
-		const char * m_name;
+	//public:
+		//const char * m_name;
 
-	protected:
-		method_adapter_interface * m_interface;
+	//protected:
+		//method_adapter_interface * m_interface;
 	};
 
 	void initialize_methods();
+	void finalize_methods();
 }
 

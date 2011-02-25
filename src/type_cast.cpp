@@ -80,22 +80,22 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool type_cast::type_info_cast( PyObject * _obj, const std::type_info & _tinfo, const std::type_info & _tptrinfo, void ** _impl )
 	{
+		m_valid = false;
+
 		if( detail::is_class( _obj ) == false )
 		{
 			return false;
 		}
-
-		m_valid = true;
 
 		void * impl = detail::get_class_impl( _obj );
 
 		if( impl == 0 )
 		{
 			error_message( "type_info_cast: unbind object" );
-			return 0;
+			return false;
 		}
 
-		class_type_scope * scope = detail::get_class_scope( _obj );
+		class_type_scope * scope = detail::get_class_scope( _obj->ob_type );
 		class_type_scope * cur_scope = detail::get_class_type_scope( _tinfo );
 
 		void * result = 0;
@@ -111,6 +111,8 @@ namespace pybind
 		{
 			return false;
 		}
+
+		m_valid = true;
 
 		*_impl = impl;
 

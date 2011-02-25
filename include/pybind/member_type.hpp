@@ -18,20 +18,7 @@ namespace pybind
 	class member_type_scope
 	{
 	public:
-		member_type_scope( const char * _name, member_adapter_interface * _ifunc );
-
-		~member_type_scope();
-
-	public:
-		PyObject * instance();
-
-	public:
-		const char * m_name;
-
-	protected:
-		member_adapter_interface * m_interface;
-		PyMethodDef m_getmethod;
-		PyMethodDef m_setmethod;
+		static PyObject * instance( const char * _name, member_adapter_interface * _iadpter  );
 	};
 
 	void initialize_members();

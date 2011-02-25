@@ -10,7 +10,7 @@ namespace pybind
 	{
 		py_member_type * mt = (py_member_type *)(_obj);
 
-		//delete mt->ifunc;
+		delete mt->iadpter;
 
 		mt->ob_type->tp_free( mt );		
 	}
@@ -29,7 +29,7 @@ namespace pybind
 			return 0;
 		}
 
-		class_type_scope * scope = detail::get_class_scope( py_self );
+		class_type_scope * scope = detail::get_class_scope( py_self->ob_type );
 
 		return mt->iadpter->get( impl, scope );
 	}
@@ -49,41 +49,38 @@ namespace pybind
 			return 0;
 		}
 
-		class_type_scope * scope = detail::get_class_scope( py_self );
+		class_type_scope * scope = detail::get_class_scope( py_self->ob_type );
 
 		mt->iadpter->set( impl, py_value, scope );
 
 		Py_RETURN_NONE;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	member_type_scope::member_type_scope( const char * _name, member_adapter_interface * _ifunc )
-		: m_name(_name)
-		, m_interface(_ifunc)
+	static PyMethodDef s_getmethod =
 	{
-		m_getmethod.ml_name = "getmethod";
-		m_getmethod.ml_meth = &py_getmethod;
-		m_getmethod.ml_flags = METH_CLASS | METH_VARARGS;
-		m_getmethod.ml_doc = "Embedding function cpp";
-
-		m_setmethod.ml_name = "setmethod";
-		m_setmethod.ml_meth = &py_setmethod;
-		m_setmethod.ml_flags = METH_CLASS | METH_VARARGS;
-		m_setmethod.ml_doc = "Embedding function cpp";	
-	}
+		"getmethod",
+		&py_getmethod,
+		METH_CLASS | METH_VARARGS,
+		"Embedding function cpp"
+	};
 	//////////////////////////////////////////////////////////////////////////
-	member_type_scope::~member_type_scope()
+	static PyMethodDef s_setmethod =
 	{
-	}
+		"setmethod",
+		&py_setmethod,
+		METH_CLASS | METH_VARARGS,
+		"Embedding function cpp"
+	};
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * member_type_scope::instance()
+	PyObject * member_type_scope::instance( const char * _name, member_adapter_interface * _iadpter )
 	{
 		py_member_type * py_member = (py_member_type *)PyType_GenericAlloc( &s_member_type, 0 );
 
-		py_member->name = m_name;
-		py_member->iadpter = m_interface;
+		py_member->name = _name;
+		py_member->iadpter = _iadpter;
 
-		PyObject * py_get = PyCFunction_New( &m_getmethod, (PyObject*)py_member );
-		PyObject * py_set = PyCFunction_New( &m_setmethod, (PyObject*)py_member );
+		PyObject * py_get = PyCFunction_New( &s_getmethod, (PyObject*)py_member );
+		PyObject * py_set = PyCFunction_New( &s_setmethod, (PyObject*)py_member );
 
 		Py_DECREF( py_member );
 

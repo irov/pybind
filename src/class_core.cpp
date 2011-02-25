@@ -41,7 +41,7 @@ namespace pybind
 	void class_core::setup_new_type_scope( 
 		class_type_scope * _scope,
 		PyObject * _module,
-		pybind_newfunc _pynew,
+		pybind_new _pynew,
 		pybind_destructor _pydestructor )
 	{
 		_scope->setup( _module, _pynew, _pydestructor );
@@ -63,7 +63,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void class_core::wrap_holder( PyObject * _obj, void * _impl )
 	{
-		detail::wrap( _obj, _impl );
+		detail::wrap( _obj, _impl, true );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_core::def_init( class_type_scope * _scope, constructor * _ctr )

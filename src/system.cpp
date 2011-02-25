@@ -42,8 +42,10 @@ namespace pybind
 	{
 		Py_Finalize();
 
-		class_core::finalize();		
+		class_core::finalize();
 		
+		finalize_methods();
+		finalize_classes();
 		finalize_def();
 		finalize_functor();
 	}
