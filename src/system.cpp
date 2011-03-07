@@ -91,6 +91,29 @@ namespace pybind
 		return module;
 	}
 
+	PyObject * module_import_exist( const char * _name, bool & _exsist )
+	{
+		PyObject * module = PyImport_ImportModule( _name );
+
+		if (PyErr_Occurred())
+		{
+			if( PyErr_ExceptionMatches(PyExc_ImportError) == 1 )
+			{
+				_exsist = false;
+
+				PyErr_Clear();
+
+				return NULL;
+			}
+			
+			PyErr_Print();
+		}
+
+		_exsist = true;
+
+		return module;
+	}
+
 	PyObject * module_init( const char * _name )
 	{
 		static PyMethodDef module_methods[] = {
