@@ -79,19 +79,7 @@ namespace pybind
 			"stdout", _handle );
 	}
 
-	PyObject * module_import( const char * _name )
-	{
-		PyObject * module = PyImport_ImportModule( _name );
-
-		if( module == 0 )
-		{
-			check_error();
-		}
-
-		return module;
-	}
-
-	PyObject * module_import_exist( const char * _name, bool & _exsist )
+	PyObject * module_import( const char * _name, bool & _exsist )
 	{
 		PyObject * module = PyImport_ImportModule( _name );
 
