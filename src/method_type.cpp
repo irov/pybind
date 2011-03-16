@@ -125,12 +125,23 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	static PyObject * descr_call( py_method_generator_type * _descr, PyObject * _args , PyObject * _kwds )
 	{
+		Py_ssize_t argc = PyTuple_GET_SIZE(_args);
+
+		if( argc == 0 )
+		{
+			const char * methodname = PyString_AS_STRING(_descr->methodname);
+			error_message( "method_call: %s take none args"
+				, methodname
+				);
+
+			return 0;
+		}
+
 		py_method_caller_type * mct = (py_method_caller_type *)PyType_GenericAlloc( &s_method_caller_type, 0 );
 		mct->iadapter = _descr->iadapter;
 		mct->self = PyTuple_GetItem(_args, 0);
-		
+		^
 
-		Py_ssize_t argc = PyTuple_GET_SIZE(_args);
 		PyObject * new_args = PyTuple_GetSlice(_args, 1, argc);
 
 		return PyEval_CallObjectWithKeywords((PyObject*)mct, new_args, _kwds);
