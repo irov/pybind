@@ -89,6 +89,7 @@ namespace pybind
 			{
 				_exsist = false;
 
+				PyErr_Print();
 				PyErr_Clear();
 
 				return NULL;

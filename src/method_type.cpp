@@ -140,8 +140,7 @@ namespace pybind
 		py_method_caller_type * mct = (py_method_caller_type *)PyType_GenericAlloc( &s_method_caller_type, 0 );
 		mct->iadapter = _descr->iadapter;
 		mct->self = PyTuple_GetItem(_args, 0);
-		^
-
+		
 		PyObject * new_args = PyTuple_GetSlice(_args, 1, argc);
 
 		return PyEval_CallObjectWithKeywords((PyObject*)mct, new_args, _kwds);
