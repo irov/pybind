@@ -93,8 +93,8 @@ namespace pybind
 				PyErr_Clear();
 
 				return NULL;
-			}
 			
+			}
 			PyErr_Print();
 		}
 
