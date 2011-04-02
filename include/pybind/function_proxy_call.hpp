@@ -134,19 +134,16 @@ namespace pybind
 
 		static PyObject * call( C * _obj, F f, PyObject * _arg, const char * _tag )
 		{
-			if( f_info::arity > 0 )
+			size_t arg_size = tuple_size(_arg);
+			if( arg_size + 1 != f_info::arity )
 			{
-				size_t arg_size = tuple_size(_arg);
-				if( arg_size + 1 != f_info::arity )
-				{
-					error_message("invalid proxy_method call args is not equal %d != %d in '%s'\n"
-						, arg_size
-						, f_info::arity
-						, _tag
-						);
+				error_message("invalid proxy_method call args is not equal %d != %d in '%s'\n"
+					, arg_size
+					, f_info::arity
+					, _tag
+					);
 
-					return 0;
-				}
+				return 0;
 			}
 
 			try
