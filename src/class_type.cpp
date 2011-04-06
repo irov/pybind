@@ -8,6 +8,8 @@
 #	include "pybind/system.hpp"
 #	include "config/python.hpp"
 
+#	include <algorithm>
+
 namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
@@ -391,8 +393,36 @@ namespace pybind
 		m_module = _module;
 	}
 	//////////////////////////////////////////////////////////////////////////
+	namespace detail
+	{
+		class FCharCmp
+		{
+		public:
+			FCharCmp( const char * _name )
+				: m_name(_name)
+			{
+			}
+
+		public:
+			bool operator () ( const char * _name ) const
+			{
+				return strcmp( m_name, _name ) == 0;
+			}
+
+		protected:
+			const char * m_name;
+		};
+	}
+	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::add_method( const char * _name, method_adapter_interface * _ifunc, int _arity )
 	{
+		TVectorMethods::iterator it_found = std::find_if( m_methods.begin(), m_methods.end(), detail::FCharCmp(_name) );
+		if( it_found != m_methods.end() )
+		{
+			pybind::throw_exception();
+			return;
+		}
+
 		m_methods.push_back( _name );
 
 		PyObject * py_type_method = method_type_scope::instance( _name, _ifunc, m_pytypeobject );
@@ -407,6 +437,13 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::add_member( const char * _name, member_adapter_interface * _imember )
 	{
+		TVectorMembers::iterator it_found = std::find_if( m_members.begin(), m_members.end(), detail::FCharCmp(_name) );
+		if( it_found != m_members.end() )
+		{
+			pybind::throw_exception();
+			return;
+		}
+
 		m_members.push_back( _name );
 
 		PyObject * py_member = member_type_scope::instance( _name, _imember );
@@ -469,7 +506,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::add_base( const char * _name, class_type_scope * _base, pybind_metacast _cast )
 	{
-		m_bases[ _name ] = std::make_pair( _base, _cast );
+		m_bases[_name] = std::make_pair( _base, _cast );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void * class_type_scope::metacast( const char * _name, void * _impl )

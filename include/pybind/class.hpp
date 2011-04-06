@@ -93,6 +93,8 @@ namespace pybind
 			return *this;
 		}
 
+		//base_ & def_construct( F f )
+
 		template<class F>
 		base_ & def_native( const char * _name, F f )
 		{			

@@ -383,6 +383,11 @@ namespace pybind
 		Py_RETURN_FALSE;
 	}
 
+	PyObject * ret_bool( bool _value )
+	{
+		return _value ? ret_true(): ret_false();
+	}
+
 	bool has_attr( PyObject * _obj, const char * _attr )
 	{
 		return PyObject_HasAttrString( _obj, _attr ) == 1;
