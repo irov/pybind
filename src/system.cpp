@@ -437,6 +437,11 @@ namespace pybind
 		return PyList_GetItem( _obj, _it );
 	}
 
+	PyObject * dict_new()
+	{
+		return PyDict_New();
+	}
+
 	bool dict_check( PyObject * _obj )
 	{
 		return PyDict_Check( _obj ) == 1;
