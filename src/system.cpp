@@ -437,6 +437,11 @@ namespace pybind
 		return PyList_GetItem( _obj, _it );
 	}
 
+	int list_setitem( PyObject * _obj, std::size_t _it, PyObject * _item )
+	{
+		return PyList_SetItem( _obj, _it, _item );
+	}
+
 	PyObject * dict_new()
 	{
 		return PyDict_New();
