@@ -447,6 +447,29 @@ namespace pybind
 		return PyDict_New();
 	}
 
+	PyObject * dict_from( PyObject * _obj )
+	{
+		PyObject * py_dict = pybind::dict_new();
+
+		PyObject * py_dir = PyObject_Dir( _obj );
+
+		for( std::size_t 
+			it = 0, 
+			it_end = PyList_Size( py_dir );
+		it != it_end;
+		++it )
+		{
+			PyObject * py_key = PyList_GetItem( py_dir, it );
+			PyObject * py_value = PyObject_GetAttr( _obj, py_key );
+
+			PyDict_SetItem( py_dict, py_key, py_value );
+		}
+
+		Py_DecRef( py_dir );
+
+		return py_dict;
+	}
+
 	bool dict_check( PyObject * _obj )
 	{
 		return PyDict_Check( _obj ) == 1;
@@ -465,6 +488,15 @@ namespace pybind
 	PyObject * dict_get( PyObject * _dict, const char * _name )
 	{
 		return PyDict_GetItemString( _dict, _name );
+	}
+
+	bool dict_contains( PyObject * _dict, const char * _name )
+	{
+		PyObject * kv = PyString_FromString( _name );
+		int contains = PyDict_Contains(_dict, kv);
+		Py_DecRef(kv);
+
+		return contains == 1;
 	}
 
 	bool dict_next( PyObject * _dict, std::size_t *_pos, PyObject ** _key, PyObject ** _value )
