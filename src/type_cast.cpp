@@ -45,6 +45,7 @@ namespace pybind
 
 		void error_invalid_extract( PyObject * _obj, const std::type_info & _tinfo )
 		{
+#	ifndef PYBIND_PYTHON_3
 			if( const char * repr = pybind::object_to_string( _obj ) )
 			{
 				pybind::error_message( "invalid extract %s from %.256s"
@@ -59,6 +60,13 @@ namespace pybind
 					, _obj->ob_type->tp_name
 					);
 			}
+#	else
+			//TODO Python3
+			pybind::error_message( "invalid extract %s from unknown object type %s"
+				, _tinfo.name()
+				, _obj->ob_type->tp_name
+				);
+#	endif
 		}
 
 		bool convert_object( PyObject * _obj, const std::type_info & _tinfo, void * _place )
@@ -131,11 +139,13 @@ namespace pybind
 				m_valid = true;
 				return (_obj == Py_True);				
 			}
+#	ifndef PYBIND_PYTHON_3
 			else if( PyInt_Check( _obj ) )
 			{
 				m_valid = true;
 				return (PyInt_AsLong( _obj ) != 0);
 			}
+#	endif
 			else if( PyLong_Check( _obj ) )
 			{
 				m_valid = true;
@@ -163,16 +173,18 @@ namespace pybind
 		{
 			m_valid = false;
 
-			if( PyInt_Check( _obj ) )
-			{
-				m_valid = true;
-				return PyInt_AsLong( _obj );
-			}
-			else if( PyLong_Check( _obj ) )
+			if( PyLong_Check( _obj ) )
 			{
 				m_valid = true;
 				return (int)PyLong_AsLong( _obj );
 			}
+#	ifndef PYBIND_PYTHON_3
+			else if( PyInt_Check( _obj ) )
+			{
+				m_valid = true;
+				return PyInt_AsLong( _obj );
+			}
+#	endif
 			else if( PyFloat_Check( _obj ) )
 			{
 				m_valid = true;
@@ -184,7 +196,11 @@ namespace pybind
 
 		PyObject * wrap( int _value ) override
 		{
+#	ifndef PYBIND_PYTHON_3
 			return PyInt_FromLong( _value );
+#	else
+			return PyLong_FromLong( _value );
+#	endif
 		}
 	}s_extract_int_type;
 
@@ -194,16 +210,18 @@ namespace pybind
 		unsigned int apply( PyObject * _obj ) override
 		{
 			m_valid = false;
-			if( PyInt_Check( _obj ) )
-			{
-				m_valid = true;
-				return PyInt_AsUnsignedLongMask( _obj );
-			}
-			else if( PyLong_Check( _obj ) )
+			if( PyLong_Check( _obj ) )
 			{				
 				m_valid = true;
 				return (unsigned int)PyLong_AsUnsignedLong( _obj );
 			}
+#	ifndef PYBIND_PYTHON_3
+			else if( PyInt_Check( _obj ) )
+			{
+				m_valid = true;
+				return PyInt_AsUnsignedLongMask( _obj );
+			}			
+#	endif
 			else if( PyFloat_Check( _obj ) )
 			{				
 				m_valid = true;
@@ -215,7 +233,11 @@ namespace pybind
 
 		PyObject * wrap( unsigned int _value ) override
 		{
+#	ifndef PYBIND_PYTHON_3
 			return PyInt_FromLong( _value );
+#	else
+			return PyLong_FromLong( _value );
+#	endif
 		}
 	}s_extract_unsigned_int_type;
 
@@ -226,16 +248,19 @@ namespace pybind
 		size_t apply( PyObject * _obj ) override
 		{
 			m_valid = false;
-			if( PyInt_Check( _obj ) )
-			{
-				m_valid = true;
-				return (std::size_t)PyInt_AsUnsignedLongMask( _obj );
-			}
-			else if( PyLong_Check( _obj ) )
+
+			if( PyLong_Check( _obj ) )
 			{				
 				m_valid = true;
 				return (std::size_t)PyLong_AsUnsignedLong( _obj );
 			}
+#	ifndef PYBIND_PYTHON_3
+			else if( PyInt_Check( _obj ) )
+			{
+				m_valid = true;
+				return (std::size_t)PyInt_AsUnsignedLongMask( _obj );
+			}
+#	endif
 			else if( PyFloat_Check( _obj ) )
 			{				
 				m_valid = true;
@@ -247,7 +272,9 @@ namespace pybind
 
 		PyObject * wrap( std::size_t _value ) override
 		{
-			return PyInt_FromLong( (long)_value );
+#	ifndef PYBIND_PYTHON_3
+			return PyLong_FromLong( (long)_value );
+#	endif
 		}
 	}s_extract_size_t_type;
 
@@ -268,11 +295,13 @@ namespace pybind
 				m_valid = true;
 				return (float)PyLong_AsLong( _obj );
 			}
+#	ifndef PYBIND_PYTHON_3
 			else if( PyInt_Check( _obj ) )
 			{
 				m_valid = true;
 				return (float)PyInt_AsLong( _obj );
 			}
+#	endif
 
 			return 0.f;
 		}
@@ -299,11 +328,13 @@ namespace pybind
 				m_valid = true;
 				return (float)PyLong_AsLong( _obj );				
 			}
+#	ifndef PYBIND_PYTHON_3
 			else if( PyInt_Check( _obj ) )
 			{
 				m_valid = true;
 				return (float)PyInt_AsLong( _obj );				
 			}
+#	endif
 
 			return 0.0;
 		}
@@ -383,8 +414,6 @@ namespace pybind
 		{
 			return PyString_FromStringAndSize( _value.c_str(), _value.size() );
 		}
-
-
 	}s_extract_string_type;
 
 	//static struct extract_wstring_type

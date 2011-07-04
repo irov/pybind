@@ -105,11 +105,15 @@ namespace pybind
 
 	PyObject * module_init( const char * _name )
 	{
+#	ifndef PYBIND_PYTHON_3
 		static PyMethodDef module_methods[] = {
 			{NULL}  /* Sentinel */
 		};
 
 		return Py_InitModule4( _name, module_methods, 0, 0, PYTHON_API_VERSION );
+#	else
+		return PyModule_New( _name );
+#	endif
 	}
 
 	PyObject * module_dict( PyObject * _module )
@@ -317,20 +321,20 @@ namespace pybind
 		return result; 
 	}
 
-	PyObject * exec_file( const char * _filename, PyObject * _global, PyObject * _local )
-	{
-		PyObject * pyfile = PyFile_FromString( const_cast<char*>(_filename), "r" );
-		FILE * f = PyFile_AsFile( pyfile );
+	//PyObject * exec_file( const char * _filename, PyObject * _global, PyObject * _local )
+	//{
+	//	PyObject * pyfile = PyFile_FromString( const_cast<char*>(_filename), "r" );
+	//	FILE * f = PyFile_AsFile( pyfile );
 
-		PyObject* result = PyRun_File( f,
-			_filename,
-			Py_file_input,
-			_global, _local );
+	//	PyObject* result = PyRun_File( f,
+	//		_filename,
+	//		Py_file_input,
+	//		_global, _local );
 
-		check_error();
+	//	check_error();
 
-		return result;
-	}
+	//	return result;
+	//}
 
 	PyObject * compile_string( const char * _string, const char * _file )
 	{
@@ -341,6 +345,7 @@ namespace pybind
 		return result;
 	}
 
+#	ifndef PYBIND_PYTHON_3
 	const char * get_syspath()
 	{
 		return Py_GetPath();
@@ -348,10 +353,23 @@ namespace pybind
 
 	void set_syspath( const char * _path )
 	{
-		PySys_SetPath( const_cast< char * >( _path ) );
+		PySys_SetPath( const_cast<char*>(_path) );
 
 		check_error();
 	}
+#	else
+	const wchar_t * get_syspath()
+	{
+		return Py_GetPath();
+	}
+
+	void set_syspath( const wchar_t * _path )
+	{
+		PySys_SetPath( _path );
+
+		check_error();
+	}
+#	endif
 
 	void incref( PyObject * _obj )
 	{
@@ -492,7 +510,12 @@ namespace pybind
 
 	bool dict_contains( PyObject * _dict, const char * _name )
 	{
+#	ifndef PYBIND_PYTHON_3
 		PyObject * kv = PyString_FromString( _name );
+#	else
+		PyObject * kv = PyUnicode_FromString( _name );
+#	endif
+
 		int contains = PyDict_Contains(_dict, kv);
 		Py_DecRef(kv);
 
@@ -522,6 +545,7 @@ namespace pybind
 		return PyTuple_GetItem( _tuple, _it );
 	}
 
+#	ifndef PYBIND_PYTHON_3
 	const char * object_to_string( PyObject * _obj )
 	{
 		PyObject * repr = PyObject_Repr( _obj );
@@ -533,6 +557,12 @@ namespace pybind
 
 		return PyString_AS_STRING( repr );
 	}
+#	else
+	PYBIND_API const wchar_t * object_to_unicode( PyObject * _obj )
+	{
+		return L"";
+	}
+#	endif
 
 	static void traceback_error( const char * _msg )
 	{
@@ -650,6 +680,7 @@ namespace pybind
 
 			return false;
 		}
+#	ifndef PYBIND_PYTHON_3
 		//////////////////////////////////////////////////////////////////////////
 		bool is_string( PyObject * _string )
 		{
@@ -665,11 +696,18 @@ namespace pybind
 		{
 			return PyString_AsString( _string );
 		}
+#	else
 		//////////////////////////////////////////////////////////////////////////
-		// const wchar_t * to_unicode( PyObject * _unicode )
-		// {
-		// 	return PyUnicode_AsUnicode( _unicode );
-		// }
+		bool is_unicode( PyObject * _unicode )
+		{
+			return PyUnicode_CheckExact(_unicode);
+		}
+		//////////////////////////////////////////////////////////////////////////
+		wchar_t * to_unicode( PyObject * _unicode )
+		{
+			return PyUnicode_AsUnicode( _unicode );
+		}
+#	endif
 	}
 }
 

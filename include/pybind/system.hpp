@@ -64,10 +64,15 @@ namespace pybind
 		
 	PYBIND_API PyObject * compile_string( const char * _string, const char * _file );
 	PYBIND_API PyObject * exec( const char * _code, PyObject * _global = 0, PyObject * _local = 0 );
-	PYBIND_API PyObject * exec_file( const char * _filename, PyObject * _global = 0, PyObject * _local = 0 );
+	//PYBIND_API PyObject * exec_file( const char * _filename, PyObject * _global = 0, PyObject * _local = 0 );
 
+#	ifndef PYBIND_PYTHON_3
 	PYBIND_API const char * get_syspath();
 	PYBIND_API void set_syspath( const char * _path );
+#	else
+	PYBIND_API const wchar_t * get_syspath();
+	PYBIND_API void set_syspath( const wchar_t * _path );
+#	endif
 
 	PYBIND_API void incref( PyObject * _obj );
 	PYBIND_API void decref( PyObject * _obj );
@@ -110,7 +115,11 @@ namespace pybind
 	PYBIND_API bool tuple_resize( PyObject ** _ptuple, std::size_t _it );
 
 
+#	ifndef PYBIND_PYTHON_3
 	PYBIND_API const char * object_to_string( PyObject * _obj );
+#	else
+	PYBIND_API const wchar_t * object_to_unicode( PyObject * _obj );
+#	endif
 	PYBIND_API void error_message( const char * _message, ... );
 	PYBIND_API PyObject * build_value( const char * _format, ... );
 	PYBIND_API PyObject * build_value_va( const char * _format, va_list _va );
@@ -127,9 +136,13 @@ namespace pybind
 		PYBIND_API bool is_bool( PyObject * _bool );
 		PYBIND_API bool to_bool( PyObject * _bool );
 
+#	ifndef PYBIND_PYTHON_3
 		PYBIND_API bool is_string( PyObject * _string );
 		PYBIND_API const char * to_string( PyObject * _string );
-		//PYBIND_API const wchar_t * to_unicode( PyObject * _unicode );
+#	else
+		PYBIND_API bool is_unicode( PyObject * _unicode );
+		PYBIND_API wchar_t * to_unicode( PyObject * _unicode );
+#	endif
 	}
 }
 

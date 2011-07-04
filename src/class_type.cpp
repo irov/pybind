@@ -62,6 +62,7 @@ namespace pybind
 
 			Py_DECREF(py_self);
 
+#ifndef PYBIND_PYTHON_3
 			if( PyCObject_Check(py_self) == false )
 			{
 				pybind::throw_exception();
@@ -69,31 +70,50 @@ namespace pybind
 			}
 
 			void * impl = PyCObject_AsVoidPtr(py_self);
+#else
+			if( PyCapsule_CheckExact(py_self) == false )
+			{
+				pybind::throw_exception();
+				return 0;
+			}
+
+			void * impl = PyCapsule_GetPointer(py_self, NULL);
+#endif			
 
 			return impl;
 		}
 		//////////////////////////////////////////////////////////////////////////
 		class_type_scope * get_class_scope( PyTypeObject * _type )
 		{
-			PyObject * obj = PyObject_GetAttrString( (PyObject*)_type, "__pybind_class_type_scope" );
+			PyObject * py_scope = PyObject_GetAttrString( (PyObject*)_type, "__pybind_class_type_scope" );
 
-			if( obj == 0 )
+			if( py_scope == 0 )
 			{
 				pybind::throw_exception();
 				return 0;
 			}
 
-			Py_DECREF(obj);
+			Py_DECREF(py_scope);
 
-			if( PyCObject_Check(obj) == false )
+#ifndef PYBIND_PYTHON_3
+			if( PyCObject_Check(py_scope) == false )
 			{
 				pybind::throw_exception();
 				return 0;
 			}
 
-			void * ptr = PyCObject_AsVoidPtr(obj);
+			void * impl = PyCObject_AsVoidPtr(py_scope);
+#else
+			if( PyCapsule_CheckExact(py_scope) == false )
+			{
+				pybind::throw_exception();
+				return 0;
+			}
 
-			class_type_scope * scope = static_cast<class_type_scope *>(ptr);
+			void * impl = PyCapsule_GetPointer(py_scope, NULL);
+#endif			
+
+			class_type_scope * scope = static_cast<class_type_scope *>(impl);
 
 			return scope;
 		}
@@ -108,7 +128,12 @@ namespace pybind
 		//////////////////////////////////////////////////////////////////////////
 		void wrap( PyObject * _obj, void * _impl, bool _holder )
 		{
-			PyObject * py_impl = PyCObject_FromVoidPtr( _impl, 0 ); 
+#	ifndef PYBIND_PYTHON_3
+			PyObject * py_impl = PyCObject_FromVoidPtr( _impl, 0 );
+#	else
+			PyObject * py_impl = PyCapsule_New( _impl, NULL, NULL );
+#	endif
+
 			PyObject_SetAttrString( _obj, "__pybind_object_impl", py_impl );
 			Py_DECREF( py_impl );
 
@@ -340,7 +365,11 @@ namespace pybind
 		m_pynew = _pynew;
 		m_pydestructor = _pydestructor;
 
+#	ifndef PYBIND_PYTHON_3
 		PyObject * py_name = PyString_InternFromString( m_name );
+#	else
+		PyObject * py_name = PyUnicode_InternFromString( m_name );
+#	endif
 
 		PyObject * py_bases = PyTuple_New( m_bases.size() );
 		int index = 0;
@@ -358,7 +387,12 @@ namespace pybind
 
 		PyObject * py_dict = PyDict_New();
 		
-		PyObject * py_pybind_class_type = PyCObject_FromVoidPtr( this, 0 ); 
+#	ifndef PYBIND_PYTHON_3
+		PyObject * py_pybind_class_type = PyCObject_FromVoidPtr( this, 0 );
+#	else
+		PyObject * py_pybind_class_type = PyCapsule_New( this, NULL, NULL );
+#	endif
+
 		PyDict_SetItemString( py_dict, "__pybind_class_type_scope", py_pybind_class_type );
 		Py_DECREF( py_pybind_class_type );
 

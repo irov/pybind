@@ -12,7 +12,11 @@ namespace pybind
 
 		delete mt->iadpter;
 
+#	ifndef PYBIND_PYTHON_3
 		mt->ob_type->tp_free( mt );		
+#	else
+		mt->ob_base.ob_type->tp_free( mt );		
+#	endif
 	}
 	//////////////////////////////////////////////////////////////////////////
 	static PyObject * py_getmethod( PyObject * _member, PyObject * _args )

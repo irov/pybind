@@ -129,10 +129,14 @@ namespace pybind
 
 		if( argc == 0 )
 		{
+#	ifndef PYBIND_PYTHON_3
 			const char * methodname = PyString_AS_STRING(_descr->methodname);
 			error_message( "method_call: %s take none args"
 				, methodname
 				);
+#	else
+			//TODO Python3
+#	endif
 
 			return 0;
 		}
@@ -218,7 +222,11 @@ namespace pybind
 		Py_XINCREF( _type );
 		self->classtype = _type;
 
+#	ifndef PYBIND_PYTHON_3
 		self->methodname = PyString_InternFromString( _name );
+#	else
+		self->methodname = PyUnicode_InternFromString( _name );
+#	endif
 		
 		return (PyObject*)self;
 	}
