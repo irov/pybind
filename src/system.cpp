@@ -20,7 +20,7 @@ namespace pybind
 
 	void initialize()
 	{
-		Py_Initialize();
+		Py_InitializeEx(0);
 
 
 		initialize_methods();

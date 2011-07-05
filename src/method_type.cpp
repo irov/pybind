@@ -79,11 +79,19 @@ namespace pybind
 		0,					/* tp_descr_set */
 	};
 	//////////////////////////////////////////////////////////////////////////
+#	ifndef PYBIND_PYTHON_3
 	static PyMemberDef descr_members[] = {
 		{"__objclass__", T_OBJECT, offsetof(py_method_generator_type, classtype), READONLY},
 		{"__name__", T_OBJECT, offsetof(py_method_generator_type, methodname), READONLY},
 		{0}
 	};
+#	else
+	static PyMemberDef descr_members[] = {
+		{"__objclass__", T_OBJECT, offsetof(py_method_generator_type, classtype), READONLY, "__objclass__"},
+		{"__name__", T_OBJECT, offsetof(py_method_generator_type, methodname), READONLY, "__name__"},
+		{0}
+	};
+#	endif
 	//////////////////////////////////////////////////////////////////////////
 	static int descr_check( py_method_generator_type *descr, PyObject *obj, PyObject **pres )
 	{

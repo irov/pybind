@@ -1,7 +1,5 @@
 #	pragma once
 
-#	include "config/python.hpp"
-
 #	include "pybind/class_core.hpp"
 
 namespace pybind
