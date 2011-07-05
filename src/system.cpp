@@ -109,7 +109,6 @@ namespace pybind
 		static PyMethodDef module_methods[] = {
 			{NULL}  /* Sentinel */
 		};
-
 		return Py_InitModule4( _name, module_methods, 0, 0, PYTHON_API_VERSION );
 #	else
 		return PyModule_New( _name );
@@ -346,23 +345,40 @@ namespace pybind
 	}
 
 #	ifndef PYBIND_PYTHON_3
+	void set_syspath( char * _path )
+	{
+		PySys_SetPath( const_cast<char*>(_path) );
+		check_error();
+	}
+
+#	else
+	void set_syspath( wchar_t * _path )
+	{
+		PySys_SetPath( const_cast< wchar_t * >( _path ) );
+		check_error();
+	}
+#	endif
+
+#	ifndef PYBIND_PYTHON_3
 	const char * get_syspath()
 	{
 		return Py_GetPath();
 	}
 
-	void set_syspath( const char * _path )
-	{
-		PySys_SetPath( const_cast<char*>(_path) );
-
-		check_error();
-	}
 #	else
 	const wchar_t * get_syspath()
 	{
 		return Py_GetPath();
 	}
+#	endif
 
+#	ifndef PYBIND_PYTHON_3
+	void set_syspath( const char * _path )
+	{
+		PySys_SetPath( _path );
+		check_error();
+	}
+#	else
 	void set_syspath( const wchar_t * _path )
 	{
 		PySys_SetPath( _path );
@@ -555,7 +571,7 @@ namespace pybind
 			return 0;
 		}
 
-		return PyString_AS_STRING( repr );
+		return PyBytes_AS_STRING( repr );
 	}
 #	else
 	PYBIND_API const wchar_t * object_to_unicode( PyObject * _obj )
@@ -587,7 +603,7 @@ namespace pybind
 		va_list valist;
 		va_start(valist, _message);
 		char buffer[1024];
-		vsprintf( buffer, _message, valist );
+		vsprintf_s( buffer, _message, valist );
 
 		traceback_error( buffer );
 
@@ -684,7 +700,7 @@ namespace pybind
 		//////////////////////////////////////////////////////////////////////////
 		bool is_string( PyObject * _string )
 		{
-			if( PyString_Check( _string ) == 1 )
+			if( PyBytes_Check( _string ) == 1 )
 			{
 				return true;
 			}
@@ -694,7 +710,7 @@ namespace pybind
 		//////////////////////////////////////////////////////////////////////////
 		const char * to_string( PyObject * _string )
 		{
-			return PyString_AsString( _string );
+			return PyBytes_AsString( _string );
 		}
 #	else
 		//////////////////////////////////////////////////////////////////////////

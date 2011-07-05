@@ -61,11 +61,20 @@ namespace pybind
 					);
 			}
 #	else
-			//TODO Python3
-			pybind::error_message( "invalid extract %s from unknown object type %s"
-				, _tinfo.name()
-				, _obj->ob_type->tp_name
-				);
+			if( const wchar_t * repr = pybind::object_to_unicode( _obj ) )
+			{
+				pybind::error_message( "invalid extract %s from %.256s"
+					, _tinfo.name()
+					, repr
+					);
+			}
+			else
+			{
+				pybind::error_message( "invalid extract %s from unknown object type %s"
+					, _tinfo.name()
+					, _obj->ob_type->tp_name
+					);
+			}
 #	endif
 		}
 
@@ -141,7 +150,7 @@ namespace pybind
 			}
 #	ifndef PYBIND_PYTHON_3
 			else if( PyInt_Check( _obj ) )
-			{
+			{B
 				m_valid = true;
 				return (PyInt_AsLong( _obj ) != 0);
 			}
@@ -178,6 +187,7 @@ namespace pybind
 				m_valid = true;
 				return (int)PyLong_AsLong( _obj );
 			}
+
 #	ifndef PYBIND_PYTHON_3
 			else if( PyInt_Check( _obj ) )
 			{
@@ -202,6 +212,7 @@ namespace pybind
 			return PyLong_FromLong( _value );
 #	endif
 		}
+
 	}s_extract_int_type;
 
 	static struct extract_unsigned_int_type
@@ -236,7 +247,7 @@ namespace pybind
 #	ifndef PYBIND_PYTHON_3
 			return PyInt_FromLong( _value );
 #	else
-			return PyLong_FromLong( _value );
+			return PyLong_FromUnsignedLong( _value );
 #	endif
 		}
 	}s_extract_unsigned_int_type;
@@ -261,6 +272,11 @@ namespace pybind
 				return (std::size_t)PyInt_AsUnsignedLongMask( _obj );
 			}
 #	endif
+			if( PyLong_Check( _obj ) )
+			{				
+				m_valid = true;
+				return (std::size_t)PyLong_AsUnsignedLong( _obj );
+			}
 			else if( PyFloat_Check( _obj ) )
 			{				
 				m_valid = true;
@@ -275,6 +291,7 @@ namespace pybind
 #	ifndef PYBIND_PYTHON_3
 			return PyLong_FromLong( (long)_value );
 #	endif
+			return PyLong_FromSize_t( _value );
 		}
 	}s_extract_size_t_type;
 
@@ -351,10 +368,10 @@ namespace pybind
 		{
 			m_valid = false;
 
-			if( PyString_Check( _obj ) )
+			if( PyBytes_Check( _obj ) )
 			{
 				m_valid = true;
-				const char * str = PyString_AS_STRING( _obj );
+				const char * str = PyBytes_AS_STRING( _obj );
 
 				return str;
 			}
@@ -369,7 +386,7 @@ namespace pybind
 		}
 		PyObject * wrap( const char * _value ) override
 		{
-			return PyString_FromString( _value );
+			return PyBytes_FromString( _value );
 		}
 	}s_extract_cchar_type;
 
@@ -380,12 +397,12 @@ namespace pybind
 		{
 			m_valid = false;
 
-			if( PyString_Check( _obj ) )
+			if( PyBytes_Check( _obj ) )
 			{
 				m_valid = true;
 				
-				const char * ch_buff = PyString_AsString(_obj);
-				Py_ssize_t ch_size = PyString_Size(_obj);
+				const char * ch_buff = PyBytes_AS_STRING(_obj);
+				Py_ssize_t ch_size = PyBytes_Size(_obj);
 				
 				return std::string( ch_buff, ch_size );
 			}
@@ -395,8 +412,8 @@ namespace pybind
 
 				PyObject* strObj = PyUnicode_AsUTF8String( _obj );
 
-				const char * ch_buff = PyString_AsString(strObj);
-				Py_ssize_t ch_size = PyString_Size(strObj);
+				const char * ch_buff = PyBytes_AS_STRING(strObj);
+				Py_ssize_t ch_size = PyBytes_Size(strObj);
 
 				return std::string( ch_buff, ch_size );
 			}
@@ -412,7 +429,7 @@ namespace pybind
 
 		PyObject * wrap( std::string _value ) override
 		{
-			return PyString_FromStringAndSize( _value.c_str(), _value.size() );
+			return PyBytes_FromStringAndSize( _value.c_str(), _value.size() );
 		}
 	}s_extract_string_type;
 
