@@ -23,7 +23,7 @@ namespace pybind
 		++Py_OptimizeFlag;
 		++Py_NoSiteFlag;
 
-		Py_Initialize();
+		Py_InitializeEx(0);
 
 
 		initialize_methods();
