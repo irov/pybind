@@ -1,0 +1,394 @@
+#	include "pybind/type_cast.hpp"
+#	include "pybind/class_core.hpp"
+#	include "pybind/class_type.hpp"
+
+#	include "pybind/convert_adapter.hpp"
+
+#	include "config/python.hpp"
+#	include "pybind/system.hpp"
+
+#	include <map>
+#	include <string>
+#	include <vector>
+
+namespace pybind
+{
+	//////////////////////////////////////////////////////////////////////////
+	struct extract_bool_type
+		: public type_cast_result<bool>
+	{
+		bool apply( PyObject * _obj, bool & _value ) override
+		{
+			if( PyBool_Check( _obj ) )
+			{
+				_value = (_obj == Py_True);
+			}
+#	ifndef PYBIND_PYTHON_3
+			else if( PyInt_Check( _obj ) )
+			{
+				_value = (PyInt_AsLong( _obj ) != 0);
+			}
+#	endif
+			else if( PyLong_Check( _obj ) )
+			{
+				_value = ( PyLong_AsLong( _obj ) != 0 );				
+			}
+			else if( PyFloat_Check( _obj ) )
+			{
+				_value = ( int(PyFloat_AsDouble( _obj )) != 0 );
+			}
+			else
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		PyObject * wrap( bool _value ) override
+		{
+			return PyBool_FromLong( _value );
+		}
+	};
+
+	struct extract_int_type
+		: public type_cast_result<int>
+	{
+		bool apply( PyObject * _obj, int & _value ) override
+		{
+			if( PyLong_Check( _obj ) )
+			{
+				_value = (int)PyLong_AsLong( _obj );
+			}
+#	ifndef PYBIND_PYTHON_3
+			else if( PyInt_Check( _obj ) )
+			{
+				_value = PyInt_AsLong( _obj );
+			}
+#	endif
+			else if( PyFloat_Check( _obj ) )
+			{
+				_value = (int)PyFloat_AsDouble( _obj );				
+			}
+			else
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		PyObject * wrap( int _value ) override
+		{
+			return PyInt_FromLong( _value );
+		}
+	};
+
+	struct extract_unsigned_int_type
+		: public type_cast_result<unsigned int>
+	{
+		bool apply( PyObject * _obj, unsigned int & _value ) override
+		{
+			if( PyLong_Check( _obj ) )
+			{				
+				_value = (unsigned int)PyLong_AsUnsignedLong( _obj );
+			}
+#	ifndef PYBIND_PYTHON_3
+			else if( PyInt_Check( _obj ) )
+			{
+				_value = (unsigned int)PyInt_AsUnsignedLongMask( _obj );
+			}
+#	endif
+			else if( PyFloat_Check( _obj ) )
+			{				
+				_value = (unsigned int)PyFloat_AsDouble( _obj );
+			}
+			else
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		PyObject * wrap( unsigned int _value ) override
+		{
+			return PyInt_FromLong( _value );
+		}
+	};
+
+
+	struct extract_size_t_type
+		: public type_cast_result<std::size_t>
+	{
+		bool apply( PyObject * _obj, size_t & _value ) override
+		{
+			if( PyLong_Check( _obj ) )
+			{				
+				_value = (std::size_t)PyLong_AsUnsignedLong( _obj );
+			}
+#	ifndef PYBIND_PYTHON_3
+			else if( PyInt_Check( _obj ) )
+			{
+				_value = (std::size_t)PyInt_AsUnsignedLongMask( _obj );
+			}
+#	endif
+			else if( PyFloat_Check( _obj ) )
+			{				
+				_value = (std::size_t)PyFloat_AsDouble( _obj );
+			}
+			else
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		PyObject * wrap( std::size_t _value ) override
+		{
+			return PyInt_FromLong( (long)_value );
+		}
+	};
+
+
+	struct extract_float_type
+		: public type_cast_result<float>
+	{
+		bool apply( PyObject * _obj, float & _value ) override
+		{
+			if( PyFloat_Check( _obj ) )
+			{
+				_value = (float)PyFloat_AsDouble( _obj );
+			}
+			else if( PyLong_Check( _obj ) )
+			{
+				_value = (float)PyLong_AsLong( _obj );
+			}
+#	ifndef PYBIND_PYTHON_3
+			else if( PyInt_Check( _obj ) )
+			{
+				_value = (float)PyInt_AsLong( _obj );
+			}
+#	endif
+			else
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		PyObject * wrap( float _value ) override
+		{
+			return PyFloat_FromDouble( _value );
+		}
+	};
+
+	struct extract_double_type
+		: public type_cast_result<double>
+	{
+		bool apply( PyObject * _obj, double & _value ) override
+		{
+			if( PyFloat_Check( _obj ) )
+			{
+				_value = (double)PyFloat_AsDouble( _obj );				
+			}
+			else if( PyLong_Check( _obj ) )
+			{
+				_value = (double)PyLong_AsLong( _obj );				
+			}
+#	ifndef PYBIND_PYTHON_3
+			else if( PyInt_Check( _obj ) )
+			{
+				_value = (double)PyInt_AsLong( _obj );				
+			}
+#	endif
+			else
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		PyObject * wrap( double _value ) override
+		{
+			return PyFloat_FromDouble( _value );
+		}
+	};
+
+	struct extract_cchar_type
+		: public type_cast_result<const char *>
+	{
+		bool apply( PyObject * _obj, const char *& _value ) override
+		{
+			if( PyString_Check( _obj ) )
+			{
+				_value = PyString_AS_STRING( _obj );
+			}
+			else
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		PyObject * wrap( const char * _value ) override
+		{
+			return PyString_FromString( _value );
+		}
+	};
+
+	struct extract_string_type
+		: public type_cast_result<std::string>
+	{
+		bool apply( PyObject * _obj, std::string & _value ) override
+		{
+			if( PyString_Check( _obj ) )
+			{
+				Py_ssize_t ch_size = PyString_Size(_obj);
+
+				if( ch_size == 0 )
+				{
+					_value.clear();
+
+					return true;
+				}
+
+				const char * ch_buff = PyString_AsString(_obj);			
+				
+				_value.assign( ch_buff, ch_size );
+			}
+			else if( PyUnicode_Check( _obj ) )
+			{
+				PyObject* strObj = PyUnicode_AsUTF8String( _obj );
+
+				Py_ssize_t ch_size = PyString_Size(strObj);
+
+				if( ch_size == 0 )
+				{
+					_value.clear();
+
+					return true;
+				}
+
+				const char * ch_buff = PyString_AsString(strObj);				
+
+				_value.assign( ch_buff, ch_size );
+			}
+			else
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		PyObject * wrap( std::string _value ) override
+		{
+			return PyString_FromStringAndSize( _value.c_str(), _value.size() );
+		}
+	};
+
+	//static struct extract_wstring_type
+	//	: public type_cast_result<std::wstring>
+	//{
+	//	std::wstring apply( PyObject * _obj ) override
+	//	{
+	//		m_valid = false;
+
+	//		if( PyString_Check( _obj ) )
+	//		{
+	//			m_valid = true;
+
+	//			char * str = PyString_AsString( _obj );
+
+	//			if( str == 0 )
+	//			{
+	//				return std::wstring();
+	//			}
+
+	//			Py_ssize_t size = PyString_Size( _obj );
+
+	//			const char * encoding = PyUnicode_GetDefaultEncoding();
+
+	//			PyObject * unicode = PyUnicode_Decode( str, size, "mbcs", 0 );
+
+	//			Py_UNICODE * unicode_str = PyUnicode_AsUnicode( unicode );
+
+	//			if( unicode_str == 0 )
+	//			{
+	//				throw_exception();
+	//			}
+
+	//			return std::wstring(unicode_str);
+	//		}
+	//		else if ( PyUnicode_Check( _obj ) )
+	//		{
+	//			m_valid = true;
+
+	//			wchar_t * unicode_str = PyUnicode_AsUnicode( _obj );
+
+	//			if( unicode_str == 0 )
+	//			{
+	//				throw_exception();
+	//			}
+
+	//			return std::wstring(unicode_str);
+	//		}
+
+	//		return std::wstring();
+	//	}
+
+	//	PyObject * wrap( std::wstring _value ) override
+	//	{
+	//		return PyUnicode_FromWideChar( _value.c_str(), _value.size() );
+	//	}
+	//}s_extract_wstring_type;
+
+	struct extract_pyobject_type
+		: public type_cast_result<PyObject *>
+	{
+		bool apply( PyObject * _obj, PyObject *& _value ) override
+		{
+			_value = _obj;
+
+			return true;
+		}
+
+		PyObject * wrap( PyObject * _value ) override
+		{
+			return _value;
+		}
+	};
+
+	typedef std::vector<type_cast *> TVectorExtractTypeCast;
+	static TVectorExtractTypeCast s_extract_type_cast;
+
+	void initialize_default_type_cast()
+	{
+		s_extract_type_cast.push_back( new extract_bool_type() );
+		s_extract_type_cast.push_back( new extract_int_type() );
+		s_extract_type_cast.push_back( new extract_unsigned_int_type() );
+		s_extract_type_cast.push_back( new extract_size_t_type() );
+		s_extract_type_cast.push_back( new extract_float_type() );
+		s_extract_type_cast.push_back( new extract_double_type() );
+		s_extract_type_cast.push_back( new extract_cchar_type() );
+		s_extract_type_cast.push_back( new extract_string_type() );
+		s_extract_type_cast.push_back( new extract_pyobject_type() );
+	}
+
+	void finialize_default_type_cast()
+	{
+		for( TVectorExtractTypeCast::iterator
+			it = s_extract_type_cast.begin(),
+			it_end = s_extract_type_cast.end();
+		it != it_end;
+		++it )
+		{
+			delete *it;
+		}
+	}
+}

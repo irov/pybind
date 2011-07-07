@@ -105,26 +105,15 @@ namespace pybind
 	{
 	public:
 		type_cast()
-			: m_valid( false )
 		{
 		}
 
-	public:
-		void setValid( bool _value )
+		virtual ~type_cast()
 		{
-			m_valid = _value;
-		}
-
-		bool is_valid() const
-		{
-			return m_valid;
 		}
 
 	protected:
 		bool type_info_cast( PyObject * _obj, const std::type_info & _tinfo, const std::type_info & _tptrinfo, void ** _impl );
-
-	protected:
-		bool m_valid;
 	};
 
 	template<class T> 
@@ -140,7 +129,9 @@ namespace pybind
 
 	public:
 		virtual PyObject * wrap( T t ) = 0;
-		virtual T apply( PyObject * _obj ) = 0;
+		virtual bool apply( PyObject * _obj, T & _value ) = 0;
 	};
-}
 
+	void initialize_default_type_cast();
+	void finialize_default_type_cast();
+}

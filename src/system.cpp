@@ -20,7 +20,10 @@ namespace pybind
 
 	void initialize()
 	{
-		Py_InitializeEx(0);
+		++Py_OptimizeFlag;
+		++Py_NoSiteFlag;
+
+		Py_Initialize();
 
 
 		initialize_methods();
@@ -28,6 +31,8 @@ namespace pybind
 		initialize_classes();
 		initialize_def();
 		initialize_functor();
+
+		initialize_default_type_cast();
 	}
 
 	void initialize_ts()
@@ -48,6 +53,8 @@ namespace pybind
 		finalize_classes();
 		finalize_def();
 		finalize_functor();
+
+		finialize_default_type_cast();
 	}
 
 	bool is_initialized()
@@ -81,6 +88,7 @@ namespace pybind
 
 	PyObject * module_import( const char * _name, bool & _exsist )
 	{
+		//const char * path = Py_GetPath();
 		PyObject * module = PyImport_ImportModule( _name );
 
 		if (PyErr_Occurred())
@@ -345,47 +353,24 @@ namespace pybind
 	}
 
 #	ifndef PYBIND_PYTHON_3
-	void set_syspath( char * _path )
+	void set_syspath( const char * _path )
 	{
 		PySys_SetPath( const_cast<char*>(_path) );
 		check_error();
 	}
 
 #	else
-	void set_syspath( wchar_t * _path )
-	{
-		PySys_SetPath( const_cast< wchar_t * >( _path ) );
-		check_error();
-	}
-#	endif
-
-#	ifndef PYBIND_PYTHON_3
-	const char * get_syspath()
-	{
-		return Py_GetPath();
-	}
-
-#	else
-	const wchar_t * get_syspath()
-	{
-		return Py_GetPath();
-	}
-#	endif
-
-#	ifndef PYBIND_PYTHON_3
-	void set_syspath( const char * _path )
-	{
-		PySys_SetPath( _path );
-		check_error();
-	}
-#	else
 	void set_syspath( const wchar_t * _path )
 	{
 		PySys_SetPath( _path );
-
 		check_error();
 	}
 #	endif
+
+	char get_sysdelim()
+	{
+		return DELIM;
+	}
 
 	void incref( PyObject * _obj )
 	{
@@ -674,56 +659,114 @@ namespace pybind
 		detail::unwrap( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	namespace convert
+	bool is_none( PyObject * _none )
 	{
-		//////////////////////////////////////////////////////////////////////////
-		bool is_none( PyObject * _none )
+		return _none == Py_None;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool bool_check( PyObject * _bool )
+	{
+		return PyBool_Check( _bool ) == 1;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool is_true( PyObject * _bool )
+	{
+		if( PyBool_Check( _bool ) )
 		{
-			return _none == Py_None;
+			return _bool == Py_True;
 		}
-		//////////////////////////////////////////////////////////////////////////
-		bool is_bool( PyObject * _bool )
-		{
-			return PyBool_Check( _bool ) == 1;
-		}
-		//////////////////////////////////////////////////////////////////////////
-		bool to_bool( PyObject * _bool )
-		{
-			if( PyBool_Check( _bool ) )
-			{
-				return _bool == Py_True;
-			}
 
-			return false;
-		}
+		return false;
+	}
 #	ifndef PYBIND_PYTHON_3
-		//////////////////////////////////////////////////////////////////////////
-		bool is_string( PyObject * _string )
+	//////////////////////////////////////////////////////////////////////////
+	bool string_check( PyObject * _string )
+	{
+		if( PyString_Check( _string ) == 1 )
 		{
-			if( PyBytes_Check( _string ) == 1 )
-			{
-				return true;
-			}
+			return true;
+		}
 
-			return false;
-		}
-		//////////////////////////////////////////////////////////////////////////
-		const char * to_string( PyObject * _string )
+		return false;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	const char * string_to_char( PyObject * _string, size_t & _size )
+	{
+		_size = PyString_Size(_string);
+
+		if( _size == 0 )
 		{
-			return PyBytes_AsString( _string );
+			return "";
 		}
+
+		const char * ch_buff = const_cast<const char *>(PyString_AsString( _string ));
+		
+		return ch_buff;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * string_from_char( const char * _str, size_t _size )
+	{
+		PyObject * py_str = PyString_FromStringAndSize( _str, _size );
+		
+		return py_str;
+	}
+	
 #	else
-		//////////////////////////////////////////////////////////////////////////
-		bool is_unicode( PyObject * _unicode )
+	//////////////////////////////////////////////////////////////////////////
+	bool string_check( PyObject * _string )
+	{
+		if( PyBytes_Check( _string ) == 1 )
 		{
-			return PyUnicode_CheckExact(_unicode);
+			return true;
 		}
-		//////////////////////////////////////////////////////////////////////////
-		wchar_t * to_unicode( PyObject * _unicode )
-		{
-			return PyUnicode_AsUnicode( _unicode );
-		}
+
+		return false;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	const char * string_to_char( PyObject * _string )
+	{
+		return PyBytes_AsString( _string );
+	}
 #	endif
+	//////////////////////////////////////////////////////////////////////////
+	bool unicode_check( PyObject * _unicode )
+	{
+		return PyUnicode_CheckExact(_unicode);
+	}
+	//////////////////////////////////////////////////////////////////////////
+	wchar_t * unicode_to_wchar( PyObject * _unicode, size_t & _size )
+	{
+		_size = PyUnicode_GetSize( _unicode );
+
+		if( _size == 0 )
+		{
+			return L"";
+		}
+
+		return PyUnicode_AsUnicode( _unicode );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	const char * unicode_to_utf8( PyObject * _unicode, size_t & _size )
+	{
+		PyObject* py_utf8 = PyUnicode_AsUTF8String( _unicode );
+
+		_size = PyString_Size(py_utf8);
+
+		if( _size == 0 )
+		{
+			return "";
+		}
+
+		const char * ch_buff = PyString_AsString( py_utf8 );
+		
+		return ch_buff;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * unicode_from_utf8( const char * _utf8, size_t _size )
+	{
+		PyObject * unicode = PyUnicode_DecodeUTF8( _utf8, _size, NULL );
+
+		return unicode;
 	}
 }
 

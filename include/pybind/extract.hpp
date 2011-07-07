@@ -45,9 +45,9 @@ namespace pybind
 
 				type_cast_result<T_WOCR> * etype_impl = static_cast<type_cast_result<T_WOCR> *>(etype);
 
-				T_WOCR t = etype_impl->apply( _obj );
+				T_WOCR value;
 
-				if( etype_impl->is_valid() == false )
+				if( etype_impl->apply( _obj, value ) == false )
 				{
 					pybind::check_error();
 
@@ -64,7 +64,50 @@ namespace pybind
 					throw_exception();
 				}
 
-				return t;
+				return value;
+			}
+
+			static bool extract( PyObject * _obj, T_WOCR & _value )
+			{
+				const std::type_info & tinfo = typeid(T_WOCR);
+
+				type_cast * etype = type_down_cast<T_WOCR>::find();
+
+				if( etype == 0 )
+				{
+					const char * type_name = tinfo.name();
+
+					pybind::error_message( "extract invalid find cast for %.256s"
+						, type_name
+						);
+
+					throw_exception();
+
+					return false;
+				}
+
+				type_cast_result<T_WOCR> * etype_impl = static_cast<type_cast_result<T_WOCR> *>(etype);
+
+				if( etype_impl->apply( _obj, _value ) == false )
+				{
+					pybind::check_error();
+
+					if( const char * repr = pybind::object_to_string( _obj ) )
+					{
+						const char * type_name = tinfo.name();
+
+						pybind::error_message( "extract from %.256s to %.256s"
+							, repr
+							, type_name
+							);
+					}
+
+					throw_exception();
+
+					return false;
+				}
+
+				return true;
 			}
 		};
 	}
@@ -73,6 +116,12 @@ namespace pybind
 	typename detail::extract_return<T>::type extract( PyObject * _obj )
 	{
 		return detail::extract_check<T>::extract( _obj );
+	}
+
+	template<class T>
+	typename bool extract( PyObject * _obj, T & _value )
+	{
+		return detail::extract_check<T>::extract( _obj, _value );
 	}
 
 	template<class T>

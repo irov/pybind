@@ -67,12 +67,12 @@ namespace pybind
 	//PYBIND_API PyObject * exec_file( const char * _filename, PyObject * _global = 0, PyObject * _local = 0 );
 
 #	ifndef PYBIND_PYTHON_3
-	PYBIND_API const char * get_syspath();
 	PYBIND_API void set_syspath( const char * _path );
 #	else
-	PYBIND_API const wchar_t * get_syspath();
 	PYBIND_API void set_syspath( const wchar_t * _path );
 #	endif
+
+	PYBIND_API char get_sysdelim();
 
 	PYBIND_API void incref( PyObject * _obj );
 	PYBIND_API void decref( PyObject * _obj );
@@ -129,20 +129,19 @@ namespace pybind
 
 	PYBIND_API void exception_filter();
 
-	namespace convert
-	{
-		PYBIND_API bool is_none( PyObject * _none );
+	PYBIND_API bool is_none( PyObject * _none );
 
-		PYBIND_API bool is_bool( PyObject * _bool );
-		PYBIND_API bool to_bool( PyObject * _bool );
+	PYBIND_API bool bool_check( PyObject * _bool );
+	PYBIND_API bool is_true( PyObject * _bool );
 
-#	ifndef PYBIND_PYTHON_3
-		PYBIND_API bool is_string( PyObject * _string );
-		PYBIND_API const char * to_string( PyObject * _string );
-#	else
-		PYBIND_API bool is_unicode( PyObject * _unicode );
-		PYBIND_API wchar_t * to_unicode( PyObject * _unicode );
-#	endif
-	}
+	PYBIND_API bool string_check( PyObject * _string );
+	PYBIND_API const char * string_to_char( PyObject * _string, size_t & _size );
+	PYBIND_API PyObject * string_from_char( const char * _str, size_t _size );
+
+	PYBIND_API bool unicode_check( PyObject * _unicode );
+	PYBIND_API wchar_t * unicode_to_wchar( PyObject * _unicode, size_t & _size );
+		
+	PYBIND_API const char * unicode_to_utf8( PyObject * _unicode, size_t & _size );
+	PYBIND_API PyObject * unicode_from_utf8( const char * _utf8, size_t _size );
 }
 

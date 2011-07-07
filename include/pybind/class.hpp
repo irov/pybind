@@ -287,10 +287,8 @@ namespace pybind
 	struct extract_class_type_ptr
 		: public type_cast_result<C *>
 	{
-		C * apply( PyObject * _obj ) override
+		bool apply( PyObject * _obj, C *& _value ) override
 		{
-			this->setValid( true );
-
 			const std::type_info & tinfo = class_info<C>();
 			const std::type_info & tptrinfo = class_info<C *>();
 
@@ -299,12 +297,14 @@ namespace pybind
 			{
 				detail::error_invalid_extract( _obj, tinfo );
 
-				this->setValid( false );
+				_value = NULL;
 
-				return 0;
+				return false;
 			}
 
-			return static_cast<C*>(impl);
+			_value = static_cast<C*>(impl);
+
+			return true;
 		}
 
 		PyObject * wrap( C * _class ) override
@@ -317,7 +317,7 @@ namespace pybind
 	struct extract_class_type_ref
 		: public type_cast_result<C>
 	{
-		C apply( PyObject * _obj ) override
+		bool apply( PyObject * _obj, C & _value ) override
 		{
 			const std::type_info & tinfo = class_info<C>();
 			const std::type_info & tptrinfo = class_info<C *>();
@@ -325,24 +325,19 @@ namespace pybind
 			void * impl;
 			if( type_cast::type_info_cast( _obj, tinfo, tptrinfo, &impl ) == false )
 			{
-				C temp;
-				if( detail::convert_object( _obj, tinfo, &temp ) == false )
+				if( detail::convert_object( _obj, tinfo, &_value ) == false )
 				{
 					detail::error_invalid_extract( _obj, tinfo );
 
-					this->setValid( false );
-				}
-				else
-				{
-					this->setValid( true );
+					return false;
 				}
 
-				return temp;
+				return true;
 			}
 
-			this->setValid( true );
+			_value = *static_cast<C*>(impl);
 
-			return *static_cast<C*>(impl);
+			return true;
 		}
 
 		PyObject * wrap( C _class )
