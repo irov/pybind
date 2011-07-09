@@ -80,7 +80,11 @@ namespace pybind
 
 		PyObject * wrap( int _value ) override
 		{
+#	ifndef PYBIND_PYTHON_3
 			return PyInt_FromLong( _value );
+#	else
+			return PyLong_FromLong( _value );
+#	endif
 		}
 	};
 
@@ -113,7 +117,11 @@ namespace pybind
 
 		PyObject * wrap( unsigned int _value ) override
 		{
+#	ifndef PYBIND_PYTHON_3
 			return PyInt_FromLong( _value );
+#	else
+			return PyLong_FromLong( _value );
+#	endif
 		}
 	};
 
@@ -147,7 +155,11 @@ namespace pybind
 
 		PyObject * wrap( std::size_t _value ) override
 		{
-			return PyInt_FromLong( (long)_value );
+#	ifndef PYBIND_PYTHON_3
+			return PyInt_FromLong( _value );
+#	else
+			return PyLong_FromLong( _value );
+#	endif
 		}
 	};
 
@@ -223,9 +235,10 @@ namespace pybind
 	{
 		bool apply( PyObject * _obj, const char *& _value ) override
 		{
-			if( PyString_Check( _obj ) )
+			if( pybind::string_check( _obj ) )
 			{
-				_value = PyString_AS_STRING( _obj );
+				size_t size;
+				_value = pybind::string_to_char( _obj, size );
 			}
 			else
 			{
@@ -237,7 +250,8 @@ namespace pybind
 
 		PyObject * wrap( const char * _value ) override
 		{
-			return PyString_FromString( _value );
+			size_t size = ::strlen(_value);
+			return pybind::string_from_char( _value, size );
 		}
 	};
 
@@ -246,9 +260,11 @@ namespace pybind
 	{
 		bool apply( PyObject * _obj, std::string & _value ) override
 		{
-			if( PyString_Check( _obj ) )
+			if( pybind::string_check( _obj ) )
 			{
-				Py_ssize_t ch_size = PyString_Size(_obj);
+				size_t ch_size;
+
+				const char * ch_buff = pybind::string_to_char(_obj, ch_size );			
 
 				if( ch_size == 0 )
 				{
@@ -257,15 +273,12 @@ namespace pybind
 					return true;
 				}
 
-				const char * ch_buff = PyString_AsString(_obj);			
-				
 				_value.assign( ch_buff, ch_size );
 			}
-			else if( PyUnicode_Check( _obj ) )
+			else if( pybind::unicode_check( _obj ) )
 			{
-				PyObject* strObj = PyUnicode_AsUTF8String( _obj );
-
-				Py_ssize_t ch_size = PyString_Size(strObj);
+				size_t ch_size;
+				const char * ch_buff = pybind::unicode_to_utf8( _obj, ch_size );
 
 				if( ch_size == 0 )
 				{
@@ -273,8 +286,6 @@ namespace pybind
 
 					return true;
 				}
-
-				const char * ch_buff = PyString_AsString(strObj);				
 
 				_value.assign( ch_buff, ch_size );
 			}
@@ -288,7 +299,7 @@ namespace pybind
 
 		PyObject * wrap( std::string _value ) override
 		{
-			return PyString_FromStringAndSize( _value.c_str(), _value.size() );
+			return pybind::string_from_char( _value.c_str(), _value.size() );
 		}
 	};
 

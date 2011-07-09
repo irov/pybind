@@ -41,7 +41,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="../include;&quot;D:\projects\python-3.2\PC&quot;;&quot;D:\projects\python-3.2\Include&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;Py_NO_ENABLE_SHARED"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -345,10 +345,6 @@
 			</File>
 			<File
 				RelativePath="..\src\type_cast.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\type_cast_default.cpp"
 				>
 			</File>
 			<File

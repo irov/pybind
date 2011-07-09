@@ -742,6 +742,13 @@ namespace pybind
 		
 		return ch_buff;
 	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * string_from_char( const char * _str, size_t _size )
+	{
+		PyObject * py_str = PyBytes_FromStringAndSize( _str, _size );
+		
+		return py_str;
+	}
 #	endif
 	//////////////////////////////////////////////////////////////////////////
 	bool unicode_check( PyObject * _unicode )
