@@ -51,7 +51,7 @@ namespace pybind
 				{
 					pybind::check_error();
 
-					if( const char * repr = pybind::object_to_string( _obj ) )
+					if( const char * repr = pybind::object_repr( _obj ) )
 					{
 						const char * type_name = tinfo.name();
 	
@@ -92,7 +92,7 @@ namespace pybind
 				{
 					pybind::check_error();
 
-					if( const char * repr = pybind::object_to_string( _obj ) )
+					if( const char * repr = pybind::object_repr( _obj ) )
 					{
 						const char * type_name = tinfo.name();
 

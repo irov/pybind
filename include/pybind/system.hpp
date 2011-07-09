@@ -115,11 +115,7 @@ namespace pybind
 	PYBIND_API bool tuple_resize( PyObject ** _ptuple, std::size_t _it );
 
 
-#	ifndef PYBIND_PYTHON_3
-	PYBIND_API const char * object_to_string( PyObject * _obj );
-#	else
-	PYBIND_API const wchar_t * object_to_unicode( PyObject * _obj );
-#	endif
+	PYBIND_API const char * object_repr( PyObject * _obj );
 	PYBIND_API void error_message( const char * _message, ... );
 	PYBIND_API PyObject * build_value( const char * _format, ... );
 	PYBIND_API PyObject * build_value_va( const char * _format, va_list _va );
@@ -135,6 +131,7 @@ namespace pybind
 	PYBIND_API bool is_true( PyObject * _bool );
 
 	PYBIND_API bool string_check( PyObject * _string );
+	PYBIND_API size_t string_size( PyObject * _string );
 	PYBIND_API const char * string_to_char( PyObject * _string, size_t & _size );
 	PYBIND_API PyObject * string_from_char( const char * _str, size_t _size );
 

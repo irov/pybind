@@ -45,8 +45,7 @@ namespace pybind
 
 		void error_invalid_extract( PyObject * _obj, const std::type_info & _tinfo )
 		{
-#	ifndef PYBIND_PYTHON_3
-			if( const char * repr = pybind::object_to_string( _obj ) )
+			if( const char * repr = pybind::object_repr( _obj ) )
 			{
 				pybind::error_message( "invalid extract %s from %.256s"
 					, _tinfo.name()
@@ -60,22 +59,6 @@ namespace pybind
 					, _obj->ob_type->tp_name
 					);
 			}
-#	else
-			if( const wchar_t * repr = pybind::object_to_unicode( _obj ) )
-			{
-				pybind::error_message( "invalid extract %s from %.256s"
-					, _tinfo.name()
-					, repr
-					);
-			}
-			else
-			{
-				pybind::error_message( "invalid extract %s from unknown object type %s"
-					, _tinfo.name()
-					, _obj->ob_type->tp_name
-					);
-			}
-#	endif
 		}
 
 		bool convert_object( PyObject * _obj, const std::type_info & _tinfo, void * _place )

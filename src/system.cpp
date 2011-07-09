@@ -545,9 +545,7 @@ namespace pybind
 	{
 		return PyTuple_GetItem( _tuple, _it );
 	}
-
-#	ifndef PYBIND_PYTHON_3
-	const char * object_to_string( PyObject * _obj )
+	PYBIND_API const char * object_repr( PyObject * _obj )
 	{
 		PyObject * repr = PyObject_Repr( _obj );
 		
@@ -556,15 +554,9 @@ namespace pybind
 			return 0;
 		}
 
-		return PyBytes_AS_STRING( repr );
+		size_t size;
+		return pybind::string_to_char( repr, size );	
 	}
-#	else
-	PYBIND_API const wchar_t * object_to_unicode( PyObject * _obj )
-	{
-		return L"";
-	}
-#	endif
-
 	static void traceback_error( const char * _msg )
 	{
 		PyErr_SetString( PyExc_RuntimeError, _msg );
@@ -690,9 +682,16 @@ namespace pybind
 		return false;
 	}
 	//////////////////////////////////////////////////////////////////////////
+	size_t string_size( PyObject * _string )
+	{
+		size_t size = PyString_Size( _string );
+
+		return size;
+	}
+	//////////////////////////////////////////////////////////////////////////
 	const char * string_to_char( PyObject * _string, size_t & _size )
 	{
-		_size = PyString_Size(_string);
+		_size = pybind::string_size(_string);
 
 		if( _size == 0 )
 		{
@@ -723,9 +722,25 @@ namespace pybind
 		return false;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	const char * string_to_char( PyObject * _string )
+	size_t string_size( PyObject * _string )
 	{
-		return PyBytes_AsString( _string );
+		size_t size = PyBytes_Size( _string );
+
+		return size;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	const char * string_to_char( PyObject * _string, size_t & _size )
+	{
+		_size = pybind::string_size( _string );
+
+		if( _size == 0 )
+		{
+			return "";
+		}
+
+		const char * ch_buff = PyBytes_AsString( _string );
+		
+		return ch_buff;
 	}
 #	endif
 	//////////////////////////////////////////////////////////////////////////
@@ -750,14 +765,7 @@ namespace pybind
 	{
 		PyObject* py_utf8 = PyUnicode_AsUTF8String( _unicode );
 
-		_size = PyString_Size(py_utf8);
-
-		if( _size == 0 )
-		{
-			return "";
-		}
-
-		const char * ch_buff = PyString_AsString( py_utf8 );
+		const char * ch_buff = pybind::string_to_char( py_utf8, _size );
 		
 		return ch_buff;
 	}
