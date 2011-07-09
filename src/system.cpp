@@ -35,14 +35,6 @@ namespace pybind
 		initialize_default_type_cast();
 	}
 
-	void initialize_ts()
-	{
-		initialize();	
-
-		PyEval_InitThreads();
-		PyEval_SaveThread();
-	}
-
 	void finalize()
 	{
 		Py_Finalize();
@@ -191,33 +183,6 @@ namespace pybind
 		return result;
 	}
 
-	PyObject * ask_ts( PyObject * _obj, const char * _format, ... )
-	{
-		va_list valist;
-		va_start(valist, _format);
-
-		PyGILState_STATE _state = PyGILState_Ensure();
-		PyObject * result = ask_va( _obj, _format, valist );
-		PyGILState_Release(_state);
-
-		va_end( valist ); 
-
-		return result;
-	}
-
-	PyObject * ask_method_ts( PyObject * _obj, const char * _method, const char * _format, ... )
-	{
-		va_list valist;
-		va_start(valist, _format);
-
-		PyGILState_STATE _state = PyGILState_Ensure();
-		PyObject * result = ask_method_va( _obj, _method, _format, valist );
-		PyGILState_Release(_state);
-
-		va_end( valist );
-		return result;
-	}
-
 	PyObject * ask_va( PyObject * _obj, const char * _format, va_list _va )
 	{		
 		PyObject * value = Py_VaBuildValue( _format, _va );
@@ -281,30 +246,6 @@ namespace pybind
 
 	
 		va_end( valist ); 
-	}
-
-	void call_ts( PyObject * _obj, const char * _format, ... )
-	{
-		va_list valist;
-		va_start(valist, _format);
-
-		PyGILState_STATE _state = PyGILState_Ensure();
-		call_va( _obj, _format, valist );
-		PyGILState_Release(_state);
-
-		va_end( valist ); 
-	}
-
-	void call_method_ts( PyObject * _obj, const char * _method, const char * _format, ... )
-	{
-		va_list valist;
-		va_start(valist, _format);
-
-		PyGILState_STATE _state = PyGILState_Ensure();
-		call_method_va( _obj, _method, _format, valist );
-		PyGILState_Release(_state);
-
-		va_end( valist );
 	}
 
 	void call_va( PyObject * _obj, const char * _format, va_list _va )

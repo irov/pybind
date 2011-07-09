@@ -21,7 +21,6 @@ namespace pybind
 	PYBIND_API void throw_exception();
 
 	PYBIND_API void initialize();
-	PYBIND_API void initialize_ts();
 	PYBIND_API void finalize();
 
 	PYBIND_API bool is_initialized();
@@ -42,10 +41,8 @@ namespace pybind
 
 	PYBIND_API PyObject * ask( PyObject * _obj, const char * _format, ... );
 	PYBIND_API PyObject * ask_ne( PyObject * _obj, const char * _format, ... );
-	PYBIND_API PyObject * ask_ts( PyObject * _obj, const char * _format, ... );
 
 	PYBIND_API PyObject * ask_method( PyObject * _obj, const char * _method, const char * _format, ... );
-	PYBIND_API PyObject * ask_method_ts( PyObject * _obj, const char * _method, const char * _format, ... );
 
 	PYBIND_API PyObject * ask_va( PyObject * _obj, const char * _format, va_list );
 	PYBIND_API PyObject * ask_method_va( PyObject * _obj, const char * _method, const char * _format, va_list );
@@ -54,10 +51,8 @@ namespace pybind
 	
 	PYBIND_API void call( PyObject * _obj, const char * _format, ... );
 	PYBIND_API void call_ne( PyObject * _obj, const char * _format, ... );
-	PYBIND_API void call_ts( PyObject * _obj, const char * _format, ... );
 
 	PYBIND_API void call_method( PyObject * _obj, const char * _method, const char * _format, ... );
-	PYBIND_API void call_method_ts( PyObject * _obj, const char * _method, const char * _format, ... );
 	
 	PYBIND_API void call_va( PyObject * _obj, const char * _format, va_list );
 	PYBIND_API void call_method_va( PyObject * _obj, const char * _method, const char * _format, va_list );
