@@ -76,7 +76,7 @@ namespace pybind
 		}		
 	};
 
-	template<class C, class F, class P>
+	template<class C, class P, class F>
 	class method_adapter_proxy_member
 		: public method_adapter_helper<C,F>
 	{

@@ -149,7 +149,7 @@ namespace pybind
 		base_ & def_static( const char * _name, P * _proxy, F f )
 		{
 			method_adapter_interface * iadpter =
-				new method_adapter_proxy_member<C, P, F>(_name, _proxy, f);
+				new method_adapter_proxy_member<C, P, F>(_proxy, f, _name);
 
 			typedef typename function_parser<F>::result t_info;
 

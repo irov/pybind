@@ -207,6 +207,9 @@
     <ClInclude Include="..\include\config\config.hpp" />
     <ClInclude Include="..\include\config\python.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

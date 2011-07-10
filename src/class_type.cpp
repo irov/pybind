@@ -184,7 +184,17 @@ namespace pybind
 		//////////////////////////////////////////////////////////////////////////
 		PyObject * alloc_class( PyTypeObject * _type, PyObject * _args, PyObject * _kwds, void * _impl, bool _holder )
 		{
-			PyObject * py_self = PyBaseObject_Type.tp_new(_type, _args, _kwds);
+			PyObject * py_self = PyBaseObject_Type.tp_alloc(_type, 0);
+
+			if( py_self == 0 )
+			{
+				if (PyErr_Occurred())
+				{
+					PyErr_Print();
+				}
+				
+				return 0;
+			}
 
 			pybind::detail::wrap( py_self, _impl, _holder );
 
@@ -360,6 +370,11 @@ namespace pybind
 		else
 		{
 			m_module = _module;
+		}
+
+		if( m_module == 0 )
+		{
+			pybind::throw_exception();
 		}
 
 		m_pynew = _pynew;
