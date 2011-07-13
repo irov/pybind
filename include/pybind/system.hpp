@@ -6,11 +6,7 @@
 
 #	include <stdarg.h>
 
-extern "C" 
-{ 
-	struct _object;
-	typedef _object PyObject;
-}
+#	include "object.hpp"
 
 namespace pybind
 {
@@ -100,6 +96,8 @@ namespace pybind
 	PYBIND_API PyObject * dict_get( PyObject * _dict, const char * _name );
 	PYBIND_API bool dict_contains( PyObject * _dict, const char * _name );	
 	PYBIND_API bool dict_next( PyObject * _dict, std::size_t *_pos, PyObject ** _key, PyObject ** _value );
+
+	PYBIND_API PyObject * dict_items( PyObject * _dict );
 	
 
 	PYBIND_API PyObject * tuple_new( std::size_t _it );

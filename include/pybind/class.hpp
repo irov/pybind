@@ -283,9 +283,9 @@ namespace pybind
 		}
 	};
 
-	template<class C> 
+	template<class C, bool V> 
 	struct extract_class_type_ptr
-		: public type_cast_result<C *>
+		: public type_cast_result<C *, V>
 	{
 		bool apply( PyObject * _obj, C *& _value ) override
 		{
@@ -313,9 +313,9 @@ namespace pybind
 		}
 	};
 
-	template<class C>
+	template<class C, bool V>
 	struct extract_class_type_ref
-		: public type_cast_result<C>
+		: public type_cast_result<C, V>
 	{
 		bool apply( PyObject * _obj, C & _value ) override
 		{
@@ -340,7 +340,7 @@ namespace pybind
 			return true;
 		}
 
-		PyObject * wrap( C _class )
+		PyObject * wrap( const C & _class )
 		{
 			//return 0;			
 			return class_core::create_impl( class_info<C>(), (void *)new C(_class) );
@@ -369,8 +369,8 @@ namespace pybind
 	protected:
 		void setup_extract() override
 		{
-			static extract_class_type_ptr<C> s_registartor_ptr;
-			static extract_class_type_ref<C> s_registartor_ref;
+			static extract_class_type_ptr<C, false> s_registartor_ptr;
+			static extract_class_type_ref<C, true> s_registartor_ref;
 		}
 	};
 
@@ -381,8 +381,8 @@ namespace pybind
 	protected:
 		void setup_extract() override
 		{
-			static extract_class_type_ptr<C> s_registartor_ptr;
-			static extract_class_type_ref<C> s_registartor_ref;
+			static extract_class_type_ptr<C, false> s_registartor_ptr;
+			static extract_class_type_ref<C, true> s_registartor_ref;
 		}
 
 	public:
@@ -406,7 +406,7 @@ namespace pybind
 		: public base_<C,B>
 	{
 	public:
-		typedef extract_class_type_ptr<C> extract_ptr_type;
+		typedef extract_class_type_ptr<C, false> extract_ptr_type;
 
 	public:
 		interface_( const char * _name, bool external_extract = true, PyObject * _module = 0 )

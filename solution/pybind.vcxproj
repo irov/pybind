@@ -198,6 +198,7 @@
     <ClInclude Include="..\include\pybind\method_proxy_call.hpp" />
     <ClInclude Include="..\include\pybind\method_type.hpp" />
     <ClInclude Include="..\include\pybind\mutex.hpp" />
+    <ClInclude Include="..\include\pybind\object.hpp" />
     <ClInclude Include="..\include\pybind\pybind.hpp" />
     <ClInclude Include="..\include\pybind\repr_adapter.hpp" />
     <ClInclude Include="..\include\pybind\system.hpp" />

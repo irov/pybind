@@ -472,6 +472,11 @@ namespace pybind
 		return res == 1;
 	}
 
+	PyObject * dict_items( PyObject * _dict )
+	{
+		return PyDict_Items( _dict );
+	}
+
 	bool tuple_check( PyObject * _tuple )
 	{
 		return PyTuple_Check( _tuple ) == 1;
