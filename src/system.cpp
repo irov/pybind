@@ -103,17 +103,45 @@ namespace pybind
 		return module;
 	}
 
+#	ifndef PYBIND_PYTHON_3
 	PyObject * module_init( const char * _name )
 	{
-#	ifndef PYBIND_PYTHON_3
 		static PyMethodDef module_methods[] = {
 			{NULL}  /* Sentinel */
 		};
 		return Py_InitModule4( _name, module_methods, 0, 0, PYTHON_API_VERSION );
-#	else
-		return PyModule_New( _name );
-#	endif
 	}
+#	else
+	static PyObject* initfunc(void)
+	{
+		static PyMethodDef module_methods[] = {
+			{NULL}  /* Sentinel */
+		};
+
+		static struct PyModuleDef module_definition = {
+			PyModuleDef_HEAD_INIT,
+			"pybind_module",
+			NULL,
+			-1,
+			module_methods,
+			NULL,
+			NULL,
+			NULL,
+			NULL
+		};
+
+		PyObject * obj = PyModule_Create( &module_definition );
+
+		return obj;
+	}
+
+	PyObject * module_init( const char * _name )
+	{
+		PyImport_AppendInittab(_name, &initfunc);
+
+		return PyImport_ImportModule(_name);
+	}
+#	endif
 
 	PyObject * module_dict( PyObject * _module )
 	{
