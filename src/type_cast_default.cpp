@@ -224,7 +224,7 @@ namespace pybind
 			return true;
 		}
 
-		PyObject * wrap( const double & _value ) override
+		PyObject * wrap( type_cast_result<double>::TCastRef _value ) override
 		{
 			return PyFloat_FromDouble( _value );
 		}
@@ -297,7 +297,7 @@ namespace pybind
 			return true;
 		}
 
-		PyObject * wrap( const std::string & _value ) override
+		PyObject * wrap( type_cast_result<std::string>::TCastRef _value ) override
 		{
 			return pybind::string_from_char( _value.c_str(), _value.size() );
 		}

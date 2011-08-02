@@ -10,6 +10,7 @@
 #	include "config/python.hpp"
 
 #	include <stdexcept>
+#	include <stdio.h>
 
 namespace pybind
 {
@@ -554,7 +555,7 @@ namespace pybind
 		va_list valist;
 		va_start(valist, _message);
 		char buffer[1024];
-		vsprintf_s( buffer, _message, valist );
+		vsprintf( buffer, _message, valist );
 
 		traceback_error( buffer );
 

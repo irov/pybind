@@ -119,7 +119,7 @@ namespace pybind
 	}
 
 	template<class T>
-	typename bool extract( PyObject * _obj, T & _value )
+	bool extract( PyObject * _obj, T & _value )
 	{
 		return detail::extract_check<T>::extract( _obj, _value );
 	}

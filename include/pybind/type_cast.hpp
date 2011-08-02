@@ -36,6 +36,15 @@ namespace pybind
 			}
 		};
 
+		template<class B>
+		struct type_down_cast_find<PyObject, B>
+		{
+			static type_cast * find()
+			{  
+				return (type_cast *)0;
+			}
+		};
+
 		template<class T>
 		struct type_down_cast
 		{
@@ -121,6 +130,9 @@ namespace pybind
 		: public type_cast
 	{
 	public:
+		typedef const T & TCastRef;
+
+	public:
 		virtual PyObject * wrap( const T & t ) = 0;
 	};
 
@@ -128,6 +140,9 @@ namespace pybind
 	class type_cast_result_cr<T, false>
 		: public type_cast
 	{
+	public:
+		typedef T TCastRef;
+
 	public:
 		virtual PyObject * wrap( T t ) = 0;		
 	};

@@ -2,6 +2,8 @@
 
 #	include "pybind/class_type.hpp"
 
+#	include <string.h>
+
 namespace pybind
 {
 	namespace detail

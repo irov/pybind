@@ -423,7 +423,7 @@ namespace pybind
 		m_pytypeobject->tp_new = py_new;
 		m_pytypeobject->tp_del = py_del;
 
-		PyType_Modified( m_pytypeobject );
+		//PyType_Modified( m_pytypeobject );
 
 		Py_INCREF( m_pytypeobject );
 
@@ -521,7 +521,7 @@ namespace pybind
 
 		m_pytypeobject->tp_repr = &py_reprfunc;
 
-		PyType_Modified( m_pytypeobject );
+		//PyType_Modified( m_pytypeobject );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::add_getattro( method_adapter_interface * _igetattro )
@@ -530,7 +530,7 @@ namespace pybind
 
 		m_pytypeobject->tp_getattro = &py_getattro;
 
-		PyType_Modified( m_pytypeobject );
+		//PyType_Modified( m_pytypeobject );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::add_mapping( method_adapter_interface * _imapping )
@@ -539,7 +539,7 @@ namespace pybind
 
 		m_pytypeobject->tp_as_mapping = &py_as_mapping;
 
-		PyType_Modified( m_pytypeobject );
+		//PyType_Modified( m_pytypeobject );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void * class_type_scope::construct( PyObject * _args )
