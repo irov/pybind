@@ -235,7 +235,7 @@ namespace pybind
 	{
 		bool apply( PyObject * _obj, const char *& _value ) override
 		{
-			if( pybind::string_check( _obj ) )
+			if( pybind::string_check( _obj ) == false )
 			{
 				size_t size;
 				_value = pybind::string_to_char( _obj, size );

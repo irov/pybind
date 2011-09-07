@@ -18,7 +18,7 @@
 
 namespace pybind
 {	
-	typedef bases<void,void,void,void,void,void> no_bases;
+	typedef bases<void,void,void,void,void,void,void> no_bases;
 
 	template<class C, class B = no_bases>
 	class base_
@@ -62,6 +62,7 @@ namespace pybind
 			if( arity-- > 0 )class_core::add_base<typename B::base5>(_scope, &meta_cast<typename B::base5>);
 			if( arity-- > 0 )class_core::add_base<typename B::base6>(_scope, &meta_cast<typename B::base6>);
 			if( arity-- > 0 )class_core::add_base<typename B::base7>(_scope, &meta_cast<typename B::base7>);
+			if( arity-- > 0 )class_core::add_base<typename B::base8>(_scope, &meta_cast<typename B::base8>);
 		}
 
 		template<class C0, class C1, class C2, class C3, class C4, class C5>
