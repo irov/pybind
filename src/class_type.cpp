@@ -13,6 +13,10 @@
 namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
+	PyObject * g_pybind_object_impl;
+	PyObject * g_pybind_class_type_scope;
+	PyObject * g_pybind_object_holder;
+	//////////////////////////////////////////////////////////////////////////
 	namespace detail
 	{
 		//////////////////////////////////////////////////////////////////////////
@@ -52,7 +56,7 @@ namespace pybind
 		//////////////////////////////////////////////////////////////////////////
 		void * get_class_impl( PyObject * _obj )
 		{
-			PyObject * py_self = PyObject_GetAttrString( _obj, "__pybind_object_impl" );
+			PyObject * py_self = PyObject_GetAttr( _obj, g_pybind_object_impl );
 
 			if( py_self == 0 )
 			{
@@ -85,7 +89,7 @@ namespace pybind
 		//////////////////////////////////////////////////////////////////////////
 		class_type_scope * get_class_scope( PyTypeObject * _type )
 		{
-			PyObject * py_scope = PyObject_GetAttrString( (PyObject*)_type, "__pybind_class_type_scope" );
+			PyObject * py_scope = PyObject_GetAttr( (PyObject*)_type, g_pybind_class_type_scope );
 
 			if( py_scope == 0 )
 			{
@@ -134,7 +138,7 @@ namespace pybind
 			PyObject * py_impl = PyCapsule_New( _impl, NULL, NULL );
 #	endif
 
-			PyObject_SetAttrString( _obj, "__pybind_object_impl", py_impl );
+			PyObject_SetAttr( _obj, g_pybind_object_impl, py_impl );
 			Py_DECREF( py_impl );
 
 			//if unwrap
@@ -144,12 +148,12 @@ namespace pybind
 			}
 
 			PyObject * py_holder = _holder ? Py_True : Py_False;
-			PyObject_SetAttrString( _obj, "__pybind_object_holder", py_holder );
+			PyObject_SetAttr( _obj, g_pybind_object_holder, py_holder );
 		}
 		//////////////////////////////////////////////////////////////////////////
 		bool is_holder( PyObject * _obj )
 		{
-			PyObject * py_holder = PyObject_GetAttrString( _obj, "__pybind_object_holder" );
+			PyObject * py_holder = PyObject_GetAttr( _obj, g_pybind_object_holder );
 
 			if( py_holder == 0 )
 			{
@@ -204,7 +208,7 @@ namespace pybind
 		void reg_class_type_scope( const std::type_info & _info, class_type_scope * _scope )
 		{
 			const char * info_name = _info.name();
-			s_mapTypeScope[ info_name ] = _scope;
+			s_mapTypeScope[info_name] = _scope;
 		}
 		//////////////////////////////////////////////////////////////////////////
 		class_type_scope * get_class_type_scope( const std::type_info & _info )
@@ -408,16 +412,16 @@ namespace pybind
 		PyObject * py_pybind_class_type = PyCapsule_New( this, NULL, NULL );
 #	endif
 
-		PyDict_SetItemString( py_dict, "__pybind_class_type_scope", py_pybind_class_type );
+		PyDict_SetItem( py_dict, g_pybind_class_type_scope, py_pybind_class_type );
 		Py_DECREF( py_pybind_class_type );
 
 
-		PyObject * py_args = PyTuple_Pack(3,py_name,py_bases,py_dict);
+		PyObject * py_args = PyTuple_Pack( 3, py_name, py_bases, py_dict );
 		Py_DECREF( py_name );
 		Py_DECREF( py_bases );
 		Py_DECREF( py_dict );
 
-		m_pytypeobject = (PyTypeObject *)PyType_Type.tp_call( (PyObject*)&PyType_Type, py_args, 0);
+		m_pytypeobject = (PyTypeObject *)PyType_Type.tp_call( (PyObject*)&PyType_Type, py_args, 0 );
 		Py_DECREF( py_args );
 
 		m_pytypeobject->tp_new = py_new;
@@ -620,11 +624,15 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void initialize_classes()
 	{
-		//
+		g_pybind_object_impl = PyString_FromString( "__pybind_object_impl" );
+		g_pybind_class_type_scope = PyString_FromString( "__pybind_class_type_scope" );
+		g_pybind_object_holder = PyString_FromString( "__pybind_object_holder" );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void finalize_classes()
 	{
-		//
+		Py_DECREF(g_pybind_object_impl);
+		Py_DECREF(g_pybind_class_type_scope);
+		Py_DECREF(g_pybind_object_holder);
 	}
 }

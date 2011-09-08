@@ -451,7 +451,12 @@ namespace pybind
 			PyObject * py_key = PyList_GetItem( py_dir, it );
 			PyObject * py_value = PyObject_GetAttr( _obj, py_key );
 
-			PyDict_SetItem( py_dict, py_key, py_value );
+			if( PyDict_SetItem( py_dict, py_key, py_value ) < 0 )
+			{
+				continue;
+			}
+
+			Py_DecRef( py_value );
 		}
 
 		Py_DecRef( py_dir );
