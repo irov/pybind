@@ -8,7 +8,7 @@
 
 namespace pybind
 {
-	static PyTypeObject * s_functor_type = 0;
+	static PyTypeObject s_functor_type;
 
 	namespace detail
 	{
@@ -27,7 +27,7 @@ namespace pybind
 				m_method.ml_flags = METH_CLASS | ( _hasargs ) ? METH_VARARGS : METH_NOARGS;
 				m_method.ml_doc = "Embedding function cpp";
 
-				py_functor_type *self = (py_functor_type *)PyType_GenericAlloc( s_functor_type, 0 );
+				py_functor_type *self = (py_functor_type *)PyType_GenericAlloc( &s_functor_type, 0 );
 
 				self->proxy = _proxy;
 
@@ -80,21 +80,19 @@ namespace pybind
 
 	void initialize_functor()
 	{
-		s_functor_type = new PyTypeObject();
+		s_functor_type.tp_name = "functor_type_scope";
+		s_functor_type.tp_basicsize = sizeof( py_functor_type );
+		s_functor_type.tp_dealloc = &py_dealloc;
+		s_functor_type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
 
-		s_functor_type->tp_name = "functor_type_scope";
-		s_functor_type->tp_basicsize = sizeof( py_functor_type );
-		s_functor_type->tp_dealloc = &py_dealloc;
-		s_functor_type->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
-
-		if( PyType_Ready( s_functor_type ) < 0 )
+		if( PyType_Ready( &s_functor_type ) < 0 )
 		{
-			printf("invalid embedding class '%s' \n", s_functor_type->tp_name );					
+			printf("invalid embedding class '%s' \n", s_functor_type.tp_name );					
 		}
 	}
 
 	void finalize_functor()
 	{
-		delete s_functor_type;
+		//Py_DecRef((PyObject*)s_functor_type);
 	}
 }

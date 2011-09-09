@@ -19,6 +19,25 @@ namespace pybind
 		throw pybind_exception();
 	}
 
+	void visit_class_type( pybind_visit_class_type * _visitor )
+	{
+		detail::TVectorTypeScope types;
+		detail::get_types_scope(types);
+
+		for( detail::TVectorTypeScope::iterator
+			it = types.begin(),
+			it_end = types.end();
+		it != it_end;
+		++it )
+		{
+			const char * name = (*it)->get_name();
+			const char * type = (*it)->get_type();
+			int refcount = (*it)->refcount();
+
+			_visitor->visit( name, type, refcount );
+		}
+	}
+
 	void initialize()
 	{
 		++Py_OptimizeFlag;
@@ -37,7 +56,7 @@ namespace pybind
 	}
 
 	void finalize()
-	{
+	{		
 		Py_Finalize();
 
 		class_core::finalize();
@@ -629,6 +648,13 @@ namespace pybind
 	void unwrap( PyObject * _value )
 	{
 		detail::unwrap( _value );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void type_initialize( PyObject * _value )
+	{
+		PyTypeObject * type = (PyTypeObject *)_value;
+		class_type_scope * scope = detail::get_class_scope( type );
+		scope->type_initialize( type );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool is_none( PyObject * _none )

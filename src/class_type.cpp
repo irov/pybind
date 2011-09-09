@@ -21,7 +21,7 @@ namespace pybind
 	{
 		//////////////////////////////////////////////////////////////////////////
 		typedef std::list<PyTypeObject *> TListClassType;
-		typedef std::map<const char *, class_type_scope *> TMapTypeScope;
+		typedef std::map<const char *, class_type_scope *, pybind_ltstr> TMapTypeScope;
 		//////////////////////////////////////////////////////////////////////////
 		static TListClassType s_listClassType;
 		static TMapTypeScope s_mapTypeScope;
@@ -223,6 +223,18 @@ namespace pybind
 
 			return it_find->second;		
 		}
+		//////////////////////////////////////////////////////////////////////////
+		void get_types_scope( TVectorTypeScope & _types )
+		{
+			for( TMapTypeScope::iterator
+				it = s_mapTypeScope.begin(),
+				it_end = s_mapTypeScope.end();
+			it != it_end;
+			++it )
+			{
+				_types.push_back( it->second );
+			}
+		}
 	}
 	//////////////////////////////////////////////////////////////////////////
 	static PyObject * py_reprfunc( PyObject * _obj )
@@ -323,7 +335,7 @@ namespace pybind
 		, m_repr(0)
 		, m_getattro(0)
 		, m_mapping(0)
-		, m_ref(0)
+		, m_refcount(0)
 	{
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -436,7 +448,17 @@ namespace pybind
 		detail::reg_class_type( m_pytypeobject );
 	}
 	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::type_initialize( PyTypeObject * _type )
+	{
+		_type->tp_del = py_del;
+	}
+	//////////////////////////////////////////////////////////////////////////
 	const char * class_type_scope::get_name() const
+	{
+		return m_name;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	const char * class_type_scope::get_type() const
 	{
 		return m_type;
 	}
@@ -590,7 +612,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * class_type_scope::create_holder( void * _impl )
 	{
-		++m_ref;
+		++m_refcount;
 
 		PyObject * py_args = PyTuple_New(0);
 
@@ -602,7 +624,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * class_type_scope::create_impl( void * _impl )
 	{
-		++m_ref;
+		++m_refcount;
 
 		PyObject * py_args = PyTuple_New(0);
 
@@ -614,12 +636,17 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::incref()
 	{
-		++m_ref;
+		++m_refcount;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::decref()
 	{
-		--m_ref;
+		--m_refcount;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	int class_type_scope::refcount() const
+	{
+		return m_refcount;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void initialize_classes()

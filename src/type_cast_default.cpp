@@ -401,5 +401,7 @@ namespace pybind
 		{
 			delete *it;
 		}
+
+		s_extract_type_cast.clear();
 	}
 }

@@ -16,6 +16,15 @@ namespace pybind
 
 	PYBIND_API void throw_exception();
 
+	class pybind_visit_class_type
+	{
+	public:
+		virtual void visit( const char * _name, const char * _type, int _refcount ) = 0;
+	};
+
+	PYBIND_API void visit_class_type( pybind_visit_class_type * _visitor );
+
+
 	PYBIND_API void initialize();
 	PYBIND_API void finalize();
 
@@ -115,6 +124,7 @@ namespace pybind
 
 
 	PYBIND_API void unwrap( PyObject * _value );
+	PYBIND_API void type_initialize( PyObject * _value );
 
 	PYBIND_API void exception_filter();
 

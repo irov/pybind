@@ -4,6 +4,7 @@
 #	include "pybind/types.hpp"
 
 #	include <list>
+#	include <vector>
 #	include <map>
 #	include <string>
 
@@ -36,6 +37,9 @@ namespace pybind
 
 		PYBIND_API void reg_class_type_scope( const std::type_info & _info, class_type_scope * _scope );
 		PYBIND_API class_type_scope * get_class_type_scope( const std::type_info & _info );
+
+		typedef std::vector<class_type_scope *> TVectorTypeScope;
+		PYBIND_API void get_types_scope( TVectorTypeScope & _types );
 	}
 
 	class class_type_scope
@@ -49,6 +53,8 @@ namespace pybind
 
 	public:
 		const char * get_name() const;
+		const char * get_type() const;
+
 		void set_module( PyObject * _module );
 
 		void * construct( PyObject * _args );
@@ -73,9 +79,11 @@ namespace pybind
 
 		void * metacast( const char * name, void * _impl );
 		void unwrap( PyObject * _obj );
+		void type_initialize( PyTypeObject * _type );
 
 		void incref();
 		void decref();
+		int refcount() const;
 
 	public:
 		typedef std::list<const char *> TVectorMembers;
@@ -83,13 +91,13 @@ namespace pybind
 
 		typedef std::list<const char *> TVectorMethods;
 		TVectorMethods m_methods;
-	
+
 		typedef std::pair<class_type_scope *, pybind_metacast> TPairMetacast;
-		typedef std::map<const char *, TPairMetacast> TMapBases;
+		typedef std::map<const char *, TPairMetacast, pybind_ltstr> TMapBases;
 		TMapBases m_bases;
 
 		constructor * m_pyconstructor;
-		
+
 		pybind_new m_pynew;
 		pybind_destructor m_pydestructor;
 
@@ -105,7 +113,7 @@ namespace pybind
 
 		PyObject * m_module;
 
-		int m_ref;
+		int m_refcount;
 	};
 
 	void initialize_classes();	

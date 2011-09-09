@@ -10,7 +10,7 @@ namespace pybind
 	{
 		void * meta_cast_scope( void * _self, const char * _scope_name, const char * _name, class_type_scope * scope )
 		{
-			const char * class_name = scope->get_name();
+			const char * class_name = scope->get_type();
 
 			if( strcmp( class_name , _scope_name ) == 0 )
 			{
