@@ -19,7 +19,7 @@ namespace pybind
 		throw pybind_exception();
 	}
 
-	void visit_class_type( pybind_visit_class_type * _visitor )
+	void visit_objects( pybind_visit_objects * _visitor )
 	{
 		detail::TVectorTypeScope types;
 		detail::get_types_scope(types);
@@ -30,21 +30,19 @@ namespace pybind
 		it != it_end;
 		++it )
 		{
-			const char * name = (*it)->get_name();
-			const char * type = (*it)->get_type();
-			int refcount = (*it)->refcount();
-
-			_visitor->visit( name, type, refcount );
+			(*it)->visit_objects(_visitor);
 		}
 	}
 
-	void initialize()
+	void initialize(bool _debug)
 	{
-		++Py_OptimizeFlag;
-		++Py_NoSiteFlag;
+		if( _debug == false )
+		{
+			++Py_OptimizeFlag;
+			++Py_NoSiteFlag;
+		}
 
-		Py_InitializeEx(0);
-
+		Py_Initialize();
 
 		initialize_methods();
 		initialize_members();
@@ -394,6 +392,11 @@ namespace pybind
 	PyObject * ret_bool( bool _value )
 	{
 		return _value ? ret_true(): ret_false();
+	}
+
+	PyObject * get_bool( bool _value )
+	{
+		return _value ? Py_True: Py_False;
 	}
 
 	bool has_attr( PyObject * _obj, const char * _attr )

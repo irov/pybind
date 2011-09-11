@@ -23,6 +23,8 @@ namespace pybind
 		py_method_caller_type * mct = (py_method_caller_type *)_obj;
 
 		Py_DECREF( mct->self );
+
+		PyObject_Free( _obj );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	static PyObject * descr_call2( PyObject * _obj, PyObject * _args , PyObject * _kwds )
@@ -173,6 +175,8 @@ namespace pybind
 
 		Py_DECREF( mgt->classtype );
 		Py_DECREF( mgt->methodname );
+
+		PyObject_Free( _obj );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	static PyTypeObject s_method_generator_type = {

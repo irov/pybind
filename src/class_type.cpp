@@ -300,11 +300,13 @@ namespace pybind
 	{
 		class_type_scope * scope = pybind::detail::get_class_scope(_type);
 
-		scope->incref();
+		//scope->incref();
 
 		void * impl = (*scope->m_pynew)( scope, _args, _kwds );
 
 		PyObject * py_self = detail::alloc_class( _type, _args, _kwds, impl, false );
+
+		scope->incref( py_self );
 
 		return py_self;
 	}
@@ -313,7 +315,7 @@ namespace pybind
 	{
 		class_type_scope * scope = pybind::detail::get_class_scope(_obj->ob_type);
 
-		scope->decref();
+		scope->decref( _obj );
 
 		bool holder = pybind::detail::is_holder(_obj);
 
@@ -369,7 +371,7 @@ namespace pybind
 
 		delete m_pyconstructor;
 
-		Py_XDECREF( m_pytypeobject );
+		Py_DecRef( m_pytypeobject );
 
 		delete m_convert;
 		delete m_repr;
@@ -612,41 +614,48 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * class_type_scope::create_holder( void * _impl )
 	{
-		++m_refcount;
-
 		PyObject * py_args = PyTuple_New(0);
 
 		PyObject * py_self = pybind::detail::alloc_class( m_pytypeobject, py_args, 0, _impl, true );
 		Py_DECREF( py_args );
+
+		this->incref( py_self );
 
 		return py_self;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * class_type_scope::create_impl( void * _impl )
 	{
-		++m_refcount;
-
 		PyObject * py_args = PyTuple_New(0);
 
 		PyObject * py_self = pybind::detail::alloc_class( m_pytypeobject, py_args, 0, _impl, false );
 		Py_DECREF( py_args );
 
+		this->incref( py_self );
+
 		return py_self;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_type_scope::incref()
+	void class_type_scope::incref( PyObject * _obj )
 	{
-		++m_refcount;
+		m_objects.push_back( _obj );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_type_scope::decref()
+	void class_type_scope::decref( PyObject * _obj )
 	{
-		--m_refcount;
+		m_objects.remove( _obj );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	int class_type_scope::refcount() const
+	void class_type_scope::visit_objects( pybind_visit_objects * _visitor )
 	{
-		return m_refcount;
+		for( TListObjects::iterator
+			it = m_objects.begin(),
+			it_end = m_objects.end();
+		it != it_end;
+		++it )
+		{
+			_visitor->visit( *it );
+		}
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void initialize_classes()

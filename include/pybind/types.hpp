@@ -37,5 +37,11 @@ namespace pybind
 			return strcmp(s1, s2) < 0;
 		}
 	};
+
+	class pybind_visit_objects
+	{
+	public:
+		virtual void visit( PyObject * _obj ) = 0;
+	};
 }
 
