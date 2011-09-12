@@ -371,7 +371,7 @@ namespace pybind
 
 		delete m_pyconstructor;
 
-		Py_DecRef( m_pytypeobject );
+		Py_DECREF( m_pytypeobject );
 
 		delete m_convert;
 		delete m_repr;
@@ -443,7 +443,7 @@ namespace pybind
 
 		//PyType_Modified( m_pytypeobject );
 
-		Py_INCREF( m_pytypeobject );
+		Py_INCREF( m_pytypeobject );	
 
 		PyModule_AddObject( m_module, m_pytypeobject->tp_name, (PyObject*)m_pytypeobject );
 
