@@ -296,6 +296,39 @@ namespace pybind
 		(objobjargproc)0,	/* mp_ass_subscript */
 	};
 	//////////////////////////////////////////////////////////////////////////
+	static PyObject * py_item( PyObject * _obj, Py_ssize_t _index )
+	{
+		void * impl = pybind::detail::get_class_impl( _obj );
+
+		if( impl == 0 )
+		{
+			error_message( "pybind: subscript unbind object" );
+			return 0;
+		}
+
+		class_type_scope * scope = pybind::detail::get_class_scope( _obj->ob_type );
+
+		PyObject * attr = Py_BuildValue( "(i)", _index );
+		PyObject * res = scope->m_sequence->call( impl, scope, attr, 0 );
+		Py_DECREF( attr );
+
+		return res;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	static PySequenceMethods py_as_sequence = {
+		(lenfunc)0,                       /* sq_length */
+		(binaryfunc)0,                    /* sq_concat */
+		(ssizeargfunc)0,                  /* sq_repeat */
+		(ssizeargfunc)py_item,                    /* sq_item */
+		(ssizessizeargfunc)0,              /* sq_slice */
+		(ssizeobjargproc)0,             /* sq_ass_item */
+		(ssizessizeobjargproc)0,       /* sq_ass_slice */
+		(objobjproc)0,                  /* sq_contains */
+		(binaryfunc)0,            /* sq_inplace_concat */
+		(ssizeargfunc)0,          /* sq_inplace_repeat */
+	};
+	//////////////////////////////////////////////////////////////////////////
 	static PyObject * py_new( PyTypeObject * _type, PyObject * _args, PyObject * _kwds )
 	{
 		class_type_scope * scope = pybind::detail::get_class_scope(_type);
@@ -568,6 +601,13 @@ namespace pybind
 		m_pytypeobject->tp_as_mapping = &py_as_mapping;
 
 		//PyType_Modified( m_pytypeobject );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::add_sequence( method_adapter_interface * _isequence )
+	{
+		m_sequence = _isequence;
+		
+		m_pytypeobject->tp_as_sequence = &py_as_sequence;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void * class_type_scope::construct( PyObject * _args )

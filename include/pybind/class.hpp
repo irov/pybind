@@ -149,14 +149,14 @@ namespace pybind
 		template<class P, class F>
 		base_ & def_static( const char * _name, P * _proxy, F f )
 		{
-			method_adapter_interface * iadpter =
+			method_adapter_interface * iadapter =
 				new method_adapter_proxy_member<C, P, F>(_proxy, f, _name);
 
 			typedef typename function_parser<F>::result t_info;
 
 			class_core::def_method(
 				_name,
-				iadpter,
+				iadapter,
 				t_info::arity,
 				class_info<C>()
 				);
@@ -167,12 +167,12 @@ namespace pybind
 		template<class A>
 		base_ & def_member( const char * _name, A C:: * a )
 		{
-			member_adapter_interface * iadpter =
+			member_adapter_interface * iadapter =
 				new member_adapter<C, A>(_name, a);
 
 			class_core::def_member(
 				_name,
-				iadpter,
+				iadapter,
 				class_info<C>()
 				);
 
@@ -182,12 +182,12 @@ namespace pybind
 		template<class FG, class FS>
 		base_ & def_property( const char * _name, FG _get, FS _set )
 		{
-			member_adapter_interface * iadpter =
+			member_adapter_interface * iadapter =
 				new member_adapter_property<C, FG, FS>(_get, _set);
 
 			class_core::def_member(
 				_name,
-				iadpter,
+				iadapter,
 				class_info<C>()
 				);
 
@@ -197,12 +197,12 @@ namespace pybind
 		template<class FG, class FS>
 		base_ & def_property_static( const char * _name, FG _get, FS _set )
 		{
-			member_adapter_interface * iadpter =
+			member_adapter_interface * iadapter =
 				new member_adapter_property_static<C, FG, FS>( _get, _set);
 
 			class_core::def_member(
 				_name,
-				iadpter,
+				iadapter,
 				class_info<C>()
 				);
 
@@ -212,11 +212,11 @@ namespace pybind
 		template<class F>
 		base_ & def_repr( F _repr )
 		{
-			repr_adapter_interface * iadpter =
+			repr_adapter_interface * iadapter =
 				new repr_adapter<C, F>( _repr );
 
 			class_core::def_repr( 
-				iadpter, 
+				iadapter, 
 				class_info<C>() 
 				);
 
@@ -226,11 +226,11 @@ namespace pybind
 		template<class F>
 		base_ & def_getattro( F _fn )
 		{
-			method_adapter_interface * iadpter =
+			method_adapter_interface * iadapter =
 				new method_adapter<C, F>(_fn, "getattro");
 
 			class_core::def_getattro( 
-				iadpter, 
+				iadapter, 
 				class_info<C>() 
 				);
 
@@ -240,16 +240,46 @@ namespace pybind
 		template<class F>
 		base_ & def_mapping( F _fn )
 		{
-			method_adapter_interface * iadpter =
+			method_adapter_interface * iadapter =
 				new method_adapter<C, F>(_fn, "getmap");
 
 			class_core::def_mapping( 
-				iadpter, 
+				iadapter, 
 				class_info<C>() 
 				);
 
 			return *this;
 		}
+
+		//template<class F>
+		//base_ & def_sequence( F _fn )
+		//{
+		//	method_adapter_interface * iadapter =
+		//		new method_adapter<C, F>(_fn, "sequence");
+
+		//	class_core::def_sequence( 
+		//		iadapter, 
+		//		class_info<C>() 
+		//		);
+
+		//	return *this;
+		//}
+
+		template<class F>
+		base_ & def_static_sequence( F _fn )
+		{
+			method_adapter_interface * iadapter =
+				new method_adapter_proxy_function<C, F>(_fn, "sequence");
+
+			class_core::def_sequence( 
+				iadapter, 
+				class_info<C>() 
+				);
+
+			return *this;
+		}
+
+		
 
 		static void *
 			new_interface( pybind::class_type_scope * _scope, PyObject * _args, PyObject * _kwds )

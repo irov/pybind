@@ -73,6 +73,10 @@ namespace pybind
 			method_adapter_interface * _iadapter,
 			const std::type_info & _info );
 
+		static void def_sequence( 
+			method_adapter_interface * _iadapter, 
+			const std::type_info & _info );
+
 		static void add_base_to_scope( class_type_scope * _scope, const char * _name, const std::type_info & _base, pybind_metacast cast );
 
 		template<class B>
