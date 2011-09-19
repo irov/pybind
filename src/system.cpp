@@ -98,7 +98,7 @@ namespace pybind
 
 	PyObject * module_import( const char * _name, bool & _exsist )
 	{
-		//const char * path = Py_GetPath();
+		const char * path = Py_GetPath();
 		PyObject * module = PyImport_ImportModule( _name );
 
 		if (PyErr_Occurred())
@@ -113,6 +113,7 @@ namespace pybind
 				return NULL;
 			
 			}
+
 			PyErr_Print();
 		}
 
