@@ -12,6 +12,9 @@
 #	include <stdexcept>
 #	include <stdio.h>
 
+extern int Py_OptimizeFlag;
+extern int Py_NoSiteFlag;
+
 namespace pybind
 {
 	void throw_exception()
@@ -38,8 +41,8 @@ namespace pybind
 	{
 		if( _debug == false )
 		{
-			++Py_OptimizeFlag;
-			++Py_NoSiteFlag;
+			Py_OptimizeFlag = 2;
+			Py_NoSiteFlag = 1;
 		}
 
 		Py_Initialize();
@@ -98,7 +101,6 @@ namespace pybind
 
 	PyObject * module_import( const char * _name, bool & _exsist )
 	{
-		const char * path = Py_GetPath();
 		PyObject * module = PyImport_ImportModule( _name );
 
 		if (PyErr_Occurred())
