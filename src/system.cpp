@@ -169,6 +169,7 @@ namespace pybind
 		return PyModule_GetDict( _module );
 	}
 
+
 	void module_addobject( PyObject * _module, const char * _name, PyObject * _obj )
 	{
 		PyModule_AddObject( _module, _name, _obj );

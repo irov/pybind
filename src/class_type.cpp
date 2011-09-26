@@ -362,6 +362,7 @@ namespace pybind
 	class_type_scope::class_type_scope( const char * _name, const char * _type_name )
 		: m_name(_name)
 		, m_type(_type_name)
+		, m_module(0)
 		, m_pyconstructor(0)
 		, m_pynew(0)
 		, m_pydestructor(0)
@@ -371,6 +372,7 @@ namespace pybind
 		, m_getattro(0)
 		, m_mapping(0)
 		, m_refcount(0)
+		, m_sequence(0)
 	{
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -404,12 +406,17 @@ namespace pybind
 
 		delete m_pyconstructor;
 
-		Py_DECREF( m_pytypeobject );
+		PyObject * dummy = m_pytypeobject->tp_dict;
+		m_pytypeobject->tp_dict = PyDict_New();
+		Py_DECREF( dummy );
+
+		//Py_DECREF( m_pytypeobject );
 
 		delete m_convert;
 		delete m_repr;
 		delete m_getattro;
 		delete m_mapping;
+		delete m_sequence;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::setup( PyObject * _module, pybind_new _pynew, pybind_destructor _pydestructor )
@@ -467,7 +474,7 @@ namespace pybind
 		Py_DECREF( py_name );
 		Py_DECREF( py_bases );
 		Py_DECREF( py_dict );
-
+		
 		m_pytypeobject = (PyTypeObject *)PyType_Type.tp_call( (PyObject*)&PyType_Type, py_args, 0 );
 		Py_DECREF( py_args );
 
@@ -476,7 +483,7 @@ namespace pybind
 
 		//PyType_Modified( m_pytypeobject );
 
-		Py_INCREF( m_pytypeobject );	
+		//Py_INCREF( m_pytypeobject );	
 
 		PyModule_AddObject( m_module, m_pytypeobject->tp_name, (PyObject*)m_pytypeobject );
 

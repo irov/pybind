@@ -28,6 +28,7 @@ namespace pybind
 
 	PYBIND_API void setStdErrorHandle( PyObject * _handle );
 	PYBIND_API void setStdOutHandle( PyObject * _handle );
+
 	PYBIND_API PyObject * module_import( const char * _name, bool & _exsist );
 	PYBIND_API PyObject * module_init( const char * _name );
 	PYBIND_API PyObject * module_dict( PyObject * _module );
