@@ -145,7 +145,7 @@ namespace pybind
 		{
 			const char * scopeName = this->getScopeName();
 			const char * className = this->getClassName();
-			const char * tag = this->getTag();
+
 			F fn = this->getFn();
 
 			C * impl = (C*)detail::meta_cast_scope( _self, scopeName, className, _scope );
