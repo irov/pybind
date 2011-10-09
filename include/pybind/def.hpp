@@ -13,7 +13,8 @@ namespace pybind
 			const char * _name, 
 			pybind_callback _callback, 
 			pybind_cfunction _cfunc, 
-			int _hasargs, 
+			bool _hasargs, 
+			bool _haskwds, 
 			PyObject * _module );
 	}
 
@@ -25,13 +26,14 @@ namespace pybind
 		template<class F, int Arity>
 		struct def_arity
 		{
-			static void call( const char * _name, F _cfunc, PyObject * _module = 0 )
+			static void def( const char * _name, F _cfunc, PyObject * _module = 0 )
 			{
 				detail::def_function(
 					_name,
 					(pybind_callback)_cfunc,
 					(pybind_cfunction)&def_adapter<F>::method1,
-					Arity,
+					true,
+					false,
 					_module
 					);
 			}
@@ -40,13 +42,14 @@ namespace pybind
 		template<class F>
 		struct def_arity<F,0>
 		{
-			static void call( const char * _name, F _cfunc, PyObject * _module = 0 )
+			static void def( const char * _name, F _cfunc, PyObject * _module = 0 )
 			{
 				detail::def_function(
 					_name,
 					(pybind_callback)_cfunc,
 					(pybind_cfunction)&def_adapter<F>::method0,
-					0,
+					false,
+					false,
 					_module
 					);
 			}
@@ -58,7 +61,20 @@ namespace pybind
 	{
 		typedef typename function_parser<F>::result f_info;
 
-		detail::def_arity<F, f_info::arity>::call( _name, _cfunc, _module );
+		detail::def_arity<F, f_info::arity>::def( _name, _cfunc, _module );
+	}
+
+	template<class F>
+	void def_native( const char * _name, F _cfunc, PyObject * _module = 0 )
+	{
+		detail::def_function(
+			_name,
+			(pybind_callback)_cfunc,
+			(pybind_cfunction)&def_adapter<F>::method_native,
+			true,
+			true,
+			_module
+			);
 	}
 }
 

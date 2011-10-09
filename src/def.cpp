@@ -20,11 +20,24 @@ namespace pybind
 			}
 
 		public:
-			void setup( const char * _name, pybind_callback f, pybind_cfunction _cfunc, int _hasargs, PyObject * _module )
+			void setup( const char * _name, pybind_callback f, pybind_cfunction _cfunc, bool _hasargs, bool _haskwds, PyObject * _module )
 			{
 				m_method.ml_name = _name;
-				m_method.ml_meth = _cfunc;
-				m_method.ml_flags = METH_CLASS | ( _hasargs ) ? METH_VARARGS : METH_NOARGS;
+				m_method.ml_meth = (PyCFunction)_cfunc;
+
+				if( _hasargs == false && _haskwds == false )
+				{
+					m_method.ml_flags = METH_CLASS | METH_NOARGS;
+				}
+				else if( _hasargs == true && _haskwds == false )
+				{
+					m_method.ml_flags = METH_CLASS | METH_VARARGS;
+				}
+				else if( _hasargs == true && _haskwds == true )
+				{
+					m_method.ml_flags = METH_CLASS | METH_VARARGS | METH_KEYWORDS;
+				}
+
 				m_method.ml_doc = "Embedding function cpp";
 
 				py_function_type *self = (py_function_type *)PyType_GenericAlloc( &s_def_type, 0 );
@@ -61,7 +74,7 @@ namespace pybind
 			TListTypeObject m_listTypeObject;
 		} s_garbageTypeObjects;
 
-		void def_function( const char * _name, pybind_callback f, pybind_cfunction _cfunc, int _hasargs, PyObject * _module )
+		void def_function( const char * _name, pybind_callback f, pybind_cfunction _cfunc, bool _hasargs, bool _haskwds, PyObject * _module )
 		{
 			if( _module == 0 )
 			{
@@ -71,7 +84,7 @@ namespace pybind
 			s_garbageTypeObjects.push_back(def_type_scope());
 			def_type_scope & cfunc_type = s_garbageTypeObjects.back();
 				
-			cfunc_type.setup( _name, f, _cfunc, _hasargs, _module );
+			cfunc_type.setup( _name, f, _cfunc, _hasargs, _haskwds, _module );
 		}
 	}
 	
