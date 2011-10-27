@@ -45,7 +45,7 @@ namespace pybind
 			return true;
 		}
 
-		PyObject * wrap( bool _value ) override
+		PyObject * wrap( type_cast_result<bool>::TCastRef _value ) override
 		{
 			return PyBool_FromLong( _value );
 		}
@@ -78,7 +78,7 @@ namespace pybind
 			return true;
 		}
 
-		PyObject * wrap( int _value ) override
+		PyObject * wrap( type_cast_result<int>::TCastRef _value ) override
 		{
 #	ifndef PYBIND_PYTHON_3
 			return PyInt_FromLong( _value );
@@ -115,7 +115,7 @@ namespace pybind
 			return true;
 		}
 
-		PyObject * wrap( unsigned int _value ) override
+		PyObject * wrap( type_cast_result<unsigned int>::TCastRef _value ) override
 		{
 #	ifndef PYBIND_PYTHON_3
 			return PyInt_FromLong( _value );
@@ -153,7 +153,7 @@ namespace pybind
 			return true;
 		}
 
-		PyObject * wrap( std::size_t _value ) override
+		PyObject * wrap( type_cast_result<std::size_t>::TCastRef _value ) override
 		{
 #	ifndef PYBIND_PYTHON_3
 			return PyInt_FromLong( _value );
@@ -191,7 +191,7 @@ namespace pybind
 			return true;
 		}
 
-		PyObject * wrap( float _value ) override
+		PyObject * wrap( type_cast_result<float>::TCastRef _value ) override
 		{
 			return PyFloat_FromDouble( _value );
 		}
@@ -248,7 +248,7 @@ namespace pybind
 			return true;
 		}
 
-		PyObject * wrap( const char * _value ) override
+		PyObject * wrap( type_cast_result<const char *>::TCastRef _value ) override
 		{
 			size_t size = ::strlen(_value);
 			return pybind::string_from_char( _value, size );
@@ -369,7 +369,7 @@ namespace pybind
 			return true;
 		}
 
-		PyObject * wrap( PyObject * _value ) override
+		PyObject * wrap( type_cast_result<PyObject *>::TCastRef _value ) override
 		{
 			return _value;
 		}
