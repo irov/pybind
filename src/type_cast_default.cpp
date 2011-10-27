@@ -129,7 +129,7 @@ namespace pybind
 	struct extract_size_t_type
 		: public type_cast_result<std::size_t>
 	{
-		bool apply( PyObject * _obj, size_t & _value ) override
+		bool apply( PyObject * _obj, std::size_t & _value ) override
 		{
 			if( PyLong_Check( _obj ) )
 			{				
