@@ -657,6 +657,11 @@ namespace pybind
 		detail::unwrap( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
+	bool is_wrap( PyObject * _value )
+	{
+		return detail::is_wrap( _value );
+	}
+	//////////////////////////////////////////////////////////////////////////
 	void type_initialize( PyObject * _value )
 	{
 		PyTypeObject * type = (PyTypeObject *)_value;

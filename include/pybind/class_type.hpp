@@ -28,6 +28,7 @@ namespace pybind
 		PYBIND_API class_type_scope * get_class_scope( PyTypeObject * _obj );
 		PYBIND_API void * unwrap( PyObject * _obj );
 		PYBIND_API void wrap( PyObject * _obj, void * _impl, bool _holder );
+		PYBIND_API bool is_wrap( PyObject * _obj );
 
 		PYBIND_API void * check_registred_class( PyObject * _obj, const std::type_info & _info );
 

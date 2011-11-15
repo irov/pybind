@@ -121,6 +121,8 @@ namespace pybind
 
 
 	PYBIND_API void unwrap( PyObject * _value );
+	PYBIND_API bool is_wrap( PyObject * _value );
+
 	PYBIND_API void type_initialize( PyObject * _value );
 
 	PYBIND_API void exception_filter();

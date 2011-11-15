@@ -130,6 +130,13 @@ namespace pybind
 			return impl;
 		}
 		//////////////////////////////////////////////////////////////////////////
+		bool is_wrap( PyObject * _obj )
+		{
+			void * impl = pybind::detail::get_class_impl( _obj );
+			
+			return impl != NULL;
+		}
+		//////////////////////////////////////////////////////////////////////////
 		void wrap( PyObject * _obj, void * _impl, bool _holder )
 		{
 #	ifndef PYBIND_PYTHON_3
