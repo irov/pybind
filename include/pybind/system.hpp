@@ -79,6 +79,7 @@ namespace pybind
 
 	PYBIND_API PyObject * ret_bool( bool _value );
 
+	PYBIND_API PyObject * get_none();
 	PYBIND_API PyObject * get_bool( bool _value );
 
 	PYBIND_API bool has_attr( PyObject * _obj, const char * _attr );

@@ -398,6 +398,11 @@ namespace pybind
 		return _value ? ret_true(): ret_false();
 	}
 
+	PyObject * get_none()
+	{
+		return Py_None;
+	}
+
 	PyObject * get_bool( bool _value )
 	{
 		return _value ? Py_True: Py_False;
