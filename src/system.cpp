@@ -382,7 +382,7 @@ namespace pybind
 	{
 		Py_RETURN_NONE;
 	}
-
+	
 	PyObject * ret_true()
 	{
 		Py_RETURN_TRUE;

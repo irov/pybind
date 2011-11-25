@@ -73,7 +73,12 @@ namespace pybind
 	PYBIND_API void decref( PyObject * _obj );
 	PYBIND_API std::size_t refcount( PyObject * _obj );
 
+	PYBIND_API bool is_none( PyObject * _none );
 	PYBIND_API PyObject * ret_none();
+
+	PYBIND_API bool bool_check( PyObject * _bool );
+	PYBIND_API bool is_true( PyObject * _bool );
+
 	PYBIND_API PyObject * ret_true();
 	PYBIND_API PyObject * ret_false();
 
@@ -127,11 +132,6 @@ namespace pybind
 	PYBIND_API void type_initialize( PyObject * _value );
 
 	PYBIND_API void exception_filter();
-
-	PYBIND_API bool is_none( PyObject * _none );
-
-	PYBIND_API bool bool_check( PyObject * _bool );
-	PYBIND_API bool is_true( PyObject * _bool );
 
 	PYBIND_API bool string_check( PyObject * _string );
 	PYBIND_API size_t string_size( PyObject * _string );
