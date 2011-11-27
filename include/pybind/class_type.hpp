@@ -96,7 +96,7 @@ namespace pybind
 		TVectorMethods m_methods;
 
 		typedef std::pair<class_type_scope *, pybind_metacast> TPairMetacast;
-		typedef std::map<const char *, TPairMetacast, pybind_ltstr> TMapBases;
+		typedef std::map<std::string, TPairMetacast, pybind_ltstr> TMapBases;
 		TMapBases m_bases;
 
 		constructor * m_pyconstructor;

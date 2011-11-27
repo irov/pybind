@@ -14,7 +14,7 @@ namespace pybind
 {
 	namespace detail
 	{
-		typedef std::map<const char *, type_cast *, pybind_ltstr> TMapExtractTypes;
+		typedef std::map<std::string, type_cast *, pybind_ltstr> TMapExtractTypes;
 
 		static TMapExtractTypes & mapExtractTypesInstance()
 		{
@@ -26,7 +26,7 @@ namespace pybind
 		{
 			const char * name = _info.name();
 			TMapExtractTypes & types = mapExtractTypesInstance();
-			types[ name ] = _type;
+			types[name] = _type;
 		}
 
 		type_cast * find_type_info_extract( const std::type_info & _info )

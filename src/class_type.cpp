@@ -21,7 +21,7 @@ namespace pybind
 	{
 		//////////////////////////////////////////////////////////////////////////
 		typedef std::list<PyTypeObject *> TListClassType;
-		typedef std::map<const char *, class_type_scope *, pybind_ltstr> TMapTypeScope;
+		typedef std::map<std::string, class_type_scope *, pybind_ltstr> TMapTypeScope;
 		//////////////////////////////////////////////////////////////////////////
 		static TListClassType s_listClassType;
 		static TMapTypeScope s_mapTypeScope;
