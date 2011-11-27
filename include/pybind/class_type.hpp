@@ -8,6 +8,8 @@
 #	include <map>
 #	include <string>
 
+#	include <typeinfo>
+
 namespace pybind
 {
 	class class_type_scope;
