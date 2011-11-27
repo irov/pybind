@@ -30,14 +30,6 @@ namespace pybind
 	typedef void * (*pybind_new)( class_type_scope * _scope, PyObject * _args, PyObject * _kwds );
 	typedef void (*pybind_destructor)( void * impl );
 
-	struct pybind_ltstr
-	{
-		bool operator()(const char* s1, const char* s2) const
-		{
-			return strcmp(s1, s2) < 0;
-		}
-	};
-
 	class pybind_visit_objects
 	{
 	public:
