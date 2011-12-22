@@ -137,8 +137,8 @@ namespace pybind
 				extract<typename f_info::param1>( _arg1 ),
 				extract<typename f_info::param2>( _arg2 ),
 				extract<typename f_info::param3>( _arg3 ),
-				extract<typename f_info::param3>( _arg4 ),
-				extract<typename f_info::param4>( _arg5 )
+				extract<typename f_info::param4>( _arg4 ),
+				extract<typename f_info::param5>( _arg5 )
 				);
 		}
 	};
@@ -163,9 +163,9 @@ namespace pybind
 				extract<typename f_info::param1>( _arg1 ),
 				extract<typename f_info::param2>( _arg2 ),
 				extract<typename f_info::param3>( _arg3 ),
-				extract<typename f_info::param3>( _arg4 ),
-				extract<typename f_info::param3>( _arg5 ),
-				extract<typename f_info::param4>( _arg6 )
+				extract<typename f_info::param4>( _arg4 ),
+				extract<typename f_info::param5>( _arg5 ),
+				extract<typename f_info::param6>( _arg6 )
 				);
 		}
 	};
