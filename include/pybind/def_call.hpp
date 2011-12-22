@@ -119,6 +119,151 @@ namespace pybind
 	};
 
 	template<class F, class Ret>
+	struct def_call_impl<F,Ret,6>
+	{
+		typedef typename function_parser<F>::result f_info;
+
+		static Ret call( F f, PyObject * _arg )
+		{
+			PyObject * _arg0 = tuple_getitem( _arg, 0 );
+			PyObject * _arg1 = tuple_getitem( _arg, 1 );
+			PyObject * _arg2 = tuple_getitem( _arg, 2 );
+			PyObject * _arg3 = tuple_getitem( _arg, 3 );
+			PyObject * _arg4 = tuple_getitem( _arg, 4 );
+			PyObject * _arg5 = tuple_getitem( _arg, 5 );
+
+			return (f)( 
+				extract<typename f_info::param0>( _arg0 ), 
+				extract<typename f_info::param1>( _arg1 ), 
+				extract<typename f_info::param2>( _arg2 ),
+				extract<typename f_info::param3>( _arg3 ),
+				extract<typename f_info::param4>( _arg4 ),
+				extract<typename f_info::param5>( _arg5 )
+				);
+		}
+	};
+
+	template<class F, class Ret>
+	struct def_call_impl<F,Ret,7>
+	{
+		typedef typename function_parser<F>::result f_info;
+
+		static Ret call( F f, PyObject * _arg )
+		{
+			PyObject * _arg0 = tuple_getitem( _arg, 0 );
+			PyObject * _arg1 = tuple_getitem( _arg, 1 );
+			PyObject * _arg2 = tuple_getitem( _arg, 2 );
+			PyObject * _arg3 = tuple_getitem( _arg, 3 );
+			PyObject * _arg4 = tuple_getitem( _arg, 4 );
+			PyObject * _arg5 = tuple_getitem( _arg, 5 );
+			PyObject * _arg6 = tuple_getitem( _arg, 6 );
+
+			return (f)( 
+				extract<typename f_info::param0>( _arg0 ), 
+				extract<typename f_info::param1>( _arg1 ), 
+				extract<typename f_info::param2>( _arg2 ),
+				extract<typename f_info::param3>( _arg3 ),
+				extract<typename f_info::param4>( _arg4 ),
+				extract<typename f_info::param5>( _arg5 ),
+				extract<typename f_info::param6>( _arg6 )
+				);
+		}
+	};
+
+	template<class F, class Ret>
+	struct def_call_impl<F,Ret,8>
+	{
+		typedef typename function_parser<F>::result f_info;
+
+		static Ret call( F f, PyObject * _arg )
+		{
+			PyObject * _arg0 = tuple_getitem( _arg, 0 );
+			PyObject * _arg1 = tuple_getitem( _arg, 1 );
+			PyObject * _arg2 = tuple_getitem( _arg, 2 );
+			PyObject * _arg3 = tuple_getitem( _arg, 3 );
+			PyObject * _arg4 = tuple_getitem( _arg, 4 );
+			PyObject * _arg5 = tuple_getitem( _arg, 5 );
+			PyObject * _arg6 = tuple_getitem( _arg, 6 );
+			PyObject * _arg7 = tuple_getitem( _arg, 7 );
+
+			return (f)( 
+				extract<typename f_info::param0>( _arg0 ), 
+				extract<typename f_info::param1>( _arg1 ), 
+				extract<typename f_info::param2>( _arg2 ),
+				extract<typename f_info::param3>( _arg3 ),
+				extract<typename f_info::param4>( _arg4 ),
+				extract<typename f_info::param5>( _arg5 ),
+				extract<typename f_info::param6>( _arg6 ),
+				extract<typename f_info::param7>( _arg7 )
+				);
+		}
+	};
+
+	template<class F, class Ret>
+	struct def_call_impl<F,Ret,9>
+	{
+		typedef typename function_parser<F>::result f_info;
+
+		static Ret call( F f, PyObject * _arg )
+		{
+			PyObject * _arg0 = tuple_getitem( _arg, 0 );
+			PyObject * _arg1 = tuple_getitem( _arg, 1 );
+			PyObject * _arg2 = tuple_getitem( _arg, 2 );
+			PyObject * _arg3 = tuple_getitem( _arg, 3 );
+			PyObject * _arg4 = tuple_getitem( _arg, 4 );
+			PyObject * _arg5 = tuple_getitem( _arg, 5 );
+			PyObject * _arg6 = tuple_getitem( _arg, 6 );
+			PyObject * _arg7 = tuple_getitem( _arg, 7 );
+			PyObject * _arg8 = tuple_getitem( _arg, 8 );
+
+			return (f)( 
+				extract<typename f_info::param0>( _arg0 ), 
+				extract<typename f_info::param1>( _arg1 ), 
+				extract<typename f_info::param2>( _arg2 ),
+				extract<typename f_info::param3>( _arg3 ),
+				extract<typename f_info::param4>( _arg4 ), 
+				extract<typename f_info::param5>( _arg5 ), 
+				extract<typename f_info::param6>( _arg6 ),
+				extract<typename f_info::param7>( _arg7 ),
+				extract<typename f_info::param8>( _arg8 )
+				);
+		}
+	};
+
+	template<class F, class Ret>
+	struct def_call_impl<F,Ret,10>
+	{
+		typedef typename function_parser<F>::result f_info;
+
+		static Ret call( F f, PyObject * _arg )
+		{
+			PyObject * _arg0 = tuple_getitem( _arg, 0 );
+			PyObject * _arg1 = tuple_getitem( _arg, 1 );
+			PyObject * _arg2 = tuple_getitem( _arg, 2 );
+			PyObject * _arg3 = tuple_getitem( _arg, 3 );
+			PyObject * _arg4 = tuple_getitem( _arg, 4 );
+			PyObject * _arg5 = tuple_getitem( _arg, 5 );
+			PyObject * _arg6 = tuple_getitem( _arg, 6 );
+			PyObject * _arg7 = tuple_getitem( _arg, 7 );
+			PyObject * _arg8 = tuple_getitem( _arg, 8 );
+			PyObject * _arg9 = tuple_getitem( _arg, 9 );
+
+			return (f)( 
+				extract<typename f_info::param0>( _arg0 ), 
+				extract<typename f_info::param1>( _arg1 ), 
+				extract<typename f_info::param2>( _arg2 ),
+				extract<typename f_info::param3>( _arg3 ),
+				extract<typename f_info::param4>( _arg4 ), 
+				extract<typename f_info::param5>( _arg5 ), 
+				extract<typename f_info::param6>( _arg6 ),
+				extract<typename f_info::param7>( _arg7 ),
+				extract<typename f_info::param8>( _arg8 ),
+				extract<typename f_info::param9>( _arg9 )
+				);
+		}
+	};
+
+	template<class F, class Ret>
 	struct def_call_ret_impl
 	{
 		typedef typename function_parser<F>::result f_info;
