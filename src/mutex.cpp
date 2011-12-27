@@ -1,5 +1,5 @@
 #	include "pybind/mutex.hpp"
-#	include "config\config.hpp"
+#	include "config/config.hpp"
 #	include "config/python.hpp"
 
 namespace pybind
