@@ -63,7 +63,7 @@ namespace pybind
 		void * construct( PyObject * _args );
 		void def_init( constructor * _ctr );
 
-		void add_method( const char * _name, method_adapter_interface * _ifunc, int _arity );
+		void add_method( const char * _name, method_adapter_interface * _ifunc );
 
 		void add_member( const char * _name, member_adapter_interface * _imember );
 		void add_member_from_scope( class_type_scope * _basescope );

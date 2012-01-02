@@ -2,7 +2,7 @@
 #	include "pybind/class_core.hpp"
 #	include "pybind/method_type.hpp"
 #	include "pybind/member_type.hpp"
-#	include "pybind/def.hpp"
+#	include "pybind/function.hpp"
 #	include "pybind/functor.hpp"
 
 #	include "pybind/class_type.hpp"
@@ -50,7 +50,7 @@ namespace pybind
 		initialize_methods();
 		initialize_members();
 		initialize_classes();
-		initialize_def();
+		initialize_function();
 		initialize_functor();
 
 		initialize_default_type_cast();
@@ -64,7 +64,7 @@ namespace pybind
 		
 		finalize_methods();
 		finalize_classes();
-		finalize_def();
+		finalize_function();
 		finalize_functor();
 
 		finialize_default_type_cast();
@@ -168,7 +168,6 @@ namespace pybind
 	{
 		return PyModule_GetDict( _module );
 	}
-
 
 	void module_addobject( PyObject * _module, const char * _name, PyObject * _obj )
 	{

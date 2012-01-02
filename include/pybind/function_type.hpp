@@ -5,10 +5,11 @@
 
 namespace pybind
 {
+	class function_adapter_interface;
+
 	struct py_function_type{
 		PyObject_HEAD
-		pybind_callback f;
-		const char * name;
+		function_adapter_interface * ifunction;
 	};
 }
 

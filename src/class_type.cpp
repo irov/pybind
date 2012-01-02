@@ -538,7 +538,7 @@ namespace pybind
 		};
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_type_scope::add_method( const char * _name, method_adapter_interface * _ifunc, int _arity )
+	void class_type_scope::add_method( const char * _name, method_adapter_interface * _ifunc )
 	{
 		TVectorMethods::iterator it_found = std::find_if( m_methods.begin(), m_methods.end(), detail::FCharCmp(_name) );
 		if( it_found != m_methods.end() )

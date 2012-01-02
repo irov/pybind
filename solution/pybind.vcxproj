@@ -85,7 +85,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../include;D:\Projects\Mengine\dependencies\Python\PC;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -158,8 +158,7 @@
     <ClCompile Include="..\src\class_core.cpp" />
     <ClCompile Include="..\src\class_type.cpp" />
     <ClCompile Include="..\src\constructor.cpp" />
-    <ClCompile Include="..\src\def.cpp" />
-    <ClCompile Include="..\src\def_adapter.cpp" />
+    <ClCompile Include="..\src\function.cpp" />
     <ClCompile Include="..\src\functor.cpp" />
     <ClCompile Include="..\src\functor_proxy.cpp" />
     <ClCompile Include="..\src\member_type.cpp" />
@@ -175,18 +174,19 @@
     <ClInclude Include="..\include\pybind\adapter_interface.hpp" />
     <ClInclude Include="..\include\pybind\bases.hpp" />
     <ClInclude Include="..\include\pybind\class.hpp" />
+    <ClInclude Include="..\include\pybind\class_adapter_interface.hpp" />
     <ClInclude Include="..\include\pybind\class_core.hpp" />
     <ClInclude Include="..\include\pybind\class_type.hpp" />
     <ClInclude Include="..\include\pybind\constructor.hpp" />
     <ClInclude Include="..\include\pybind\convert_adapter.hpp" />
-    <ClInclude Include="..\include\pybind\def.hpp" />
-    <ClInclude Include="..\include\pybind\def_adapter.hpp" />
-    <ClInclude Include="..\include\pybind\def_call.hpp" />
-    <ClInclude Include="..\include\pybind\def_type.hpp" />
     <ClInclude Include="..\include\pybind\exports.hpp" />
     <ClInclude Include="..\include\pybind\extract.hpp" />
+    <ClInclude Include="..\include\pybind\function.hpp" />
+    <ClInclude Include="..\include\pybind\function_adapter.hpp" />
+    <ClInclude Include="..\include\pybind\function_call.hpp" />
     <ClInclude Include="..\include\pybind\function_parser.hpp" />
     <ClInclude Include="..\include\pybind\function_proxy_call.hpp" />
+    <ClInclude Include="..\include\pybind\function_type.hpp" />
     <ClInclude Include="..\include\pybind\functor.hpp" />
     <ClInclude Include="..\include\pybind\functor_proxy.hpp" />
     <ClInclude Include="..\include\pybind\functor_type.hpp" />

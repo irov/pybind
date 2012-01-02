@@ -1,9 +1,10 @@
 #	pragma once
 
-#	include "pybind/types.hpp"
-
 #	include "pybind/function_parser.hpp"
 #	include "pybind/functor_proxy.hpp"
+
+#	include "pybind/types.hpp"
+#	include "pybind/exports.hpp"
 
 namespace pybind
 {

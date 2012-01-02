@@ -41,7 +41,7 @@ namespace pybind
 			PyMethodDef m_method;
 		};
 
-		static class GarbageTypeObjects
+		static class Garbage
 		{
 		public:
 			void push_back( const functor_type_scope & scope )
@@ -57,7 +57,7 @@ namespace pybind
 		protected:
 			typedef std::list<functor_type_scope> TListTypeObject;
 			TListTypeObject m_listTypeObject;
-		} s_garbageTypeObjects;
+		} s_garbage;
 
 		void def_functor( const char * _name, functor_proxy_interface * _proxy, pybind_cfunction _cfunc, int _hasargs, PyObject * _module )
 		{
@@ -66,8 +66,8 @@ namespace pybind
 				_module = get_currentmodule();
 			}
 
-			s_garbageTypeObjects.push_back( functor_type_scope());
-			functor_type_scope & cfunc_type = s_garbageTypeObjects.back();
+			s_garbage.push_back( functor_type_scope());
+			functor_type_scope & cfunc_type = s_garbage.back();
 
 			cfunc_type.setup( _name, _proxy, _cfunc, _hasargs, _module );
 		}

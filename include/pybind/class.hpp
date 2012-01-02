@@ -82,12 +82,9 @@ namespace pybind
 			method_adapter_interface * iadapter =
 				new method_adapter<C, F>(f, _name);
 
-			typedef typename function_parser<F>::result t_info;
-
 			class_core::def_method(
 				_name,
 				iadapter,
-				t_info::arity,
 				class_info<C>()
 				);
 
@@ -102,12 +99,9 @@ namespace pybind
 			method_adapter_interface * iadapter =
 				new method_adapter_native<C, F>(f, _name);
 
-			typedef typename function_parser<F>::result t_info;
-
 			class_core::def_method(
 				_name,
 				iadapter,
-				t_info::arity,
 				class_info<C>()
 				);
 
@@ -134,12 +128,9 @@ namespace pybind
 			method_adapter_interface * iadapter =
 				new method_adapter_proxy_function<C, F>(f, _name);
 
-			typedef typename function_parser<F>::result t_info;
-
 			class_core::def_method(
 				_name,
 				iadapter,
-				t_info::arity,
 				class_info<C>()
 				);
 
@@ -152,12 +143,9 @@ namespace pybind
 			method_adapter_interface * iadapter =
 				new method_adapter_proxy_member<C, P, F>(_proxy, f, _name);
 
-			typedef typename function_parser<F>::result t_info;
-
 			class_core::def_method(
 				_name,
 				iadapter,
-				t_info::arity,
 				class_info<C>()
 				);
 

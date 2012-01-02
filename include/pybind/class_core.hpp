@@ -53,7 +53,6 @@ namespace pybind
 		static void def_method( 
 			const char * _name, 
 			method_adapter_interface * _iadapter, 
-			int _arity, 
 			const std::type_info & _info );
 
 		static void def_member(

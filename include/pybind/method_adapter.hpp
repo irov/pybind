@@ -24,9 +24,8 @@ namespace pybind
 		virtual PyObject * call( void * _self, class_type_scope * scope, PyObject * _args, PyObject * _kwds ) = 0;
 	};
 
-	template<class C, class F>
+	template<class F>
 	class method_adapter_helper
-		: public class_adapter_interface<C, method_adapter_interface>
 	{
 	public:
 		method_adapter_helper( F _fn, const char * _tag )
@@ -51,13 +50,44 @@ namespace pybind
 		const char * m_tag;
 	};
 
+	template<class C>
+	class class_adapter_helper
+	{
+	protected:
+		class_adapter_helper()
+		{
+			const std::type_info & class_info = typeid(C*);
+			m_class_name = class_info.name();
+
+			const std::type_info & scope_info = typeid(C);
+			m_scope_name = scope_info.name();
+		}
+
+	protected:
+		const char * getClassName() const
+		{
+			return m_class_name;
+		}
+
+		const char * getScopeName() const
+		{
+			return m_scope_name;
+		}
+
+	protected:
+		const char * m_class_name;
+		const char * m_scope_name;
+	};
+
 	template<class C, class F>
 	class method_adapter
-		: public method_adapter_helper<C,F>
+		: public method_adapter_interface
+		, public method_adapter_helper<F>
+		, public class_adapter_helper<C>
 	{
 	public:
 		method_adapter( F _fn, const char * _tag )
-			: method_adapter_helper<C,F>(_fn,_tag)
+			: method_adapter_helper<F>(_fn, _tag)
 		{
 		}
 
@@ -78,11 +108,13 @@ namespace pybind
 
 	template<class C, class P, class F>
 	class method_adapter_proxy_member
-		: public method_adapter_helper<C,F>
+		: public method_adapter_interface
+		, public method_adapter_helper<F>
+		, public class_adapter_helper<C>
 	{
 	public:
 		method_adapter_proxy_member( P * _proxy, F _fn, const char * _tag )
-			: method_adapter_helper<C,F>(_fn, _tag)
+			: method_adapter_helper<F>(_fn, _tag)
 			, m_proxy(_proxy)
 		{
 		}
@@ -107,11 +139,13 @@ namespace pybind
 
 	template<class C, class F>
 	class method_adapter_proxy_function
-		: public method_adapter_helper<C,F>
+		: public method_adapter_interface
+		, public method_adapter_helper<F>
+		, public class_adapter_helper<C>
 	{
 	public:
 		method_adapter_proxy_function( F _fn, const char * _tag )
-			: method_adapter_helper<C,F>(_fn, _tag)
+			: method_adapter_helper<F>(_fn, _tag)
 		{
 		}
 
@@ -132,11 +166,13 @@ namespace pybind
 
 	template<class C, class F>
 	class method_adapter_native
-		: public method_adapter_helper<C,F>
+		: public method_adapter_interface
+		, public method_adapter_helper<F>
+		, public class_adapter_helper<C>
 	{
 	public:
 		method_adapter_native( F _fn, const char * _tag )
-			: method_adapter_helper<C,F>(_fn, _tag)
+			: method_adapter_helper<F>(_fn, _tag)
 		{
 		}
 

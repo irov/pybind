@@ -1,19 +1,18 @@
 #	pragma once
 
-#	include "pybind/exports.hpp"
 #	include "pybind/function_parser.hpp"
 #	include "pybind/extract.hpp"
 
 namespace pybind
 {
 	template<class F, class Ret, int i>
-	struct def_call_impl
+	struct function_call_impl
 	{
 		static Ret call( F f, PyObject * _arg );
 	};
 
 	template<class F, class Ret>
-	struct def_call_impl<F,Ret,0>
+	struct function_call_impl<F,Ret,0>
 	{
 		typedef typename function_parser<F>::result f_info;
 
@@ -24,7 +23,7 @@ namespace pybind
 	};
 
 	template<class F, class Ret>
-	struct def_call_impl<F,Ret,1>
+	struct function_call_impl<F,Ret,1>
 	{
 		typedef typename function_parser<F>::result f_info;
 
@@ -39,7 +38,7 @@ namespace pybind
 	};
 
 	template<class F, class Ret>
-	struct def_call_impl<F,Ret,2>
+	struct function_call_impl<F,Ret,2>
 	{
 		typedef typename function_parser<F>::result f_info;
 
@@ -56,7 +55,7 @@ namespace pybind
 	};
 
 	template<class F, class Ret>
-	struct def_call_impl<F,Ret,3>
+	struct function_call_impl<F,Ret,3>
 	{
 		typedef typename function_parser<F>::result f_info;
 
@@ -75,7 +74,7 @@ namespace pybind
 	};
 
 	template<class F, class Ret>
-	struct def_call_impl<F,Ret,4>
+	struct function_call_impl<F,Ret,4>
 	{
 		typedef typename function_parser<F>::result f_info;
 
@@ -96,7 +95,7 @@ namespace pybind
 	};
 
 	template<class F, class Ret>
-	struct def_call_impl<F,Ret,5>
+	struct function_call_impl<F,Ret,5>
 	{
 		typedef typename function_parser<F>::result f_info;
 
@@ -119,7 +118,7 @@ namespace pybind
 	};
 
 	template<class F, class Ret>
-	struct def_call_impl<F,Ret,6>
+	struct function_call_impl<F,Ret,6>
 	{
 		typedef typename function_parser<F>::result f_info;
 
@@ -144,7 +143,7 @@ namespace pybind
 	};
 
 	template<class F, class Ret>
-	struct def_call_impl<F,Ret,7>
+	struct function_call_impl<F,Ret,7>
 	{
 		typedef typename function_parser<F>::result f_info;
 
@@ -171,7 +170,7 @@ namespace pybind
 	};
 
 	template<class F, class Ret>
-	struct def_call_impl<F,Ret,8>
+	struct function_call_impl<F,Ret,8>
 	{
 		typedef typename function_parser<F>::result f_info;
 
@@ -200,7 +199,7 @@ namespace pybind
 	};
 
 	template<class F, class Ret>
-	struct def_call_impl<F,Ret,9>
+	struct function_call_impl<F,Ret,9>
 	{
 		typedef typename function_parser<F>::result f_info;
 
@@ -231,7 +230,7 @@ namespace pybind
 	};
 
 	template<class F, class Ret>
-	struct def_call_impl<F,Ret,10>
+	struct function_call_impl<F,Ret,10>
 	{
 		typedef typename function_parser<F>::result f_info;
 
@@ -264,38 +263,38 @@ namespace pybind
 	};
 
 	template<class F, class Ret>
-	struct def_call_ret_impl
+	struct function_call_ret_impl
 	{
 		typedef typename function_parser<F>::result f_info;
 
 		static PyObject * call( F f, PyObject * _arg )
 		{
-			Ret result = def_call_impl<F,Ret,f_info::arity>::call( f, _arg );
+			Ret result = function_call_impl<F,Ret,f_info::arity>::call( f, _arg );
 
 			return ptr( result );
 		}
 	};
 
 	template<class F>
-	struct def_call_ret_impl<F,void>
+	struct function_call_ret_impl<F,void>
 	{
 		typedef typename function_parser<F>::result f_info;
 
 		static PyObject * call( F f, PyObject * _arg )
 		{
-			def_call_impl<F,void,f_info::arity>::call( f, _arg );
+			function_call_impl<F,void,f_info::arity>::call( f, _arg );
 
 			return ret_none();
 		}
 	};
 
 	template<class F>
-	struct def_call
+	struct function_call
 	{
 		typedef typename function_parser<F>::result f_info;
 
 		static PyObject * call( const char * _name, F f, PyObject * _arg )
-		{
+			{
 			size_t arg_size = (_arg)?tuple_size(_arg):0;
 
 			if( arg_size != f_info::arity )
@@ -311,7 +310,7 @@ namespace pybind
 
 			try
 			{
-				return def_call_ret_impl<F,typename f_info::ret_type>::call( f, _arg );
+				return function_call_ret_impl<F,typename f_info::ret_type>::call( f, _arg );
 			}
 			catch( const pybind_exception & )
 			{

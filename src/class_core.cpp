@@ -87,11 +87,11 @@ namespace pybind
 		scope->add_convert( _iadapter );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_core::def_method( const char * _name, method_adapter_interface * _iadapter, int _arity, const std::type_info & _info )
+	void class_core::def_method( const char * _name, method_adapter_interface * _iadapter, const std::type_info & _info )
 	{
 		class_type_scope * scope = detail::get_class_type_scope( _info );
 
-		scope->add_method( _name, _iadapter, _arity );
+		scope->add_method( _name, _iadapter );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_core::def_member( const char * _name, member_adapter_interface * _iadapter, const std::type_info & _info )
