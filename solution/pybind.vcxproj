@@ -162,6 +162,7 @@
     <ClCompile Include="..\src\function_type.cpp" />
     <ClCompile Include="..\src\functor.cpp" />
     <ClCompile Include="..\src\functor_proxy.cpp" />
+    <ClCompile Include="..\src\functor_type.cpp" />
     <ClCompile Include="..\src\member_type.cpp" />
     <ClCompile Include="..\src\method_adapter.cpp" />
     <ClCompile Include="..\src\method_type.cpp" />

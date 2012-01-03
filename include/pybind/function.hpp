@@ -22,10 +22,6 @@ namespace pybind
 		PYBIND_API void def_function_adapter( function_adapter_interface * _adapter, bool _native, PyObject * _module );
 	}
 
-	void initialize_function();
-	void finalize_function();
-
-
 	template<class F>
 	function_adapter_interface * create_function_adapter( const char * _name, F _function )
 	{

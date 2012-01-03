@@ -2,8 +2,8 @@
 #	include "pybind/class_core.hpp"
 #	include "pybind/method_type.hpp"
 #	include "pybind/member_type.hpp"
-#	include "pybind/function.hpp"
-#	include "pybind/functor.hpp"
+#	include "pybind/function_type.hpp"
+#	include "pybind/functor_type.hpp"
 
 #	include "pybind/class_type.hpp"
 

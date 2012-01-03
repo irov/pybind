@@ -22,5 +22,6 @@ namespace pybind
 	};
 
 	void initialize_members();
+	void finalize_members();
 }
 

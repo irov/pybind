@@ -107,4 +107,9 @@ namespace pybind
 			printf("invalid embedding class '%s' \n", s_member_type.tp_name );
 		}
 	}
+	//////////////////////////////////////////////////////////////////////////
+	void finalize_members()
+	{
+
+	}
 }

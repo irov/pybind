@@ -83,7 +83,7 @@ void main()
 		.def_member( "y", &Vec2::y)
 		;
 
-	pybind::def("test", &test_Bar );
+	pybind::def_function("test", &test_Bar );
 		
 	bool exist;
 	pybind::module_import("Test1", exist);

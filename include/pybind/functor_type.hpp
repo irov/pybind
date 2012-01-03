@@ -10,5 +10,10 @@ namespace pybind
 		PyObject_HEAD
 		functor_proxy_interface * proxy;
 	};
+
+	py_functor_type * gen_functor();
+
+	void initialize_functor();
+	void finalize_functor();
 }
 
