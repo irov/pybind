@@ -555,7 +555,8 @@ namespace pybind
 	{
 		return PyTuple_GetItem( _tuple, _it );
 	}
-	PYBIND_API const char * object_repr( PyObject * _obj )
+
+	const char * object_repr( PyObject * _obj )
 	{
 		PyObject * repr = PyObject_Repr( _obj );
 		

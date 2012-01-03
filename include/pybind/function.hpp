@@ -19,24 +19,12 @@ namespace pybind
 		PYBIND_API PyObject * create_function_adapter( function_adapter_interface * _adapter, bool _native );
 
 		PYBIND_API void store_function_adapter( function_adapter_interface * _adapter );
+		PYBIND_API void def_function_adapter( function_adapter_interface * _adapter, bool _native, PyObject * _module );
 	}
 
 	void initialize_function();
 	void finalize_function();
 
-	void def_function_adapter( function_adapter_interface * _adapter, bool _native, PyObject * _module = 0 )
-	{
-		PyObject * py_func = detail::create_function_adapter( _adapter, _native );
-
-		if( _module == 0 )
-		{
-			_module = get_currentmodule();
-		}
-
-		const char * name = _adapter->getName();
-
-		module_addobject( _module, name, py_func );
-	}
 
 	template<class F>
 	function_adapter_interface * create_function_adapter( const char * _name, F _function )
@@ -52,19 +40,19 @@ namespace pybind
 	{
 		function_adapter_interface * adapter = create_function_adapter( _name, _function );
 
-		def_function_adapter( ifunction, false, _module );
+		detail::def_function_adapter( adapter, false, _module );
 
-		detail::store_function_adapter( ifunction );
+		detail::store_function_adapter( adapter );
 	}
 
 	template<class F>
 	void def_function_native( const char * _name, F _cfunc, PyObject * _module = 0 )
 	{
-		function_adapter_interface * ifunction =
+		function_adapter_interface * adapter =
 			new function_adapter_native<F>(_function, _name);
 
-		def_function_adapter( ifunction, true, _module );
+		detail::def_function_adapter( adapter, true, _module );
 
-		detail::store_function_adapter( ifunction );
+		detail::store_function_adapter( adapter );
 	}
 }

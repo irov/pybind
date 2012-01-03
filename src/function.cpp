@@ -137,5 +137,19 @@ namespace pybind
 
 			return py_func;
 		}
+
+		void def_function_adapter( function_adapter_interface * _adapter, bool _native, PyObject * _module = 0 )
+		{
+			PyObject * py_func = detail::create_function_adapter( _adapter, _native );
+
+			if( _module == 0 )
+			{
+				_module = get_currentmodule();
+			}
+
+			const char * name = _adapter->getName();
+
+			module_addobject( _module, name, py_func );
+		}
 	}
 }
