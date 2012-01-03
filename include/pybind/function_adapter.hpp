@@ -16,8 +16,7 @@ namespace pybind
 		virtual const char * getName() const = 0;
 
 	public:
-		virtual PyObject * call( PyObject * _args ) = 0;
-		virtual PyObject * call_kwds( PyObject * _args, PyObject * _kwds ) = 0;
+		virtual PyObject * call( PyObject * _args, PyObject * _kwds ) = 0;
 	};
 
 	template<class F>
@@ -73,7 +72,7 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( PyObject * _args ) override
+		PyObject * call( PyObject * _args, PyObject * _kwds ) override
 		{
 			const char * tag = this->getTag();
 			F fn = this->getFn();
@@ -82,12 +81,42 @@ namespace pybind
 
 			return ret;
 		}
+	};
 
-		PyObject * call_kwds( PyObject * _args, PyObject * _kwds ) override
+	template<class F>
+	class function_adapter_native
+		: public function_adapter_interface
+		, public function_adapter_helper<F>
+	{
+	public:
+		function_adapter_native( F _fn, const char * _tag )
+			: function_adapter_helper<F>(_fn, _tag)
 		{
-			//ToDo
+		}
 
-			return 0;
+	protected:
+		int getArity() const override
+		{
+			typedef typename function_parser<F>::result t_info;
+
+			return t_info::arity;
+		}
+
+		const char * getName() const override
+		{
+			const char * tag = this->getTag();
+
+			return tag;
+		}
+
+	protected:
+		PyObject * call( PyObject * _args, PyObject * _kwds ) override
+		{
+			F fn = this->getFn();
+
+			PyObject * ret = fn(_args, _kwds);
+
+			return ret;
 		}
 	};
 }

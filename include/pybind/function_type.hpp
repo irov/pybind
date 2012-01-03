@@ -11,5 +11,7 @@ namespace pybind
 		PyObject_HEAD
 		function_adapter_interface * ifunction;
 	};
+
+	py_function_type * gen_function();
 }
 

@@ -8,8 +8,6 @@
 
 namespace pybind
 {
-	static PyTypeObject s_function_type;
-
 	namespace detail
 	{		
 		class function_type_scope
@@ -20,7 +18,7 @@ namespace pybind
 			}
 
 		public:
-			PyObject * setup( function_adapter_interface * _adapter )
+			PyObject * setup( function_adapter_interface * _adapter, bool _native )
 			{
 				int arity = _adapter->getArity();
 
@@ -28,20 +26,29 @@ namespace pybind
 
 				m_method.ml_name = name;
 
-				if( arity > 0 )
+				if( _native == true )
 				{
-					m_method.ml_meth = (PyCFunction)&function_args;
-					m_method.ml_flags = METH_CLASS | METH_VARARGS;
+					m_method.ml_meth = (PyCFunction)&function_kwds;
+					m_method.ml_flags = METH_CLASS | METH_VARARGS | METH_KEYWORDS;
 				}
 				else
 				{
-					m_method.ml_meth = (PyCFunction)&function_noargs;
-					m_method.ml_flags = METH_CLASS | METH_NOARGS;
+					if( arity > 0 )
+					{
+						m_method.ml_meth = (PyCFunction)&function_args;
+						m_method.ml_flags = METH_CLASS | METH_VARARGS;
+					}
+					else
+					{
+						m_method.ml_meth = (PyCFunction)&function_noargs;
+						m_method.ml_flags = METH_CLASS | METH_NOARGS;
+					}
 				}
+
 
 				m_method.ml_doc = "Embedding function cpp";
 
-				py_function_type * py_self = (py_function_type *)PyType_GenericAlloc( &s_function_type, 0 );
+				py_function_type * py_self = gen_function();
 
 				py_self->ifunction = _adapter;
 
@@ -105,18 +112,14 @@ namespace pybind
 
 		PyObject * function_args( PyObject * _self, PyObject * _args )
 		{
-			function_adapter_interface * ifunction = detail::extract_adapter_py_function( _self );
-
-			PyObject * ret = ifunction->call( _args );
-
-			return ret;
+			return function_kwds( _self, _args, 0 );
 		}
 
-		PyObject * function_native( PyObject * _self, PyObject * _args, PyObject * _kwds )
+		PyObject * function_kwds( PyObject * _self, PyObject * _args, PyObject * _kwds )
 		{
 			function_adapter_interface * ifunction = detail::extract_adapter_py_function( _self );
 
-			PyObject * ret = ifunction->call_kwds( _args, _kwds );
+			PyObject * ret = ifunction->call( _args, _kwds );
 
 			return ret;
 		}
@@ -126,36 +129,13 @@ namespace pybind
 			s_garbage.storeAdapter(_adapter);
 		}
 
-		PyObject * create_function_adapter( function_adapter_interface * _adapter )
+		PyObject * create_function_adapter( function_adapter_interface * _adapter, bool _native )
 		{
 			function_type_scope & cfunc_type = s_garbage.newScope();
 			
-			PyObject * py_func = cfunc_type.setup( _adapter );
+			PyObject * py_func = cfunc_type.setup( _adapter, _native );
 
 			return py_func;
 		}
-	}
-
-	static void py_dealloc( PyObject * _obj )
-	{
-		_obj->ob_type->tp_free( _obj );
-	}
-
-	void initialize_function()
-	{
-		s_function_type.tp_name = "function_type_scope";
-		s_function_type.tp_basicsize = sizeof( py_function_type );
-		s_function_type.tp_dealloc = &py_dealloc;
-		s_function_type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
-
-		if( PyType_Ready( &s_function_type ) < 0 )
-		{
-			printf("invalid embedding class '%s' \n", s_function_type.tp_name );					
-		}
-	}
-
-	void finalize_function()
-	{
-		//Py_DecRef((PyObject*)s_def_type);
 	}
 }
