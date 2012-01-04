@@ -76,10 +76,10 @@ namespace pybind
 			method_adapter_interface * _iadapter, 
 			const std::type_info & _info );
 
-		static void add_base_to_scope( class_type_scope * _scope, const char * _name, const std::type_info & _base, pybind_metacast cast );
+		static void add_base_to_scope( class_type_scope * _scope, const char * _name, const std::type_info & _base, pybind_metacast _cast );
 
 		template<class B>
-		static void add_base( class_type_scope * _scope, pybind_metacast cast)
+		static void add_base( class_type_scope * _scope, pybind_metacast _cast)
 		{
 			const std::type_info & tptrinfo = class_info<B*>();
 			const char * name = tptrinfo.name();

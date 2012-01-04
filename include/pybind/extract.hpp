@@ -75,6 +75,8 @@ namespace pybind
 
 				if( etype == 0 )
 				{
+					pybind::check_error();
+
 					const char * type_name = tinfo.name();
 
 					pybind::error_message( "extract invalid find cast for %.256s"
@@ -137,14 +139,6 @@ namespace pybind
 
 		return 0;
 	}
-
-	template<class T>
-	typename detail::extract_return<T>::type extract_item( PyObject * _obj, std::size_t _it )
-	{
-		PyObject * item = tuple_getitem( _obj, 0 );
-		return detail::extract_check<T>::extract( item );
-	}
-
 
 	template<class T>
 	PyObject * ptr( T _value )
