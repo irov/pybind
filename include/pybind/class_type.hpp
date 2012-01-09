@@ -66,7 +66,6 @@ namespace pybind
 		void add_method( const char * _name, method_adapter_interface * _ifunc );
 
 		void add_member( const char * _name, member_adapter_interface * _imember );
-		void add_member_from_scope( class_type_scope * _basescope );
 
 		void add_convert( convert_adapter_interface * _iconvert );
 		convert_adapter_interface * get_convert();
