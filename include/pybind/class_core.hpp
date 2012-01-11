@@ -86,7 +86,7 @@ namespace pybind
 
 			const std::type_info & tinfo = class_info<B>();
 
-			add_base_to_scope( _scope, name, tinfo, cast );			
+			add_base_to_scope( _scope, name, tinfo, _cast );			
 		}
 
 		static void * meta_cast( void * _impl, class_type_scope * _scope, const char * _name );
