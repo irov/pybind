@@ -42,7 +42,7 @@ namespace pybind
 	}
 
 	template<class F>
-	void def_function_native( const char * _name, F _cfunc, PyObject * _module = 0 )
+	void def_function_native( const char * _name, F _function, PyObject * _module = 0 )
 	{
 		function_adapter_interface * adapter =
 			new function_adapter_native<F>(_function, _name);

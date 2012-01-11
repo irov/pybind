@@ -96,8 +96,6 @@ namespace pybind
 		class_type_scope * scope = detail::get_class_scope( _obj->ob_type );
 		class_type_scope * cur_scope = detail::get_class_type_scope( _tinfo );
 
-		void * result = 0;
-
 		if( cur_scope != scope )
 		{
 			const std::type_info & tinfo = _tptrinfo;
