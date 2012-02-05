@@ -127,23 +127,23 @@ namespace pybind
 
 
 	struct extract_size_t_type
-		: public type_cast_result<std::size_t>
+		: public type_cast_result<size_t>
 	{
-		bool apply( PyObject * _obj, std::size_t & _value ) override
+		bool apply( PyObject * _obj, size_t & _value ) override
 		{
 			if( PyLong_Check( _obj ) )
 			{				
-				_value = (std::size_t)PyLong_AsUnsignedLong( _obj );
+				_value = (size_t)PyLong_AsUnsignedLong( _obj );
 			}
 #	ifndef PYBIND_PYTHON_3
 			else if( PyInt_Check( _obj ) )
 			{
-				_value = (std::size_t)PyInt_AsUnsignedLongMask( _obj );
+				_value = (size_t)PyInt_AsUnsignedLongMask( _obj );
 			}
 #	endif
 			else if( PyFloat_Check( _obj ) )
 			{				
-				_value = (std::size_t)PyFloat_AsDouble( _obj );
+				_value = (size_t)PyFloat_AsDouble( _obj );
 			}
 			else
 			{
@@ -153,7 +153,7 @@ namespace pybind
 			return true;
 		}
 
-		PyObject * wrap( type_cast_result<std::size_t>::TCastRef _value ) override
+		PyObject * wrap( type_cast_result<size_t>::TCastRef _value ) override
 		{
 #	ifndef PYBIND_PYTHON_3
 			return PyInt_FromLong( _value );

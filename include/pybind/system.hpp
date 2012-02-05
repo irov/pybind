@@ -71,7 +71,7 @@ namespace pybind
 
 	PYBIND_API void incref( PyObject * _obj );
 	PYBIND_API void decref( PyObject * _obj );
-	PYBIND_API std::size_t refcount( PyObject * _obj );
+	PYBIND_API size_t refcount( PyObject * _obj );
 
 	PYBIND_API bool is_none( PyObject * _none );
 	PYBIND_API PyObject * ret_none();
@@ -93,11 +93,11 @@ namespace pybind
 
 	PYBIND_API bool check_type( PyObject * _obj );
 	
-	PYBIND_API PyObject * list_new( std::size_t _size );
+	PYBIND_API PyObject * list_new( size_t _size );
 	PYBIND_API bool list_check( PyObject * _obj );
-	PYBIND_API std::size_t list_size( PyObject * _obj );
-	PYBIND_API PyObject * list_getitem( PyObject * _obj, std::size_t _it );
-	PYBIND_API int list_setitem( PyObject * _obj, std::size_t _it, PyObject * _item );
+	PYBIND_API size_t list_size( PyObject * _obj );
+	PYBIND_API PyObject * list_getitem( PyObject * _obj, size_t _it );
+	PYBIND_API int list_setitem( PyObject * _obj, size_t _it, PyObject * _item );
 	PYBIND_API int list_appenditem( PyObject * _obj, PyObject * _item );
 
 	PYBIND_API PyObject * dict_new();
@@ -107,17 +107,17 @@ namespace pybind
 	PYBIND_API bool dict_set( PyObject * _dict, const char * _name, PyObject * _value );
 	PYBIND_API PyObject * dict_get( PyObject * _dict, const char * _name );
 	PYBIND_API bool dict_contains( PyObject * _dict, const char * _name );	
-	PYBIND_API bool dict_next( PyObject * _dict, std::size_t *_pos, PyObject ** _key, PyObject ** _value );
+	PYBIND_API bool dict_next( PyObject * _dict, size_t *_pos, PyObject ** _key, PyObject ** _value );
 
 	PYBIND_API PyObject * dict_items( PyObject * _dict );
 	
 
-	PYBIND_API PyObject * tuple_new( std::size_t _it );
+	PYBIND_API PyObject * tuple_new( size_t _it );
 	PYBIND_API bool tuple_check( PyObject * _tuple );
-	PYBIND_API std::size_t tuple_size( PyObject * _tuple );
-	PYBIND_API PyObject * tuple_getitem( PyObject * _tuple, std::size_t _it );
-	PYBIND_API bool tuple_setitem( PyObject * _tuple, std::size_t _it, PyObject * _value );
-	PYBIND_API bool tuple_resize( PyObject ** _ptuple, std::size_t _it );
+	PYBIND_API size_t tuple_size( PyObject * _tuple );
+	PYBIND_API PyObject * tuple_getitem( PyObject * _tuple, size_t _it );
+	PYBIND_API bool tuple_setitem( PyObject * _tuple, size_t _it, PyObject * _value );
+	PYBIND_API bool tuple_resize( PyObject ** _ptuple, size_t _it );
 
 
 	PYBIND_API const char * object_repr( PyObject * _obj );

@@ -24,7 +24,7 @@ namespace pybind
 			typedef R ret_type;
 
 			static const bool member = false;
-			static const std::size_t arity = 0;
+			static const size_t arity = 0;
 		};
 
 		template<class R, class P0>
@@ -35,7 +35,7 @@ namespace pybind
 			typedef typename external_type_cast<P0>::Type param0;
 
 			static const bool member = false;
-			static const std::size_t arity = 1;
+			static const size_t arity = 1;
 		};
 
 		template<class R, class P0, class P1>
@@ -47,7 +47,7 @@ namespace pybind
 			typedef typename external_type_cast<P1>::Type param1;
 
 			static const bool member = false;
-			static const std::size_t arity = 2;
+			static const size_t arity = 2;
 		};
 
 		template<class R, class P0, class P1, class P2>
@@ -60,7 +60,7 @@ namespace pybind
 			typedef typename external_type_cast<P2>::Type param2;
 
 			static const bool member = false;
-			static const std::size_t arity = 3;
+			static const size_t arity = 3;
 		};
 
 
@@ -75,7 +75,7 @@ namespace pybind
 			typedef typename external_type_cast<P3>::Type param3;
 
 			static const bool member = false;
-			static const std::size_t arity = 4;
+			static const size_t arity = 4;
 		};
 
 		template<class R, class P0, class P1, class P2, class P3, class P4>
@@ -90,7 +90,7 @@ namespace pybind
 			typedef typename external_type_cast<P4>::Type param4;
 
 			static const bool member = false;
-			static const std::size_t arity = 5;
+			static const size_t arity = 5;
 		};
 
 		template<class R, class P0, class P1, class P2, class P3, class P4, class P5>
@@ -106,7 +106,7 @@ namespace pybind
 			typedef typename external_type_cast<P5>::Type param5;
 
 			static const bool member = false;
-			static const std::size_t arity = 6;
+			static const size_t arity = 6;
 		};
 
 		template<class R, class P0, class P1, class P2, class P3, class P4, class P5, class P6>
@@ -123,7 +123,7 @@ namespace pybind
 			typedef typename external_type_cast<P6>::Type param6;
 
 			static const bool member = false;
-			static const std::size_t arity = 7;
+			static const size_t arity = 7;
 		};
 
 		template<class R, class P0, class P1, class P2, class P3, class P4, class P5, class P6, class P7>
@@ -141,7 +141,7 @@ namespace pybind
 			typedef typename external_type_cast<P7>::Type param7;
 
 			static const bool member = false;
-			static const std::size_t arity = 8;
+			static const size_t arity = 8;
 		};
 
 		template<class R, class P0, class P1, class P2, class P3, class P4, class P5, class P6, class P7, class P8>
@@ -161,7 +161,7 @@ namespace pybind
 
 
 			static const bool member = false;
-			static const std::size_t arity = 9;
+			static const size_t arity = 9;
 		};
 
 		template<class R, class P0, class P1, class P2, class P3, class P4, class P5, class P6, class P7, class P8, class P9>
@@ -181,7 +181,7 @@ namespace pybind
 			typedef typename external_type_cast<P9>::Type param9;
 
 			static const bool member = false;
-			static const std::size_t arity = 10;
+			static const size_t arity = 10;
 		};
 
 		template<class R, class C>
@@ -191,7 +191,7 @@ namespace pybind
 			typedef C class_type;
 
 			static const bool member = true;
-			static const std::size_t arity = 0;
+			static const size_t arity = 0;
 		};
 
 		template<class R, class C>
@@ -201,7 +201,7 @@ namespace pybind
 			typedef C class_type;
 
 			static const bool member = true;
-			static const std::size_t arity = 0;
+			static const size_t arity = 0;
 		};
 
 		template<class R, class C, class P0>
@@ -213,7 +213,7 @@ namespace pybind
 			typedef typename external_type_cast<P0>::Type param0;
 
 			static const bool member = true;
-			static const std::size_t arity = 1;
+			static const size_t arity = 1;
 		};
 
 		template<class R, class C, class P0>
@@ -225,7 +225,7 @@ namespace pybind
 			typedef typename external_type_cast<P0>::Type param0;
 
 			static const bool member = true;
-			static const std::size_t arity = 1;
+			static const size_t arity = 1;
 		};
 
 		template<class R, class C, class P0, class P1>
@@ -238,7 +238,7 @@ namespace pybind
 			typedef typename external_type_cast<P1>::Type param1;
 
 			static const bool member = true;
-			static const std::size_t arity = 2;
+			static const size_t arity = 2;
 		};
 
 		template<class R, class C, class P0, class P1>
@@ -251,7 +251,7 @@ namespace pybind
 			typedef typename external_type_cast<P1>::Type param1;
 
 			static const bool member = true;
-			static const std::size_t arity = 2;
+			static const size_t arity = 2;
 		};
 
 		template<class R, class C, class P0, class P1, class P2>
@@ -265,7 +265,7 @@ namespace pybind
 			typedef typename external_type_cast<P2>::Type param2;
 
 			static const bool member = true;
-			static const std::size_t arity = 3;
+			static const size_t arity = 3;
 		};
 
 		template<class R, class C, class P0, class P1, class P2>
@@ -279,7 +279,7 @@ namespace pybind
 			typedef typename external_type_cast<P2>::Type param2;
 
 			static const bool member = true;
-			static const std::size_t arity = 3;
+			static const size_t arity = 3;
 		};
 
 		template<class R, class C, class P0, class P1, class P2, class P3>
@@ -294,7 +294,7 @@ namespace pybind
 			typedef typename external_type_cast<P3>::Type param3;
 
 			static const bool member = true;
-			static const std::size_t arity = 4;
+			static const size_t arity = 4;
 		};
 
 		template<class R, class C, class P0, class P1, class P2, class P3>
@@ -309,7 +309,7 @@ namespace pybind
 			typedef typename external_type_cast<P3>::Type param3;
 
 			static const bool member = true;
-			static const std::size_t arity = 4;
+			static const size_t arity = 4;
 		};
 
 		template<class R, class C, class P0, class P1, class P2, class P3, class P4>
@@ -325,7 +325,7 @@ namespace pybind
 			typedef typename external_type_cast<P4>::Type param4;
 
 			static const bool member = true;
-			static const std::size_t arity = 5;
+			static const size_t arity = 5;
 		};
 
 		template<class R, class C, class P0, class P1, class P2, class P3, class P4>
@@ -341,7 +341,7 @@ namespace pybind
 			typedef typename external_type_cast<P4>::Type param4;
 
 			static const bool member = true;
-			static const std::size_t arity = 5;
+			static const size_t arity = 5;
 		};
 
 		template<class R, class C, class P0, class P1, class P2, class P3, class P4, class P5>
@@ -358,7 +358,7 @@ namespace pybind
 			typedef typename external_type_cast<P5>::Type param5;
 
 			static const bool member = true;
-			static const std::size_t arity = 6;
+			static const size_t arity = 6;
 		};
 
 		template<class R, class C, class P0, class P1, class P2, class P3, class P4, class P5>
@@ -375,7 +375,7 @@ namespace pybind
 			typedef typename external_type_cast<P5>::Type param5;
 
 			static const bool member = true;
-			static const std::size_t arity = 6;
+			static const size_t arity = 6;
 		};
 
 		template<class R, class C, class P0, class P1, class P2, class P3, class P4, class P5, class P6>
@@ -393,7 +393,7 @@ namespace pybind
 			typedef typename external_type_cast<P6>::Type param6;
 
 			static const bool member = true;
-			static const std::size_t arity = 7;
+			static const size_t arity = 7;
 		};
 
 		template<class R, class C, class P0, class P1, class P2, class P3, class P4, class P5, class P6>
@@ -411,7 +411,7 @@ namespace pybind
 			typedef typename external_type_cast<P6>::Type param6;
 
 			static const bool member = true;
-			static const std::size_t arity = 7;
+			static const size_t arity = 7;
 		};
 
 		template<class R, class C, class P0, class P1, class P2, class P3, class P4, class P5, class P6, class P7>
@@ -430,7 +430,7 @@ namespace pybind
 			typedef typename external_type_cast<P7>::Type param7;
 
 			static const bool member = true;
-			static const std::size_t arity = 8;
+			static const size_t arity = 8;
 		};
 
 		template<class R, class C, class P0, class P1, class P2, class P3, class P4, class P5, class P6, class P7>
@@ -449,7 +449,7 @@ namespace pybind
 			typedef typename external_type_cast<P7>::Type param7;
 
 			static const bool member = true;
-			static const std::size_t arity = 8;
+			static const size_t arity = 8;
 		};
 
 		template<class R, class C, class P0, class P1, class P2, class P3, class P4, class P5, class P6, class P7, class P8>
@@ -469,7 +469,7 @@ namespace pybind
 			typedef typename external_type_cast<P8>::Type param8;
 
 			static const bool member = true;
-			static const std::size_t arity = 9;
+			static const size_t arity = 9;
 		};
 
 		template<class R, class C, class P0, class P1, class P2, class P3, class P4, class P5, class P6, class P7, class P8>
@@ -489,7 +489,7 @@ namespace pybind
 			typedef typename external_type_cast<P8>::Type param8;
 
 			static const bool member = true;
-			static const std::size_t arity = 9;
+			static const size_t arity = 9;
 		};
 
 		template<class R, class C, class P0, class P1, class P2, class P3, class P4, class P5, class P6, class P7, class P8, class P9>
@@ -510,7 +510,7 @@ namespace pybind
 			typedef typename external_type_cast<P9>::Type param9;
 
 			static const bool member = true;
-			static const std::size_t arity = 10;
+			static const size_t arity = 10;
 		};
 
 		template<class R, class C, class P0, class P1, class P2, class P3, class P4, class P5, class P6, class P7, class P8, class P9>
@@ -531,7 +531,7 @@ namespace pybind
 			typedef typename external_type_cast<P9>::Type param9;
 
 			static const bool member = true;
-			static const std::size_t arity = 10;
+			static const size_t arity = 10;
 		};
 	}
 

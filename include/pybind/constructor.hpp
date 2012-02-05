@@ -8,7 +8,7 @@ namespace pybind
 	class PYBIND_API constructor
 	{
 	public:
-		constructor( std::size_t _arity );
+		constructor( size_t _arity );
 		virtual ~constructor();
 
 	public:

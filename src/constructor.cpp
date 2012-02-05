@@ -6,7 +6,7 @@
 namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
-	constructor::constructor( std::size_t _arity )
+	constructor::constructor( size_t _arity )
 		: m_arity(_arity)
 	{
 	}

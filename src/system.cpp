@@ -436,7 +436,7 @@ namespace pybind
 		return PyType_Check( _obj ) == 1;
 	}
 
-	PyObject * list_new( std::size_t _size )
+	PyObject * list_new( size_t _size )
 	{
 		return PyList_New( _size );
 	}
@@ -446,17 +446,17 @@ namespace pybind
 		return PyList_Check( _obj ) == 1;
 	}
 
-	std::size_t list_size( PyObject * _obj )
+	size_t list_size( PyObject * _obj )
 	{
-		return (std::size_t) PyList_Size( _obj );
+		return (size_t) PyList_Size( _obj );
 	}
 
-	PyObject * list_getitem( PyObject * _obj, std::size_t _it )
+	PyObject * list_getitem( PyObject * _obj, size_t _it )
 	{
 		return PyList_GetItem( _obj, _it );
 	}
 
-	int list_setitem( PyObject * _obj, std::size_t _it, PyObject * _item )
+	int list_setitem( PyObject * _obj, size_t _it, PyObject * _item )
 	{
 		return PyList_SetItem( _obj, _it, _item );
 	}
@@ -472,7 +472,7 @@ namespace pybind
 
 		PyObject * py_dir = PyObject_Dir( _obj );
 
-		for( std::size_t 
+		for( size_t 
 			it = 0, 
 			it_end = PyList_Size( py_dir );
 		it != it_end;
@@ -528,11 +528,11 @@ namespace pybind
 		return contains == 1;
 	}
 
-	bool dict_next( PyObject * _dict, std::size_t *_pos, PyObject ** _key, PyObject ** _value )
+	bool dict_next( PyObject * _dict, size_t *_pos, PyObject ** _key, PyObject ** _value )
 	{
 		Py_ssize_t ps = (Py_ssize_t)(*_pos);
 		int res = PyDict_Next( _dict, &ps, _key, _value );
-		*_pos = (std::size_t)ps;
+		*_pos = (size_t)ps;
 		return res == 1;
 	}
 
@@ -551,7 +551,7 @@ namespace pybind
 		return PyTuple_Size( _tuple );
 	}
 
-	PyObject * tuple_getitem( PyObject * _tuple, std::size_t _it )
+	PyObject * tuple_getitem( PyObject * _tuple, size_t _it )
 	{
 		return PyTuple_GetItem( _tuple, _it );
 	}
@@ -598,17 +598,17 @@ namespace pybind
 		va_end( valist ); 
 	}
 
-	bool tuple_setitem( PyObject * _tuple, std::size_t _it, PyObject * _value )
+	bool tuple_setitem( PyObject * _tuple, size_t _it, PyObject * _value )
 	{
 		return PyTuple_SetItem( _tuple, _it, _value ) == 0;
 	}
 
-	bool tuple_resize( PyObject ** _ptuple, std::size_t _it )
+	bool tuple_resize( PyObject ** _ptuple, size_t _it )
 	{
 		return _PyTuple_Resize( _ptuple, _it ) == 0;
 	}
 
-	PyObject * tuple_new( std::size_t _it )
+	PyObject * tuple_new( size_t _it )
 	{
 		return PyTuple_New(_it);
 	}
