@@ -61,11 +61,7 @@ namespace pybind
 	PYBIND_API PyObject * exec( const char * _code, PyObject * _global = 0, PyObject * _local = 0 );
 	//PYBIND_API PyObject * exec_file( const char * _filename, PyObject * _global = 0, PyObject * _local = 0 );
 
-#	ifndef PYBIND_PYTHON_3
-	PYBIND_API void set_syspath( const char * _path );
-#	else
-	PYBIND_API void set_syspath( const wchar_t * _path );
-#	endif
+	PYBIND_API void set_syspath( PyObject * _value );
 
 	PYBIND_API char get_sysdelim();
 

@@ -342,20 +342,11 @@ namespace pybind
 		return result;
 	}
 
-#	ifndef PYBIND_PYTHON_3
-	void set_syspath( const char * _path )
+	void set_syspath( PyObject * _value )
 	{
-		PySys_SetPath( const_cast<char*>(_path) );
+		PySys_SetObject( "path", _value );
 		check_error();
 	}
-
-#	else
-	void set_syspath( const wchar_t * _path )
-	{
-		PySys_SetPath( _path );
-		check_error();
-	}
-#	endif
 
 	char get_sysdelim()
 	{
