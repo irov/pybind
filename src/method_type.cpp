@@ -45,8 +45,12 @@ namespace pybind
 	}
 	//////////////////////////////////////////////////////////////////////////
 	static PyTypeObject s_method_caller_type = {
+#	ifndef PYBIND_PYTHON_3
 		PyObject_HEAD_INIT(&PyType_Type)
 		0,
+#else
+		PyVarObject_HEAD_INIT(&PyType_Type, 0)
+#endif
 		"pybind_method_caller_type",
 		sizeof(py_method_caller_type),
 		0,
@@ -180,8 +184,12 @@ namespace pybind
 	}
 	//////////////////////////////////////////////////////////////////////////
 	static PyTypeObject s_method_generator_type = {
+#	ifndef PYBIND_PYTHON_3
 		PyObject_HEAD_INIT(&PyType_Type)
 		0,
+#else
+		PyVarObject_HEAD_INIT(&PyType_Type, 0)
+#endif
 		"pybind_method_generator_type",
 		sizeof(py_method_generator_type),
 		0,
