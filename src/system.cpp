@@ -37,7 +37,7 @@ namespace pybind
 		}
 	}
 
-	void initialize(bool _debug)
+	void initialize( bool _debug, bool install_sigs )
 	{
 		if( _debug == false )
 		{
@@ -45,7 +45,7 @@ namespace pybind
 			Py_NoSiteFlag = 1;
 		}
 
-		Py_Initialize();
+		Py_InitializeEx( install_sigs?1:0 );
 
 		initialize_methods();
 		initialize_members();

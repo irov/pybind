@@ -19,7 +19,7 @@ namespace pybind
 	PYBIND_API void visit_objects( pybind_visit_objects * _visitor );
 
 
-	PYBIND_API void initialize( bool _debug );
+	PYBIND_API void initialize( bool _debug, bool install_sigs );
 	PYBIND_API void finalize();
 
 	PYBIND_API bool is_initialized();
