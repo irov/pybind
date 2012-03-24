@@ -134,8 +134,9 @@ namespace pybind
 	PYBIND_API const char * string_to_char( PyObject * _string, size_t & _size );
 	PYBIND_API PyObject * string_from_char( const char * _str, size_t _size );
 
-	PYBIND_API bool unicode_check( PyObject * _unicode );
+	PYBIND_API bool unicode_check( PyObject * _unicode );	
 	PYBIND_API wchar_t * unicode_to_wchar( PyObject * _unicode, size_t & _size );
+	PYBIND_API PyObject * unicode_from_wchar( const wchar_t * _wchar, size_t _size );
 		
 	PYBIND_API const char * unicode_to_utf8( PyObject * _unicode, size_t & _size );
 	PYBIND_API PyObject * unicode_from_utf8( const char * _utf8, size_t _size );

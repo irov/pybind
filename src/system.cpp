@@ -782,6 +782,13 @@ namespace pybind
 		return PyUnicode_AsUnicode( _unicode );
 	}
 	//////////////////////////////////////////////////////////////////////////
+	PyObject * unicode_from_wchar( const wchar_t * _wchar, size_t _size )
+	{
+		PyObject * py_unicode = PyUnicode_FromUnicode( _wchar, _size );
+
+		return py_unicode;
+	}
+	//////////////////////////////////////////////////////////////////////////
 	const char * unicode_to_utf8( PyObject * _unicode, size_t & _size )
 	{
 		PyObject* py_utf8 = PyUnicode_AsUTF8String( _unicode );
