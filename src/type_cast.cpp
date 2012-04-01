@@ -32,8 +32,12 @@ namespace pybind
 		type_cast * find_type_info_extract( const std::type_info & _info )
 		{
 			const char * name = _info.name();
+			static std::string s_helper; 
+
+			s_helper.assign(name);
+
 			TMapExtractTypes & types = mapExtractTypesInstance();
-			TMapExtractTypes::iterator it_find = types.find( name );
+			TMapExtractTypes::iterator it_find = types.find( s_helper );
 
 			if( it_find == types.end() )
 			{

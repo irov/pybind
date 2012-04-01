@@ -22,6 +22,7 @@ namespace pybind
 		throw pybind_exception();
 	}
 
+#	ifdef PYBIND_VISIT_OBJECTS
 	void visit_objects( pybind_visit_objects * _visitor )
 	{
 		detail::TVectorTypeScope types;
@@ -36,6 +37,7 @@ namespace pybind
 			(*it)->visit_objects(_visitor);
 		}
 	}
+#	endif
 
 	void initialize( bool _debug, bool install_sigs )
 	{

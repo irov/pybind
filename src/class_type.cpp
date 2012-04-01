@@ -221,7 +221,11 @@ namespace pybind
 		class_type_scope * get_class_type_scope( const std::type_info & _info )
 		{
 			const char * info_name = _info.name();
-			TMapTypeScope::iterator it_find = s_mapTypeScope.find( info_name );
+
+			static std::string s_helper;
+			s_helper.assign( info_name );
+
+			TMapTypeScope::iterator it_find = s_mapTypeScope.find( s_helper );
 
 			if( it_find == s_mapTypeScope.end() )
 			{
@@ -345,23 +349,30 @@ namespace pybind
 		void * impl = (*scope->m_pynew)( scope, _args, _kwds );
 
 		PyObject * py_self = detail::alloc_class( _type, _args, _kwds, impl, false );
-
+		
+#	ifdef PYBIND_VISIT_OBJECTS
 		scope->incref( py_self );
+#	endif
 
 		return py_self;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	static void py_del( PyObject * _obj )
 	{
-		class_type_scope * scope = pybind::detail::get_class_scope(_obj->ob_type);
-
-		scope->decref( _obj );
+#	ifdef PYBIND_VISIT_OBJECTS
+		{
+			class_type_scope * scope = pybind::detail::get_class_scope(_obj->ob_type);
+			scope->decref( _obj );
+		}
+#	endif
 
 		bool holder = pybind::detail::is_holder(_obj);
 
 		if( holder == false )
 		{
 			void * impl = pybind::detail::get_class_impl(_obj);
+
+			class_type_scope * scope = pybind::detail::get_class_scope(_obj->ob_type);
 			(scope->m_pydestructor)( impl );
 		}
 	}
@@ -378,7 +389,6 @@ namespace pybind
 		, m_repr(0)
 		, m_getattro(0)
 		, m_mapping(0)
-		, m_refcount(0)
 		, m_sequence(0)
 	{
 	}
@@ -642,7 +652,11 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void * class_type_scope::metacast( const char * _name, void * _impl )
 	{
-		TMapBases::iterator it_find = m_bases.find( _name );
+		static std::string s_helper;
+
+		s_helper.assign( _name );
+
+		TMapBases::iterator it_find = m_bases.find( s_helper );
 
 		if( it_find != m_bases.end() )
 		{
@@ -673,7 +687,9 @@ namespace pybind
 		PyObject * py_self = pybind::detail::alloc_class( m_pytypeobject, py_args, 0, _impl, true );
 		Py_DECREF( py_args );
 
+#	ifdef PYBIND_VISIT_OBJECTS
 		this->incref( py_self );
+#	endif
 
 		return py_self;
 	}
@@ -685,10 +701,13 @@ namespace pybind
 		PyObject * py_self = pybind::detail::alloc_class( m_pytypeobject, py_args, 0, _impl, false );
 		Py_DECREF( py_args );
 
+#	ifdef PYBIND_VISIT_OBJECTS
 		this->incref( py_self );
+#	endif
 
 		return py_self;
 	}
+#	ifdef PYBIND_VISIT_OBJECTS
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::incref( PyObject * _obj )
 	{
@@ -711,6 +730,7 @@ namespace pybind
 			_visitor->visit( *it );
 		}
 	}
+#	endif
 	//////////////////////////////////////////////////////////////////////////
 	void initialize_classes()
 	{

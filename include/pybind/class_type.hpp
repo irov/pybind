@@ -84,11 +84,6 @@ namespace pybind
 		void unwrap( PyObject * _obj );
 		void type_initialize( PyTypeObject * _type );
 
-		void incref( PyObject * _obj );
-		void decref( PyObject * _obj );
-
-		void visit_objects( pybind_visit_objects * _visitor );		
-
 	public:
 		typedef std::list<const char *> TVectorMembers;
 		TVectorMembers m_members;
@@ -119,10 +114,17 @@ namespace pybind
 
 		PyObject * m_module;
 
-		int m_refcount;
+#	ifdef PYBIND_VISIT_OBJECTS
+	protected:
+		void incref( PyObject * _obj );
+		void decref( PyObject * _obj );
 
+		void visit_objects( pybind_visit_objects * _visitor );
+
+	protected:
 		typedef std::list<PyObject *> TListObjects;
 		TListObjects m_objects;
+#	endif
 	};
 
 	void initialize_classes();	
