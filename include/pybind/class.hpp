@@ -284,6 +284,7 @@ namespace pybind
 			return impl;
 		}
 
+
 		static void 
 			dealloc_only_python( void * impl )
 		{
@@ -389,7 +390,7 @@ namespace pybind
 		void setup_extract() override
 		{
 			static extract_class_type_ptr<C, false> s_registartor_ptr;
-			static extract_class_type_ref<C, true> s_registartor_ref;
+			//static extract_class_type_ref<C, true> s_registartor_ref;
 		}
 	};
 
@@ -401,12 +402,39 @@ namespace pybind
 		void setup_extract() override
 		{
 			static extract_class_type_ptr<C, false> s_registartor_ptr;
-			static extract_class_type_ref<C, true> s_registartor_ref;
+			//static extract_class_type_ref<C, true> s_registartor_ref;
 		}
 
 	public:
 		proxy_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
 			: base_<C,B>( _name, &base_<C,B>::new_, &base_<C,B>::dealloc_only_python, _module )
+		{
+			if( external_extract )
+			{
+				setup_extract();
+			}
+
+			constructor * empty_ctr = 
+				new constructor_params<C, init<> >();
+
+			class_core::def_init( base_<C,B>::scope(), empty_ctr );
+		}
+	};
+
+	template<class C, class B = no_bases>
+	class struct_
+		: public base_<C,B>
+	{
+	protected:
+		void setup_extract() override
+		{
+			//static extract_class_type_ptr<C, false> s_registartor_ptr;
+			static extract_class_type_ref<C, true> s_registartor_ref;
+		}
+
+	public:
+		struct_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
+			: base_<C,B>( _name, &base_<C,B>::new_, &base_<C,B>::dealloc_, _module )
 		{
 			if( external_extract )
 			{

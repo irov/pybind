@@ -734,17 +734,15 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void initialize_classes()
 	{
-		#	ifndef PYBIND_PYTHON_3
-            g_pybind_object_impl = PyString_FromString( "__pybind_object_impl" );
-            g_pybind_class_type_scope = PyString_FromString( "__pybind_class_type_scope" );
-            g_pybind_object_holder = PyString_FromString( "__pybind_object_holder" );
-        #	else
-            g_pybind_object_impl = PyUnicode_FromString( "__pybind_object_impl" );
-            g_pybind_class_type_scope = PyUnicode_FromString( "__pybind_class_type_scope" );
-            g_pybind_object_holder = PyUnicode_FromString( "__pybind_object_holder" );
-        #	endif
-        
-       
+#	ifndef PYBIND_PYTHON_3
+		g_pybind_object_impl = PyString_FromString( "__pybind_object_impl" );
+		g_pybind_class_type_scope = PyString_FromString( "__pybind_class_type_scope" );
+		g_pybind_object_holder = PyString_FromString( "__pybind_object_holder" );
+#	else
+		g_pybind_object_impl = PyUnicode_FromString( "__pybind_object_impl" );
+		g_pybind_class_type_scope = PyUnicode_FromString( "__pybind_class_type_scope" );
+		g_pybind_object_holder = PyUnicode_FromString( "__pybind_object_holder" );
+#	endif
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void finalize_classes()
