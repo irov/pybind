@@ -69,11 +69,12 @@ namespace pybind
 			PyObject * py_self = PyObject_GetAttr( _obj, g_pybind_object_impl );
 
 			if( py_self == 0 )
-			{
-				Py_DECREF(py_self);
+			{				
 				pybind::throw_exception();
 				return 0;
 			}
+
+			Py_DECREF(py_self);
 			
 			if( py_self->ob_type == &s_pod64_type )
 			{
@@ -81,15 +82,12 @@ namespace pybind
 
 				void * buff = py_pod64->buff;
 
-				Py_DECREF(py_self);
-
 				return buff;
 			}
 
 #ifndef PYBIND_PYTHON_3
 			if( PyCObject_Check(py_self) == false )
 			{
-				Py_DECREF(py_self);
 				pybind::throw_exception();
 				return 0;
 			}
@@ -98,15 +96,12 @@ namespace pybind
 #else
 			if( PyCapsule_CheckExact(py_self) == false )
 			{
-				Py_DECREF(py_self);
 				pybind::throw_exception();
 				return 0;
 			}
 
 			void * impl = PyCapsule_GetPointer(py_self, NULL);
-#endif			
-
-			Py_DECREF(py_self);
+#endif						
 
 			return impl;
 		}
