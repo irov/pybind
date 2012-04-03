@@ -16,6 +16,16 @@ namespace pybind
 	PyObject * g_pybind_object_impl;
 	PyObject * g_pybind_class_type_scope;
 	PyObject * g_pybind_object_holder;
+
+	//////////////////////////////////////////////////////////////////////////
+	static PyTypeObject s_pod64_type;
+
+	//////////////////////////////////////////////////////////////////////////
+	struct py_pod64_object
+	{
+		PyObject_HEAD
+		char buff[64];
+	};
 	//////////////////////////////////////////////////////////////////////////
 	namespace detail
 	{
@@ -60,15 +70,26 @@ namespace pybind
 
 			if( py_self == 0 )
 			{
+				Py_DECREF(py_self);
 				pybind::throw_exception();
 				return 0;
 			}
+			
+			if( py_self->ob_type == &s_pod64_type )
+			{
+				py_pod64_object * py_pod64 = (py_pod64_object *)py_self;
 
-			Py_DECREF(py_self);
+				void * buff = py_pod64->buff;
+
+				Py_DECREF(py_self);
+
+				return buff;
+			}
 
 #ifndef PYBIND_PYTHON_3
 			if( PyCObject_Check(py_self) == false )
 			{
+				Py_DECREF(py_self);
 				pybind::throw_exception();
 				return 0;
 			}
@@ -77,12 +98,15 @@ namespace pybind
 #else
 			if( PyCapsule_CheckExact(py_self) == false )
 			{
+				Py_DECREF(py_self);
 				pybind::throw_exception();
 				return 0;
 			}
 
 			void * impl = PyCapsule_GetPointer(py_self, NULL);
 #endif			
+
+			Py_DECREF(py_self);
 
 			return impl;
 		}
@@ -125,6 +149,7 @@ namespace pybind
 		void * unwrap( PyObject * _obj )
 		{
 			void * impl = pybind::detail::get_class_impl( _obj );
+
 			pybind::detail::wrap( _obj, 0, false );
 
 			return impl;
@@ -167,16 +192,19 @@ namespace pybind
 				pybind::throw_exception();
 				return false;
 			}
-
-			Py_DECREF( py_holder );
-
-			if( PyBool_Check(py_holder) == false )
+			
+			if( PyBool_Check( py_holder ) == false )
 			{
+				Py_DECREF( py_holder );
 				pybind::throw_exception();
 				return false;
 			}
 
-			return py_holder == Py_True;
+			bool result = py_holder == Py_True;
+
+			Py_DECREF( py_holder );
+
+			return result;
 		}
 		//////////////////////////////////////////////////////////////////////////
 		void * check_registred_class( PyObject * _obj, const std::type_info & _info )
@@ -208,6 +236,25 @@ namespace pybind
 			}
 
 			pybind::detail::wrap( py_self, _impl, _holder );
+
+			return py_self;
+		}
+		//////////////////////////////////////////////////////////////////////////
+		PyObject * alloc_struct( PyTypeObject * _type, PyObject * _args, PyObject * _kwds, void ** _buff )
+		{
+			PyObject * py_self = PyBaseObject_Type.tp_alloc(_type, 0);
+
+			if( py_self == 0 )
+			{
+				if (PyErr_Occurred())
+				{
+					PyErr_Print();
+				}
+
+				return 0;
+			}
+
+			pybind::detail::wrap_pod64( py_self, _buff );
 
 			return py_self;
 		}
@@ -707,6 +754,20 @@ namespace pybind
 
 		return py_self;
 	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * class_type_scope::create_pod( void ** _impl )
+	{
+		PyObject * py_args = PyTuple_New(0);
+
+		PyObject * py_self = pybind::detail::alloc_struct( m_pytypeobject, py_args, 0, _impl );
+		Py_DECREF( py_args );
+
+#	ifdef PYBIND_VISIT_OBJECTS
+		this->incref( py_self );
+#	endif
+
+		return py_self;
+	}
 #	ifdef PYBIND_VISIT_OBJECTS
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::incref( PyObject * _obj )
@@ -732,6 +793,11 @@ namespace pybind
 	}
 #	endif
 	//////////////////////////////////////////////////////////////////////////
+	static void py_dealloc( PyObject * _obj )
+	{
+		_obj->ob_type->tp_free( _obj );
+	}
+	//////////////////////////////////////////////////////////////////////////
 	void initialize_classes()
 	{
 #	ifndef PYBIND_PYTHON_3
@@ -743,6 +809,16 @@ namespace pybind
 		g_pybind_class_type_scope = PyUnicode_FromString( "__pybind_class_type_scope" );
 		g_pybind_object_holder = PyUnicode_FromString( "__pybind_object_holder" );
 #	endif
+
+		s_pod64_type.tp_name = "pod64_type";
+		s_pod64_type.tp_basicsize = sizeof(py_pod64_object);
+		s_pod64_type.tp_dealloc = &py_dealloc;
+		s_pod64_type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
+
+		if( PyType_Ready( &s_pod64_type ) < 0 )
+		{
+			printf("invalid embedding class '%s' \n", s_pod64_type.tp_name );					
+		}		
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void finalize_classes()

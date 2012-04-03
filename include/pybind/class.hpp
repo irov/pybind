@@ -329,7 +329,8 @@ namespace pybind
 
 		PyObject * wrap( C * _class ) override
 		{
-			return class_core::create_holder( class_info<C>(), (void *)_class );
+			const std::type_info & tinfo = class_info<C>();
+			return class_core::create_holder( tinfo, (void *)_class );
 		}
 	};
 
@@ -362,8 +363,17 @@ namespace pybind
 
 		PyObject * wrap( const C & _class )
 		{
-			//return 0;			
-			return class_core::create_impl( class_info<C>(), (void *)new C(_class) );
+			//return 0;
+			const std::type_info & tinfo = class_info<C>();
+			//C * obj = new C(_class);
+
+			void * obj_place;
+
+			PyObject * py_obj = class_core::create_pod( tinfo, &obj_place );
+
+			new (obj_place) C(_class);
+
+			return py_obj;
 		}
 	};
 
