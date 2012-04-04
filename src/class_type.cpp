@@ -188,6 +188,8 @@ namespace pybind
 			py_pod64_object * py_pod64 = (py_pod64_object *)py_impl;
 
 			*_impl = (void *)py_pod64->buff;
+
+			PyObject_SetAttr( _obj, g_pybind_object_holder, Py_True );
 		}
 		//////////////////////////////////////////////////////////////////////////
 		bool is_holder( PyObject * _obj )
