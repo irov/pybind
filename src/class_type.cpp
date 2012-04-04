@@ -178,6 +178,18 @@ namespace pybind
 			PyObject_SetAttr( _obj, g_pybind_object_holder, py_holder );
 		}
 		//////////////////////////////////////////////////////////////////////////
+		void wrap_pod64( PyObject * _obj, void ** _impl )
+		{
+			PyObject * py_impl = PyType_GenericAlloc( &s_pod64_type, 0 );
+
+			PyObject_SetAttr( _obj, g_pybind_object_impl, py_impl );
+			Py_DECREF( py_impl );
+
+			py_pod64_object * py_pod64 = (py_pod64_object *)py_impl;
+
+			*_impl = (void *)py_pod64->buff;
+		}
+		//////////////////////////////////////////////////////////////////////////
 		bool is_holder( PyObject * _obj )
 		{
 			PyObject * py_holder = PyObject_GetAttr( _obj, g_pybind_object_holder );
