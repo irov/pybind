@@ -275,10 +275,30 @@ namespace pybind
 
 				_value.assign( ch_buff, ch_size );
 			}
-			else if( pybind::unicode_check( _obj ) )
+			else
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		PyObject * wrap( type_cast_result<std::string>::TCastRef _value ) override
+		{
+			return pybind::string_from_char( _value.c_str(), _value.size() );
+		}
+	};
+
+	struct extract_wstring_type
+		: public type_cast_result<std::wstring>
+	{
+		bool apply( PyObject * _obj, std::wstring & _value ) override
+		{
+			if( pybind::unicode_check( _obj ) )
 			{
 				size_t ch_size;
-				const char * ch_buff = pybind::unicode_to_utf8( _obj, ch_size );
+
+				const wchar_t * ch_buff = pybind::unicode_to_wchar(_obj, ch_size );
 
 				if( ch_size == 0 )
 				{
@@ -297,9 +317,9 @@ namespace pybind
 			return true;
 		}
 
-		PyObject * wrap( type_cast_result<std::string>::TCastRef _value ) override
+		PyObject * wrap( type_cast_result<std::wstring>::TCastRef _value ) override
 		{
-			return pybind::string_from_char( _value.c_str(), _value.size() );
+			return pybind::unicode_from_wchar( _value.c_str(), _value.size() );
 		}
 	};
 
@@ -388,6 +408,7 @@ namespace pybind
 		s_extract_type_cast.push_back( new extract_double_type() );
 		s_extract_type_cast.push_back( new extract_cchar_type() );
 		s_extract_type_cast.push_back( new extract_string_type() );
+		s_extract_type_cast.push_back( new extract_wstring_type() );
 		s_extract_type_cast.push_back( new extract_pyobject_type() );
 	}
 
