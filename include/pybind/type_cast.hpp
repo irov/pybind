@@ -16,6 +16,8 @@ namespace pybind
 		PYBIND_API void error_invalid_extract( PyObject * _obj, const std::type_info & _tinfo );
 		PYBIND_API bool convert_object( PyObject * _obj, const std::type_info & _tinfo, void * _place );
 
+		PYBIND_API bool instance_of_type( PyObject * _obj, const std::type_info & tinfo );
+
 		template<class T> struct type_down_cast;
 
 		template<class T, class B>
@@ -98,6 +100,16 @@ namespace pybind
 				return type_down_cast_find<const T &,T>::find();
 			}
 		};
+	}
+
+	template<class T>
+	bool instance_of( PyObject * _obj )
+	{
+		const std::type_info & tinfo = typeid(T);
+
+		bool result = detail::instance_of_type( _obj, tinfo );
+
+		return result;
 	}
 
 

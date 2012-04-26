@@ -80,6 +80,32 @@ namespace pybind
 			
 			return result;
 		}
+		//////////////////////////////////////////////////////////////////////////
+		bool instance_of_type( PyObject * _obj, const std::type_info & _tinfo )
+		{
+			if( detail::is_class( _obj ) == false )
+			{
+				return false;
+			}
+
+			void * impl = detail::get_class_impl( _obj );
+
+			if( impl == 0 )
+			{
+				error_message( "instance_of_type: unbind object" );
+				return false;
+			}
+
+			class_type_scope * scope = detail::get_class_scope( _obj->ob_type );
+			class_type_scope * cur_scope = detail::get_class_type_scope( _tinfo );
+
+			if( scope != cur_scope )
+			{
+				return false;
+			}
+
+			return true;
+		}
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool type_cast::type_info_cast( PyObject * _obj, const std::type_info & _tinfo, const std::type_info & _tptrinfo, void ** _impl )
