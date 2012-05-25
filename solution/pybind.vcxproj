@@ -158,6 +158,7 @@
     <ClCompile Include="..\src\class_core.cpp" />
     <ClCompile Include="..\src\class_type.cpp" />
     <ClCompile Include="..\src\constructor.cpp" />
+    <ClCompile Include="..\src\extract.cpp" />
     <ClCompile Include="..\src\function.cpp" />
     <ClCompile Include="..\src\function_type.cpp" />
     <ClCompile Include="..\src\functor.cpp" />
@@ -169,7 +170,6 @@
     <ClCompile Include="..\src\mutex.cpp" />
     <ClCompile Include="..\src\system.cpp" />
     <ClCompile Include="..\src\type_cast.cpp" />
-    <ClCompile Include="..\src\type_cast_default.cpp" />
     <ClCompile Include="..\src\wrap_base.cpp" />
   </ItemGroup>
   <ItemGroup>

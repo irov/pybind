@@ -55,7 +55,7 @@ namespace pybind
 		initialize_function();
 		initialize_functor();
 
-		initialize_default_type_cast();
+		//initialize_default_type_cast();
 	}
 
 	void finalize()
@@ -69,7 +69,7 @@ namespace pybind
 		finalize_function();
 		finalize_functor();
 
-		finialize_default_type_cast();
+		//finialize_default_type_cast();
 	}
 
 	bool is_initialized()
