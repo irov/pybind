@@ -3,6 +3,8 @@
 #	include "pybind/system.hpp"
 #	include "pybind/type_cast.hpp"
 
+#	include "pybind/type_cast_default.hpp"
+
 #	include <exception>
 
 namespace pybind
@@ -110,6 +112,31 @@ namespace pybind
 				}
 
 				return true;
+			}
+		};
+
+		template<>
+		struct extract_check<float>
+		{
+			static float extract( PyObject * _obj )
+			{
+				float value;
+
+				if( pybind::detail::extract_float( _obj, value ) == false )
+				{
+					const char * repr = pybind::object_repr( _obj );
+
+					if( repr != NULL )
+					{
+						pybind::error_message( "extract from %.256s to float"
+							, repr
+							);
+					}
+
+					throw_exception();
+				}
+
+				return value;
 			}
 		};
 	}

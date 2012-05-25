@@ -25,7 +25,7 @@ namespace pybind
 		{
 			static type_cast * find()
 			{  
-				const std::type_info & tinfo =  typeid(T);
+				const std::type_info & tinfo = typeid(T);
 
 				type_cast * etype = find_type_info_extract( tinfo );
 

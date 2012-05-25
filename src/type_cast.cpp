@@ -32,7 +32,7 @@ namespace pybind
 		type_cast * find_type_info_extract( const std::type_info & _info )
 		{
 			const char * name = _info.name();
-			static std::string s_helper; 
+			static std::string s_helper;
 
 			s_helper.assign(name);
 

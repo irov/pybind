@@ -18,13 +18,19 @@ namespace pybind
 	PyObject * g_pybind_object_holder;
 
 	//////////////////////////////////////////////////////////////////////////
-	static PyTypeObject s_pod64_type;
-
+	static PyTypeObject s_pod64_type;	
 	//////////////////////////////////////////////////////////////////////////
 	struct py_pod64_object
 	{
 		PyObject_HEAD
 		char buff[64];
+	};
+	//////////////////////////////////////////////////////////////////////////
+	static PyTypeObject s_base_type;
+	//////////////////////////////////////////////////////////////////////////
+	struct py_base_object
+	{
+		PyObject_HEAD
 	};
 	//////////////////////////////////////////////////////////////////////////
 	namespace detail
@@ -33,35 +39,39 @@ namespace pybind
 		typedef std::list<PyTypeObject *> TListClassType;
 		typedef std::map<std::string, class_type_scope *> TMapTypeScope;
 		//////////////////////////////////////////////////////////////////////////
-		static TListClassType s_listClassType;
+		//static TListClassType s_listClassType;
 		static TMapTypeScope s_mapTypeScope;
 		//////////////////////////////////////////////////////////////////////////
 		bool is_class( PyObject * _obj )
 		{
-			for( TListClassType::iterator
-				it = s_listClassType.begin(),
-				it_end = s_listClassType.end();
-			it != it_end;
-			++it )
+			if( PyType_IsSubtype( _obj->ob_type, &s_base_type ) == 1 )
 			{
-				PyTypeObject * pytype_base = *it; 
-				if( _obj->ob_type == pytype_base )
-				{
-					return true;
-				}
-
-				if( PyType_IsSubtype( _obj->ob_type, pytype_base ) == 1 )
-				{
-					return true;
-				}
+				return true;
 			}
+			//for( TListClassType::iterator
+			//	it = s_listClassType.begin(),
+			//	it_end = s_listClassType.end();
+			//it != it_end;
+			//++it )
+			//{
+			//	PyTypeObject * pytype_base = *it; 
+			//	if( _obj->ob_type == pytype_base )
+			//	{
+			//		return true;
+			//	}
+
+			//	if( PyType_IsSubtype( _obj->ob_type, pytype_base ) == 1 )
+			//	{
+			//		return true;
+			//	}
+			//}
 
 			return false;
 		}
 		//////////////////////////////////////////////////////////////////////////
 		void reg_class_type( PyTypeObject * _type )
 		{
-			s_listClassType.push_back( _type );
+			//s_listClassType.push_back( _type );
 		}
 		//////////////////////////////////////////////////////////////////////////
 		void * get_class_impl( PyObject * _obj )
@@ -517,18 +527,30 @@ namespace pybind
 		PyObject * py_name = PyUnicode_InternFromString( m_name );
 #	endif
 
-		PyObject * py_bases = PyTuple_New( m_bases.size() );
-		int index = 0;
+		PyObject * py_bases;
 
-		for( TMapBases::iterator
-			it = m_bases.begin(),
-			it_end = m_bases.end();
-		it != it_end;
-		++it)
+		if( m_bases.empty() == false )
 		{
-			PyTypeObject * py_base = it->second.first->m_pytypeobject;
-			Py_INCREF( py_base );
-			PyTuple_SetItem( py_bases, index++, (PyObject*)py_base );
+			py_bases = PyTuple_New( m_bases.size() );
+			int index = 0;
+
+			for( TMapBases::iterator
+				it = m_bases.begin(),
+				it_end = m_bases.end();
+			it != it_end;
+			++it)
+			{
+				PyTypeObject * py_base = it->second.first->m_pytypeobject;
+				Py_INCREF( py_base );
+				PyTuple_SetItem( py_bases, index++, (PyObject*)py_base );
+			}
+		}
+		else
+		{
+			py_bases = PyTuple_New( 1 );
+
+			Py_INCREF( &s_base_type );
+			PyTuple_SetItem( py_bases, 0, (PyObject *)&s_base_type );
 		}
 
 		PyObject * py_dict = PyDict_New();
@@ -828,6 +850,16 @@ namespace pybind
 		{
 			printf("invalid embedding class '%s' \n", s_pod64_type.tp_name );					
 		}		
+
+		s_base_type.tp_name = "pybind_base_type";
+		s_base_type.tp_basicsize = sizeof(py_base_object);
+		s_base_type.tp_dealloc = &py_dealloc;
+		s_base_type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
+
+		if( PyType_Ready( &s_base_type ) < 0 )
+		{
+			printf("invalid embedding class '%s' \n", s_base_type.tp_name );					
+		}	
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void finalize_classes()

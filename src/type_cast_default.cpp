@@ -13,6 +13,32 @@
 
 namespace pybind
 {
+	namespace detail
+	{
+		bool extract_float( PyObject * _obj, float & _value )
+		{
+			if( PyFloat_Check( _obj ) )
+			{
+				_value = (float)PyFloat_AsDouble( _obj );
+			}
+			else if( PyLong_Check( _obj ) )
+			{
+				_value = (float)PyLong_AsLong( _obj );
+			}
+#	ifndef PYBIND_PYTHON_3
+			else if( PyInt_Check( _obj ) )
+			{
+				_value = (float)PyInt_AsLong( _obj );
+			}
+#	endif
+			else
+			{
+				return false;
+			}
+
+			return true;
+		}
+	}
 	//////////////////////////////////////////////////////////////////////////
 	struct extract_bool_type
 		: public type_cast_result<bool>
@@ -169,26 +195,9 @@ namespace pybind
 	{
 		bool apply( PyObject * _obj, float & _value ) override
 		{
-			if( PyFloat_Check( _obj ) )
-			{
-				_value = (float)PyFloat_AsDouble( _obj );
-			}
-			else if( PyLong_Check( _obj ) )
-			{
-				_value = (float)PyLong_AsLong( _obj );
-			}
-#	ifndef PYBIND_PYTHON_3
-			else if( PyInt_Check( _obj ) )
-			{
-				_value = (float)PyInt_AsLong( _obj );
-			}
-#	endif
-			else
-			{
-				return false;
-			}
+			bool result = detail::extract_float( _obj, _value );
 
-			return true;
+			return result;
 		}
 
 		PyObject * wrap( type_cast_result<float>::TCastRef _value ) override

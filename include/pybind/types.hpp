@@ -1,6 +1,6 @@
 #	pragma once
 
-#	include <string.h>
+#	include <memory.h>
 
 extern "C" 
 { 

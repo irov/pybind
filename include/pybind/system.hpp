@@ -118,7 +118,9 @@ namespace pybind
 	PYBIND_API bool tuple_resize( PyObject ** _ptuple, size_t _it );
 
 
+	PYBIND_API PyObject * object_dir( PyObject * _obj );
 	PYBIND_API const char * object_repr( PyObject * _obj );
+
 	PYBIND_API void error_message( const char * _message, ... );
 	PYBIND_API PyObject * build_value( const char * _format, ... );
 	PYBIND_API PyObject * build_value_va( const char * _format, va_list _va );

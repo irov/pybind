@@ -549,6 +549,13 @@ namespace pybind
 		return PyTuple_GetItem( _tuple, _it );
 	}
 
+	PyObject * object_dir( PyObject * _obj )
+	{
+		PyObject * py_dir = PyObject_Dir( _obj );
+
+		return py_dir;
+	}
+
 	const char * object_repr( PyObject * _obj )
 	{
 		PyObject * repr = PyObject_Repr( _obj );
@@ -561,6 +568,7 @@ namespace pybind
 		size_t size;
 		return pybind::string_to_char( repr, size );	
 	}
+
 	static void traceback_error( const char * _msg )
 	{
 		PyErr_SetString( PyExc_RuntimeError, _msg );
