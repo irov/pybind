@@ -242,7 +242,7 @@ namespace pybind
 #	ifndef PYBIND_PYTHON_3
 		return PyInt_FromLong( _value );
 #	else
-		return PyLong_FromLong( _value );/Users/yuriylevchenko/Desktop/Mengine/dependencies/pybind/include/pybind/extract.hpp
+		return PyLong_FromLong( _value );
 #	endif
 	}
 	//////////////////////////////////////////////////////////////////////////
