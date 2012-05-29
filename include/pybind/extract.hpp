@@ -75,16 +75,6 @@ namespace pybind
 	}
 
 	template<class T>
-	typename detail::extract_return<T>::type extract( PyObject * _obj )
-	{
-		typename detail::extract_return<T>::type value;
-
-		extract_value( _obj, value );
-
-		return value;
-	}
-
-	template<class T>
 	bool extract_value( PyObject * _obj, T & _value )
 	{
 		return detail::extract_check<T>::extract( _obj, _value );
@@ -100,6 +90,16 @@ namespace pybind
 	PYBIND_API bool extract_value( PyObject * _obj, std::wstring & _value );
 	PYBIND_API bool extract_value( PyObject * _obj, PyObject * & _value );
 
+    template<class T>
+	typename detail::extract_return<T>::type extract( PyObject * _obj )
+	{
+		typename detail::extract_return<T>::type value;
+        
+		extract_value( _obj, value );
+        
+		return value;
+	}
+    
 	template<class T>
 	PyObject * ptr( T _value )
 	{
