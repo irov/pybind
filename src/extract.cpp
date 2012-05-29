@@ -59,7 +59,7 @@ namespace pybind
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, size_t & _value )
+	bool extract_value( PyObject * _obj, unsigned int & _value )
 	{
 		if( PyLong_Check( _obj ) )
 		{				
@@ -80,6 +80,30 @@ namespace pybind
 			return false;
 		}
 
+		return true;
+	}
+    //////////////////////////////////////////////////////////////////////////
+	bool extract_value( PyObject * _obj, unsigned long & _value )
+	{
+		if( PyLong_Check( _obj ) )
+		{				
+			_value = (size_t)PyLong_AsUnsignedLong( _obj );
+		}
+#	ifndef PYBIND_PYTHON_3
+		else if( PyInt_Check( _obj ) )
+		{
+			_value = (size_t)PyInt_AsUnsignedLongMask( _obj );
+		}
+#	endif
+		else if( PyFloat_Check( _obj ) )
+		{				
+			_value = (size_t)PyFloat_AsDouble( _obj );
+		}
+		else
+		{
+			return false;
+		}
+        
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -218,11 +242,20 @@ namespace pybind
 #	ifndef PYBIND_PYTHON_3
 		return PyInt_FromLong( _value );
 #	else
-		return PyLong_FromLong( _value );
+		return PyLong_FromLong( _value );/Users/yuriylevchenko/Desktop/Mengine/dependencies/pybind/include/pybind/extract.hpp
 #	endif
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr( size_t _value )
+	PyObject * ptr( unsigned int _value )
+	{
+#	ifndef PYBIND_PYTHON_3
+		return PyInt_FromLong( _value );
+#	else
+		return PyLong_FromLong( _value );
+#	endif
+	}
+    //////////////////////////////////////////////////////////////////////////
+	PyObject * ptr( unsigned long _value )
 	{
 #	ifndef PYBIND_PYTHON_3
 		return PyInt_FromLong( _value );
