@@ -77,9 +77,9 @@ namespace pybind
 	template<class T>
 	typename detail::extract_return<T>::type extract( PyObject * _obj )
 	{
-		detail::extract_return<T>::type value;
+		typename detail::extract_return<T>::type value;
 
-		pybind::extract_value( _obj, value );
+		extract_value( _obj, value );
 
 		return value;
 	}
