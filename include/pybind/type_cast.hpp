@@ -167,7 +167,6 @@ namespace pybind
 		type_cast_result()
 			: type_cast_result_cr<T, V>()
 		{
-			registration_type_cast<T>( this );
 		}
 
 	public:

@@ -27,12 +27,11 @@ namespace pybind
 		typedef B bases_type;
 
 	public:
-		virtual void setup_extract() = 0;
-
-	public:
 		base_( const char * _name, pybind_new _pynew, pybind_destructor _pydestructor, PyObject * _module )
 		{
-			class_type_scope * scope = class_core::create_new_type_scope( class_info<C>(), _name);
+			const std::type_info & cinfo = class_info<C>();
+
+			class_type_scope * scope = class_core::create_new_type_scope( cinfo, _name);
 
 			setup_bases( scope );
 
@@ -299,7 +298,9 @@ namespace pybind
 
 		static class_type_scope * scope()
 		{
-			return detail::get_class_type_scope( class_info<C>() );
+			const std::type_info & cinfo = class_info<C>();
+
+			return detail::get_class_type_scope( cinfo );
 		}
 	};
 
@@ -397,10 +398,14 @@ namespace pybind
 		}
 
 	protected:
-		void setup_extract() override
+		typedef extract_class_type_ptr<C, false> extract_type_ptr;
+
+	protected:
+		void setup_extract()
 		{
-			static extract_class_type_ptr<C, false> s_registartor_ptr;
-			//static extract_class_type_ref<C, true> s_registartor_ref;
+			//static extract_class_type_ptr<C, false> s_registartor_ptr;
+			////static extract_class_type_ref<C, true> s_registartor_ref;
+			pybind::registration_type_cast<C>( new extract_type_ptr );
 		}
 	};
 
@@ -408,11 +413,15 @@ namespace pybind
 	class proxy_
 		: public base_<C,B>
 	{
+	public:
+		typedef extract_class_type_ptr<C, false> extract_type_ptr;
+
 	protected:
-		void setup_extract() override
+		void setup_extract()
 		{
-			static extract_class_type_ptr<C, false> s_registartor_ptr;
-			//static extract_class_type_ref<C, true> s_registartor_ref;
+			//static extract_class_type_ptr<C, false> s_registartor_ptr;
+			////static extract_class_type_ref<C, true> s_registartor_ref;
+			pybind::registration_type_cast<C>( new extract_type_ptr );
 		}
 
 	public:
@@ -435,11 +444,15 @@ namespace pybind
 	class struct_
 		: public base_<C,B>
 	{
+	public:
+		typedef extract_class_type_ref<C, true> extract_type_ref;
+
 	protected:
-		void setup_extract() override
+		void setup_extract()
 		{
-			//static extract_class_type_ptr<C, false> s_registartor_ptr;
-			static extract_class_type_ref<C, true> s_registartor_ref;
+			////static extract_class_type_ptr<C, false> s_registartor_ptr;
+			//static extract_class_type_ref<C, true> s_registartor_ref;
+			pybind::registration_type_cast<C>( new extract_type_ref );
 		}
 
 	public:
@@ -463,7 +476,7 @@ namespace pybind
 		: public base_<C,B>
 	{
 	public:
-		typedef extract_class_type_ptr<C, false> extract_ptr_type;
+		typedef extract_class_type_ptr<C, false> extract_type_ptr;
 
 	public:
 		interface_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
@@ -476,9 +489,9 @@ namespace pybind
 		}
 
 	protected:
-		void setup_extract() override
+		void setup_extract()
 		{
-			static extract_ptr_type s_registartor_ptr;
+			pybind::registration_type_cast<C>( new extract_type_ptr );
 		}
 	};
 }
