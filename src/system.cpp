@@ -668,11 +668,19 @@ namespace pybind
 		return detail::is_wrap( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void type_initialize( PyObject * _value )
+	bool type_initialize( PyObject * _value )
 	{
 		PyTypeObject * type = (PyTypeObject *)_value;
 		class_type_scope * scope = detail::get_class_scope( type );
+
+		if( scope == 0 )
+		{
+			return false;
+		}
+
 		scope->type_initialize( type );
+
+		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool is_none( PyObject * _none )
