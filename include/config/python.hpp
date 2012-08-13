@@ -5,6 +5,7 @@
 #	include "../../Python/Include/Python.h"
 #	include "../../Python/Include/structmember.h"
 #	include "../../Python/Include/osdefs.h"
+#	include "../../Python/Python/importdl.h"
 #	else
 #	include "../../Python32/include/Python.h"
 #	include "../../Python32/include/structmember.h"
