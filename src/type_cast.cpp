@@ -142,4 +142,20 @@ namespace pybind
 
 		return true;
 	}
+
+    //void finialize_type_cast()
+    //{
+        //TMapExtractTypes & extractTypes = detail::mapExtractTypesInstance();
+
+        //for( detail::TMapExtractTypes::iterator
+        //    it = extractTypes.begin(),
+        //    it_end = extractTypes.end();
+        //it != it_end;
+        //++it )
+        //{
+        //    type_cast * tc = it->second;
+
+        //    delete tc;
+        //}
+    //}
 }
