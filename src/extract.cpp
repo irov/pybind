@@ -159,8 +159,7 @@ namespace pybind
 	{
 		if( pybind::string_check( _obj ) == false )
 		{
-			size_t size;
-			_value = pybind::string_to_char( _obj, size );
+			_value = pybind::string_to_char( _obj );
 		}
 		else
 		{
@@ -174,18 +173,9 @@ namespace pybind
 	{
 		if( pybind::string_check( _obj ) )
 		{
-			size_t ch_size;
+			const char * ch_buff = pybind::string_to_char(_obj );			
 
-			const char * ch_buff = pybind::string_to_char(_obj, ch_size );			
-
-			if( ch_size == 0 )
-			{
-				_value.clear();
-
-				return true;
-			}
-
-			_value.assign( ch_buff, ch_size );
+			_value.assign( ch_buff );
 		}
 		else
 		{
@@ -199,18 +189,9 @@ namespace pybind
 	{
 		if( pybind::unicode_check( _obj ) )
 		{
-			size_t ch_size;
+			const wchar_t * ch_buff = pybind::unicode_to_wchar(_obj );
 
-			const wchar_t * ch_buff = pybind::unicode_to_wchar(_obj, ch_size );
-
-			if( ch_size == 0 )
-			{
-				_value.clear();
-
-				return true;
-			}
-
-			_value.assign( ch_buff, ch_size );
+			_value.assign( ch_buff );
 		}
 		else
 		{
@@ -276,18 +257,17 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * ptr( const char * _value )
 	{
-		size_t size = ::strlen(_value);
-		return pybind::string_from_char( _value, size );
+		return pybind::string_from_char( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * ptr( const std::string & _value )
 	{
-		return pybind::string_from_char( _value.c_str(), _value.size() );
+		return pybind::string_from_char_size( _value.c_str(), _value.size() );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * ptr( const std::wstring & _value )
 	{
-		return pybind::unicode_from_wchar( _value.c_str(), _value.size() );
+		return pybind::unicode_from_wchar_size( _value.c_str(), _value.size() );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * ptr( PyObject * _value )

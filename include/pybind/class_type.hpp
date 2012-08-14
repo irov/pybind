@@ -115,8 +115,8 @@ namespace pybind
 
 		PyObject * m_module;
 
-#	ifdef PYBIND_VISIT_OBJECTS
-	protected:
+#	ifdef _DEBUG
+    public:
 		void incref( PyObject * _obj );
 		void decref( PyObject * _obj );
 

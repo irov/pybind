@@ -172,4 +172,6 @@ namespace pybind
 	public:
 		virtual bool apply( PyObject * _obj, T & _value ) = 0;
 	};
+
+    PYBIND_API void finialize_type_cast();
 }

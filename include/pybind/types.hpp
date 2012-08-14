@@ -30,10 +30,12 @@ namespace pybind
 	typedef void * (*pybind_new)( class_type_scope * _scope, PyObject * _args, PyObject * _kwds );
 	typedef void (*pybind_destructor)( void * impl );
 
+#   ifdef _DEBUG
 	class pybind_visit_objects
 	{
 	public:
 		virtual void visit( PyObject * _obj ) = 0;
 	};
+#   endif
 }
 
