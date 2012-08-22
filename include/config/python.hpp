@@ -1,6 +1,7 @@
 #	pragma once
 
 #	define Py_USING_UNICODE
+
 #	ifndef PYBIND_PYTHON_3
 #	include "../../Python/Include/Python.h"
 #	include "../../Python/Include/structmember.h"
