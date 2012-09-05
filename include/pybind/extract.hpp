@@ -88,7 +88,6 @@ namespace pybind
 	PYBIND_API bool extract_value( PyObject * _obj, double & _value );
 	PYBIND_API bool extract_value( PyObject * _obj, const char * & _value );
 	PYBIND_API bool extract_value( PyObject * _obj, std::string & _value );
-	PYBIND_API bool extract_value( PyObject * _obj, std::wstring & _value );
 	PYBIND_API bool extract_value( PyObject * _obj, PyObject * & _value );
 
     template<class T>
@@ -147,7 +146,6 @@ namespace pybind
 	PYBIND_API PyObject * ptr( double _value );
 	PYBIND_API PyObject * ptr( const char * _value );
 	PYBIND_API PyObject * ptr( const std::string & _value );
-	PYBIND_API PyObject * ptr( const std::wstring & _value );
 	PYBIND_API PyObject * ptr( PyObject * _value );
 }
 

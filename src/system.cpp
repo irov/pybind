@@ -792,12 +792,12 @@ namespace pybind
 		return PyUnicode_CheckExact(_unicode);
 	}
 	//////////////////////////////////////////////////////////////////////////
-	wchar_t * unicode_to_wchar( PyObject * _unicode )
+	pybind_unicode_t * unicode_to_wchar( PyObject * _unicode )
 	{
 		return PyUnicode_AsUnicode( _unicode );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * unicode_from_wchar_size( const wchar_t * _wchar, size_t _size )
+	PyObject * unicode_from_wchar_size( const pybind_unicode_t * _wchar, size_t _size )
 	{
 		PyObject * py_unicode = PyUnicode_FromUnicode( _wchar, _size );
 

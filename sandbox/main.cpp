@@ -62,7 +62,7 @@ public:
 
 void main()
 {
-	pybind::initialize(false);
+	pybind::initialize(false, false);
 
 	PyObject * module = pybind::module_init("MyModule");
 
