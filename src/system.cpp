@@ -574,19 +574,19 @@ namespace pybind
 	static void traceback_error( const char * _msg )
 	{
 		PyErr_SetString( PyExc_RuntimeError, _msg );
-		PyObject *error = PyErr_Occurred();
-		if( error )
-		{
-			PyErr_Print();
+		//PyObject *error = PyErr_Occurred();
+		//if( error )
+		//{
+		//	PyErr_Print();
 
-			PyObject *ptype, *pvalue, *ptraceback;
-			PyErr_Fetch(&ptype, &pvalue, &ptraceback);
+		//	PyObject *ptype, *pvalue, *ptraceback;
+		//	PyErr_Fetch(&ptype, &pvalue, &ptraceback);
 
-			PyObject * sysModule = PyImport_AddModule( "sys" );
-			PyObject * handle = PyObject_GetAttrString( sysModule, "stderr" );
+		//	PyObject * sysModule = PyImport_AddModule( "sys" );
+		//	PyObject * handle = PyObject_GetAttrString( sysModule, "stderr" );
 
-			PyTraceBack_Print( ptraceback, handle );			
-		}
+		//	PyTraceBack_Print( ptraceback, handle );			
+		//}
 	}
 
 	void error_message( const char * _message, ... )

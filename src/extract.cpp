@@ -159,7 +159,14 @@ namespace pybind
 	{
 		if( pybind::string_check( _obj ) == false )
 		{
-			_value = pybind::string_to_char( _obj );
+            const char * ch_buff = pybind::string_to_char( _obj );
+
+            if( ch_buff == 0 )
+            {
+                return false;
+            }
+
+			_value = ch_buff;
 		}
 		else
 		{
@@ -174,6 +181,11 @@ namespace pybind
 		if( pybind::string_check( _obj ) )
 		{
 			const char * ch_buff = pybind::string_to_char(_obj );			
+
+            if( ch_buff == 0 )
+            {
+                return false;
+            }
 
 			_value.assign( ch_buff );
 		}

@@ -54,15 +54,22 @@ namespace pybind
 				{
 					pybind::check_error();
 
-					if( const char * repr = pybind::object_repr( _obj ) )
-					{
-						const char * type_name = tinfo.name();
+                    const char * type_name = tinfo.name();
+                    const char * repr_obj = pybind::object_repr( _obj );
 
+					if( repr_obj != 0 )
+					{
 						pybind::error_message( "extract from %.256s to %.256s"
-							, repr
+							, repr_obj
 							, type_name
 							);
 					}
+                    else
+                    {
+                        pybind::error_message( "extract from xxxx to %.256s"
+                            , type_name
+                            );
+                    }
 
 					throw_exception();
 
