@@ -157,7 +157,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, const char *& _value )
 	{
-		if( pybind::string_check( _obj ) == false )
+		if( pybind::string_check( _obj ) == true )
 		{
             const char * ch_buff = pybind::string_to_char( _obj );
 
@@ -178,7 +178,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, std::string & _value )
 	{
-		if( pybind::string_check( _obj ) )
+		if( pybind::string_check( _obj ) == true )
 		{
 			const char * ch_buff = pybind::string_to_char(_obj );			
 
