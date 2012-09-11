@@ -91,7 +91,7 @@ namespace pybind
 	{
 		class_type_scope * scope = detail::get_class_type_scope( _info );
 
-		scope->add_convert( _iadapter );
+		scope->set_convert( _iadapter );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_core::def_method( const char * _name, method_adapter_interface * _iadapter, const std::type_info & _info )
@@ -112,28 +112,37 @@ namespace pybind
 	{
 		class_type_scope * scope = detail::get_class_type_scope( _info );
 
-		scope->add_repr( _iadapter );
+		scope->set_repr( _iadapter );
 	}
+    //////////////////////////////////////////////////////////////////////////
+    void class_core::def_compare(
+        compare_adapter_interface * _iadapter,
+        const std::type_info & _info )
+    {
+        class_type_scope * scope = detail::get_class_type_scope( _info );
+
+        scope->set_compare( _iadapter );
+    }
 	//////////////////////////////////////////////////////////////////////////
 	void class_core::def_getattro( method_adapter_interface * _iadapter,	const std::type_info & _info )
 	{
 		class_type_scope * scope = detail::get_class_type_scope( _info );
 
-		scope->add_getattro( _iadapter );		
+		scope->set_getattro( _iadapter );		
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_core::def_mapping( method_adapter_interface * _iadapter, const std::type_info & _info )
 	{
 		class_type_scope * scope = detail::get_class_type_scope( _info );
 
-		scope->add_mapping( _iadapter );
+		scope->set_mapping( _iadapter );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_core::def_sequence( method_adapter_interface * _iadapter, const std::type_info & _info )
 	{
 		class_type_scope * scope = detail::get_class_type_scope( _info );
 
-		scope->add_sequence( _iadapter );
+		scope->set_sequence( _iadapter );
 	}	
 	//////////////////////////////////////////////////////////////////////////
 	void class_core::add_base_to_scope( class_type_scope * _scope, const char * _name, const std::type_info & _base, pybind_metacast cast )

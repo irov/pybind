@@ -20,6 +20,7 @@ namespace pybind
 	class member_adapter_interface;
 	class convert_adapter_interface;
 	class repr_adapter_interface;
+    class compare_adapter_interface;
 	
 	class constructor;
 
@@ -64,18 +65,18 @@ namespace pybind
 		void def_init( constructor * _ctr );
 
 		void add_method( const char * _name, method_adapter_interface * _ifunc );
-
 		void add_member( const char * _name, member_adapter_interface * _imember );
+        void add_base( const char * _name, class_type_scope * _base, pybind_metacast _cast );
 
-		void add_convert( convert_adapter_interface * _iconvert );
+		void set_convert( convert_adapter_interface * _iconvert );
 		convert_adapter_interface * get_convert();
 
-		void add_repr( repr_adapter_interface * _irepr );
-		void add_getattro( method_adapter_interface * _igetattro );
-		void add_mapping( method_adapter_interface * _imapping );
-		void add_sequence( method_adapter_interface * _isequence );
-
-		void add_base( const char * _name, class_type_scope * _base, pybind_metacast _cast );
+		void set_repr( repr_adapter_interface * _irepr );
+        void set_compare( compare_adapter_interface * _iadapter );
+		void set_getattro( method_adapter_interface * _igetattro );
+		void set_mapping( method_adapter_interface * _imapping );
+		void set_sequence( method_adapter_interface * _isequence );
+        
 
 		PyObject * create_holder( void * _impl );
 		PyObject * create_impl( void * _impl );
@@ -103,6 +104,7 @@ namespace pybind
 
 		convert_adapter_interface * m_convert;
 		repr_adapter_interface * m_repr;
+        compare_adapter_interface * m_compare;
 		method_adapter_interface * m_getattro;
 
 		method_adapter_interface * m_sequence;

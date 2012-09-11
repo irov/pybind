@@ -9,6 +9,7 @@
 #	include "pybind/method_adapter.hpp"
 #	include "pybind/member_adapter.hpp"
 #	include "pybind/convert_adapter.hpp"
+#   include "pybind/compare_adapter.hpp"
 #	include "pybind/repr_adapter.hpp"
 #	include "pybind/type_cast.hpp"
 
@@ -70,7 +71,8 @@ namespace pybind
 			constructor * ctr = 
 				new constructor_params<C, init<C0,C1,C2,C3,C4,C5> >();
 
-			class_core::def_init( scope(), ctr );
+            class_type_scope * scope = get_scope();
+			class_core::def_init( scope, ctr );
 
 			return *this;
 		}
@@ -210,6 +212,20 @@ namespace pybind
 			return *this;
 		}
 
+        template<class F>
+        base_ & def_compare( F _equal )
+        {
+            compare_adapter_interface * iadapter =
+                new compare_adapter<C, F>( _equal );
+
+            class_core::def_compare(
+                iadapter,
+                class_info<C>()
+                );
+
+            return *this;
+        }
+
 		template<class F>
 		base_ & def_getattro( F _fn )
 		{
@@ -278,7 +294,8 @@ namespace pybind
 		static void *
 			new_( pybind::class_type_scope * _scope, PyObject * _args, PyObject * _kwds )
 		{
-			void * impl = class_core::construct( scope(), _args );
+            class_type_scope * scope = get_scope();
+			void * impl = class_core::construct( scope, _args );
 
 			return impl;
 		}
@@ -296,7 +313,7 @@ namespace pybind
 			delete obj;
 		}
 
-		static class_type_scope * scope()
+		static class_type_scope * get_scope()
 		{
 			const std::type_info & cinfo = class_info<C>();
 
@@ -304,9 +321,9 @@ namespace pybind
 		}
 	};
 
-	template<class C, bool V> 
+	template<class C> 
 	struct extract_class_type_ptr
-		: public type_cast_result<C *, V>
+		: public type_cast_result<C *>
 	{
 		bool apply( PyObject * _obj, C *& _value ) override
 		{
@@ -328,16 +345,16 @@ namespace pybind
 			return true;
 		}
 
-		PyObject * wrap( C * _class ) override
+        PyObject * wrap( typename type_cast_result<C *>::TCastRef _class ) override
 		{
 			const std::type_info & tinfo = class_info<C>();
 			return class_core::create_holder( tinfo, (void *)_class );
 		}
 	};
 
-	template<class C, bool V>
+	template<class C>
 	struct extract_class_type_ref
-		: public type_cast_result<C, V>
+		: public type_cast_result<C>
 	{
 		bool apply( PyObject * _obj, C & _value ) override
 		{
@@ -394,11 +411,12 @@ namespace pybind
 			constructor * empty_ctr = 
 				new constructor_params<C, init<> >();
 
-			class_core::def_init( base_<C,B>::scope(), empty_ctr );
+            class_type_scope * scope = base_<C,B>::get_scope();
+			class_core::def_init( scope, empty_ctr );
 		}
 
 	protected:
-		typedef extract_class_type_ptr<C, false> extract_type_ptr;
+		typedef extract_class_type_ptr<C> extract_type_ptr;
 
 	protected:
 		void setup_extract()
@@ -414,7 +432,7 @@ namespace pybind
 		: public base_<C,B>
 	{
 	public:
-		typedef extract_class_type_ptr<C, false> extract_type_ptr;
+		typedef extract_class_type_ptr<C> extract_type_ptr;
 
 	protected:
 		void setup_extract()
@@ -435,8 +453,9 @@ namespace pybind
 
 			constructor * empty_ctr = 
 				new constructor_params<C, init<> >();
-
-			class_core::def_init( base_<C,B>::scope(), empty_ctr );
+            
+            class_type_scope * scope = base_<C,B>::get_scope();
+			class_core::def_init( scope, empty_ctr );
 		}
 	};
 
@@ -445,7 +464,7 @@ namespace pybind
 		: public base_<C,B>
 	{
 	public:
-		typedef extract_class_type_ref<C, true> extract_type_ref;
+		typedef extract_class_type_ref<C> extract_type_ref;
 
 	protected:
 		void setup_extract()
@@ -467,7 +486,8 @@ namespace pybind
 			constructor * empty_ctr = 
 				new constructor_params<C, init<> >();
 
-			class_core::def_init( base_<C,B>::scope(), empty_ctr );
+            class_type_scope * scope = base_<C,B>::get_scope();
+			class_core::def_init( scope, empty_ctr );
 		}
 	};
 
@@ -476,7 +496,7 @@ namespace pybind
 		: public base_<C,B>
 	{
 	public:
-		typedef extract_class_type_ptr<C, false> extract_type_ptr;
+		typedef extract_class_type_ptr<C> extract_type_ptr;
 
 	public:
 		interface_( const char * _name, bool external_extract = true, PyObject * _module = 0 )

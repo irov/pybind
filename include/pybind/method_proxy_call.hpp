@@ -155,6 +155,9 @@ namespace pybind
 			}
 			catch( const pybind_exception & )
 			{
+                error_message("invalid proxy method call '%s'\n"
+                    , _tag
+                    );
 			}
 
 			return 0;			

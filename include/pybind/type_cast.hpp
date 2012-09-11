@@ -137,39 +137,15 @@ namespace pybind
 		bool type_info_cast( PyObject * _obj, const std::type_info & _tinfo, const std::type_info & _tptrinfo, void ** _impl );
 	};
 
-	template<class T, bool V> 
-	class type_cast_result_cr
-		: public type_cast
-	{
-	public:
-		typedef const T & TCastRef;
-
-	public:
-		virtual PyObject * wrap( const T & t ) = 0;
-	};
-
-	template<class T> 
-	class type_cast_result_cr<T, false>
-		: public type_cast
-	{
-	public:
-		typedef T TCastRef;
-
-	public:
-		virtual PyObject * wrap( T t ) = 0;		
-	};
-
-	template<class T, bool V = (sizeof(T) > 4)>
+	template<class T>
 	class type_cast_result
-		: public type_cast_result_cr<T, V>
+		: public type_cast
 	{
-	public:
-		type_cast_result()
-			: type_cast_result_cr<T, V>()
-		{
-		}
+    public:
+        typedef const T & TCastRef;
 
 	public:
+        virtual PyObject * wrap( TCastRef t ) = 0;
 		virtual bool apply( PyObject * _obj, T & _value ) = 0;
 	};
 

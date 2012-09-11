@@ -12,6 +12,7 @@ namespace pybind
 	class method_adapter_interface;
 	class member_adapter_interface;
 	class repr_adapter_interface;
+    class compare_adapter_interface;
 
 	template<class T>
 	const std::type_info & class_info()
@@ -65,6 +66,10 @@ namespace pybind
 		static void def_repr(
 			repr_adapter_interface * _iadapter,
 			const std::type_info & _info );
+
+        static void def_compare(
+            compare_adapter_interface * _iadapter,
+            const std::type_info & _info );
 
 		static void def_getattro(
 			method_adapter_interface * _iadapter,

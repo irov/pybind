@@ -77,7 +77,7 @@ namespace pybind
 			const char * tag = this->getTag();
 			F fn = this->getFn();
 
-			PyObject *ret = function_call<F>::call( tag, fn, _args );
+			PyObject *ret = function_call<F>::call( fn, _args, tag );
 
 			return ret;
 		}

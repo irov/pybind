@@ -16,7 +16,7 @@ namespace pybind
 		size_t arity() const;
 
 	public:
-		virtual void * call( PyObject * _args ) = 0;
+		virtual void * call( PyObject * _args, const char * _tag ) = 0;
 
 	protected:
 		size_t m_arity;
@@ -112,7 +112,7 @@ namespace pybind
 		}
 
 	public:
-		void * call( PyObject * _args ) override
+		void * call( PyObject * _args, const char * _tag ) override
 		{
 			if( this->valid( _args ) == false )
 			{
@@ -125,6 +125,9 @@ namespace pybind
 			}
 			catch( const pybind_exception & )
 			{
+                error_message("invalid construct '%s'\n"
+                    , _tag
+                    );
 			}
 
 			return 0;

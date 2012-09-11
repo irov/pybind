@@ -420,7 +420,7 @@ namespace pybind
 			check_error();
 		}
 
-		Py_XDECREF( _value );
+		//Py_XDECREF( _value );
 
 		return res != -1;
 	}

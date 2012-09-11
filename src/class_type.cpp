@@ -3,6 +3,7 @@
 #	include "pybind/member_type.hpp"
 #	include "pybind/repr_adapter.hpp"
 #	include "pybind/convert_adapter.hpp"
+#	include "pybind/compare_adapter.hpp"
 #	include "pybind/constructor.hpp"
 
 #	include "pybind/system.hpp"
@@ -328,6 +329,79 @@ namespace pybind
 
 		return scope->m_repr->repr( _obj, impl, scope );
 	}
+    //////////////////////////////////////////////////////////////////////////
+    static PyObject * py_richcompare( PyObject * _obj, PyObject * _compare, int _op )
+    {
+        void * impl = pybind::detail::get_class_impl( _obj );
+
+        if( impl == 0 )
+        {
+            pybind::error_message( "pybind: compare unbind object" );
+
+            Py_IncRef(Py_NotImplemented);
+
+            return Py_NotImplemented;
+        }
+
+        class_type_scope * scope = pybind::detail::get_class_scope( _obj->ob_type );
+        
+        bool test_value = false;
+
+        PybindOperatorCompare pybind_op;
+
+        switch( _op )
+        {
+        case Py_LT:
+            {
+                pybind_op = POC_Less;
+            }break;            
+        case Py_LE:
+            {
+                pybind_op = POC_Lessequal;
+            }break;
+        case Py_EQ:
+            {
+                pybind_op = POC_Equal;
+            }break;
+        case Py_NE:
+            {
+                pybind_op = POC_Notequal;
+            }break;
+        case Py_GT:
+            {
+                pybind_op = POC_Great;
+            }break;
+        case Py_GE:
+            {
+                pybind_op = POC_Greatequal;
+            }break;
+        }
+
+        bool test_result;
+
+        try
+        {
+            if( scope->m_compare->compare( _obj, impl, scope, _compare, pybind_op, test_result ) == false )
+            {
+                return Py_NotImplemented;
+            }
+        }
+        catch( const pybind_exception & )
+        {
+            error_message("invalid compare\n"
+                );
+
+            return NULL;
+        }
+
+        PyObject * py_result;
+
+        py_result = (test_result)? Py_True : Py_False;
+
+        Py_IncRef( py_result );
+
+        return py_result;
+    }
 	//////////////////////////////////////////////////////////////////////////
 	static PyObject * py_getattro( PyObject * _obj, PyObject * _key )
 	{
@@ -455,6 +529,7 @@ namespace pybind
 		, m_pytypeobject(0)
 		, m_convert(0)
 		, m_repr(0)
+        , m_compare(0)
 		, m_getattro(0)
 		, m_mapping(0)
 		, m_sequence(0)
@@ -670,7 +745,7 @@ namespace pybind
 		Py_DECREF( py_member );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_type_scope::add_convert( convert_adapter_interface * _iconvert )
+	void class_type_scope::set_convert( convert_adapter_interface * _iconvert )
 	{
 		m_convert = _iconvert;
 	}
@@ -680,7 +755,7 @@ namespace pybind
 		return m_convert;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_type_scope::add_repr( repr_adapter_interface * _irepr )
+	void class_type_scope::set_repr( repr_adapter_interface * _irepr )
 	{
 		m_repr = _irepr;
 
@@ -688,8 +763,15 @@ namespace pybind
 
 		//PyType_Modified( m_pytypeobject );
 	}
+    //////////////////////////////////////////////////////////////////////////
+    void class_type_scope::set_compare( compare_adapter_interface * _icompare )
+    {
+        m_compare = _icompare;
+
+        m_pytypeobject->tp_richcompare = &py_richcompare;
+    }
 	//////////////////////////////////////////////////////////////////////////
-	void class_type_scope::add_getattro( method_adapter_interface * _igetattro )
+	void class_type_scope::set_getattro( method_adapter_interface * _igetattro )
 	{
 		m_getattro = _igetattro;
 
@@ -698,7 +780,7 @@ namespace pybind
 		//PyType_Modified( m_pytypeobject );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_type_scope::add_mapping( method_adapter_interface * _imapping )
+	void class_type_scope::set_mapping( method_adapter_interface * _imapping )
 	{
 		m_mapping = _imapping;
 
@@ -707,7 +789,7 @@ namespace pybind
 		//PyType_Modified( m_pytypeobject );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_type_scope::add_sequence( method_adapter_interface * _isequence )
+	void class_type_scope::set_sequence( method_adapter_interface * _isequence )
 	{
 		m_sequence = _isequence;
 		
@@ -716,7 +798,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void * class_type_scope::construct( PyObject * _args )
 	{
-		return m_pyconstructor->call( _args );
+		return m_pyconstructor->call( _args, m_type );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::def_init( constructor * _ctr )

@@ -84,7 +84,9 @@ namespace pybind
 	template<class T>
 	bool extract_value( PyObject * _obj, T & _value )
 	{
-		return detail::extract_check<T>::extract( _obj, _value );
+		bool result = detail::extract_check<T>::extract( _obj, _value );
+
+        return result;
 	}
 
 	PYBIND_API bool extract_value( PyObject * _obj, bool & _value );
