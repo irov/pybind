@@ -3,10 +3,11 @@
 #	include "pybind/exports.hpp"
 #	include "pybind/types.hpp"
 
+#   include "pybind/helper.hpp"
+
 #	include <list>
 #	include <vector>
 #	include <map>
-#	include <string>
 
 #	include <typeinfo>
 
@@ -94,7 +95,7 @@ namespace pybind
 		TVectorMethods m_methods;
 
 		typedef std::pair<class_type_scope *, pybind_metacast> TPairMetacast;
-		typedef std::map<std::string, TPairMetacast> TMapBases;
+		typedef std::map<const char *, TPairMetacast> TMapBases;
 		TMapBases m_bases;
 
 		constructor * m_pyconstructor;

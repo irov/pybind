@@ -9,6 +9,8 @@
 #	include "pybind/system.hpp"
 #	include "config/python.hpp"
 
+#   include "pybind/helper.hpp"
+
 #	include <algorithm>
 
 namespace pybind
@@ -38,7 +40,8 @@ namespace pybind
 	{
 		//////////////////////////////////////////////////////////////////////////
 		typedef std::list<PyTypeObject *> TListClassType;
-		typedef std::map<std::string, class_type_scope *> TMapTypeScope;
+        //////////////////////////////////////////////////////////////////////////
+		typedef std::map<const char *, class_type_scope *> TMapTypeScope;
 		//////////////////////////////////////////////////////////////////////////
 		//static TListClassType s_listClassType;
 		static TMapTypeScope s_mapTypeScope;
@@ -289,10 +292,7 @@ namespace pybind
 		{
 			const char * info_name = _info.name();
 
-			static std::string s_helper;
-			s_helper.assign( info_name );
-
-			TMapTypeScope::iterator it_find = s_mapTypeScope.find( s_helper );
+			TMapTypeScope::iterator it_find = s_mapTypeScope.find( info_name );
 
 			if( it_find == s_mapTypeScope.end() )
 			{
@@ -814,11 +814,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void * class_type_scope::metacast( const char * _name, void * _impl )
 	{
-		static std::string s_helper;
-
-		s_helper.assign( _name );
-
-		TMapBases::iterator it_find = m_bases.find( s_helper );
+		TMapBases::iterator it_find = m_bases.find( _name );
 
 		if( it_find != m_bases.end() )
 		{

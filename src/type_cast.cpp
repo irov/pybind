@@ -7,37 +7,37 @@
 #	include "config/python.hpp"
 #	include "pybind/system.hpp"
 
+#   include "pybind/helper.hpp"
+
 #	include <map>
-#	include <string>
 
 namespace pybind
 {
 	namespace detail
-	{
-		typedef std::map<std::string, type_cast *> TMapExtractTypes;
-
+	{        
+        //////////////////////////////////////////////////////////////////////////
+		typedef std::map<const char *, type_cast *, less_char> TMapExtractTypes;
+        //////////////////////////////////////////////////////////////////////////
 		static TMapExtractTypes & mapExtractTypesInstance()
 		{
 			static TMapExtractTypes s_mapExtractTypes;
 			return s_mapExtractTypes;
 		}
-
+        //////////////////////////////////////////////////////////////////////////
 		void register_type_info_extract( const std::type_info & _info, type_cast * _type )
-		{
-			const char * name = _info.name();
-			TMapExtractTypes & types = mapExtractTypesInstance();
+		{	
+            const char * name = _info.name();
+
+			TMapExtractTypes & types = mapExtractTypesInstance();            
 			types[name] = _type;
 		}
-
+        //////////////////////////////////////////////////////////////////////////
 		type_cast * find_type_info_extract( const std::type_info & _info )
 		{
 			const char * name = _info.name();
-			static std::string s_helper;
-
-			s_helper.assign(name);
 
 			TMapExtractTypes & types = mapExtractTypesInstance();
-			TMapExtractTypes::iterator it_find = types.find( s_helper );
+			TMapExtractTypes::iterator it_find = types.find( name );
 
 			if( it_find == types.end() )
 			{
@@ -46,7 +46,7 @@ namespace pybind
 
 			return it_find->second;
 		}
-
+        //////////////////////////////////////////////////////////////////////////
 		void error_invalid_extract( PyObject * _obj, const std::type_info & _tinfo )
 		{
 			if( const char * repr = pybind::object_repr( _obj ) )
@@ -64,7 +64,7 @@ namespace pybind
 					);
 			}
 		}
-
+        //////////////////////////////////////////////////////////////////////////
 		bool convert_object( PyObject * _obj, const std::type_info & _tinfo, void * _place )
 		{
 			class_type_scope * scope = detail::get_class_type_scope( _tinfo );
@@ -130,6 +130,7 @@ namespace pybind
 		{
 			const std::type_info & tinfo = _tptrinfo;
 			const char * name = tinfo.name();
+
 			impl = class_core::meta_cast( impl, scope, name );
 		}
 
@@ -142,7 +143,7 @@ namespace pybind
 
 		return true;
 	}
-
+    //////////////////////////////////////////////////////////////////////////
     void finialize_type_cast()
     {
         detail::TMapExtractTypes & extractTypes = detail::mapExtractTypesInstance();
