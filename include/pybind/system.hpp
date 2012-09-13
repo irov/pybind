@@ -16,7 +16,7 @@ namespace pybind
 
 	PYBIND_API void throw_exception();
 
-#	ifdef _DEBUG
+#	ifdef PYBIND_VISIT_OBJECTS
 	PYBIND_API void visit_objects( pybind_visit_objects * _visitor );
 #	endif
 

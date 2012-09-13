@@ -22,7 +22,7 @@ namespace pybind
 		throw pybind_exception();
 	}
 
-#	ifdef _DEBUG
+#	ifdef PYBIND_VISIT_OBJECTS
 	void visit_objects( pybind_visit_objects * _visitor )
 	{
 		detail::TVectorTypeScope types;

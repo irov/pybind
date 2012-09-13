@@ -490,7 +490,7 @@ namespace pybind
 
 		PyObject * py_self = detail::alloc_class( _type, _args, _kwds, impl, false );
 		
-#	ifdef _DEBUG
+#	ifdef PYBIND_VISIT_OBJECTS
         {
 		    scope->incref( py_self );
         }
@@ -501,7 +501,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	static void py_del( PyObject * _obj )
 	{
-#	ifdef _DEBUG
+#	ifdef PYBIND_VISIT_OBJECTS
         {
 		    class_type_scope * scope = pybind::detail::get_class_scope(_obj->ob_type);
 		    scope->decref( _obj );
@@ -845,7 +845,7 @@ namespace pybind
 		PyObject * py_self = pybind::detail::alloc_class( m_pytypeobject, py_args, 0, _impl, true );
 		Py_DECREF( py_args );
 
-#	ifdef _DEBUG
+#	ifdef PYBIND_VISIT_OBJECTS
         {
 		    this->incref( py_self );
         }
@@ -861,7 +861,7 @@ namespace pybind
 		PyObject * py_self = pybind::detail::alloc_class( m_pytypeobject, py_args, 0, _impl, false );
 		Py_DECREF( py_args );
 
-#	ifdef _DEBUG
+#	ifdef PYBIND_VISIT_OBJECTS
         {
 		    this->incref( py_self );
         }
@@ -877,7 +877,7 @@ namespace pybind
 		PyObject * py_self = pybind::detail::alloc_struct( m_pytypeobject, py_args, 0, _impl );
 		Py_DECREF( py_args );
 
-#	ifdef _DEBUG
+#	ifdef PYBIND_VISIT_OBJECTS
         {
 		    this->incref( py_self );
         }
@@ -885,7 +885,7 @@ namespace pybind
 
 		return py_self;
 	}
-#	ifdef _DEBUG
+#	ifdef PYBIND_VISIT_OBJECTS
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::incref( PyObject * _obj )
 	{
