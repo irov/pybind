@@ -3,6 +3,8 @@
 #	include "pybind/exports.hpp"
 #	include "pybind/types.hpp"
 
+#   include "pybind/class_info.hpp"
+
 namespace pybind
 {
 	class type_cast;
