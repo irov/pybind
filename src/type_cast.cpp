@@ -1,4 +1,6 @@
 #	include "pybind/type_cast.hpp"
+
+#	include "pybind/class_info.hpp"
 #	include "pybind/class_core.hpp"
 #	include "pybind/class_type.hpp"
 
@@ -7,65 +9,88 @@
 #	include "config/python.hpp"
 #	include "pybind/system.hpp"
 
-#   include "pybind/helper.hpp"
-
-#	include <map>
-
 namespace pybind
 {
 	namespace detail
 	{        
+        struct Extract
+        {
+            type_cast * cast;
+            bool setup;
+        };
         //////////////////////////////////////////////////////////////////////////
-		typedef std::map<const char *, type_cast *, less_char> TMapExtractTypes;
+		typedef std::vector<Extract> TExtractTypes;
         //////////////////////////////////////////////////////////////////////////
-		static TMapExtractTypes & mapExtractTypesInstance()
+		static TExtractTypes & extractTypesInstance()
 		{
-			static TMapExtractTypes s_mapExtractTypes;
-			return s_mapExtractTypes;
+			static TExtractTypes s_extractTypes;
+			return s_extractTypes;
 		}
         //////////////////////////////////////////////////////////////////////////
-		void register_type_info_extract( const std::type_info & _info, type_cast * _type )
+		void register_type_info_extract( size_t _info, type_cast * _type )
 		{	
-            const char * name = _info.name();
+			TExtractTypes & types = extractTypesInstance();
 
-			TMapExtractTypes & types = mapExtractTypesInstance();            
-			types[name] = _type;
+            size_t last_size = types.size();
+
+            if( types.size() <= _info )
+            {
+                types.resize( _info + 1 );
+
+                for( size_t i = last_size; i != _info; ++i )
+                {
+                    types[i].setup = false;
+                }
+            }
+
+            Extract ex;
+
+            ex.cast = _type;
+            ex.setup = true;
+
+			types[_info] = ex;
 		}
         //////////////////////////////////////////////////////////////////////////
-		type_cast * find_type_info_extract( const std::type_info & _info )
+		type_cast * find_type_info_extract( size_t _info )
 		{
-			const char * name = _info.name();
+			TExtractTypes & types = extractTypesInstance();
 
-			TMapExtractTypes & types = mapExtractTypesInstance();
-			TMapExtractTypes::iterator it_find = types.find( name );
+            if( _info >= types.size() )
+            {
+                return 0;
+            }
 
-			if( it_find == types.end() )
+            Extract & ex = types[_info];
+
+			if( ex.setup == false )
 			{
 				return 0;
 			}
 
-			return it_find->second;
+			return ex.cast;
 		}
         //////////////////////////////////////////////////////////////////////////
-		void error_invalid_extract( PyObject * _obj, const std::type_info & _tinfo )
+		void error_invalid_extract( PyObject * _obj, size_t _tinfo )
 		{
+            const char * typeinfo_name = detail::get_class_type_info( _tinfo );
+
 			if( const char * repr = pybind::object_repr( _obj ) )
-			{
+			{          
 				pybind::error_message( "invalid extract %s from %.256s"
-					, _tinfo.name()
+					, typeinfo_name
 					, repr
 					);
 			}
 			else
 			{
 				pybind::error_message( "invalid extract %s from unknown object type %s"
-					, _tinfo.name()
+					, typeinfo_name
 					, _obj->ob_type->tp_name
 					);
 			}
 		}
         //////////////////////////////////////////////////////////////////////////
-		bool convert_object( PyObject * _obj, const std::type_info & _tinfo, void * _place )
+		bool convert_object( PyObject * _obj, size_t _tinfo, void * _place )
 		{
 			class_type_scope * scope = detail::get_class_type_scope( _tinfo );
 
@@ -81,7 +106,7 @@ namespace pybind
 			return result;
 		}
 		//////////////////////////////////////////////////////////////////////////
-		bool instance_of_type( PyObject * _obj, const std::type_info & _tinfo )
+		bool instance_of_type( PyObject * _obj, size_t _tinfo )
 		{
 			if( detail::is_class( _obj ) == false )
 			{
@@ -108,7 +133,7 @@ namespace pybind
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool type_cast::type_info_cast( PyObject * _obj, const std::type_info & _tinfo, const std::type_info & _tptrinfo, void ** _impl )
+	bool type_cast::type_info_cast( PyObject * _obj, size_t _tinfo, size_t _tptrinfo, void ** _impl )
 	{
 		if( detail::is_class( _obj ) == false )
 		{
@@ -128,10 +153,7 @@ namespace pybind
 
 		if( cur_scope != scope )
 		{
-			const std::type_info & tinfo = _tptrinfo;
-			const char * name = tinfo.name();
-
-			impl = class_core::meta_cast( impl, scope, name );
+			impl = class_core::meta_cast( impl, scope, _tptrinfo );
 		}
 
 		if( impl == 0 )
@@ -146,17 +168,17 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void finialize_type_cast()
     {
-        detail::TMapExtractTypes & extractTypes = detail::mapExtractTypesInstance();
+        detail::TExtractTypes & extractTypes = detail::extractTypesInstance();
 
-        for( detail::TMapExtractTypes::iterator
+        for( detail::TExtractTypes::iterator
             it = extractTypes.begin(),
             it_end = extractTypes.end();
         it != it_end;
         ++it )
         {
-            type_cast * tc = it->second;
+            detail::Extract & tc = *it;
 
-            delete tc;
+            delete tc.cast;
         }
     }
 }

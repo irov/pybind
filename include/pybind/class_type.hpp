@@ -3,11 +3,8 @@
 #	include "pybind/exports.hpp"
 #	include "pybind/types.hpp"
 
-#   include "pybind/helper.hpp"
-
 #	include <list>
 #	include <vector>
-#	include <map>
 
 #	include <typeinfo>
 
@@ -34,14 +31,14 @@ namespace pybind
 		PYBIND_API void wrap( PyObject * _obj, void * _impl, bool _holder );
 		PYBIND_API bool is_wrap( PyObject * _obj );
 
-		PYBIND_API void * check_registred_class( PyObject * _obj, const std::type_info & _info );
+		PYBIND_API void * check_registred_class( PyObject * _obj, size_t _info );
 
 		PYBIND_API PyObject * alloc_class( PyTypeObject * _type, PyObject * _args, PyObject * _kwds, void * _impl, bool _holder );
 
 		PYBIND_API void reg_class_type( PyTypeObject * _type );
 
-		PYBIND_API void reg_class_type_scope( const std::type_info & _info, class_type_scope * _scope );
-		PYBIND_API class_type_scope * get_class_type_scope( const std::type_info & _info );
+		PYBIND_API void reg_class_type_scope( size_t _info, class_type_scope * _scope );
+		PYBIND_API class_type_scope * get_class_type_scope( size_t _info );
 
 		typedef std::vector<class_type_scope *> TVectorTypeScope;
 		PYBIND_API void get_types_scope( TVectorTypeScope & _types );
@@ -50,7 +47,7 @@ namespace pybind
 	class class_type_scope
 	{
 	public:
-		class_type_scope( const char * _name, const char * _type_name );
+		class_type_scope( const char * _name, size_t _type_name );
 		~class_type_scope();
 
 	public:
@@ -58,7 +55,7 @@ namespace pybind
 
 	public:
 		const char * get_name() const;
-		const char * get_type() const;
+		size_t get_type() const;
 
 		void set_module( PyObject * _module );
 
@@ -67,7 +64,7 @@ namespace pybind
 
 		void add_method( const char * _name, method_adapter_interface * _ifunc );
 		void add_member( const char * _name, member_adapter_interface * _imember );
-        void add_base( const char * _name, class_type_scope * _base, pybind_metacast _cast );
+        void add_base( size_t _name, class_type_scope * _base, pybind_metacast _cast );
 
 		void set_convert( convert_adapter_interface * _iconvert );
 		convert_adapter_interface * get_convert();
@@ -83,7 +80,7 @@ namespace pybind
 		PyObject * create_impl( void * _impl );
 		PyObject * create_pod( void ** _impl );
 
-		void * metacast( const char * name, void * _impl );
+		void * metacast( size_t name, void * _impl );
 		void unwrap( PyObject * _obj );
 		void type_initialize( PyTypeObject * _type );
 
@@ -94,9 +91,15 @@ namespace pybind
 		typedef std::list<const char *> TVectorMethods;
 		TVectorMethods m_methods;
 
-		typedef std::pair<class_type_scope *, pybind_metacast> TPairMetacast;
-		typedef std::map<const char *, TPairMetacast> TMapBases;
-		TMapBases m_bases;
+        struct Metacast
+        {
+            bool setup;
+		    class_type_scope * scope;
+            pybind_metacast cast;
+        };
+
+		typedef std::vector<Metacast> TBases;
+		TBases m_bases;
 
 		constructor * m_pyconstructor;
 
@@ -112,7 +115,7 @@ namespace pybind
 		method_adapter_interface * m_mapping;
 
 		const char * m_name;
-		const char * m_type;
+		size_t m_type;
 
 		PyTypeObject * m_pytypeobject;
 

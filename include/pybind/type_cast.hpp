@@ -2,7 +2,6 @@
 
 #	include "pybind/exports.hpp"
 #	include "pybind/types.hpp"
-#	include <typeinfo>
 
 namespace pybind
 {
@@ -10,13 +9,13 @@ namespace pybind
 
 	namespace detail
 	{
-		PYBIND_API void register_type_info_extract( const std::type_info & _info, type_cast * _type );
-		PYBIND_API type_cast * find_type_info_extract( const std::type_info & _info );
+		PYBIND_API void register_type_info_extract( size_t _info, type_cast * _type );
+		PYBIND_API type_cast * find_type_info_extract( size_t _info );
 
-		PYBIND_API void error_invalid_extract( PyObject * _obj, const std::type_info & _tinfo );
-		PYBIND_API bool convert_object( PyObject * _obj, const std::type_info & _tinfo, void * _place );
+		PYBIND_API void error_invalid_extract( PyObject * _obj, size_t _tinfo );
+		PYBIND_API bool convert_object( PyObject * _obj, size_t _tinfo, void * _place );
 
-		PYBIND_API bool instance_of_type( PyObject * _obj, const std::type_info & tinfo );
+		PYBIND_API bool instance_of_type( PyObject * _obj, size_t tinfo );
 
 		template<class T> struct type_down_cast;
 
@@ -25,9 +24,9 @@ namespace pybind
 		{
 			static type_cast * find()
 			{  
-				const std::type_info & tinfo = typeid(T);
+				size_t id = class_info<T>();
 
-				type_cast * etype = find_type_info_extract( tinfo );
+				type_cast * etype = find_type_info_extract( id );
 
 				if( etype == 0 )
 				{
@@ -105,9 +104,9 @@ namespace pybind
 	template<class T>
 	bool instance_of( PyObject * _obj )
 	{
-		const std::type_info & tinfo = typeid(T);
+		size_t id = class_info<T>();
 
-		bool result = detail::instance_of_type( _obj, tinfo );
+		bool result = detail::instance_of_type( _obj, id );
 
 		return result;
 	}
@@ -116,9 +115,9 @@ namespace pybind
 	template<class T>
 	void registration_type_cast( type_cast * _type )
 	{
-		const std::type_info & tinfo = typeid(T);
+		size_t id = class_info<T>();
 
-		detail::register_type_info_extract( tinfo, _type );
+		detail::register_type_info_extract( id, _type );
 	}
 
 
@@ -134,7 +133,7 @@ namespace pybind
 		}
 
 	protected:
-		bool type_info_cast( PyObject * _obj, const std::type_info & _tinfo, const std::type_info & _tptrinfo, void ** _impl );
+		bool type_info_cast( PyObject * _obj, size_t _tinfo, size_t _tptrinfo, void ** _impl );
 	};
 
 	template<class T>

@@ -23,11 +23,8 @@ namespace pybind
 		member_adapter( const char * _name, A C:: * _member )
 			: m_member(_member)
 		{
-			const std::type_info & class_info = typeid(C*);
-			m_class_name = class_info.name();
-
-			const std::type_info & scope_info = typeid(C);
-			m_scope_name = scope_info.name();
+            m_class_name = class_info<C*>();
+            m_scope_name = class_info<C>();
 		}
 
 	public:
@@ -52,8 +49,8 @@ namespace pybind
 	protected:
 		A C:: * m_member;
 
-		const char * m_class_name;
-		const char * m_scope_name;
+		size_t m_class_name;
+		size_t m_scope_name;
 	};
 	//////////////////////////////////////////////////////////////////////////
 	template<class C, class FG, class FS>
@@ -65,11 +62,8 @@ namespace pybind
 			: m_get(_get)
 			, m_set(_set)
 		{
-			const std::type_info & class_info = typeid(C*);
-			m_class_name = class_info.name();
-
-			const std::type_info & scope_info = typeid(C);
-			m_scope_name = scope_info.name();
+			m_class_name = class_info<C*>();
+			m_scope_name = class_info<C>();
 		}
 
 	public:
@@ -99,8 +93,8 @@ namespace pybind
 		FG m_get;
 		FS m_set;
 
-		const char * m_class_name;
-		const char * m_scope_name;
+		size_t m_class_name;
+		size_t m_scope_name;
 	};
 	//////////////////////////////////////////////////////////////////////////
 	template<class C, class FG, class FS>
@@ -112,11 +106,8 @@ namespace pybind
 			: m_get(_get)
 			, m_set(_set)
 		{
-			const std::type_info & class_info = typeid(C*);
-			m_class_name = class_info.name();
-
-			const std::type_info & scope_info = typeid(C);
-			m_scope_name = scope_info.name();
+            m_class_name = class_info<C*>();
+            m_scope_name = class_info<C>();
 		}
 
 	public:
@@ -146,8 +137,8 @@ namespace pybind
 		FG m_get;
 		FS m_set;
 
-		const char * m_class_name;
-		const char * m_scope_name;
+		size_t m_class_name;
+		size_t m_scope_name;
 	};
 }
 

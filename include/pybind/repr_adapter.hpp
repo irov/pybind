@@ -19,11 +19,8 @@ namespace pybind
 		repr_adapter( F _repr )
 			: m_repr(_repr)
 		{
-			const std::type_info & class_info = typeid(C*);
-			m_class_name = class_info.name();
-
-			const std::type_info & scope_info = typeid(C);
-			m_scope_name = scope_info.name();
+            m_class_name = class_info<C*>();
+            m_scope_name = class_info<C>();
 		}
 
 	public:
@@ -39,8 +36,8 @@ namespace pybind
 	protected:
 		F m_repr;
 
-		const char * m_class_name;
-		const char * m_scope_name;
+		size_t m_class_name;
+		size_t m_scope_name;
 	};
 }
 

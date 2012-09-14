@@ -6,7 +6,7 @@
 #	include "pybind/method_proxy_call.hpp"
 #	include "pybind/function_proxy_call.hpp"
 
-#	include <typeinfo>
+#   include "pybind/class_info.hpp"
 
 namespace pybind
 {
@@ -14,7 +14,7 @@ namespace pybind
 
 	namespace detail
 	{
-		PYBIND_API void * meta_cast_scope( void * _self, const char * _scope_name, const char * _class_name, class_type_scope * scope );
+		PYBIND_API void * meta_cast_scope( void * _self, size_t _scope_name, size_t _class_name, class_type_scope * scope );
 	}
 
 	class method_adapter_interface
@@ -55,28 +55,25 @@ namespace pybind
 	{
 	protected:
 		class_adapter_helper()
-		{
-			const std::type_info & class_info = typeid(C*);
-			m_class_name = class_info.name();
-
-			const std::type_info & scope_info = typeid(C);
-			m_scope_name = scope_info.name();
+		{             
+			m_class_name = class_info<C*>();
+			m_scope_name = class_info<C>();
 		}
 
 	protected:
-		const char * getClassName() const
+		size_t getClassName() const
 		{
 			return m_class_name;
 		}
 
-		const char * getScopeName() const
+		size_t getScopeName() const
 		{
 			return m_scope_name;
 		}
 
 	protected:
-		const char * m_class_name;
-		const char * m_scope_name;
+		size_t m_class_name;
+		size_t m_scope_name;
 	};
 
 	template<class C, class F>
@@ -94,8 +91,8 @@ namespace pybind
 	public:
 		PyObject * call( void * _self, class_type_scope * _scope, PyObject * _args, PyObject * _kwds ) override
 		{
-			const char * scopeName = this->getScopeName();
-			const char * className = this->getClassName();
+			size_t scopeName = this->getScopeName();
+			size_t className = this->getClassName();
 			const char * tag = this->getTag();
 			F fn = this->getFn();
 
@@ -122,14 +119,17 @@ namespace pybind
 	public:
 		PyObject * call( void * _self, class_type_scope * _scope, PyObject * _args, PyObject * _kwds ) override
 		{
-			const char * scopeName = this->getScopeName();
-			const char * className = this->getClassName();
+			size_t scopeName = this->getScopeName();
+			size_t className = this->getClassName();
+
 			const char * tag = this->getTag();
+
 			F fn = this->getFn();
 
 			C * impl = (C*)detail::meta_cast_scope( _self, scopeName, className, _scope );
 
 			PyObject *ret = method_proxy_call<P,C,F>::call( m_proxy, impl, fn, _args, tag );
+
 			return ret;
 		}
 
@@ -152,14 +152,17 @@ namespace pybind
 	public:
 		PyObject * call( void * _self, class_type_scope * _scope, PyObject * _args, PyObject * _kwds ) override
 		{
-			const char * scopeName = this->getScopeName();
-			const char * className = this->getClassName();
+			size_t scopeName = this->getScopeName();
+			size_t className = this->getClassName();
+
 			const char * tag = this->getTag();
+
 			F fn = this->getFn();
 
 			C * impl = (C*)detail::meta_cast_scope( _self, scopeName, className, _scope );
 
 			PyObject *ret = function_proxy_call<C,F>::call( impl, fn, _args, tag );
+
 			return ret;
 		}
 	};
@@ -179,8 +182,8 @@ namespace pybind
 	public:
 		PyObject * call( void * _self, class_type_scope * _scope, PyObject * _args, PyObject * _kwds ) override
 		{
-			const char * scopeName = this->getScopeName();
-			const char * className = this->getClassName();
+			size_t scopeName = this->getScopeName();
+			size_t className = this->getClassName();
 
 			F fn = this->getFn();
 

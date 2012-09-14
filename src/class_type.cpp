@@ -9,8 +9,6 @@
 #	include "pybind/system.hpp"
 #	include "config/python.hpp"
 
-#   include "pybind/helper.hpp"
-
 #	include <algorithm>
 
 namespace pybind
@@ -41,10 +39,10 @@ namespace pybind
 		//////////////////////////////////////////////////////////////////////////
 		typedef std::list<PyTypeObject *> TListClassType;
         //////////////////////////////////////////////////////////////////////////
-		typedef std::map<const char *, class_type_scope *> TMapTypeScope;
+		typedef std::vector<class_type_scope *> TVectorTypeScope;
 		//////////////////////////////////////////////////////////////////////////
 		//static TListClassType s_listClassType;
-		static TMapTypeScope s_mapTypeScope;
+		static TVectorTypeScope s_typeScope;
 		//////////////////////////////////////////////////////////////////////////
 		bool is_class( PyObject * _obj )
 		{
@@ -230,7 +228,7 @@ namespace pybind
 			return result;
 		}
 		//////////////////////////////////////////////////////////////////////////
-		void * check_registred_class( PyObject * _obj, const std::type_info & _info )
+		void * check_registred_class( PyObject * _obj, size_t _info )
 		{
 			PyObject * py_type = PyObject_Type( _obj );
 
@@ -282,35 +280,33 @@ namespace pybind
 			return py_self;
 		}
 		//////////////////////////////////////////////////////////////////////////
-		void reg_class_type_scope( const std::type_info & _info, class_type_scope * _scope )
+		void reg_class_type_scope( size_t _info, class_type_scope * _scope )
 		{
-			const char * info_name = _info.name();
-			s_mapTypeScope[info_name] = _scope;
+            if( s_typeScope.size() <= _info )
+            {
+                s_typeScope.resize( _info + 1 );
+            }
+
+            s_typeScope[_info] = _scope;
 		}
 		//////////////////////////////////////////////////////////////////////////
-		class_type_scope * get_class_type_scope( const std::type_info & _info )
+		class_type_scope * get_class_type_scope( size_t _info )
 		{
-			const char * info_name = _info.name();
+			class_type_scope * scope = s_typeScope[_info];
 
-			TMapTypeScope::iterator it_find = s_mapTypeScope.find( info_name );
-
-			if( it_find == s_mapTypeScope.end() )
-			{
-				return 0;
-			}
-
-			return it_find->second;		
+			return scope;		
 		}
 		//////////////////////////////////////////////////////////////////////////
 		void get_types_scope( TVectorTypeScope & _types )
 		{
-			for( TMapTypeScope::iterator
-				it = s_mapTypeScope.begin(),
-				it_end = s_mapTypeScope.end();
+			for( TVectorTypeScope::iterator
+				it = s_typeScope.begin(),
+				it_end = s_typeScope.end();
 			it != it_end;
 			++it )
 			{
-				_types.push_back( it->second );
+                class_type_scope * scope = *it;
+				_types.push_back( scope );
 			}
 		}
 	}
@@ -519,7 +515,7 @@ namespace pybind
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////
-	class_type_scope::class_type_scope( const char * _name, const char * _type_name )
+	class_type_scope::class_type_scope( const char * _name, size_t _type_name )
 		: m_name(_name)
 		, m_type(_type_name)
 		, m_module(0)
@@ -608,16 +604,38 @@ namespace pybind
 
 		if( m_bases.empty() == false )
 		{
-			py_bases = PyTuple_New( m_bases.size() );
+            size_t bases_size = 0;
+            for( TBases::iterator
+                it = m_bases.begin(),
+                it_end = m_bases.end();
+            it != it_end;
+            ++it)
+            {
+                if( it->setup == false )
+                {
+                    continue;
+                }
+
+                ++bases_size;
+            }
+
+			py_bases = PyTuple_New( bases_size );
 			int index = 0;
 
-			for( TMapBases::iterator
+			for( TBases::iterator
 				it = m_bases.begin(),
 				it_end = m_bases.end();
 			it != it_end;
 			++it)
 			{
-				PyTypeObject * py_base = it->second.first->m_pytypeobject;
+                Metacast & mc = *it; 
+
+                if( mc.setup == false )
+                {
+                    continue;
+                }
+                
+				PyTypeObject * py_base = mc.scope->m_pytypeobject;
 				Py_INCREF( py_base );
 				PyTuple_SetItem( py_bases, index++, (PyObject*)py_base );
 			}
@@ -672,7 +690,7 @@ namespace pybind
 		return m_name;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	const char * class_type_scope::get_type() const
+	size_t class_type_scope::get_type() const
 	{
 		return m_type;
 	}
@@ -798,7 +816,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void * class_type_scope::construct( PyObject * _args )
 	{
-		return m_pyconstructor->call( _args, m_type );
+		return m_pyconstructor->call( _args, m_name );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::def_init( constructor * _ctr )
@@ -807,29 +825,54 @@ namespace pybind
 		m_pyconstructor = _ctr;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_type_scope::add_base( const char * _name, class_type_scope * _base, pybind_metacast _cast )
+	void class_type_scope::add_base( size_t _name, class_type_scope * _base, pybind_metacast _cast )
 	{
-		m_bases[_name] = std::make_pair( _base, _cast );
+        size_t last_size = m_bases.size();
+        if( last_size <= _name )
+        {            
+            m_bases.resize( _name + 1 );
+            
+            for( size_t i = last_size; i != _name; ++i )
+            {
+                m_bases[i].setup = false;
+            }
+        }
+
+        Metacast mc;
+        mc.scope = _base;
+        mc.cast = _cast;
+        mc.setup = true;
+
+		m_bases[_name] = mc;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void * class_type_scope::metacast( const char * _name, void * _impl )
+	void * class_type_scope::metacast( size_t _name, void * _impl )
 	{
-		TMapBases::iterator it_find = m_bases.find( _name );
+        if( _name < m_bases.size() )
+        {
+		    Metacast & mc = m_bases[_name];
 
-		if( it_find != m_bases.end() )
-		{
-			return it_find->second.second( _impl );
-		}
-		
-		for( TMapBases::iterator 
+            if( mc.setup == true )
+            {
+                return mc.cast( _impl );
+            }
+        }
+
+		for( TBases::iterator 
 			it = m_bases.begin(),
 			it_end = m_bases.end();
 		it != it_end;
 		++it)
 		{
-			TPairMetacast & pair = it->second;
-			void * down_impl = pair.second(_impl);
-			if( void * result = pair.first->metacast( _name, down_impl ) )
+            Metacast & mc = *it;
+
+            if( mc.setup == false )
+            {
+                continue;
+            }            
+
+			void * down_impl = mc.cast(_impl);
+			if( void * result = mc.scope->metacast( _name, down_impl ) )
 			{
 				return result;
 			}

@@ -156,6 +156,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\src\class_core.cpp" />
+    <ClCompile Include="..\src\class_info.cpp" />
     <ClCompile Include="..\src\class_type.cpp" />
     <ClCompile Include="..\src\constructor.cpp" />
     <ClCompile Include="..\src\extract.cpp" />
@@ -178,6 +179,7 @@
     <ClInclude Include="..\include\pybind\class.hpp" />
     <ClInclude Include="..\include\pybind\class_adapter_interface.hpp" />
     <ClInclude Include="..\include\pybind\class_core.hpp" />
+    <ClInclude Include="..\include\pybind\class_info.hpp" />
     <ClInclude Include="..\include\pybind\class_type.hpp" />
     <ClInclude Include="..\include\pybind\constructor.hpp" />
     <ClInclude Include="..\include\pybind\convert_adapter.hpp" />

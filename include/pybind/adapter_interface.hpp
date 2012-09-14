@@ -1,7 +1,5 @@
 #	pragma once
 
-#	include <typeinfo>
-
 namespace pybind
 {
 	class adapter_interface

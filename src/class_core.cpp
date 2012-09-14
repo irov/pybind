@@ -26,11 +26,10 @@ namespace pybind
 	}
 	//////////////////////////////////////////////////////////////////////////
 	class_type_scope * class_core::create_new_type_scope( 
-		const std::type_info & _info,
+		size_t _info,
 		const char * _name )
 	{
-		const char * type_name = _info.name();
-		class_type_scope * scope = new class_type_scope( _name, type_name );
+		class_type_scope * scope = new class_type_scope( _name, _info );
 
 		detail::reg_class_type_scope( _info, scope );
 		s_listClassType.push_back( scope );
@@ -47,21 +46,21 @@ namespace pybind
 		_scope->setup( _module, _pynew, _pydestructor );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * class_core::create_holder( const std::type_info & _info, void * _impl )
+	PyObject * class_core::create_holder( size_t _info, void * _impl )
 	{
 		class_type_scope * t_scope = detail::get_class_type_scope( _info );
 
 		return t_scope->create_holder( _impl );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * class_core::create_impl( const std::type_info & _info, void * _impl )
+	PyObject * class_core::create_impl( size_t _info, void * _impl )
 	{
 		class_type_scope * t_scope = detail::get_class_type_scope( _info );
 
 		return t_scope->create_impl( _impl );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * class_core::create_pod( const std::type_info & _info, void ** _impl )
+	PyObject * class_core::create_pod( size_t _info, void ** _impl )
 	{
 		class_type_scope * t_scope = detail::get_class_type_scope( _info );
 
@@ -87,72 +86,70 @@ namespace pybind
 	{
 		_scope->set_module( _module );
 	}
-	void class_core::def_convert( convert_adapter_interface * _iadapter, const std::type_info & _info )
+	void class_core::def_convert( convert_adapter_interface * _iadapter, size_t _info )
 	{
 		class_type_scope * scope = detail::get_class_type_scope( _info );
 
 		scope->set_convert( _iadapter );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_core::def_method( const char * _name, method_adapter_interface * _iadapter, const std::type_info & _info )
+	void class_core::def_method( const char * _name, method_adapter_interface * _iadapter, size_t _info )
 	{
 		class_type_scope * scope = detail::get_class_type_scope( _info );
 
 		scope->add_method( _name, _iadapter );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_core::def_member( const char * _name, member_adapter_interface * _iadapter, const std::type_info & _info )
+	void class_core::def_member( const char * _name, member_adapter_interface * _iadapter, size_t _info )
 	{
 		class_type_scope * scope = detail::get_class_type_scope( _info );
 
 		scope->add_member( _name, _iadapter );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_core::def_repr( repr_adapter_interface * _iadapter, const std::type_info & _info )
+	void class_core::def_repr( repr_adapter_interface * _iadapter, size_t _info )
 	{
 		class_type_scope * scope = detail::get_class_type_scope( _info );
 
 		scope->set_repr( _iadapter );
 	}
     //////////////////////////////////////////////////////////////////////////
-    void class_core::def_compare(
-        compare_adapter_interface * _iadapter,
-        const std::type_info & _info )
+    void class_core::def_compare( compare_adapter_interface * _iadapter, size_t _info )
     {
         class_type_scope * scope = detail::get_class_type_scope( _info );
 
         scope->set_compare( _iadapter );
     }
 	//////////////////////////////////////////////////////////////////////////
-	void class_core::def_getattro( method_adapter_interface * _iadapter,	const std::type_info & _info )
+	void class_core::def_getattro( method_adapter_interface * _iadapter, size_t _info )
 	{
 		class_type_scope * scope = detail::get_class_type_scope( _info );
 
 		scope->set_getattro( _iadapter );		
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_core::def_mapping( method_adapter_interface * _iadapter, const std::type_info & _info )
+	void class_core::def_mapping( method_adapter_interface * _iadapter, size_t _info )
 	{
 		class_type_scope * scope = detail::get_class_type_scope( _info );
 
 		scope->set_mapping( _iadapter );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_core::def_sequence( method_adapter_interface * _iadapter, const std::type_info & _info )
+	void class_core::def_sequence( method_adapter_interface * _iadapter, size_t _info )
 	{
 		class_type_scope * scope = detail::get_class_type_scope( _info );
 
 		scope->set_sequence( _iadapter );
 	}	
 	//////////////////////////////////////////////////////////////////////////
-	void class_core::add_base_to_scope( class_type_scope * _scope, const char * _name, const std::type_info & _base, pybind_metacast cast )
+	void class_core::add_base_to_scope( class_type_scope * _scope, size_t _name, size_t _base, pybind_metacast cast )
 	{
 		class_type_scope * basescope = detail::get_class_type_scope( _base );
 
 		_scope->add_base( _name, basescope, cast );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void * class_core::meta_cast( void * _impl, class_type_scope * _scope, const char * _name )
+	void * class_core::meta_cast( void * _impl, class_type_scope * _scope, size_t _name )
 	{
 		return _scope->metacast( _name, _impl );
 	}

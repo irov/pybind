@@ -2,6 +2,7 @@
 
 #	include "pybind/bases.hpp"
 
+#	include "pybind/class_info.hpp"
 #	include "pybind/class_core.hpp"
 #	include "pybind/class_type.hpp"
 #	include "pybind/function_parser.hpp"
@@ -14,8 +15,6 @@
 #	include "pybind/type_cast.hpp"
 
 #	include <list>
-
-#	include <typeinfo>
 
 namespace pybind
 {	
@@ -30,7 +29,7 @@ namespace pybind
 	public:
 		base_( const char * _name, pybind_new _pynew, pybind_destructor _pydestructor, PyObject * _module )
 		{
-			const std::type_info & cinfo = class_info<C>();
+			size_t cinfo = class_info<C>();
 
 			class_type_scope * scope = class_core::create_new_type_scope( cinfo, _name);
 
@@ -315,7 +314,7 @@ namespace pybind
 
 		static class_type_scope * get_scope()
 		{
-			const std::type_info & cinfo = class_info<C>();
+			size_t cinfo = class_info<C>();
 
 			return detail::get_class_type_scope( cinfo );
 		}
@@ -327,8 +326,8 @@ namespace pybind
 	{
 		bool apply( PyObject * _obj, C *& _value ) override
 		{
-			const std::type_info & tinfo = class_info<C>();
-			const std::type_info & tptrinfo = class_info<C *>();
+			size_t tinfo = class_info<C>();
+			size_t tptrinfo = class_info<C *>();
 
 			void * impl;
 			if( type_cast::type_info_cast( _obj, tinfo, tptrinfo, &impl ) == false )
@@ -347,7 +346,7 @@ namespace pybind
 
         PyObject * wrap( typename type_cast_result<C *>::TCastRef _class ) override
 		{
-			const std::type_info & tinfo = class_info<C>();
+			size_t tinfo = class_info<C>();
 			return class_core::create_holder( tinfo, (void *)_class );
 		}
 	};
@@ -358,8 +357,8 @@ namespace pybind
 	{
 		bool apply( PyObject * _obj, C & _value ) override
 		{
-			const std::type_info & tinfo = class_info<C>();
-			const std::type_info & tptrinfo = class_info<C *>();
+			size_t tinfo = class_info<C>();
+			size_t tptrinfo = class_info<C *>();
 
 			void * impl;
 			if( type_cast::type_info_cast( _obj, tinfo, tptrinfo, &impl ) == false )
@@ -382,7 +381,7 @@ namespace pybind
 		PyObject * wrap( const C & _class )
 		{
 			//return 0;
-			const std::type_info & tinfo = class_info<C>();
+			size_t tinfo = class_info<C>();
 			//C * obj = new C(_class);
 
 			void * obj_place;
