@@ -72,6 +72,8 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
 		void error_invalid_extract( PyObject * _obj, size_t _tinfo )
 		{
+            pybind::check_error();
+
             const char * typeinfo_name = detail::get_class_type_info( _tinfo );
 
 			if( const char * repr = pybind::object_repr( _obj ) )
