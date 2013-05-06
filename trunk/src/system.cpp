@@ -397,6 +397,15 @@ namespace pybind
 		return result;
 	}
     //////////////////////////////////////////////////////////////////////////
+    void set_path( const wchar_t * _value )
+    {
+#   if PYBIND_PYTHON_VERSION >= 300
+        Py_SetPath( _value );
+#   endif
+
+        check_error();
+    }
+    //////////////////////////////////////////////////////////////////////////
 	void set_syspath( PyObject * _value )
 	{
 		PySys_SetObject( "path", _value );
