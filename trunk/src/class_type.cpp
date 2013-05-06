@@ -7,6 +7,7 @@
 #	include "pybind/convert_adapter.hpp"
 #	include "pybind/compare_adapter.hpp"
 #	include "pybind/constructor.hpp"
+#	include "pybind/exception.hpp"
 
 #	include "pybind/system.hpp"
 #	include "config/python.hpp"

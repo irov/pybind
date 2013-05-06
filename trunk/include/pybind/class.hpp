@@ -4,7 +4,6 @@
 
 #	include "pybind/class_info.hpp"
 #	include "pybind/class_core.hpp"
-//#	include "pybind/class_type.hpp"
 #	include "pybind/function_parser.hpp"
 
 #	include "pybind/method_adapter.hpp"
