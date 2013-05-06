@@ -10,7 +10,7 @@ namespace pybind
         : public adapter_interface
 	{
     public:
-        virtual int getArity() const = 0;
+        virtual size_t getArity() const = 0;
         virtual const char * getName() const = 0;
 
 	public:
