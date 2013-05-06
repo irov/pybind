@@ -17,11 +17,6 @@ namespace pybind
 		virtual PyObject * call( PyObject * _args, PyObject * _kwds ) = 0;
 	};
 
-	namespace detail
-	{
-		PYBIND_API functor_adapter_interface * extract_from_py_functor( PyObject * _self );
-	}
-
 	template<class C, class F>
 	class functor_proxy_adapter
 		: public functor_adapter_interface
