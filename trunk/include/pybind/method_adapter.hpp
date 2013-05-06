@@ -6,9 +6,8 @@
 #	include "pybind/method_proxy_call.hpp"
 #	include "pybind/function_proxy_call.hpp"
 
-#   include "pybind/class_type_scope.hpp"
-
 #   include "pybind/class_info.hpp"
+#   include "pybind/class_type_scope.hpp"
 
 namespace pybind
 {
