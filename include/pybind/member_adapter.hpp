@@ -2,7 +2,12 @@
 
 #	include "pybind/adapter_interface.hpp"
 
+#   include "pybind/class_info.hpp"
 #	include "pybind/class_type_scope.hpp"
+
+#   include "pybind/function_parser.hpp"
+
+#   include "pybind/extract.hpp"
 
 namespace pybind
 {
