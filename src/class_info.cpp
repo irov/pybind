@@ -1,6 +1,7 @@
 #   include "pybind/class_info.hpp"
 
 #   include "pybind/system.hpp"
+#	include "pybind/exception.hpp"
 
 #   include "static_var.hpp"
 

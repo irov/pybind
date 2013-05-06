@@ -10,12 +10,6 @@
 
 namespace pybind
 {
-	class pybind_exception
-	{
-	};
-
-	PYBIND_API void throw_exception();
-
 #	ifdef PYBIND_VISIT_OBJECTS
 	PYBIND_API void visit_objects( pybind_visit_objects * _visitor );
 #	endif
