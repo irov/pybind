@@ -8,15 +8,6 @@
 
 namespace pybind
 {
-    namespace detail
-    {
-        PYBIND_API void reg_class_type_scope( size_t _info, class_type_scope * _scope );
-        PYBIND_API class_type_scope * get_class_type_scope( size_t _info );
-        
-        typedef std::vector<class_type_scope *> TVectorTypeScope;
-        PYBIND_API void get_types_scope( TVectorTypeScope & _types );
-    }
-
 	class class_type_scope;
 
 	class convert_adapter_interface;

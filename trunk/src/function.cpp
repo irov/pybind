@@ -57,7 +57,7 @@ namespace pybind
 		public:
 			PyObject * setup( function_adapter_interface * _adapter, bool _native )
 			{
-				int arity = _adapter->getArity();
+				size_t arity = _adapter->getArity();
 
 				const char * name = _adapter->getName();
 

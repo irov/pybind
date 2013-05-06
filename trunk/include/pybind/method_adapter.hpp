@@ -6,16 +6,13 @@
 #	include "pybind/method_proxy_call.hpp"
 #	include "pybind/function_proxy_call.hpp"
 
+#   include "pybind/class_type_scope.hpp"
+
 #   include "pybind/class_info.hpp"
 
 namespace pybind
 {
 	class class_type_scope;
-
-	namespace detail
-	{
-		PYBIND_API void * meta_cast_scope( void * _self, size_t _scope_name, size_t _class_name, class_type_scope * scope );
-	}
 
 	class method_adapter_interface
 		: public adapter_interface

@@ -1,6 +1,4 @@
-#	include "class_type.hpp"
-#	include "method_type.hpp"
-#	include "member_type.hpp"
+#	include "pybind/class_type_scope.hpp"
 
 #	include "pybind/repr_adapter.hpp"
 #	include "pybind/hash_adapter.hpp"
@@ -11,6 +9,9 @@
 
 #	include "pybind/system.hpp"
 #	include "config/python.hpp"
+
+#	include "method_type.hpp"
+#	include "member_type.hpp"
 
 #	include <algorithm>
 
@@ -39,6 +40,38 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	namespace detail
 	{
+        //////////////////////////////////////////////////////////////////////////
+        STATIC_DECLARE(TVectorTypeScope, s_typeScope);
+        //////////////////////////////////////////////////////////////////////////
+        void reg_class_type_scope( size_t _info, class_type_scope * _scope )
+        {
+            if( STATIC_VAR(s_typeScope).size() <= _info )
+            {
+                STATIC_VAR(s_typeScope).resize( _info + 1 );
+            }
+
+            STATIC_VAR(s_typeScope)[_info] = _scope;
+        }
+        //////////////////////////////////////////////////////////////////////////
+        class_type_scope * get_class_type_scope( size_t _info )
+        {
+            class_type_scope * scope = STATIC_VAR(s_typeScope)[_info];
+
+            return scope;		
+        }
+        //////////////////////////////////////////////////////////////////////////
+        void get_types_scope( TVectorTypeScope & _types )
+        {
+            for( TVectorTypeScope::iterator
+                it = STATIC_VAR(s_typeScope).begin(),
+                it_end = STATIC_VAR(s_typeScope).end();
+            it != it_end;
+            ++it )
+            {
+                class_type_scope * scope = *it;
+                _types.push_back( scope );
+            }
+        }
 		//////////////////////////////////////////////////////////////////////////
 		bool is_class( PyObject * _obj )
 		{
@@ -225,6 +258,18 @@ namespace pybind
 
 			return 0;
 		}
+        //////////////////////////////////////////////////////////////////////////
+        void * meta_cast_scope( void * _self, size_t _scope_name, size_t _name, class_type_scope * scope )
+        {
+            size_t class_name = scope->get_type();
+
+            if( class_name == _scope_name )
+            {
+                return _self;
+            }	
+
+            return scope->metacast( _name, _self );			
+        }
 		//////////////////////////////////////////////////////////////////////////
 		PyObject * alloc_class( PyTypeObject * _type, PyObject * _args, PyObject * _kwds )
 		{

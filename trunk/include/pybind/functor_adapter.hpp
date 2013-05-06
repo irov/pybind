@@ -1,7 +1,8 @@
 #	pragma once
 
-#	include "pybind/method_call.hpp"
 #   include "pybind/adapter_interface.hpp"
+
+#	include "pybind/method_call.hpp"
 
 namespace pybind
 {
@@ -36,7 +37,7 @@ namespace pybind
 		}
 
     public:
-        int getArity() const override
+        size_t getArity() const override
         {
             return f_info::arity;
         }

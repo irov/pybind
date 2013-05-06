@@ -2,8 +2,7 @@
 
 #	include "pybind/adapter_interface.hpp"
 
-#	include "pybind/method_adapter.hpp"
-#	include "pybind/class_core.hpp"
+#	include "pybind/class_type_scope.hpp"
 
 namespace pybind
 {

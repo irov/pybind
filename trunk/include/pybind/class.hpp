@@ -4,6 +4,7 @@
 
 #	include "pybind/class_info.hpp"
 #	include "pybind/class_core.hpp"
+#	include "pybind/class_type_scope.hpp"
 #	include "pybind/function_parser.hpp"
 
 #	include "pybind/method_adapter.hpp"
@@ -13,6 +14,7 @@
 #	include "pybind/repr_adapter.hpp"
 #	include "pybind/hash_adapter.hpp"
 #	include "pybind/type_cast.hpp"
+#	include "pybind/exception.hpp"
 
 #   include "pybind/constructor_new.hpp"
 #   include "pybind/constructor_placement.hpp"

@@ -1,49 +1,14 @@
 #	include "pybind/class_core.hpp"
+#	include "pybind/class_type_scope.hpp"
 
 #	include "config/python.hpp"
 
-#	include "class_type.hpp"
 #   include "static_var.hpp"
 
 #	include <vector>
 
 namespace pybind
 {	
-    namespace detail
-    {
-        //////////////////////////////////////////////////////////////////////////
-        STATIC_DECLARE(TVectorTypeScope, s_typeScope);
-        //////////////////////////////////////////////////////////////////////////
-        void reg_class_type_scope( size_t _info, class_type_scope * _scope )
-        {
-            if( STATIC_VAR(s_typeScope).size() <= _info )
-            {
-                STATIC_VAR(s_typeScope).resize( _info + 1 );
-            }
-
-            STATIC_VAR(s_typeScope)[_info] = _scope;
-        }
-        //////////////////////////////////////////////////////////////////////////
-        class_type_scope * get_class_type_scope( size_t _info )
-        {
-            class_type_scope * scope = STATIC_VAR(s_typeScope)[_info];
-
-            return scope;		
-        }
-        //////////////////////////////////////////////////////////////////////////
-        void get_types_scope( TVectorTypeScope & _types )
-        {
-            for( TVectorTypeScope::iterator
-                it = STATIC_VAR(s_typeScope).begin(),
-                it_end = STATIC_VAR(s_typeScope).end();
-            it != it_end;
-            ++it )
-            {
-                class_type_scope * scope = *it;
-                _types.push_back( scope );
-            }
-        }
-    }
     //////////////////////////////////////////////////////////////////////////
     typedef std::vector<class_type_scope *> TListClassType;
     //////////////////////////////////////////////////////////////////////////

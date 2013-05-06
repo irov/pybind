@@ -12,7 +12,7 @@ namespace pybind
 		: public adapter_interface
 	{
 	public:
-		virtual int getArity() const = 0;
+		virtual size_t getArity() const = 0;
 		virtual const char * getName() const = 0;
 
 	public:
@@ -57,7 +57,7 @@ namespace pybind
 		}
 
 	protected:
-		int getArity() const override
+		size_t getArity() const override
 		{
 			typedef typename function_parser<F>::result t_info;
 
@@ -97,7 +97,7 @@ namespace pybind
 		}
 
 	protected:
-		int getArity() const override
+		size_t getArity() const override
 		{
 			typedef typename function_parser<F>::result t_info;
 

@@ -1,5 +1,6 @@
 #	include "pybind/type_cast.hpp"
 
+#	include "pybind/class_type_scope.hpp"
 #	include "pybind/class_info.hpp"
 #	include "pybind/class_core.hpp"
 #	include "pybind/convert_adapter.hpp"
@@ -8,7 +9,7 @@
 
 #	include "config/python.hpp"
 
-#	include "class_type.hpp"
+
 #   include "static_var.hpp"
 
 namespace pybind
