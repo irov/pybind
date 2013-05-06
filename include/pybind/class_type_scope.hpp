@@ -26,8 +26,17 @@ namespace pybind
 
 	namespace detail
 	{
-		PYBIND_API bool is_class( PyObject * _obj );
-		PYBIND_API void * get_class_impl( PyObject * _obj );
+        PYBIND_API bool is_class( PyObject * _obj );
+        PYBIND_API void * get_class_impl( PyObject * _obj );
+
+        PYBIND_API void reg_class_type_scope( size_t _info, class_type_scope * _scope );
+        PYBIND_API class_type_scope * get_class_type_scope( size_t _info );
+
+        typedef std::vector<class_type_scope *> TVectorTypeScope;
+        PYBIND_API void get_types_scope( TVectorTypeScope & _types );
+
+        PYBIND_API void * get_scope_user( class_type_scope * _scope );
+
 		PYBIND_API class_type_scope * get_class_scope( PyTypeObject * _obj );
 		PYBIND_API void * unwrap( PyObject * _obj );
 		PYBIND_API void wrap( PyObject * _obj, void * _impl, bool _holder );
@@ -36,6 +45,8 @@ namespace pybind
 		PYBIND_API void * check_registred_class( PyObject * _obj, size_t _info );
 
 		PYBIND_API PyObject * alloc_class( PyTypeObject * _type, PyObject * _args, PyObject * _kwds, void * _impl, bool _holder );
+
+        PYBIND_API void * meta_cast_scope( void * _self, size_t _scope_name, size_t _class_name, class_type_scope * scope );
 	}
 
 	class class_type_scope

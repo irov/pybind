@@ -1,6 +1,7 @@
 #	pragma once
 
-#	include "pybind/class_core.hpp"
+#   include "pybind/adapter_interface.hpp"
+
 
 namespace pybind
 {

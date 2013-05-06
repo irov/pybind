@@ -157,7 +157,7 @@
   <ItemGroup>
     <ClCompile Include="..\src\class_core.cpp" />
     <ClCompile Include="..\src\class_info.cpp" />
-    <ClCompile Include="..\src\class_type.cpp" />
+    <ClCompile Include="..\src\class_type_scope.cpp" />
     <ClCompile Include="..\src\constructor.cpp" />
     <ClCompile Include="..\src\exception.cpp" />
     <ClCompile Include="..\src\extract.cpp" />
@@ -167,9 +167,7 @@
     <ClCompile Include="..\src\functor_adapter.cpp" />
     <ClCompile Include="..\src\functor_type.cpp" />
     <ClCompile Include="..\src\member_type.cpp" />
-    <ClCompile Include="..\src\method_adapter.cpp" />
     <ClCompile Include="..\src\method_type.cpp" />
-    <ClCompile Include="..\src\mutex.cpp" />
     <ClCompile Include="..\src\system.cpp" />
     <ClCompile Include="..\src\type_cast.cpp" />
   </ItemGroup>
@@ -177,9 +175,9 @@
     <ClInclude Include="..\include\pybind\adapter_interface.hpp" />
     <ClInclude Include="..\include\pybind\bases.hpp" />
     <ClInclude Include="..\include\pybind\class.hpp" />
-    <ClInclude Include="..\include\pybind\class_adapter_interface.hpp" />
     <ClInclude Include="..\include\pybind\class_core.hpp" />
     <ClInclude Include="..\include\pybind\class_info.hpp" />
+    <ClInclude Include="..\include\pybind\class_type_scope.hpp" />
     <ClInclude Include="..\include\pybind\constructor.hpp" />
     <ClInclude Include="..\include\pybind\constructor_new.hpp" />
     <ClInclude Include="..\include\pybind\constructor_placement.hpp" />
@@ -202,7 +200,6 @@
     <ClInclude Include="..\include\pybind\method_call.hpp" />
     <ClInclude Include="..\include\pybind\method_proxy_call.hpp" />
     <ClInclude Include="..\include\pybind\method_type.hpp" />
-    <ClInclude Include="..\include\pybind\mutex.hpp" />
     <ClInclude Include="..\include\pybind\object.hpp" />
     <ClInclude Include="..\include\pybind\pybind.hpp" />
     <ClInclude Include="..\include\pybind\repr_adapter.hpp" />
@@ -212,7 +209,6 @@
     <ClInclude Include="..\include\pybind\types.hpp" />
     <ClInclude Include="..\include\config\config.hpp" />
     <ClInclude Include="..\include\config\python.hpp" />
-    <ClInclude Include="..\src\class_type.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

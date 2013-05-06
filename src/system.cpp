@@ -1,5 +1,6 @@
 #	include "pybind/system.hpp"
 #	include "pybind/class_core.hpp"
+#	include "pybind/class_type_scope.hpp"
 
 #	include "config/python.hpp"
 
@@ -8,7 +9,6 @@
 #	include "function_type.hpp"
 #	include "functor_type.hpp"
 
-#	include "class_type.hpp"
 
 #   include "static_var.hpp"
 
