@@ -731,34 +731,50 @@ namespace pybind
 		return str;
 	}
     //////////////////////////////////////////////////////////////////////////
-	static void traceback_error( const char * _msg )
-	{
-		PyErr_SetString( PyExc_RuntimeError, _msg );
-		//PyObject *error = PyErr_Occurred();
-		//if( error )
-		//{
-		//	PyErr_Print();
+    void error_traceback( const char * _message, ... )
+    {
+        pybind::check_error();
 
-		//	PyObject *ptype, *pvalue, *ptraceback;
-		//	PyErr_Fetch(&ptype, &pvalue, &ptraceback);
+        va_list valist;
+        va_start(valist, _message);
 
-		//	PyObject * sysModule = PyImport_AddModule( "sys" );
-		//	PyObject * handle = PyObject_GetAttrString( sysModule, "stderr" );
+        char buffer[1024];
+        vsprintf( buffer, _message, valist );
+        va_end( valist );
 
-		//	PyTraceBack_Print( ptraceback, handle );			
-		//}
-	}
+        PyThreadState * tstate = PyThreadState_GET();
+
+        if( tstate->frame == NULL )
+        {
+            return;
+        }
+
+        PyObject * py_filename = tstate->frame->f_code->co_filename;
+        int fileline = tstate->frame->f_lineno;
+
+        const char * str_filename = pybind::string_to_char( py_filename );
+
+        char trace_buffer[1024];
+        sprintf( trace_buffer, "%s[%d]: %s"
+            , str_filename
+            , fileline
+            , buffer
+            );
+
+        PyErr_SetString( PyExc_RuntimeError, trace_buffer );
+    }
     //////////////////////////////////////////////////////////////////////////
 	void error_message( const char * _message, ... )
 	{
+        pybind::check_error();
+
 		va_list valist;
 		va_start(valist, _message);
 		char buffer[1024];
 		vsprintf( buffer, _message, valist );
+        va_end( valist );
 
-		traceback_error( buffer );
-
-		va_end( valist ); 
+        PyErr_SetString( PyExc_RuntimeError, buffer );		 
 	}
     //////////////////////////////////////////////////////////////////////////
 	bool tuple_setitem( PyObject * _tuple, size_t _it, PyObject * _value )

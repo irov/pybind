@@ -75,6 +75,17 @@ namespace pybind
 			return *this;
 		}
 
+        template<class F>
+        base_ & def_depricated( const char * _name, F f, const char * _doc )
+        {			
+            method_adapter_interface * iadapter =
+                new method_adapter_depricated<C, F>(f, _name, _doc);
+
+            class_core::def_method( _name, iadapter, m_info );
+
+            return *this;
+        }
+
 		template<class F>
 		base_ & def_native( const char * _name, F f )
 		{			
