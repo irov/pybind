@@ -4,3 +4,4 @@
 #	include "Include/structmember.h"
 #	include "Include/osdefs.h"
 #   include "Include/marshal.h"
+#   include "Include/frameobject.h"

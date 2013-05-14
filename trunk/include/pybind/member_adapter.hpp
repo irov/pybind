@@ -28,14 +28,14 @@ namespace pybind
 			: m_name(_name)
             , m_member(_member)
 		{
-            m_class_name = class_info<C*>();
-            m_scope_name = class_info<C>();
+            m_class_id = class_info<C*>();
+            m_scope_id = class_info<C>();
 		}
 
 	public:
 		PyObject * get( void * _self, class_type_scope * _scope ) override
 		{
-			C * obj = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_name, m_class_name, _scope ) );
+			C * obj = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_id, m_class_id, _scope ) );
 
 			PyObject * py_value = pybind::ptr( obj->*m_member );
 
@@ -44,7 +44,7 @@ namespace pybind
 
 		int set( void * _self, PyObject * _args, class_type_scope * _scope ) override
 		{
-			C * obj = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_name, m_class_name, _scope ) );
+			C * obj = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_id, m_class_id, _scope ) );
 
 			obj->*m_member = pybind::extract<A>( _args );
 
@@ -55,8 +55,8 @@ namespace pybind
         const char * m_name;
 		A C:: * m_member;
 
-		size_t m_class_name;
-		size_t m_scope_name;
+		size_t m_class_id;
+		size_t m_scope_id;
 	};
 	//////////////////////////////////////////////////////////////////////////
 	template<class C, class FG, class FS>
@@ -69,14 +69,14 @@ namespace pybind
             , m_get(_get)
 			, m_set(_set)
 		{
-			m_class_name = class_info<C*>();
-			m_scope_name = class_info<C>();
+			m_class_id = class_info<C*>();
+			m_scope_id = class_info<C>();
 		}
 
 	public:
 		PyObject * get( void * _self, class_type_scope * _scope ) override
 		{
-			C * obj = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_name, m_class_name, _scope ) );
+			C * obj = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_id, m_class_id, _scope ) );
 
 			PyObject * py_value = pybind::ptr( (obj->*m_get)() );
 
@@ -85,7 +85,7 @@ namespace pybind
 
 		int set( void * _self, PyObject * _args, class_type_scope * _scope ) override
 		{
-			C * obj = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_name, m_class_name, _scope ) );
+			C * obj = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_id, m_class_id, _scope ) );
 
 			typedef typename function_parser<FS>::result f_info;
 				
@@ -102,8 +102,8 @@ namespace pybind
 		FG m_get;
 		FS m_set;
 
-		size_t m_class_name;
-		size_t m_scope_name;
+		size_t m_class_id;
+		size_t m_scope_id;
 	};
 	//////////////////////////////////////////////////////////////////////////
 	template<class C, class FG, class FS>
@@ -116,14 +116,14 @@ namespace pybind
             , m_get(_get)
 			, m_set(_set)
 		{
-            m_class_name = class_info<C*>();
-            m_scope_name = class_info<C>();
+            m_class_id = class_info<C*>();
+            m_scope_id = class_info<C>();
 		}
 
 	public:
 		PyObject * get( void * _self, class_type_scope * _scope ) override
 		{
-			C * obj = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_name, m_class_name, _scope ) );
+			C * obj = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_id, m_class_id, _scope ) );
 
 			PyObject * py_value = pybind::ptr( (*m_get)( obj ) );
 
@@ -132,7 +132,7 @@ namespace pybind
 
 		int set( void * _self, PyObject * _args, class_type_scope * _scope ) override
 		{
-			C * obj = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_name, m_class_name, _scope ) );
+			C * obj = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_id, m_class_id, _scope ) );
 
 			typedef typename function_parser<FS>::result f_info;
 
@@ -149,8 +149,8 @@ namespace pybind
 		FG m_get;
 		FS m_set;
 
-		size_t m_class_name;
-		size_t m_scope_name;
+		size_t m_class_id;
+		size_t m_scope_id;
 	};
 }
 

@@ -52,24 +52,24 @@ namespace pybind
 	protected:
 		class_adapter_helper()
 		{             
-			m_class_name = class_info<C*>();
-			m_scope_name = class_info<C>();
+			m_class_id = class_info<C*>();
+			m_scope_id = class_info<C>();
 		}
 
 	protected:
-		size_t getClassName() const
+		size_t getClassId() const
 		{
-			return m_class_name;
+			return m_class_id;
 		}
 
-		size_t getScopeName() const
+		size_t getScopeId() const
 		{
-			return m_scope_name;
+			return m_scope_id;
 		}
 
 	protected:
-		size_t m_class_name;
-		size_t m_scope_name;
+		size_t m_class_id;
+		size_t m_scope_id;
 	};
 
 	template<class C, class F>
@@ -89,10 +89,10 @@ namespace pybind
 		{
             (void)_kwds;
 
-			size_t scopeName = this->getScopeName();
-			size_t className = this->getClassName();
+			size_t scopeId = this->getScopeId();
+			size_t classId = this->getClassId();
 
-			C * impl = (C*)detail::meta_cast_scope( _self, scopeName, className, _scope );
+			C * impl = (C*)detail::meta_cast_scope( _self, scopeId, classId, _scope );
 
             const char * tag = this->getTag();
 			F fn = this->getFn();
@@ -102,6 +102,42 @@ namespace pybind
 			return ret;
 		}		
 	};
+
+    template<class C, class F>
+    class method_adapter_depricated
+        : public method_adapter<C, F>
+    {
+    public:
+        method_adapter_depricated( F _fn, const char * _tag, const char * _doc )
+            : method_adapter<C, F>(_fn, _tag)
+            , m_doc(_doc)
+        {
+        }
+
+    public:
+        PyObject * call( void * _self, class_type_scope * _scope, PyObject * _args, PyObject * _kwds ) override
+        {
+            size_t scopeId = this->getScopeId();
+            const char * scopeName = detail::get_class_type_info( scopeId );
+
+            const char * tag = this->getTag();
+
+            pybind::error_traceback("method %s::%s depricated '%s'"
+                , scopeName
+                , tag
+                , m_doc
+                );
+
+            pybind::check_error();
+
+            PyObject * ret = method_adapter<C, F>::call( _self, _scope, _args, _kwds );
+
+            return ret;
+        }
+
+    protected:
+        const char * m_doc;
+    };
 
 	template<class C, class P, class F>
 	class method_adapter_proxy_member
@@ -121,10 +157,10 @@ namespace pybind
 		{
             (void)_kwds;
 
-			size_t scopeName = this->getScopeName();
-			size_t className = this->getClassName();
+			size_t scopeId = this->getScopeId();
+			size_t classId = this->getClassId();
 
-			C * impl = (C*)detail::meta_cast_scope( _self, scopeName, className, _scope );
+			C * impl = (C*)detail::meta_cast_scope( _self, scopeId, classId, _scope );
 
             const char * tag = this->getTag();
             F fn = this->getFn();
@@ -155,10 +191,10 @@ namespace pybind
 		{
             (void)_kwds;
 
-			size_t scopeName = this->getScopeName();
-			size_t className = this->getClassName();
+			size_t scopeId = this->getScopeId();
+			size_t classId = this->getClassId();
 
-			C * impl = (C*)detail::meta_cast_scope( _self, scopeName, className, _scope );
+			C * impl = (C*)detail::meta_cast_scope( _self, scopeId, classId, _scope );
 
             const char * tag = this->getTag();
 			F fn = this->getFn();
@@ -184,10 +220,10 @@ namespace pybind
 	public:
 		PyObject * call( void * _self, class_type_scope * _scope, PyObject * _args, PyObject * _kwds ) override
 		{
-			size_t scopeName = this->getScopeName();
-			size_t className = this->getClassName();
+			size_t scopeId = this->getScopeId();
+			size_t classId = this->getClassId();
 
-			C * impl = (C*)detail::meta_cast_scope( _self, scopeName, className, _scope );
+			C * impl = (C*)detail::meta_cast_scope( _self, scopeId, classId, _scope );
 
             F fn = this->getFn();
 
