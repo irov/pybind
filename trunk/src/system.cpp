@@ -137,7 +137,7 @@ namespace pybind
     PyObject * get_builtins()
     {
 #   if PYBIND_PYTHON_VERSION < 300
-        PyObject * builtins = PyImport_ImportModuleLevel("__builtin__",
+        PyObject * builtins = PyImport_ImportModuleLevel(const_cast<char *>("__builtin__"),
             NULL, NULL, NULL, 0);
 #   endif
 
@@ -408,7 +408,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
 	void set_syspath( PyObject * _value )
 	{
-		PySys_SetObject( "path", _value );
+		PySys_SetObject( const_cast<char *>("path"), _value );
 
 		check_error();
 	}
@@ -1090,7 +1090,7 @@ namespace pybind
     void _set_module_finder( PyObject * _finder )
     {
 #   if PYBIND_PYTHON_VERSION < 300
-        PyObject * py_meta_path = PySys_GetObject( "meta_path" );
+        PyObject * py_meta_path = PySys_GetObject( const_cast<char *>("meta_path") );
 
         pybind::list_insert( py_meta_path, 0, _finder );
         pybind::decref( _finder );

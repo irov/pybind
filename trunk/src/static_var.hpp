@@ -33,3 +33,4 @@
 
 #   define STATIC_VAR(Name)\
     Name()
+

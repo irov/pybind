@@ -96,8 +96,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
 	STATIC_DECLARE_ARRAY_BEGIN(PyMemberDef, s_descr_members)
     {
-		{"__objclass__", T_OBJECT, offsetof(py_method_generator_type, classtype), READONLY},
-		{"__name__", T_OBJECT, offsetof(py_method_generator_type, methodname), READONLY},
+		{const_cast<char*>("__objclass__"), T_OBJECT, offsetof(py_method_generator_type, classtype), READONLY},
+		{const_cast<char*>("__name__"), T_OBJECT, offsetof(py_method_generator_type, methodname), READONLY},
 		{0}
 	}
     STATIC_DECLARE_VALUE_END();
