@@ -2,7 +2,7 @@
 
 #	include "config/config.hpp"
 
-#	ifndef PYBIND_STATIC
+#	ifdef PYBIND_DLL
 	#	ifdef PYBIND_EXPORTS
 		#	define PYBIND_API __declspec(dllexport)
 	#	else
