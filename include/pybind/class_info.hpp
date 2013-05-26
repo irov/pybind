@@ -29,4 +29,6 @@ namespace pybind
 
         return type_id;
     }
+
+    PYBIND_API bool initialize_class_info();
 }

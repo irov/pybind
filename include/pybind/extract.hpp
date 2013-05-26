@@ -94,7 +94,6 @@ namespace pybind
 	PYBIND_API bool extract_value( PyObject * _obj, float & _value );
 	PYBIND_API bool extract_value( PyObject * _obj, double & _value );
 	PYBIND_API bool extract_value( PyObject * _obj, const char * & _value );
-    PYBIND_API bool extract_value( PyObject * _obj, const pybind_unicode_t *& _value );    
 	PYBIND_API bool extract_value( PyObject * _obj, PyObject * & _value );
 
     template<class T>
@@ -131,7 +130,7 @@ namespace pybind
 
 		PyObject * result = etype_impl->wrap( _value );
 
-		if( result == 0 )
+		if( result == nullptr )
 		{
 			const char * type_name = tinfo.name();
 
@@ -152,7 +151,6 @@ namespace pybind
 	PYBIND_API PyObject * ptr( float _value );
 	PYBIND_API PyObject * ptr( double _value );
 	PYBIND_API PyObject * ptr( const char * _value );
-    PYBIND_API PyObject * ptr( const pybind_unicode_t * _value );
 	PYBIND_API PyObject * ptr( PyObject * _value );
 }
 

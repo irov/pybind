@@ -5,30 +5,11 @@
 
 #   include "static_var.hpp"
 
-#	include <vector>
-
 namespace pybind
 {	
     //////////////////////////////////////////////////////////////////////////
-    typedef std::vector<class_type_scope *> TListClassType;
-    //////////////////////////////////////////////////////////////////////////
-    STATIC_DECLARE(TListClassType, s_listClassType);
-    //////////////////////////////////////////////////////////////////////////
     void class_core::finalize()
     {
-        for( TListClassType::iterator
-            it = STATIC_VAR(s_listClassType).begin(),
-            it_end = STATIC_VAR(s_listClassType).end();
-        it != it_end;
-        ++it )
-        {
-            class_type_scope * scope = *it;
-
-            //scope->finalize();
-            scope->decref();
-        }
-
-        STATIC_VAR(s_listClassType).clear();
     }
     //////////////////////////////////////////////////////////////////////////
     class_type_scope * class_core::create_new_type_scope( size_t _info, const char * _name, PyObject * _module, void * _user, pybind::pybind_new _pynew, pybind::pybind_destructor _pydestructor, bool _pod )
@@ -36,8 +17,6 @@ namespace pybind
         class_type_scope * scope = new class_type_scope( _name, _info, _module, _user, _pynew, _pydestructor, _pod );
 
         detail::reg_class_type_scope( _info, scope );
-
-        STATIC_VAR(s_listClassType).push_back( scope );
 
         return scope;
     }

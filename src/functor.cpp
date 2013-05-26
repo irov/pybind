@@ -6,9 +6,6 @@
 #	include "functor_type.hpp"
 #   include "static_var.hpp"
 
-#	include <list>
-#   include <vector>
-
 namespace pybind
 {
 	namespace detail
@@ -82,58 +79,28 @@ namespace pybind
 			PyMethodDef m_method;
 		};
         //////////////////////////////////////////////////////////////////////////
-		class FunctorGarbage
-		{
-        public:
-            ~FunctorGarbage()
-            {
-                for( TVectorAdapter::iterator
-                    it = m_adapters.begin(),
-                    it_end = m_adapters.end();
-                it != it_end;
-                ++it )
-                {
-                    delete *it;
-                }
-            }
-
-		public:
-			functor_type_scope & newScope()
-			{
-                m_listTypeObject.push_back( functor_type_scope() );
-
-                functor_type_scope & scope = m_listTypeObject.back();
-
-                return scope;
-			}
-
-            void storeAdapter( functor_adapter_interface * _adapter )
-            {
-                m_adapters.push_back( _adapter );
-            }
-
-		protected:
-			typedef std::list<functor_type_scope> TListTypeObject;
-			TListTypeObject m_listTypeObject;
-
-            typedef std::vector<functor_adapter_interface *> TVectorAdapter;
-            TVectorAdapter m_adapters;
-		};
-        //////////////////////////////////////////////////////////////////////////
-        STATIC_DECLARE(FunctorGarbage, s_functorGarbage);
+        functor_type_scope g_functor_type_scope[PYBIND_FUNCTOR_COUNT];
+        size_t g_functor_type_scope_count = 0;
         //////////////////////////////////////////////////////////////////////////
         static PyObject * create_functor_adapter( functor_adapter_interface * _adapter )
         {
-            functor_type_scope & cfunc_type = STATIC_VAR(s_functorGarbage).newScope();
+            ++g_functor_type_scope_count;
+
+            if( g_functor_type_scope_count == PYBIND_FUNCTOR_COUNT )
+            {
+                pybind::throw_exception();
+
+                return NULL;
+            }
+
+            functor_type_scope & cfunc_type = g_functor_type_scope[g_functor_type_scope_count];
 
             PyObject * py_func = cfunc_type.setup( _adapter );
-
-            STATIC_VAR(s_functorGarbage).storeAdapter( _adapter );
 
             return py_func;
         }
         //////////////////////////////////////////////////////////////////////////
-		void def_functor( const char * _name, functor_adapter_interface * _adapter, PyObject * _module )
+		void def_functor( functor_adapter_interface * _adapter, PyObject * _module )
 		{
             PyObject * py_func = create_functor_adapter( _adapter );
 

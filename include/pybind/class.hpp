@@ -19,8 +19,6 @@
 #   include "pybind/constructor_new.hpp"
 #   include "pybind/constructor_placement.hpp"
 
-#	include <list>
-
 namespace pybind
 {	
 	typedef bases<void,void,void,void,void,void,void> no_bases;
@@ -98,10 +96,10 @@ namespace pybind
 		}
 
 		template<class F>
-		base_ & def_convert( F f )
+		base_ & def_convert( F f, void * _user )
 		{
 			convert_adapter_interface * iadapter =
-				new convert_adapter<F>(f);
+				new convert_adapter<F>(f, _user);
 
 			class_core::def_convert( iadapter, m_info );
 

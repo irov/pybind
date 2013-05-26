@@ -7,9 +7,6 @@
 
 #	include "config/python.hpp"
 
-#	include <list>
-#   include <vector>
-
 namespace pybind
 {
 	namespace detail
@@ -99,54 +96,24 @@ namespace pybind
 			PyMethodDef m_method;
 		};
         //////////////////////////////////////////////////////////////////////////
-		class FunctionGarbage
-		{
-		public:
-			~FunctionGarbage()
-			{
-				for( TVectorAdapter::iterator
-					it = m_adapters.begin(),
-					it_end = m_adapters.end();
-				it != it_end;
-				++it )
-				{
-					delete *it;
-				}
-			}
-
-		public:
-			function_type_scope & newScope()
-			{
-				m_scopes.push_back( function_type_scope() );
-
-                function_type_scope & scope = m_scopes.back();
-
-				return scope;
-			}
-
-			void storeAdapter( function_adapter_interface * _adapter )
-			{
-				m_adapters.push_back( _adapter );
-			}
-
-		protected:
-			typedef std::list<function_type_scope> TListScope;
-			TListScope m_scopes;
-
-			typedef std::vector<function_adapter_interface *> TVectorAdapter;
-			TVectorAdapter m_adapters;
-		};
-        //////////////////////////////////////////////////////////////////////////
-        STATIC_DECLARE(FunctionGarbage, s_functionGarbage);
+        function_type_scope g_function_type_scope[PYBIND_FUNCTION_COUNT];
+        size_t g_function_type_scope_count = 0;
         //////////////////////////////////////////////////////////////////////////
 		PyObject * create_function_adapter( function_adapter_interface * _adapter, bool _native )
 		{
-			function_type_scope & cfunc_type = STATIC_VAR(s_functionGarbage).newScope();
-			
+            ++g_function_type_scope_count;
+
+            if( g_function_type_scope_count == PYBIND_FUNCTION_COUNT )
+            {
+                pybind::throw_exception();
+
+                return NULL;
+            }
+
+			function_type_scope & cfunc_type = g_function_type_scope[g_function_type_scope_count];            
+
 			PyObject * py_func = cfunc_type.setup( _adapter, _native );
-
-            STATIC_VAR(s_functionGarbage).storeAdapter( _adapter );
-
+            
 			return py_func;
 		}
         //////////////////////////////////////////////////////////////////////////

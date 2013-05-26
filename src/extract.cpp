@@ -175,27 +175,6 @@ namespace pybind
 
 		return true;
 	}
-    //////////////////////////////////////////////////////////////////////////
-    bool extract_value( PyObject * _obj, const pybind_unicode_t *& _value )
-    {
-        if( pybind::unicode_check( _obj ) == true )
-        {
-            const pybind_unicode_t * ch_buff = pybind::unicode_to_wchar( _obj );
-
-            if( ch_buff == 0 )
-            {
-                return false;
-            }
-
-            _value = ch_buff;
-        }
-        else
-        {
-            return false;
-        }
-
-        return true;
-    }
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, PyObject *& _value )
 	{
@@ -255,11 +234,6 @@ namespace pybind
 	{
 		return pybind::string_from_char( _value );
 	}
-    //////////////////////////////////////////////////////////////////////////
-    PyObject * ptr( const pybind_unicode_t * _value )
-    {
-        return pybind::unicode_from_wchar( _value );
-    }
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * ptr( PyObject * _value )
 	{

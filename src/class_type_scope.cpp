@@ -41,37 +41,36 @@ namespace pybind
 	namespace detail
 	{
         //////////////////////////////////////////////////////////////////////////
-        STATIC_DECLARE(TVectorTypeScope, s_typeScope);
+        class_type_scope * g_class_type_scope[PYBIND_TYPE_COUNT];
         //////////////////////////////////////////////////////////////////////////
         void reg_class_type_scope( size_t _info, class_type_scope * _scope )
         {
-            if( STATIC_VAR(s_typeScope).size() <= _info )
-            {
-                STATIC_VAR(s_typeScope).resize( _info + 1 );
-            }
-
-            STATIC_VAR(s_typeScope)[_info] = _scope;
+            g_class_type_scope[_info] = _scope;
         }
         //////////////////////////////////////////////////////////////////////////
         class_type_scope * get_class_type_scope( size_t _info )
         {
-            class_type_scope * scope = STATIC_VAR(s_typeScope)[_info];
+            class_type_scope * scope = g_class_type_scope[_info];
 
-            return scope;		
+            return scope;	
         }
+#	ifdef PYBIND_VISIT_OBJECTS
         //////////////////////////////////////////////////////////////////////////
-        void get_types_scope( TVectorTypeScope & _types )
+        void get_types_scope( getter_class_type_scope * _getter )
         {
-            for( TVectorTypeScope::iterator
-                it = STATIC_VAR(s_typeScope).begin(),
-                it_end = STATIC_VAR(s_typeScope).end();
-            it != it_end;
-            ++it )
+            for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
             {
-                class_type_scope * scope = *it;
-                _types.push_back( scope );
+                class_type_scope * scope = g_class_type_scope[index];
+
+                if( scope == nullptr )
+                {
+                    continue;
+                }
+
+                _getter.get_scope( scope );
             }
         }
+#   endif
 		//////////////////////////////////////////////////////////////////////////
 		bool is_class( PyObject * _obj )
 		{
@@ -740,34 +739,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void class_type_scope::finalize()
     {
-        for( TVectorMembers::iterator
-            it = m_members.begin(),
-            it_end = m_members.end();
-        it != it_end;
-        ++it )
-        {
-            const char * name = (*it);
-
-            if( PyDict_DelItemString( m_pytypeobject->tp_dict, name ) == -1 )
-            {
-                check_error();
-            }
-        }
-
-        for( TVectorMembers::iterator
-            it = m_methods.begin(),
-            it_end = m_methods.end();
-        it != it_end;
-        ++it )
-        {
-            const char * name = (*it);
-
-            if( PyDict_DelItemString( m_pytypeobject->tp_dict, name ) == -1 )
-            {
-                check_error();
-            }
-        }
-
         delete m_pyconstructor;
 
         PyObject * dummy = m_pytypeobject->tp_dict;
@@ -841,16 +812,6 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::add_method( const char * _name, method_adapter_interface * _ifunc )
 	{
-		TVectorMethods::iterator it_found = std::find_if( m_methods.begin(), m_methods.end(), detail::FCharCmp(_name) );
-		if( it_found != m_methods.end() )
-		{
-			pybind::throw_exception();
-
-			return;
-		}
-
-		m_methods.push_back( _name );
-
 		PyObject * py_type_method = method_type_scope::instance( _name, _ifunc, m_pytypeobject );
 
 		if( PyDict_SetItemString( m_pytypeobject->tp_dict, _name, py_type_method ) == -1 )
@@ -865,16 +826,6 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::add_member( const char * _name, member_adapter_interface * _imember )
 	{
-		TVectorMembers::iterator it_found = std::find_if( m_members.begin(), m_members.end(), detail::FCharCmp(_name) );
-		if( it_found != m_members.end() )
-		{
-			pybind::throw_exception();
-
-			return;
-		}
-
-		m_members.push_back( _name );
-
 		PyObject * py_member = member_type_scope::instance( _name, _imember );
 
 		if( PyDict_SetItemString( m_pytypeobject->tp_dict, _name, py_member ) == -1 )
@@ -1112,6 +1063,11 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool initialize_classes()
 	{
+        for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
+        {
+            detail::g_class_type_scope[index] = nullptr;
+        }
+
 #   if PYBIND_PYTHON_VERSION > 300
         STATIC_VAR(s_pybind_object_impl) = pybind::unicode_from_utf8( "__pybind_object_impl" );
         STATIC_VAR(s_pybind_class_type_scope) = pybind::unicode_from_utf8( "__pybind_class_type_scope" );

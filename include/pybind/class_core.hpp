@@ -4,8 +4,6 @@
 #	include "pybind/exports.hpp"
 #	include "pybind/types.hpp"
 
-#   include <vector>
-
 namespace pybind
 {
 	class class_type_scope;
