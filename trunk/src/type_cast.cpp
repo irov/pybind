@@ -16,60 +16,19 @@ namespace pybind
 {
 	namespace detail
 	{        
-        struct Extract
-        {
-            Extract()
-                : cast(NULL)
-                , setup(false)
-            {
-            }
-
-            type_cast * cast;
-            bool setup;
-        };
         //////////////////////////////////////////////////////////////////////////
-		typedef std::vector<Extract> TExtractTypes;        
+        type_cast * g_type_cast[PYBIND_TYPE_COUNT];
         //////////////////////////////////////////////////////////////////////////
-        STATIC_DECLARE(TExtractTypes, s_extractTypes);
-        //////////////////////////////////////////////////////////////////////////
-		void register_type_info_extract( size_t _info, type_cast * _type )
+		void register_type_info_extract( size_t _info, type_cast * _cast )
 		{	
-            TExtractTypes & extractTypes = STATIC_VAR(s_extractTypes);
-
-            size_t last_size = extractTypes.size();
-
-            if( last_size <= _info )
-            {
-                extractTypes.resize( _info + 1 );
-            }
-
-            Extract ex;
-
-            ex.cast = _type;
-            ex.setup = true;
-
-			extractTypes[_info] = ex;
+			g_type_cast[_info] = _cast;
 		}
         //////////////////////////////////////////////////////////////////////////
 		type_cast * find_type_info_extract( size_t _info )
 		{
-            const TExtractTypes & extractTypes = STATIC_VAR(s_extractTypes);
+            type_cast * cast = g_type_cast[_info];
 
-            size_t size = extractTypes.size();
-
-            if( _info >= size )
-            {
-                return 0;
-            }
-
-            const Extract & ex = extractTypes[_info];
-
-			if( ex.setup == false )
-			{
-				return 0;
-			}
-
-			return ex.cast;
+			return cast;
 		}
         //////////////////////////////////////////////////////////////////////////
 		void error_invalid_extract( PyObject * _obj, size_t _tinfo )
@@ -100,7 +59,7 @@ namespace pybind
 
 			convert_adapter_interface * convert = scope->get_convert();
 
-			if( convert == 0 )
+			if( convert == nullptr )
 			{
 				return false;
 			}
@@ -119,9 +78,10 @@ namespace pybind
 
 			void * impl = detail::get_class_impl( _obj );
 
-			if( impl == 0 )
+			if( impl == nullptr )
 			{
 				error_message( "instance_of_type: unbind object" );
+
 				return false;
 			}
 
@@ -146,7 +106,7 @@ namespace pybind
 
 		void * impl = detail::get_class_impl( _obj );
 
-		if( impl == 0 )
+		if( impl == nullptr )
 		{
 			error_message( "type_info_cast: unbind object" );
 			return false;
@@ -160,7 +120,7 @@ namespace pybind
 			impl = class_core::meta_cast( impl, scope, _tptrinfo );
 		}
 
-		if( impl == 0 )
+		if( impl == nullptr )
 		{
 			return false;
 		}
@@ -170,19 +130,17 @@ namespace pybind
 		return true;
 	}
     //////////////////////////////////////////////////////////////////////////
-    void finialize_type_cast()
+    bool initialize_type_cast()
     {
-        detail::TExtractTypes & extractTypes = detail::STATIC_VAR(s_extractTypes);
-
-        for( detail::TExtractTypes::iterator
-            it = extractTypes.begin(),
-            it_end = extractTypes.end();
-        it != it_end;
-        ++it )
+        for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
         {
-            detail::Extract & tc = *it;
-
-            delete tc.cast;
+            detail::g_type_cast[index] = nullptr;
         }
+
+        return true;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void finialize_type_cast()
+    {        
     }
 }

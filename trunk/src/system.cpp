@@ -55,6 +55,16 @@ namespace pybind
         Py_InitializeEx( install_sigs?1:0 );
 #   endif
 
+        if( initialize_class_info() == false )
+        {
+            return false;
+        }
+
+        if( initialize_type_cast() == false )
+        {
+            return false;
+        }
+
 		if( initialize_methods() == false )
         {
             return false;
@@ -79,7 +89,7 @@ namespace pybind
         {
             return false;
         }
-
+        
 		//initialize_default_type_cast();
 
         return true;
@@ -399,6 +409,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void set_path( const wchar_t * _value )
     {
+        (void)_value;
 #   if PYBIND_PYTHON_VERSION >= 300
         Py_SetPath( _value );
 #   endif
@@ -977,12 +988,22 @@ namespace pybind
 		return value;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	pybind_unicode_t * unicode_to_wchar( PyObject * _unicode )
+	const wchar_t * unicode_to_wchar( PyObject * _unicode )
 	{
-        pybind_unicode_t * unicode = PyUnicode_AsUnicode( _unicode );
+        const wchar_t * wstr = PyUnicode_AS_UNICODE( _unicode );
 
-		return unicode;
+		return wstr;
 	}
+    //////////////////////////////////////////////////////////////////////////
+    const wchar_t * unicode_to_wchar_and_size( PyObject * _unicode, size_t & _size )
+    {
+        const wchar_t * wstr = PyUnicode_AS_UNICODE( _unicode );
+        Py_ssize_t py_size = PyUnicode_GET_SIZE( _unicode );
+
+        _size = (size_t)py_size;
+
+        return wstr;
+    }
     //////////////////////////////////////////////////////////////////////////
     PyObject * unicode_from_wchar( const pybind_unicode_t * _value )
     {

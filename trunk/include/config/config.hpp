@@ -6,6 +6,10 @@
 
 //#   define PYBIND_VISIT_OBJECTS
 
+#   define PYBIND_TYPE_COUNT 128
+#   define PYBIND_FUNCTION_COUNT 256
+#   define PYBIND_FUNCTOR_COUNT 256
+
 namespace pybind
 {
 #   ifdef PYBIND_MARMALADE

@@ -150,5 +150,6 @@ namespace pybind
 		virtual bool apply( PyObject * _obj, T & _value ) = 0;
 	};
 
+    PYBIND_API bool initialize_type_cast();
     PYBIND_API void finialize_type_cast();
 }

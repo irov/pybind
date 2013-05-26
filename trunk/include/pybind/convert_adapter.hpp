@@ -16,21 +16,23 @@ namespace pybind
 		: public convert_adapter_interface
 	{
 	public:
-		convert_adapter( F _convert )
+		convert_adapter( F _convert, void * _user )
 			: m_convert(_convert)
+            , m_user(_user)
 		{
 		}
 
 	public:
 		virtual bool convert( PyObject * _obj, void * _place ) override
 		{
-			bool result = (*m_convert)( _obj, _place );
+			bool result = (*m_convert)( _obj, _place, m_user );
 
 			return result;
 		}
 
 	protected:
 		F m_convert;
+        void * m_user;
 	};
 }
 

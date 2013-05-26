@@ -10,8 +10,7 @@ namespace pybind
 {
 	namespace detail
 	{
-		PYBIND_API void def_functor(
-			const char * _name,
+		PYBIND_API void def_functor(			
 			functor_adapter_interface * _adapter,
 			PyObject * _module );
 	}
@@ -25,7 +24,6 @@ namespace pybind
 			new functor_proxy_adapter<typename t_info::class_type, F>(_self, _method, _name);
 
 		detail::def_functor(
-			_name,
 			imethod,
             _module
 			);
