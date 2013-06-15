@@ -99,9 +99,25 @@ namespace pybind
     template<class T>
 	typename detail::extract_return<T>::type extract( PyObject * _obj )
 	{
-		typename detail::extract_return<T>::type value;
+        typedef typename detail::extract_return<T>::type TValue;
+		TValue value;
         
-		extract_value( _obj, value );
+		if( extract_value( _obj, value ) == false )
+        {
+            const std::type_info & tinfo = typeid(TValue);
+            
+            const char * type_name = tinfo.name();
+
+            pybind::error_message( "extract invalid %s:%s not cast to %s"
+                , pybind::object_repr(_obj)
+                , pybind::object_repr_type(_obj)
+                , type_name
+                );
+
+            pybind::throw_exception();
+
+            return value;
+        }
         
 		return value;
 	}
@@ -115,7 +131,7 @@ namespace pybind
 
 		type_cast * etype = detail::type_down_cast<T_WOCR>::find();
 
-		if( etype == 0 )
+		if( etype == nullptr )
 		{
 			const char * type_name = tinfo.name();
 

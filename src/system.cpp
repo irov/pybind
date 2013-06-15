@@ -728,6 +728,29 @@ namespace pybind
 		return py_dir;
 	}
     //////////////////////////////////////////////////////////////////////////
+    PyTypeObject * object_type( PyObject * _obj )
+    {
+        PyTypeObject * type = Py_TYPE(_obj);
+
+        return type;
+    }    
+    //////////////////////////////////////////////////////////////////////////
+    const char * object_repr_type( PyObject * _obj )
+    {
+        PyTypeObject * type = Py_TYPE(_obj);
+
+        PyObject * repr = PyObject_Repr( (PyObject *)type );
+
+        if( repr == 0 )
+        {
+            return 0;
+        }
+
+        const char * str = pybind::string_to_char( repr );
+
+        return str;
+    }
+    //////////////////////////////////////////////////////////////////////////
 	const char * object_repr( PyObject * _obj )
 	{
 		PyObject * repr = PyObject_Repr( _obj );
