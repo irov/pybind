@@ -30,6 +30,7 @@ namespace pybind
 
 	PYBIND_API PyObject * module_import( const char * _name, bool & _exsist );
 	PYBIND_API PyObject * module_init( const char * _name );
+    PYBIND_API void module_fini( PyObject * _module );
 	PYBIND_API PyObject * module_dict( PyObject * _module );
 	PYBIND_API void module_addobject( PyObject * _module, const char * _name, PyObject * _obj );
     PYBIND_API PyObject * module_execcode( const char * _name, PyObject * _code );
@@ -104,6 +105,7 @@ namespace pybind
 
 	PYBIND_API bool dict_check( PyObject * _dict );
 	PYBIND_API bool dict_set( PyObject * _dict, const char * _name, PyObject * _value );
+    PYBIND_API bool dict_remove( PyObject * _dict, const char * _name );
 	PYBIND_API PyObject * dict_get( PyObject * _dict, const char * _name );
 	PYBIND_API bool dict_contains( PyObject * _dict, const char * _name );	
 	PYBIND_API bool dict_next( PyObject * _dict, size_t *_pos, PyObject ** _key, PyObject ** _value );

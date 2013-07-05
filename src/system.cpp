@@ -197,6 +197,13 @@ namespace pybind
 
         return module;
 	}
+    //////////////////////////////////////////////////////////////////////////
+    void module_fini( PyObject * _module )
+    {
+        _PyModule_Clear( _module );
+
+        pybind::decref( _module );
+    }
 #	else
     //   //////////////////////////////////////////////////////////////////////////
 	//static PyObject* initfunc(void)
@@ -660,6 +667,20 @@ namespace pybind
 
 		return true;
 	}
+    //////////////////////////////////////////////////////////////////////////
+    bool dict_remove( PyObject * _dict, const char * _name )
+    {
+        int res = PyDict_DelItemString( _dict, _name );
+
+        if( res == -1 )
+        {
+            check_error();
+
+            return false;
+        }
+
+        return true;
+    }
     //////////////////////////////////////////////////////////////////////////
 	PyObject * dict_get( PyObject * _dict, const char * _name )
 	{
