@@ -27,14 +27,6 @@ namespace pybind
 	
 	class constructor;
 
-#	ifdef PYBIND_VISIT_OBJECTS
-    class getter_class_type_scope
-    {
-    public:
-        virtual void get_scope( class_type_scope * _scope ) = 0;
-    };
-#   endif
-
 	namespace detail
 	{
         PYBIND_API bool is_class( PyObject * _obj );
@@ -43,9 +35,7 @@ namespace pybind
         PYBIND_API void reg_class_type_scope( size_t _info, class_type_scope * _scope );
         PYBIND_API class_type_scope * get_class_type_scope( size_t _info );
 
-#	ifdef PYBIND_VISIT_OBJECTS
-        PYBIND_API void get_types_scope( getter_class_type_scope * _getter );
-#   endif
+        PYBIND_API void visit_types_scope( visitor_class_type_scope * _getter );
 
         PYBIND_API void * get_scope_user( class_type_scope * _scope );
 
@@ -111,6 +101,7 @@ namespace pybind
     public:
         void incref();
         bool decref();
+        size_t getRefcount() const;
 
 	public:
         const char * m_name;
