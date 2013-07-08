@@ -30,10 +30,18 @@ namespace pybind
 	typedef void * (*pybind_new)( class_type_scope * _scope, PyObject * _obj, PyObject * _args, PyObject * _kwds );
 	typedef void (*pybind_destructor)( class_type_scope * _scope, void * impl );
 
+#	ifdef PYBIND_VISIT_OBJECTS
 	class pybind_visit_objects
 	{
 	public:
-		virtual void visit( PyObject * _obj ) = 0;
+		virtual void visit_object( PyObject * _obj ) = 0;
 	};
+#   endif
+
+    class visitor_class_type_scope
+    {
+    public:
+        virtual void visit_scope( class_type_scope * _scope ) = 0;
+    };
 }
 

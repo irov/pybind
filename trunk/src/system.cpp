@@ -21,23 +21,10 @@ extern int Py_NoSiteFlag;
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
-#	ifdef PYBIND_VISIT_OBJECTS
-    //////////////////////////////////////////////////////////////////////////
-	void visit_objects( pybind_visit_objects * _visitor )
-	{
-		detail::TVectorTypeScope types;
-		detail::get_types_scope(types);
-
-		for( detail::TVectorTypeScope::iterator
-			it = types.begin(),
-			it_end = types.end();
-		it != it_end;
-		++it )
-		{
-			(*it)->visit_objects(_visitor);
-		}
-	}
-#	endif
+    void visit_class_type_scope( visitor_class_type_scope * _visitor )
+    {
+        detail::visit_types_scope( _visitor );
+    }
     //////////////////////////////////////////////////////////////////////////
 	bool initialize( bool _debug, bool install_sigs )
 	{

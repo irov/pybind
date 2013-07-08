@@ -54,9 +54,8 @@ namespace pybind
 
             return scope;	
         }
-#	ifdef PYBIND_VISIT_OBJECTS
         //////////////////////////////////////////////////////////////////////////
-        void get_types_scope( getter_class_type_scope * _getter )
+        void visit_types_scope( visitor_class_type_scope * _getter )
         {
             for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
             {
@@ -67,10 +66,9 @@ namespace pybind
                     continue;
                 }
 
-                _getter.get_scope( scope );
+                _getter->visit_scope( scope );
             }
         }
-#   endif
 		//////////////////////////////////////////////////////////////////////////
 		bool is_class( PyObject * _obj )
 		{
@@ -634,6 +632,11 @@ namespace pybind
 
         return true;
     }
+    //////////////////////////////////////////////////////////////////////////
+    size_t class_type_scope::getRefcount() const
+    {
+        return m_refcount;
+    }
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::initialize()
 	{
@@ -1051,7 +1054,9 @@ namespace pybind
 		it != it_end;
 		++it )
 		{
-			_visitor->visit( *it );
+            PyObject * obj = *it;
+
+			_visitor->visit_object( obj );
 		}
 	}
 #	endif

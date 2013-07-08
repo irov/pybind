@@ -10,10 +10,7 @@
 
 namespace pybind
 {
-#	ifdef PYBIND_VISIT_OBJECTS
-	PYBIND_API void visit_objects( pybind_visit_objects * _visitor );
-#	endif
-
+	PYBIND_API void visit_class_type_scope( visitor_class_type_scope * _visitor );
 
 	PYBIND_API bool initialize( bool _debug, bool install_sigs );
 	PYBIND_API void finalize();
