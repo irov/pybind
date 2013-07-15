@@ -271,7 +271,7 @@ namespace pybind
 		{
 			Ret result = function_call_impl<F,Ret,f_info::arity>::call( f, _arg );
 
-			return ptr( result );
+			return ptr_throw( result );
 		}
 	};
 

@@ -38,8 +38,10 @@ namespace pybind
 		}
 
 		class_type_scope * scope = detail::get_class_scope( py_self->ob_type );
+        
+        PyObject * py_method = mt->iadpter->get( impl, scope );
 
-		return mt->iadpter->get( impl, scope );
+		return py_method;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	static PyObject * py_setmethod( PyObject * _member, PyObject * _args )
