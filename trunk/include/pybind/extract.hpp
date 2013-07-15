@@ -121,9 +121,27 @@ namespace pybind
         
 		return value;
 	}
+
+    template<class T>
+    PyObject * ptr( const T & _value )
+    {
+        try
+        {
+            PyObject * value = ptr_throw( _value );
+
+            return value;
+        }
+        catch( const pybind::pybind_exception & )
+        {
+        }
+
+        check_error();
+
+        return nullptr;
+    }
     
 	template<class T>
-	PyObject * ptr( T _value )
+	PyObject * ptr_throw( const T & _value )
 	{
 		typedef typename detail::extract_return<T>::type T_WOCR;
 
@@ -160,13 +178,13 @@ namespace pybind
 		return result;
 	}
 
-	PYBIND_API PyObject * ptr( bool _value );
-	PYBIND_API PyObject * ptr( int _value );
-	PYBIND_API PyObject * ptr( unsigned int _value );
-	PYBIND_API PyObject * ptr( unsigned long _value );
-	PYBIND_API PyObject * ptr( float _value );
-	PYBIND_API PyObject * ptr( double _value );
-	PYBIND_API PyObject * ptr( const char * _value );
-	PYBIND_API PyObject * ptr( PyObject * _value );
+	PYBIND_API PyObject * ptr_throw( bool _value );
+	PYBIND_API PyObject * ptr_throw( int _value );
+	PYBIND_API PyObject * ptr_throw( unsigned int _value );
+	PYBIND_API PyObject * ptr_throw( unsigned long _value );
+	PYBIND_API PyObject * ptr_throw( float _value );
+	PYBIND_API PyObject * ptr_throw( double _value );
+	PYBIND_API PyObject * ptr_throw( const char * _value );
+	PYBIND_API PyObject * ptr_throw( PyObject * _value );
 }
 

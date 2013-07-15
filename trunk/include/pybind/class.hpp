@@ -323,6 +323,13 @@ namespace pybind
 	{
 		bool apply( PyObject * _obj, C *& _value ) override
 		{
+            if( pybind::is_none( _obj ) == true )
+            {
+                _value = nullptr;
+
+                return true;
+            }
+
 			size_t tinfo = class_info<C>();
 			size_t tptrinfo = class_info<C *>();
 

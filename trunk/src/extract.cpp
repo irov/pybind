@@ -183,7 +183,7 @@ namespace pybind
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr( bool _value )
+	PyObject * ptr_throw( bool _value )
 	{
 		if( _value == true )
 		{
@@ -193,7 +193,7 @@ namespace pybind
 		Py_RETURN_FALSE;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr( int _value )
+	PyObject * ptr_throw( int _value )
 	{
 #   if PYBIND_PYTHON_VERSION < 300
 		return PyInt_FromLong( _value );
@@ -202,7 +202,7 @@ namespace pybind
 #	endif
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr( unsigned int _value )
+	PyObject * ptr_throw( unsigned int _value )
 	{
 #   if PYBIND_PYTHON_VERSION < 300
 		return PyInt_FromLong( _value );
@@ -211,7 +211,7 @@ namespace pybind
 #	endif
 	}
     //////////////////////////////////////////////////////////////////////////
-	PyObject * ptr( unsigned long _value )
+	PyObject * ptr_throw( unsigned long _value )
 	{
 #   if PYBIND_PYTHON_VERSION < 300
 		return PyInt_FromLong( _value );
@@ -220,22 +220,22 @@ namespace pybind
 #	endif
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr( float _value )
+	PyObject * ptr_throw( float _value )
 	{
 		return PyFloat_FromDouble( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr( double _value )
+	PyObject * ptr_throw( double _value )
 	{
 		return PyFloat_FromDouble( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr( const char * _value )
+	PyObject * ptr_throw( const char * _value )
 	{
 		return pybind::string_from_char( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr( PyObject * _value )
+	PyObject * ptr_throw( PyObject * _value )
 	{
 		return _value;
 	}
