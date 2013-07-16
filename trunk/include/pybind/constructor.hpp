@@ -1,15 +1,18 @@
 #	pragma once
 
+#	include "pybind/adapter_interface.hpp"
+
 #	include "pybind/extract.hpp"
 #	include "pybind/exports.hpp"
 
 namespace pybind
 {
-	class PYBIND_API constructor
+	class constructor_adapter_interface
+        : public adapter_interface
 	{
 	public:
-		constructor( size_t _arity );
-		virtual ~constructor();
+		constructor_adapter_interface( size_t _arity );
+		virtual ~constructor_adapter_interface();
 
 	public:
 		bool valid( PyObject * _args ) const;
@@ -21,4 +24,6 @@ namespace pybind
 	protected:
 		size_t m_arity;
 	};
+    //////////////////////////////////////////////////////////////////////////
+    typedef stdex::intrusive_ptr<constructor_adapter_interface> constructor_adapter_interface_ptr;
 }

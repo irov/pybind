@@ -6,17 +6,17 @@
 namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
-	constructor::constructor( size_t _arity )
+	constructor_adapter_interface::constructor_adapter_interface( size_t _arity )
 		: m_arity(_arity)
 	{
 	}
 	//////////////////////////////////////////////////////////////////////////
-	constructor::~constructor()
+	constructor_adapter_interface::~constructor_adapter_interface()
 	{
 		
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool constructor::valid( PyObject * _args ) const
+	bool constructor_adapter_interface::valid( PyObject * _args ) const
 	{
 		if( pybind::tuple_check( _args ) == false )
 		{
@@ -38,7 +38,7 @@ namespace pybind
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	size_t constructor::arity() const
+	size_t constructor_adapter_interface::arity() const
 	{
 		return m_arity;
 	}

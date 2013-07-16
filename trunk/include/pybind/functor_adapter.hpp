@@ -16,7 +16,9 @@ namespace pybind
 	public:
 		virtual PyObject * call( PyObject * _args, PyObject * _kwds ) = 0;
 	};
-
+    //////////////////////////////////////////////////////////////////////////
+    typedef stdex::intrusive_ptr<class functor_adapter_interface> functor_adapter_interface_ptr;
+    //////////////////////////////////////////////////////////////////////////
 	template<class C, class F>
 	class functor_proxy_adapter
 		: public functor_adapter_interface

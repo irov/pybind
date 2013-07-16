@@ -113,7 +113,6 @@ namespace pybind
 		return result;
 	}
 
-
 	template<class T>
 	void registration_type_cast( type_cast * _type )
 	{
@@ -121,8 +120,7 @@ namespace pybind
 
 		detail::register_type_info_extract( id, _type );
 	}
-
-
+    
 	class type_cast
 	{
 	public:

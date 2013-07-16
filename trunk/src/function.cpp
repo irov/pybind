@@ -12,18 +12,18 @@ namespace pybind
 	namespace detail
 	{		
         //////////////////////////////////////////////////////////////////////////
-        static function_adapter_interface * extract_adapter_py_function( PyObject * _self )
+        static const function_adapter_interface_ptr & extract_adapter_py_function( PyObject * _self )
         {
             py_function_type * function_type = reinterpret_cast<py_function_type*>(_self);
 
-            function_adapter_interface * iadapter = function_type->iadapter;
+            const function_adapter_interface_ptr & iadapter = function_type->iadapter;
 
             return iadapter;
         }
         //////////////////////////////////////////////////////////////////////////
         static PyObject * function_kwds( PyObject * _self, PyObject * _args, PyObject * _kwds )
         {
-            function_adapter_interface * ifunction = detail::extract_adapter_py_function( _self );
+            const function_adapter_interface_ptr & ifunction = detail::extract_adapter_py_function( _self );
 
             PyObject * ret = ifunction->call( _args, _kwds );
 
@@ -52,7 +52,7 @@ namespace pybind
 			}
 
 		public:
-			PyObject * setup( function_adapter_interface * _adapter, bool _native )
+			PyObject * setup( const function_adapter_interface_ptr &  _adapter, bool _native )
 			{
 				size_t arity = _adapter->getArity();
 
@@ -99,7 +99,7 @@ namespace pybind
         function_type_scope g_function_type_scope[PYBIND_FUNCTION_COUNT];
         size_t g_function_type_scope_count = 0;
         //////////////////////////////////////////////////////////////////////////
-		PyObject * create_function_adapter( function_adapter_interface * _adapter, bool _native )
+		PyObject * create_function_adapter( const function_adapter_interface_ptr & _adapter, bool _native )
 		{
             ++g_function_type_scope_count;
 
@@ -117,7 +117,7 @@ namespace pybind
 			return py_func;
 		}
         //////////////////////////////////////////////////////////////////////////
-		void def_function_adapter( function_adapter_interface * _adapter, bool _native, PyObject * _module )
+		void def_function_adapter( const function_adapter_interface_ptr & _adapter, bool _native, PyObject * _module )
 		{
 			PyObject * py_func = create_function_adapter( _adapter, _native );
 

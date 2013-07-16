@@ -1,16 +1,15 @@
 #	pragma once
 
-#	include "pybind/types.hpp"
+#	include "pybind/functor_adapter.hpp"
 
+#	include "pybind/types.hpp"
 #	include "config/python.hpp"
 
 namespace pybind
 {
-    class functor_adapter_interface;
-
 	struct py_functor_type{
 		PyObject_HEAD
-		functor_adapter_interface * iadapter;
+		functor_adapter_interface_ptr iadapter;
 	};
 
 	py_functor_type * gen_functor();

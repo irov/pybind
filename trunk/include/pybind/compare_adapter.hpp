@@ -18,8 +18,10 @@ namespace pybind
         : public adapter_interface
     {
     public:
-        virtual bool compare( PyObject * _obj, void * _self, class_type_scope * _scope, PyObject * _compare, PybindOperatorCompare _op, bool & _result ) = 0;
+        virtual bool compare( PyObject * _obj, void * _self, const class_type_scope_ptr & _scope, PyObject * _compare, PybindOperatorCompare _op, bool & _result ) = 0;
     };
+    //////////////////////////////////////////////////////////////////////////
+    typedef stdex::intrusive_ptr<compare_adapter_interface> compare_adapter_interface_ptr;
     //////////////////////////////////////////////////////////////////////////
     template<class C, class F>
     class compare_adapter
@@ -34,7 +36,7 @@ namespace pybind
         }
 
     public:
-        bool compare( PyObject * _obj, void * _self, class_type_scope * _scope, PyObject * _compare, PybindOperatorCompare _op, bool & _result ) override
+        bool compare( PyObject * _obj, void * _self, const class_type_scope_ptr & _scope, PyObject * _compare, PybindOperatorCompare _op, bool & _result ) override
         {
             C * inst = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_name, m_class_name, _scope ) );
 

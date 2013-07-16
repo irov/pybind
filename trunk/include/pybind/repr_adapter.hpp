@@ -11,8 +11,10 @@ namespace pybind
 		: public adapter_interface
     {
 	public:
-		virtual PyObject * repr( PyObject * _obj, void * _self, class_type_scope * _scope ) = 0;
+		virtual PyObject * repr( PyObject * _obj, void * _self, const class_type_scope_ptr & _scope ) = 0;
 	};
+    //////////////////////////////////////////////////////////////////////////
+    typedef stdex::intrusive_ptr<repr_adapter_interface> repr_adapter_interface_ptr;
 	//////////////////////////////////////////////////////////////////////////
 	template<class C, class F>
 	class repr_adapter
@@ -27,7 +29,7 @@ namespace pybind
 		}
 
 	public:
-		PyObject * repr( PyObject * _obj, void * _self, class_type_scope * _scope ) override
+		PyObject * repr( PyObject * _obj, void * _self, const class_type_scope_ptr & _scope ) override
 		{
 			C * inst = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_name, m_class_name, _scope ) );
 

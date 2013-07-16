@@ -11,14 +11,14 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	struct py_method_generator_type{
 		PyObject_HEAD
-		method_adapter_interface * iadapter;
+		method_adapter_interface_ptr iadapter;
 		PyTypeObject * classtype;
 		PyObject * methodname;
 	};
 	//////////////////////////////////////////////////////////////////////////
 	struct py_method_caller_type{
 		PyObject_HEAD
-		method_adapter_interface * iadapter;
+		method_adapter_interface_ptr iadapter;
 		PyObject * self;
 	};
 	//////////////////////////////////////////////////////////////////////////
@@ -43,9 +43,11 @@ namespace pybind
 			return 0;
 		}
 
-		class_type_scope * scope = detail::get_class_scope( mct->self->ob_type );
+		const class_type_scope_ptr & scope = detail::get_class_scope( mct->self->ob_type );
 
-		return mct->iadapter->call( impl, scope, _args, _kwds );
+        PyObject * py_value = mct->iadapter->call( impl, scope, _args, _kwds );
+
+		return py_value;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	STATIC_DECLARE_VALUE_BEGIN(PyTypeObject, s_method_caller_type)
@@ -186,7 +188,7 @@ namespace pybind
 	{
 		py_method_generator_type * mgt = (py_method_generator_type *)_obj;
 
-		delete mgt->iadapter;
+		mgt->iadapter = nullptr;
 
 		Py_DecRef( (PyObject *)mgt->classtype );
 		Py_DecRef( mgt->methodname );
@@ -248,7 +250,7 @@ namespace pybind
 	//{
 	//}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * method_type_scope::instance( const char * _name, method_adapter_interface * _ifunc, PyTypeObject * _type )
+	PyObject * method_type_scope::instance( const char * _name, const method_adapter_interface_ptr & _ifunc, PyTypeObject * _type )
 	{
 		py_method_generator_type * self = (py_method_generator_type *)PyType_GenericAlloc( &STATIC_VAR(s_method_generator_type), 0 );
 

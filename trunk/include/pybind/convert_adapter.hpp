@@ -10,6 +10,8 @@ namespace pybind
 	public:
 		virtual bool convert( PyObject * _obj, void * _place ) = 0;
 	};
+    //////////////////////////////////////////////////////////////////////////
+    typedef stdex::intrusive_ptr<convert_adapter_interface> convert_adapter_interface_ptr;
 	//////////////////////////////////////////////////////////////////////////
 	template<class F>
 	class convert_adapter

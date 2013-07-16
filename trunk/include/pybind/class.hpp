@@ -65,7 +65,7 @@ namespace pybind
 		template<class F>
 		base_ & def( const char * _name, F f )
 		{			
-			method_adapter_interface * iadapter =
+			method_adapter_interface_ptr iadapter =
 				new method_adapter<C, F>(f, _name);
 
             class_core::def_method( _name, iadapter, m_info );
@@ -76,7 +76,7 @@ namespace pybind
         template<class F>
         base_ & def_depricated( const char * _name, F f, const char * _doc )
         {			
-            method_adapter_interface * iadapter =
+            method_adapter_interface_ptr iadapter =
                 new method_adapter_depricated<C, F>(f, _name, _doc);
 
             class_core::def_method( _name, iadapter, m_info );
@@ -87,7 +87,7 @@ namespace pybind
 		template<class F>
 		base_ & def_native( const char * _name, F f )
 		{			
-			method_adapter_interface * iadapter =
+			method_adapter_interface_ptr iadapter =
 				new method_adapter_native<C, F>(f, _name);
 
 			class_core::def_method( _name, iadapter, m_info );
@@ -98,7 +98,7 @@ namespace pybind
 		template<class F>
 		base_ & def_convert( F f, void * _user )
 		{
-			convert_adapter_interface * iadapter =
+			convert_adapter_interface_ptr iadapter =
 				new convert_adapter<F>(f, _user);
 
 			class_core::def_convert( iadapter, m_info );
@@ -109,7 +109,7 @@ namespace pybind
 		template<class F>
 		base_ & def_static( const char * _name, F f )
 		{			
-			method_adapter_interface * iadapter =
+			method_adapter_interface_ptr iadapter =
 				new method_adapter_proxy_function<C, F>(f, _name);
 
 			class_core::def_method( _name, iadapter, m_info );
@@ -120,7 +120,7 @@ namespace pybind
 		template<class P, class F>
 		base_ & def_proxy_static( const char * _name, P * _proxy, F f )
 		{
-			method_adapter_interface * iadapter =
+			method_adapter_interface_ptr iadapter =
 				new method_adapter_proxy_member<C, P, F>(_proxy, f, _name);
 
 			class_core::def_method( _name, iadapter, m_info );
@@ -131,7 +131,7 @@ namespace pybind
 		template<class A>
 		base_ & def_member( const char * _name, A C:: * a )
 		{
-			member_adapter_interface * iadapter =
+			member_adapter_interface_ptr iadapter =
 				new member_adapter<C, A>(_name, a);
 
 			class_core::def_member( _name, iadapter, m_info );
@@ -142,7 +142,7 @@ namespace pybind
 		template<class FG, class FS>
 		base_ & def_property( const char * _name, FG _get, FS _set )
 		{
-			member_adapter_interface * iadapter =
+			member_adapter_interface_ptr iadapter =
 				new member_adapter_property<C, FG, FS>(_name, _get, _set);
 
 			class_core::def_member( _name, iadapter, m_info );
@@ -153,7 +153,7 @@ namespace pybind
 		template<class FG, class FS>
 		base_ & def_property_static( const char * _name, FG _get, FS _set )
 		{
-			member_adapter_interface * iadapter =
+			member_adapter_interface_ptr iadapter =
 				new member_adapter_property_static<C, FG, FS>(_name, _get, _set);
 
 			class_core::def_member( _name, iadapter, m_info );
@@ -164,7 +164,7 @@ namespace pybind
         template<class F>
         base_ & def_call( F _fn )
         {
-            method_adapter_interface * iadapter =
+            method_adapter_interface_ptr iadapter =
                 new method_adapter<C, F>( _fn, "__call__" );
 
             class_core::def_call( iadapter, m_info );
@@ -175,7 +175,7 @@ namespace pybind
 		template<class F>
 		base_ & def_repr( F _fn )
 		{
-			repr_adapter_interface * iadapter =
+			repr_adapter_interface_ptr iadapter =
 				new repr_adapter<C, F>( _fn );
 
 			class_core::def_repr( iadapter, m_info );
@@ -186,7 +186,7 @@ namespace pybind
         template<class F>
         base_ & def_hash( F _fn )
         {
-            hash_adapter_interface * iadapter =
+            hash_adapter_interface_ptr iadapter =
                 new hash_adapter<C, F>( _fn );
 
             class_core::def_hash( iadapter, m_info );
@@ -197,7 +197,7 @@ namespace pybind
         template<class F>
         base_ & def_compare( F _fn )
         {
-            compare_adapter_interface * iadapter =
+            compare_adapter_interface_ptr iadapter =
                 new compare_adapter<C, F>( _fn );
 
             class_core::def_compare( iadapter, m_info );
@@ -208,7 +208,7 @@ namespace pybind
 		template<class F>
 		base_ & def_getattro( F _fn )
 		{
-			method_adapter_interface * iadapter =
+			method_adapter_interface_ptr iadapter =
 				new method_adapter<C, F>(_fn, "getattro");
 
 			class_core::def_getattro( iadapter, m_info );
@@ -219,7 +219,7 @@ namespace pybind
 		template<class F>
 		base_ & def_mapping( F _fn )
 		{
-			method_adapter_interface * iadapter =
+			method_adapter_interface_ptr iadapter =
 				new method_adapter<C, F>(_fn, "getmap");
 
 			class_core::def_mapping( iadapter, m_info );
@@ -244,7 +244,7 @@ namespace pybind
 		template<class F>
 		base_ & def_static_sequence( F _fn )
 		{
-			method_adapter_interface * iadapter =
+			method_adapter_interface_ptr iadapter =
 				new method_adapter_proxy_function<C, F>(_fn, "sequence");
 
 			class_core::def_sequence( iadapter, m_info );
@@ -253,7 +253,7 @@ namespace pybind
 		}
         
 		static void *
-			new_( pybind::class_type_scope * _scope, PyObject * _obj, PyObject * _args, PyObject * _kwds )
+			new_( const pybind::class_type_scope_ptr & _scope, PyObject * _obj, PyObject * _args, PyObject * _kwds )
 		{
             (void)_kwds;
 
@@ -263,7 +263,7 @@ namespace pybind
 		}
 
         static void *
-            new_interface( pybind::class_type_scope * _scope, PyObject * _obj, PyObject * _args, PyObject * _kwds )
+            new_interface( const pybind::class_type_scope_ptr & _scope, PyObject * _obj, PyObject * _args, PyObject * _kwds )
         {
             (void)_scope;
             (void)_obj;
@@ -276,14 +276,14 @@ namespace pybind
         }
 
 		static void 
-			dealloc_only_python_( pybind::class_type_scope * _scope, void * _impl )
+			dealloc_only_python_( const pybind::class_type_scope_ptr & _scope, void * _impl )
 		{
             (void)_scope;
             (void)_impl;
 		}
 
 		static void			
-            dealloc_( pybind::class_type_scope * _scope, void * _impl )
+            dealloc_( const pybind::class_type_scope_ptr & _scope, void * _impl )
 		{
             (void)_scope;
 
@@ -293,7 +293,7 @@ namespace pybind
 		}
 
         static void
-            dealloc_only_destructor_( pybind::class_type_scope * _scope, void * _impl )
+            dealloc_only_destructor_( const pybind::class_type_scope_ptr & _scope, void * _impl )
         {
             (void)_scope;
 
@@ -304,11 +304,11 @@ namespace pybind
             obj->~C();
         }
 
-		static class_type_scope * get_scope()
+		static const pybind::class_type_scope_ptr & get_scope()
 		{
 			size_t cinfo = class_info<C>();
 
-            class_type_scope * scope = detail::get_class_type_scope( cinfo );
+            const pybind::class_type_scope_ptr & scope = detail::get_class_type_scope( cinfo );
 
 			return scope;
 		}
@@ -424,7 +424,7 @@ namespace pybind
         template<class C0, class C1, class C2, class C3, class C4, class C5>
         class_ & def_constructor( const init<C0,C1,C2,C3,C4,C5> & _init )
         {
-            constructor * ctr = 
+            constructor_adapter_interface_ptr ctr = 
                 new constructor_new<C, init<C0,C1,C2,C3,C4,C5> >();
 
             class_type_scope * scope = base_<C,B>::get_scope();
@@ -464,7 +464,7 @@ namespace pybind
         template<class C0, class C1, class C2, class C3, class C4, class C5>
         proxy_ & def_constructor( const init<C0,C1,C2,C3,C4,C5> & _init )
         {
-            constructor * ctr = 
+            constructor_adapter_interface_ptr ctr = 
                 new constructor_new<C, init<C0,C1,C2,C3,C4,C5> >();
 
             class_type_scope * scope = base_<C,B>::get_scope();
@@ -503,10 +503,11 @@ namespace pybind
         {
             (void)_init;
 
-            constructor * ctr = 
+            constructor_adapter_interface_ptr ctr = 
                 new constructor_new<C, init<C0,C1,C2,C3,C4,C5> >();
 
-            class_type_scope * scope = base_<C,B>::get_scope();
+            const class_type_scope_ptr & scope = base_<C,B>::get_scope();
+
             class_core::def_init( scope, ctr );
 
             return *this;
@@ -542,10 +543,10 @@ namespace pybind
         {
             (void)_init;
 
-            constructor * ctr = 
+            constructor_adapter_interface_ptr ctr = 
                 new constructor_placement<C, init<C0,C1,C2,C3,C4,C5> >();
 
-            class_type_scope * scope = base_<C,B>::get_scope();
+            const class_type_scope_ptr & scope = base_<C,B>::get_scope();
             class_core::def_init( scope, ctr );
 
             return *this;

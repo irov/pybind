@@ -15,10 +15,12 @@ namespace pybind
 		: public adapter_interface
 	{
 	public:
-		virtual PyObject * get( void * _self, class_type_scope * _scope ) = 0;
-		virtual int set( void * _self, PyObject * _args, class_type_scope * _scope ) = 0;
+		virtual PyObject * get( void * _self, const class_type_scope_ptr & _scope ) = 0;
+		virtual int set( void * _self, PyObject * _args, const class_type_scope_ptr & _scope ) = 0;
 	};
-
+    //////////////////////////////////////////////////////////////////////////
+    typedef stdex::intrusive_ptr<member_adapter_interface> member_adapter_interface_ptr;
+    //////////////////////////////////////////////////////////////////////////
 	template<class C, class A>
 	class member_adapter
 		: public member_adapter_interface
@@ -33,7 +35,7 @@ namespace pybind
 		}
 
 	public:
-		PyObject * get( void * _self, class_type_scope * _scope ) override
+		PyObject * get( void * _self, const class_type_scope_ptr & _scope ) override
 		{
 			C * obj = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_id, m_class_id, _scope ) );
 
@@ -42,7 +44,7 @@ namespace pybind
 			return py_value;
 		}
 
-		int set( void * _self, PyObject * _args, class_type_scope * _scope ) override
+		int set( void * _self, PyObject * _args, const class_type_scope_ptr & _scope ) override
 		{
 			C * obj = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_id, m_class_id, _scope ) );
 
@@ -74,7 +76,7 @@ namespace pybind
 		}
 
 	public:
-		PyObject * get( void * _self, class_type_scope * _scope ) override
+		PyObject * get( void * _self, const class_type_scope_ptr & _scope ) override
 		{
 			C * obj = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_id, m_class_id, _scope ) );
 
@@ -83,7 +85,7 @@ namespace pybind
 			return py_value;
 		}
 
-		int set( void * _self, PyObject * _args, class_type_scope * _scope ) override
+		int set( void * _self, PyObject * _args, const class_type_scope_ptr & _scope ) override
 		{
 			C * obj = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_id, m_class_id, _scope ) );
 
@@ -121,7 +123,7 @@ namespace pybind
 		}
 
 	public:
-		PyObject * get( void * _self, class_type_scope * _scope ) override
+		PyObject * get( void * _self, const class_type_scope_ptr & _scope ) override
 		{
 			C * obj = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_id, m_class_id, _scope ) );
 
@@ -130,7 +132,7 @@ namespace pybind
 			return py_value;
 		}
 
-		int set( void * _self, PyObject * _args, class_type_scope * _scope ) override
+		int set( void * _self, PyObject * _args, const class_type_scope_ptr & _scope ) override
 		{
 			C * obj = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_id, m_class_id, _scope ) );
 

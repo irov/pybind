@@ -85,7 +85,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../include;D:\Projects\Mengine\dependencies\Python\;D:\Projects\Mengine\dependencies\Python\PC;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../include;D:\Projects\Mengine\dependencies\stdex\include;D:\Projects\Mengine\dependencies\Python\;D:\Projects\Mengine\dependencies\Python\PC;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -189,16 +189,12 @@
     <ClInclude Include="..\include\pybind\function_call.hpp" />
     <ClInclude Include="..\include\pybind\function_parser.hpp" />
     <ClInclude Include="..\include\pybind\function_proxy_call.hpp" />
-    <ClInclude Include="..\include\pybind\function_type.hpp" />
     <ClInclude Include="..\include\pybind\functor.hpp" />
     <ClInclude Include="..\include\pybind\functor_adapter.hpp" />
-    <ClInclude Include="..\include\pybind\functor_type.hpp" />
     <ClInclude Include="..\include\pybind\member_adapter.hpp" />
-    <ClInclude Include="..\include\pybind\member_type.hpp" />
     <ClInclude Include="..\include\pybind\method_adapter.hpp" />
     <ClInclude Include="..\include\pybind\method_call.hpp" />
     <ClInclude Include="..\include\pybind\method_proxy_call.hpp" />
-    <ClInclude Include="..\include\pybind\method_type.hpp" />
     <ClInclude Include="..\include\pybind\object.hpp" />
     <ClInclude Include="..\include\pybind\pybind.hpp" />
     <ClInclude Include="..\include\pybind\repr_adapter.hpp" />
@@ -208,6 +204,10 @@
     <ClInclude Include="..\include\pybind\types.hpp" />
     <ClInclude Include="..\include\config\config.hpp" />
     <ClInclude Include="..\include\config\python.hpp" />
+    <ClInclude Include="..\src\function_type.hpp" />
+    <ClInclude Include="..\src\functor_type.hpp" />
+    <ClInclude Include="..\src\member_type.hpp" />
+    <ClInclude Include="..\src\method_type.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
