@@ -2,6 +2,8 @@
 
 #	include <memory.h>
 
+#   include "stdex/intrusive_ptr.h"
+
 extern "C" 
 { 
 	struct _object;
@@ -16,7 +18,7 @@ extern "C"
 
 namespace pybind
 {
-	class class_type_scope;
+    typedef stdex::intrusive_ptr<class class_type_scope> class_type_scope_ptr;
 
 	typedef void * (*pybind_metacast)( void * );
 
@@ -27,8 +29,8 @@ namespace pybind
 	typedef PyObject *(*pybind_getter)(PyObject *, void *);
 	typedef int (*pybind_setter)(PyObject *, PyObject *, void *);
 
-	typedef void * (*pybind_new)( class_type_scope * _scope, PyObject * _obj, PyObject * _args, PyObject * _kwds );
-	typedef void (*pybind_destructor)( class_type_scope * _scope, void * impl );
+	typedef void * (*pybind_new)( const class_type_scope_ptr & _scope, PyObject * _obj, PyObject * _args, PyObject * _kwds );
+	typedef void (*pybind_destructor)( const class_type_scope_ptr & _scope, void * impl );
 
 #	ifdef PYBIND_VISIT_OBJECTS
 	class pybind_visit_objects

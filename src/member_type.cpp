@@ -14,7 +14,7 @@ namespace pybind
 	{
 		py_member_type * mt = (py_member_type *)(_obj);
 
-		delete mt->iadpter;
+		mt->iadpter = nullptr;
 
 #   if PYBIND_PYTHON_VERSION < 300
 		mt->ob_type->tp_free( mt );		
@@ -37,7 +37,7 @@ namespace pybind
 			return 0;
 		}
 
-		class_type_scope * scope = detail::get_class_scope( py_self->ob_type );
+		const class_type_scope_ptr & scope = detail::get_class_scope( py_self->ob_type );
         
         PyObject * py_method = mt->iadpter->get( impl, scope );
 
@@ -59,7 +59,7 @@ namespace pybind
 			return 0;
 		}
 
-		class_type_scope * scope = detail::get_class_scope( py_self->ob_type );
+		const class_type_scope_ptr & scope = detail::get_class_scope( py_self->ob_type );
 
 		mt->iadpter->set( impl, py_value, scope );
 
@@ -84,7 +84,7 @@ namespace pybind
     }
     STATIC_DECLARE_VALUE_END();
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * member_type_scope::instance( const char * _name, member_adapter_interface * _iadpter )
+	PyObject * member_type_scope::instance( const char * _name, const member_adapter_interface_ptr & _iadpter )
 	{
 		py_member_type * py_member = (py_member_type *)PyType_GenericAlloc( &STATIC_VAR(s_member_type), 0 );
 

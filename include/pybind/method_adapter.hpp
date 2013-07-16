@@ -17,9 +17,11 @@ namespace pybind
 		: public adapter_interface
 	{
 	public:
-		virtual PyObject * call( void * _self, class_type_scope * scope, PyObject * _args, PyObject * _kwds ) = 0;
+		virtual PyObject * call( void * _self, const class_type_scope_ptr & scope, PyObject * _args, PyObject * _kwds ) = 0;
 	};
-
+    //////////////////////////////////////////////////////////////////////////
+    typedef stdex::intrusive_ptr<method_adapter_interface> method_adapter_interface_ptr;
+    //////////////////////////////////////////////////////////////////////////
 	template<class F>
 	class method_adapter_helper
 	{
@@ -85,7 +87,7 @@ namespace pybind
 		}
 
 	public:
-		PyObject * call( void * _self, class_type_scope * _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( void * _self, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
             (void)_kwds;
 
@@ -115,7 +117,7 @@ namespace pybind
         }
 
     public:
-        PyObject * call( void * _self, class_type_scope * _scope, PyObject * _args, PyObject * _kwds ) override
+        PyObject * call( void * _self, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
         {
             size_t scopeId = this->getScopeId();
             const char * scopeName = detail::get_class_type_info( scopeId );
@@ -153,7 +155,7 @@ namespace pybind
 		}
 
 	public:
-		PyObject * call( void * _self, class_type_scope * _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( void * _self, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
             (void)_kwds;
 
@@ -187,7 +189,7 @@ namespace pybind
 		}
 
 	public:
-		PyObject * call( void * _self, class_type_scope * _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( void * _self, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
             (void)_kwds;
 
@@ -218,7 +220,7 @@ namespace pybind
 		}
 
 	public:
-		PyObject * call( void * _self, class_type_scope * _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( void * _self, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
 			size_t scopeId = this->getScopeId();
 			size_t classId = this->getClassId();

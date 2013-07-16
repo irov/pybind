@@ -11,18 +11,20 @@ namespace pybind
 	namespace detail
 	{
         //////////////////////////////////////////////////////////////////////////
-        static functor_adapter_interface* extract_adapter_py_functor( PyObject * _self )
+        static const functor_adapter_interface_ptr & extract_adapter_py_functor( PyObject * _self )
         {
             py_functor_type * functor_type = reinterpret_cast<py_functor_type*>(_self);
 
-            return functor_type->iadapter;
+            const functor_adapter_interface_ptr & adapter = functor_type->iadapter;
+
+            return adapter;
         }
         //////////////////////////////////////////////////////////////////////////
         static PyObject * functor_kwds( PyObject * _self, PyObject * _args, PyObject * _kwds )
         {
-            functor_adapter_interface * ifunction = detail::extract_adapter_py_functor( _self );
+            const functor_adapter_interface_ptr & adapter = detail::extract_adapter_py_functor( _self );
 
-            PyObject * ret = ifunction->call( _args, _kwds );
+            PyObject * ret = adapter->call( _args, _kwds );
 
             return ret;
         }
@@ -45,7 +47,7 @@ namespace pybind
 			}
 
 		public:
-			PyObject * setup( functor_adapter_interface * _adapter )
+			PyObject * setup( const functor_adapter_interface_ptr & _adapter )
 			{
                 int arity = _adapter->getArity();
                 const char * name = _adapter->getName();
@@ -82,7 +84,7 @@ namespace pybind
         functor_type_scope g_functor_type_scope[PYBIND_FUNCTOR_COUNT];
         size_t g_functor_type_scope_count = 0;
         //////////////////////////////////////////////////////////////////////////
-        static PyObject * create_functor_adapter( functor_adapter_interface * _adapter )
+        static PyObject * create_functor_adapter( const functor_adapter_interface_ptr & _adapter )
         {
             ++g_functor_type_scope_count;
 
@@ -90,7 +92,7 @@ namespace pybind
             {
                 pybind::throw_exception();
 
-                return NULL;
+                return nullptr;
             }
 
             functor_type_scope & cfunc_type = g_functor_type_scope[g_functor_type_scope_count];
@@ -100,7 +102,7 @@ namespace pybind
             return py_func;
         }
         //////////////////////////////////////////////////////////////////////////
-		void def_functor( functor_adapter_interface * _adapter, PyObject * _module )
+		void def_functor( const functor_adapter_interface_ptr & _adapter, PyObject * _module )
 		{
             PyObject * py_func = create_functor_adapter( _adapter );
 

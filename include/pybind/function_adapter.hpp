@@ -20,6 +20,8 @@ namespace pybind
 		virtual PyObject * call( PyObject * _args, PyObject * _kwds ) = 0;
 	};
 
+    typedef stdex::intrusive_ptr<function_adapter_interface> function_adapter_interface_ptr;
+
 	template<class F>
 	class function_adapter_helper
 	{

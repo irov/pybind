@@ -85,11 +85,11 @@ namespace pybind
 
 	template<class C, class P>
 	class constructor_placement
-		: public constructor
+		: public constructor_adapter_interface
 	{
 	public:
 		constructor_placement()
-			: constructor( P::base_arity )
+			: constructor_adapter_interface( P::base_arity )
 		{
 		}
 

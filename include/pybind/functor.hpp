@@ -11,7 +11,7 @@ namespace pybind
 	namespace detail
 	{
 		PYBIND_API void def_functor(			
-			functor_adapter_interface * _adapter,
+			const functor_adapter_interface_ptr & _adapter,
 			PyObject * _module );
 	}
 
@@ -20,7 +20,7 @@ namespace pybind
 	{
 		typedef typename function_parser<F>::result t_info;
 
-		functor_adapter_interface * imethod =
+		functor_adapter_interface_ptr imethod =
 			new functor_proxy_adapter<typename t_info::class_type, F>(_self, _method, _name);
 
 		detail::def_functor(

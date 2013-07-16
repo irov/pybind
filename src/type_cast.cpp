@@ -55,9 +55,9 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
 		bool convert_object( PyObject * _obj, size_t _tinfo, void * _place )
 		{
-			class_type_scope * scope = detail::get_class_type_scope( _tinfo );
+			const class_type_scope_ptr & scope = detail::get_class_type_scope( _tinfo );
 
-			convert_adapter_interface * convert = scope->get_convert();
+			const convert_adapter_interface_ptr & convert = scope->get_convert();
 
 			if( convert == nullptr )
 			{
@@ -85,8 +85,8 @@ namespace pybind
 				return false;
 			}
 
-			class_type_scope * scope = detail::get_class_scope( _obj->ob_type );
-			class_type_scope * cur_scope = detail::get_class_type_scope( _tinfo );
+			const class_type_scope_ptr & scope = detail::get_class_scope( _obj->ob_type );
+			const class_type_scope_ptr & cur_scope = detail::get_class_type_scope( _tinfo );
 
 			if( scope != cur_scope )
 			{
@@ -112,8 +112,8 @@ namespace pybind
 			return false;
 		}
 
-		class_type_scope * scope = detail::get_class_scope( _obj->ob_type );
-		class_type_scope * cur_scope = detail::get_class_type_scope( _tinfo );
+		const class_type_scope_ptr & scope = detail::get_class_scope( _obj->ob_type );
+		const class_type_scope_ptr & cur_scope = detail::get_class_type_scope( _tinfo );
 
 		if( cur_scope != scope )
 		{

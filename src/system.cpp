@@ -84,6 +84,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
 	void finalize()
 	{	
+        Py_Finalize();
+
 		class_core::finalize();
 		
 		finalize_methods();
@@ -91,8 +93,6 @@ namespace pybind
 		finalize_function();
 		finalize_functor();
         finialize_type_cast();
-
-        Py_Finalize();
 
 		//finalize_default_type_cast();
 	}
@@ -901,7 +901,7 @@ namespace pybind
 	bool type_initialize( PyObject * _value )
 	{
 		PyTypeObject * type = (PyTypeObject *)_value;
-		class_type_scope * scope = detail::get_class_scope( type );
+		const class_type_scope_ptr & scope = detail::get_class_scope( type );
 
 		if( scope == 0 )
 		{
