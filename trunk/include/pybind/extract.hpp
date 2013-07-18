@@ -121,24 +121,6 @@ namespace pybind
         
 		return value;
 	}
-
-    template<class T>
-    PyObject * ptr( const T & _value )
-    {
-        try
-        {
-            PyObject * value = ptr_throw( _value );
-
-            return value;
-        }
-        catch( const pybind::pybind_exception & )
-        {
-        }
-
-        check_error();
-
-        return nullptr;
-    }
     
 	template<class T>
 	PyObject * ptr_throw( const T & _value )
@@ -186,5 +168,23 @@ namespace pybind
 	PYBIND_API PyObject * ptr_throw( double _value );
 	PYBIND_API PyObject * ptr_throw( const char * _value );
 	PYBIND_API PyObject * ptr_throw( PyObject * _value );
+
+    template<class T>
+    PyObject * ptr( const T & _value )
+    {
+        try
+        {
+            PyObject * value = ptr_throw( _value );
+
+            return value;
+        }
+        catch( const pybind::pybind_exception & )
+        {
+        }
+
+        check_error();
+
+        return nullptr;
+    }
 }
 

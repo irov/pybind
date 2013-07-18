@@ -12,7 +12,7 @@ namespace pybind
 	{
 	public:
 		constructor_adapter_interface( size_t _arity );
-		virtual ~constructor_adapter_interface();
+		~constructor_adapter_interface();
 
 	public:
 		bool valid( PyObject * _args ) const;

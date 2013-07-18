@@ -106,7 +106,7 @@ namespace pybind
 	bool initialize_members()
 	{
 		STATIC_VAR(s_member_type).tp_name = "member_type_scope";
-		STATIC_VAR(s_member_type).tp_basicsize = sizeof( py_member_type );
+		STATIC_VAR(s_member_type).tp_basicsize = sizeof(py_member_type);
 		STATIC_VAR(s_member_type).tp_dealloc = &py_dealloc;
 		STATIC_VAR(s_member_type).tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
 

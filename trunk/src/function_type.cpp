@@ -18,13 +18,17 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
 	static void py_dealloc( PyObject * _obj )
 	{
+        py_function_type * py_self = (py_function_type *)_obj;
+
+        py_self->iadapter = nullptr;
+
 		_obj->ob_type->tp_free( _obj );
 	}
     //////////////////////////////////////////////////////////////////////////
 	bool initialize_function()
 	{
 		STATIC_VAR(s_function_type).tp_name = "function_type_scope";
-		STATIC_VAR(s_function_type).tp_basicsize = sizeof( py_function_type );
+		STATIC_VAR(s_function_type).tp_basicsize = sizeof(py_function_type);
 		STATIC_VAR(s_function_type).tp_dealloc = &py_dealloc;
 		STATIC_VAR(s_function_type).tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
 
