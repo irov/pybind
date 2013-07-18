@@ -26,6 +26,8 @@ namespace pybind
 	{
 		py_method_caller_type * mct = (py_method_caller_type *)_obj;
 
+        mct->iadapter = nullptr;
+
 		Py_DecRef( mct->self );
 
 		PyObject_Free( _obj );

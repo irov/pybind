@@ -3,6 +3,7 @@
 #	include "pybind/exports.hpp"
 #	include "pybind/types.hpp"
 
+#   include "stdex/intrusive_ptr_base.h"
 #   include "stdex/intrusive_ptr.h"
 
 #	ifdef PYBIND_VISIT_OBJECTS
@@ -53,14 +54,11 @@ namespace pybind
 	}
 
 	class class_type_scope
+        : public stdex::intrusive_ptr_base
 	{
 	public:
 		class_type_scope( const char * _name, size_t _type_name, PyObject * _module, void * _user, pybind_new _pynew, pybind_destructor _pydestructor, bool _pod );
 		~class_type_scope();
-
-    protected:
-        friend void intrusive_ptr_add_ref( class_type_scope * _ptr );
-        friend void intrusive_ptr_release( class_type_scope * _ptr );
 
 	public:
 		void initialize();
@@ -110,13 +108,11 @@ namespace pybind
         size_t getObjectCount() const;
 
     protected:
-        void destroy();
+        void destroy() override;
 
 	public:
         const char * m_name;
         size_t m_type;
-
-        size_t m_refcount;
 
         struct Metacast
         {
@@ -162,19 +158,6 @@ namespace pybind
 		TListObjects m_objects;
 #	endif
 	};
-    //////////////////////////////////////////////////////////////////////////
-    inline void intrusive_ptr_add_ref( class_type_scope * _ptr )
-    {
-        ++_ptr->m_refcount;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    inline void intrusive_ptr_release( class_type_scope * _ptr )
-    {
-        if( --_ptr->m_refcount == 0 )
-        {
-            _ptr->destroy();
-        }
-    }
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<class_type_scope> class_type_scope_ptr;
 

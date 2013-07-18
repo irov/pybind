@@ -602,7 +602,6 @@ namespace pybind
 	class_type_scope::class_type_scope( const char * _name, size_t _type_name, PyObject * _module, void * _user, pybind_new _pynew, pybind_destructor _pydestructor, bool _pod )
 		: m_name(_name)
 		, m_type(_type_name)
-        , m_refcount(0)
 		, m_module(_module)
         , m_user(_user)
 		, m_pynew(_pynew)
@@ -616,6 +615,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	class_type_scope::~class_type_scope()
 	{
+        this->finalize();
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::initialize()
