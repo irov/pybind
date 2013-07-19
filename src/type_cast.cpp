@@ -17,18 +17,20 @@ namespace pybind
 	namespace detail
 	{        
         //////////////////////////////////////////////////////////////////////////
-        type_cast * g_type_cast[PYBIND_TYPE_COUNT];
+        type_cast_ptr g_type_cast[PYBIND_TYPE_COUNT];
         //////////////////////////////////////////////////////////////////////////
-		void register_type_info_extract( size_t _info, type_cast * _cast )
+		void register_type_info_extract( size_t _info, const type_cast_ptr & _cast )
 		{	
 			g_type_cast[_info] = _cast;
 		}
         //////////////////////////////////////////////////////////////////////////
 		type_cast * find_type_info_extract( size_t _info )
 		{
-            type_cast * cast = g_type_cast[_info];
+            const type_cast_ptr & cast = g_type_cast[_info];
 
-			return cast;
+            type_cast * t = cast.get();
+
+			return t;
 		}
         //////////////////////////////////////////////////////////////////////////
 		void error_invalid_extract( PyObject * _obj, size_t _tinfo )
@@ -132,15 +134,14 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool initialize_type_cast()
     {
-        for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
-        {
-            detail::g_type_cast[index] = nullptr;
-        }
-
         return true;
     }
     //////////////////////////////////////////////////////////////////////////
     void finialize_type_cast()
-    {        
+    {     
+        for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
+        {
+            detail::g_type_cast[index] = nullptr;
+        }
     }
 }
