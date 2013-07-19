@@ -5,13 +5,38 @@
 
 #   include "pybind/class_info.hpp"
 
+#   include "stdex/intrusive_ptr_base.h"
+#   include "stdex/intrusive_ptr.h"
+
 namespace pybind
 {
-	class type_cast;
+    class type_cast
+        : public stdex::intrusive_ptr_base
+    {
+    public:
+        type_cast()
+        {
+        }
+
+        virtual ~type_cast()
+        {
+        }
+
+    public:
+        void destroy() override
+        {
+            delete this;
+        }
+
+    protected:
+        bool type_info_cast( PyObject * _obj, size_t _tinfo, size_t _tptrinfo, void ** _impl );
+    };
+
+    typedef stdex::intrusive_ptr<type_cast> type_cast_ptr;
 
 	namespace detail
 	{
-		PYBIND_API void register_type_info_extract( size_t _info, type_cast * _type );
+		PYBIND_API void register_type_info_extract( size_t _info, const type_cast_ptr & _type );
 		PYBIND_API type_cast * find_type_info_extract( size_t _info );
 
 		PYBIND_API void error_invalid_extract( PyObject * _obj, size_t _tinfo );
@@ -114,28 +139,13 @@ namespace pybind
 	}
 
 	template<class T>
-	void registration_type_cast( type_cast * _type )
+	void registration_type_cast( const type_cast_ptr & _type )
 	{
 		size_t id = class_info<T>();
 
 		detail::register_type_info_extract( id, _type );
 	}
     
-	class type_cast
-	{
-	public:
-		type_cast()
-		{
-		}
-
-		virtual ~type_cast()
-		{
-		}
-
-	protected:
-		bool type_info_cast( PyObject * _obj, size_t _tinfo, size_t _tptrinfo, void ** _impl );
-	};
-
 	template<class T>
 	class type_cast_result
 		: public type_cast
