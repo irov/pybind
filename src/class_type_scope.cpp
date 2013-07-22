@@ -604,6 +604,7 @@ namespace pybind
 		, m_type(_type_name)
 		, m_module(_module)
         , m_user(_user)
+        , m_objectCount(0)
 		, m_pynew(_pynew)
 		, m_pydestructor(_pydestructor)
         , m_pod(_pod)
@@ -713,10 +714,11 @@ namespace pybind
 		    m_pytypeobject->tp_del = py_del;
         }
 
-		//PyType_Modified( m_pytypeobject );
+		PyType_Modified( m_pytypeobject );
 
 		//Py_IncRef( m_pytypeobject );	
-
+        
+        Py_IncRef( (PyObject*)m_pytypeobject );
 		PyModule_AddObject( m_module, m_pytypeobject->tp_name, (PyObject*)m_pytypeobject );
 	}
     //////////////////////////////////////////////////////////////////////////
@@ -726,7 +728,7 @@ namespace pybind
         m_pytypeobject->tp_dict = PyDict_New();
         Py_DecRef( dummy );
 
-        //Py_DECREF( m_pytypeobject );
+        Py_DECREF( (PyObject*)m_pytypeobject );
 
         m_pyconstructor = nullptr;
 
