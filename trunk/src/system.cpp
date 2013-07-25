@@ -641,7 +641,7 @@ namespace pybind
 		return true;
 	}
     //////////////////////////////////////////////////////////////////////////
-	bool dict_set( PyObject * _dict, const char * _name, PyObject * _value )
+	bool dict_setstring( PyObject * _dict, const char * _name, PyObject * _value )
 	{
         int res = PyDict_SetItemString( _dict, _name, _value );
 
@@ -654,6 +654,20 @@ namespace pybind
 
 		return true;
 	}
+    //////////////////////////////////////////////////////////////////////////
+    bool dict_set( PyObject * _dict, PyObject * _name, PyObject * _value )
+    {
+        int res = PyDict_SetItem( _dict, _name, _value );
+
+        if( res == -1 )
+        {
+            check_error();
+
+            return false;
+        }
+
+        return true;
+    }
     //////////////////////////////////////////////////////////////////////////
     bool dict_remove( PyObject * _dict, const char * _name )
     {
