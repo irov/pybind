@@ -31,7 +31,7 @@ namespace pybind
 
 				type_cast * etype = type_down_cast<T_WOCR>::find();
 
-				if( etype == 0 )
+				if( etype == nullptr )
 				{
 					pybind::check_error();
 
@@ -55,7 +55,7 @@ namespace pybind
                     const char * type_name = tinfo.name();
                     const char * repr_obj = pybind::object_repr( _obj );
 
-					if( repr_obj != 0 )
+					if( repr_obj != nullptr )
 					{
 						pybind::error_message( "extract from %.256s to %.256s"
 							, repr_obj
