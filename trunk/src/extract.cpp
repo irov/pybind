@@ -161,7 +161,7 @@ namespace pybind
 		{
             const char * ch_buff = pybind::string_to_char( _obj );
 
-            if( ch_buff == 0 )
+            if( ch_buff == nullptr )
             {
                 return false;
             }
