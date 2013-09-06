@@ -312,7 +312,9 @@ namespace pybind
 
 			try
 			{
-				return method_call_ret_impl<C,F,typename f_info::ret_type>::call( _obj, f, _arg );
+				PyObject * py_ret = method_call_ret_impl<C,F,typename f_info::ret_type>::call( _obj, f, _arg );
+
+				return py_ret;
 			}
 			catch( const pybind_exception & )
 			{
