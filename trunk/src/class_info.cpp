@@ -7,7 +7,7 @@
 
 #   include "static_var.hpp"
 
-#   include <string>
+#   include <string.h>
 
 namespace pybind
 {   
