@@ -20,23 +20,113 @@
 namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
-    STATIC_DECLARE(PyObject *, s_pybind_object_impl);
-    STATIC_DECLARE(PyObject *, s_pybind_class_type_scope);
-    STATIC_DECLARE(PyObject *, s_pybind_object_holder);
-    //////////////////////////////////////////////////////////////////////////
-    STATIC_DECLARE(PyTypeObject, s_pod64_type);
-    STATIC_DECLARE(PyTypeObject, s_base_type);
-	//////////////////////////////////////////////////////////////////////////
 	struct py_pod64_object
 	{
 		PyObject_HEAD
-		char buff[64];
+			char buff[64];
 	};
 	//////////////////////////////////////////////////////////////////////////
 	struct py_base_object
 	{
 		PyObject_HEAD
 	};
+	//////////////////////////////////////////////////////////////////////////
+	static void py_dealloc( PyObject * _obj )
+	{
+		_obj->ob_type->tp_free( _obj );
+	}
+	//////////////////////////////////////////////////////////////////////////
+    STATIC_DECLARE(PyObject *, s_pybind_object_impl);
+    STATIC_DECLARE(PyObject *, s_pybind_class_type_scope);
+    STATIC_DECLARE(PyObject *, s_pybind_object_holder);
+    //////////////////////////////////////////////////////////////////////////
+	STATIC_DECLARE_VALUE_BEGIN(PyTypeObject, s_pod64_type)
+	{
+		PyVarObject_HEAD_INIT(&PyType_Type, 0)
+			"pod64_type",
+			sizeof(py_pod64_object),
+			0,
+			&py_dealloc,                             /* tp_dealloc */
+			0,                    /* tp_print */
+			0,                                          /* tp_getattr */
+			0,                                          /* tp_setattr */
+			0,                                          /* tp_compare */
+			0,                                /* tp_repr */
+			0,                          /* tp_as_number */
+			0,                        /* tp_as_sequence */
+			0,                         /* tp_as_mapping */
+			0,                      /* tp_hash */
+			0,                                          /* tp_call */
+			0,                                 /* tp_str */
+			0,                    /* tp_getattro */
+			0,                                          /* tp_setattro */
+			0,                          /* tp_as_buffer */
+			Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,              /* tp_flags */
+			0,                                 /* tp_doc */
+			0,                                          /* tp_traverse */
+			0,                                          /* tp_clear */
+			0,            /* tp_richcompare */
+			0,                                          /* tp_weaklistoffset */
+			0,                                          /* tp_iter */
+			0,                                          /* tp_iternext */
+			0,                             /* tp_methods */
+			0,                                          /* tp_members */
+			0,                                          /* tp_getset */
+			0,                         /* tp_base */
+			0,                                          /* tp_dict */
+			0,                                          /* tp_descr_get */
+			0,                                          /* tp_descr_set */
+			0,                                          /* tp_dictoffset */
+			0,                                          /* tp_init */
+			0,                                          /* tp_alloc */
+			0,                                 /* tp_new */
+			0,                               /* tp_free */
+	}
+	STATIC_DECLARE_VALUE_END();
+	//////////////////////////////////////////////////////////////////////////
+	STATIC_DECLARE_VALUE_BEGIN(PyTypeObject, s_base_type)
+	{
+		PyVarObject_HEAD_INIT(&PyType_Type, 0)
+		"pybind_base_type",
+		sizeof(py_base_object),
+		0,
+		&py_dealloc,                             /* tp_dealloc */
+		0,                    /* tp_print */
+		0,                                          /* tp_getattr */
+		0,                                          /* tp_setattr */
+		0,                                          /* tp_compare */
+		0,                                /* tp_repr */
+		0,                          /* tp_as_number */
+		0,                        /* tp_as_sequence */
+		0,                         /* tp_as_mapping */
+		0,                      /* tp_hash */
+		0,                                          /* tp_call */
+		0,                                 /* tp_str */
+		0,                    /* tp_getattro */
+		0,                                          /* tp_setattro */
+		0,                          /* tp_as_buffer */
+		Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,              /* tp_flags */
+		0,                                 /* tp_doc */
+		0,                                          /* tp_traverse */
+		0,                                          /* tp_clear */
+		0,            /* tp_richcompare */
+		0,                                          /* tp_weaklistoffset */
+		0,                                          /* tp_iter */
+		0,                                          /* tp_iternext */
+		0,                             /* tp_methods */
+		0,                                          /* tp_members */
+		0,                                          /* tp_getset */
+		0,                         /* tp_base */
+		0,                                          /* tp_dict */
+		0,                                          /* tp_descr_get */
+		0,                                          /* tp_descr_set */
+		0,                                          /* tp_dictoffset */
+		0,                                          /* tp_init */
+		0,                                          /* tp_alloc */
+		0,                                 /* tp_new */
+		0,                               /* tp_free */
+	}
+	STATIC_DECLARE_VALUE_END();
 	//////////////////////////////////////////////////////////////////////////
 	namespace detail
 	{
@@ -1047,11 +1137,6 @@ namespace pybind
 	}
 #	endif
 	//////////////////////////////////////////////////////////////////////////
-	static void py_dealloc( PyObject * _obj )
-	{
-		_obj->ob_type->tp_free( _obj );
-	}
-	//////////////////////////////////////////////////////////////////////////
 	bool initialize_classes()
 	{
         for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
@@ -1069,29 +1154,34 @@ namespace pybind
         STATIC_VAR(s_pybind_object_holder) = pybind::string_from_char( "__pybind_object_holder" );
 #   endif
 
-		STATIC_VAR(s_pod64_type).tp_name = "pod64_type";
-		STATIC_VAR(s_pod64_type).tp_basicsize = sizeof(py_pod64_object);
-		STATIC_VAR(s_pod64_type).tp_dealloc = &py_dealloc;
-		STATIC_VAR(s_pod64_type).tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
+		PyTypeObject * pod64_type = &STATIC_VAR(s_pod64_type);
 
-		if( PyType_Ready( &STATIC_VAR(s_pod64_type) ) < 0 )
+		if( PyType_Ready( pod64_type ) < 0 )
 		{
 			printf("invalid embedding class '%s' \n", STATIC_VAR(s_pod64_type).tp_name );
 
             return false;
-		}		
+		}
 
-		STATIC_VAR(s_base_type).tp_name = "pybind_base_type";
-		STATIC_VAR(s_base_type).tp_basicsize = sizeof(py_base_object);
-		STATIC_VAR(s_base_type).tp_dealloc = &py_dealloc;
-		STATIC_VAR(s_base_type).tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
+		PyTypeObject * pybind_base_type = &STATIC_VAR(s_base_type);
 
-		if( PyType_Ready( &STATIC_VAR(s_base_type) ) < 0 )
+		if( PyType_Ready( pybind_base_type ) < 0 )
 		{
 			printf("invalid embedding class '%s' \n", STATIC_VAR(s_base_type).tp_name );
 
             return false;
 		}	
+
+		PyObject * builtins = pybind::get_builtins();
+		
+		PyObject * dir_bltin = pybind::module_dict( builtins );
+		
+		PyObject * pybind_base_obj = (PyObject *)pybind_base_type;
+
+		pybind::dict_setstring( dir_bltin, "pybind_base_type", pybind_base_obj );
+
+		pybind::decref( pybind_base_obj );
+		pybind::decref( builtins );
 
         return true;
 	}
