@@ -1,7 +1,5 @@
 #	pragma once
 
-#	include <cstddef>
-
 #	include "exports.hpp"
 
 #	include <stdarg.h>
