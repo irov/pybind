@@ -92,7 +92,7 @@ namespace pybind
 		finalize_classes();
 		finalize_function();
 		finalize_functor();
-        finialize_type_cast();
+        finalize_type_cast();
 
 		//finalize_default_type_cast();
 	}
@@ -425,22 +425,12 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
 	void incref( PyObject * _obj )
 	{
-        if( _obj == NULL )
-        {
-            return;
-        }
-
-		Py_IncRef( _obj );
+		Py_XINCREF( _obj );
 	}
     //////////////////////////////////////////////////////////////////////////
 	void decref( PyObject * _obj )
 	{
-        if( _obj == NULL )
-        {
-            return;
-        }
-
-		Py_DecRef( _obj );
+		Py_XDECREF( _obj );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	size_t refcount( PyObject * _obj )
@@ -1168,5 +1158,28 @@ namespace pybind
         interp->importlib = _finder;
 #   endif
     }
+	//////////////////////////////////////////////////////////////////////////
+	size_t _get_string_hash( const char * _str, size_t _len )
+	{
+#   if PYBIND_PYTHON_VERSION > 300
+		return -1;
+#	else
+		unsigned char * p = (unsigned char *) _str;
+		long len = (long)_len;
+
+		long x = _Py_HashSecret.prefix;
+
+		x ^= *p << 7;
+		long it = len;
+		while (--it >= 0)
+			x = (1000003*x) ^ *p++;
+		x ^= len;
+		x ^= _Py_HashSecret.suffix;
+		if (x == -1)
+			x = -2;
+
+		return (size_t)x;
+#	endif
+	}
 }
 

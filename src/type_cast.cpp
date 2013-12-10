@@ -137,7 +137,7 @@ namespace pybind
         return true;
     }
     //////////////////////////////////////////////////////////////////////////
-    void finialize_type_cast()
+    void finalize_type_cast()
     {     
         for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
         {

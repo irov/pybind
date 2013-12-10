@@ -35,7 +35,7 @@ namespace pybind
 	{
 		_obj->ob_type->tp_free( _obj );
 	}
-	//////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////	
     STATIC_DECLARE(PyObject *, s_pybind_object_impl);
     STATIC_DECLARE(PyObject *, s_pybind_class_type_scope);
     STATIC_DECLARE(PyObject *, s_pybind_object_holder);
@@ -637,18 +637,16 @@ namespace pybind
 
         void * impl = (*scope->m_pynew)( scope, py_self, _args, _kwds );
 
-        if( impl == NULL )
+        if( impl == nullptr )
         {
             pybind::decref( py_self );
 
-            return NULL;
+            return nullptr;
         }
 
         pybind::detail::wrap( py_self, impl, false );
 
-#	ifdef PYBIND_VISIT_OBJECTS
         scope->addObject( py_self );
-#	endif
 
 		return py_self;
 	}
@@ -664,11 +662,7 @@ namespace pybind
 
         (void)impl;
 
-#	ifdef PYBIND_VISIT_OBJECTS
-        {
-            scope->addObject( py_self );
-        }
-#	endif
+		scope->addObject( py_self );
         
         return py_self;
     }
