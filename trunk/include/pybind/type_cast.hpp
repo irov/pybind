@@ -159,5 +159,5 @@ namespace pybind
 	};
 
     PYBIND_API bool initialize_type_cast();
-    PYBIND_API void finialize_type_cast();
+    PYBIND_API void finalize_type_cast();
 }

@@ -118,11 +118,14 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	static int descr_check( py_method_generator_type *descr, PyObject *obj, PyObject **pres )
 	{
-		if (obj == NULL) {
+		if( obj == NULL )
+		{
 			Py_IncRef( (PyObject *)descr );
 			*pres = (PyObject *)descr;
+
 			return 1;
 		}
+
 		if (!PyObject_TypeCheck(obj, descr->classtype)) {
 			//PyErr_Format(PyExc_TypeError,
 			//	"descriptor '%s' for '%s' objects "
@@ -131,8 +134,10 @@ namespace pybind
 			//	descr->d_type->tp_name,
 			//	obj->ob_type->tp_name);
 			*pres = NULL;
+
 			return 1;
 		}
+
 		return 0;
 	}
 	//////////////////////////////////////////////////////////////////////////

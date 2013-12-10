@@ -1,7 +1,7 @@
 #	pragma once
 
 #   ifndef PYBIND_PYTHON_VERSION
-#   define PYBIND_PYTHON_VERSION 274
+#   define PYBIND_PYTHON_VERSION 276
 #   endif
 
 //#   define PYBIND_VISIT_OBJECTS
