@@ -12,9 +12,9 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
-    class_type_scope * class_core::create_new_type_scope( size_t _info, const char * _name, PyObject * _module, void * _user, pybind::pybind_new _pynew, pybind::pybind_destructor _pydestructor, bool _pod )
+    class_type_scope_ptr class_core::create_new_type_scope( size_t _info, const char * _name, PyObject * _module, void * _user, pybind::pybind_new _pynew, pybind::pybind_destructor _pydestructor, bool _pod )
     {
-        class_type_scope * scope = new class_type_scope( _name, _info, _module, _user, _pynew, _pydestructor, _pod );
+        class_type_scope_ptr scope = new class_type_scope( _name, _info, _module, _user, _pynew, _pydestructor, _pod );
 
         detail::reg_class_type_scope( _info, scope );
 
