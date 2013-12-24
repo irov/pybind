@@ -34,7 +34,7 @@ namespace pybind
 		{
 			m_info = class_info<C>();
 
-			class_type_scope * scope = class_core::create_new_type_scope( m_info, _name, _module, _user, _pynew, _pydestructor, _pod );
+			class_type_scope_ptr scope = class_core::create_new_type_scope( m_info, _name, _module, _user, _pynew, _pydestructor, _pod );
 
 			setup_bases( scope );
 
@@ -47,7 +47,7 @@ namespace pybind
 			return static_cast<BB*>(static_cast<C*>(_ptr));
 		}
 
-		void setup_bases( class_type_scope * _scope )
+		void setup_bases( const class_type_scope_ptr & _scope )
 		{
 			int arity = B::base_arity;
 
@@ -427,7 +427,7 @@ namespace pybind
             constructor_adapter_interface_ptr ctr = 
                 new constructor_new<C, init<C0,C1,C2,C3,C4,C5> >();
 
-            class_type_scope * scope = base_<C,B>::get_scope();
+            const pybind::class_type_scope_ptr & scope = base_<C,B>::get_scope();
             class_core::def_init( scope, ctr );
 
             return *this;
@@ -467,7 +467,7 @@ namespace pybind
             constructor_adapter_interface_ptr ctr = 
                 new constructor_new<C, init<C0,C1,C2,C3,C4,C5> >();
 
-            class_type_scope * scope = base_<C,B>::get_scope();
+            const pybind::class_type_scope_ptr & scope = base_<C,B>::get_scope();
             class_core::def_init( scope, ctr );
 
             return *this;
