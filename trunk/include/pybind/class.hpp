@@ -128,6 +128,17 @@ namespace pybind
 			return *this;
 		}
 
+		template<class P, class F>
+		base_ & def_proxy_native( const char * _name, P * _proxy, F f )
+		{
+			method_adapter_interface_ptr iadapter =
+				new method_adapter_proxy_native<C, P, F>(_proxy, f, _name);
+
+			class_core::def_method( _name, iadapter, m_info );
+
+			return *this;
+		}
+
 		template<class A>
 		base_ & def_member( const char * _name, A C:: * a )
 		{

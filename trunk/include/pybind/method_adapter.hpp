@@ -86,7 +86,7 @@ namespace pybind
 		{
 		}
 
-	public:
+	protected:
 		PyObject * call( void * _self, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
             (void)_kwds;
@@ -116,7 +116,7 @@ namespace pybind
         {
         }
 
-    public:
+    protected:
         PyObject * call( void * _self, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
         {
             size_t scopeId = this->getScopeId();
@@ -154,7 +154,7 @@ namespace pybind
 		{
 		}
 
-	public:
+	protected:
 		PyObject * call( void * _self, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
             (void)_kwds;
@@ -176,6 +176,38 @@ namespace pybind
 		P * m_proxy;
 	};
 
+	template<class C, class P, class F>
+	class method_adapter_proxy_native
+		: public method_adapter_interface
+		, public method_adapter_helper<F>
+		, public class_adapter_helper<C>
+	{
+	public:
+		method_adapter_proxy_native( P * _proxy, F _fn, const char * _tag )
+			: method_adapter_helper<F>(_fn, _tag)
+			, m_proxy(_proxy)
+		{
+		}
+
+	protected:
+		PyObject * call( void * _self, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		{
+			size_t scopeId = this->getScopeId();
+			size_t classId = this->getClassId();
+
+			C * impl = (C*)detail::meta_cast_scope( _self, scopeId, classId, _scope );
+
+			F fn = this->getFn();
+
+			PyObject * ret = (m_proxy->*fn)( impl, _args, _kwds );
+
+			return ret;
+		}
+
+	protected:
+		P * m_proxy;
+	};
+
 	template<class C, class F>
 	class method_adapter_proxy_function
 		: public method_adapter_interface
@@ -188,7 +220,7 @@ namespace pybind
 		{
 		}
 
-	public:
+	protected:
 		PyObject * call( void * _self, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
             (void)_kwds;
@@ -219,7 +251,7 @@ namespace pybind
 		{
 		}
 
-	public:
+	protected:
 		PyObject * call( void * _self, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
 			size_t scopeId = this->getScopeId();
