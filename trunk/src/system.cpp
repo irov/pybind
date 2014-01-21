@@ -765,14 +765,28 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
 	const char * object_repr( PyObject * _obj )
 	{
-		PyObject * repr = PyObject_Repr( _obj );
+		PyObject * py_repr = PyObject_Repr( _obj );
 		
-		if( repr == 0 )
+		if( py_repr == 0 )
 		{
 			return 0;
 		}
 
-        const char * str = pybind::string_to_char( repr );
+        const char * str = pybind::string_to_char( py_repr );
+
+		return str;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	const char * object_str( PyObject * _obj )
+	{
+		PyObject * py_str = PyObject_Str( _obj );
+
+		if( py_str == 0 )
+		{
+			return 0;
+		}
+
+		const char * str = pybind::string_to_char( py_str );
 
 		return str;
 	}
