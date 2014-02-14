@@ -349,7 +349,7 @@ namespace pybind
 			{
 				detail::error_invalid_extract( _obj, tinfo );
 
-				_value = NULL;
+				_value = nullptr;
 
 				return false;
 			}
@@ -361,7 +361,7 @@ namespace pybind
 
         PyObject * wrap( typename type_cast_result<C *>::TCastRef _class ) override
 		{			
-            if( _class == 0 )
+            if( _class == nullptr )
             {
                 return pybind::ret_none();
             }
