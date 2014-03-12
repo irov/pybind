@@ -23,6 +23,11 @@ namespace pybind
 		{	
 			g_type_cast[_info] = _cast;
 		}
+		//////////////////////////////////////////////////////////////////////////
+		void unregister_type_info_extract( size_t _info )
+		{	
+			g_type_cast[_info] = nullptr;
+		}
         //////////////////////////////////////////////////////////////////////////
 		type_cast * find_type_info_extract( size_t _info )
 		{

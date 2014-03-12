@@ -37,6 +37,8 @@ namespace pybind
 	namespace detail
 	{
 		PYBIND_API void register_type_info_extract( size_t _info, const type_cast_ptr & _type );
+		PYBIND_API void unregister_type_info_extract( size_t _info );
+
 		PYBIND_API type_cast * find_type_info_extract( size_t _info );
 
 		PYBIND_API void error_invalid_extract( PyObject * _obj, size_t _tinfo );
@@ -145,12 +147,22 @@ namespace pybind
 
 		detail::register_type_info_extract( id, _type );
 	}
+
+	template<class T>
+	void unregistration_type_cast()
+	{	
+		size_t id = class_info<T>();
+
+		detail::unregister_type_info_extract( id );
+	}
+
     
 	template<class T>
 	class type_cast_result
 		: public type_cast
 	{
     public:
+		typedef T TValue;
         typedef const T & TCastRef;
 
 	public:

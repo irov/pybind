@@ -167,6 +167,7 @@
     <ClCompile Include="..\src\functor_type.cpp" />
     <ClCompile Include="..\src\member_type.cpp" />
     <ClCompile Include="..\src\method_type.cpp" />
+    <ClCompile Include="..\src\stl_type_cast.cpp" />
     <ClCompile Include="..\src\system.cpp" />
     <ClCompile Include="..\src\type_cast.cpp" />
   </ItemGroup>
@@ -199,6 +200,7 @@
     <ClInclude Include="..\include\pybind\pybind.hpp" />
     <ClInclude Include="..\include\pybind\repr_adapter.hpp" />
     <ClInclude Include="..\include\pybind\static_var.hpp" />
+    <ClInclude Include="..\include\pybind\stl_type_cast.hpp" />
     <ClInclude Include="..\include\pybind\system.hpp" />
     <ClInclude Include="..\include\pybind\type_cast.hpp" />
     <ClInclude Include="..\include\pybind\types.hpp" />
