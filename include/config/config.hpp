@@ -10,6 +10,8 @@
 #   define PYBIND_FUNCTION_COUNT 256
 #   define PYBIND_FUNCTOR_COUNT 256
 
+#   define PYBIND_STL_SUPPORT
+
 namespace pybind
 {
 #   ifdef PYBIND_MARMALADE

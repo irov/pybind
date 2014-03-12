@@ -2,6 +2,10 @@
 #	include "pybind/class_core.hpp"
 #	include "pybind/class_type_scope.hpp"
 
+#	ifdef PYBIND_STL_SUPPORT
+#	include "pybind/stl_type_cast.hpp"
+#	endif
+
 #	include "config/python.hpp"
 
 #	include "method_type.hpp"
@@ -52,6 +56,13 @@ namespace pybind
             return false;
         }
 
+#	ifdef PYBIND_STL_SUPPORT
+		if( initialize_stl_type_cast() == false )
+		{
+			return false;
+		}
+#	endif
+
 		if( initialize_methods() == false )
         {
             return false;
@@ -92,7 +103,8 @@ namespace pybind
 		finalize_classes();
 		finalize_function();
 		finalize_functor();
-        finalize_type_cast();
+		finalize_stl_type_cast();
+        finalize_type_cast();		
 
 		//finalize_default_type_cast();
 	}
@@ -694,13 +706,13 @@ namespace pybind
 		return contains == 1;
 	}
     //////////////////////////////////////////////////////////////////////////
-	bool dict_next( PyObject * _dict, size_t *_pos, PyObject ** _key, PyObject ** _value )
+	bool dict_next( PyObject * _dict, size_t & _pos, PyObject ** _key, PyObject ** _value )
 	{
-		Py_ssize_t ps = (Py_ssize_t)(*_pos);
+		Py_ssize_t ps = (Py_ssize_t)(_pos);
 		
         int res = PyDict_Next( _dict, &ps, _key, _value );
 
-		*_pos = (size_t)ps;
+		_pos = (size_t)ps;
 
 		return res == 1;
 	}
