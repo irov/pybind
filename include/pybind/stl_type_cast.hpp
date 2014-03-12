@@ -66,7 +66,7 @@ namespace pybind
 		{
 			PyObject * py_vector = pybind::list_new(0);
 
-			for( V::const_iterator
+			for( typename V::const_iterator
 				it = _vector.begin(),
 				it_end = _vector.end();
 			it != it_end;
@@ -126,7 +126,7 @@ namespace pybind
 		{
 			PyObject * py_dict = pybind::dict_new();
 
-			for( M::const_iterator
+			for( typename M::const_iterator
 				it = _value.begin(),
 				it_end = _value.end();
 			it != it_end;
