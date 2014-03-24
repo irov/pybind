@@ -89,7 +89,7 @@ namespace pybind
 		{
 			if( pybind::dict_check( _obj ) == true )
 			{
-				size_t dict_pos;
+				size_t dict_pos = 0;
 
 				PyObject * py_key;
 				PyObject * py_value;
