@@ -79,8 +79,6 @@ namespace pybind
 				PyObject * py_value = pybind::ptr( value );
 
 				pybind::list_setitem( py_vector, it, py_value );
-
-				pybind::decref( py_value );
 			}
 
 			return py_vector;
