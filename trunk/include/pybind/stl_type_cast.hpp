@@ -20,6 +20,8 @@ namespace pybind
 			{
 				size_t size = pybind::tuple_size( _obj );
 
+				_vector.reserve( size );
+
 				for( size_t it = 0; it != size; ++it )
 				{
 					PyObject * py_value = pybind::tuple_getitem( _obj, it );
@@ -36,6 +38,8 @@ namespace pybind
 			else if( pybind::list_check( _obj ) == true )
 			{
 				size_t size = pybind::list_size( _obj );
+
+				_vector.reserve( size );
 
 				for( size_t it = 0; it != size; ++it )
 				{
@@ -60,17 +64,21 @@ namespace pybind
 
 		PyObject * wrap( TCastRef _vector ) override
 		{
-			PyObject * py_vector = pybind::list_new(0);
+			size_t vector_size = _vector.size();
 
-			for( typename V::const_iterator
-				it = _vector.begin(),
-				it_end = _vector.end();
+			PyObject * py_vector = pybind::list_new( vector_size );
+
+			for( typename V::size_type
+				it = 0,
+				it_end = vector_size;
 			it != it_end;
 			++it )
 			{
-				PyObject * py_value = pybind::ptr( *it );
+				const T & value = _vector[it];
 
-				pybind::list_appenditem( py_vector, py_value );
+				PyObject * py_value = pybind::ptr( value );
+
+				pybind::list_setitem( py_vector, it, py_value );
 
 				pybind::decref( py_value );
 			}
@@ -107,7 +115,7 @@ namespace pybind
 						return false;
 					}
 
-					_map.insert( std::make_pair( key, value ) );
+					_map.insert( std::make_pair(key, value) );
 				}
 			}
 			else
