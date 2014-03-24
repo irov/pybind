@@ -44,14 +44,10 @@ namespace pybind
 					T value;
 					if( pybind::extract_value( py_value, value ) == false )
 					{
-						pybind::decref( py_value );
-
 						return false;
 					}
 
 					_vector.push_back( value );
-
-					pybind::decref( py_value );
 				}
 			}
 			else
