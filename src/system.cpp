@@ -34,10 +34,10 @@ namespace pybind
 	{
 		if( _debug == false )
 		{
-			Py_OptimizeFlag = 2;
-			Py_NoSiteFlag = 1;
+			Py_OptimizeFlag = 2;			
 		}
 
+		Py_NoSiteFlag = 1;
         Py_IgnoreEnvironmentFlag = 1;
 
 #   if PYBIND_PYTHON_VERSION > 330
