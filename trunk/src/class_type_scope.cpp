@@ -741,7 +741,7 @@ namespace pybind
             }
 
 			py_bases = PyTuple_New( bases_size );
-			int index = 0;
+			Py_ssize_t index = 0;
 
 			for( TBases::iterator
 				it = m_bases.begin(),
