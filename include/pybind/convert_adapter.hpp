@@ -4,6 +4,7 @@
 
 namespace pybind
 {
+	//////////////////////////////////////////////////////////////////////////
 	class convert_adapter_interface
 		: public adapter_interface
 	{
@@ -25,7 +26,7 @@ namespace pybind
 		}
 
 	public:
-		virtual bool convert( PyObject * _obj, void * _place ) override
+		bool convert( PyObject * _obj, void * _place ) override
 		{
 			bool result = (*m_convert)( _obj, _place, m_user );
 
