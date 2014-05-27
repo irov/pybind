@@ -10,6 +10,10 @@
 #	include <list>
 #   endif
 
+#	ifndef PYBIND_TYPE_OBJECT_POOL_COUNT
+#	define PYBIND_TYPE_OBJECT_POOL_COUNT 16
+#	endif
+
 #	include <vector>
 
 #	include <typeinfo>
@@ -65,6 +69,9 @@ namespace pybind
         void finalize();
 
 	public:
+		void finalize_pool();
+
+	public:
 		const char * get_name() const;
 		size_t get_type() const;
 
@@ -100,6 +107,10 @@ namespace pybind
 		void * metacast( size_t name, void * _impl );
 		void unwrap( PyObject * _obj );
 		void type_initialize( PyTypeObject * _type );
+
+	public:
+		bool poolObject( PyObject * _obj );
+		PyObject * unpoolObject();
 
     public:
         void addObject( PyObject * _obj );
@@ -149,13 +160,17 @@ namespace pybind
 
         size_t m_objectCount;
 
+		
+		PyObject * m_poolObjects[PYBIND_TYPE_OBJECT_POOL_COUNT];
+		size_t m_poolCount;
+
 #	ifdef PYBIND_VISIT_OBJECTS
     public:
 		void visit_objects( pybind_visit_objects * _visitor );
 
 	protected:
-		typedef std::list<PyObject *> TListObjects;
-		TListObjects m_objects;
+		typedef std::vector<PyObject *> TVectorObjects;
+		TVectorObjects m_objects;
 #	endif
 	};
     //////////////////////////////////////////////////////////////////////////
@@ -163,5 +178,6 @@ namespace pybind
 
 	bool initialize_classes();	
 	void finalize_classes();
+	void finalize_classes_pool();
 }
 

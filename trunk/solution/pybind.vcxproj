@@ -200,6 +200,7 @@
     <ClInclude Include="..\include\pybind\pybind.hpp" />
     <ClInclude Include="..\include\pybind\repr_adapter.hpp" />
     <ClInclude Include="..\include\pybind\static_var.hpp" />
+    <ClInclude Include="..\include\pybind\stdex_type_cast.hpp" />
     <ClInclude Include="..\include\pybind\stl_type_cast.hpp" />
     <ClInclude Include="..\include\pybind\system.hpp" />
     <ClInclude Include="..\include\pybind\type_cast.hpp" />
