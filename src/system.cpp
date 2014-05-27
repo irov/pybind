@@ -115,28 +115,31 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
 	void finalize()
 	{	
-        Py_Finalize();
+		finalize_classes_pool();
 
-		class_core::finalize();
+        Py_Finalize();
 		
 		finalize_methods();
 		finalize_classes();
 		finalize_function();
 		finalize_functor();
 		finalize_stl_type_cast();
-        finalize_type_cast();		
-
-		//finalize_default_type_cast();
+        finalize_type_cast();
 	}
     //////////////////////////////////////////////////////////////////////////
 	bool is_initialized()
 	{
-		return (Py_IsInitialized() != 0);
+		if( Py_IsInitialized() == 0 )
+		{
+			return false;
+		}
+
+		return true;
 	}
     //////////////////////////////////////////////////////////////////////////
 	void check_error()
 	{
-		if (PyErr_Occurred())
+		if( PyErr_Occurred() != nullptr )
 		{
 			PyErr_Print();
 		}
@@ -167,13 +170,13 @@ namespace pybind
     {
 #   if PYBIND_PYTHON_VERSION < 300
         PyObject * builtins = PyImport_ImportModuleLevel(const_cast<char *>("__builtin__"),
-            NULL, NULL, NULL, 0);
+            nullptr, nullptr, nullptr, 0);
 #   endif
 
 
 #   if PYBIND_PYTHON_VERSION >= 300
         PyObject * builtins = PyImport_ImportModuleLevel("builtins",
-            NULL, NULL, NULL, 0);
+            nullptr, nullptr, nullptr, 0);
 #   endif
 
         return builtins;
@@ -192,7 +195,7 @@ namespace pybind
 				PyErr_Print();
 				PyErr_Clear();
 
-				return NULL;
+				return nullptr;
 			
 			}
 
@@ -208,10 +211,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
 	PyObject * module_init( const char * _name )
 	{
-		//static PyMethodDef module_methods[] = {
-		//	{NULL}  /* Sentinel */
-		//};
-		//return Py_InitModule4( _name, module_methods, 0, 0, PYTHON_API_VERSION );
         PyObject * module = PyImport_AddModule( _name );
 
         return module;
@@ -362,7 +361,7 @@ namespace pybind
 	{
 		PyObject * res = ask_native( _obj, _args );
         
-        if( res == NULL )
+        if( res == nullptr )
         {
             return;
         }
@@ -395,7 +394,7 @@ namespace pybind
 	{
 		PyObject * res = ask_va( _obj, _format, _va );
 
-        if( res == NULL )
+        if( res == nullptr )
         {
             return;
         }
@@ -836,7 +835,7 @@ namespace pybind
 
         PyThreadState * tstate = PyThreadState_GET();
 
-        if( tstate->frame == NULL )
+        if( tstate->frame == nullptr )
         {
             return;
         }
@@ -953,7 +952,7 @@ namespace pybind
 		PyTypeObject * type = (PyTypeObject *)_value;
 		const class_type_scope_ptr & scope = detail::get_class_scope( type );
 
-		if( scope == 0 )
+		if( scope == nullptr )
 		{
 			return false;
 		}
@@ -1155,9 +1154,9 @@ namespace pybind
     PyObject * void_ptr_new( void * _impl )
     {
 #   if PYBIND_PYTHON_VERSION > 300
-        PyObject * py_void = PyCapsule_New( _impl, NULL, NULL );
+        PyObject * py_void = PyCapsule_New( _impl, nullptr, nullptr );
 #	else
-        PyObject * py_void = PyCObject_FromVoidPtr( _impl, NULL );    
+        PyObject * py_void = PyCObject_FromVoidPtr( _impl, nullptr );    
 #	endif
 
         return py_void;
@@ -1166,7 +1165,7 @@ namespace pybind
     void * void_ptr_get( PyObject * _obj )
     {
 #   if PYBIND_PYTHON_VERSION > 300
-        void * impl = PyCapsule_GetPointer( _obj, NULL );
+        void * impl = PyCapsule_GetPointer( _obj, nullptr );
 #   else
         void * impl = PyCObject_AsVoidPtr( _obj );
 #   endif	

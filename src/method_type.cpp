@@ -118,7 +118,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	static int descr_check( py_method_generator_type *descr, PyObject *obj, PyObject **pres )
 	{
-		if( obj == NULL )
+		if( obj == nullptr )
 		{
 			Py_IncRef( (PyObject *)descr );
 			*pres = (PyObject *)descr;
@@ -133,7 +133,7 @@ namespace pybind
 			//	descr_name((PyDescrObject *)descr),
 			//	descr->d_type->tp_name,
 			//	obj->ob_type->tp_name);
-			*pres = NULL;
+			*pres = nullptr;
 
 			return 1;
 		}
@@ -263,7 +263,7 @@ namespace pybind
 
 		self->iadapter = _ifunc;
 
-        if( _type != NULL )
+        if( _type != nullptr )
         {
 		    Py_IncRef( (PyObject *)_type );
 		    self->classtype = _type;

@@ -73,10 +73,11 @@ namespace pybind
 
 		void * impl = detail::get_class_impl( py_self );
 
-		if( impl == 0 )
+		if( impl == nullptr )
 		{
 			error_message( "py_getmethod: unbind object" );
-			return 0;
+
+			return nullptr;
 		}
 
 		const class_type_scope_ptr & scope = detail::get_class_scope( py_self->ob_type );
@@ -95,10 +96,11 @@ namespace pybind
 
 		void * impl = detail::get_class_impl( py_self );
 
-		if( impl == 0 )
+		if( impl == nullptr )
 		{
 			error_message( "py_setmethod: unbind object" );
-			return 0;
+
+			return nullptr;
 		}
 
 		const class_type_scope_ptr & scope = detail::get_class_scope( py_self->ob_type );

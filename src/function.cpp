@@ -107,7 +107,7 @@ namespace pybind
             {
                 pybind::throw_exception();
 
-                return NULL;
+                return nullptr;
             }
 
 			function_type_scope & cfunc_type = g_function_type_scope[g_function_type_scope_count];            

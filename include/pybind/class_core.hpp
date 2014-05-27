@@ -20,8 +20,6 @@ namespace pybind
 	public:
 		static class_type_scope_ptr create_new_type_scope( size_t _info, const char * _name, PyObject * _module, void * _user, pybind::pybind_new _pynew, pybind::pybind_destructor _pydestructor, bool _pod );
 		static void initialize_new_type_scope( const class_type_scope_ptr & _scope );
-        
-		static void finalize();
 
         static PyTypeObject * get_typemodule( size_t _info );
 
