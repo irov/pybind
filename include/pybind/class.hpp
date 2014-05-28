@@ -332,7 +332,7 @@ namespace pybind
 	struct extract_class_type_ptr
 		: public type_cast_result<C *>
 	{
-		bool apply( PyObject * _obj, C *& _value ) override
+		bool apply( PyObject * _obj, typename type_cast_result<C *>::TCastValue _value ) override
 		{
             if( pybind::is_none( _obj ) == true )
             {
@@ -359,16 +359,16 @@ namespace pybind
 			return true;
 		}
 
-        PyObject * wrap( typename type_cast_result<C *>::TCastRef _class ) override
+        PyObject * wrap( typename type_cast_result<C *>::TCastRef _value ) override
 		{			
-            if( _class == nullptr )
+            if( _value == nullptr )
             {
                 return pybind::ret_none();
             }
 
             size_t tinfo = class_info<C>();
     
-            PyObject * py_obj = class_core::create_holder( tinfo, (void *)_class );
+            PyObject * py_obj = class_core::create_holder( tinfo, (void *)_value );
     
             return py_obj;
 		}
@@ -378,7 +378,7 @@ namespace pybind
 	struct extract_struct_type_ref
 		: public type_cast_result<C>
 	{
-		bool apply( PyObject * _obj, C & _value ) override
+		bool apply( PyObject * _obj, typename type_cast_result<C>::TCastValue _value ) override
 		{
 			size_t tinfo = class_info<C>();
 			size_t tptrinfo = class_info<C *>();

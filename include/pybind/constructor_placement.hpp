@@ -98,7 +98,7 @@ namespace pybind
 		{
 			if( this->valid( _args ) == false )
 			{
-				return 0;
+				return nullptr;
 			}
 
             void * impl = pybind::detail::get_class_impl( _obj );
@@ -107,7 +107,9 @@ namespace pybind
 
 			try
 			{
-				return call_constructor_placement_impl<C, P, P::base_arity>::call( self,  _args );
+				C * obj = call_constructor_placement_impl<C, P, P::base_arity>::call( self,  _args );
+
+				return obj;
 			}
 			catch( const pybind_exception & )
 			{
@@ -116,7 +118,7 @@ namespace pybind
                     );
 			}
 
-			return 0;
+			return nullptr;
 		}
 	};
 }

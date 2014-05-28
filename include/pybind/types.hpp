@@ -1,5 +1,6 @@
 #	pragma once
 
+#	include <stdint.h>
 #	include <memory.h>
 
 #   include "stdex/intrusive_ptr.h"

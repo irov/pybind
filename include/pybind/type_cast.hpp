@@ -162,12 +162,12 @@ namespace pybind
 		: public type_cast
 	{
     public:
-		typedef T TValue;
+		typedef T & TCastValue;
         typedef const T & TCastRef;
 
 	public:
         virtual PyObject * wrap( TCastRef t ) = 0;
-		virtual bool apply( PyObject * _obj, T & _value ) = 0;
+		virtual bool apply( PyObject * _obj, TCastValue _value ) = 0;
 	};
 
     PYBIND_API bool initialize_type_cast();

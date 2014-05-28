@@ -35,7 +35,7 @@ namespace pybind
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, int & _value )
+	bool extract_value( PyObject * _obj, int32_t & _value )
 	{
 		if( PyLong_Check( _obj ) )
 		{
@@ -59,7 +59,7 @@ namespace pybind
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, unsigned int & _value )
+	bool extract_value( PyObject * _obj, uint32_t & _value )
 	{
 		if( PyLong_Check( _obj ) )
 		{				
@@ -83,7 +83,7 @@ namespace pybind
 		return true;
 	}
     //////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, unsigned long & _value )
+	bool extract_value( PyObject * _obj, uint64_t & _value )
 	{
 		if( PyLong_Check( _obj ) )
 		{				
@@ -193,7 +193,7 @@ namespace pybind
 		Py_RETURN_FALSE;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw( int _value )
+	PyObject * ptr_throw( int32_t _value )
 	{
 #   if PYBIND_PYTHON_VERSION < 300
 		return PyInt_FromLong( _value );
@@ -202,7 +202,7 @@ namespace pybind
 #	endif
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw( unsigned int _value )
+	PyObject * ptr_throw( uint32_t _value )
 	{
 #   if PYBIND_PYTHON_VERSION < 300
 		return PyInt_FromLong( _value );
@@ -211,7 +211,7 @@ namespace pybind
 #	endif
 	}
     //////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw( unsigned long _value )
+	PyObject * ptr_throw( uint64_t _value )
 	{
 #   if PYBIND_PYTHON_VERSION < 300
 		return PyInt_FromLong( _value );

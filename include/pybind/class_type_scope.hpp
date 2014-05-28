@@ -38,7 +38,7 @@ namespace pybind
         PYBIND_API bool is_class( PyObject * _obj );
         PYBIND_API void * get_class_impl( PyObject * _obj );
 
-        PYBIND_API void reg_class_type_scope( size_t _info, const class_type_scope_ptr & _scope );
+        PYBIND_API bool reg_class_type_scope( size_t _info, const class_type_scope_ptr & _scope );
         PYBIND_API const class_type_scope_ptr & get_class_type_scope( size_t _info );
 
         PYBIND_API void visit_types_scope( visitor_class_type_scope * _getter );
@@ -61,7 +61,7 @@ namespace pybind
         : public stdex::intrusive_ptr_base
 	{
 	public:
-		class_type_scope( const char * _name, size_t _type_name, PyObject * _module, void * _user, pybind_new _pynew, pybind_destructor _pydestructor, bool _pod );
+		class_type_scope( const char * _name, size_t _typeId, PyObject * _module, void * _user, pybind_new _pynew, pybind_destructor _pydestructor, bool _pod );
 		~class_type_scope();
 
 	public:
@@ -73,7 +73,8 @@ namespace pybind
 
 	public:
 		const char * get_name() const;
-		size_t get_type() const;
+		size_t get_type_id() const;
+		bool is_pod() const;
 
         void * get_user() const;
 
@@ -101,7 +102,6 @@ namespace pybind
         
 
 		PyObject * create_holder( void * _impl );
-		PyObject * create_impl( void * _impl );
 		PyObject * create_pod( void ** _impl );
 
 		void * metacast( size_t name, void * _impl );
@@ -123,7 +123,7 @@ namespace pybind
 
 	public:
         const char * m_name;
-        size_t m_type;
+        size_t m_typeId;
 
         struct Metacast
         {

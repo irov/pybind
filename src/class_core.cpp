@@ -12,7 +12,10 @@ namespace pybind
     {
         class_type_scope_ptr scope = new class_type_scope( _name, _info, _module, _user, _pynew, _pydestructor, _pod );
 
-        detail::reg_class_type_scope( _info, scope );
+        if( detail::reg_class_type_scope( _info, scope ) == false )
+		{
+			return nullptr;
+		}
 
         return scope;
     }
@@ -36,13 +39,6 @@ namespace pybind
         const class_type_scope_ptr & t_scope = detail::get_class_type_scope( _info );
 
         return t_scope->create_holder( _impl );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    PyObject * class_core::create_impl( size_t _info, void * _impl )
-    {
-        const class_type_scope_ptr & t_scope = detail::get_class_type_scope( _info );
-
-        return t_scope->create_impl( _impl );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * class_core::create_pod( size_t _info, void ** _impl )

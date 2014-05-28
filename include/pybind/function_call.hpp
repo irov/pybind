@@ -306,12 +306,14 @@ namespace pybind
 					, fn_arity
 					);
 
-				return 0;
+				return nullptr;
 			}
 
 			try
 			{
-				return function_call_ret_impl<F,typename f_info::ret_type>::call( f, _arg );
+				PyObject * ret = function_call_ret_impl<F,typename f_info::ret_type>::call( f, _arg );
+
+				return ret;
 			}
 			catch( const pybind_exception & )
 			{
@@ -320,7 +322,7 @@ namespace pybind
                     );
 			}
 
-			return 0;
+			return nullptr;
 		}
 	};
 }
