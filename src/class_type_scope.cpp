@@ -231,9 +231,7 @@ namespace pybind
             
             Py_DecRef( py_scope );
 
-            class_type_scope_ptr * scopes = g_class_type_scope;
-
-            const class_type_scope_ptr & scope = scopes[id];
+            const class_type_scope_ptr & scope = g_class_type_scope[id];
 
             if( scope == nullptr )
             {
@@ -372,11 +370,11 @@ namespace pybind
 		//////////////////////////////////////////////////////////////////////////
 		void * check_registred_class( PyObject * _obj, size_t _info )
 		{
-			PyObject * py_type = PyObject_Type( _obj );
+			PyTypeObject * py_type = _obj->ob_type;
 
 			const class_type_scope_ptr & type_scope = detail::get_class_type_scope( _info );
 
-			if( PyType_IsSubtype( (PyTypeObject *)py_type, type_scope->m_pytypeobject ) )
+			if( PyType_IsSubtype( py_type, type_scope->m_pytypeobject ) )
 			{
 				return detail::get_class_impl( _obj );
 			}
@@ -657,13 +655,24 @@ namespace pybind
 	static PyObject * py_new_class( PyTypeObject * _type, PyObject * _args, PyObject * _kwds )
 	{
 		const class_type_scope_ptr & scope = pybind::detail::get_class_scope(_type);
+		
+		PyObject * py_self = nullptr;
 
-		PyObject * py_self = scope->unpoolObject();
-
+		PyTypeObject * scope_pytype = scope->get_typemodule();
+		if( scope_pytype == _type )
+		{
+			py_self = scope->unpoolObject();
+		}
+		
 		if( py_self == nullptr )
 		{
 			py_self = detail::alloc_class( _type, _args, _kwds );
 		}
+		else
+		{
+			_type->tp_init( py_self, _args, _kwds );
+		}
+
 
         void * impl = (*scope->m_pynew)( scope, py_self, _args, _kwds );
 
@@ -696,7 +705,12 @@ namespace pybind
 			(scope->m_pydestructor)( scope, impl );            		
 		}
 
-		scope->poolObject( _obj );
+		PyTypeObject * scope_pytype = scope->get_typemodule();
+		PyTypeObject * obj_pytype = _obj->ob_type;
+		if( scope_pytype == obj_pytype )
+		{
+			scope->poolObject( _obj );
+		}
 	}
     //////////////////////////////////////////////////////////////////////////
     static PyObject * py_new_pod( PyTypeObject * _type, PyObject * _args, PyObject * _kwds )
