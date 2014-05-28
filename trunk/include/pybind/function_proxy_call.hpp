@@ -170,12 +170,14 @@ namespace pybind
 					, _tag
 					);
 
-				return 0;
+				return nullptr;
 			}
 
 			try
 			{
-				return function_proxy_call_ret_impl<C,F,typename f_info::ret_type>::call( _obj, f, _arg );
+				PyObject * ret = function_proxy_call_ret_impl<C,F,typename f_info::ret_type>::call( _obj, f, _arg );
+
+				return ret;
 			}
 			catch( const pybind_exception & )
 			{
@@ -184,7 +186,7 @@ namespace pybind
                     );
 			}
 
-			return 0;			
+			return nullptr;			
 		}
 	};
 }

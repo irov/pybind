@@ -136,6 +136,7 @@ namespace pybind
 		static PyObject * call( P * _proxy, C * _obj, F f, PyObject * _arg )
 		{
 			Ret result = method_proxy_call_impl<P,C,F,Ret,f_info::arity>::call( _proxy, _obj, f, _arg );
+
 			return ptr_throw( result );
 		}
 	};
@@ -148,6 +149,7 @@ namespace pybind
 		static PyObject * call( P * _proxy, C * _obj, F f, PyObject * _arg )
 		{
 			method_proxy_call_impl<P,C,F,void,f_info::arity>::call( _proxy, _obj, f, _arg );
+
 			return ret_none();
 		}
 	};
@@ -170,12 +172,14 @@ namespace pybind
                     , _tag
                     );
 
-                return 0;
+                return nullptr;
             }
 
 			try
 			{
-				return method_proxy_call_ret_impl<P,C,F,typename f_info::ret_type>::call( _proxy, _obj, f, _arg );
+				PyObject * ret = method_proxy_call_ret_impl<P,C,F,typename f_info::ret_type>::call( _proxy, _obj, f, _arg );
+
+				return ret;
 			}
 			catch( const pybind_exception & )
 			{
@@ -184,7 +188,7 @@ namespace pybind
                     );
 			}
 
-			return 0;			
+			return nullptr;			
 		}
 	};
 }

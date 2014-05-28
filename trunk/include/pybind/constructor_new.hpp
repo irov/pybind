@@ -102,12 +102,14 @@ namespace pybind
 
 			if( this->valid( _args ) == false )
 			{
-				return 0;
+				return nullptr;
 			}
 
 			try
 			{
-				return call_constructor_new_impl<C, P, P::base_arity>::call( _args );
+				void * impl = call_constructor_new_impl<C, P, P::base_arity>::call( _args );
+
+				return impl;
 			}
 			catch( const pybind_exception & )
 			{
@@ -116,7 +118,7 @@ namespace pybind
                     );
 			}
 
-			return 0;
+			return nullptr;
 		}
 	};
 }

@@ -25,20 +25,17 @@ namespace pybind
 		PyObject_HEAD
 			char buff[64];
 	};
-	//////////////////////////////////////////////////////////////////////////
-	struct py_base_object
-	{
-		PyObject_HEAD
-	};
-	//////////////////////////////////////////////////////////////////////////
-	static void py_dealloc( PyObject * _obj )
-	{
-		_obj->ob_type->tp_free( _obj );
-	}
 	//////////////////////////////////////////////////////////////////////////	
     STATIC_DECLARE(PyObject *, s_pybind_object_impl);
     STATIC_DECLARE(PyObject *, s_pybind_class_type_scope);
     STATIC_DECLARE(PyObject *, s_pybind_object_holder);
+	//////////////////////////////////////////////////////////////////////////
+	static void py_pod64_dealloc( PyObject * _obj )
+	{
+		PyTypeObject * objtype = Py_TYPE(_obj);
+
+		objtype->tp_free( _obj );
+	}
     //////////////////////////////////////////////////////////////////////////
 	STATIC_DECLARE_VALUE_BEGIN(PyTypeObject, s_pod64_type)
 	{
@@ -46,7 +43,7 @@ namespace pybind
 			"pod64_type",
 			sizeof(py_pod64_object),
 			0,
-			&py_dealloc,                             /* tp_dealloc */
+			&py_pod64_dealloc,                             /* tp_dealloc */
 			0,                    /* tp_print */
 			0,                                          /* tp_getattr */
 			0,                                          /* tp_setattr */
@@ -84,11 +81,18 @@ namespace pybind
 	}
 	STATIC_DECLARE_VALUE_END();
 	//////////////////////////////////////////////////////////////////////////
+	static void py_dealloc( PyObject * _obj )
+	{
+		PyTypeObject * objtype = Py_TYPE(_obj);
+
+		objtype->tp_free( _obj );
+	}
+	//////////////////////////////////////////////////////////////////////////
 	STATIC_DECLARE_VALUE_BEGIN(PyTypeObject, s_base_type)
 	{
 		PyVarObject_HEAD_INIT(&PyType_Type, 0)
 		"pybind_base_type",
-		sizeof(py_base_object),
+		sizeof(PyObject),
 		0,
 		&py_dealloc,                             /* tp_dealloc */
 		0,                    /* tp_print */
@@ -131,11 +135,40 @@ namespace pybind
 	namespace detail
 	{
         //////////////////////////////////////////////////////////////////////////
-        class_type_scope_ptr g_class_type_scope[PYBIND_TYPE_COUNT];
+        static class_type_scope_ptr g_class_type_scope[PYBIND_TYPE_COUNT];
+		//////////////////////////////////////////////////////////////////////////
+		void initialize_class_type_scope()
+		{
+			for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
+			{
+				g_class_type_scope[index] = nullptr;
+			}
+		}
+		//////////////////////////////////////////////////////////////////////////
+		void finalize_class_type_scope()
+		{
+			for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
+			{
+				class_type_scope_ptr & scope = g_class_type_scope[index];
+
+				if( scope != nullptr )
+				{
+					scope->finalize();
+					scope = nullptr;
+				}
+			}
+		}
         //////////////////////////////////////////////////////////////////////////
-        void reg_class_type_scope( size_t _info, const class_type_scope_ptr & _scope )
+        bool reg_class_type_scope( size_t _info, const class_type_scope_ptr & _scope )
         {
+			if( _info == 0 )
+			{
+				return false;
+			}
+
             g_class_type_scope[ _info ] = _scope;
+
+			return true;
         }
         //////////////////////////////////////////////////////////////////////////
         const class_type_scope_ptr & get_class_type_scope( size_t _info )
@@ -144,12 +177,19 @@ namespace pybind
 
             return scope;	
         }
+		//////////////////////////////////////////////////////////////////////////
+		const class_type_scope_ptr & get_invalid_scope()
+		{
+			const class_type_scope_ptr & scope = g_class_type_scope[0];
+
+			return scope;	
+		}
         //////////////////////////////////////////////////////////////////////////
         void visit_types_scope( visitor_class_type_scope * _getter )
         {
             for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
             {
-                const class_type_scope_ptr & scope_ptr = g_class_type_scope[index];
+				const class_type_scope_ptr & scope_ptr = detail::get_class_type_scope( index );
 
                 if( scope_ptr == nullptr )
                 {
@@ -164,7 +204,9 @@ namespace pybind
 		//////////////////////////////////////////////////////////////////////////
 		bool is_class( PyObject * _obj )
 		{
-			if( PyType_IsSubtype( _obj->ob_type, &STATIC_VAR(s_base_type) ) == 1 )
+			PyTypeObject * objtype = Py_TYPE(_obj);
+
+			if( PyType_IsSubtype( objtype, &STATIC_VAR(s_base_type) ) == 1 )
 			{
 				return true;
 			}
@@ -178,6 +220,7 @@ namespace pybind
 
 			if( py_self == nullptr )
 			{				
+				pybind::check_error();
 				pybind::throw_exception();
 
 				return nullptr;
@@ -185,7 +228,9 @@ namespace pybind
 
 			Py_DecRef( py_self );
 			
-			if( py_self->ob_type == &STATIC_VAR(s_pod64_type) )
+			PyTypeObject * py_self_type = Py_TYPE(py_self);
+
+			if( py_self_type == &STATIC_VAR(s_pod64_type) )
 			{
 				py_pod64_object * py_pod64 = (py_pod64_object *)py_self;
 
@@ -212,9 +257,10 @@ namespace pybind
 
 			if( py_scope == nullptr )
 			{
+				pybind::check_error();
 				pybind::throw_exception();
 				
-                const class_type_scope_ptr & scope_null = g_class_type_scope[0];
+                const class_type_scope_ptr & scope_null = detail::get_class_type_scope( 0 );
 
                 return scope_null;
 			}
@@ -224,20 +270,20 @@ namespace pybind
             {
                 pybind::throw_exception();
 
-                const class_type_scope_ptr & scope_null = g_class_type_scope[0];
+				const class_type_scope_ptr & scope_null = detail::get_invalid_scope();
 
                 return scope_null;
             }
             
             Py_DecRef( py_scope );
 
-            const class_type_scope_ptr & scope = g_class_type_scope[id];
+			const class_type_scope_ptr & scope = detail::get_class_type_scope( id );
 
             if( scope == nullptr )
             {
                 pybind::throw_exception();
 
-                const class_type_scope_ptr & scope_null = g_class_type_scope[0];
+				const class_type_scope_ptr & scope_null = detail::get_invalid_scope();
 
                 return scope_null;
             }
@@ -251,6 +297,7 @@ namespace pybind
 
             PyObject * py_impl = void_ptr_new( nullptr );
 
+			Py_IncRef( STATIC_VAR(s_pybind_object_impl) );
             if( PyObject_SetAttr( _obj, STATIC_VAR(s_pybind_object_impl), py_impl ) == -1 )
             {
                 pybind::throw_exception();
@@ -258,7 +305,6 @@ namespace pybind
                 return nullptr;
             }
 
-            Py_DecRef( STATIC_VAR(s_pybind_object_impl) );
             Py_DecRef( py_impl );
 
 			return impl;
@@ -370,23 +416,25 @@ namespace pybind
 		//////////////////////////////////////////////////////////////////////////
 		void * check_registred_class( PyObject * _obj, size_t _info )
 		{
-			PyTypeObject * py_type = _obj->ob_type;
+			PyTypeObject * py_type = Py_TYPE(_obj);
 
 			const class_type_scope_ptr & type_scope = detail::get_class_type_scope( _info );
 
-			if( PyType_IsSubtype( py_type, type_scope->m_pytypeobject ) )
+			if( PyType_IsSubtype( py_type, type_scope->m_pytypeobject ) == 0 )
 			{
-				return detail::get_class_impl( _obj );
+				return nullptr;
 			}
 
-			return nullptr;
+			void * impl = detail::get_class_impl( _obj );
+
+			return impl;
 		}
         //////////////////////////////////////////////////////////////////////////
-        void * meta_cast_scope( void * _self, size_t _scope_name, size_t _name, const class_type_scope_ptr & scope )
+        void * meta_cast_scope( void * _self, size_t _typeId, size_t _name, const class_type_scope_ptr & scope )
         {
-            size_t class_name = scope->get_type();
+            size_t class_name = scope->get_type_id();
 
-            if( class_name == _scope_name )
+            if( class_name == _typeId )
             {
                 return _self;
             }
@@ -415,28 +463,6 @@ namespace pybind
 
 			return py_self;
 		}
-		//////////////////////////////////////////////////////////////////////////
-		PyObject * alloc_pod( PyTypeObject * _type, PyObject * _args, PyObject * _kwds, void ** _buff )
-		{
-            (void)_args;
-            (void)_kwds;
-
-			PyObject * py_self = PyBaseObject_Type.tp_alloc(_type, 0);
-
-			if( py_self == nullptr )
-			{
-				if (PyErr_Occurred())
-				{
-					PyErr_Print();
-				}
-
-				return nullptr;
-			}
-
-			pybind::detail::wrap_pod64( py_self, _buff );
-
-			return py_self;
-		}
     }
     //////////////////////////////////////////////////////////////////////////
     static PyObject * py_callfunc( PyObject * _obj, PyObject * _args, PyObject * _kwds )
@@ -450,7 +476,8 @@ namespace pybind
             return nullptr;
         }
 
-        const class_type_scope_ptr & scope = pybind::detail::get_class_scope( _obj->ob_type );
+		PyTypeObject * objtype = Py_TYPE(_obj);
+        const class_type_scope_ptr & scope = pybind::detail::get_class_scope( objtype );
 
         PyObject * repr = scope->m_call->call( impl, scope, _args, _kwds );
 
@@ -468,7 +495,8 @@ namespace pybind
 			return nullptr;
 		}
 
-		const class_type_scope_ptr & scope = pybind::detail::get_class_scope( _obj->ob_type );
+		PyTypeObject * objtype = Py_TYPE(_obj);
+		const class_type_scope_ptr & scope = pybind::detail::get_class_scope( objtype );
 
         PyObject * repr = scope->m_repr->repr( _obj, impl, scope );
 
@@ -486,7 +514,8 @@ namespace pybind
             return 0;
         }
 
-        const class_type_scope_ptr & scope = pybind::detail::get_class_scope( _obj->ob_type );
+		PyTypeObject * objtype = Py_TYPE(_obj);
+        const class_type_scope_ptr & scope = pybind::detail::get_class_scope( objtype );
 
         size_t hash = scope->m_hash->hash( _obj, impl, scope );
 
@@ -506,7 +535,8 @@ namespace pybind
             return Py_NotImplemented;
         }
 
-        const class_type_scope_ptr & scope = pybind::detail::get_class_scope( _obj->ob_type );
+		PyTypeObject * objtype = Py_TYPE(_obj);
+        const class_type_scope_ptr & scope = pybind::detail::get_class_scope( objtype );
 
         PybindOperatorCompare pybind_op = POC_Less;
 
@@ -583,7 +613,8 @@ namespace pybind
 			return nullptr;
 		}
 
-		const class_type_scope_ptr & scope = pybind::detail::get_class_scope( _obj->ob_type );
+		PyTypeObject * objtype = Py_TYPE(_obj);
+		const class_type_scope_ptr & scope = pybind::detail::get_class_scope( objtype );
 
 		PyObject * attr = PyTuple_Pack( 1, _key );
 		PyObject * res = scope->m_getattro->call( impl, scope, attr, 0 );
@@ -603,7 +634,8 @@ namespace pybind
 			return nullptr;
 		}
 
-		const class_type_scope_ptr & scope = pybind::detail::get_class_scope( _obj->ob_type );
+		PyTypeObject * objtype = Py_TYPE(_obj);
+		const class_type_scope_ptr & scope = pybind::detail::get_class_scope( objtype );
 
 		PyObject * attr = PyTuple_Pack( 1, _key );
 		PyObject * res = scope->m_mapping->call( impl, scope, attr, 0 );
@@ -629,7 +661,8 @@ namespace pybind
 			return nullptr;
 		}
 
-		const class_type_scope_ptr & scope = pybind::detail::get_class_scope( _obj->ob_type );
+		PyTypeObject * objtype = Py_TYPE(_obj);
+		const class_type_scope_ptr & scope = pybind::detail::get_class_scope( objtype );
 
 		PyObject * attr = Py_BuildValue( "(i)", _index );
 		PyObject * res = scope->m_sequence->call( impl, scope, attr, 0 );
@@ -637,7 +670,6 @@ namespace pybind
 
 		return res;
 	}
-
 	//////////////////////////////////////////////////////////////////////////
 	static PySequenceMethods py_as_sequence = {
 		(lenfunc)0,                       /* sq_length */
@@ -654,12 +686,14 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	static PyObject * py_new_class( PyTypeObject * _type, PyObject * _args, PyObject * _kwds )
 	{
-		const class_type_scope_ptr & scope = pybind::detail::get_class_scope(_type);
+		const class_type_scope_ptr & scope = pybind::detail::get_class_scope( _type );
 		
 		PyObject * py_self = nullptr;
 
 		PyTypeObject * scope_pytype = scope->get_typemodule();
-		if( scope_pytype == _type )
+		bool is_pod = scope->is_pod();
+
+		if( scope_pytype == _type && is_pod == true )
 		{
 			py_self = scope->unpoolObject();
 		}
@@ -673,12 +707,11 @@ namespace pybind
 			_type->tp_init( py_self, _args, _kwds );
 		}
 
-
         void * impl = (*scope->m_pynew)( scope, py_self, _args, _kwds );
 
         if( impl == nullptr )
         {
-            pybind::decref( py_self );
+            Py_DecRef( py_self );
 
             return nullptr;
         }
@@ -692,24 +725,19 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	static void py_del_class( PyObject * _obj )
 	{
-		const class_type_scope_ptr & scope = pybind::detail::get_class_scope(_obj->ob_type);
+		PyTypeObject * objtype = Py_TYPE(_obj);
+
+		const class_type_scope_ptr & scope = pybind::detail::get_class_scope( objtype );
 
 		scope->removeObject( _obj );
 		
-		bool holder = pybind::detail::is_holder(_obj);
+		bool holder = pybind::detail::is_holder( _obj );
 
 		if( holder == false )
 		{
-			void * impl = pybind::detail::get_class_impl(_obj);
+			void * impl = pybind::detail::get_class_impl( _obj );
 
 			(scope->m_pydestructor)( scope, impl );            		
-		}
-
-		PyTypeObject * scope_pytype = scope->get_typemodule();
-		PyTypeObject * obj_pytype = _obj->ob_type;
-		if( scope_pytype == obj_pytype )
-		{
-			scope->poolObject( _obj );
 		}
 	}
     //////////////////////////////////////////////////////////////////////////
@@ -720,9 +748,11 @@ namespace pybind
 		PyObject * py_self = scope->unpoolObject();
 
 		if( py_self == nullptr )
-		{
+		{			
+			py_self = detail::alloc_class( _type, _args, _kwds );
+
 			void * buff;
-			py_self = detail::alloc_pod( _type, _args, _kwds, &buff );
+			pybind::detail::wrap_pod64( py_self, &buff );
 		}
 
         void * impl = (*scope->m_pynew)( scope, py_self, _args, _kwds );
@@ -736,15 +766,17 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	static void py_del_pod( PyObject * _obj )
 	{
-		const class_type_scope_ptr & scope = pybind::detail::get_class_scope(_obj->ob_type);
+		PyTypeObject * objtype = Py_TYPE(_obj);
+
+		const class_type_scope_ptr & scope = pybind::detail::get_class_scope( objtype );
 
 		scope->removeObject( _obj );
 
-		bool holder = pybind::detail::is_holder(_obj);
+		bool holder = pybind::detail::is_holder( _obj );
 
 		if( holder == false )
 		{
-			void * impl = pybind::detail::get_class_impl(_obj);
+			void * impl = pybind::detail::get_class_impl( _obj );
 
 			(scope->m_pydestructor)( scope, impl );            
 		}
@@ -752,9 +784,9 @@ namespace pybind
 		scope->poolObject( _obj );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	class_type_scope::class_type_scope( const char * _name, size_t _type_name, PyObject * _module, void * _user, pybind_new _pynew, pybind_destructor _pydestructor, bool _pod )
+	class_type_scope::class_type_scope( const char * _name, size_t _typeId, PyObject * _module, void * _user, pybind_new _pynew, pybind_destructor _pydestructor, bool _pod )
 		: m_name(_name)
-		, m_type(_type_name)
+		, m_typeId(_typeId)
 		, m_module(_module)
         , m_user(_user)
         , m_objectCount(0)
@@ -842,7 +874,7 @@ namespace pybind
 
 		PyObject * py_dict = PyDict_New();
 		
-        PyObject * py_pybind_class_type = pybind::ptr( m_type );
+        PyObject * py_pybind_class_type = pybind::ptr( m_typeId );
                 
 		PyDict_SetItem( py_dict, STATIC_VAR(s_pybind_class_type_scope), py_pybind_class_type );
 		Py_DecRef( py_pybind_class_type );
@@ -901,13 +933,10 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::finalize_pool()
 	{
-		size_t poolCount = m_poolCount;
-		m_poolCount = PYBIND_TYPE_OBJECT_POOL_COUNT;
-
 		destructor old_del = m_pytypeobject->tp_del;
 		m_pytypeobject->tp_del = nullptr;
 
-		for( size_t i = 0; i != poolCount; ++i )
+		for( size_t i = 0; i != m_poolCount; ++i )
 		{
 			PyObject * obj = m_poolObjects[i];
 
@@ -927,9 +956,14 @@ namespace pybind
 		return m_name;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	size_t class_type_scope::get_type() const
+	size_t class_type_scope::get_type_id() const
 	{
-		return m_type;
+		return m_typeId;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool class_type_scope::is_pod() const
+	{
+		return m_pod;
 	}
     //////////////////////////////////////////////////////////////////////////
     void * class_type_scope::get_user() const
@@ -1135,72 +1169,37 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * class_type_scope::create_holder( void * _impl )
 	{
-		PyObject * py_self = this->unpoolObject();
+		if( m_pod == true )
+		{
+			return nullptr;	
+		}
 		
-		if( py_self == nullptr )
-		{
-			PyObject * py_args = PyTuple_New(0);
-			py_self = pybind::detail::alloc_class( m_pytypeobject, py_args, 0 );
-			Py_DecRef( py_args );
+		PyObject * py_self = pybind::detail::alloc_class( m_pytypeobject, nullptr, nullptr );
 
-			pybind::detail::wrap( py_self, _impl, true );
-		}
-		else
-		{
-			pybind::detail::wrap( py_self, _impl, true );
-
-			PyObject * py_args = PyTuple_New(0);
-			m_pytypeobject->tp_init( py_self, py_args, nullptr );
-			Py_DecRef( py_args );
-		}
+		pybind::detail::wrap( py_self, _impl, true );
 
 	    this->addObject( py_self );
 
 		return py_self;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * class_type_scope::create_impl( void * _impl )
-	{
-		PyObject * py_self = this->unpoolObject();
-
-		if( py_self == nullptr )
-		{
-			PyObject * py_args = PyTuple_New(0);
-			py_self = pybind::detail::alloc_class( m_pytypeobject, py_args, 0 );
-			Py_DecRef( py_args );
-		
-			pybind::detail::wrap( py_self, _impl, false );
-		}
-		else
-		{
-			pybind::detail::wrap( py_self, _impl, false );
-
-			PyObject * py_args = PyTuple_New(0);
-			m_pytypeobject->tp_init( py_self, py_args, nullptr );
-			Py_DecRef( py_args );
-		}
-        
-        this->addObject( py_self );
-
-		return py_self;
-	}
-	//////////////////////////////////////////////////////////////////////////
 	PyObject * class_type_scope::create_pod( void ** _impl )
 	{
+		if( m_pod == false )
+		{
+			return nullptr;
+		}
+
 		PyObject * py_self = this->unpoolObject();
 
 		if( py_self == nullptr )
 		{
-			PyObject * py_args = PyTuple_New(0);
-			py_self = pybind::detail::alloc_pod( m_pytypeobject, py_args, 0, _impl );
-			Py_DecRef( py_args );
+			py_self = pybind::detail::alloc_class( m_pytypeobject, nullptr, nullptr );
+
+			pybind::detail::wrap_pod64( py_self, _impl );
 		}
 		else
 		{
-			PyObject * py_args = PyTuple_New(0);
-			m_pytypeobject->tp_init( py_self, py_args, nullptr );
-			Py_DecRef( py_args );
-
 			pybind::detail::get_wrap_pod64( py_self, _impl );
 		}
 
@@ -1285,10 +1284,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool initialize_classes()
 	{
-        for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
-        {
-            detail::g_class_type_scope[index] = nullptr;
-        }
+		detail::initialize_class_type_scope();
 
 #   if PYBIND_PYTHON_VERSION > 300
         STATIC_VAR(s_pybind_object_impl) = pybind::unicode_from_utf8( "__pybind_object_impl" );
@@ -1316,7 +1312,7 @@ namespace pybind
 			printf("invalid embedding class '%s' \n", STATIC_VAR(s_base_type).tp_name );
 
             return false;
-		}	
+		}
 
 		PyObject * builtins = pybind::get_builtins();
 		
@@ -1326,9 +1322,9 @@ namespace pybind
 
 		pybind::dict_setstring( dir_bltin, "pybind_base_type", pybind_base_obj );
 
-		pybind::decref( pybind_base_obj );
-		pybind::decref( builtins );
-
+		Py_DecRef( pybind_base_obj );
+		Py_DecRef( builtins );
+		
         return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -1350,16 +1346,5 @@ namespace pybind
 		Py_DecRef(STATIC_VAR(s_pybind_object_impl));
 		Py_DecRef(STATIC_VAR(s_pybind_class_type_scope));
 		Py_DecRef(STATIC_VAR(s_pybind_object_holder));
-
-        for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
-        {
-			class_type_scope_ptr & scope = detail::g_class_type_scope[index];
-
-			if( scope != nullptr )
-			{
-				scope->finalize();
-				scope = nullptr;
-			}
-        }
 	}
 }
