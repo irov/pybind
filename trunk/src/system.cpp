@@ -974,47 +974,38 @@ namespace pybind
 		return value == 1;
 	}
 	//////////////////////////////////////////////////////////////////////////
+	bool test_equal( PyObject * _left, PyObject * _right )
+	{
+		int value = PyObject_RichCompareBool( _left, _right, Py_EQ );
+
+		return value == 1;
+	}
+	//////////////////////////////////////////////////////////////////////////
 	bool is_true( PyObject * _value )
 	{
 		return _value == Py_True;
 	}
-
 	//////////////////////////////////////////////////////////////////////////
 	bool string_check( PyObject * _string )
 	{
-#   if PYBIND_PYTHON_VERSION < 300
-		if( PyString_Check( _string ) == 1 )
-		{
-			return true;
-		}
-#   else
         if( PyBytes_Check( _string ) == 1 )
         {
             return true;
         }
-#   endif
-                
+      
 		return false;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	size_t string_size( PyObject * _string )
 	{
-#   if PYBIND_PYTHON_VERSION < 300
-		Py_ssize_t size = PyString_Size( _string );
-#   else
         Py_ssize_t size = PyBytes_Size( _string );
-#   endif
 
 		return (size_t)size;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	const char * string_to_char( PyObject * _string )
 	{
-#   if PYBIND_PYTHON_VERSION < 300
-        char * ch_buff_unconst = PyString_AsString( _string );
-#   else
 		char * ch_buff_unconst = PyBytes_AsString( _string );        
-#   endif
 
         const char * ch_buff = const_cast<const char *>(ch_buff_unconst);
 
@@ -1023,14 +1014,9 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     const char * string_to_char_and_size( PyObject * _string, size_t & _size )
     {
-#   if PYBIND_PYTHON_VERSION < 300
         char * ch_buff_unconst;
         Py_ssize_t len;
-        PyString_AsStringAndSize( _string, &ch_buff_unconst, &len );
-#   else
-        char * ch_buff_unconst = PyBytes_AsString( _string );
-        Py_ssize_t len = PyBytes_Size( _string );
-#   endif
+        PyBytes_AsStringAndSize( _string, &ch_buff_unconst, &len );
 
         _size = (size_t)len;
 
@@ -1041,22 +1027,14 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * string_from_char( const char * _str )
     {
-#   if PYBIND_PYTHON_VERSION < 300
-        PyObject * py_str = PyString_FromString( _str );
-#   else
         PyObject * py_str = PyBytes_FromString( _str );
-#   endif
 
         return py_str;
     }
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * string_from_char_size( const char * _str, size_t _size )
 	{
-#   if PYBIND_PYTHON_VERSION < 300
-		PyObject * py_str = PyString_FromStringAndSize( _str, _size );
-#   else
         PyObject * py_str = PyBytes_FromStringAndSize( _str, _size );
-#   endif
 
 		return py_str;
 	}
@@ -1144,31 +1122,19 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool void_ptr_check( PyObject * _obj )
     {
-#   if PYBIND_PYTHON_VERSION > 300
         return PyCapsule_CheckExact( _obj );
-#   else
-        return PyCObject_Check( _obj );
-#   endif		
-    }
+	}
     //////////////////////////////////////////////////////////////////////////
     PyObject * void_ptr_new( void * _impl )
     {
-#   if PYBIND_PYTHON_VERSION > 300
         PyObject * py_void = PyCapsule_New( _impl, nullptr, nullptr );
-#	else
-        PyObject * py_void = PyCObject_FromVoidPtr( _impl, nullptr );    
-#	endif
 
         return py_void;
     }
     //////////////////////////////////////////////////////////////////////////
     void * void_ptr_get( PyObject * _obj )
     {
-#   if PYBIND_PYTHON_VERSION > 300
         void * impl = PyCapsule_GetPointer( _obj, nullptr );
-#   else
-        void * impl = PyCObject_AsVoidPtr( _obj );
-#   endif	
 
         return impl;
     }

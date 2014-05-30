@@ -216,9 +216,9 @@ namespace pybind
 		//////////////////////////////////////////////////////////////////////////
 		void * get_class_impl( PyObject * _obj )
 		{
-			PyObject * py_self = PyObject_GetAttr( _obj, STATIC_VAR(s_pybind_object_impl) );
+			PyObject * py_impl = PyObject_GetAttr( _obj, STATIC_VAR(s_pybind_object_impl) );
 
-			if( py_self == nullptr )
+			if( py_impl == nullptr )
 			{				
 				pybind::check_error();
 				pybind::throw_exception();
@@ -226,27 +226,32 @@ namespace pybind
 				return nullptr;
 			}
 
-			Py_DecRef( py_self );
+			Py_DecRef( py_impl );
 			
-			PyTypeObject * py_self_type = Py_TYPE(py_self);
+			PyTypeObject * py_self_type = Py_TYPE(py_impl);
 
 			if( py_self_type == &STATIC_VAR(s_pod64_type) )
 			{
-				py_pod64_object * py_pod64 = (py_pod64_object *)py_self;
+				py_pod64_object * py_pod64 = (py_pod64_object *)py_impl;
 
 				void * buff = py_pod64->buff;
 
 				return buff;
 			}
+
+			if( is_none( py_impl ) == true )
+			{
+				return nullptr;
+			}
             
-            if( void_ptr_check( py_self ) == false )
+            if( void_ptr_check( py_impl ) == false )
             {
                 pybind::throw_exception();
 
                 return nullptr;
             }
 
-            void * impl = void_ptr_get( py_self );				
+            void * impl = void_ptr_get( py_impl );				
 
 			return impl;
 		}
@@ -265,6 +270,8 @@ namespace pybind
                 return scope_null;
 			}
 
+			Py_DecRef( py_scope );
+
             size_t id;
             if( pybind::extract_value( py_scope, id ) == false )
             {
@@ -273,9 +280,7 @@ namespace pybind
 				const class_type_scope_ptr & scope_null = detail::get_invalid_scope();
 
                 return scope_null;
-            }
-            
-            Py_DecRef( py_scope );
+            }        
 
 			const class_type_scope_ptr & scope = detail::get_class_type_scope( id );
 
@@ -295,33 +300,38 @@ namespace pybind
 		{
 			void * impl = pybind::detail::get_class_impl( _obj );
 
-            PyObject * py_impl = void_ptr_new( nullptr );
-
-			Py_IncRef( STATIC_VAR(s_pybind_object_impl) );
-            if( PyObject_SetAttr( _obj, STATIC_VAR(s_pybind_object_impl), py_impl ) == -1 )
+            if( PyObject_SetAttr( _obj, STATIC_VAR(s_pybind_object_impl), Py_None ) == -1 )
             {
                 pybind::throw_exception();
 
                 return nullptr;
             }
 
-            Py_DecRef( py_impl );
-
 			return impl;
 		}
 		//////////////////////////////////////////////////////////////////////////
 		bool is_wrap( PyObject * _obj )
 		{
-			void * impl = pybind::detail::get_class_impl( _obj );
-			
-			return impl != nullptr;
+			PyObject * py_impl = PyObject_GetAttr( _obj, STATIC_VAR(s_pybind_object_impl) );
+
+			if( py_impl == nullptr )
+			{
+				pybind::throw_exception();
+
+				return false;
+			}
+
+			Py_DecRef( py_impl );
+
+			bool result = void_ptr_check( py_impl );			
+
+			return result;
 		}
 		//////////////////////////////////////////////////////////////////////////
 		void wrap( PyObject * _obj, void * _impl, bool _holder )
 		{
 			PyObject * py_impl = void_ptr_new( _impl );
             
-            Py_IncRef( STATIC_VAR(s_pybind_object_impl) );
 			if( PyObject_SetAttr( _obj, STATIC_VAR(s_pybind_object_impl), py_impl ) == -1 )
             {
                 pybind::throw_exception();
@@ -332,8 +342,7 @@ namespace pybind
 			Py_DecRef( py_impl );
 
             PyObject * py_holder = get_bool( _holder );
-
-            Py_IncRef( STATIC_VAR(s_pybind_object_holder) );			
+	
 			if( PyObject_SetAttr( _obj, STATIC_VAR(s_pybind_object_holder), py_holder ) == -1 )
             {
                 pybind::throw_exception();
@@ -346,7 +355,6 @@ namespace pybind
 		{
 			PyObject * py_impl = PyType_GenericAlloc( &STATIC_VAR(s_pod64_type), 0 );
 
-            Py_IncRef( STATIC_VAR(s_pybind_object_impl) );
 			if( PyObject_SetAttr( _obj, STATIC_VAR(s_pybind_object_impl), py_impl ) == -1 )
             {
                 pybind::throw_exception();
@@ -360,7 +368,6 @@ namespace pybind
 
 			*_impl = (void *)py_pod64->buff;
 
-            Py_IncRef( STATIC_VAR(s_pybind_object_holder) );
 			if( PyObject_SetAttr( _obj, STATIC_VAR(s_pybind_object_holder), Py_False ) == -1 )
             {
                 pybind::throw_exception();
@@ -371,7 +378,6 @@ namespace pybind
 		//////////////////////////////////////////////////////////////////////////
 		void get_wrap_pod64( PyObject * _obj, void ** _impl )
 		{
-			Py_IncRef( STATIC_VAR(s_pybind_object_impl) );
 			PyObject * py_impl = PyObject_GetAttr( _obj, STATIC_VAR(s_pybind_object_impl) );
 
 			if( py_impl == nullptr )
@@ -381,11 +387,18 @@ namespace pybind
 				return;
 			}
 
+			Py_DecRef( py_impl );
+
+			if( py_impl->ob_type != &STATIC_VAR(s_pod64_type) )
+			{
+				pybind::throw_exception();
+
+				return;
+			}
+
 			py_pod64_object * py_pod64 = (py_pod64_object *)py_impl;
 
 			*_impl = (void *)py_pod64->buff;
-
-			Py_DecRef( py_impl );
 		}
 		//////////////////////////////////////////////////////////////////////////
 		bool is_holder( PyObject * _obj )
@@ -398,18 +411,17 @@ namespace pybind
 
 				return false;
 			}
+
+			Py_DecRef( py_holder );
 			
 			if( bool_check( py_holder ) == false )
 			{
-				Py_DecRef( py_holder );
 				pybind::throw_exception();
 
 				return false;
 			}
 
 			bool result = (py_holder == Py_True);
-
-			Py_DecRef( py_holder );
 
 			return result;
 		}
@@ -593,11 +605,7 @@ namespace pybind
             return nullptr;
         }
 
-        PyObject * py_result;
-
-        py_result = (test_result)? Py_True : Py_False;
-
-        Py_IncRef( py_result );
+        PyObject * py_result = pybind::ret_bool( test_result );
 
         return py_result;
     }
@@ -772,14 +780,9 @@ namespace pybind
 
 		scope->removeObject( _obj );
 
-		bool holder = pybind::detail::is_holder( _obj );
+		void * impl = pybind::detail::get_class_impl( _obj );
 
-		if( holder == false )
-		{
-			void * impl = pybind::detail::get_class_impl( _obj );
-
-			(scope->m_pydestructor)( scope, impl );            
-		}
+		(scope->m_pydestructor)( scope, impl ); 
 
 		scope->poolObject( _obj );
 	}
@@ -796,8 +799,8 @@ namespace pybind
 		, m_pytypeobject(nullptr)
 		, m_poolCount(0)
 	{
-        Py_IncRef( STATIC_VAR(s_pybind_class_type_scope) );
-        Py_IncRef( STATIC_VAR(s_pybind_class_type_scope) ); //Double - memory leak! yeaaa
+        //Py_IncRef( STATIC_VAR(s_pybind_class_type_scope) );
+        //Py_IncRef( STATIC_VAR(s_pybind_class_type_scope) ); //Double - memory leak! yeaaa
 	}
 	//////////////////////////////////////////////////////////////////////////
 	class_type_scope::~class_type_scope()
@@ -900,9 +903,7 @@ namespace pybind
         }
 
 		PyType_Modified( m_pytypeobject );
-
-		//Py_IncRef( m_pytypeobject );	
-        
+       
         Py_IncRef( (PyObject*)m_pytypeobject );
 		PyModule_AddObject( m_module, m_pytypeobject->tp_name, (PyObject*)m_pytypeobject );
 	}
@@ -925,8 +926,6 @@ namespace pybind
         m_mapping = nullptr;
         m_sequence = nullptr;
         m_compare = nullptr;
-
-        Py_DecRef( STATIC_VAR(s_pybind_class_type_scope) );
 
         m_bases.clear();
     }
