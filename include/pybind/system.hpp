@@ -134,7 +134,9 @@ namespace pybind
 
 	PYBIND_API void exception_filter();
 
-	PYBIND_API bool string_check( PyObject * _string );
+	PYBIND_API bool test_equal( PyObject * _left, PyObject * _right );
+	
+	PYBIND_API bool string_check( PyObject * _string );	
 	PYBIND_API size_t string_size( PyObject * _string );
 	PYBIND_API const char * string_to_char( PyObject * _string );
     PYBIND_API const char * string_to_char_and_size( PyObject * _string, size_t & _size );
