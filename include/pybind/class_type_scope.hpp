@@ -102,7 +102,7 @@ namespace pybind
         
 
 		PyObject * create_holder( void * _impl );
-		PyObject * create_pod( void ** _impl );
+		PyObject * create_pod( void ** _impl, size_t & _size );
 
 		void * metacast( size_t name, void * _impl );
 		void unwrap( PyObject * _obj );

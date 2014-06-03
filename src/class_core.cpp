@@ -41,11 +41,11 @@ namespace pybind
         return t_scope->create_holder( _impl );
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * class_core::create_pod( size_t _info, void ** _impl )
+    PyObject * class_core::create_pod( size_t _info, void ** _impl, size_t & _size )
     {
         const class_type_scope_ptr & t_scope = detail::get_class_type_scope( _info );
 
-        return t_scope->create_pod( _impl );
+        return t_scope->create_pod( _impl, _size );
     }
     //////////////////////////////////////////////////////////////////////////
     void class_core::wrap_holder( PyObject * _obj, void * _impl )

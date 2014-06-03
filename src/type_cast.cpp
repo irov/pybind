@@ -17,7 +17,7 @@ namespace pybind
 	namespace detail
 	{        
         //////////////////////////////////////////////////////////////////////////
-        type_cast_ptr g_type_cast[PYBIND_TYPE_COUNT];
+        static type_cast_ptr g_type_cast[PYBIND_TYPE_COUNT];
         //////////////////////////////////////////////////////////////////////////
 		void register_type_info_extract( size_t _info, const type_cast_ptr & _cast )
 		{	
