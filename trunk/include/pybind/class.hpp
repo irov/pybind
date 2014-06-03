@@ -403,13 +403,22 @@ namespace pybind
 
 		PyObject * wrap( const C & _class )
 		{
-			//return 0;
 			size_t tinfo = class_info<C>();
-			//C * obj = new C(_class);
 
-			void * obj_place;
+			void * obj_place = nullptr;
+			size_t obj_place_size = 0;
 
-			PyObject * py_obj = class_core::create_pod( tinfo, &obj_place );
+			PyObject * py_obj = class_core::create_pod( tinfo, &obj_place, obj_place_size );
+
+			if( py_obj == nullptr )
+			{
+				return nullptr;
+			}
+
+			if( obj_place_size < sizeof(C) )
+			{
+				return nullptr;
+			}
 
 			new (obj_place) C(_class);
 
@@ -425,7 +434,7 @@ namespace pybind
 		class_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
 			: base_<C,B>( _name, 0, &base_<C,B>::new_, &base_<C,B>::dealloc_, false, _module )
 		{
-			if( external_extract )
+			if( external_extract == true )
 			{
 				this->setup_extract();
 			}
@@ -465,7 +474,7 @@ namespace pybind
 		proxy_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
 			: base_<C,B>( _name, 0, &base_<C,B>::new_, &base_<C,B>::dealloc_only_python_, false, _module )
 		{
-			if( external_extract )
+			if( external_extract == true )
 			{
 				this->setup_extract();
 			}
@@ -502,7 +511,7 @@ namespace pybind
         superclass_( const char * _name, void * _user, pybind_new _pynew, pybind_destructor _pydestructor, bool external_extract = true, PyObject * _module = 0 )
             : base_<C,B>(_name, _user, _pynew, _pydestructor, false, _module)
         {
-            if( external_extract )
+            if( external_extract == true )
             {
                 this->setup_extract();
             }
@@ -542,7 +551,7 @@ namespace pybind
 		struct_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
 			: base_<C,B>( _name, 0, &base_<C,B>::new_, &base_<C,B>::dealloc_only_destructor_, true, _module )
 		{
-			if( external_extract )
+			if( external_extract == true )
 			{
 				this->setup_extract();
 			}
@@ -581,7 +590,7 @@ namespace pybind
 		interface_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
 			: base_<C,B>( _name, 0, &base_<C,B>::new_interface, &base_<C,B>::dealloc_only_python_, false, _module )
 		{
-			if( external_extract )
+			if( external_extract == true )
 			{
 				this->setup_extract();
 			}

@@ -17,13 +17,17 @@
 
 #   include "static_var.hpp"
 
+#	ifndef PYBIND_OBJECT_POD64_SIZE
+#	define PYBIND_OBJECT_POD64_SIZE 64
+#	endif
+
 namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
 	struct py_pod64_object
 	{
 		PyObject_HEAD
-			char buff[64];
+			char buff[PYBIND_OBJECT_POD64_SIZE];
 	};
 	//////////////////////////////////////////////////////////////////////////	
     STATIC_DECLARE(PyObject *, s_pybind_object_impl);
@@ -351,7 +355,7 @@ namespace pybind
             }
 		}
 		//////////////////////////////////////////////////////////////////////////
-		void wrap_pod64( PyObject * _obj, void ** _impl )
+		static bool wrap_pod64( PyObject * _obj, void ** _impl, size_t & _size )
 		{
 			PyObject * py_impl = PyType_GenericAlloc( &STATIC_VAR(s_pod64_type), 0 );
 
@@ -359,7 +363,7 @@ namespace pybind
             {
                 pybind::throw_exception();
 
-                return;
+                return false;
             }
 
 			Py_DecRef( py_impl );
@@ -372,11 +376,15 @@ namespace pybind
             {
                 pybind::throw_exception();
 
-                return;
+                return false;
             }
+
+			_size = PYBIND_OBJECT_POD64_SIZE;
+
+			return true;
 		}
 		//////////////////////////////////////////////////////////////////////////
-		void get_wrap_pod64( PyObject * _obj, void ** _impl )
+		static bool get_wrap_pod64( PyObject * _obj, void ** _impl, size_t & _size )
 		{
 			PyObject * py_impl = PyObject_GetAttr( _obj, STATIC_VAR(s_pybind_object_impl) );
 
@@ -384,7 +392,7 @@ namespace pybind
 			{
 				pybind::throw_exception();
 
-				return;
+				return false;
 			}
 
 			Py_DecRef( py_impl );
@@ -393,12 +401,15 @@ namespace pybind
 			{
 				pybind::throw_exception();
 
-				return;
+				return false;
 			}
 
 			py_pod64_object * py_pod64 = (py_pod64_object *)py_impl;
 
 			*_impl = (void *)py_pod64->buff;
+			_size = PYBIND_OBJECT_POD64_SIZE;
+
+			return true;
 		}
 		//////////////////////////////////////////////////////////////////////////
 		bool is_holder( PyObject * _obj )
@@ -759,8 +770,9 @@ namespace pybind
 		{			
 			py_self = detail::alloc_class( _type, _args, _kwds );
 
-			void * buff;
-			pybind::detail::wrap_pod64( py_self, &buff );
+			void * buff = nullptr;
+			size_t size;
+			pybind::detail::wrap_pod64( py_self, &buff, size );
 		}
 
         void * impl = (*scope->m_pynew)( scope, py_self, _args, _kwds );
@@ -1182,7 +1194,7 @@ namespace pybind
 		return py_self;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * class_type_scope::create_pod( void ** _impl )
+	PyObject * class_type_scope::create_pod( void ** _impl, size_t & _size )
 	{
 		if( m_pod == false )
 		{
@@ -1195,11 +1207,11 @@ namespace pybind
 		{
 			py_self = pybind::detail::alloc_class( m_pytypeobject, nullptr, nullptr );
 
-			pybind::detail::wrap_pod64( py_self, _impl );
+			pybind::detail::wrap_pod64( py_self, _impl, _size );
 		}
 		else
 		{
-			pybind::detail::get_wrap_pod64( py_self, _impl );
+			pybind::detail::get_wrap_pod64( py_self, _impl, _size );
 		}
 
 	    this->addObject( py_self );

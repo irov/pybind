@@ -24,7 +24,7 @@ namespace pybind
         static PyTypeObject * get_typemodule( size_t _info );
 
 		static PyObject * create_holder( size_t _info, void * _impl );
-		static PyObject * create_pod( size_t _info, void ** _impl );
+		static PyObject * create_pod( size_t _info, void ** _impl, size_t & _size );
 
 		static void wrap_holder( PyObject * _obj, void * _impl );
 
