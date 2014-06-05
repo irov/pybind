@@ -37,11 +37,13 @@ namespace pybind
 
 					const char * type_name = tinfo.name();
 
-					pybind::error_message( "extract invalid find cast for %.256s"
+					//pybind::error_message( "extract invalid find cast for %.256s"
+					//	, type_name
+					//	);
+
+					pybind::throw_exception( "extract invalid find cast for %.256s"
 						, type_name
 						);
-
-					throw_exception();
 
 					return false;
 				}
@@ -57,20 +59,18 @@ namespace pybind
 
 					if( repr_obj != nullptr )
 					{
-						pybind::error_message( "extract from %.256s to %.256s"
+						pybind::throw_exception( "extract from %.256s to %.256s"
 							, repr_obj
 							, type_name
 							);
 					}
                     else
                     {
-                        pybind::error_message( "extract from xxxx to %.256s"
+                        pybind::throw_exception( "extract from xxxx to %.256s"
                             , type_name
                             );
                     }
-
-					throw_exception();
-
+					
 					return false;
 				}
 
@@ -109,13 +109,11 @@ namespace pybind
             
             const char * type_name = tinfo.name();
 
-            pybind::error_message( "extract invalid %s:%s not cast to %s"
+            pybind::throw_exception( "extract invalid %s:%s not cast to %s"
                 , pybind::object_repr(_obj)
                 , pybind::object_repr_type(_obj)
                 , type_name
                 );
-
-            pybind::throw_exception();
 
             return value;
         }
@@ -136,11 +134,9 @@ namespace pybind
 		{
 			const char * type_name = tinfo.name();
 
-			pybind::error_message( "ptr invalid find cast for %.256s"
+			pybind::throw_exception( "ptr invalid find cast for %.256s"
 				, type_name
 				);
-
-			throw_exception();
 		}
 
 		type_cast_result<T_WOCR> * etype_impl = static_cast<type_cast_result<T_WOCR> *>(etype);
@@ -151,11 +147,9 @@ namespace pybind
 		{
 			const char * type_name = tinfo.name();
 
-			pybind::error_message( "ptr invalid wrap %.256s"
+			pybind::throw_exception( "ptr invalid wrap %.256s"
 				, type_name
 				);
-
-			throw_exception();
 		}
 
 		return result;
@@ -180,11 +174,12 @@ namespace pybind
 
             return value;
         }
-        catch( const pybind::pybind_exception & )
+        catch( const pybind::pybind_exception & _ex )
         {
+			pybind::error_message("ptr value %s"
+				, _ex.what()
+				);
         }
-
-        check_error();
 
         return nullptr;
     }

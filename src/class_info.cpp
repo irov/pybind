@@ -117,7 +117,7 @@ namespace pybind
 
             if( new_desc == nullptr )
             {
-                pybind::throw_exception();
+                pybind::throw_exception("invalid create new type info");
 
                 return 0;
             }
@@ -136,7 +136,9 @@ namespace pybind
 
             if( desc == nullptr )
             {
-                pybind::throw_exception();
+                pybind::throw_exception("invalid get class info %d"
+					, _id
+					);
 
                 return nullptr;
             }

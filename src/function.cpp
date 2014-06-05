@@ -21,13 +21,26 @@ namespace pybind
             return iadapter;
         }
         //////////////////////////////////////////////////////////////////////////
-        static PyObject * function_kwds( PyObject * _self, PyObject * _args, PyObject * _kwds )
+        static PyObject * function_kwds( PyObject * _obj, PyObject * _args, PyObject * _kwds )
         {
-            const function_adapter_interface_ptr & ifunction = detail::extract_adapter_py_function( _self );
+            const function_adapter_interface_ptr & ifunction = detail::extract_adapter_py_function( _obj );
 
-            PyObject * ret = ifunction->call( _args, _kwds );
+			try
+			{
+				PyObject * ret = ifunction->call( _args, _kwds );
 
-            return ret;
+				return ret;
+			}
+			catch( const pybind_exception & _ex )
+			{
+				pybind::error_message("obj %s invalid function call '%s' error '%s'\n"
+					, pybind::object_str( _obj )
+					, ifunction->getName()
+					, _ex.what()
+					);
+			}
+
+            return nullptr;
         }
         //////////////////////////////////////////////////////////////////////////
         static PyObject * function_args( PyObject * _self, PyObject * _args )
@@ -96,8 +109,8 @@ namespace pybind
 			PyMethodDef m_method;
 		};
         //////////////////////////////////////////////////////////////////////////
-        function_type_scope g_function_type_scope[PYBIND_FUNCTION_COUNT];
-        size_t g_function_type_scope_count = 0;
+        static function_type_scope g_function_type_scope[PYBIND_FUNCTION_COUNT];
+        static size_t g_function_type_scope_count = 0;
         //////////////////////////////////////////////////////////////////////////
 		PyObject * create_function_adapter( const function_adapter_interface_ptr & _adapter, bool _native )
 		{
@@ -105,7 +118,9 @@ namespace pybind
 
             if( g_function_type_scope_count == PYBIND_FUNCTION_COUNT )
             {
-                pybind::throw_exception();
+				pybind::throw_exception("pybind maximize function count PYBIND_FUNCTION_COUNT == %d (more?)"
+					, PYBIND_FUNCTION_COUNT
+					);
 
                 return nullptr;
             }

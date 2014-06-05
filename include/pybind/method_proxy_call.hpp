@@ -159,36 +159,24 @@ namespace pybind
 	{
 		typedef typename function_parser<F>::result f_info;
 
-		static PyObject * call( P * _proxy, C * _obj, F f, PyObject * _arg, const char * _tag )
+		static PyObject * call( P * _proxy, C * _obj, F f, PyObject * _arg )
 		{
-            size_t arg_size = tuple_size(_arg);
+			size_t arg_size = pybind::tuple_size(_arg);
             size_t fn_arity = f_info::arity;
 
             if( arg_size + 1 != fn_arity )
             {
-                error_message("invalid proxy method call args is not equal %d != %d in '%s'\n"
+				pybind::throw_exception("invalid proxy method call args is not equal %d != %d\n"
                     , arg_size + 1
                     , fn_arity
-                    , _tag
                     );
 
                 return nullptr;
             }
 
-			try
-			{
-				PyObject * ret = method_proxy_call_ret_impl<P,C,F,typename f_info::ret_type>::call( _proxy, _obj, f, _arg );
+			PyObject * ret = method_proxy_call_ret_impl<P,C,F,typename f_info::ret_type>::call( _proxy, _obj, f, _arg );
 
-				return ret;
-			}
-			catch( const pybind_exception & )
-			{
-                error_message("invalid proxy method call '%s'\n"
-                    , _tag
-                    );
-			}
-
-			return nullptr;			
+			return ret;		
 		}
 	};
 }

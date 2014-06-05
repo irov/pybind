@@ -23,8 +23,6 @@ namespace pybind
 	class functor_proxy_adapter
 		: public functor_adapter_interface
 	{
-		typedef typename function_parser<F>::result f_info;
-
 	public:
 		functor_proxy_adapter( C * _self, F f, const char * _tag )
 			: m_self(_self)
@@ -36,6 +34,8 @@ namespace pybind
     public:
         size_t getArity() const override
         {
+			typedef typename function_parser<F>::result f_info;
+
             return f_info::arity;
         }
 
@@ -49,7 +49,7 @@ namespace pybind
 		{
             (void)_kwds;
 
-			PyObject *ret = method_call<C,F>::call( m_self, m_fn, _args, m_tag );
+			PyObject *ret = method_call<C,F>::call( m_self, m_fn, _args );
 			
 			return ret;	
 		}
