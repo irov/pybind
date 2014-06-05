@@ -36,7 +36,7 @@ namespace pybind
 
 			class_type_scope_ptr scope = class_core::create_new_type_scope( m_info, _name, _module, _user, _pynew, _pydestructor, _pod );
 
-			setup_bases( scope );
+			this->setup_bases( scope );
 
 			class_core::initialize_new_type_scope( scope );
 		}
@@ -281,9 +281,11 @@ namespace pybind
             (void)_args;
             (void)_kwds;
 
-            throw_exception();
+			pybind::throw_exception("scope %s not support 'new_interface'"
+				, _scope->get_name()
+				);
 
-            return 0;
+            return nullptr;
         }
 
 		static void 

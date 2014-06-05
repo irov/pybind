@@ -19,7 +19,7 @@ namespace pybind
 		size_t arity() const;
 
 	public:
-		virtual void * call( PyObject * _obj, PyObject * _args, const char * _tag ) = 0;
+		virtual void * call( PyObject * _obj, PyObject * _args ) = 0;
 
 	protected:
 		size_t m_arity;

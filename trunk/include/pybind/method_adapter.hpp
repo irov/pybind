@@ -17,6 +17,9 @@ namespace pybind
 		: public adapter_interface
 	{
 	public:
+		virtual const char * getName() const = 0;
+
+	public:
 		virtual PyObject * call( void * _self, const class_type_scope_ptr & scope, PyObject * _args, PyObject * _kwds ) = 0;
 	};
     //////////////////////////////////////////////////////////////////////////
@@ -24,18 +27,19 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
 	template<class F>
 	class method_adapter_helper
+		: public method_adapter_interface
 	{
 	public:
-		method_adapter_helper( F _fn, const char * _tag )
+		method_adapter_helper( F _fn, const char * _name )
 			: m_fn(_fn)
-			, m_tag(_tag)
+			, m_name(_name)
 		{
 		}
 
 	protected:
-		const char * getTag() const
+		const char * getName() const override
 		{
-			return m_tag;
+			return m_name;
 		}
 
 		F getFn() const
@@ -45,7 +49,7 @@ namespace pybind
 
 	protected:
 		F m_fn;
-		const char * m_tag;
+		const char * m_name;
 	};
 
 	template<class C>
@@ -76,8 +80,7 @@ namespace pybind
 
 	template<class C, class F>
 	class method_adapter
-		: public method_adapter_interface
-		, public method_adapter_helper<F>
+		: public method_adapter_helper<F>
 		, public class_adapter_helper<C>
 	{
 	public:
@@ -96,10 +99,9 @@ namespace pybind
 
 			C * impl = (C*)detail::meta_cast_scope( _self, scopeId, classId, _scope );
 
-            const char * tag = this->getTag();
 			F fn = this->getFn();
 
-			PyObject *ret = method_call<C,F>::call( impl, fn, _args, tag );
+			PyObject *ret = method_call<C,F>::call( impl, fn, _args );
 
 			return ret;
 		}		
@@ -122,11 +124,11 @@ namespace pybind
             size_t scopeId = this->getScopeId();
             const char * scopeName = detail::get_class_type_info( scopeId );
 
-            const char * tag = this->getTag();
+            const char * name = this->getName();
 
             pybind::error_traceback("method %s::%s depricated '%s'"
                 , scopeName
-                , tag
+                , name
                 , m_doc
                 );
 
@@ -143,8 +145,7 @@ namespace pybind
 
 	template<class C, class P, class F>
 	class method_adapter_proxy_member
-		: public method_adapter_interface
-		, public method_adapter_helper<F>
+		: public method_adapter_helper<F>
 		, public class_adapter_helper<C>
 	{
 	public:
@@ -164,10 +165,9 @@ namespace pybind
 
 			C * impl = (C*)detail::meta_cast_scope( _self, scopeId, classId, _scope );
 
-            const char * tag = this->getTag();
             F fn = this->getFn();
 
-			PyObject *ret = method_proxy_call<P,C,F>::call( m_proxy, impl, fn, _args, tag );
+			PyObject *ret = method_proxy_call<P,C,F>::call( m_proxy, impl, fn, _args );
 
 			return ret;
 		}
@@ -178,8 +178,7 @@ namespace pybind
 
 	template<class C, class P, class F>
 	class method_adapter_proxy_native
-		: public method_adapter_interface
-		, public method_adapter_helper<F>
+		: public method_adapter_helper<F>
 		, public class_adapter_helper<C>
 	{
 	public:
@@ -210,8 +209,7 @@ namespace pybind
 
 	template<class C, class F>
 	class method_adapter_proxy_function
-		: public method_adapter_interface
-		, public method_adapter_helper<F>
+		: public method_adapter_helper<F>
 		, public class_adapter_helper<C>
 	{
 	public:
@@ -230,10 +228,9 @@ namespace pybind
 
 			C * impl = (C*)detail::meta_cast_scope( _self, scopeId, classId, _scope );
 
-            const char * tag = this->getTag();
 			F fn = this->getFn();
 
-			PyObject *ret = function_proxy_call<C,F>::call( impl, fn, _args, tag );
+			PyObject * ret = function_proxy_call<C,F>::call( impl, fn, _args );
 
 			return ret;
 		}
@@ -241,8 +238,7 @@ namespace pybind
 
 	template<class C, class F>
 	class method_adapter_native
-		: public method_adapter_interface
-		, public method_adapter_helper<F>
+		: public method_adapter_helper<F>
 		, public class_adapter_helper<C>
 	{
 	public:

@@ -94,7 +94,7 @@ namespace pybind
 		}
 
 	public:
-		void * call( PyObject * _obj, PyObject * _args, const char * _tag ) override
+		void * call( PyObject * _obj, PyObject * _args ) override
 		{
 			if( this->valid( _args ) == false )
 			{
@@ -103,22 +103,16 @@ namespace pybind
 
             void * impl = pybind::detail::get_class_impl( _obj );
 
+			if( impl == nullptr )
+			{
+				return nullptr;
+			}
+
             C * self = static_cast<C *>(impl);
 
-			try
-			{
-				C * obj = call_constructor_placement_impl<C, P, P::base_arity>::call( self,  _args );
+			C * obj = call_constructor_placement_impl<C, P, P::base_arity>::call( self,  _args );
 
-				return obj;
-			}
-			catch( const pybind_exception & )
-			{
-                error_message("invalid construct '%s'\n"
-                    , _tag
-                    );
-			}
-
-			return nullptr;
+			return obj;
 		}
 	};
 }

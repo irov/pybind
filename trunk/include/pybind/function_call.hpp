@@ -293,15 +293,14 @@ namespace pybind
 	{
 		typedef typename function_parser<F>::result f_info;
 
-		static PyObject * call( F f, PyObject * _arg, const char * _tag )
+		static PyObject * call( F f, PyObject * _arg )
         {
 			size_t arg_size = (_arg)?tuple_size(_arg):0;
             size_t fn_arity = f_info::arity;
 
 			if( arg_size != fn_arity )
 			{
-				error_message("invalid function call '%s' args is not equal %d != %d\n"
-					, _tag
+				pybind::throw_exception("invalid function call args is not equal %d != %d\n"					
 					, arg_size
 					, fn_arity
 					);
@@ -309,20 +308,9 @@ namespace pybind
 				return nullptr;
 			}
 
-			try
-			{
-				PyObject * ret = function_call_ret_impl<F,typename f_info::ret_type>::call( f, _arg );
+			PyObject * ret = function_call_ret_impl<F,typename f_info::ret_type>::call( f, _arg );
 
-				return ret;
-			}
-			catch( const pybind_exception & )
-			{
-                error_message("invalid function call '%s'\n"
-                    , _tag
-                    );
-			}
-
-			return nullptr;
+			return ret;
 		}
 	};
 }

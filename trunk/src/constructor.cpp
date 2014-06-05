@@ -27,7 +27,7 @@ namespace pybind
 
 		if( m_arity != args_arity )
 		{
-			printf("construct have %d args, but you call %d params"
+			pybind::throw_exception("construct have %d args, but you call %d params"
 				, m_arity
 				, args_arity
 				);

@@ -24,18 +24,26 @@ namespace pybind
 
 	template<class F>
 	class function_adapter_helper
+		: public function_adapter_interface
 	{
 	public:
-		function_adapter_helper( F _fn, const char * _tag )
+		function_adapter_helper( F _fn, const char * _name )
 			: m_fn(_fn)
-			, m_tag(_tag)
+			, m_name(_name)
 		{
 		}
 
 	protected:
-		const char * getTag() const
+		size_t getArity() const override
 		{
-			return m_tag;
+			typedef typename function_parser<F>::result t_info;
+
+			return t_info::arity;
+		}
+
+		const char * getName() const override
+		{
+			return m_name;
 		}
 
 		F getFn() const
@@ -45,44 +53,27 @@ namespace pybind
 
 	protected:
 		F m_fn;
-		const char * m_tag;
+		const char * m_name;
 	};
 
 	template<class F>
 	class function_adapter
-		: public function_adapter_interface
-		, public function_adapter_helper<F>
+		: public function_adapter_helper<F>
 	{
 	public:
 		function_adapter( F _fn, const char * _tag )
 			: function_adapter_helper<F>(_fn, _tag)
 		{
 		}
-
-	protected:
-		size_t getArity() const override
-		{
-			typedef typename function_parser<F>::result t_info;
-
-			return t_info::arity;
-		}
-
-		const char * getName() const override
-		{
-			const char * tag = this->getTag();
-
-			return tag;
-		}
-
+		
 	protected:
 		PyObject * call( PyObject * _args, PyObject * _kwds ) override
 		{
             (void)_kwds;
 
-			const char * tag = this->getTag();
 			F fn = this->getFn();
 
-			PyObject *ret = function_call<F>::call( fn, _args, tag );
+			PyObject *ret = function_call<F>::call( fn, _args );
 
 			return ret;
 		}
@@ -90,28 +81,12 @@ namespace pybind
 
 	template<class F>
 	class function_adapter_native
-		: public function_adapter_interface
-		, public function_adapter_helper<F>
+		: public function_adapter_helper<F>
 	{
 	public:
 		function_adapter_native( F _fn, const char * _tag )
 			: function_adapter_helper<F>(_fn, _tag)
 		{
-		}
-
-	protected:
-		size_t getArity() const override
-		{
-			typedef typename function_parser<F>::result t_info;
-
-			return t_info::arity;
-		}
-
-		const char * getName() const override
-		{
-			const char * tag = this->getTag();
-
-			return tag;
 		}
 
 	protected:

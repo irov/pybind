@@ -81,8 +81,8 @@ namespace pybind
 			PyMethodDef m_method;
 		};
         //////////////////////////////////////////////////////////////////////////
-        functor_type_scope g_functor_type_scope[PYBIND_FUNCTOR_COUNT];
-        size_t g_functor_type_scope_count = 0;
+        static functor_type_scope g_functor_type_scope[PYBIND_FUNCTOR_COUNT];
+        static size_t g_functor_type_scope_count = 0;
         //////////////////////////////////////////////////////////////////////////
         static PyObject * create_functor_adapter( const functor_adapter_interface_ptr & _adapter )
         {
@@ -90,7 +90,9 @@ namespace pybind
 
             if( g_functor_type_scope_count == PYBIND_FUNCTOR_COUNT )
             {
-                pybind::throw_exception();
+                pybind::throw_exception("pybind maximize functor count PYBIND_FUNCTOR_COUNT == %d (more?)"
+					, PYBIND_FUNCTOR_COUNT
+					);
 
                 return nullptr;
             }

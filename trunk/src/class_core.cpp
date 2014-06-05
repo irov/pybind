@@ -60,9 +60,22 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void * class_core::construct( const class_type_scope_ptr & _scope, PyObject * _obj, PyObject * _args )
     {
-        void * impl = _scope->construct( _obj, _args );
+		try
+		{
+			void * impl = _scope->construct( _obj, _args );
 
-        return impl;
+			return impl;
+		}
+		catch( const pybind_exception & _ex )
+		{
+			pybind::error_message("obj %s invalid construct '%s' error '%s'\n"
+				, pybind::object_str( _obj )
+				, _scope->get_name()
+				, _ex.what()
+				);
+		}
+
+		return nullptr;
     }
     //////////////////////////////////////////////////////////////////////////
     void class_core::set_module( const class_type_scope_ptr & _scope, PyObject * _module )
