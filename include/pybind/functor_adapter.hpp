@@ -9,55 +9,60 @@ namespace pybind
 	class functor_adapter_interface
         : public adapter_interface
 	{
+	public:
+		functor_adapter_interface( const char * _name, size_t _arity )
+			: m_name(_name)
+			, m_arity(_arity)
+		{
+		}
+
+	public:
+		inline const char * getName() const
+		{
+			return m_name;
+		}
+
     public:
-        virtual size_t getArity() const = 0;
-        virtual const char * getName() const = 0;
+        size_t getArity() const
+		{
+			return m_arity;
+		}        
 
 	public:
 		virtual PyObject * call( PyObject * _args, PyObject * _kwds ) = 0;
+
+	protected:
+		const char * m_name;
+		size_t m_arity;
 	};
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<class functor_adapter_interface> functor_adapter_interface_ptr;
     //////////////////////////////////////////////////////////////////////////
-	template<class C, class F>
+	template<class C, class M>
 	class functor_proxy_adapter
 		: public functor_adapter_interface
 	{
 	public:
-		functor_proxy_adapter( C * _self, F f, const char * _tag )
-			: m_self(_self)
-			, m_fn(f)
-            , m_tag(_tag)
+		functor_proxy_adapter( const char * _name, size_t _arity, C * _self, M _method )
+			: functor_adapter_interface(_name, _arity)
+			, m_self(_self)
+			, m_method(_method)			
 		{
 		}
-
-    public:
-        size_t getArity() const override
-        {
-			typedef typename function_parser<F>::result f_info;
-
-            return f_info::arity;
-        }
-
-        const char * getName() const override
-        {
-            return m_tag;
-        }
 
 	public:
 		PyObject * call( PyObject * _args, PyObject * _kwds ) override
 		{
             (void)_kwds;
 
-			PyObject *ret = method_call<C,F>::call( m_self, m_fn, _args );
+			PyObject * ret = method_call<C,M>::call( m_self, m_method, _args );
 			
 			return ret;	
 		}
 
 	protected:
 		C * m_self;
-		F m_fn;
-        const char * m_tag;
+		M m_method;		
 	};
 }
 

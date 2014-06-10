@@ -830,7 +830,7 @@ namespace pybind
         va_start(valist, _message);
 
         char buffer[1024];
-        vsprintf( buffer, _message, valist );
+        vsnprintf( buffer, 1023, _message, valist );
         va_end( valist );
 
         PyThreadState * tstate = PyThreadState_GET();
@@ -846,7 +846,7 @@ namespace pybind
         const char * str_filename = pybind::string_to_char( py_filename );
 
         char trace_buffer[1024];
-        sprintf( trace_buffer, "%s[%d]: %s"
+        snprintf( trace_buffer, 1023, "%s[%d]: %s"
             , str_filename
             , fileline
             , buffer
@@ -862,7 +862,7 @@ namespace pybind
 		va_list valist;
 		va_start(valist, _message);
 		char buffer[1024];
-		vsprintf( buffer, _message, valist );
+		vsnprintf( buffer, 1023, _message, valist );
         va_end( valist );
 
         PyErr_SetString( PyExc_RuntimeError, buffer );		 
@@ -944,7 +944,9 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool is_wrap( PyObject * _value )
 	{
-		return detail::is_wrap( _value );
+		bool result = detail::is_wrap( _value );
+
+		return result;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool type_initialize( PyObject * _value )

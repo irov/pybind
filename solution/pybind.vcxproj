@@ -158,7 +158,6 @@
     <ClCompile Include="..\src\class_core.cpp" />
     <ClCompile Include="..\src\class_info.cpp" />
     <ClCompile Include="..\src\class_type_scope.cpp" />
-    <ClCompile Include="..\src\constructor.cpp" />
     <ClCompile Include="..\src\exception.cpp" />
     <ClCompile Include="..\src\extract.cpp" />
     <ClCompile Include="..\src\function.cpp" />
@@ -178,7 +177,7 @@
     <ClInclude Include="..\include\pybind\class_core.hpp" />
     <ClInclude Include="..\include\pybind\class_info.hpp" />
     <ClInclude Include="..\include\pybind\class_type_scope.hpp" />
-    <ClInclude Include="..\include\pybind\constructor.hpp" />
+    <ClInclude Include="..\include\pybind\constructor_adapter.hpp" />
     <ClInclude Include="..\include\pybind\constructor_new.hpp" />
     <ClInclude Include="..\include\pybind\constructor_placement.hpp" />
     <ClInclude Include="..\include\pybind\convert_adapter.hpp" />

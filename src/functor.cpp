@@ -13,7 +13,7 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         static const functor_adapter_interface_ptr & extract_adapter_py_functor( PyObject * _self )
         {
-            py_functor_type * functor_type = reinterpret_cast<py_functor_type*>(_self);
+            py_functor_type * functor_type = reinterpret_cast<py_functor_type *>(_self);
 
             const functor_adapter_interface_ptr & adapter = functor_type->iadapter;
 
@@ -24,9 +24,21 @@ namespace pybind
         {
             const functor_adapter_interface_ptr & adapter = detail::extract_adapter_py_functor( _self );
 
-            PyObject * ret = adapter->call( _args, _kwds );
+			try
+			{
+				PyObject * ret = adapter->call( _args, _kwds );
 
-            return ret;
+				return ret;
+			}
+			catch( const pybind::pybind_exception & _ex )
+			{
+				pybind::error_message("functor_kwds %s exception call '%s'"
+					, adapter->getName()
+					, _ex.what()
+					);
+			}
+
+            return nullptr;
         }
         //////////////////////////////////////////////////////////////////////////
         static PyObject * functor_args( PyObject * _self, PyObject * _args )
@@ -49,7 +61,7 @@ namespace pybind
 		public:
 			PyObject * setup( const functor_adapter_interface_ptr & _adapter )
 			{
-                int arity = _adapter->getArity();
+                size_t arity = _adapter->getArity();
                 const char * name = _adapter->getName();
 
 				m_method.ml_name = name;
@@ -108,7 +120,7 @@ namespace pybind
 		{
             PyObject * py_func = create_functor_adapter( _adapter );
 
-			if( _module == 0 )
+			if( _module == nullptr )
 			{
 				_module = get_currentmodule();
 			}

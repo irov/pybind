@@ -1,8 +1,9 @@
 #	pragma once
 
-#	include "pybind/constructor.hpp"
-#	include "pybind/exports.hpp"
+#	include "pybind/class_info.hpp"
+
 #	include "pybind/types.hpp"
+#	include "pybind/exports.hpp"
 
 namespace pybind
 {
@@ -14,6 +15,7 @@ namespace pybind
     typedef stdex::intrusive_ptr<class convert_adapter_interface> convert_adapter_interface_ptr;
     typedef stdex::intrusive_ptr<class hash_adapter_interface> hash_adapter_interface_ptr;
     typedef stdex::intrusive_ptr<class compare_adapter_interface> compare_adapter_interface_ptr;
+	typedef stdex::intrusive_ptr<class constructor_adapter_interface> constructor_adapter_interface_ptr;
     
 	class PYBIND_API class_core
 	{
@@ -26,16 +28,14 @@ namespace pybind
 		static PyObject * create_holder( size_t _info, void * _impl );
 		static PyObject * create_pod( size_t _info, void ** _impl, size_t & _size );
 
-		static void wrap_holder( PyObject * _obj, void * _impl );
-
 		static void def_init( const class_type_scope_ptr & _scope, const constructor_adapter_interface_ptr & _ctr );
 		static void * construct( const class_type_scope_ptr & _scope, PyObject * _obj, PyObject * _args );
 
 		static void set_module( const class_type_scope_ptr & _scope, PyObject * _module );
 
 		static void def_convert( const convert_adapter_interface_ptr & _iadapter,	size_t _info );
-		static void def_method( const char * _name, const method_adapter_interface_ptr & _iadapter, size_t _info );
-		static void def_member( const char * _name, const member_adapter_interface_ptr & _iadapter, size_t _info );
+		static void def_method( const method_adapter_interface_ptr & _iadapter, size_t _info );
+		static void def_member( const member_adapter_interface_ptr & _iadapter, size_t _info );
 
         static void def_call( const method_adapter_interface_ptr & _iadapter, size_t _info );
 		static void def_repr( const repr_adapter_interface_ptr & _iadapter, size_t _info );

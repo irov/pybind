@@ -66,9 +66,9 @@ namespace pybind
 		base_ & def( const char * _name, F f )
 		{			
 			method_adapter_interface_ptr iadapter =
-				new method_adapter<C, F>(f, _name);
+				new method_adapter<C, F>(_name, f);
 
-            class_core::def_method( _name, iadapter, m_info );
+            class_core::def_method( iadapter, m_info );
 
 			return *this;
 		}
@@ -77,9 +77,9 @@ namespace pybind
         base_ & def_depricated( const char * _name, F f, const char * _doc )
         {			
             method_adapter_interface_ptr iadapter =
-                new method_adapter_depricated<C, F>(f, _name, _doc);
+                new method_adapter_depricated<C, F>(_name, f, _doc);
 
-            class_core::def_method( _name, iadapter, m_info );
+            class_core::def_method( iadapter, m_info );
 
             return *this;
         }
@@ -88,9 +88,9 @@ namespace pybind
 		base_ & def_native( const char * _name, F f )
 		{			
 			method_adapter_interface_ptr iadapter =
-				new method_adapter_native<C, F>(f, _name);
+				new method_adapter_native<C, F>(_name, f);
 
-			class_core::def_method( _name, iadapter, m_info );
+			class_core::def_method( iadapter, m_info );
 
 			return *this;
 		}
@@ -110,9 +110,9 @@ namespace pybind
 		base_ & def_static( const char * _name, F f )
 		{			
 			method_adapter_interface_ptr iadapter =
-				new method_adapter_proxy_function<C, F>(f, _name);
+				new method_adapter_proxy_function<C, F>(_name, f);
 
-			class_core::def_method( _name, iadapter, m_info );
+			class_core::def_method( iadapter, m_info );
 
 			return *this;
 		}
@@ -121,9 +121,9 @@ namespace pybind
 		base_ & def_proxy_static( const char * _name, P * _proxy, F f )
 		{
 			method_adapter_interface_ptr iadapter =
-				new method_adapter_proxy_member<C, P, F>(_proxy, f, _name);
+				new method_adapter_proxy_member<C, P, F>(_name, f, _proxy);
 
-			class_core::def_method( _name, iadapter, m_info );
+			class_core::def_method( iadapter, m_info );
 
 			return *this;
 		}
@@ -132,9 +132,9 @@ namespace pybind
 		base_ & def_proxy_native( const char * _name, P * _proxy, F f )
 		{
 			method_adapter_interface_ptr iadapter =
-				new method_adapter_proxy_native<C, P, F>(_proxy, f, _name);
+				new method_adapter_proxy_native<C, P, F>(_name, f, _proxy );
 
-			class_core::def_method( _name, iadapter, m_info );
+			class_core::def_method( iadapter, m_info );
 
 			return *this;
 		}
@@ -145,7 +145,7 @@ namespace pybind
 			member_adapter_interface_ptr iadapter =
 				new member_adapter<C, A>(_name, a);
 
-			class_core::def_member( _name, iadapter, m_info );
+			class_core::def_member( iadapter, m_info );
 
 			return *this;
 		}
@@ -156,7 +156,7 @@ namespace pybind
 			member_adapter_interface_ptr iadapter =
 				new member_adapter_property<C, FG, FS>(_name, _get, _set);
 
-			class_core::def_member( _name, iadapter, m_info );
+			class_core::def_member( iadapter, m_info );
 
 			return *this;
 		}
@@ -167,7 +167,7 @@ namespace pybind
 			member_adapter_interface_ptr iadapter =
 				new member_adapter_property_static<C, FG, FS>(_name, _get, _set);
 
-			class_core::def_member( _name, iadapter, m_info );
+			class_core::def_member( iadapter, m_info );
 
 			return *this;
 		}
@@ -176,7 +176,7 @@ namespace pybind
         base_ & def_call( F _fn )
         {
             method_adapter_interface_ptr iadapter =
-                new method_adapter<C, F>( _fn, "__call__" );
+                new method_adapter<C, F>( "__call__", _fn );
 
             class_core::def_call( iadapter, m_info );
 
@@ -220,7 +220,7 @@ namespace pybind
 		base_ & def_getattro( F _fn )
 		{
 			method_adapter_interface_ptr iadapter =
-				new method_adapter<C, F>(_fn, "getattro");
+				new method_adapter<C, F>("getattro", _fn);
 
 			class_core::def_getattro( iadapter, m_info );
 
@@ -231,7 +231,7 @@ namespace pybind
 		base_ & def_mapping( F _fn )
 		{
 			method_adapter_interface_ptr iadapter =
-				new method_adapter<C, F>(_fn, "getmap");
+				new method_adapter<C, F>("getmap", _fn);
 
 			class_core::def_mapping( iadapter, m_info );
 
@@ -256,15 +256,14 @@ namespace pybind
 		base_ & def_static_sequence( F _fn )
 		{
 			method_adapter_interface_ptr iadapter =
-				new method_adapter_proxy_function<C, F>(_fn, "sequence");
+				new method_adapter_proxy_function<C, F>("sequence", _fn);
 
 			class_core::def_sequence( iadapter, m_info );
 
 			return *this;
 		}
         
-		static void *
-			new_( const pybind::class_type_scope_ptr & _scope, PyObject * _obj, PyObject * _args, PyObject * _kwds )
+		static void * new_( const pybind::class_type_scope_ptr & _scope, PyObject * _obj, PyObject * _args, PyObject * _kwds )
 		{
             (void)_kwds;
 
@@ -273,8 +272,7 @@ namespace pybind
 			return impl;
 		}
 
-        static void *
-            new_interface( const pybind::class_type_scope_ptr & _scope, PyObject * _obj, PyObject * _args, PyObject * _kwds )
+        static void * new_interface( const pybind::class_type_scope_ptr & _scope, PyObject * _obj, PyObject * _args, PyObject * _kwds )
         {
             (void)_scope;
             (void)_obj;
@@ -288,15 +286,13 @@ namespace pybind
             return nullptr;
         }
 
-		static void 
-			dealloc_only_python_( const pybind::class_type_scope_ptr & _scope, void * _impl )
+		static void dealloc_only_python_( const pybind::class_type_scope_ptr & _scope, void * _impl )
 		{
             (void)_scope;
             (void)_impl;
 		}
 
-		static void			
-            dealloc_( const pybind::class_type_scope_ptr & _scope, void * _impl )
+		static void	dealloc_( const pybind::class_type_scope_ptr & _scope, void * _impl )
 		{
             (void)_scope;
 
@@ -305,8 +301,7 @@ namespace pybind
 			delete obj;
 		}
 
-        static void
-            dealloc_only_destructor_( const pybind::class_type_scope_ptr & _scope, void * _impl )
+        static void dealloc_only_destructor_( const pybind::class_type_scope_ptr & _scope, void * _impl )
         {
             (void)_scope;
 

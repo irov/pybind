@@ -1,6 +1,9 @@
 #	include "pybind/class_core.hpp"
 #	include "pybind/class_type_scope.hpp"
 
+#	include "pybind/exception.hpp"
+#	include "pybind/system.hpp"
+
 #	include "config/python.hpp"
 
 #   include "static_var.hpp"
@@ -38,19 +41,18 @@ namespace pybind
     {
         const class_type_scope_ptr & t_scope = detail::get_class_type_scope( _info );
 
-        return t_scope->create_holder( _impl );
+        PyObject * obj = t_scope->create_holder( _impl );
+
+		return obj;
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * class_core::create_pod( size_t _info, void ** _impl, size_t & _size )
     {
         const class_type_scope_ptr & t_scope = detail::get_class_type_scope( _info );
 
-        return t_scope->create_pod( _impl, _size );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    void class_core::wrap_holder( PyObject * _obj, void * _impl )
-    {
-        detail::wrap( _obj, _impl, true );
+        PyObject * obj = t_scope->create_pod( _impl, _size );
+
+		return obj;
     }
     //////////////////////////////////////////////////////////////////////////
     void class_core::def_init( const class_type_scope_ptr & _scope, const constructor_adapter_interface_ptr & _ctr )
@@ -66,7 +68,7 @@ namespace pybind
 
 			return impl;
 		}
-		catch( const pybind_exception & _ex )
+		catch( const pybind::pybind_exception & _ex )
 		{
 			pybind::error_message("obj %s invalid construct '%s' error '%s'\n"
 				, pybind::object_str( _obj )
@@ -90,18 +92,18 @@ namespace pybind
         scope->set_convert( _iadapter );
     }
     //////////////////////////////////////////////////////////////////////////
-    void class_core::def_method( const char * _name, const method_adapter_interface_ptr & _iadapter, size_t _info )
+    void class_core::def_method( const method_adapter_interface_ptr & _iadapter, size_t _info )
     {
         const class_type_scope_ptr & scope = detail::get_class_type_scope( _info );
 
-        scope->add_method( _name, _iadapter );
+        scope->add_method( _iadapter );
     }
     //////////////////////////////////////////////////////////////////////////
-    void class_core::def_member( const char * _name, const member_adapter_interface_ptr & _iadapter, size_t _info )
+    void class_core::def_member( const member_adapter_interface_ptr & _iadapter, size_t _info )
     {
         const class_type_scope_ptr & scope = detail::get_class_type_scope( _info );
 
-        scope->add_member( _name, _iadapter );
+        scope->add_member( _iadapter );
     }
     //////////////////////////////////////////////////////////////////////////
     void class_core::def_call( const method_adapter_interface_ptr & _iadapter, size_t _info )

@@ -1,13 +1,13 @@
 #	pragma once
 
-#	include "pybind/constructor.hpp"
+#	include "pybind/constructor_adapter.hpp"
 
 namespace pybind
 {
 	template<class C, class P, int i>
 	struct call_constructor_placement_impl
 	{
-		static C * call( void * _impl, PyObject * _obj, PyObject * _args );
+		static C * call( void * _impl, PyObject * _args );
 	};
 
 	template<class C, class P>
