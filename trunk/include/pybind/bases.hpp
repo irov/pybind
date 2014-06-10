@@ -2,6 +2,7 @@
 
 namespace pybind
 {
+	//////////////////////////////////////////////////////////////////////////
 	namespace detail
 	{
 		template<class C>
@@ -16,8 +17,7 @@ namespace pybind
 			static const int result = 0;
 		};
 	}
-
-
+	//////////////////////////////////////////////////////////////////////////
 	template<
 		class C0 = void  
 		, class C1 = void  
@@ -54,8 +54,7 @@ namespace pybind
 			+ detail::is_void<C8>::result
 			; 
 	};
-
-
+	//////////////////////////////////////////////////////////////////////////
 	template<
 		class C0 = void  
 		, class C1 = void  

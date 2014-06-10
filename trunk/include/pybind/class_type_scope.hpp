@@ -6,16 +6,6 @@
 #   include "stdex/intrusive_ptr_base.h"
 #   include "stdex/intrusive_ptr.h"
 
-#	ifdef PYBIND_VISIT_OBJECTS
-#	include <list>
-#   endif
-
-#	ifndef PYBIND_TYPE_OBJECT_POOL_COUNT
-#	define PYBIND_TYPE_OBJECT_POOL_COUNT 16
-#	endif
-
-#	include <vector>
-
 #	include <typeinfo>
 
 namespace pybind
@@ -29,8 +19,7 @@ namespace pybind
     typedef stdex::intrusive_ptr<class member_adapter_interface> member_adapter_interface_ptr;
     typedef stdex::intrusive_ptr<class convert_adapter_interface> convert_adapter_interface_ptr;
     typedef stdex::intrusive_ptr<class hash_adapter_interface> hash_adapter_interface_ptr;
-    typedef stdex::intrusive_ptr<class compare_adapter_interface> compare_adapter_interface_ptr;
-	
+    typedef stdex::intrusive_ptr<class compare_adapter_interface> compare_adapter_interface_ptr;	
     typedef stdex::intrusive_ptr<class constructor_adapter_interface> constructor_adapter_interface_ptr;
 
 	namespace detail
@@ -47,12 +36,11 @@ namespace pybind
 
 		PYBIND_API const class_type_scope_ptr & get_class_scope( PyTypeObject * _obj );
 		PYBIND_API void * unwrap( PyObject * _obj );
-		PYBIND_API void wrap( PyObject * _obj, void * _impl, bool _holder );
 		PYBIND_API bool is_wrap( PyObject * _obj );
 
 		PYBIND_API void * check_registred_class( PyObject * _obj, size_t _info );
 
-		PYBIND_API PyObject * alloc_class( PyTypeObject * _type, PyObject * _args, PyObject * _kwds, void * _impl, bool _holder );
+		//PYBIND_API PyObject * alloc_class( PyTypeObject * _type, PyObject * _args, PyObject * _kwds, void * _impl, bool _holder );
 
         PYBIND_API void * meta_cast_scope( void * _self, size_t _scope_name, size_t _class_name, const class_type_scope_ptr & scope );
 	}
@@ -85,9 +73,9 @@ namespace pybind
 		void * construct( PyObject * _obj, PyObject * _args );
 		void def_init( const constructor_adapter_interface_ptr & _ctr );
 
-		void add_method( const char * _name, const method_adapter_interface_ptr & _ifunc );
-		void add_member( const char * _name, const member_adapter_interface_ptr & _imember );
-        void add_base( size_t _name, const class_type_scope_ptr & _base, pybind_metacast _cast );
+		void add_method( const method_adapter_interface_ptr & _ifunc );
+		void add_member( const member_adapter_interface_ptr & _imember );
+        void add_base( size_t _info, const class_type_scope_ptr & _base, pybind_metacast _cast );
 
 		void set_convert( const convert_adapter_interface_ptr & _iconvert );
 		const convert_adapter_interface_ptr & get_convert();
@@ -104,7 +92,7 @@ namespace pybind
 		PyObject * create_holder( void * _impl );
 		PyObject * create_pod( void ** _impl, size_t & _size );
 
-		void * metacast( size_t name, void * _impl );
+		void * metacast( size_t _info, void * _impl );
 		void unwrap( PyObject * _obj );
 		void type_initialize( PyTypeObject * _type );
 
@@ -127,13 +115,13 @@ namespace pybind
 
         struct Metacast
         {
-            bool setup;
+            size_t info;
 		    class_type_scope_ptr scope;
             pybind_metacast cast;
         };
 
-		typedef std::vector<Metacast> TBases;
-		TBases m_bases;
+		Metacast m_bases[PYBIND_BASES_COUNT];
+		size_t m_basesCount;
         
         void * m_user;
 		pybind_new m_pynew;
@@ -163,15 +151,6 @@ namespace pybind
 		
 		PyObject * m_poolObjects[PYBIND_TYPE_OBJECT_POOL_COUNT];
 		size_t m_poolCount;
-
-#	ifdef PYBIND_VISIT_OBJECTS
-    public:
-		void visit_objects( pybind_visit_objects * _visitor );
-
-	protected:
-		typedef std::vector<PyObject *> TVectorObjects;
-		TVectorObjects m_objects;
-#	endif
 	};
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<class_type_scope> class_type_scope_ptr;

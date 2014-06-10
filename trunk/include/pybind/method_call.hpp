@@ -296,9 +296,9 @@ namespace pybind
 	{
 		typedef typename function_parser<F>::result f_info;
 
-		static PyObject * call( C * _obj, F f, PyObject * _arg )
+		static PyObject * call( C * _self, F f, PyObject * _arg )
 		{
-			size_t arg_size = (_arg)?tuple_size(_arg):0;
+			size_t arg_size = (_arg) ? pybind::tuple_size(_arg) : 0;
             size_t fn_arity = f_info::arity;
 
 			if( arg_size != fn_arity )
@@ -311,7 +311,7 @@ namespace pybind
 				return nullptr;
 			}
 
-			PyObject * py_ret = method_call_ret_impl<C,F,typename f_info::ret_type>::call( _obj, f, _arg );
+			PyObject * py_ret = method_call_ret_impl<C,F,typename f_info::ret_type>::call( _self, f, _arg );
 
 			return py_ret;		
 		}

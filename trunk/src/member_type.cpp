@@ -128,11 +128,10 @@ namespace pybind
 	}
 	STATIC_DECLARE_VALUE_END();
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * member_type_scope::instance( const char * _name, const member_adapter_interface_ptr & _iadpter )
+	PyObject * member_type_scope::instance( const member_adapter_interface_ptr & _iadpter )
 	{
 		py_member_type * py_member = (py_member_type *)PyType_GenericAlloc( &STATIC_VAR(s_member_type), 0 );
 
-		py_member->name = _name;
 		py_member->iadpter = _iadpter;
 
 		PyObject * py_get = PyCFunction_New( &STATIC_VAR(s_getmethod), (PyObject*)py_member );

@@ -4,13 +4,33 @@
 #   define PYBIND_PYTHON_VERSION 276
 #   endif
 
-//#   define PYBIND_VISIT_OBJECTS
+#	ifndef PYBIND_BASES_COUNT
+#   define PYBIND_BASES_COUNT 16
+#	endif
 
+#	ifndef PYBIND_TYPE_COUNT
 #   define PYBIND_TYPE_COUNT 256
-#   define PYBIND_FUNCTION_COUNT 256
-#   define PYBIND_FUNCTOR_COUNT 256
+#	endif
 
+#	ifndef PYBIND_FUNCTION_COUNT
+#   define PYBIND_FUNCTION_COUNT 256
+#	endif
+
+#	ifndef PYBIND_FUNCTOR_COUNT
+#   define PYBIND_FUNCTOR_COUNT 256
+#	endif
+
+#	ifndef PYBIND_STL_NOT_SUPPORT
 #   define PYBIND_STL_SUPPORT
+#	endif
+
+#	ifndef PYBIND_TYPE_OBJECT_POOL_COUNT
+#	define PYBIND_TYPE_OBJECT_POOL_COUNT 16
+#	endif
+
+#	ifndef PYBIND_OBJECT_POD64_SIZE
+#	define PYBIND_OBJECT_POD64_SIZE 64
+#	endif
 
 namespace pybind
 {

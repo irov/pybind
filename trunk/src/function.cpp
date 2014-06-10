@@ -136,9 +136,17 @@ namespace pybind
 		{
 			PyObject * py_func = create_function_adapter( _adapter, _native );
 
-			if( _module == 0 )
+			if( _module == nullptr )
 			{
 				_module = get_currentmodule();
+
+				if( _module == nullptr )
+				{
+					pybind::throw_exception("def_function_adapter not setup module!"
+						);
+
+					return;
+				}
 			}
 
 			const char * name = _adapter->getName();

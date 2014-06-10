@@ -12,28 +12,23 @@
 namespace pybind
 {   
     //////////////////////////////////////////////////////////////////////////
-    struct class_info_desc_t
-    {
-        size_t id;
-        const char * name;
-    };
-    //////////////////////////////////////////////////////////////////////////
-    class_info_desc_t g_class_info_desc[PYBIND_TYPE_COUNT];
-    //////////////////////////////////////////////////////////////////////////
-    bool initialize_class_info()
-    {
-        for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
-        {
-            class_info_desc_t & desc = g_class_info_desc[index];
-            
-            desc.id = 0;
-        }
-
-        return true;
-    }
-    //////////////////////////////////////////////////////////////////////////
     namespace detail
     {
+		//////////////////////////////////////////////////////////////////////////
+		struct class_info_desc_t
+		{
+			size_t id;
+			const char * name;
+		};
+		//////////////////////////////////////////////////////////////////////////
+		static class_info_desc_t & modify_class_info_desc( size_t _index )
+		{
+			static class_info_desc_t g_class_info_desc[PYBIND_TYPE_COUNT];
+
+			class_info_desc_t & desc = g_class_info_desc[_index];
+
+			return desc;
+		}
         //////////////////////////////////////////////////////////////////////////
         static size_t s_get_next_id()
         {
@@ -48,7 +43,7 @@ namespace pybind
         {
             for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
             {
-                const class_info_desc_t & desc = g_class_info_desc[index];
+                class_info_desc_t & desc = modify_class_info_desc( index );
 
                 if( desc.id == 0 )
                 {
@@ -70,7 +65,7 @@ namespace pybind
         {
             for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
             {
-                const class_info_desc_t & desc = g_class_info_desc[index];
+                class_info_desc_t & desc = modify_class_info_desc( index );
 
                 if( desc.id != _id )
                 {
@@ -87,7 +82,7 @@ namespace pybind
         {
             for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
             {
-                class_info_desc_t & desc = g_class_info_desc[index];
+                class_info_desc_t & desc = modify_class_info_desc( index );
 
                 if( desc.id != 0 )
                 {
@@ -148,4 +143,17 @@ namespace pybind
             return name;
         }
     }
+	//////////////////////////////////////////////////////////////////////////
+	bool initialize_class_info()
+	{
+		for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
+		{
+			detail::class_info_desc_t & desc = detail::modify_class_info_desc( index );
+
+			desc.id = 0;
+			desc.name = nullptr;
+		}
+
+		return true;
+	}
 }
