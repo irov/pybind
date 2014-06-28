@@ -303,7 +303,7 @@ namespace pybind
 
 			if( arg_size != fn_arity )
 			{
-				error_message("invalid method call args is not equal %d != %d\n"
+				pybind::throw_exception("invalid method call args is not equal %d != %d\n"
 					, arg_size
 					, fn_arity
 					);
