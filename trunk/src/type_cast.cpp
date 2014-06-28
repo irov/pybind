@@ -87,7 +87,7 @@ namespace pybind
 
 			if( impl == nullptr )
 			{
-				error_message( "instance_of_type: unbind object" );
+				pybind::error_message( "instance_of_type: unbind object" );
 
 				return false;
 			}
@@ -115,7 +115,8 @@ namespace pybind
 
 		if( impl == nullptr )
 		{
-			error_message( "type_info_cast: unbind object" );
+			pybind::error_message( "type_info_cast: unbind object" );
+
 			return false;
 		}
 

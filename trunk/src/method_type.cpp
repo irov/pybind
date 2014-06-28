@@ -57,7 +57,8 @@ namespace pybind
 		}
 		catch( const pybind_exception & _ex )
 		{
-			pybind::error_message( "descr_call2: method %s invalid call exception '%s'"
+			pybind::error_message( "descr_call2: obj %s method %s invalid call exception '%s'"
+				, pybind::object_str(mct->self)
 				, mct->iadapter->getName()
 				, _ex.what()
 				);			
@@ -181,7 +182,7 @@ namespace pybind
 
 		if( argc == 0 )
 		{
-			error_message( "descr_call: method %s take none args"
+			pybind::error_message( "descr_call: method %s take none args"
 				, _descr->iadapter->getName()
 				);
 
@@ -194,7 +195,9 @@ namespace pybind
 		
 		PyObject * new_args = PyTuple_GetSlice(_args, 1, argc);
 
-		return PyEval_CallObjectWithKeywords((PyObject*)mct, new_args, _kwds);
+		PyObject * py_method = PyEval_CallObjectWithKeywords((PyObject*)mct, new_args, _kwds);
+
+		return py_method;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	static void descr_destr2( PyObject * _obj )
