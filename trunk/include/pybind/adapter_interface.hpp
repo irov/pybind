@@ -8,7 +8,7 @@
 namespace pybind
 {
 	class adapter_interface
-        : public stdex::intrusive_ptr_base
+        : public stdex::intrusive_ptr_base<adapter_interface>
 	{
 	public:
         adapter_interface()
@@ -19,8 +19,8 @@ namespace pybind
 		{
 		};
 
-    protected:
-        void destroy() override
+    public:
+        void intrusive_ptr_destroy()
         {
             delete this;
         }

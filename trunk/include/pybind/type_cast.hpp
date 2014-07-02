@@ -11,7 +11,7 @@
 namespace pybind
 {
     class type_cast
-        : public stdex::intrusive_ptr_base
+        : public stdex::intrusive_ptr_base<type_cast>
     {
     public:
         type_cast()
@@ -23,7 +23,7 @@ namespace pybind
         }
 
     public:
-        void destroy() override
+        void intrusive_ptr_destroy()
         {
             delete this;
         }

@@ -9,13 +9,15 @@
 namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
-	struct py_method_generator_type{
+	struct py_method_generator_type
+	{
 		PyObject_HEAD
 		method_adapter_interface_ptr iadapter;
 		PyTypeObject * classtype;
 	};
 	//////////////////////////////////////////////////////////////////////////
-	struct py_method_caller_type{
+	struct py_method_caller_type
+	{
 		PyObject_HEAD
 		method_adapter_interface_ptr iadapter;
 		PyObject * self;

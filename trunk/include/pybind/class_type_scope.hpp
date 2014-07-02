@@ -46,7 +46,7 @@ namespace pybind
 	}
 
 	class class_type_scope
-        : public stdex::intrusive_ptr_base
+        : public stdex::intrusive_ptr_base<class_type_scope>
 	{
 	public:
 		class_type_scope( const char * _name, size_t _typeId, PyObject * _module, void * _user, pybind_new _pynew, pybind_destructor _pydestructor, bool _pod );
@@ -106,8 +106,8 @@ namespace pybind
 
         size_t getObjectCount() const;
 
-    protected:
-        void destroy() override;
+    public:
+        void intrusive_ptr_destroy();
 
 	public:
         const char * m_name;
