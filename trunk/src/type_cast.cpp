@@ -44,18 +44,22 @@ namespace pybind
 
             const char * typeinfo_name = detail::get_class_type_info( _tinfo );
 
-			if( const char * repr = pybind::object_repr( _obj ) )
+			const char * obj_repr = pybind::object_repr( _obj );
+			const char * obj_repr_type = pybind::object_repr_type( _obj );
+
+			if( obj_repr != nullptr )
 			{          
-				pybind::error_message( "invalid extract %s from %.256s"
+				pybind::error_message( "invalid extract from %.256s type %.256s to %.256s"					
+					, obj_repr
+					, obj_repr_type
 					, typeinfo_name
-					, repr
 					);
 			}
 			else
 			{
-				pybind::error_message( "invalid extract %s from unknown object type %s"
-					, typeinfo_name
+				pybind::error_message( "invalid extract from unknown object type %s to %s"					
 					, _obj->ob_type->tp_name
+					, typeinfo_name
 					);
 			}
 		}

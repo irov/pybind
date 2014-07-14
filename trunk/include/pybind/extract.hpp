@@ -56,11 +56,13 @@ namespace pybind
 
                     const char * type_name = tinfo.name();
                     const char * repr_obj = pybind::object_repr( _obj );
-
+					const char * repr_obj_type = pybind::object_repr_type( _obj );
+					
 					if( repr_obj != nullptr )
 					{
-						pybind::throw_exception( "extract from %.256s to %.256s"
+						pybind::throw_exception( "extract from %.256s type %.256s to %.256s"
 							, repr_obj
+							, repr_obj_type
 							, type_name
 							);
 					}
