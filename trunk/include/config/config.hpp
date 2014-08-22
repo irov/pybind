@@ -32,10 +32,26 @@
 #	define PYBIND_OBJECT_POD64_SIZE 64
 #	endif
 
+
+#	ifndef PYBIND_MALLOC
+#	include "stdex/allocator.h"
+#	define PYBIND_MALLOC(S) stdex_malloc(S)
+#	endif
+
+#	ifndef PYBIND_FREE
+#	include "stdex/allocator.h"
+#	define PYBIND_FREE(B, S) stdex_free(B)
+#	endif 
+
+#	ifndef PYBIND_MEMCPY
+#	include "stdex/memorycopy.h"
+#	define PYBIND_MEMCPY(Dest, Src, Size) stdex::memorycopy(Dest, Src, Size)
+#	endif
+
 namespace pybind
 {
 #   ifdef PYBIND_MARMALADE
-    typedef wchar_t pybind_unicode_t;
+	typedef wchar_t pybind_unicode_t;
 #   else
     typedef wchar_t pybind_unicode_t;
 #   endif

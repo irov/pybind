@@ -23,10 +23,11 @@ namespace pybind
         }
 
     public:
-        void intrusive_ptr_destroy()
-        {
-            delete this;
-        }
+        void intrusive_ptr_destroy();
+
+	public:
+		void * operator new ( size_t _size );
+		void operator delete ( void * _ptr, size_t _size );
 
     protected:
         bool type_info_cast( PyObject * _obj, size_t _tinfo, size_t _tptrinfo, void ** _impl );

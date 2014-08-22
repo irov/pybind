@@ -110,6 +110,10 @@ namespace pybind
         void intrusive_ptr_destroy();
 
 	public:
+		void * operator new ( size_t _size );
+		void operator delete ( void * _ptr, size_t _size );
+
+	public:
         const char * m_name;
         size_t m_typeId;
 
