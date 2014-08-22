@@ -7,8 +7,8 @@
 
 #	include "pybind/system.hpp"
 
+#	include "config/config.hpp"
 #	include "config/python.hpp"
-
 
 #   include "static_var.hpp"
 
@@ -106,6 +106,23 @@ namespace pybind
 
 			return true;
 		}
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void * type_cast::operator new ( size_t _size )
+	{
+		return PYBIND_MALLOC(_size);
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void type_cast::operator delete ( void * _ptr, size_t _size )
+	{		
+		(void)_size;
+
+		PYBIND_FREE(_ptr, _size);
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void type_cast::intrusive_ptr_destroy()
+	{
+		delete this;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool type_cast::type_info_cast( PyObject * _obj, size_t _tinfo, size_t _tptrinfo, void ** _impl )

@@ -1453,6 +1453,18 @@ namespace pybind
     {
         delete this;
     }
+	//////////////////////////////////////////////////////////////////////////
+	void * class_type_scope::operator new ( size_t _size )
+	{
+		return PYBIND_MALLOC(_size);
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::operator delete ( void * _ptr, size_t _size )
+	{		
+		(void)_size;
+
+		PYBIND_FREE(_ptr, _size);
+	}
     //////////////////////////////////////////////////////////////////////////
 #	ifdef PYBIND_VISIT_OBJECTS
     void class_type_scope::visit_objects( pybind_visit_objects * _visitor )

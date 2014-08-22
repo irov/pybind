@@ -3,12 +3,11 @@
 #	include "pybind/type_cast.hpp"
 #	include "pybind/extract.hpp"
 
-#	include <vector>
-#	include <map>
+#	include <utility>
 
 namespace pybind
 {
-	template<class T, class V = std::vector<T> >
+	template<class T, class V>
 	struct extract_stl_vector_type
 		: public pybind::type_cast_result<V>
 	{
@@ -85,7 +84,7 @@ namespace pybind
 		}
 	};
 
-	template<class K, class V, class M = std::map<K, V> >
+	template<class K, class V, class M>
 	struct extract_stl_map_type
 		: public pybind::type_cast_result<M>
 	{
@@ -150,7 +149,7 @@ namespace pybind
 		}
 	};
 
-	template<class T, class V = std::vector<T> >
+	template<class T, class V>
 	struct registration_stl_vector_type_cast
 	{
 		registration_stl_vector_type_cast()
@@ -161,7 +160,7 @@ namespace pybind
 		}
 	};
 
-	template<class T, class V = std::vector<T> >
+	template<class T, class V>
 	struct unregistration_stl_vector_type_cast
 	{	
 		unregistration_stl_vector_type_cast()
@@ -172,7 +171,7 @@ namespace pybind
 		}
 	};
 
-	template<class K, class V, class M = std::map<K, V> >
+	template<class K, class V, class M>
 	struct registration_stl_map_type_cast
 	{
 		registration_stl_map_type_cast()
@@ -183,7 +182,7 @@ namespace pybind
 		}
 	};
 
-	template<class K, class V, class M = std::map<K, V> >
+	template<class K, class V, class M>
 	struct unregistration_stl_map_type_cast
 	{	
 		unregistration_stl_map_type_cast()
