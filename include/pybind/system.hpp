@@ -67,6 +67,8 @@ namespace pybind
 	PYBIND_API void decref( PyObject * _obj );
 	PYBIND_API size_t refcount( PyObject * _obj );
 
+	PYBIND_API bool is_callable( PyObject * _obj );
+
 	PYBIND_API bool is_none( PyObject * _none );
 	PYBIND_API PyObject * ret_none();
 
