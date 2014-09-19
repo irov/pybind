@@ -9,15 +9,15 @@
 #	endif
 
 #	ifndef PYBIND_TYPE_COUNT
-#   define PYBIND_TYPE_COUNT 256
+#   define PYBIND_TYPE_COUNT 512
 #	endif
 
 #	ifndef PYBIND_FUNCTION_COUNT
-#   define PYBIND_FUNCTION_COUNT 256
+#   define PYBIND_FUNCTION_COUNT 512
 #	endif
 
 #	ifndef PYBIND_FUNCTOR_COUNT
-#   define PYBIND_FUNCTOR_COUNT 256
+#   define PYBIND_FUNCTOR_COUNT 512
 #	endif
 
 #	ifndef PYBIND_STL_NOT_SUPPORT
