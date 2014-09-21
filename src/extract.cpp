@@ -21,11 +21,11 @@ namespace pybind
 #	endif
 		else if( PyLong_Check( _obj ) )
 		{
-			_value = ( PyLong_AsLong( _obj ) != 0 );				
+			_value = (PyLong_AsLong( _obj ) != 0);				
 		}
 		else if( PyFloat_Check( _obj ) )
 		{
-			_value = ( int(PyFloat_AsDouble( _obj )) != 0 );
+			_value = (PyFloat_AsDouble( _obj ) != 0.0);
 		}
 		else
 		{
@@ -39,17 +39,17 @@ namespace pybind
 	{
 		if( PyLong_Check( _obj ) )
 		{
-			_value = (int)PyLong_AsLong( _obj );
+			_value = (int32_t)PyLong_AsLong( _obj );
 		}
 #   if PYBIND_PYTHON_VERSION < 300
 		else if( PyInt_Check( _obj ) )
 		{
-			_value = PyInt_AsLong( _obj );
+			_value = (int32_t)PyInt_AsLong( _obj );
 		}
 #	endif
 		else if( PyFloat_Check( _obj ) )
 		{
-			_value = (int)PyFloat_AsDouble( _obj );				
+			_value = (int32_t)PyFloat_AsDouble( _obj );				
 		}
 		else
 		{
@@ -63,17 +63,17 @@ namespace pybind
 	{
 		if( PyLong_Check( _obj ) )
 		{				
-			_value = (size_t)PyLong_AsUnsignedLong( _obj );
+			_value = (uint32_t)PyLong_AsUnsignedLong( _obj );
 		}
 #   if PYBIND_PYTHON_VERSION < 300
 		else if( PyInt_Check( _obj ) )
 		{
-			_value = (size_t)PyInt_AsUnsignedLongMask( _obj );
+			_value = (uint32_t)PyInt_AsUnsignedLongMask( _obj );
 		}
 #	endif
 		else if( PyFloat_Check( _obj ) )
 		{				
-			_value = (size_t)PyFloat_AsDouble( _obj );
+			_value = (uint32_t)PyFloat_AsDouble( _obj );
 		}
 		else
 		{
@@ -87,17 +87,17 @@ namespace pybind
 	{
 		if( PyLong_Check( _obj ) )
 		{				
-			_value = (size_t)PyLong_AsLong( _obj );
+			_value = (int64_t)PyLong_AsLong( _obj );
 		}
 #   if PYBIND_PYTHON_VERSION < 300
 		else if( PyInt_Check( _obj ) )
 		{
-			_value = (size_t)PyInt_AsLong( _obj );
+			_value = (int64_t)PyInt_AsLong( _obj );
 		}
 #	endif
 		else if( PyFloat_Check( _obj ) )
 		{				
-			_value = (size_t)PyFloat_AsDouble( _obj );
+			_value = (int64_t)PyFloat_AsDouble( _obj );
 		}
 		else
 		{
@@ -111,17 +111,17 @@ namespace pybind
 	{
 		if( PyLong_Check( _obj ) )
 		{				
-			_value = (size_t)PyLong_AsUnsignedLong( _obj );
+			_value = (uint64_t)PyLong_AsUnsignedLong( _obj );
 		}
 #   if PYBIND_PYTHON_VERSION < 300
 		else if( PyInt_Check( _obj ) )
 		{
-			_value = (size_t)PyInt_AsUnsignedLongMask( _obj );
+			_value = (uint64_t)PyInt_AsUnsignedLongMask( _obj );
 		}
 #	endif
 		else if( PyFloat_Check( _obj ) )
 		{				
-			_value = (size_t)PyFloat_AsDouble( _obj );
+			_value = (uint64_t)PyFloat_AsDouble( _obj );
 		}
 		else
 		{

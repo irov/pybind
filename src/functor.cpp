@@ -11,18 +11,18 @@ namespace pybind
 	namespace detail
 	{
         //////////////////////////////////////////////////////////////////////////
-        static const functor_adapter_interface_ptr & extract_adapter_py_functor( PyObject * _self )
+        static functor_adapter_interface * extract_adapter_py_functor( PyObject * _self )
         {
             py_functor_type * functor_type = reinterpret_cast<py_functor_type *>(_self);
 
-            const functor_adapter_interface_ptr & adapter = functor_type->iadapter;
+			functor_adapter_interface * iadapter = functor_type->iadapter;
 
-            return adapter;
+            return iadapter;
         }
         //////////////////////////////////////////////////////////////////////////
         static PyObject * functor_kwds( PyObject * _self, PyObject * _args, PyObject * _kwds )
         {
-            const functor_adapter_interface_ptr & adapter = detail::extract_adapter_py_functor( _self );
+            functor_adapter_interface * adapter = detail::extract_adapter_py_functor( _self );
 
 			try
 			{
@@ -81,7 +81,7 @@ namespace pybind
 
 				py_functor_type * self = gen_functor();
 
-				self->iadapter = _adapter;
+				stdex::intrusive_ptr_setup( self->iadapter, _adapter );
 
 				PyObject *py_func = PyCFunction_New( &m_method, (PyObject*)self );
 				Py_DecRef( (PyObject *)self );

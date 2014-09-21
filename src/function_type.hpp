@@ -10,7 +10,7 @@ namespace pybind
 	struct py_function_type{
 		PyObject_HEAD
 
-		function_adapter_interface_ptr iadapter;
+		function_adapter_interface * iadapter;
 	};
 
 	py_function_type * gen_function();
