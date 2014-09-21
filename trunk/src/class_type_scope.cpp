@@ -1038,7 +1038,8 @@ namespace pybind
 
 		if( m_basesCount > 0 )
 		{
-			py_bases = PyTuple_New( m_basesCount );
+			Py_ssize_t py_basesCount = (Py_ssize_t)m_basesCount;
+			py_bases = PyTuple_New( py_basesCount );
 			Py_ssize_t index = 0;
 
 			for( size_t i = 0; i != m_basesCount; ++i )

@@ -12,14 +12,14 @@ namespace pybind
 	struct py_method_generator_type
 	{
 		PyObject_HEAD
-		method_adapter_interface_ptr iadapter;
+		method_adapter_interface * iadapter;
 		PyTypeObject * classtype;
 	};
 	//////////////////////////////////////////////////////////////////////////
 	struct py_method_caller_type
 	{
 		PyObject_HEAD
-		method_adapter_interface_ptr iadapter;
+		method_adapter_interface * iadapter;
 		PyObject * self;
 	};
 	//////////////////////////////////////////////////////////////////////////
@@ -27,7 +27,7 @@ namespace pybind
 	{
 		py_method_caller_type * mct = (py_method_caller_type *)_obj;
 
-        mct->iadapter = nullptr;
+		stdex::intrusive_ptr_release( mct->iadapter );
 
 		Py_DecRef( mct->self );
 
@@ -170,7 +170,7 @@ namespace pybind
 		}
 
 		py_method_caller_type * mct = (py_method_caller_type *)PyType_GenericAlloc( &STATIC_VAR(s_method_caller_type), 0 );
-		mct->iadapter = _descr->iadapter;
+		stdex::intrusive_ptr_setup( mct->iadapter, _descr->iadapter );
 
 		Py_IncRef( _obj );
 		mct->self = _obj;
@@ -192,7 +192,8 @@ namespace pybind
 		}
 
 		py_method_caller_type * mct = (py_method_caller_type *)PyType_GenericAlloc( &STATIC_VAR(s_method_caller_type), 0 );
-		mct->iadapter = _descr->iadapter;
+		stdex::intrusive_ptr_setup( mct->iadapter, _descr->iadapter );
+
 		mct->self = PyTuple_GetItem(_args, 0);
 		
 		PyObject * new_args = PyTuple_GetSlice(_args, 1, argc);
@@ -206,7 +207,7 @@ namespace pybind
 	{
 		py_method_generator_type * mgt = (py_method_generator_type *)_obj;
 
-		mgt->iadapter = nullptr;
+		stdex::intrusive_ptr_release( mgt->iadapter );
 
 		Py_DecRef( (PyObject *)mgt->classtype );
 
@@ -261,7 +262,7 @@ namespace pybind
 	{
 		py_method_generator_type * self = (py_method_generator_type *)PyType_GenericAlloc( &STATIC_VAR(s_method_generator_type), 0 );
 
-		self->iadapter = _ifunc;
+		stdex::intrusive_ptr_setup( self->iadapter, _ifunc );
 
         if( _type != nullptr )
         {		    

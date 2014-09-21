@@ -9,7 +9,7 @@ namespace pybind
 {
 	struct py_functor_type{
 		PyObject_HEAD
-		functor_adapter_interface_ptr iadapter;
+		functor_adapter_interface * iadapter;
 	};
 
 	py_functor_type * gen_functor();

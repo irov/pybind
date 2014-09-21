@@ -11,7 +11,7 @@ namespace pybind
 	{
         py_function_type * py_self = (py_function_type *)_obj;
 
-        py_self->iadapter = nullptr;
+		stdex::intrusive_ptr_release( py_self->iadapter );
 
 		_obj->ob_type->tp_free( _obj );
 	}
