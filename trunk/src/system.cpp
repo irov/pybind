@@ -145,9 +145,9 @@ namespace pybind
 		}
 	}
     //////////////////////////////////////////////////////////////////////////
-    size_t get_python_version()
+    uint32_t get_python_version()
     {
-        size_t version = PYBIND_PYTHON_VERSION;
+        uint32_t version = PYBIND_PYTHON_VERSION;
 
         return version;
     }
@@ -466,7 +466,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	size_t refcount( PyObject * _obj )
 	{
-		return _obj->ob_refcnt;
+		return (size_t)_obj->ob_refcnt;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool is_callable( PyObject * _obj )
@@ -1191,10 +1191,10 @@ namespace pybind
 #   endif
     }
 	//////////////////////////////////////////////////////////////////////////
-	size_t _get_string_hash( const char * _str, size_t _len )
+	uint32_t _get_string_hash( const char * _str, size_t _len )
 	{
 #   if PYBIND_PYTHON_VERSION > 300
-		return -1;
+		return (uint32_t)-1;
 #	else
 		unsigned char * p = (unsigned char *) _str;
 		long len = (long)_len;
@@ -1210,7 +1210,7 @@ namespace pybind
 		if (x == -1)
 			x = -2;
 
-		return (size_t)x;
+		return (uint32_t)x;
 #	endif
 	}
 }

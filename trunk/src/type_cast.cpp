@@ -19,17 +19,17 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         static type_cast_ptr g_type_cast[PYBIND_TYPE_COUNT];
         //////////////////////////////////////////////////////////////////////////
-		void register_type_info_extract( size_t _info, const type_cast_ptr & _cast )
+		void register_type_info_extract( uint32_t _info, const type_cast_ptr & _cast )
 		{	
 			g_type_cast[_info] = _cast;
 		}
 		//////////////////////////////////////////////////////////////////////////
-		void unregister_type_info_extract( size_t _info )
+		void unregister_type_info_extract( uint32_t _info )
 		{	
 			g_type_cast[_info] = nullptr;
 		}
         //////////////////////////////////////////////////////////////////////////
-		type_cast * find_type_info_extract( size_t _info )
+		type_cast * find_type_info_extract( uint32_t _info )
 		{
             const type_cast_ptr & cast = g_type_cast[_info];
 
@@ -38,7 +38,7 @@ namespace pybind
 			return t;
 		}
         //////////////////////////////////////////////////////////////////////////
-		void error_invalid_extract( PyObject * _obj, size_t _tinfo )
+		void error_invalid_extract( PyObject * _obj, uint32_t _tinfo )
 		{
             pybind::check_error();
 
@@ -64,7 +64,7 @@ namespace pybind
 			}
 		}
         //////////////////////////////////////////////////////////////////////////
-		bool convert_object( PyObject * _obj, size_t _tinfo, void * _place )
+		bool convert_object( PyObject * _obj, uint32_t _tinfo, void * _place )
 		{
 			const class_type_scope_ptr & scope = detail::get_class_type_scope( _tinfo );
 
@@ -80,7 +80,7 @@ namespace pybind
 			return result;
 		}
 		//////////////////////////////////////////////////////////////////////////
-		bool instance_of_type( PyObject * _obj, size_t _tinfo )
+		bool instance_of_type( PyObject * _obj, uint32_t _tinfo )
 		{
 			if( detail::is_class( _obj ) == false )
 			{
@@ -125,7 +125,7 @@ namespace pybind
 		delete this;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool type_cast::type_info_cast( PyObject * _obj, size_t _tinfo, size_t _tptrinfo, void ** _impl )
+	bool type_cast::type_info_cast( PyObject * _obj, uint32_t _tinfo, uint32_t _tptrinfo, void ** _impl )
 	{
 		if( detail::is_class( _obj ) == false )
 		{

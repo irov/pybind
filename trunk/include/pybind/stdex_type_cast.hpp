@@ -89,7 +89,7 @@ namespace pybind
 	{
 		registration_stl_vector_type_cast()
 		{
-			size_t id = class_info<V>();
+			uint32_t id = class_info<V>();
 
 			detail::register_type_info_extract( id, new pybind::extract_stl_vector_type<T, V> );
 		}
@@ -100,7 +100,7 @@ namespace pybind
 	{	
 		unregistration_stl_vector_type_cast()
 		{
-			size_t id = class_info<V>();
+			uint32_t id = class_info<V>();
 
 			detail::unregister_type_info_extract( id );
 		}
