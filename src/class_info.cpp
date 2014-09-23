@@ -17,11 +17,11 @@ namespace pybind
 		//////////////////////////////////////////////////////////////////////////
 		struct class_info_desc_t
 		{
-			size_t id;
+			uint32_t id;
 			const char * name;
 		};
 		//////////////////////////////////////////////////////////////////////////
-		static class_info_desc_t & modify_class_info_desc( size_t _index )
+		static class_info_desc_t & modify_class_info_desc( uint32_t _index )
 		{
 			static class_info_desc_t g_class_info_desc[PYBIND_TYPE_COUNT];
 
@@ -30,9 +30,9 @@ namespace pybind
 			return desc;
 		}
         //////////////////////////////////////////////////////////////////////////
-        static size_t s_get_next_id()
+        static uint32_t s_get_next_id()
         {
-            static size_t enumerator = 0;
+            static uint32_t enumerator = 0;
 
             ++enumerator;
 
@@ -41,7 +41,7 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         static const class_info_desc_t * s_find_class_info_desc_name( const char * _name )
         {
-            for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
+            for( uint32_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
             {
                 class_info_desc_t & desc = modify_class_info_desc( index );
 
@@ -61,9 +61,9 @@ namespace pybind
             return nullptr;
         }
         //////////////////////////////////////////////////////////////////////////
-        static const class_info_desc_t * s_find_class_info_desc_id( size_t _id )
+        static const class_info_desc_t * s_find_class_info_desc_id( uint32_t _id )
         {
-            for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
+            for( uint32_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
             {
                 class_info_desc_t & desc = modify_class_info_desc( index );
 
@@ -80,7 +80,7 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         static class_info_desc_t * s_alloc_class_info_desc()
         {
-            for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
+            for( uint32_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
             {
                 class_info_desc_t & desc = modify_class_info_desc( index );
 
@@ -95,7 +95,7 @@ namespace pybind
             return nullptr;
         }
         //////////////////////////////////////////////////////////////////////////
-        size_t get_class_type_id( const std::type_info & _info )
+        uint32_t get_class_type_id( const std::type_info & _info )
         {
             const char * info_name = _info.name();
 
@@ -103,7 +103,7 @@ namespace pybind
 
             if( desc != nullptr )
             {
-                size_t id = desc->id;
+                uint32_t id = desc->id;
 
                 return id;
             }
@@ -117,7 +117,7 @@ namespace pybind
                 return 0;
             }
 
-            size_t new_id = s_get_next_id();
+            uint32_t new_id = s_get_next_id();
 
             new_desc->id = new_id;            
             new_desc->name = info_name;
@@ -125,7 +125,7 @@ namespace pybind
             return new_id;
         }
         //////////////////////////////////////////////////////////////////////////
-        const char * get_class_type_info( size_t _id )
+        const char * get_class_type_info( uint32_t _id )
         {
             const class_info_desc_t * desc = s_find_class_info_desc_id( _id );
 
@@ -146,7 +146,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool initialize_class_info()
 	{
-		for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
+		for( uint32_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
 		{
 			detail::class_info_desc_t & desc = detail::modify_class_info_desc( index );
 

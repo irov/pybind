@@ -110,7 +110,7 @@ namespace pybind
 		};
         //////////////////////////////////////////////////////////////////////////
         static function_type_scope g_function_type_scope[PYBIND_FUNCTION_COUNT];
-        static size_t g_function_type_scope_count = 0;
+        static uint32_t g_function_type_scope_count = 0;
         //////////////////////////////////////////////////////////////////////////
 		PyObject * create_function_adapter( const function_adapter_interface_ptr & _adapter, bool _native )
 		{

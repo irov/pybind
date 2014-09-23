@@ -66,19 +66,19 @@ namespace pybind
 		}
 
 	protected:
-		size_t getClassId() const
+		uint32_t getClassId() const
 		{
 			return m_class_id;
 		}
 
-		size_t getScopeId() const
+		uint32_t getScopeId() const
 		{
 			return m_scope_id;
 		}
 
 	protected:
-		size_t m_class_id;
-		size_t m_scope_id;
+		uint32_t m_class_id;
+		uint32_t m_scope_id;
 	};
 	//////////////////////////////////////////////////////////////////////////
 	template<class C, class F>
@@ -99,8 +99,8 @@ namespace pybind
 		{
             (void)_kwds;
 
-			size_t scopeId = this->getScopeId();
-			size_t classId = this->getClassId();
+			uint32_t scopeId = this->getScopeId();
+			uint32_t classId = this->getClassId();
 
 			void * meta_impl = detail::meta_cast_scope( _impl, scopeId, classId, _scope );
 
@@ -128,7 +128,7 @@ namespace pybind
     protected:
         PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
         {
-            size_t scopeId = this->getScopeId();
+            uint32_t scopeId = this->getScopeId();
             const char * scopeName = detail::get_class_type_info( scopeId );
 
             const char * name = this->getName();
@@ -169,8 +169,8 @@ namespace pybind
 		{
             (void)_kwds;
 
-			size_t scopeId = this->getScopeId();
-			size_t classId = this->getClassId();
+			uint32_t scopeId = this->getScopeId();
+			uint32_t classId = this->getClassId();
 
 			void * meta_impl = detail::meta_cast_scope( _impl, scopeId, classId, _scope );
 
@@ -204,8 +204,8 @@ namespace pybind
 	protected:
 		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
-			size_t scopeId = this->getScopeId();
-			size_t classId = this->getClassId();
+			uint32_t scopeId = this->getScopeId();
+			uint32_t classId = this->getClassId();
 
 			void * meta_impl = detail::meta_cast_scope( _impl, scopeId, classId, _scope );
 
@@ -240,8 +240,8 @@ namespace pybind
 		{
             (void)_kwds;
 
-			size_t scopeId = this->getScopeId();
-			size_t classId = this->getClassId();
+			uint32_t scopeId = this->getScopeId();
+			uint32_t classId = this->getClassId();
 
 			void * meta_impl = detail::meta_cast_scope( _impl, scopeId, classId, _scope );
 
@@ -271,8 +271,8 @@ namespace pybind
 	protected:
 		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
-			size_t scopeId = this->getScopeId();
-			size_t classId = this->getClassId();
+			uint32_t scopeId = this->getScopeId();
+			uint32_t classId = this->getClassId();
 
 			void * meta_impl = detail::meta_cast_scope( _impl, scopeId, classId, _scope );
 

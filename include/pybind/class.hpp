@@ -314,7 +314,7 @@ namespace pybind
 
 		static const pybind::class_type_scope_ptr & get_scope()
 		{
-			size_t cinfo = class_info<C>();
+			uint32_t cinfo = class_info<C>();
 
             const pybind::class_type_scope_ptr & scope = detail::get_class_type_scope( cinfo );
 
@@ -322,7 +322,7 @@ namespace pybind
 		}
 
     protected:
-        size_t m_info;
+        uint32_t m_info;
 	};
 
 	template<class C> 
@@ -338,8 +338,8 @@ namespace pybind
                 return true;
             }
 
-			size_t tinfo = class_info<C>();
-			size_t tptrinfo = class_info<C *>();
+			uint32_t tinfo = class_info<C>();
+			uint32_t tptrinfo = class_info<C *>();
 
 			void * impl;
 			if( type_cast::type_info_cast( _obj, tinfo, tptrinfo, &impl ) == false )
@@ -363,7 +363,7 @@ namespace pybind
                 return pybind::ret_none();
             }
 
-            size_t tinfo = class_info<C>();
+            uint32_t tinfo = class_info<C>();
     
             PyObject * py_obj = class_core::create_holder( tinfo, (void *)_value );
     
@@ -377,8 +377,8 @@ namespace pybind
 	{
 		bool apply( PyObject * _obj, typename type_cast_result<C>::TCastValue _value ) override
 		{
-			size_t tinfo = class_info<C>();
-			size_t tptrinfo = class_info<C *>();
+			uint32_t tinfo = class_info<C>();
+			uint32_t tptrinfo = class_info<C *>();
 
 			void * impl;
 			if( type_cast::type_info_cast( _obj, tinfo, tptrinfo, &impl ) == false )
@@ -400,7 +400,7 @@ namespace pybind
 
 		PyObject * wrap( const C & _class )
 		{
-			size_t tinfo = class_info<C>();
+			uint32_t tinfo = class_info<C>();
 
 			void * obj_place = nullptr;
 			size_t obj_place_size = 0;
@@ -603,7 +603,7 @@ namespace pybind
     template<class T>
     PyTypeObject * get_typemodule()
     {
-        size_t tinfo = class_info<T>();
+        uint32_t tinfo = class_info<T>();
 
         PyTypeObject * typemodule = class_core::get_typemodule( tinfo );
 

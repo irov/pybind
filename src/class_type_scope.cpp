@@ -133,9 +133,9 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	namespace detail
 	{
-		static const size_t invalid_info = 0;
+		static const uint32_t invalid_info = 0;
         //////////////////////////////////////////////////////////////////////////
-		static class_type_scope_ptr & modify_class_type_scope( size_t _info )
+		static class_type_scope_ptr & modify_class_type_scope( uint32_t _info )
 		{
 			static class_type_scope_ptr g_class_type_scope[PYBIND_TYPE_COUNT];
 
@@ -146,7 +146,7 @@ namespace pybind
 		//////////////////////////////////////////////////////////////////////////
 		static void initialize_class_type_scope()
 		{
-			for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
+			for( uint32_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
 			{
 				modify_class_type_scope( index ) = nullptr;
 			}
@@ -154,7 +154,7 @@ namespace pybind
 		//////////////////////////////////////////////////////////////////////////
 		static void finalize_class_type_scope()
 		{
-			for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
+			for( uint32_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
 			{
 				class_type_scope_ptr & scope = modify_class_type_scope( index );
 
@@ -168,7 +168,7 @@ namespace pybind
 		//////////////////////////////////////////////////////////////////////////
 		static void finalize_class_type_scope_pool()
 		{
-			for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
+			for( uint32_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
 			{
 				class_type_scope_ptr & scope = modify_class_type_scope( index );
 
@@ -179,7 +179,7 @@ namespace pybind
 			}
 		}
         //////////////////////////////////////////////////////////////////////////
-        bool reg_class_type_scope( size_t _info, const class_type_scope_ptr & _scope )
+        bool reg_class_type_scope( uint32_t _info, const class_type_scope_ptr & _scope )
         {
 			if( _info == invalid_info )
 			{
@@ -191,7 +191,7 @@ namespace pybind
 			return true;
         }
         //////////////////////////////////////////////////////////////////////////
-        const class_type_scope_ptr & get_class_type_scope( size_t _info )
+        const class_type_scope_ptr & get_class_type_scope( uint32_t _info )
         {
             const class_type_scope_ptr & scope = modify_class_type_scope( _info );
 
@@ -207,7 +207,7 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         void visit_types_scope( visitor_class_type_scope * _getter )
         {
-            for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
+            for( uint32_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
             {
 				const class_type_scope_ptr & scope_ptr = detail::get_class_type_scope( index );
 
@@ -296,7 +296,7 @@ namespace pybind
 
 			Py_DecRef( py_scope );
 
-            size_t id;
+            uint32_t id;
             if( pybind::extract_value( py_scope, id ) == false )
             {
 				pybind::throw_exception("obj %s incorrect wrap pybind (scope)"
@@ -482,7 +482,7 @@ namespace pybind
 			return result;
 		}
 		//////////////////////////////////////////////////////////////////////////
-		void * check_registred_class( PyObject * _obj, size_t _info )
+		void * check_registred_class( PyObject * _obj, uint32_t _info )
 		{
 			PyTypeObject * py_type = Py_TYPE(_obj);
 
@@ -498,9 +498,9 @@ namespace pybind
 			return impl;
 		}
         //////////////////////////////////////////////////////////////////////////
-        void * meta_cast_scope( void * _self, size_t _typeId, size_t _name, const class_type_scope_ptr & scope )
+        void * meta_cast_scope( void * _self, uint32_t _typeId, uint32_t _name, const class_type_scope_ptr & scope )
         {
-            size_t class_name = scope->get_type_id();
+            uint32_t class_name = scope->get_type_id();
 
             if( class_name == _typeId )
             {
@@ -618,7 +618,7 @@ namespace pybind
 
 		try
 		{
-			size_t hash = adapter->hash( _obj, impl, scope );
+			uint32_t hash = adapter->hash( _obj, impl, scope );
 
 			return (long)hash;
 		}
@@ -812,7 +812,7 @@ namespace pybind
 
 		try
 		{
-			PyObject * py_index = pybind::ptr((size_t)_index);
+			PyObject * py_index = pybind::ptr( _index );
 			PyObject * attr = PyTuple_Pack( 1, py_index );
 			pybind::decref( py_index );
 
@@ -991,7 +991,7 @@ namespace pybind
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////
-	class_type_scope::class_type_scope( const char * _name, size_t _typeId, PyObject * _module, void * _user, pybind_new _pynew, pybind_destructor _pydestructor, bool _pod )
+	class_type_scope::class_type_scope( const char * _name, uint32_t _typeId, PyObject * _module, void * _user, pybind_new _pynew, pybind_destructor _pydestructor, bool _pod )
 		: m_name(_name)
 		, m_typeId(_typeId)
 		, m_module(_module)
@@ -1042,7 +1042,7 @@ namespace pybind
 			py_bases = PyTuple_New( py_basesCount );
 			Py_ssize_t index = 0;
 
-			for( size_t i = 0; i != m_basesCount; ++i )
+			for( uint32_t i = 0; i != m_basesCount; ++i )
 			{
                 Metacast & mc = m_bases[i];
 
@@ -1113,7 +1113,7 @@ namespace pybind
         m_sequence = nullptr;
         m_compare = nullptr;
 
-		for( size_t i = 0; i != m_basesCount; ++i )
+		for( uint32_t i = 0; i != m_basesCount; ++i )
 		{
 			Metacast & m = m_bases[i];
 
@@ -1128,7 +1128,7 @@ namespace pybind
 		destructor old_del = m_pytypeobject->tp_del;
 		m_pytypeobject->tp_del = nullptr;
 
-		for( size_t i = 0; i != m_poolCount; ++i )
+		for( uint32_t i = 0; i != m_poolCount; ++i )
 		{
 			PyObject * obj = m_poolObjects[i];
 
@@ -1148,7 +1148,7 @@ namespace pybind
 		return m_name;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	size_t class_type_scope::get_type_id() const
+	uint32_t class_type_scope::get_type_id() const
 	{
 		return m_typeId;
 	}
@@ -1308,7 +1308,7 @@ namespace pybind
 		m_pyconstructor = _ctr;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_type_scope::add_base( size_t _info, const class_type_scope_ptr & _base, pybind_metacast _cast )
+	void class_type_scope::add_base( uint32_t _info, const class_type_scope_ptr & _base, pybind_metacast _cast )
 	{
 		if( m_basesCount == PYBIND_BASES_COUNT )
 		{
@@ -1325,13 +1325,13 @@ namespace pybind
         mc.scope = _base;
         mc.cast = _cast;
 				
-		size_t newId = m_basesCount++;
+		uint32_t newId = m_basesCount++;
 		m_bases[newId] = mc;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void * class_type_scope::metacast( size_t _info, void * _impl )
+	void * class_type_scope::metacast( uint32_t _info, void * _impl )
 	{
-		for( size_t i = 0; i != m_basesCount; ++i )
+		for( uint32_t i = 0; i != m_basesCount; ++i )
 		{
 			Metacast & mc = m_bases[i];
 
@@ -1345,7 +1345,7 @@ namespace pybind
 			return obj;
 		}
 
-		for( size_t i = 0; i != m_basesCount; ++i )
+		for( uint32_t i = 0; i != m_basesCount; ++i )
 		{
             Metacast & mc = m_bases[i];
 
@@ -1445,7 +1445,7 @@ namespace pybind
         --m_objectCount;
 	}
     //////////////////////////////////////////////////////////////////////////
-    size_t class_type_scope::getObjectCount() const
+    uint32_t class_type_scope::getObjectCount() const
     {
         return m_objectCount;
     }

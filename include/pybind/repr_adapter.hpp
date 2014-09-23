@@ -41,8 +41,8 @@ namespace pybind
 	protected:
 		F m_repr;
 
-		size_t m_class_name;
-		size_t m_scope_name;
+		uint32_t m_class_name;
+		uint32_t m_scope_name;
 	};
 }
 

@@ -75,8 +75,8 @@ namespace pybind
 	protected:
 		A C:: * m_member;
 
-		size_t m_class_id;
-		size_t m_scope_id;
+		uint32_t m_class_id;
+		uint32_t m_scope_id;
 	};
 	//////////////////////////////////////////////////////////////////////////
 	template<class C, class FG, class FS>
@@ -124,8 +124,8 @@ namespace pybind
 		FG m_get;
 		FS m_set;
 
-		size_t m_class_id;
-		size_t m_scope_id;
+		uint32_t m_class_id;
+		uint32_t m_scope_id;
 	};
 	//////////////////////////////////////////////////////////////////////////
 	template<class C, class FG, class FS>
@@ -173,8 +173,8 @@ namespace pybind
 		FG m_get;
 		FS m_set;
 
-		size_t m_class_id;
-		size_t m_scope_id;
+		uint32_t m_class_id;
+		uint32_t m_scope_id;
 	};
 }
 

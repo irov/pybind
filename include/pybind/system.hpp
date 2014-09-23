@@ -15,7 +15,7 @@ namespace pybind
 
 	PYBIND_API bool is_initialized();
 
-    PYBIND_API size_t get_python_version();
+    PYBIND_API uint32_t get_python_version();
 
 	PYBIND_API void check_error();
 
@@ -167,6 +167,6 @@ namespace pybind
     PYBIND_API PyObject * marshal_get_object( const char * _buf, size_t _len );
 
     PYBIND_API void _set_module_finder( PyObject * _finder );
-	PYBIND_API size_t _get_string_hash( const char * _str, size_t _len );
+	PYBIND_API uint32_t _get_string_hash( const char * _str, size_t _len );
 }
 

@@ -30,22 +30,22 @@ namespace pybind
 		void operator delete ( void * _ptr, size_t _size );
 
     protected:
-        bool type_info_cast( PyObject * _obj, size_t _tinfo, size_t _tptrinfo, void ** _impl );
+        bool type_info_cast( PyObject * _obj, uint32_t _tinfo, uint32_t _tptrinfo, void ** _impl );
     };
 
     typedef stdex::intrusive_ptr<type_cast> type_cast_ptr;
 
 	namespace detail
 	{
-		PYBIND_API void register_type_info_extract( size_t _info, const type_cast_ptr & _type );
-		PYBIND_API void unregister_type_info_extract( size_t _info );
+		PYBIND_API void register_type_info_extract( uint32_t _info, const type_cast_ptr & _type );
+		PYBIND_API void unregister_type_info_extract( uint32_t _info );
 
-		PYBIND_API type_cast * find_type_info_extract( size_t _info );
+		PYBIND_API type_cast * find_type_info_extract( uint32_t _info );
 
-		PYBIND_API void error_invalid_extract( PyObject * _obj, size_t _tinfo );
-		PYBIND_API bool convert_object( PyObject * _obj, size_t _tinfo, void * _place );
+		PYBIND_API void error_invalid_extract( PyObject * _obj, uint32_t _tinfo );
+		PYBIND_API bool convert_object( PyObject * _obj, uint32_t _tinfo, void * _place );
 
-		PYBIND_API bool instance_of_type( PyObject * _obj, size_t tinfo );
+		PYBIND_API bool instance_of_type( PyObject * _obj, uint32_t tinfo );
 
 		template<class T> struct type_down_cast;
 
@@ -54,7 +54,7 @@ namespace pybind
 		{
 			static type_cast * find()
 			{  
-				size_t id = class_info<T>();
+				uint32_t id = class_info<T>();
 
 				type_cast * etype = find_type_info_extract( id );
 
@@ -72,7 +72,7 @@ namespace pybind
 		{
 			static type_cast * find()
 			{  
-				return (type_cast *)0;
+				return nullptr;
 			}
 		};
 
@@ -81,7 +81,7 @@ namespace pybind
 		{
 			static type_cast * find()
 			{
-				return type_down_cast_find<T,void>::find();
+				return type_down_cast_find<T, void>::find();
 			}
 		};
 
@@ -90,7 +90,7 @@ namespace pybind
 		{
 			static type_cast * find()
 			{
-				return 0;
+				return nullptr;
 			}
 		};
 
@@ -134,7 +134,7 @@ namespace pybind
 	template<class T>
 	bool instance_of( PyObject * _obj )
 	{
-		size_t id = class_info<T>();
+		uint32_t id = class_info<T>();
 
 		bool result = detail::instance_of_type( _obj, id );
 
@@ -144,7 +144,7 @@ namespace pybind
 	template<class T>
 	void registration_type_cast( const type_cast_ptr & _type )
 	{
-		size_t id = class_info<T>();
+		uint32_t id = class_info<T>();
 
 		detail::register_type_info_extract( id, _type );
 	}
@@ -152,7 +152,7 @@ namespace pybind
 	template<class T>
 	void unregistration_type_cast()
 	{	
-		size_t id = class_info<T>();
+		uint32_t id = class_info<T>();
 
 		detail::unregister_type_info_extract( id );
 	}
