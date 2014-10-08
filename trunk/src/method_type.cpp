@@ -216,12 +216,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
     STATIC_DECLARE_VALUE_BEGIN(PyTypeObject, s_method_generator_type)
     {
-#   if PYBIND_PYTHON_VERSION < 300
-		PyObject_HEAD_INIT(&PyType_Type)
-		0,
-#   else
 		PyVarObject_HEAD_INIT(&PyType_Type, 0)
-#   endif
 		"pybind_method_generator_type",
 		sizeof(py_method_generator_type),
 		0,
@@ -275,7 +270,8 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool initialize_methods()
 	{
-		if( PyType_Ready( &STATIC_VAR(s_method_generator_type) ) < 0 )
+		PyTypeObject * pt = &STATIC_VAR(s_method_generator_type);
+		if( PyType_Ready( pt ) < 0 )
 		{
 			printf("invalid embedding class '%s'\n"
                 , STATIC_VAR(s_method_generator_type).tp_name 

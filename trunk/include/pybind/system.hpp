@@ -122,6 +122,7 @@ namespace pybind
     PYBIND_API const char * object_repr_type( PyObject * _obj );
 	PYBIND_API const char * object_repr( PyObject * _obj );  
 	PYBIND_API const char * object_str( PyObject * _obj );
+	PYBIND_API uint32_t object_hash( PyObject * _obj );
 
     PYBIND_API void error_traceback( const char * _message, ... );
 	PYBIND_API void error_message( const char * _message, ... );
@@ -167,6 +168,5 @@ namespace pybind
     PYBIND_API PyObject * marshal_get_object( const char * _buf, size_t _len );
 
     PYBIND_API void _set_module_finder( PyObject * _finder );
-	PYBIND_API uint32_t _get_string_hash( const char * _str, size_t _len );
 }
 
