@@ -22,6 +22,10 @@
 extern int Py_OptimizeFlag;
 extern int Py_NoSiteFlag;
 
+#	if PYBIND_PYTHON_VERSION < 300
+extern int Py_HashRandomizationFlag;
+#	endif
+
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
@@ -39,6 +43,10 @@ namespace pybind
 
 		Py_NoSiteFlag = 1;
         Py_IgnoreEnvironmentFlag = 1;
+		
+#   if PYBIND_PYTHON_VERSION < 300
+		Py_HashRandomizationFlag = 0;
+#	endif
 
 #   if PYBIND_PYTHON_VERSION >= 330
 		wchar_t pyProgramName[] = L"pybind";
@@ -115,16 +123,14 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
 	void finalize()
 	{	
-		finalize_classes_pool();
+		Py_Finalize();
 
-        Py_Finalize();
-		
 		finalize_methods();
 		finalize_classes();
 		finalize_function();
 		finalize_functor();
 		finalize_stl_type_cast();
-        finalize_type_cast();
+        finalize_type_cast();		
 	}
     //////////////////////////////////////////////////////////////////////////
 	bool is_initialized()
@@ -831,6 +837,13 @@ namespace pybind
 
 		return str;
 	}
+	//////////////////////////////////////////////////////////////////////////
+	uint32_t object_hash( PyObject * _obj )
+	{
+		long py_hash = PyObject_Hash( _obj );
+
+		return (uint32_t)py_hash;
+	}
     //////////////////////////////////////////////////////////////////////////
     void error_traceback( const char * _message, ... )
     {
@@ -1190,28 +1203,5 @@ namespace pybind
         interp->importlib = _finder;
 #   endif
     }
-	//////////////////////////////////////////////////////////////////////////
-	uint32_t _get_string_hash( const char * _str, size_t _len )
-	{
-#   if PYBIND_PYTHON_VERSION > 300
-		return (uint32_t)-1;
-#	else
-		unsigned char * p = (unsigned char *) _str;
-		long len = (long)_len;
-
-		long x = _Py_HashSecret.prefix;
-
-		x ^= *p << 7;
-		long it = len;
-		while (--it >= 0)
-			x = (1000003*x) ^ *p++;
-		x ^= len;
-		x ^= _Py_HashSecret.suffix;
-		if (x == -1)
-			x = -2;
-
-		return (uint32_t)x;
-#	endif
-	}
 }
 

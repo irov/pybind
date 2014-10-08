@@ -57,9 +57,6 @@ namespace pybind
         void finalize();
 
 	public:
-		void finalize_pool();
-
-	public:
 		const char * get_name() const;
 		uint32_t get_type_id() const;
 		bool is_pod() const;
@@ -95,10 +92,6 @@ namespace pybind
 		void * metacast( uint32_t _info, void * _impl );
 		void unwrap( PyObject * _obj );
 		void type_initialize( PyTypeObject * _type );
-
-	public:
-		bool poolObject( PyObject * _obj );
-		PyObject * unpoolObject();
 
     public:
         void addObject( PyObject * _obj );
@@ -151,16 +144,11 @@ namespace pybind
         bool m_pod;
 
         uint32_t m_objectCount;
-
-		
-		PyObject * m_poolObjects[PYBIND_TYPE_OBJECT_POOL_COUNT];
-		uint32_t m_poolCount;
 	};
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<class_type_scope> class_type_scope_ptr;
 
 	bool initialize_classes();	
 	void finalize_classes();
-	void finalize_classes_pool();
 }
 
