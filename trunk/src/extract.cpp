@@ -228,6 +228,27 @@ namespace pybind
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
+	bool extract_value( PyObject * _obj, const wchar_t *& _value )
+	{
+		if( pybind::unicode_check( _obj ) == true )
+		{
+			const wchar_t * ch_buff = pybind::unicode_to_wchar( _obj );
+
+			if( ch_buff == nullptr )
+			{
+				return false;
+			}
+
+			_value = ch_buff;
+		}
+		else
+		{
+			return false;
+		}
+
+		return true;
+	}
+	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, PyObject *& _value )
 	{
 		_value = _obj;
@@ -295,6 +316,11 @@ namespace pybind
 	PyObject * ptr_throw( const char * _value )
 	{
 		return pybind::string_from_char( _value );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * ptr_throw( const wchar_t * _value )
+	{
+		return pybind::unicode_from_wchar( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * ptr_throw( PyObject * _value )

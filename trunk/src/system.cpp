@@ -19,9 +19,6 @@
 #	include <stdexcept>
 #	include <stdio.h>
 
-extern int Py_OptimizeFlag;
-extern int Py_NoSiteFlag;
-
 #	if PYBIND_PYTHON_VERSION < 300
 extern int Py_HashRandomizationFlag;
 #	endif

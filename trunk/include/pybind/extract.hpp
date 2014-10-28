@@ -97,6 +97,7 @@ namespace pybind
 	PYBIND_API bool extract_value( PyObject * _obj, float & _value );
 	PYBIND_API bool extract_value( PyObject * _obj, double & _value );
 	PYBIND_API bool extract_value( PyObject * _obj, const char * & _value );
+	PYBIND_API bool extract_value( PyObject * _obj, const wchar_t * & _value );
 	PYBIND_API bool extract_value( PyObject * _obj, PyObject * & _value );
 
 #	ifdef PYBIND_EXTRACT_SIZE_T
@@ -169,6 +170,7 @@ namespace pybind
 	PYBIND_API PyObject * ptr_throw( float _value );
 	PYBIND_API PyObject * ptr_throw( double _value );
 	PYBIND_API PyObject * ptr_throw( const char * _value );
+	PYBIND_API PyObject * ptr_throw( const wchar_t * _value );
 	PYBIND_API PyObject * ptr_throw( PyObject * _value );
 
 #	ifdef PYBIND_EXTRACT_SIZE_T
