@@ -19,10 +19,6 @@
 #	include <stdexcept>
 #	include <stdio.h>
 
-#	if PYBIND_PYTHON_VERSION < 300
-extern int Py_HashRandomizationFlag;
-#	endif
-
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
@@ -33,43 +29,46 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
 	bool initialize( bool _debug, bool install_sigs )
 	{
-		if( _debug == false )
+		if( Py_IsInitialized() == 0 )
 		{
-			Py_OptimizeFlag = 2;			
-		}
+			if( _debug == false )
+			{
+				Py_OptimizeFlag = 2;			
+			}
 
-		Py_NoSiteFlag = 1;
-        Py_IgnoreEnvironmentFlag = 1;
-		
+			Py_NoSiteFlag = 1;
+			Py_IgnoreEnvironmentFlag = 1;
+
 #   if PYBIND_PYTHON_VERSION < 300
-		Py_HashRandomizationFlag = 0;
+			Py_HashRandomizationFlag = 0;
 #	endif
 
 #   if PYBIND_PYTHON_VERSION >= 330
-		wchar_t pyProgramName[] = L"pybind";
-		Py_SetProgramName( pyProgramName );
+			wchar_t pyProgramName[] = L"pybind";
+			Py_SetProgramName( pyProgramName );
 
-		wchar_t pySearchPath[] = L".";
-		Py_SetPythonHome( pySearchPath );
+			wchar_t pySearchPath[] = L".";
+			Py_SetPythonHome( pySearchPath );
 
-		_Py_InitializeEx_Private( install_sigs?1:0, 0 );
+			_Py_InitializeEx_Private( install_sigs?1:0, 0 );
 #   elif PYBIND_PYTHON_VERSION >= 320
-		wchar_t pyProgramName[] = L"pybind";
-		Py_SetProgramName( pyProgramName );
+			wchar_t pyProgramName[] = L"pybind";
+			Py_SetProgramName( pyProgramName );
 
-		wchar_t pySearchPath[] = L".";
-		Py_SetPythonHome( pySearchPath );
+			wchar_t pySearchPath[] = L".";
+			Py_SetPythonHome( pySearchPath );
 
-		Py_InitializeEx( install_sigs?1:0 );
+			Py_InitializeEx( install_sigs?1:0 );
 #   else
-		char pyProgramName[] = "pybind";
-		Py_SetProgramName( pyProgramName );
+			char pyProgramName[] = "pybind";
+			Py_SetProgramName( pyProgramName );
 
-		char pySearchPath[] = ".";
-		Py_SetPythonHome( pySearchPath );
+			char pySearchPath[] = ".";
+			Py_SetPythonHome( pySearchPath );
 
-        Py_InitializeEx( install_sigs?1:0 );
+			Py_InitializeEx( install_sigs?1:0 );
 #   endif
+		}
 
         if( initialize_class_info() == false )
         {
