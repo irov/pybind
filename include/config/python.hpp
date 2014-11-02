@@ -6,3 +6,4 @@
 #   include "Include/marshal.h"
 #   include "Include/object.h"
 #   include "Include/frameobject.h"
+#   include "Include/pydebug.h"
