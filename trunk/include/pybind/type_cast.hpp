@@ -5,8 +5,7 @@
 
 #   include "pybind/class_info.hpp"
 
-#   include "stdex/intrusive_ptr_base.h"
-#   include "stdex/intrusive_ptr.h"
+#	include "config/stdex.hpp"
 
 namespace pybind
 {

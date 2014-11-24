@@ -6,6 +6,8 @@
 
 #	include "config/python.hpp"
 
+#	include "pybind/debug.hpp"
+
 namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
@@ -53,7 +55,11 @@ namespace pybind
 
 			const class_type_scope_ptr & scope = detail::get_class_scope( mct->self->ob_type );
 
-			PyObject * py_value = mct->iadapter->call( impl, scope, _args, _kwds );
+			method_adapter_interface * adapter = mct->iadapter;
+
+			DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( scope->get_name(), adapter->getName(), _args, _kwds );
+			PyObject * py_value = adapter->call( impl, scope, _args, _kwds );
+			DEBUG_PYBIND_NOTIFY_END_BIND_CALL( scope->get_name(), adapter->getName(), _args, _kwds );
 
 			return py_value;
 		}

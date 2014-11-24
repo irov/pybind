@@ -475,6 +475,13 @@ namespace pybind
 	{
 		return PyCallable_Check( _obj ) == 1;
 	}
+	//////////////////////////////////////////////////////////////////////////
+	bool is_instanceof( PyObject * _obj, PyTypeObject * _type )
+	{
+		int result = PyObject_TypeCheck(_obj, _type);
+
+		return result == 1;
+	}
     //////////////////////////////////////////////////////////////////////////
 	PyObject * ret_none()
 	{
@@ -552,9 +559,27 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
 	bool check_type( PyObject * _obj )
 	{
-        int value = PyType_Check( _obj );
+        int result = PyType_Check( _obj );
 
-		return value == 1;
+		return result == 1;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool int_check( PyObject * _obj )
+	{
+#   if PYBIND_PYTHON_VERSION < 300
+		int result = PyInt_Check( _obj );
+#	else
+		int result = PyLong_Check( _obj );
+#	endif
+		
+		return result == 1;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool float_check( PyObject * _obj )
+	{
+		int result = PyFloat_Check( _obj );
+
+		return result == 1;
 	}
     //////////////////////////////////////////////////////////////////////////
 	PyObject * list_new( size_t _size )
@@ -623,6 +648,13 @@ namespace pybind
 
 		return obj;
 	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * dict_new_presized( size_t _count )
+	{
+		PyObject * obj = _PyDict_NewPresized( _count );
+
+		return obj;
+	}
     //////////////////////////////////////////////////////////////////////////
 	PyObject * dict_from( PyObject * _obj )
 	{
@@ -657,6 +689,13 @@ namespace pybind
         int value = PyDict_Check( _obj );
 
 		return value == 1;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	size_t dict_size( PyObject * _obj )
+	{
+		Py_ssize_t size = PyDict_Size( _obj );
+
+		return (size_t)size;
 	}
     //////////////////////////////////////////////////////////////////////////
 	bool list_appenditem( PyObject * _obj, PyObject * _item )
