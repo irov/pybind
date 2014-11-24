@@ -1,10 +1,9 @@
 #	pragma once
 
 #	include "exports.hpp"
+#	include "types.hpp"
 
 #	include <stdarg.h>
-
-#	include "types.hpp"
 
 namespace pybind
 {
@@ -68,6 +67,7 @@ namespace pybind
 	PYBIND_API size_t refcount( PyObject * _obj );
 
 	PYBIND_API bool is_callable( PyObject * _obj );
+	PYBIND_API bool is_instanceof( PyObject * _obj, PyTypeObject * _type );
 
 	PYBIND_API PyObject * get_none();
 	PYBIND_API bool is_none( PyObject * _none );
@@ -87,7 +87,10 @@ namespace pybind
 	PYBIND_API bool set_attr( PyObject * _obj, const char * _attr , PyObject * _value);
 
 	PYBIND_API bool check_type( PyObject * _obj );
-	
+
+	PYBIND_API bool int_check( PyObject * _obj );
+	PYBIND_API bool float_check( PyObject * _obj );
+		
 	PYBIND_API PyObject * list_new( size_t _size );
 	PYBIND_API bool list_check( PyObject * _obj );
 	PYBIND_API size_t list_size( PyObject * _obj );
@@ -97,9 +100,11 @@ namespace pybind
 	PYBIND_API bool list_appenditem( PyObject * _obj, PyObject * _item );
 
 	PYBIND_API PyObject * dict_new();
+	PYBIND_API PyObject * dict_new_presized( size_t _count );
 	PYBIND_API PyObject * dict_from( PyObject * _obj );
 
 	PYBIND_API bool dict_check( PyObject * _dict );
+	PYBIND_API size_t dict_size( PyObject * _obj );
 	PYBIND_API bool dict_set( PyObject * _dict, PyObject * _name, PyObject * _value );
     PYBIND_API bool dict_setstring( PyObject * _dict, const char * _name, PyObject * _value );
     PYBIND_API bool dict_remove( PyObject * _dict, const char * _name );	

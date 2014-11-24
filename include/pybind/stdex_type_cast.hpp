@@ -3,7 +3,7 @@
 #	include "pybind/type_cast.hpp"
 #	include "pybind/extract.hpp"
 
-#	include <stdex/intrusive_ptr.h>
+#	include "config/stdex.hpp"
 
 namespace pybind
 {

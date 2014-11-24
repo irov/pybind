@@ -6,6 +6,8 @@
 #	include "functor_type.hpp"
 #   include "static_var.hpp"
 
+#	include "pybind/debug.hpp"
+
 namespace pybind
 {
 	namespace detail
@@ -26,7 +28,9 @@ namespace pybind
 
 			try
 			{
+				DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL("", adapter->getName(), _args, _kwds);
 				PyObject * ret = adapter->call( _args, _kwds );
+				DEBUG_PYBIND_NOTIFY_END_BIND_CALL("", adapter->getName(), _args, _kwds);
 
 				return ret;
 			}
@@ -43,12 +47,12 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         static PyObject * functor_args( PyObject * _self, PyObject * _args )
         {
-            return functor_kwds( _self, _args, 0 );
+            return functor_kwds( _self, _args, nullptr );
         }
         //////////////////////////////////////////////////////////////////////////
         static PyObject * functor_noargs( PyObject * _self )
         {
-            return functor_args( _self, 0 );
+            return functor_args( _self, nullptr );
         }
         //////////////////////////////////////////////////////////////////////////
 		class functor_type_scope

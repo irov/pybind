@@ -3,8 +3,7 @@
 #	include "pybind/exports.hpp"
 #	include "pybind/types.hpp"
 
-#   include "stdex/intrusive_ptr_base.h"
-#   include "stdex/intrusive_ptr.h"
+#	include "config/stdex.hpp"
 
 #	include <typeinfo>
 

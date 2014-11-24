@@ -159,6 +159,7 @@
     <ClCompile Include="..\src\class_core.cpp" />
     <ClCompile Include="..\src\class_info.cpp" />
     <ClCompile Include="..\src\class_type_scope.cpp" />
+    <ClCompile Include="..\src\debug.cpp" />
     <ClCompile Include="..\src\exception.cpp" />
     <ClCompile Include="..\src\extract.cpp" />
     <ClCompile Include="..\src\function.cpp" />
@@ -167,6 +168,7 @@
     <ClCompile Include="..\src\functor_type.cpp" />
     <ClCompile Include="..\src\member_type.cpp" />
     <ClCompile Include="..\src\method_type.cpp" />
+    <ClCompile Include="..\src\pickle.cpp" />
     <ClCompile Include="..\src\stl_type_cast.cpp" />
     <ClCompile Include="..\src\system.cpp" />
     <ClCompile Include="..\src\type_cast.cpp" />
@@ -182,6 +184,7 @@
     <ClInclude Include="..\include\pybind\constructor_new.hpp" />
     <ClInclude Include="..\include\pybind\constructor_placement.hpp" />
     <ClInclude Include="..\include\pybind\convert_adapter.hpp" />
+    <ClInclude Include="..\include\pybind\debug.hpp" />
     <ClInclude Include="..\include\pybind\exception.hpp" />
     <ClInclude Include="..\include\pybind\exports.hpp" />
     <ClInclude Include="..\include\pybind\extract.hpp" />
@@ -198,6 +201,7 @@
     <ClInclude Include="..\include\pybind\method_call.hpp" />
     <ClInclude Include="..\include\pybind\method_proxy_call.hpp" />
     <ClInclude Include="..\include\pybind\object.hpp" />
+    <ClInclude Include="..\include\pybind\pickle.hpp" />
     <ClInclude Include="..\include\pybind\pybind.hpp" />
     <ClInclude Include="..\include\pybind\repr_adapter.hpp" />
     <ClInclude Include="..\include\pybind\static_var.hpp" />

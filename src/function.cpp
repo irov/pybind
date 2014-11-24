@@ -5,6 +5,8 @@
 #	include "function_type.hpp"
 #   include "static_var.hpp"
 
+#	include "pybind/debug.hpp"
+
 #	include "config/python.hpp"
 
 namespace pybind
@@ -23,11 +25,13 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         static PyObject * function_kwds( PyObject * _obj, PyObject * _args, PyObject * _kwds )
         {
-            function_adapter_interface * ifunction = detail::extract_adapter_py_function( _obj );
+            function_adapter_interface * adapter = detail::extract_adapter_py_function( _obj );
 
 			try
 			{
-				PyObject * ret = ifunction->call( _args, _kwds );
+				DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL("", adapter->getName(), _args, _kwds);
+				PyObject * ret = adapter->call( _args, _kwds );
+				DEBUG_PYBIND_NOTIFY_END_BIND_CALL("", adapter->getName(), _args, _kwds);
 
 				return ret;
 			}
@@ -35,7 +39,7 @@ namespace pybind
 			{
 				pybind::error_message("obj %s invalid function call '%s' error '%s'\n"
 					, pybind::object_str( _obj )
-					, ifunction->getName()
+					, adapter->getName()
 					, _ex.what()
 					);
 			}
@@ -45,14 +49,14 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         static PyObject * function_args( PyObject * _self, PyObject * _args )
         {
-            PyObject * arg = function_kwds( _self, _args, 0 );
+            PyObject * arg = function_kwds( _self, _args, nullptr );
 
             return arg;
         }
         //////////////////////////////////////////////////////////////////////////
         static PyObject * function_noargs( PyObject * _self )
         {
-            PyObject * arg = function_args( _self, 0 );
+            PyObject * arg = function_args( _self, nullptr );
 
             return arg;
         }

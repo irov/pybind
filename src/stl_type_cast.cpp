@@ -1,11 +1,10 @@
 #	include "pybind/stl_type_cast.hpp"
 #	include "pybind/system.hpp"
 
+#	include "config/stdex.hpp"
+
 #	include <string>
 #	include <vector>
-
-#	include <stdex/stl_string.h>
-#	include <stdex/stl_vector.h>
 
 namespace pybind
 {

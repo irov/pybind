@@ -16,6 +16,8 @@
 
 #   include "static_var.hpp"
 
+#	include "pybind/debug.hpp"
+
 namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
@@ -408,38 +410,6 @@ namespace pybind
 			return true;
 		}
 		//////////////////////////////////////////////////////////////////////////
-		static bool get_wrap_pod64( PyObject * _obj, void ** _impl, size_t & _size )
-		{
-			PyObject * py_impl = PyObject_GetAttr( _obj, STATIC_VAR(s_pybind_object_impl) );
-
-			if( py_impl == nullptr )
-			{
-				pybind::throw_exception("get_wrap_pod64 obj %s not pybind (impl)"
-					, pybind::object_str( _obj )
-					);
-
-				return false;
-			}
-
-			Py_DecRef( py_impl );
-
-			if( py_impl->ob_type != &STATIC_VAR(s_pod64_type) )
-			{
-				pybind::throw_exception("get_wrap_pod64 obj %s not pod64"
-					, pybind::object_str( _obj )
-					);
-
-				return false;
-			}
-
-			py_pod64_object * py_pod64 = (py_pod64_object *)py_impl;
-
-			*_impl = (void *)py_pod64->buff;
-			_size = PYBIND_OBJECT_POD64_SIZE;
-
-			return true;
-		}
-		//////////////////////////////////////////////////////////////////////////
 		static bool is_holder( PyObject * _obj )
 		{
 			PyObject * py_holder = PyObject_GetAttr( _obj, STATIC_VAR(s_pybind_object_holder) );
@@ -538,7 +508,9 @@ namespace pybind
 
 		try
 		{
+			DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( scope->get_name(), adapter->getName(), _args, _kwds );
 			PyObject * ret = adapter->call( impl, scope, _args, _kwds );
+			DEBUG_PYBIND_NOTIFY_END_BIND_CALL( scope->get_name(), adapter->getName(), _args, _kwds );
 			
 			return ret;
 		}
@@ -722,7 +694,9 @@ namespace pybind
 		try
 		{
 			PyObject * attr = PyTuple_Pack( 1, _key );
-			PyObject * res = adapter->call( impl, scope, attr, 0 );
+			DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( scope->get_name(), adapter->getName(), attr, nullptr );
+			PyObject * res = adapter->call( impl, scope, attr, nullptr );
+			DEBUG_PYBIND_NOTIFY_END_BIND_CALL( scope->get_name(), adapter->getName(), attr, nullptr );
 			Py_DecRef( attr );
 
 			return res;
@@ -758,7 +732,9 @@ namespace pybind
 		try
 		{
 			PyObject * attr = PyTuple_Pack( 1, _key );
-			PyObject * res = adapter->call( impl, scope, attr, 0 );
+			DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( scope->get_name(), adapter->getName(), attr, nullptr );
+			PyObject * res = adapter->call( impl, scope, attr, nullptr );
+			DEBUG_PYBIND_NOTIFY_END_BIND_CALL( scope->get_name(), adapter->getName(), attr, nullptr );
 			Py_DecRef( attr );
 
 			return res;
@@ -802,9 +778,9 @@ namespace pybind
 			PyObject * py_index = pybind::ptr( _index );
 			PyObject * attr = PyTuple_Pack( 1, py_index );
 			pybind::decref( py_index );
-
-			PyObject * res = adapter->call( impl, scope, attr, 0 );
-
+			DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( scope->get_name(), adapter->getName(), attr, nullptr );
+			PyObject * res = adapter->call( impl, scope, attr, nullptr );
+			DEBUG_PYBIND_NOTIFY_END_BIND_CALL( scope->get_name(), adapter->getName(), attr, nullptr );
 			Py_DecRef( attr );
 
 			return res;
@@ -840,9 +816,6 @@ namespace pybind
 		
 		try
 		{
-			PyTypeObject * scope_pytype = scope->get_typemodule();
-			bool is_pod = scope->is_pod();
-				
 			PyObject * py_self = detail::alloc_class( _type, _args, _kwds );
 
 			void * impl = (*scope->m_pynew)( scope, py_self, _args, _kwds );
