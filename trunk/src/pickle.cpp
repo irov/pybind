@@ -36,9 +36,9 @@ namespace pybind
 					);
 			}
 
-			void * write_buffer = static_cast<uint8_t *>(_buffer) + _size;
+			uint8_t * write_buffer = static_cast<uint8_t *>(_buffer);
 
-			stdex::memorycopy( write_buffer, &_t, size );
+			stdex::memorycopy( write_buffer, _size, &_t, size );
 		}
 
 		_size += size;
@@ -60,9 +60,9 @@ namespace pybind
 					);
 			}
 
-			void * write_buffer = static_cast<uint8_t *>(_buffer) + _size;
+			uint8_t * write_buffer = static_cast<uint8_t *>(_buffer);
 
-			stdex::memorycopy( write_buffer, _t, size );
+			stdex::memorycopy( write_buffer, _size, _t, size );
 		}
 
 		_size += size;
@@ -277,7 +277,7 @@ namespace pybind
 		}
 
 		const void * src_buffer = (static_cast<const uint8_t *>(_buffer) + _carriage);
-		stdex::memorycopy( &_t, src_buffer, size );
+		stdex::memorycopy( &_t, 0, src_buffer, size );
 
 		_carriage += size;
 	}
@@ -294,7 +294,7 @@ namespace pybind
 		}
 
 		const void * src_buffer = static_cast<uint8_t *>(_buffer) + _carriage;
-		stdex::memorycopy( _t, src_buffer, size );
+		stdex::memorycopy( _t, 0, src_buffer, size );
 
 		_carriage += size;
 	}
