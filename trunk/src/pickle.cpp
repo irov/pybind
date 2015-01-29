@@ -313,7 +313,7 @@ namespace pybind
 			uint32_t size_full;
 			s_read_buffer_t( _buffer, _capacity, _carriage, size_full );
 
-			_t = size_full;
+			_t = (size_t)size_full;
 		}		
 	}	
 	//////////////////////////////////////////////////////////////////////////
@@ -384,7 +384,7 @@ namespace pybind
 			}break;
 		case PICKLE_UNICODE:
 			{
-				uint32_t utf8_size;
+				size_t utf8_size;
 				s_read_size_t( _buffer, _capacity, _carriage, utf8_size );
 
 				const char * utf8_buffer = (const char *)(static_cast<const uint8_t *>(_buffer) + _carriage);
