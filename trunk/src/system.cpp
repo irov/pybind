@@ -44,13 +44,17 @@ namespace pybind
 #	endif
 
 #   if PYBIND_PYTHON_VERSION >= 330
+			Py_DontWriteBytecodeFlag = 1;
+#	endif
+
+#   if PYBIND_PYTHON_VERSION >= 330
 			wchar_t pyProgramName[] = L"pybind";
 			Py_SetProgramName( pyProgramName );
 
 			wchar_t pySearchPath[] = L".";
 			Py_SetPythonHome( pySearchPath );
 
-			_Py_InitializeEx_Private( install_sigs?1:0, 0 );
+			_Py_InitializeEx_Private( install_sigs?1:0, 1 );
 #   elif PYBIND_PYTHON_VERSION >= 320
 			wchar_t pyProgramName[] = L"pybind";
 			Py_SetProgramName( pyProgramName );
