@@ -82,7 +82,8 @@ namespace pybind
         void set_compare( const compare_adapter_interface_ptr &  _iadapter );
 		void set_getattro( const method_adapter_interface_ptr & _igetattro );
 		void set_mapping( const method_adapter_interface_ptr & _imapping );
-		void set_sequence( const method_adapter_interface_ptr & _isequence );
+		void set_sequence_get( const method_adapter_interface_ptr & _isequence );
+		void set_sequence_set( const method_adapter_interface_ptr & _isequence );
         
 
 		PyObject * create_holder( void * _impl );
@@ -133,7 +134,8 @@ namespace pybind
         compare_adapter_interface_ptr m_compare;
 		method_adapter_interface_ptr m_getattro;
 
-		method_adapter_interface_ptr m_sequence;
+		method_adapter_interface_ptr m_sequence_get;
+		method_adapter_interface_ptr m_sequence_set;
 		method_adapter_interface_ptr m_mapping;
 
 		PyTypeObject * m_pytypeobject;

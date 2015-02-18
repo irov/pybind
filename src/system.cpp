@@ -342,7 +342,7 @@ namespace pybind
 		PyObject * value = Py_VaBuildValue( _format, _va );
 		PyObject * result = ask_native( _obj, value );
 
-		Py_DecRef( value );
+		Py_DECREF( value );
 
 		return result;
 	}
@@ -358,7 +358,7 @@ namespace pybind
 
 		PyObject * result = ask_va( method, _format, _va );
 
-		Py_DecRef( method );
+		Py_DECREF( method );
 
 		return result;		
 	}
@@ -372,7 +372,7 @@ namespace pybind
             return;
         }
 
-		Py_DecRef( res );
+		Py_DECREF( res );
 	}
     //////////////////////////////////////////////////////////////////////////
 	void call( PyObject * _obj, const char * _format, ... )
@@ -405,7 +405,7 @@ namespace pybind
             return;
         }
 
-		Py_DecRef( res );
+		Py_DECREF( res );
 	}
     //////////////////////////////////////////////////////////////////////////
 	void call_method_va( PyObject * _obj, const char * _method, const char * _format, va_list _va )
@@ -417,7 +417,7 @@ namespace pybind
             return;
         }
 
-		Py_DecRef( res );
+		Py_DECREF( res );
 	}
     //////////////////////////////////////////////////////////////////////////
 	PyObject * exec( const char * _code, PyObject * _global, PyObject * _local )
@@ -680,10 +680,10 @@ namespace pybind
 				continue;
 			}
 
-			Py_DecRef( py_value );
+			Py_DECREF( py_value );
 		}
 
-		Py_DecRef( py_dir );
+		Py_DECREF( py_dir );
 
 		return py_dict;
 	}
@@ -774,7 +774,7 @@ namespace pybind
 #	endif
 
 		int contains = PyDict_Contains( _dict, kv );
-		Py_DecRef( kv );
+		Py_DECREF( kv );
 
 		return contains == 1;
 	}

@@ -12,7 +12,7 @@ namespace pybind
 	{
 		py_member_type * mt = (py_member_type *)(_obj);
 
-		mt->iadpter = nullptr;
+		stdex::intrusive_ptr_release( mt->iadapter );
 
 #   if PYBIND_PYTHON_VERSION < 300
 		mt->ob_type->tp_free( mt );		
@@ -82,7 +82,7 @@ namespace pybind
 
 		const class_type_scope_ptr & scope = detail::get_class_scope( py_self->ob_type );
 
-		PyObject * py_method = mt->iadpter->get( impl, scope );
+		PyObject * py_method = mt->iadapter->get( impl, scope );
 
 		return py_method;
 	}
@@ -105,7 +105,7 @@ namespace pybind
 
 		const class_type_scope_ptr & scope = detail::get_class_scope( py_self->ob_type );
 
-		mt->iadpter->set( impl, py_value, scope );
+		mt->iadapter->set( impl, py_value, scope );
 
 		Py_RETURN_NONE;
 	}
@@ -128,11 +128,11 @@ namespace pybind
 	}
 	STATIC_DECLARE_VALUE_END();
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * member_type_scope::instance( const member_adapter_interface_ptr & _iadpter )
+	PyObject * member_type_scope::instance( const member_adapter_interface_ptr & _iadapter )
 	{
 		py_member_type * py_member = (py_member_type *)PyType_GenericAlloc( &STATIC_VAR(s_member_type), 0 );
-
-		py_member->iadpter = _iadpter;
+		
+		stdex::intrusive_ptr_setup( py_member->iadapter, _iadapter );
 
 		PyObject * py_get = PyCFunction_New( &STATIC_VAR(s_getmethod), (PyObject*)py_member );
 		PyObject * py_set = PyCFunction_New( &STATIC_VAR(s_setmethod), (PyObject*)py_member );
