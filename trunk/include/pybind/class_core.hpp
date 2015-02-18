@@ -43,7 +43,8 @@ namespace pybind
         static void def_compare( const compare_adapter_interface_ptr & _iadapter, uint32_t _info );
 		static void def_getattro( const method_adapter_interface_ptr & _iadapter, uint32_t _info );
 		static void def_mapping( const method_adapter_interface_ptr & _iadapter, uint32_t _info );
-		static void def_sequence( const method_adapter_interface_ptr & _iadapter, uint32_t _info );
+		static void def_sequence_get( const method_adapter_interface_ptr & _iadapter, uint32_t _info );
+		static void def_sequence_set( const method_adapter_interface_ptr & _iadapter, uint32_t _info );
 
 		static void add_base_to_scope( const class_type_scope_ptr & _scope, uint32_t _name, uint32_t _base, pybind_metacast _cast );
 

@@ -238,27 +238,47 @@ namespace pybind
 			return *this;
 		}
 
-		//template<class F>
-		//base_ & def_sequence( F _fn )
-		//{
-		//	method_adapter_interface * iadapter =
-		//		new method_adapter<C, F>(_fn, "sequence");
-
-		//	class_core::def_sequence( 
-		//		iadapter, 
-		//		class_info<C>() 
-		//		);
-
-		//	return *this;
-		//}
-
 		template<class F>
-		base_ & def_static_sequence( F _fn )
+		base_ & def_sequence_get( F _fn )
 		{
 			method_adapter_interface_ptr iadapter =
-				new method_adapter_proxy_function<C, F>("sequence", _fn);
+				new method_adapter<C, F>("sequence_get", _fn);
 
-			class_core::def_sequence( iadapter, m_info );
+			class_core::def_sequence_get( iadapter, m_info );
+
+			return *this;
+		}
+
+		template<class F>
+		base_ & def_sequence_set( F _fn )
+		{
+			method_adapter_interface_ptr iadapter =
+				new method_adapter<C, F>("sequence_set", _fn);
+
+			class_core::def_sequence_set( iadapter, m_info );
+
+			return *this;
+		}
+
+
+		template<class F>
+		base_ & def_static_sequence_get( F _fn )
+		{
+			method_adapter_interface_ptr iadapter =
+				new method_adapter_proxy_function<C, F>("static_sequence_get", _fn);
+
+			class_core::def_sequence_get( iadapter, m_info );
+
+			return *this;
+		}
+
+		template<class F>
+		base_ & def_static_sequence_set( F _fn )
+		{
+			method_adapter_interface_ptr iadapter =
+				new method_adapter_proxy_function<C, F>("static_sequence_set", _fn);
+
+			class_core::def_sequence_set( iadapter, m_info );
 
 			return *this;
 		}

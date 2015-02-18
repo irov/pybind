@@ -46,9 +46,9 @@
 
 namespace pybind
 {
-#   ifdef PYBIND_MARMALADE
-	typedef wchar_t pybind_unicode_t;
-#   else
-    typedef wchar_t pybind_unicode_t;
-#   endif
+#   ifndef PYBIND_UNICODE_T
+#	define PYBIND_UNICODE_T wchar_t
+#	endif
+
+	typedef PYBIND_UNICODE_T pybind_unicode_t;
 }

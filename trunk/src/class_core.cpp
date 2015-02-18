@@ -148,13 +148,20 @@ namespace pybind
         scope->set_mapping( _iadapter );
     }
     //////////////////////////////////////////////////////////////////////////
-    void class_core::def_sequence( const method_adapter_interface_ptr & _iadapter, uint32_t _info )
+    void class_core::def_sequence_get( const method_adapter_interface_ptr & _iadapter, uint32_t _info )
     {
         const class_type_scope_ptr & scope = detail::get_class_type_scope( _info );
 
-        scope->set_sequence( _iadapter );
+        scope->set_sequence_get( _iadapter );
     }	
-    //////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////
+	void class_core::def_sequence_set( const method_adapter_interface_ptr & _iadapter, uint32_t _info )
+	{
+		const class_type_scope_ptr & scope = detail::get_class_type_scope( _info );
+
+		scope->set_sequence_set( _iadapter );
+	}	
+	//////////////////////////////////////////////////////////////////////////
     void class_core::add_base_to_scope( const class_type_scope_ptr & _scope, uint32_t _name, uint32_t _base, pybind_metacast cast )
     {
         const class_type_scope_ptr & basescope = detail::get_class_type_scope( _base );

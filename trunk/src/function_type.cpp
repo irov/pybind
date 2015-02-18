@@ -85,6 +85,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
 	void finalize_function()
 	{
-		Py_DecRef( (PyObject *)&STATIC_VAR(s_function_type) );
+		Py_DECREF( (PyObject *)&STATIC_VAR(s_function_type) );
 	}
 }

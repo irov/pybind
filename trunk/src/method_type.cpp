@@ -31,7 +31,7 @@ namespace pybind
 
 		stdex::intrusive_ptr_release( mct->iadapter );
 
-		Py_DecRef( mct->self );
+		Py_DECREF( mct->self );
 
 		PyObject_Free( _obj );
 	}
@@ -143,7 +143,7 @@ namespace pybind
 	{
 		if( _obj == nullptr )
 		{
-			Py_IncRef( (PyObject *)_descr );
+			Py_INCREF( (PyObject *)_descr );
 			*_pres = (PyObject *)_descr;
 
 			return 1;
@@ -178,7 +178,7 @@ namespace pybind
 		py_method_caller_type * mct = (py_method_caller_type *)PyType_GenericAlloc( &STATIC_VAR(s_method_caller_type), 0 );
 		stdex::intrusive_ptr_setup( mct->iadapter, _descr->iadapter );
 
-		Py_IncRef( _obj );
+		Py_INCREF( _obj );
 		mct->self = _obj;
 
 		return (PyObject*)mct;
@@ -215,7 +215,7 @@ namespace pybind
 
 		stdex::intrusive_ptr_release( mgt->iadapter );
 
-		Py_DecRef( (PyObject *)mgt->classtype );
+		Py_DECREF( (PyObject *)mgt->classtype );
 
 		PyObject_Free( _obj );
 	}
@@ -268,7 +268,7 @@ namespace pybind
         if( _type != nullptr )
         {		    
 		    self->classtype = _type;
-			Py_IncRef( (PyObject *)self->classtype );
+			Py_INCREF( (PyObject *)self->classtype );
         }
 		
 		return (PyObject*)self;
@@ -300,7 +300,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void finalize_methods()
 	{
-		Py_DecRef( (PyObject *)&STATIC_VAR(s_method_generator_type) );
-		Py_DecRef( (PyObject *)&STATIC_VAR(s_method_caller_type) );
+		Py_DECREF( (PyObject *)&STATIC_VAR(s_method_generator_type) );
+		Py_DECREF( (PyObject *)&STATIC_VAR(s_method_caller_type) );
 	}
 }

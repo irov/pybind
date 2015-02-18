@@ -88,7 +88,7 @@ namespace pybind
 				stdex::intrusive_ptr_setup( self->iadapter, _adapter );
 
 				PyObject *py_func = PyCFunction_New( &m_method, (PyObject*)self );
-				Py_DecRef( (PyObject *)self );
+				Py_DECREF( (PyObject *)self );
 
                 return py_func;
 			}

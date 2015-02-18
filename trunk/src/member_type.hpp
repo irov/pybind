@@ -11,13 +11,13 @@ namespace pybind
 	struct py_member_type{
 		PyObject_HEAD
 
-		member_adapter_interface_ptr iadpter;
+		member_adapter_interface * iadapter;
 	};
 
 	class member_type_scope
 	{
 	public:
-		static PyObject * instance( const member_adapter_interface_ptr & _iadpter  );
+		static PyObject * instance( const member_adapter_interface_ptr & _iadapter  );
 	};
 
 	bool initialize_members();
