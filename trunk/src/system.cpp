@@ -877,11 +877,11 @@ namespace pybind
 		return str;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	uint32_t object_hash( PyObject * _obj )
+	long object_hash( PyObject * _obj )
 	{
 		long py_hash = PyObject_Hash( _obj );
 
-		return (uint32_t)py_hash;
+		return py_hash;
 	}
     //////////////////////////////////////////////////////////////////////////
     void error_traceback( const char * _message, ... )
