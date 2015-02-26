@@ -27,11 +27,11 @@ namespace pybind
 		}
 
 	public:
-		uint32_t hash( PyObject * _obj, void * _self, const class_type_scope_ptr & _scope ) override
+		long hash( PyObject * _obj, void * _self, const class_type_scope_ptr & _scope ) override
 		{
 			C * inst = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_name, m_class_name, _scope ) );
 
-			uint32_t hash = (*m_hash)( _obj, inst );
+			long hash = (*m_hash)( _obj, inst );
 
 			return hash;
 		}

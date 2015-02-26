@@ -577,9 +577,9 @@ namespace pybind
 
 		try
 		{
-			uint32_t hash = adapter->hash( _obj, impl, scope );
+			long hash = adapter->hash( _obj, impl, scope );
 
-			return (long)hash;
+			return hash;
 		}
 		catch( const pybind_exception & _ex )
 		{
