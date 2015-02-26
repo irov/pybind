@@ -21,16 +21,16 @@ namespace pybind
 	static const uint8_t PICKLE_OBJECT = 10;
 	//////////////////////////////////////////////////////////////////////////
 	template<class T>
-	static void s_write_buffer_t( void * _buffer, size_t _capacity, const T & _t, size_t & _size )
+	static void s_write_buffer_t( void * _buffer, size_t _capacity, const T & _t, size_t & _offset )
 	{
 		const size_t size = sizeof(T);
 
 		if( _buffer != nullptr )
 		{
-			if( _size + size > _capacity )
+			if( _offset + size > _capacity )
 			{
 				pybind::throw_exception("pickle buffer out of capacity %d + %d > %d"
-					, _size
+					, _offset
 					, size
 					, _capacity
 					);
@@ -38,23 +38,23 @@ namespace pybind
 
 			uint8_t * write_buffer = static_cast<uint8_t *>(_buffer);
 
-			stdex::memorycopy( write_buffer, _size, &_t, size );
+			stdex::memorycopy( write_buffer, _offset, &_t, size );
 		}
 
-		_size += size;
+		_offset += size;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	template<class T>
-	static void s_write_buffer_tn( void * _buffer, size_t _capacity, const T * _t, size_t _count, size_t & _size )
+	static void s_write_buffer_tn( void * _buffer, size_t _capacity, const T * _t, size_t _count, size_t & _offset )
 	{
 		const size_t size = sizeof(T) * _count;
 
 		if( _buffer != nullptr )
 		{
-			if( _size + size > _capacity )
+			if( _offset + size > _capacity )
 			{
 				pybind::throw_exception("pickle buffer out of capacity %d + %d > %d"
-					, _size
+					, _offset
 					, size
 					, _capacity
 					);
@@ -62,130 +62,130 @@ namespace pybind
 
 			uint8_t * write_buffer = static_cast<uint8_t *>(_buffer);
 
-			stdex::memorycopy( write_buffer, _size, _t, size );
+			stdex::memorycopy( write_buffer, _offset, _t, size );
 		}
 
-		_size += size;
+		_offset += size;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	static void s_write_size_t( void * _buffer, size_t _capacity, const size_t _t, size_t & _size )
+	static void s_write_size_t( void * _buffer, size_t _capacity, const size_t _t, size_t & _offset )
 	{
 		if( _t < 255 )
 		{
 			uint8_t write_t = (uint8_t)_t;
-			s_write_buffer_t( _buffer, _capacity, write_t, _size );
+			s_write_buffer_t( _buffer, _capacity, write_t, _offset );
 		}
 		else
 		{
 			uint8_t write_dummy = 255;
-			s_write_buffer_t( _buffer, _capacity, write_dummy, _size );
+			s_write_buffer_t( _buffer, _capacity, write_dummy, _offset );
 
 			uint32_t write_t = (uint32_t)_t;
-			s_write_buffer_t( _buffer, _capacity, write_t, _size );
+			s_write_buffer_t( _buffer, _capacity, write_t, _offset );
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////
-	static void s_obj_pickle( PyObject * _obj, PyObject * _types, void * _buffer, size_t _capacity, size_t & _size )
+	static void s_obj_pickle( PyObject * _obj, PyObject * _types, void * _buffer, size_t _capacity, size_t & _offset )
 	{
 		if( pybind::is_none( _obj ) == true )
 		{
 			uint8_t type = PICKLE_NONE;
 
-			s_write_buffer_t( _buffer, _capacity, type, _size );
+			s_write_buffer_t( _buffer, _capacity, type, _offset );
 		}
 		else if( pybind::bool_check( _obj ) == true )
 		{
 			uint8_t type = pybind::is_true( _obj ) == true ? PICKLE_TRUE : PICKLE_FALSE;
 			
-			s_write_buffer_t( _buffer, _capacity, type, _size );
+			s_write_buffer_t( _buffer, _capacity, type, _offset );
 		}
 		else if( pybind::int_check( _obj ) == true )
 		{
 			uint8_t type = PICKLE_INT;
 
-			s_write_buffer_t( _buffer, _capacity, type, _size );
+			s_write_buffer_t( _buffer, _capacity, type, _offset );
 
-			int32_t value = (int32_t)pybind::extract<int32_t>( _obj );
+			int32_t value = pybind::extract<int32_t>( _obj );
 
-			s_write_buffer_t( _buffer, _capacity, value, _size );
+			s_write_buffer_t( _buffer, _capacity, value, _offset );
 		}
 		else if( pybind::float_check( _obj ) == true )
 		{
 			uint8_t type = PICKLE_FLOAT;
 
-			s_write_buffer_t( _buffer, _capacity, type, _size );
+			s_write_buffer_t( _buffer, _capacity, type, _offset );
 
 			float value = pybind::extract<float>( _obj );
 
-			s_write_buffer_t( _buffer, _capacity, value, _size );
+			s_write_buffer_t( _buffer, _capacity, value, _offset );
 		}
 		else if( pybind::string_check( _obj ) == true )
 		{
 			uint8_t type = PICKLE_STRING;
 
-			s_write_buffer_t( _buffer, _capacity, type, _size );
+			s_write_buffer_t( _buffer, _capacity, type, _offset );
 
 			size_t str_size;
 			const char * str = pybind::string_to_char_and_size( _obj, str_size );
 
-			s_write_size_t( _buffer, _capacity, str_size, _size );			
-			s_write_buffer_tn( _buffer, _capacity, str, str_size, _size );
+			s_write_size_t( _buffer, _capacity, str_size, _offset );			
+			s_write_buffer_tn( _buffer, _capacity, str, str_size, _offset );
 		}
 		else if( pybind::unicode_check( _obj ) == true )
 		{
 			uint8_t type = PICKLE_UNICODE;
 
-			s_write_buffer_t( _buffer, _capacity, type, _size );
+			s_write_buffer_t( _buffer, _capacity, type, _offset );
 
 			size_t str_size;
 			const char * str = pybind::unicode_to_utf8_and_size( _obj, str_size );
 
-			s_write_size_t( _buffer, _capacity, str_size, _size );
-			s_write_buffer_tn( _buffer, _capacity, str, str_size, _size );
+			s_write_size_t( _buffer, _capacity, str_size, _offset );
+			s_write_buffer_tn( _buffer, _capacity, str, str_size, _offset );
 		}
 		else if( pybind::tuple_check( _obj ) == true )
 		{
 			uint8_t type = PICKLE_TUPLE;
 
-			s_write_buffer_t( _buffer, _capacity, type, _size );
+			s_write_buffer_t( _buffer, _capacity, type, _offset );
 
 			size_t count = pybind::tuple_size( _obj );
 
-			s_write_size_t( _buffer, _capacity, count, _size );
+			s_write_size_t( _buffer, _capacity, count, _offset );
 
 			for( size_t i = 0; i != count; ++i )
 			{
 				PyObject * element = pybind::tuple_getitem( _obj, i );
 
-				s_obj_pickle( element, _types, _buffer, _capacity, _size );
+				s_obj_pickle( element, _types, _buffer, _capacity, _offset );
 			}
 		}
 		else if( pybind::list_check( _obj ) == true )
 		{
 			uint8_t type = PICKLE_LIST;
 
-			s_write_buffer_t( _buffer, _capacity, type, _size );
+			s_write_buffer_t( _buffer, _capacity, type, _offset );
 
 			size_t count = pybind::list_size( _obj );
 
-			s_write_size_t( _buffer, _capacity, count, _size );
+			s_write_size_t( _buffer, _capacity, count, _offset );
 
 			for( size_t i = 0; i != count; ++i )
 			{
 				PyObject * element = pybind::list_getitem( _obj, i );
 
-				s_obj_pickle( element, _types, _buffer, _capacity, _size );
+				s_obj_pickle( element, _types, _buffer, _capacity, _offset );
 			}
 		}
 		else if( pybind::dict_check( _obj ) == true )
 		{
 			uint8_t type = PICKLE_DICT;
 
-			s_write_buffer_t( _buffer, _capacity, type, _size );
+			s_write_buffer_t( _buffer, _capacity, type, _offset );
 
 			size_t count = pybind::dict_size( _obj );
 
-			s_write_size_t( _buffer, _capacity, count, _size );
+			s_write_size_t( _buffer, _capacity, count, _offset );
 
 			size_t pos = 0;
 
@@ -193,15 +193,15 @@ namespace pybind
 			PyObject * value;
 			while( pybind::dict_next( _obj, pos, &key, &value ) == true )
 			{
-				s_obj_pickle( key, _types, _buffer, _capacity, _size );
-				s_obj_pickle( value, _types, _buffer, _capacity, _size );
+				s_obj_pickle( key, _types, _buffer, _capacity, _offset );
+				s_obj_pickle( value, _types, _buffer, _capacity, _offset );
 			}
 		}
 		else if( pybind::has_attr( _obj, "value" ) == true )
 		{
 			uint8_t type = PICKLE_OBJECT;
 
-			s_write_buffer_t( _buffer, _capacity, type, _size );
+			s_write_buffer_t( _buffer, _capacity, type, _offset );
 
 			size_t type_count = pybind::list_size( _types );
 
@@ -216,11 +216,11 @@ namespace pybind
 					continue;
 				}
 
-				s_write_size_t( _buffer, _capacity, index, _size );
+				s_write_size_t( _buffer, _capacity, index, _offset );
 				
 				PyObject * obj_value = pybind::get_attr( _obj, "value" );
 
-				s_obj_pickle( obj_value, _types, _buffer, _capacity, _size );
+				s_obj_pickle( obj_value, _types, _buffer, _capacity, _offset );
 
 				pybind::decref( obj_value );
 
