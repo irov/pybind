@@ -478,7 +478,7 @@ namespace pybind
 
 			if( py_self == nullptr )
 			{
-				if (PyErr_Occurred())
+				if( PyErr_Occurred() )
 				{
 					PyErr_Print();
 				}
@@ -775,7 +775,7 @@ namespace pybind
 
 		try
 		{
-			PyObject * py_index = pybind::ptr( _index );
+			PyObject * py_index = pybind::ptr_throw( _index );
 			PyObject * attr = PyTuple_Pack( 1, py_index );
 			pybind::decref( py_index );
 
@@ -817,7 +817,7 @@ namespace pybind
 
 		try
 		{
-			PyObject * py_index = pybind::ptr( _index );
+			PyObject * py_index = pybind::ptr_throw( _index );
 			PyObject * attr = PyTuple_Pack( 2, py_index, _value );
 			pybind::decref( py_index );			
 
@@ -1046,7 +1046,7 @@ namespace pybind
 
 		PyObject * py_dict = PyDict_New();
 		
-        PyObject * py_pybind_class_type = pybind::ptr( m_typeId );
+        PyObject * py_pybind_class_type = pybind::ptr_throw( m_typeId );
                 
 		PyDict_SetItem( py_dict, STATIC_VAR(s_pybind_class_type_scope), py_pybind_class_type );
 		Py_DECREF( py_pybind_class_type );

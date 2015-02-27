@@ -75,7 +75,7 @@ namespace pybind
 			{
 				const T & value = _vector[it];
 
-				PyObject * py_value = pybind::ptr( value );
+				PyObject * py_value = pybind::ptr_throw( value );
 
 				pybind::list_setitem( py_vector, it, py_value );
 			}
@@ -136,8 +136,8 @@ namespace pybind
 				const K & key = it->first;
 				const V & value = it->second;
 
-				PyObject * py_key = pybind::ptr( key );
-				PyObject * py_value = pybind::ptr( value );
+				PyObject * py_key = pybind::ptr_throw( key );
+				PyObject * py_value = pybind::ptr_throw( value );
 
 				pybind::dict_set( py_dict, py_key, py_value );
 
