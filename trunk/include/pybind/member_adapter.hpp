@@ -56,7 +56,7 @@ namespace pybind
 
 			C * obj = static_cast<C *>(impl);
 
-			PyObject * py_value = pybind::ptr( obj->*m_member );
+			PyObject * py_value = pybind::ptr_throw( obj->*m_member );
 
 			return py_value;
 		}
@@ -100,7 +100,7 @@ namespace pybind
 			
 			C * obj = static_cast<C *>(impl);
 
-			PyObject * py_value = pybind::ptr( (obj->*m_get)() );
+			PyObject * py_value = pybind::ptr_throw( (obj->*m_get)() );
 
 			return py_value;
 		}
@@ -149,7 +149,7 @@ namespace pybind
 
 			C * obj = static_cast<C *>(impl);
 
-			PyObject * py_value = pybind::ptr( (*m_get)( obj ) );
+			PyObject * py_value = pybind::ptr_throw( (*m_get)( obj ) );
 
 			return py_value;
 		}
