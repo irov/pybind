@@ -37,11 +37,7 @@ namespace pybind
 
 					const char * type_name = tinfo.name();
 
-					//pybind::error_message( "extract invalid find cast for %.256s"
-					//	, type_name
-					//	);
-
-					pybind::throw_exception( "extract invalid find cast for %.256s"
+					pybind::throw_exception( "extract invalid find cast for '%.256s'"
 						, type_name
 						);
 
@@ -60,7 +56,7 @@ namespace pybind
 					
 					if( repr_obj != nullptr )
 					{
-						pybind::throw_exception( "extract from %.256s type %.256s to %.256s"
+						pybind::throw_exception( "extract from '%.256s' type '%.256s' to '%.256s'"
 							, repr_obj
 							, repr_obj_type
 							, type_name
@@ -68,7 +64,7 @@ namespace pybind
 					}
                     else
                     {
-                        pybind::throw_exception( "extract from xxxx to %.256s"
+                        pybind::throw_exception( "extract from xxxx to '%.256s'"
                             , type_name
                             );
                     }
@@ -116,7 +112,7 @@ namespace pybind
             
             const char * type_name = tinfo.name();
 
-            pybind::throw_exception( "extract invalid %s:%s not cast to %s"
+            pybind::throw_exception( "extract invalid %s:%s not cast to '%s'"
                 , pybind::object_repr(_obj)
                 , pybind::object_repr_type(_obj)
                 , type_name
@@ -141,7 +137,7 @@ namespace pybind
 		{
 			const char * type_name = tinfo.name();
 
-			pybind::throw_exception( "ptr invalid find cast for %.256s"
+			pybind::throw_exception( "ptr invalid find cast for '%.256s'"
 				, type_name
 				);
 		}
@@ -154,7 +150,7 @@ namespace pybind
 		{
 			const char * type_name = tinfo.name();
 
-			pybind::throw_exception( "ptr invalid wrap %.256s"
+			pybind::throw_exception( "ptr invalid wrap '%.256s'"
 				, type_name
 				);
 		}
@@ -188,7 +184,7 @@ namespace pybind
         }
         catch( const pybind::pybind_exception & _ex )
         {
-			pybind::error_message("ptr value %s"
+			pybind::error_message("ptr value: %s"
 				, _ex.what()
 				);
         }
