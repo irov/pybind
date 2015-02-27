@@ -163,6 +163,7 @@ namespace pybind
 	PYBIND_API PyObject * ptr_throw( uint32_t _value );
 	PYBIND_API PyObject * ptr_throw( int64_t _value );
 	PYBIND_API PyObject * ptr_throw( uint64_t _value );
+	PYBIND_API PyObject * ptr_throw( long _value );
 	PYBIND_API PyObject * ptr_throw( float _value );
 	PYBIND_API PyObject * ptr_throw( double _value );
 	PYBIND_API PyObject * ptr_throw( const char * _value );
