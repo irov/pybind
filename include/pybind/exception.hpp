@@ -7,9 +7,14 @@ namespace pybind
 	class pybind_exception
 	{
 	public:
-		pybind_exception( const char * _message )
-			: m_message(_message)
+		pybind_exception()
 		{
+		}
+
+	public:
+		char * buff()
+		{
+			return m_message;
 		}
 
 	public:
@@ -19,7 +24,7 @@ namespace pybind
 		}
 
 	protected:
-		const char * m_message;
+		char m_message[2048];
 	};
 
 	PYBIND_API void throw_exception( const char * _format, ... );
