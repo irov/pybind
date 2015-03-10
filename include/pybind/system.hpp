@@ -9,7 +9,7 @@ namespace pybind
 {
 	PYBIND_API void visit_class_type_scope( visitor_class_type_scope * _visitor );
 
-	PYBIND_API bool initialize( bool _debug, bool install_sigs );
+	PYBIND_API bool initialize( bool _debug, bool install_sigs, bool _nosite );
 	PYBIND_API void finalize();
 
 	PYBIND_API bool is_initialized();
@@ -35,23 +35,21 @@ namespace pybind
 	PYBIND_API void set_currentmodule( PyObject * _module );
 	PYBIND_API PyObject * get_currentmodule();
 
+	PYBIND_API PyObject * ask( PyObject * _obj, const char * _format, ... );
+	PYBIND_API PyObject * ask_va( PyObject * _obj, const char * _format, va_list );
 	PYBIND_API PyObject * ask_native( PyObject * _obj, PyObject * _args );
 
-	PYBIND_API PyObject * ask( PyObject * _obj, const char * _format, ... );
-
-	PYBIND_API PyObject * ask_method( PyObject * _obj, const char * _method, const char * _format, ... );
-
-	PYBIND_API PyObject * ask_va( PyObject * _obj, const char * _format, va_list );
+	PYBIND_API PyObject * ask_method( PyObject * _obj, const char * _method, const char * _format, ... );	
 	PYBIND_API PyObject * ask_method_va( PyObject * _obj, const char * _method, const char * _format, va_list );
-
-	PYBIND_API void call_native( PyObject * _obj, PyObject * _args );
-	
+	PYBIND_API PyObject * ask_method_native( PyObject * _obj, const char * _method, PyObject * _args );
+		
 	PYBIND_API void call( PyObject * _obj, const char * _format, ... );
+	PYBIND_API void call_va( PyObject * _obj, const char * _format, va_list );
+	PYBIND_API void call_native( PyObject * _obj, PyObject * _args );
 
 	PYBIND_API void call_method( PyObject * _obj, const char * _method, const char * _format, ... );
-	
-	PYBIND_API void call_va( PyObject * _obj, const char * _format, va_list );
 	PYBIND_API void call_method_va( PyObject * _obj, const char * _method, const char * _format, va_list );
+	PYBIND_API void call_method_native( PyObject * _obj, const char * _method, PyObject * _args );
 		
 	PYBIND_API PyObject * compile_string( const char * _string, const char * _file );
 	PYBIND_API PyObject * exec( const char * _code, PyObject * _global = 0, PyObject * _local = 0 );

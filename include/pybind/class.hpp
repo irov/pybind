@@ -44,7 +44,10 @@ namespace pybind
 		template<class BB>
 		static void * meta_cast( void * _ptr )
 		{
-			return static_cast<BB*>(static_cast<C*>(_ptr));
+			C * c = static_cast<C *>(_ptr);
+			BB * bb = static_cast<BB *>(c);
+
+			return bb;
 		}
 
 		void setup_bases( const class_type_scope_ptr & _scope )
