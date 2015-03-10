@@ -27,7 +27,7 @@ namespace pybind
         detail::visit_types_scope( _visitor );
     }
     //////////////////////////////////////////////////////////////////////////
-	bool initialize( bool _debug, bool install_sigs )
+	bool initialize( bool _debug, bool install_sigs, bool _nosite )
 	{
 		if( Py_IsInitialized() == 0 )
 		{
@@ -36,7 +36,11 @@ namespace pybind
 				Py_OptimizeFlag = 2;			
 			}
 
-			Py_NoSiteFlag = 1;
+			if( _nosite == true )
+			{
+				Py_NoSiteFlag = 1;
+			}
+			
 			Py_IgnoreEnvironmentFlag = 1;
 
 #   if PYBIND_PYTHON_VERSION < 300
@@ -351,7 +355,7 @@ namespace pybind
 	{
 		PyObject * method = PyObject_GetAttrString( _obj, _method );
 
-		if( method == 0 )
+		if( method == nullptr )
 		{
 			Py_RETURN_NONE;
 		}
@@ -361,6 +365,22 @@ namespace pybind
 		Py_DECREF( method );
 
 		return result;		
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * ask_method_native( PyObject * _obj, const char * _method, PyObject * _args )
+	{
+		PyObject * method = PyObject_GetAttrString( _obj, _method );
+
+		if( method == nullptr )
+		{
+			Py_RETURN_NONE;
+		}
+
+		PyObject * result = ask_native( method, _args );
+
+		Py_DECREF( method );
+
+		return result;
 	}
     //////////////////////////////////////////////////////////////////////////
 	void call_native( PyObject * _obj, PyObject * _args )
@@ -394,6 +414,18 @@ namespace pybind
 		call_method_va( _obj, _method, _format, valist );
 
 		va_end( valist ); 
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void call_method_native( PyObject * _obj, const char * _method, PyObject * _args )
+	{
+		PyObject * res = ask_method_native( _obj, _method, _args );
+
+		if( res == nullptr )
+		{
+			return;
+		}
+
+		Py_DECREF( res );
 	}
     //////////////////////////////////////////////////////////////////////////
 	void call_va( PyObject * _obj, const char * _format, va_list _va )
