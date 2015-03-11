@@ -25,6 +25,7 @@ namespace pybind
 
         static PyTypeObject * get_typemodule( uint32_t _info );
 
+		static PyObject * create_class( uint32_t _info, void * _impl );
 		static PyObject * create_holder( uint32_t _info, void * _impl );
 		static PyObject * create_pod( uint32_t _info, void ** _impl, size_t & _size );
 

@@ -1337,6 +1337,22 @@ namespace pybind
 		return nullptr;
 	}
 	//////////////////////////////////////////////////////////////////////////
+	PyObject * class_type_scope::create_class( void * _impl )
+	{
+		if( m_pod == true )
+		{
+			return nullptr;	
+		}
+
+		PyObject * py_self = pybind::detail::alloc_class( m_pytypeobject, nullptr, nullptr );
+
+		pybind::detail::wrap( py_self, _impl, false );
+
+		this->addObject( py_self );
+
+		return py_self;
+	}
+	//////////////////////////////////////////////////////////////////////////
 	PyObject * class_type_scope::create_holder( void * _impl )
 	{
 		if( m_pod == true )

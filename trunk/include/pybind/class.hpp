@@ -388,9 +388,55 @@ namespace pybind
 
             uint32_t tinfo = class_info<C>();
     
-            PyObject * py_obj = class_core::create_holder( tinfo, (void *)_value );
+            PyObject * py_obj = class_core::create_class( tinfo, (void *)_value );
     
             return py_obj;
+		}
+	};
+
+	template<class C> 
+	struct extract_holder_type_ptr
+		: public type_cast_result<C *>
+	{
+		bool apply( PyObject * _obj, typename type_cast_result<C *>::TCastValue _value ) override
+		{
+			if( pybind::is_none( _obj ) == true )
+			{
+				_value = nullptr;
+
+				return true;
+			}
+
+			uint32_t tinfo = class_info<C>();
+			uint32_t tptrinfo = class_info<C *>();
+
+			void * impl;
+			if( type_cast::type_info_cast( _obj, tinfo, tptrinfo, &impl ) == false )
+			{
+				detail::error_invalid_extract( _obj, tinfo );
+
+				_value = nullptr;
+
+				return false;
+			}
+
+			_value = static_cast<C*>(impl);
+
+			return true;
+		}
+
+		PyObject * wrap( typename type_cast_result<C *>::TCastRef _value ) override
+		{			
+			if( _value == nullptr )
+			{
+				return pybind::ret_none();
+			}
+
+			uint32_t tinfo = class_info<C>();
+
+			PyObject * py_obj = class_core::create_holder( tinfo, (void *)_value );
+
+			return py_obj;
 		}
 	};
 
@@ -488,7 +534,7 @@ namespace pybind
 		: public base_<C,B>
 	{
 	public:
-		typedef extract_class_type_ptr<C> extract_type_ptr;
+		typedef extract_holder_type_ptr<C> extract_type_ptr;
 
 	public:
 		proxy_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
@@ -525,7 +571,7 @@ namespace pybind
         : public base_<C,B>
     {
     public:
-        typedef extract_class_type_ptr<C> extract_type_ptr;
+        typedef extract_holder_type_ptr<C> extract_type_ptr;
 
     public:
         superclass_( const char * _name, void * _user, pybind_new _pynew, pybind_destructor _pydestructor, bool external_extract = true, PyObject * _module = 0 )
@@ -604,7 +650,7 @@ namespace pybind
 		: public base_<C,B>
 	{
 	public:
-		typedef extract_class_type_ptr<C> extract_type_ptr;
+		typedef extract_holder_type_ptr<C> extract_type_ptr;
 
 	public:
 		interface_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
