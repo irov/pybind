@@ -86,6 +86,7 @@ namespace pybind
 		void set_sequence_set( const method_adapter_interface_ptr & _isequence );
         
 
+		PyObject * create_class( void * _impl );
 		PyObject * create_holder( void * _impl );
 		PyObject * create_pod( void ** _impl, size_t & _size );
 

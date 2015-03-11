@@ -36,6 +36,15 @@ namespace pybind
 
         return typemodule;
     }
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * class_core::create_class( uint32_t _info, void * _impl )
+	{
+		const class_type_scope_ptr & t_scope = detail::get_class_type_scope( _info );
+
+		PyObject * obj = t_scope->create_class( _impl );
+
+		return obj;
+	}
     //////////////////////////////////////////////////////////////////////////
     PyObject * class_core::create_holder( uint32_t _info, void * _impl )
     {
