@@ -30,7 +30,7 @@ namespace pybind
 		typedef B bases_type;
 
 	public:
-		base_( const char * _name, void * _user, pybind_new _pynew, pybind_destructor _pydestructor, bool _pod, PyObject * _module )
+		base_( const char * _name, void * _user, pybind_new _pynew, pybind_destructor _pydestructor, size_t _pod, PyObject * _module )
 		{
 			m_info = class_info<C>();
 
@@ -472,16 +472,12 @@ namespace pybind
 			uint32_t tinfo = class_info<C>();
 
 			void * obj_place = nullptr;
-			size_t obj_place_size = 0;
+			
+			size_t size_C = sizeof(C);
 
-			PyObject * py_obj = class_core::create_pod( tinfo, &obj_place, obj_place_size );
+			PyObject * py_obj = class_core::create_pod( tinfo, &obj_place, size_C );
 
 			if( py_obj == nullptr )
-			{
-				return nullptr;
-			}
-
-			if( obj_place_size < sizeof(C) )
 			{
 				return nullptr;
 			}
@@ -496,6 +492,9 @@ namespace pybind
 	class class_
 		: public base_<C,B>
 	{
+	protected:
+		typedef extract_class_type_ptr<C> extract_type_ptr;
+
 	public:
 		class_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
 			: base_<C,B>( _name, 0, &base_<C,B>::new_, &base_<C,B>::dealloc_, false, _module )
@@ -520,9 +519,6 @@ namespace pybind
         }
 
 	protected:
-		typedef extract_class_type_ptr<C> extract_type_ptr;
-
-	protected:
 		void setup_extract()
 		{
 			pybind::registration_type_cast<C>( new extract_type_ptr );
@@ -534,7 +530,7 @@ namespace pybind
 		: public base_<C,B>
 	{
 	public:
-		typedef extract_holder_type_ptr<C> extract_type_ptr;
+		typedef extract_class_type_ptr<C> extract_type_ptr;
 
 	public:
 		proxy_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
@@ -571,7 +567,7 @@ namespace pybind
         : public base_<C,B>
     {
     public:
-        typedef extract_holder_type_ptr<C> extract_type_ptr;
+        typedef extract_class_type_ptr<C> extract_type_ptr;
 
     public:
         superclass_( const char * _name, void * _user, pybind_new _pynew, pybind_destructor _pydestructor, bool external_extract = true, PyObject * _module = 0 )
@@ -650,7 +646,7 @@ namespace pybind
 		: public base_<C,B>
 	{
 	public:
-		typedef extract_holder_type_ptr<C> extract_type_ptr;
+		typedef extract_class_type_ptr<C> extract_type_ptr;
 
 	public:
 		interface_( const char * _name, bool external_extract = true, PyObject * _module = 0 )

@@ -24,8 +24,8 @@
 #   define PYBIND_STL_SUPPORT
 #	endif
 
-#	ifndef PYBIND_OBJECT_POD64_SIZE
-#	define PYBIND_OBJECT_POD64_SIZE 64
+#	ifndef PYBIND_OBJECT_POD_SIZE
+#	define PYBIND_OBJECT_POD_SIZE 64
 #	endif
 
 
