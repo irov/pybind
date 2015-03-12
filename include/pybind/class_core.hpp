@@ -20,14 +20,14 @@ namespace pybind
 	class PYBIND_API class_core
 	{
 	public:
-		static class_type_scope_ptr create_new_type_scope( uint32_t _info, const char * _name, PyObject * _module, void * _user, pybind::pybind_new _pynew, pybind::pybind_destructor _pydestructor, bool _pod );
+		static class_type_scope_ptr create_new_type_scope( uint32_t _info, const char * _name, PyObject * _module, void * _user, pybind::pybind_new _pynew, pybind::pybind_destructor _pydestructor, size_t _pod );
 		static void initialize_new_type_scope( const class_type_scope_ptr & _scope );
 
         static PyTypeObject * get_typemodule( uint32_t _info );
 
 		static PyObject * create_class( uint32_t _info, void * _impl );
 		static PyObject * create_holder( uint32_t _info, void * _impl );
-		static PyObject * create_pod( uint32_t _info, void ** _impl, size_t & _size );
+		static PyObject * create_pod( uint32_t _info, void ** _impl, size_t _size );
 
 		static void def_init( const class_type_scope_ptr & _scope, const constructor_adapter_interface_ptr & _ctr );
 		static void * construct( const class_type_scope_ptr & _scope, PyObject * _obj, PyObject * _args );
