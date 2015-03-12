@@ -530,7 +530,7 @@ namespace pybind
 		: public base_<C,B>
 	{
 	public:
-		typedef extract_class_type_ptr<C> extract_type_ptr;
+		typedef extract_holder_type_ptr<C> extract_type_ptr;
 
 	public:
 		proxy_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
@@ -567,7 +567,7 @@ namespace pybind
         : public base_<C,B>
     {
     public:
-        typedef extract_class_type_ptr<C> extract_type_ptr;
+        typedef extract_holder_type_ptr<C> extract_type_ptr;
 
     public:
         superclass_( const char * _name, void * _user, pybind_new _pynew, pybind_destructor _pydestructor, bool external_extract = true, PyObject * _module = 0 )
@@ -646,7 +646,7 @@ namespace pybind
 		: public base_<C,B>
 	{
 	public:
-		typedef extract_class_type_ptr<C> extract_type_ptr;
+		typedef extract_holder_type_ptr<C> extract_type_ptr;
 
 	public:
 		interface_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
