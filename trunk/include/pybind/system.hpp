@@ -87,6 +87,7 @@ namespace pybind
 	PYBIND_API bool check_type( PyObject * _obj );
 
 	PYBIND_API bool int_check( PyObject * _obj );
+	PYBIND_API bool long_check( PyObject * _obj );
 	PYBIND_API bool float_check( PyObject * _obj );
 		
 	PYBIND_API PyObject * list_new( size_t _size );
