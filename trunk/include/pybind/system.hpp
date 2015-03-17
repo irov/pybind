@@ -95,6 +95,7 @@ namespace pybind
 	PYBIND_API size_t list_size( PyObject * _obj );
 	PYBIND_API PyObject * list_getitem( PyObject * _obj, size_t _it );
     PYBIND_API bool list_insert( PyObject * _obj, size_t _it, PyObject * _item );
+	PYBIND_API bool list_remove( PyObject * _obj, size_t _it );
 	PYBIND_API bool list_setitem( PyObject * _obj, size_t _it, PyObject * _item );
 	PYBIND_API bool list_appenditem( PyObject * _obj, PyObject * _item );
 
@@ -171,5 +172,6 @@ namespace pybind
     PYBIND_API PyObject * marshal_get_object( const char * _buf, size_t _len );
 
     PYBIND_API void _set_module_finder( PyObject * _finder );
+	PYBIND_API void _remove_module_finder();
 }
 

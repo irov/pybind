@@ -669,6 +669,20 @@ namespace pybind
 
         return true;
     }
+	//////////////////////////////////////////////////////////////////////////
+	bool list_remove( PyObject * _obj, size_t _it )
+	{
+		int res = PyList_SetSlice( _obj, _it, _it + 1, nullptr );
+
+		if( res != 0 )
+		{
+			check_error();
+
+			return false;
+		}
+
+		return true;
+	}
     //////////////////////////////////////////////////////////////////////////
 	bool list_setitem( PyObject * _obj, size_t _index, PyObject * _item )
 	{
@@ -1281,5 +1295,20 @@ namespace pybind
         interp->importlib = _finder;
 #   endif
     }
+	//////////////////////////////////////////////////////////////////////////
+	void _remove_module_finder()
+	{
+#   if PYBIND_PYTHON_VERSION < 300
+		PyObject * py_meta_path = PySys_GetObject( const_cast<char *>("meta_path") );
+
+		pybind::list_remove( py_meta_path, 0 );
+#   endif
+
+#   if PYBIND_PYTHON_VERSION >= 330
+		PyThreadState * thread_state = PyThreadState_Get();
+		PyInterpreterState * interp = thread_state->interp;
+		interp->importlib = nullptr;
+#   endif
+	}
 }
 
