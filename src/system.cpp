@@ -611,6 +611,13 @@ namespace pybind
 		return result == 1;
 	}
 	//////////////////////////////////////////////////////////////////////////
+	bool long_check( PyObject * _obj )
+	{
+		int result = PyLong_Check( _obj );
+
+		return result == 1;
+	}
+	//////////////////////////////////////////////////////////////////////////
 	bool float_check( PyObject * _obj )
 	{
 		int result = PyFloat_Check( _obj );

@@ -11,7 +11,7 @@ namespace pybind
 	static const uint8_t PICKLE_NONE = 0;
 	static const uint8_t PICKLE_FALSE = 1;
 	static const uint8_t PICKLE_TRUE = 2;
-	static const uint8_t PICKLE_INT = 3;
+	static const uint8_t PICKLE_INT = 3;	
 	static const uint8_t PICKLE_FLOAT = 4;
 	static const uint8_t PICKLE_STRING = 5;
 	static const uint8_t PICKLE_UNICODE = 6;
@@ -19,6 +19,7 @@ namespace pybind
 	static const uint8_t PICKLE_LIST = 8;
 	static const uint8_t PICKLE_DICT = 9;
 	static const uint8_t PICKLE_OBJECT = 10;
+	static const uint8_t PICKLE_LONG = 11;
 	//////////////////////////////////////////////////////////////////////////
 	template<class T>
 	static void s_write_buffer_t( void * _buffer, size_t _capacity, const T & _t, size_t & _offset )
@@ -106,6 +107,16 @@ namespace pybind
 			s_write_buffer_t( _buffer, _capacity, type, _offset );
 
 			int32_t value = pybind::extract<int32_t>( _obj );
+
+			s_write_buffer_t( _buffer, _capacity, value, _offset );
+		}
+		else if( pybind::long_check( _obj ) == true )
+		{
+			uint8_t type = PICKLE_LONG;
+
+			s_write_buffer_t( _buffer, _capacity, type, _offset );
+
+			int64_t value = pybind::extract<int64_t>( _obj );
 
 			s_write_buffer_t( _buffer, _capacity, value, _offset );
 		}
@@ -259,6 +270,8 @@ namespace pybind
 				, _ex.what()
 				);
 
+			pybind::check_error();
+
 			return false;
 		}
 		
@@ -345,6 +358,15 @@ namespace pybind
 		case PICKLE_INT:
 			{
 				int32_t value;
+				s_read_buffer_t( _buffer, _capacity, _carriage, value );
+
+				PyObject * obj = pybind::ptr_throw( value );
+
+				return obj;
+			}break;
+		case PICKLE_LONG:
+			{
+				int64_t value;
 				s_read_buffer_t( _buffer, _capacity, _carriage, value );
 
 				PyObject * obj = pybind::ptr_throw( value );
