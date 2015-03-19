@@ -102,10 +102,6 @@ namespace pybind
 	PYBIND_API bool extract_value( PyObject * _obj, const wchar_t * & _value );
 	PYBIND_API bool extract_value( PyObject * _obj, PyObject * & _value );
 
-#	ifdef PYBIND_EXTRACT_SIZE_T
-	PYBIND_API bool extract_value( PyObject * _obj, size_t & _value );
-#	endif
-
     template<class T>
 	typename detail::extract_return<T>::type extract( PyObject * _obj )
 	{
@@ -182,10 +178,6 @@ namespace pybind
 	PYBIND_API PyObject * ptr_throw( const char * _value );
 	PYBIND_API PyObject * ptr_throw( const wchar_t * _value );
 	PYBIND_API PyObject * ptr_throw( PyObject * _value );
-
-#	ifdef PYBIND_EXTRACT_SIZE_T
-	PYBIND_API PyObject * ptr_throw( size_t _value );
-#	endif
 
     template<class T>
     PyObject * ptr( const T & _value )
