@@ -246,11 +246,11 @@ namespace pybind
 
 			if( PyLong_Check( _obj ) )
 			{				
-				_value = (uint64_t)PyLong_AsLong( _obj );
+				_value = (long)PyLong_AsLong( _obj );
 			}
 			else if( PyFloat_Check( _obj ) )
 			{				
-				_value = (uint64_t)PyFloat_AsDouble( _obj );
+				_value = (long)PyFloat_AsDouble( _obj );
 			}
 			else
 			{

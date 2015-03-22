@@ -14,7 +14,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<convert_adapter_interface> convert_adapter_interface_ptr;
 	//////////////////////////////////////////////////////////////////////////
-	template<class F>
+	template<class C, class F>
 	class convert_adapter
 		: public convert_adapter_interface
 	{
@@ -28,7 +28,9 @@ namespace pybind
 	public:
 		bool convert( PyObject * _obj, void * _place ) override
 		{
-			bool result = (*m_convert)( _obj, _place, m_user );
+			C * c = static_cast<C *>(_place);
+
+			bool result = (*m_convert)( _obj, c, m_user );
 
 			return result;
 		}
