@@ -102,7 +102,7 @@ namespace pybind
 		base_ & def_convert( F f, void * _user )
 		{
 			convert_adapter_interface_ptr iadapter =
-				new convert_adapter<F>(f, _user);
+				new convert_adapter<C, F>(f, _user);
 
 			class_core::def_convert( iadapter, m_info );
 

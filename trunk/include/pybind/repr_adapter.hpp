@@ -31,9 +31,11 @@ namespace pybind
 	public:
 		PyObject * repr( PyObject * _obj, void * _self, const class_type_scope_ptr & _scope ) override
 		{
-			C * inst = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_name, m_class_name, _scope ) );
+			void * impl = detail::meta_cast_scope( _self, m_scope_name, m_class_name, _scope );
 
-			PyObject * py_repr = (*m_repr)( _obj, inst );
+			C * c = static_cast<C *>(impl);
+
+			PyObject * py_repr = (*m_repr)( _obj, c );
 
 			return py_repr;
 		}
