@@ -152,6 +152,51 @@ namespace pybind
 		pybind::tuple_setitem( _obj, _it, py_item );
 	}
 
+	template<class T0>
+	PyObject * make_tuple_t( const T0 & _t0 )
+	{
+		PyObject * py_tuple = pybind::tuple_new( 1 );
+
+		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
+
+		return py_tuple;
+	}
+
+	template<class T0, class T1>
+	PyObject * make_tuple_t( const T0 & _t0, const T1 & _t1 )
+	{
+		PyObject * py_tuple = pybind::tuple_new( 2 );
+
+		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
+		pybind::tuple_setitem_t( py_tuple, 1, _t1 );
+
+		return py_tuple;
+	}
+
+	template<class T0, class T1, class T2>
+	PyObject * make_tuple_t( const T0 & _t0, const T1 & _t1, const T2 & _t2 )
+	{
+		PyObject * py_tuple = pybind::tuple_new( 3 );
+
+		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
+		pybind::tuple_setitem_t( py_tuple, 1, _t1 );
+		pybind::tuple_setitem_t( py_tuple, 2, _t2 );
+
+		return py_tuple;
+	}
+
+	template<class T0, class T1, class T2, class T3>
+	PyObject * make_tuple_t( const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3 )
+	{
+		PyObject * py_tuple = pybind::tuple_new( 4 );
+
+		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
+		pybind::tuple_setitem_t( py_tuple, 1, _t1 );
+		pybind::tuple_setitem_t( py_tuple, 2, _t2 );
+		pybind::tuple_setitem_t( py_tuple, 3, _t3 );
+
+		return py_tuple;
+	}
 
 	PYBIND_API PyObject * object_dir( PyObject * _obj );
     PYBIND_API PyTypeObject * object_type( PyObject * _obj );
