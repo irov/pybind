@@ -99,34 +99,6 @@ namespace pybind
 	PYBIND_API bool list_setitem( PyObject * _list, size_t _it, PyObject * _item );
 	PYBIND_API bool list_appenditem( PyObject * _list, PyObject * _item );
 
-	template<class T>
-	inline T list_getitem_t( PyObject * _list, size_t _it )
-	{
-		PyObject * py_item = pybind::list_getitem( _list, _it );
-
-		return pybind::extract<T>( py_item );
-	}
-
-	template<class T>
-	inline bool list_setitem_t( PyObject * _list, size_t _it, const T & _item )
-	{
-		PyObject * py_item = pybind::ptr( _item );
-
-		return pybind::list_setitem( _list, _it, py_item );
-	}
-
-	template<class T>
-	inline bool list_appenditem_t( PyObject * _obj, const T & _item )
-	{
-		PyObject * py_item = pybind::ptr( _item );
-
-		bool result = pybind::list_appenditem( _obj, py_item );
-
-		pybind::decref( py_item );
-
-		return result;
-	}
-
 	PYBIND_API PyObject * dict_new();
 	PYBIND_API PyObject * dict_new_presized( size_t _count );
 	PYBIND_API PyObject * dict_from( PyObject * _obj );
@@ -142,129 +114,11 @@ namespace pybind
 
 	PYBIND_API PyObject * dict_items( PyObject * _dict );
 
-	template<class T>
-	PYBIND_API bool dict_setstring_t( PyObject * _dict, const char * _name, const T & _value )
-	{
-		PyObject * py_value = pybind::ptr( _value );
-
-		return pybind::dict_setstring( _dict, _name, py_value );
-	}
-	
 	PYBIND_API PyObject * tuple_new( size_t _it );
 	PYBIND_API bool tuple_check( PyObject * _tuple );
 	PYBIND_API size_t tuple_size( PyObject * _tuple );
 	PYBIND_API PyObject * tuple_getitem( PyObject * _tuple, size_t _it );
 	PYBIND_API bool tuple_setitem( PyObject * _tuple, size_t _it, PyObject * _value );
-
-	template<class T>
-	inline T tuple_getitem_t( PyObject * _tuple, size_t _it )
-	{
-		PyObject * py_item = pybind::tuple_getitem( _tuple, _it );
-
-		return pybind::extract<T>( py_item );
-	}
-
-	template<class T>
-	inline bool tuple_setitem_t( PyObject * _tuple, size_t _it, const T & _item )
-	{
-		PyObject * py_item = pybind::ptr( _item );
-
-		return pybind::tuple_setitem( _tuple, _it, py_item );
-	}
-
-	template<class T0>
-	inline PyObject * make_tuple_t( const T0 & _t0 )
-	{
-		PyObject * py_tuple = pybind::tuple_new( 1 );
-
-		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
-
-		return py_tuple;
-	}
-
-	template<class T0, class T1>
-	inline PyObject * make_tuple_t( const T0 & _t0, const T1 & _t1 )
-	{
-		PyObject * py_tuple = pybind::tuple_new( 2 );
-
-		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
-		pybind::tuple_setitem_t( py_tuple, 1, _t1 );
-
-		return py_tuple;
-	}
-
-	template<class T0, class T1, class T2>
-	inline PyObject * make_tuple_t( const T0 & _t0, const T1 & _t1, const T2 & _t2 )
-	{
-		PyObject * py_tuple = pybind::tuple_new( 3 );
-
-		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
-		pybind::tuple_setitem_t( py_tuple, 1, _t1 );
-		pybind::tuple_setitem_t( py_tuple, 2, _t2 );
-
-		return py_tuple;
-	}
-
-	template<class T0, class T1, class T2, class T3>
-	inline PyObject * make_tuple_t( const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3 )
-	{
-		PyObject * py_tuple = pybind::tuple_new( 4 );
-
-		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
-		pybind::tuple_setitem_t( py_tuple, 1, _t1 );
-		pybind::tuple_setitem_t( py_tuple, 2, _t2 );
-		pybind::tuple_setitem_t( py_tuple, 3, _t3 );
-
-		return py_tuple;
-	}
-
-	template<class T0>
-	inline bool list_appendtuple_t( PyObject * _obj, const T0 & _t0 )
-	{
-		PyObject * py_tuple = pybind::make_tuple_t( _t0 );
-
-		bool result = pybind::list_appenditem( _obj, py_tuple );
-
-		pybind::decref( py_tuple );
-
-		return result;
-	}
-
-	template<class T0, class T1>
-	inline bool list_appendtuple_t( PyObject * _obj, const T0 & _t0, const T1 & _t1 )
-	{
-		PyObject * py_tuple = pybind::make_tuple_t( _t0, _t1 );
-
-		bool result = pybind::list_appenditem( _obj, py_tuple );
-
-		pybind::decref( py_tuple );
-
-		return result;
-	}
-
-	template<class T0, class T1, class T2>
-	inline bool list_appendtuple_t( PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2 )
-	{
-		PyObject * py_tuple = pybind::make_tuple_t( _t0, _t1, _t2 );
-
-		bool result = pybind::list_appenditem( _obj, py_tuple );
-
-		pybind::decref( py_tuple );
-
-		return result;
-	}
-
-	template<class T0, class T1, class T2, class T3>
-	inline bool list_appendtuple_t( PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3 )
-	{
-		PyObject * py_tuple = pybind::make_tuple_t( _t0, _t1, _t2, _t3 );
-
-		bool result = pybind::list_appenditem( _obj, py_tuple );
-
-		pybind::decref( py_tuple );
-
-		return result;
-	}
 
 	PYBIND_API PyObject * object_dir( PyObject * _obj );
     PYBIND_API PyTypeObject * object_type( PyObject * _obj );
