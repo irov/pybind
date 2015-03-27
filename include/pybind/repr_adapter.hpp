@@ -7,6 +7,8 @@
 #   include "pybind/class_info.hpp"
 #   include "pybind/class_type_scope.hpp"
 
+#   include "pybind/extract.hpp"
+
 namespace pybind
 {
 	class repr_adapter_interface
@@ -37,7 +39,7 @@ namespace pybind
 		{
 			C * c = detail::meta_cast_scope_t<C>( _self, m_scope_name, m_class_name, _scope );
 
-			f_info::ret_type result = (*m_repr)( c );
+			typename f_info::ret_type result = (*m_repr)( c );
 
 			PyObject * py_result = pybind::ptr( result );
 

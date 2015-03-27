@@ -7,4 +7,5 @@
 #	include "pybind/functor.hpp"
 #	include "pybind/class.hpp"
 #	include "pybind/system.hpp"
+#	include "pybind/helper.hpp"
 
