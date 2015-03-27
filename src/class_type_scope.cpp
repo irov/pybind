@@ -793,7 +793,7 @@ namespace pybind
 
 		try
 		{
-			PyObject * ret = adapter->repr( _obj, impl, scope );
+			PyObject * ret = adapter->repr( impl, scope );
 
 			return ret;
 		}

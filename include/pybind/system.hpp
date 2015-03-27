@@ -91,28 +91,28 @@ namespace pybind
 	PYBIND_API bool float_check( PyObject * _obj );
 		
 	PYBIND_API PyObject * list_new( size_t _size );
-	PYBIND_API bool list_check( PyObject * _obj );
-	PYBIND_API size_t list_size( PyObject * _obj );
-	PYBIND_API PyObject * list_getitem( PyObject * _obj, size_t _it );
-    PYBIND_API bool list_insert( PyObject * _obj, size_t _it, PyObject * _item );
-	PYBIND_API bool list_remove( PyObject * _obj, size_t _it );
-	PYBIND_API bool list_setitem( PyObject * _obj, size_t _it, PyObject * _item );
-	PYBIND_API bool list_appenditem( PyObject * _obj, PyObject * _item );
+	PYBIND_API bool list_check( PyObject * _list );
+	PYBIND_API size_t list_size( PyObject * _list );
+	PYBIND_API PyObject * list_getitem( PyObject * _list, size_t _it );
+    PYBIND_API bool list_insert( PyObject * _list, size_t _it, PyObject * _item );
+	PYBIND_API bool list_remove( PyObject * _list, size_t _it );
+	PYBIND_API bool list_setitem( PyObject * _list, size_t _it, PyObject * _item );
+	PYBIND_API bool list_appenditem( PyObject * _list, PyObject * _item );
 
 	template<class T>
-	inline T list_getitem_t( PyObject * _obj, size_t _it )
+	inline T list_getitem_t( PyObject * _list, size_t _it )
 	{
-		PyObject * py_item = pybind::list_getitem( _obj, _it );
+		PyObject * py_item = pybind::list_getitem( _list, _it );
 
 		return pybind::extract<T>( py_item );
 	}
 
 	template<class T>
-	inline bool list_setitem_t( PyObject * _obj, size_t _it, const T & _item )
+	inline bool list_setitem_t( PyObject * _list, size_t _it, const T & _item )
 	{
 		PyObject * py_item = pybind::ptr( _item );
 
-		return pybind::list_setitem( _obj, _it, py_item );
+		return pybind::list_setitem( _list, _it, py_item );
 	}
 
 	template<class T>
@@ -141,6 +141,14 @@ namespace pybind
 	PYBIND_API bool dict_next( PyObject * _dict, size_t & _pos, PyObject ** _key, PyObject ** _value );
 
 	PYBIND_API PyObject * dict_items( PyObject * _dict );
+
+	template<class T>
+	PYBIND_API bool dict_setstring_t( PyObject * _dict, const char * _name, const T & _value )
+	{
+		PyObject * py_value = pybind::ptr( _value );
+
+		return pybind::dict_setstring( _dict, _name, py_value );
+	}
 	
 	PYBIND_API PyObject * tuple_new( size_t _it );
 	PYBIND_API bool tuple_check( PyObject * _tuple );
@@ -149,19 +157,19 @@ namespace pybind
 	PYBIND_API bool tuple_setitem( PyObject * _tuple, size_t _it, PyObject * _value );
 
 	template<class T>
-	inline T tuple_getitem_t( PyObject * _obj, size_t _it )
+	inline T tuple_getitem_t( PyObject * _tuple, size_t _it )
 	{
-		PyObject * py_item = pybind::tuple_getitem( _obj, _it );
+		PyObject * py_item = pybind::tuple_getitem( _tuple, _it );
 
 		return pybind::extract<T>( py_item );
 	}
 
 	template<class T>
-	inline bool tuple_setitem_t( PyObject * _obj, size_t _it, const T & _item )
+	inline bool tuple_setitem_t( PyObject * _tuple, size_t _it, const T & _item )
 	{
 		PyObject * py_item = pybind::ptr( _item );
 
-		return pybind::tuple_setitem( _obj, _it, py_item );
+		return pybind::tuple_setitem( _tuple, _it, py_item );
 	}
 
 	template<class T0>

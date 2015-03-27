@@ -41,7 +41,17 @@ namespace pybind
 
 		//PYBIND_API PyObject * alloc_class( PyTypeObject * _type, PyObject * _args, PyObject * _kwds, void * _impl, bool _holder );
 
-        PYBIND_API void * meta_cast_scope( void * _self, uint32_t _scope_name, uint32_t _class_name, const class_type_scope_ptr & scope );
+        PYBIND_API void * meta_cast_scope( void * _self, uint32_t _scope_name, uint32_t _class_name, const class_type_scope_ptr & _scope );
+
+		template<class T>
+		inline T * meta_cast_scope_t( void * _self, uint32_t _scope_name, uint32_t _class_name, const class_type_scope_ptr & _scope )
+		{
+			void * impl = meta_cast_scope( _self, _scope_name, _class_name, _scope );
+
+			T * obj = static_cast<T *>(impl);
+
+			return obj;
+		}
 	}
 
 	class class_type_scope
