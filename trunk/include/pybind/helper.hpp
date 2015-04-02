@@ -11,6 +11,13 @@ namespace pybind
 	{
 		PyObject * py_item = pybind::list_getitem( _list, _it );
 
+		if( py_item == nullptr )
+		{
+			pybind::check_error();
+
+			return T();
+		}
+
 		return pybind::extract<T>( py_item );
 	}
 
@@ -19,6 +26,13 @@ namespace pybind
 	{
 		PyObject * py_item = pybind::ptr( _item );
 
+		if( py_item == nullptr )
+		{
+			pybind::check_error();
+
+			return false;
+		}
+
 		return pybind::list_setitem( _list, _it, py_item );
 	}
 
@@ -26,6 +40,13 @@ namespace pybind
 	inline bool list_appenditem_t( PyObject * _obj, const T & _item )
 	{
 		PyObject * py_item = pybind::ptr( _item );
+
+		if( py_item == nullptr )
+		{
+			pybind::check_error();
+
+			return false;
+		}
 
 		bool result = pybind::list_appenditem( _obj, py_item );
 
@@ -39,13 +60,31 @@ namespace pybind
 	{
 		PyObject * py_value = pybind::ptr( _value );
 
-		return pybind::dict_setstring( _dict, _name, py_value );
+		if( py_value == nullptr )
+		{
+			pybind::check_error();
+
+			return false;
+		}
+
+		bool result = pybind::dict_setstring( _dict, _name, py_value );
+
+		pybind::decref( py_value );
+
+		return result;
 	}
 
 	template<class T>
 	inline T tuple_getitem_t( PyObject * _tuple, size_t _it )
 	{
 		PyObject * py_item = pybind::tuple_getitem( _tuple, _it );
+
+		if( py_item == nullptr )
+		{
+			pybind::check_error();
+
+			return T();
+		}
 
 		return pybind::extract<T>( py_item );
 	}
@@ -55,6 +94,13 @@ namespace pybind
 	{
 		PyObject * py_item = pybind::ptr( _item );
 
+		if( py_item == nullptr )
+		{
+			pybind::check_error();
+
+			return false;
+		}
+
 		return pybind::tuple_setitem( _tuple, _it, py_item );
 	}
 
@@ -62,6 +108,13 @@ namespace pybind
 	inline PyObject * make_tuple_t( const T0 & _t0 )
 	{
 		PyObject * py_tuple = pybind::tuple_new( 1 );
+
+		if( py_tuple == nullptr )
+		{
+			pybind::check_error();
+
+			return nullptr;
+		}
 
 		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
 
@@ -72,6 +125,13 @@ namespace pybind
 	inline PyObject * make_tuple_t( const T0 & _t0, const T1 & _t1 )
 	{
 		PyObject * py_tuple = pybind::tuple_new( 2 );
+
+		if( py_tuple == nullptr )
+		{
+			pybind::check_error();
+
+			return false;
+		}
 
 		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
 		pybind::tuple_setitem_t( py_tuple, 1, _t1 );
@@ -84,6 +144,13 @@ namespace pybind
 	{
 		PyObject * py_tuple = pybind::tuple_new( 3 );
 
+		if( py_tuple == nullptr )
+		{
+			pybind::check_error();
+
+			return nullptr;
+		}
+
 		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
 		pybind::tuple_setitem_t( py_tuple, 1, _t1 );
 		pybind::tuple_setitem_t( py_tuple, 2, _t2 );
@@ -95,6 +162,13 @@ namespace pybind
 	inline PyObject * make_tuple_t( const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3 )
 	{
 		PyObject * py_tuple = pybind::tuple_new( 4 );
+
+		if( py_tuple == nullptr )
+		{
+			pybind::check_error();
+
+			return nullptr;
+		}
 
 		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
 		pybind::tuple_setitem_t( py_tuple, 1, _t1 );
@@ -109,6 +183,13 @@ namespace pybind
 	{
 		PyObject * py_tuple = pybind::make_tuple_t( _t0 );
 
+		if( py_tuple == nullptr )
+		{
+			pybind::check_error();
+
+			return false;
+		}
+
 		bool result = pybind::list_appenditem( _obj, py_tuple );
 
 		pybind::decref( py_tuple );
@@ -120,6 +201,13 @@ namespace pybind
 	inline bool list_appendtuple_t( PyObject * _obj, const T0 & _t0, const T1 & _t1 )
 	{
 		PyObject * py_tuple = pybind::make_tuple_t( _t0, _t1 );
+
+		if( py_tuple == nullptr )
+		{
+			pybind::check_error();
+
+			return false;
+		}
 
 		bool result = pybind::list_appenditem( _obj, py_tuple );
 
@@ -133,6 +221,13 @@ namespace pybind
 	{
 		PyObject * py_tuple = pybind::make_tuple_t( _t0, _t1, _t2 );
 
+		if( py_tuple == nullptr )
+		{
+			pybind::check_error();
+
+			return false;
+		}
+
 		bool result = pybind::list_appenditem( _obj, py_tuple );
 
 		pybind::decref( py_tuple );
@@ -144,6 +239,13 @@ namespace pybind
 	inline bool list_appendtuple_t( PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3 )
 	{
 		PyObject * py_tuple = pybind::make_tuple_t( _t0, _t1, _t2, _t3 );
+
+		if( py_tuple == nullptr )
+		{
+			pybind::check_error();
+
+			return false;
+		}
 
 		bool result = pybind::list_appenditem( _obj, py_tuple );
 

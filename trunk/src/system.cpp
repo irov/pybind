@@ -644,6 +644,13 @@ namespace pybind
 	{
         Py_ssize_t size = PyList_Size( _obj );
 
+		if( size == -1 )
+		{
+			check_error();
+
+			return 0;
+		}
+
 		return (size_t)size;
 	}
     //////////////////////////////////////////////////////////////////////////
