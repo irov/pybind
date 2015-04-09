@@ -58,11 +58,11 @@ namespace pybind
         : public stdex::intrusive_ptr_base<class_type_scope>
 	{
 	public:
-		class_type_scope( const char * _name, uint32_t _typeId, PyObject * _module, void * _user, pybind_new _pynew, pybind_destructor _pydestructor, size_t _pod );
+		class_type_scope( const char * _name, uint32_t _typeId, void * _user, pybind_new _pynew, pybind_destructor _pydestructor, size_t _pod );
 		~class_type_scope();
 
 	public:
-		void initialize();
+		void initialize( PyObject * _module );
         void finalize();
 
 	public:
@@ -73,8 +73,6 @@ namespace pybind
         void * get_user() const;
 
         PyTypeObject * get_typemodule() const;
-
-		void set_module( PyObject * _module );
 
 		void * construct( PyObject * _obj, PyObject * _args );
 		void def_init( const constructor_adapter_interface_ptr & _ctr );
@@ -150,8 +148,6 @@ namespace pybind
 		method_adapter_interface_ptr m_mapping;
 
 		PyTypeObject * m_pytypeobject;
-
-		PyObject * m_module;
 
         size_t m_pod;
 
