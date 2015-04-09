@@ -77,12 +77,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	STATIC_DECLARE_VALUE_BEGIN(PyTypeObject, s_method_caller_type)
     {
-#   if PYBIND_PYTHON_VERSION < 300
-        PyObject_HEAD_INIT(&PyType_Type)
-            0,
-#   else
         PyVarObject_HEAD_INIT(&PyType_Type, 0)
-#   endif
             "pybind_method_caller_type",
             sizeof(py_method_caller_type),
             0,
@@ -101,7 +96,11 @@ namespace pybind
             0,					/* tp_getattro */
             0,					/* tp_setattro */
             0,					/* tp_as_buffer */
-            Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags */
+#   if PYBIND_PYTHON_VERSION < 300
+            Py_TPFLAGS_HAVE_CLASS, /* tp_flags */
+#	else
+			0,
+#	endif
             0,					/* tp_doc */
             0,					/* tp_traverse */
             0,					/* tp_clear */
@@ -220,42 +219,46 @@ namespace pybind
 		PyObject_Free( _obj );
 	}
 	//////////////////////////////////////////////////////////////////////////
-    STATIC_DECLARE_VALUE_BEGIN(PyTypeObject, s_method_generator_type)
-    {
+	STATIC_DECLARE_VALUE_BEGIN(PyTypeObject, s_method_generator_type)
+	{
 		PyVarObject_HEAD_INIT(&PyType_Type, 0)
-		"pybind_method_generator_type",
-		sizeof(py_method_generator_type),
-		0,
-		(destructor)descr_destr2,					/* tp_dealloc */
-		0,					/* tp_print */
-		0,					/* tp_getattr */
-		0,					/* tp_setattr */
-		0,					/* tp_compare */
-		0,					/* tp_repr */
-		0,					/* tp_as_number */
-		0,					/* tp_as_sequence */
-		0,					/* tp_as_mapping */
-		0,					/* tp_hash */
-		(ternaryfunc)descr_call,					/* tp_call */
-		0,					/* tp_str */
-		0,					/* tp_getattro */
-		0,					/* tp_setattro */
-		0,					/* tp_as_buffer */
-		Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags */
-		0,					/* tp_doc */
-		0,					/* tp_traverse */
-		0,					/* tp_clear */
-		0,					/* tp_richcompare */
-		0,					/* tp_weaklistoffset */
-		0,					/* tp_iter */
-		0,					/* tp_iternext */
-		0,					/* tp_methods */
-		STATIC_VAR(s_descr_members),		/* tp_members */
-		0,					/* tp_getset */
-		0,					/* tp_base */
-		0,					/* tp_dict */
-		(descrgetfunc)method_get,		/* tp_descr_get */
-		0,					/* tp_descr_set */
+			"pybind_method_generator_type",
+			sizeof(py_method_generator_type),
+			0,
+			(destructor)descr_destr2,					/* tp_dealloc */
+			0,					/* tp_print */
+			0,					/* tp_getattr */
+			0,					/* tp_setattr */
+			0,					/* tp_compare */
+			0,					/* tp_repr */
+			0,					/* tp_as_number */
+			0,					/* tp_as_sequence */
+			0,					/* tp_as_mapping */
+			0,					/* tp_hash */
+			(ternaryfunc)descr_call,					/* tp_call */
+			0,					/* tp_str */
+			0,					/* tp_getattro */
+			0,					/* tp_setattro */
+			0,					/* tp_as_buffer */
+#   if PYBIND_PYTHON_VERSION < 300
+			Py_TPFLAGS_HAVE_CLASS, /* tp_flags */
+#	else
+			0,
+#	endif
+			0,					/* tp_doc */
+			0,					/* tp_traverse */
+			0,					/* tp_clear */
+			0,					/* tp_richcompare */
+			0,					/* tp_weaklistoffset */
+			0,					/* tp_iter */
+			0,					/* tp_iternext */
+			0,					/* tp_methods */
+			STATIC_VAR(s_descr_members),		/* tp_members */
+			0,					/* tp_getset */
+			0,					/* tp_base */
+			0,					/* tp_dict */
+			(descrgetfunc)method_get,		/* tp_descr_get */
+			0,					/* tp_descr_set */
 	}
     STATIC_DECLARE_VALUE_END();
 	//////////////////////////////////////////////////////////////////////////

@@ -15,7 +15,7 @@ namespace pybind
 
 		stdex::intrusive_ptr_release( py_self->iadapter );
 
-		_obj->ob_type->tp_free( _obj );
+		PyObject_Free(_obj);
 	}
 	//////////////////////////////////////////////////////////////////////////
 	STATIC_DECLARE_VALUE_BEGIN(PyTypeObject, s_functor_type)
@@ -39,7 +39,7 @@ namespace pybind
 			0,                    /* tp_getattro */
 			0,                                          /* tp_setattro */
 			0,                          /* tp_as_buffer */
-			Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,              /* tp_flags */
+			0,              /* tp_flags */
 			0,                                 /* tp_doc */
 			0,                                          /* tp_traverse */
 			0,                                          /* tp_clear */

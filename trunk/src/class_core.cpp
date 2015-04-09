@@ -11,9 +11,9 @@
 namespace pybind
 {	
     //////////////////////////////////////////////////////////////////////////
-    class_type_scope_ptr class_core::create_new_type_scope( uint32_t _info, const char * _name, PyObject * _module, void * _user, pybind::pybind_new _pynew, pybind::pybind_destructor _pydestructor, size_t _pod )
+    class_type_scope_ptr class_core::create_new_type_scope( uint32_t _info, const char * _name, void * _user, pybind::pybind_new _pynew, pybind::pybind_destructor _pydestructor, size_t _pod )
     {
-        class_type_scope_ptr scope = new class_type_scope( _name, _info, _module, _user, _pynew, _pydestructor, _pod );
+        class_type_scope_ptr scope = new class_type_scope( _name, _info, _user, _pynew, _pydestructor, _pod );
 
         if( detail::reg_class_type_scope( _info, scope ) == false )
 		{
@@ -23,9 +23,9 @@ namespace pybind
         return scope;
     }
     //////////////////////////////////////////////////////////////////////////
-    void class_core::initialize_new_type_scope( const class_type_scope_ptr & _scope )
+    void class_core::initialize_new_type_scope( const class_type_scope_ptr & _scope, PyObject * _module )
     {
-        _scope->initialize();
+        _scope->initialize( _module );
     }
     //////////////////////////////////////////////////////////////////////////
     PyTypeObject * class_core::get_typemodule( uint32_t _info )
@@ -87,11 +87,6 @@ namespace pybind
 		}
 
 		return nullptr;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    void class_core::set_module( const class_type_scope_ptr & _scope, PyObject * _module )
-    {
-        _scope->set_module( _module );
     }
     //////////////////////////////////////////////////////////////////////////
     void class_core::def_convert( const convert_adapter_interface_ptr & _iadapter, uint32_t _info )
