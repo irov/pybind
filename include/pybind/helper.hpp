@@ -130,7 +130,7 @@ namespace pybind
 		{
 			pybind::check_error();
 
-			return false;
+			return nullptr;
 		}
 
 		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
