@@ -670,8 +670,10 @@ namespace pybind
 			{
 				wrap_pod16( _obj, _impl );
 			}
-
-			wrap_pod8( _obj, _impl );
+			else
+			{
+				wrap_pod8( _obj, _impl );
+			}
 		}
 		//////////////////////////////////////////////////////////////////////////
 		static bool is_holder( PyObject * _obj )
