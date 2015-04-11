@@ -96,11 +96,7 @@ namespace pybind
             0,					/* tp_getattro */
             0,					/* tp_setattro */
             0,					/* tp_as_buffer */
-#   if PYBIND_PYTHON_VERSION < 300
-            Py_TPFLAGS_HAVE_CLASS, /* tp_flags */
-#	else
-			0,
-#	endif
+			Py_TPFLAGS_DEFAULT, /* tp_flags */
             0,					/* tp_doc */
             0,					/* tp_traverse */
             0,					/* tp_clear */
@@ -240,11 +236,7 @@ namespace pybind
 			0,					/* tp_getattro */
 			0,					/* tp_setattro */
 			0,					/* tp_as_buffer */
-#   if PYBIND_PYTHON_VERSION < 300
-			Py_TPFLAGS_HAVE_CLASS, /* tp_flags */
-#	else
-			0,
-#	endif
+			Py_TPFLAGS_DEFAULT, /* tp_flags */
 			0,					/* tp_doc */
 			0,					/* tp_traverse */
 			0,					/* tp_clear */
