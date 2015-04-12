@@ -62,7 +62,12 @@ public:
 
 void main()
 {
-	pybind::initialize(false, false);
+	pybind::initialize(false, false, true);
+
+	bool gc_exist;
+	PyObject * gc = pybind::module_import( "gc", gc_exist );
+
+	pybind::call_method( gc, "disable", "()" );
 
 	PyObject * module = pybind::module_init("MyModule");
 
@@ -82,6 +87,10 @@ void main()
 		.def_member( "x", &Vec2::x)
 		.def_member( "y", &Vec2::y)
 		;
+
+	Bar * b = new Bar;
+
+	PyObject * py_b = pybind::ptr( b );
 
 	pybind::def_function("test", &test_Bar );
 		
