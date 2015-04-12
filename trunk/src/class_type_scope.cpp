@@ -20,38 +20,58 @@
 
 namespace pybind
 {
+	static const uint32_t PY_OBJECT_UNWRAP = 0xFF000000;
+	static const uint32_t PY_OBJECT_HOLDER = 0x00000001;
+	static const uint32_t PY_OBJECT_PTR = 0x00000002;
+	static const uint32_t PY_OBJECT_POD8 = 0x00000010;
+	static const uint32_t PY_OBJECT_POD16 = 0x00000020;
+	static const uint32_t PY_OBJECT_POD32 = 0x00000040;
+	static const uint32_t PY_OBJECT_POD64 = 0x00000080;
+
 	//////////////////////////////////////////////////////////////////////////
-	struct py_pod8_object
+	struct py_base_object
 	{
 		PyObject_HEAD
-			unsigned char buff[8];
+			uint32_t flag;
+	};
+	//////////////////////////////////////////////////////////////////////////
+	struct py_ptr_object
+		: public py_base_object
+	{
+		void * impl;
+	};
+	//////////////////////////////////////////////////////////////////////////
+	struct py_pod8_object
+		: public py_base_object
+	{
+		unsigned char buff[8];
 	};
 	//////////////////////////////////////////////////////////////////////////
 	struct py_pod16_object
+		: public py_base_object
 	{
-		PyObject_HEAD
-			unsigned char buff[16];
+		unsigned char buff[16];
 	};
 	//////////////////////////////////////////////////////////////////////////
 	struct py_pod32_object
+		: public py_base_object
 	{
-		PyObject_HEAD
-			unsigned char buff[32];
+		unsigned char buff[32];
 	};
 	//////////////////////////////////////////////////////////////////////////
 	struct py_pod64_object
+		: public py_base_object
 	{
-		PyObject_HEAD
-			unsigned char buff[64];
+		unsigned char buff[64];
 	};
 	//////////////////////////////////////////////////////////////////////////	
-    STATIC_DECLARE(PyObject *, s_pybind_object_impl);
     STATIC_DECLARE(PyObject *, s_pybind_class_type_scope);
-    STATIC_DECLARE(PyObject *, s_pybind_object_holder);
 	//////////////////////////////////////////////////////////////////////////
-	static void py_pod_dealloc( PyObject * _obj )
+	static void py_dealloc( PyObject * _obj )
 	{
-		PyObject_Free( _obj );
+		PyTypeObject * objtype = Py_TYPE( _obj );
+
+		objtype->tp_free( _obj );
 	}
     //////////////////////////////////////////////////////////////////////////
 	STATIC_DECLARE_VALUE_BEGIN(PyTypeObject, s_pod8_type)
@@ -60,7 +80,7 @@ namespace pybind
 			"pod8_type",
 			sizeof(py_pod8_object),
 			0,
-			&py_pod_dealloc,                             /* tp_dealloc */
+			&py_dealloc,                             /* tp_dealloc */
 			0,                    /* tp_print */
 			0,                                          /* tp_getattr */
 			0,                                          /* tp_setattr */
@@ -75,7 +95,7 @@ namespace pybind
 			0,                    /* tp_getattro */
 			0,                                          /* tp_setattro */
 			0,                          /* tp_as_buffer */
-			0,              /* tp_flags */
+			Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,              /* tp_flags */
 			0,                                 /* tp_doc */
 			0,                                          /* tp_traverse */
 			0,                                          /* tp_clear */
@@ -104,7 +124,7 @@ namespace pybind
 			"pod16_type",
 			sizeof(py_pod16_object),
 			0,
-			&py_pod_dealloc,                             /* tp_dealloc */
+			&py_dealloc,                             /* tp_dealloc */
 			0,                    /* tp_print */
 			0,                                          /* tp_getattr */
 			0,                                          /* tp_setattr */
@@ -119,7 +139,7 @@ namespace pybind
 			0,                    /* tp_getattro */
 			0,                                          /* tp_setattro */
 			0,                          /* tp_as_buffer */
-			0,              /* tp_flags */
+			Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,              /* tp_flags */
 			0,                                 /* tp_doc */
 			0,                                          /* tp_traverse */
 			0,                                          /* tp_clear */
@@ -148,7 +168,7 @@ namespace pybind
 			"pod32_type",
 			sizeof(py_pod32_object),
 			0,
-			&py_pod_dealloc,                             /* tp_dealloc */
+			&py_dealloc,                             /* tp_dealloc */
 			0,                    /* tp_print */
 			0,                                          /* tp_getattr */
 			0,                                          /* tp_setattr */
@@ -163,7 +183,7 @@ namespace pybind
 			0,                    /* tp_getattro */
 			0,                                          /* tp_setattro */
 			0,                          /* tp_as_buffer */
-			0,              /* tp_flags */
+			Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,              /* tp_flags */
 			0,                                 /* tp_doc */
 			0,                                          /* tp_traverse */
 			0,                                          /* tp_clear */
@@ -190,9 +210,9 @@ namespace pybind
 	{
 		PyVarObject_HEAD_INIT(&PyType_Type, 0)
 			"pod64_type",
-			sizeof(py_pod64_object),
+			sizeof( py_pod64_object ),
 			0,
-			&py_pod_dealloc,                             /* tp_dealloc */
+			&py_dealloc,                             /* tp_dealloc */
 			0,                    /* tp_print */
 			0,                                          /* tp_getattr */
 			0,                                          /* tp_setattr */
@@ -207,7 +227,7 @@ namespace pybind
 			0,                    /* tp_getattro */
 			0,                                          /* tp_setattro */
 			0,                          /* tp_as_buffer */
-			0,              /* tp_flags */
+			Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,              /* tp_flags */
 			0,                                 /* tp_doc */
 			0,                                          /* tp_traverse */
 			0,                                          /* tp_clear */
@@ -230,54 +250,47 @@ namespace pybind
 	}
 	STATIC_DECLARE_VALUE_END();
 	//////////////////////////////////////////////////////////////////////////
-	static void py_dealloc( PyObject * _obj )
+	STATIC_DECLARE_VALUE_BEGIN( PyTypeObject, s_ptr_type )
 	{
-		PyTypeObject * objtype = Py_TYPE(_obj);
-
-		objtype->tp_free( _obj );
-	}
-	//////////////////////////////////////////////////////////////////////////
-	STATIC_DECLARE_VALUE_BEGIN(PyTypeObject, s_base_type)
-	{
-		PyVarObject_HEAD_INIT(&PyType_Type, 0)
-		"pybind_base_type",
-		sizeof(PyObject),
-		0,
-		&py_dealloc,                             /* tp_dealloc */
-		0,                    /* tp_print */
-		0,                                          /* tp_getattr */
-		0,                                          /* tp_setattr */
-		0,                                          /* tp_compare */
-		0,                                /* tp_repr */
-		0,                          /* tp_as_number */
-		0,                        /* tp_as_sequence */
-		0,                         /* tp_as_mapping */
-		0,                      /* tp_hash */
-		0,                                          /* tp_call */
-		0,                                 /* tp_str */
-		0,                    /* tp_getattro */
-		0,                                          /* tp_setattro */
-		0,                          /* tp_as_buffer */
-		Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,              /* tp_flags */
-		0,                                 /* tp_doc */
-		0,                                          /* tp_traverse */
-		0,                                          /* tp_clear */
-		0,            /* tp_richcompare */
-		0,                                          /* tp_weaklistoffset */
-		0,                                          /* tp_iter */
-		0,                                          /* tp_iternext */
-		0,                             /* tp_methods */
-		0,                                          /* tp_members */
-		0,                                          /* tp_getset */
-		0,                         /* tp_base */
-		0,                                          /* tp_dict */
-		0,                                          /* tp_descr_get */
-		0,                                          /* tp_descr_set */
-		0,                                          /* tp_dictoffset */
-		0,                                          /* tp_init */
-		0,                                          /* tp_alloc */
-		0,                                 /* tp_new */
-		0,                               /* tp_free */
+		PyVarObject_HEAD_INIT( &PyType_Type, 0 )
+			"pybind_ptr_type",
+			sizeof( py_ptr_object ),
+			0,
+			&py_dealloc,                             /* tp_dealloc */
+			0,                    /* tp_print */
+			0,                                          /* tp_getattr */
+			0,                                          /* tp_setattr */
+			0,                                          /* tp_compare */
+			0,                                /* tp_repr */
+			0,                          /* tp_as_number */
+			0,                        /* tp_as_sequence */
+			0,                         /* tp_as_mapping */
+			0,                      /* tp_hash */
+			0,                                          /* tp_call */
+			0,                                 /* tp_str */
+			0,                    /* tp_getattro */
+			0,                                          /* tp_setattro */
+			0,                          /* tp_as_buffer */
+			Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,              /* tp_flags */
+			0,                                 /* tp_doc */
+			0,                                          /* tp_traverse */
+			0,                                          /* tp_clear */
+			0,            /* tp_richcompare */
+			0,                                          /* tp_weaklistoffset */
+			0,                                          /* tp_iter */
+			0,                                          /* tp_iternext */
+			0,                             /* tp_methods */
+			0,                                          /* tp_members */
+			0,                                          /* tp_getset */
+			0,                         /* tp_base */
+			0,                                          /* tp_dict */
+			0,                                          /* tp_descr_get */
+			0,                                          /* tp_descr_set */
+			0,                                          /* tp_dictoffset */
+			0,                                          /* tp_init */
+			0,                        /* tp_alloc */
+			0,                          /* tp_new */
+			0,                               /* tp_free */
 	}
 	STATIC_DECLARE_VALUE_END();
 	//////////////////////////////////////////////////////////////////////////
@@ -363,88 +376,66 @@ namespace pybind
 		{
 			PyTypeObject * objtype = Py_TYPE(_obj);
 
-			if( PyType_IsSubtype( objtype, &STATIC_VAR(s_base_type) ) == 1 )
+			if( PyObject_HasAttr( (PyObject *)objtype, STATIC_VAR( s_pybind_class_type_scope ) ) == 0 )
 			{
-				return true;
+				return false;
 			}
 
-			return false;
-		}
-		//////////////////////////////////////////////////////////////////////////
-		void * get_class_impl2( PyObject * _obj, PyObject * _impl )
-		{
-			if( void_ptr_check( _impl ) == true )
-			{
-				void * impl = void_ptr_get( _impl );
-
-				return impl;
-			}		
-
-			PyTypeObject * py_self_type = Py_TYPE(_impl);
-
-			if( py_self_type == &STATIC_VAR(s_pod8_type) )
-			{
-				py_pod8_object * py_pod = (py_pod8_object *)_impl;
-
-				void * buff = py_pod->buff;
-
-				return buff;
-			}
-			else if( py_self_type == &STATIC_VAR(s_pod16_type) )
-			{
-				py_pod16_object * py_pod = (py_pod16_object *)_impl;
-
-				void * buff = py_pod->buff;
-
-				return buff;
-			}
-			else if( py_self_type == &STATIC_VAR(s_pod32_type) )
-			{
-				py_pod32_object * py_pod = (py_pod32_object *)_impl;
-
-				void * buff = py_pod->buff;
-
-				return buff;
-			}
-			else if( py_self_type == &STATIC_VAR(s_pod64_type) )
-			{
-				py_pod64_object * py_pod = (py_pod64_object *)_impl;
-
-				void * buff = py_pod->buff;
-
-				return buff;
-			}
-
-			if( is_none( _impl ) == true )
-			{
-				return nullptr;
-			}
-
-			pybind::throw_exception("obj %s incorrect wrap pybind"
-				, pybind::object_str( _obj )
-				);
-
-			return nullptr;
+			return true;
 		}
 		//////////////////////////////////////////////////////////////////////////
 		void * get_class_impl( PyObject * _obj )
 		{
-			PyObject * py_impl = PyObject_GetAttr( _obj, STATIC_VAR(s_pybind_object_impl) );
+			py_base_object * py_base = (py_base_object *)_obj;
 
-			if( py_impl == nullptr )
-			{	
-				pybind::throw_exception("obj %s not wrap pybind (impl)"
-					, pybind::object_str( _obj )
-					);
+			uint32_t flag = py_base->flag;
 
-				return nullptr;
+			if( flag & PY_OBJECT_PTR )
+			{
+				py_ptr_object * py_ptr = (py_ptr_object *)_obj;
+
+				void * impl = py_ptr->impl;
+
+				return impl;
+			}
+			else if( flag & PY_OBJECT_POD8 )
+			{
+				py_pod8_object * py_pod = (py_pod8_object *)_obj;
+
+				void * impl = (void *)py_pod->buff;
+
+				return impl;
+			}
+			else if( flag & PY_OBJECT_POD16 )
+			{
+				py_pod16_object * py_pod = (py_pod16_object *)_obj;
+
+				void * impl = (void *)py_pod->buff;
+
+				return impl;
+			}
+			else if( flag & PY_OBJECT_POD32 )
+			{
+				py_pod32_object * py_pod = (py_pod32_object *)_obj;
+
+				void * impl = (void *)py_pod->buff;
+
+				return impl;
+			}
+			else if( flag & PY_OBJECT_POD64 )
+			{
+				py_pod64_object * py_pod = (py_pod64_object *)_obj;
+
+				void * impl = (void *)py_pod->buff;
+
+				return impl;
 			}
 
-			void * impl = get_class_impl2( _obj, py_impl );
-			
-			Py_DECREF( py_impl );
+			pybind::throw_exception( "obj %s not wrap pybind (impl)"
+				, pybind::object_str( _obj )
+				);
 
-			return impl;
+			return nullptr;			
 		}
 		//////////////////////////////////////////////////////////////////////////
 		const class_type_scope_ptr & get_class_scope2( PyTypeObject * _type, PyObject * _scope )
@@ -459,7 +450,7 @@ namespace pybind
 				const class_type_scope_ptr & scope_null = detail::get_invalid_scope();
 
 				return scope_null;
-			}        
+			}
 
 			const class_type_scope_ptr & scope = detail::get_class_type_scope( id );
 
@@ -488,7 +479,7 @@ namespace pybind
 					, pybind::object_str( (PyObject *)_type )
 					);
 				
-                const class_type_scope_ptr & scope_null = detail::get_class_type_scope( 0 );
+				const class_type_scope_ptr & scope_null = detail::get_invalid_scope();
 
                 return scope_null;
 			}
@@ -502,146 +493,73 @@ namespace pybind
 		//////////////////////////////////////////////////////////////////////////
 		void * unwrap( PyObject * _obj )
 		{
-			void * impl = pybind::detail::get_class_impl( _obj );
+			void * impl = get_class_impl( _obj );
 
-            if( PyObject_SetAttr( _obj, STATIC_VAR(s_pybind_object_impl), Py_None ) == -1 )
-            {
-                pybind::throw_exception("unwrap obj %s not pybind"
-					, pybind::object_str( _obj )
-					);
-
-                return nullptr;
-            }
-
+			py_base_object * py_base = (py_base_object *)_obj;
+			
+			py_base->flag |= PY_OBJECT_UNWRAP;
+			
 			return impl;
 		}
 		//////////////////////////////////////////////////////////////////////////
 		bool is_wrap( PyObject * _obj )
 		{
-			PyObject * py_impl = PyObject_GetAttr( _obj, STATIC_VAR(s_pybind_object_impl) );
+			py_base_object * py_base = (py_base_object *)_obj;
 
-			if( py_impl == nullptr )
+			if( py_base->flag & PY_OBJECT_UNWRAP )
 			{
-				pybind::throw_exception("is_wrap obj %s not pybind"
-					, pybind::object_str( _obj )
-					);
-
 				return false;
 			}
 
-			bool result = void_ptr_check( py_impl );
-
-			Py_DECREF( py_impl );					
-
-			return result;
+			return true;
 		}
 		//////////////////////////////////////////////////////////////////////////
 		static void wrap( PyObject * _obj, void * _impl, bool _holder )
 		{
-			PyObject * py_impl = void_ptr_new( _impl );
-            
-			if( PyObject_SetAttr( _obj, STATIC_VAR(s_pybind_object_impl), py_impl ) == -1 )
-            {
-				pybind::throw_exception("wrap obj %s python error (impl)"
-					, pybind::object_str( _obj )
-					);
+			py_ptr_object * py_ptr = (py_ptr_object *)_obj;
 
-                return;
-            }
+			py_ptr->impl = _impl;
 
-			Py_DECREF( py_impl );
-
+			py_ptr->flag |= PY_OBJECT_PTR;
+			
 			if( _holder == true )
 			{	
-				PyObject * py_holder = get_none();
-	
-				if( PyObject_SetAttr( _obj, STATIC_VAR(s_pybind_object_holder), py_holder ) == -1 )
-				{
-					pybind::throw_exception("wrap obj %s python error (holder)"
-						, pybind::object_str( _obj )
-						);
-
-					return;
-				}
+				py_ptr->flag |= PY_OBJECT_HOLDER;
 			}
 		}
 		//////////////////////////////////////////////////////////////////////////
 		static void wrap_pod64( PyObject * _obj, void ** _impl )
 		{
-			PyObject * py_impl = PyType_GenericAlloc( &STATIC_VAR(s_pod64_type), 0 );
+			py_pod64_object * py_pod = (py_pod64_object *)_obj;
 
-			if( PyObject_SetAttr( _obj, STATIC_VAR(s_pybind_object_impl), py_impl ) == -1 )
-            {
-				pybind::throw_exception("wrap_pod64 obj %s python error (impl)"
-					, pybind::object_str( _obj )
-					);
-
-                return;
-            }
-
-			Py_DECREF( py_impl );
-
-			py_pod64_object * py_pod = (py_pod64_object *)py_impl;
+			py_pod->flag |= PY_OBJECT_POD64;
 
 			*_impl = (void *)py_pod->buff;
 		}
 		//////////////////////////////////////////////////////////////////////////
 		static void wrap_pod32( PyObject * _obj, void ** _impl )
 		{
-			PyObject * py_impl = PyType_GenericAlloc( &STATIC_VAR(s_pod32_type), 0 );
+			py_pod32_object * py_pod = (py_pod32_object *)_obj;
 
-			if( PyObject_SetAttr( _obj, STATIC_VAR(s_pybind_object_impl), py_impl ) == -1 )
-			{
-				pybind::throw_exception("wrap_pod32 obj %s python error (impl)"
-					, pybind::object_str( _obj )
-					);
-
-				return;
-			}
-
-			Py_DECREF( py_impl );
-
-			py_pod32_object * py_pod = (py_pod32_object *)py_impl;
+			py_pod->flag |= PY_OBJECT_POD32;
 
 			*_impl = (void *)py_pod->buff;
 		}
 		//////////////////////////////////////////////////////////////////////////
 		static void wrap_pod16( PyObject * _obj, void ** _impl )
 		{
-			PyObject * py_impl = PyType_GenericAlloc( &STATIC_VAR(s_pod16_type), 0 );
+			py_pod16_object * py_pod = (py_pod16_object *)_obj;
 
-			if( PyObject_SetAttr( _obj, STATIC_VAR(s_pybind_object_impl), py_impl ) == -1 )
-			{
-				pybind::throw_exception("wrap_pod16 obj %s python error (impl)"
-					, pybind::object_str( _obj )
-					);
-
-				return;
-			}
-
-			Py_DECREF( py_impl );
-
-			py_pod16_object * py_pod = (py_pod16_object *)py_impl;
+			py_pod->flag |= PY_OBJECT_POD16;
 
 			*_impl = (void *)py_pod->buff;
 		}
 		//////////////////////////////////////////////////////////////////////////
 		static void wrap_pod8( PyObject * _obj, void ** _impl )
 		{
-			PyObject * py_impl = PyType_GenericAlloc( &STATIC_VAR(s_pod8_type), 0 );
+			py_pod8_object * py_pod = (py_pod8_object *)_obj;
 
-			if( PyObject_SetAttr( _obj, STATIC_VAR(s_pybind_object_impl), py_impl ) == -1 )
-			{
-				pybind::throw_exception("wrap_pod8 obj %s python error (impl)"
-					, pybind::object_str( _obj )
-					);
-
-				return;
-			}
-
-			Py_DECREF( py_impl );
-
-			py_pod8_object * py_pod = (py_pod8_object *)py_impl;
+			py_pod->flag |= PY_OBJECT_POD8;
 
 			*_impl = (void *)py_pod->buff;
 		}
@@ -678,12 +596,14 @@ namespace pybind
 		//////////////////////////////////////////////////////////////////////////
 		static bool is_holder( PyObject * _obj )
 		{
-			if( PyObject_HasAttr( _obj, STATIC_VAR(s_pybind_object_holder) ) == 0 )
+			py_base_object * py_base = (py_base_object *)_obj;
+
+			if( py_base->flag & PY_OBJECT_HOLDER )
 			{
-				return false;
+				return true;
 			}
-			
-			return true;
+
+			return false;
 		}
 		//////////////////////////////////////////////////////////////////////////
 		void * check_registred_class( PyObject * _obj, uint32_t _info )
@@ -1286,26 +1206,57 @@ namespace pybind
 		}
 		else
 		{
-			py_bases = PyTuple_New( 1 );
+			py_bases = PyTuple_New(1);
 
-            PyTypeObject * base_type = &STATIC_VAR(s_base_type);
-			Py_INCREF( (PyObject *)base_type );
-			PyTuple_SetItem( py_bases, 0, (PyObject *)base_type );
+			PyTypeObject * py_pybind_type;
+			
+			if( m_pod > 64 )
+			{
+				pybind::throw_exception( "scope %s initialize not pod %d"
+					, m_name
+					, m_pod
+					);
+
+				return;
+			}
+			else if( m_pod > 32 )
+			{
+				py_pybind_type = &STATIC_VAR( s_pod64_type );
+			}
+			else if( m_pod > 16 )
+			{
+				py_pybind_type = &STATIC_VAR( s_pod32_type );
+			}
+			else if( m_pod > 8 )
+			{
+				py_pybind_type = &STATIC_VAR( s_pod16_type );
+			}
+			else if( m_pod > 0 )
+			{
+				py_pybind_type = &STATIC_VAR( s_pod8_type );
+			}
+			else
+			{
+				py_pybind_type = &STATIC_VAR( s_ptr_type );
+			}
+
+			Py_INCREF( (PyObject *)py_pybind_type );
+			PyTuple_SetItem( py_bases, 0, (PyObject *)py_pybind_type );
 		}
 
 		PyObject * py_dict = PyDict_New();
 		
-        PyObject * py_pybind_class_type = pybind::ptr_throw( m_typeId );
+        PyObject * py_pybind_scope_id = pybind::ptr_throw( m_typeId );
                 
-		PyDict_SetItem( py_dict, STATIC_VAR(s_pybind_class_type_scope), py_pybind_class_type );
-		Py_DECREF( py_pybind_class_type );
+		PyDict_SetItem( py_dict, STATIC_VAR(s_pybind_class_type_scope), py_pybind_scope_id );
+		Py_DECREF( py_pybind_scope_id );
 		
 		PyObject * py_args = PyTuple_Pack( 3, py_name, py_bases, py_dict );
 		Py_DECREF( py_name );
 		Py_DECREF( py_bases );
 		Py_DECREF( py_dict );
-		
-		m_pytypeobject = (PyTypeObject *)PyType_Type.tp_call( (PyObject*)&PyType_Type, py_args, 0 );
+			
+		m_pytypeobject = (PyTypeObject *)PyType_Type.tp_call( (PyObject *)&PyType_Type, py_args, 0 );
 		Py_DECREF( py_args );
 
 		if( m_pytypeobject == nullptr )
@@ -1695,14 +1646,19 @@ namespace pybind
 		detail::initialize_class_type_scope();
 
 #   if PYBIND_PYTHON_VERSION > 300
-        STATIC_VAR(s_pybind_object_impl) = pybind::unicode_from_utf8( "__pybind_object_impl" );
         STATIC_VAR(s_pybind_class_type_scope) = pybind::unicode_from_utf8( "__pybind_class_type_scope" );
-        STATIC_VAR(s_pybind_object_holder) = pybind::unicode_from_utf8( "__pybind_object_holder" );
 #   else
-        STATIC_VAR(s_pybind_object_impl) = pybind::string_from_char( "__pybind_object_impl" );
         STATIC_VAR(s_pybind_class_type_scope) = pybind::string_from_char( "__pybind_class_type_scope" );
-        STATIC_VAR(s_pybind_object_holder) = pybind::string_from_char( "__pybind_object_holder" );
 #   endif
+
+		PyTypeObject * pybind_ptr_type = &STATIC_VAR( s_ptr_type );
+
+		if( PyType_Ready( pybind_ptr_type ) < 0 )
+		{
+			printf( "invalid embedding class '%s' \n", STATIC_VAR( s_ptr_type ).tp_name );
+
+			return false;
+		}
 
 		PyTypeObject * pod64_type = &STATIC_VAR(s_pod64_type);
 
@@ -1739,27 +1695,7 @@ namespace pybind
 
 			return false;
 		}
-
-		PyTypeObject * pybind_base_type = &STATIC_VAR(s_base_type);
-
-		if( PyType_Ready( pybind_base_type ) < 0 )
-		{
-			printf("invalid embedding class '%s' \n", STATIC_VAR(s_base_type).tp_name );
-
-            return false;
-		}
-
-		PyObject * builtins = pybind::get_builtins();
-		
-		PyObject * dir_bltin = pybind::module_dict( builtins );
-		
-		PyObject * pybind_base_obj = (PyObject *)pybind_base_type;
-
-		pybind::dict_setstring( dir_bltin, "pybind_base_type", pybind_base_obj );
-
-		Py_DECREF( pybind_base_obj );
-		Py_DECREF( builtins );
-		
+				
         return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -1767,8 +1703,6 @@ namespace pybind
 	{
 		detail::finalize_class_type_scope();
 
-		Py_DECREF(STATIC_VAR(s_pybind_object_impl));
 		Py_DECREF(STATIC_VAR(s_pybind_class_type_scope));
-		Py_DECREF(STATIC_VAR(s_pybind_object_holder));
 	}
 }
