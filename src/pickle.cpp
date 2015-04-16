@@ -306,7 +306,7 @@ namespace pybind
 				);
 		}
 
-		const void * src_buffer = static_cast<uint8_t *>(_buffer) + _carriage;
+		const void * src_buffer = static_cast<const uint8_t *>(_buffer) + _carriage;
 		stdex::memorycopy( _t, 0, src_buffer, size );
 
 		_carriage += size;
