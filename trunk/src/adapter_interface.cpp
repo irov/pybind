@@ -10,12 +10,12 @@ namespace pybind
 		delete this;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void * adapter_interface::operator new (std::size_t _size)
+	void * adapter_interface::operator new ( size_t _size )
 	{
 		return PYBIND_MALLOC(_size);
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void adapter_interface::operator delete (void * _ptr, std::size_t _size)
+	void adapter_interface::operator delete ( void * _ptr, size_t _size )
 	{		
 		(void)_size;
 
