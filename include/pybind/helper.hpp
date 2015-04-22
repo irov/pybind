@@ -253,19 +253,64 @@ namespace pybind
 		return result;
 	}
 
-	inline PyObject * ask_t( PyObject * _obj )
+	namespace detail
+	{
+		class ask_t_returner
+		{
+		public:
+			ask_t_returner( PyObject * _obj )
+				: m_obj( _obj )
+			{
+			}
+
+			ask_t_returner( const ask_t_returner & _r )
+				: m_obj(_r.m_obj)
+			{ 
+				pybind::incref( m_obj );
+			}
+
+			~ask_t_returner()
+			{
+				pybind::decref( m_obj );
+			}
+
+			operator PyObject * ()
+			{
+				pybind::incref( m_obj );
+
+				return m_obj;
+			}
+
+			template<class T>
+			operator T ()
+			{
+				return pybind::extract<T>( m_obj );
+			}
+
+			template<class T>
+			bool operator == (const T & _value)
+			{
+				return pybind::extract<T>( m_obj ) == _value;
+			}
+
+		protected:
+			PyObject * m_obj;
+		};
+	}
+
+	inline detail::ask_t_returner ask_t( PyObject * _obj )
 	{
 		PyObject * py_args = pybind::tuple_new( 0 );
 
 		PyObject * py_result = pybind::ask_native( _obj, py_args );
 
 		pybind::decref( py_args );
-
-		return py_result;
+		
+		return detail::ask_t_returner( py_result );
 	}
 
 	template<class T0>
-	inline PyObject * ask_t( PyObject * _obj, const T0 & _t0 )
+	inline detail::ask_t_returner ask_t( PyObject * _obj, const T0 & _t0 )
 	{
 		PyObject * py_args = pybind::tuple_new( 1 );
 
@@ -275,11 +320,11 @@ namespace pybind
 
 		pybind::decref( py_args );
 
-		return py_result;
+		return detail::ask_t_returner( py_result );
 	}
 
 	template<class T0, class T1>
-	inline PyObject * ask_t( PyObject * _obj, const T0 & _t0, const T1 & _t1 )
+	inline detail::ask_t_returner ask_t( PyObject * _obj, const T0 & _t0, const T1 & _t1 )
 	{
 		PyObject * py_args = pybind::tuple_new( 2 );
 
@@ -290,11 +335,11 @@ namespace pybind
 
 		pybind::decref( py_args );
 
-		return py_result;
+		return detail::ask_t_returner( py_result );
 	}
 
 	template<class T0, class T1, class T2>
-	inline PyObject * ask_t( PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2 )
+	inline detail::ask_t_returner ask_t( PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2 )
 	{
 		PyObject * py_args = pybind::tuple_new( 3 );
 
@@ -306,11 +351,11 @@ namespace pybind
 
 		pybind::decref( py_args );
 
-		return py_result;
+		return detail::ask_t_returner( py_result );
 	}
 
 	template<class T0, class T1, class T2, class T3>
-	inline PyObject * ask_t( PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3 )
+	inline detail::ask_t_returner ask_t( PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3 )
 	{
 		PyObject * py_args = pybind::tuple_new( 4 );
 
@@ -323,11 +368,11 @@ namespace pybind
 
 		pybind::decref( py_args );
 
-		return py_result;
+		return detail::ask_t_returner( py_result );
 	}
 
 	template<class T0, class T1, class T2, class T3, class T4>
-	inline PyObject * ask_t( PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4 )
+	inline detail::ask_t_returner ask_t( PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4 )
 	{
 		PyObject * py_args = pybind::tuple_new( 5 );
 
@@ -341,7 +386,7 @@ namespace pybind
 
 		pybind::decref( py_args );
 
-		return py_result;
+		return detail::ask_t_returner( py_result );
 	}
 
 	inline void call_t( PyObject * _obj )

@@ -2,6 +2,7 @@
 
 #	include "pybind/system.hpp"
 #	include "pybind/extract.hpp"
+#	include "pybind/helper.hpp"
 
 #	include "stdex/memorycopy.h"
 
