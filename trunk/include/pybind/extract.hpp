@@ -127,7 +127,7 @@ namespace pybind
         
 		return value;
 	}
-    
+	   
 	template<class T>
 	PyObject * ptr_throw( const T & _value )
 	{
