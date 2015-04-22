@@ -5,7 +5,6 @@
 
 namespace pybind
 {
-
 	template<class T>
 	inline T list_getitem_t( PyObject * _list, size_t _it )
 	{
@@ -252,5 +251,229 @@ namespace pybind
 		pybind::decref( py_tuple );
 
 		return result;
+	}
+
+	inline PyObject * ask_t( PyObject * _obj )
+	{
+		PyObject * py_args = pybind::tuple_new( 0 );
+
+		PyObject * py_result = pybind::ask_native( _obj, py_args );
+
+		pybind::decref( py_args );
+
+		return py_result;
+	}
+
+	template<class T0>
+	inline PyObject * ask_t( PyObject * _obj, const T0 & _t0 )
+	{
+		PyObject * py_args = pybind::tuple_new( 1 );
+
+		pybind::tuple_setitem_t( py_args, 0, _t0 );
+
+		PyObject * py_result = pybind::ask_native( _obj, py_args );
+
+		pybind::decref( py_args );
+
+		return py_result;
+	}
+
+	template<class T0, class T1>
+	inline PyObject * ask_t( PyObject * _obj, const T0 & _t0, const T1 & _t1 )
+	{
+		PyObject * py_args = pybind::tuple_new( 2 );
+
+		pybind::tuple_setitem_t( py_args, 0, _t0 );
+		pybind::tuple_setitem_t( py_args, 1, _t1 );
+
+		PyObject * py_result = pybind::ask_native( _obj, py_args );
+
+		pybind::decref( py_args );
+
+		return py_result;
+	}
+
+	template<class T0, class T1, class T2>
+	inline PyObject * ask_t( PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2 )
+	{
+		PyObject * py_args = pybind::tuple_new( 3 );
+
+		pybind::tuple_setitem_t( py_args, 0, _t0 );
+		pybind::tuple_setitem_t( py_args, 1, _t1 );
+		pybind::tuple_setitem_t( py_args, 2, _t2 );
+
+		PyObject * py_result = pybind::ask_native( _obj, py_args );
+
+		pybind::decref( py_args );
+
+		return py_result;
+	}
+
+	template<class T0, class T1, class T2, class T3>
+	inline PyObject * ask_t( PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3 )
+	{
+		PyObject * py_args = pybind::tuple_new( 4 );
+
+		pybind::tuple_setitem_t( py_args, 0, _t0 );
+		pybind::tuple_setitem_t( py_args, 1, _t1 );
+		pybind::tuple_setitem_t( py_args, 2, _t2 );
+		pybind::tuple_setitem_t( py_args, 3, _t3 );
+
+		PyObject * py_result = pybind::ask_native( _obj, py_args );
+
+		pybind::decref( py_args );
+
+		return py_result;
+	}
+
+	template<class T0, class T1, class T2, class T3, class T4>
+	inline PyObject * ask_t( PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4 )
+	{
+		PyObject * py_args = pybind::tuple_new( 5 );
+
+		pybind::tuple_setitem_t( py_args, 0, _t0 );
+		pybind::tuple_setitem_t( py_args, 1, _t1 );
+		pybind::tuple_setitem_t( py_args, 2, _t2 );
+		pybind::tuple_setitem_t( py_args, 3, _t3 );
+		pybind::tuple_setitem_t( py_args, 4, _t4 );
+
+		PyObject * py_result = pybind::ask_native( _obj, py_args );
+
+		pybind::decref( py_args );
+
+		return py_result;
+	}
+
+	inline void call_t( PyObject * _obj )
+	{
+		PyObject * py_args = pybind::tuple_new( 0 );
+
+		pybind::call_native( _obj, py_args );
+
+		pybind::decref( py_args );
+	}
+
+	template<class T0>
+	inline void call_t( PyObject * _obj, const T0 & _t0 )
+	{
+		PyObject * py_args = pybind::tuple_new( 1 );
+
+		pybind::tuple_setitem_t( py_args, 0, _t0 );
+
+		pybind::call_native( _obj, py_args );
+
+		pybind::decref( py_args );
+	}
+
+	template<class T0, class T1>
+	inline void call_t( PyObject * _obj, const T0 & _t0, const T1 & _t1 )
+	{
+		PyObject * py_args = pybind::tuple_new( 2 );
+
+		pybind::tuple_setitem_t( py_args, 0, _t0 );
+		pybind::tuple_setitem_t( py_args, 1, _t1 );
+
+		pybind::call_native( _obj, py_args );
+
+		pybind::decref( py_args );
+	}
+
+	template<class T0, class T1, class T2>
+	inline void call_t( PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2 )
+	{
+		PyObject * py_args = pybind::tuple_new( 3 );
+
+		pybind::tuple_setitem_t( py_args, 0, _t0 );
+		pybind::tuple_setitem_t( py_args, 1, _t1 );
+		pybind::tuple_setitem_t( py_args, 2, _t2 );
+
+		pybind::call_native( _obj, py_args );
+
+		pybind::decref( py_args );
+	}
+
+	template<class T0, class T1, class T2, class T3>
+	inline void call_t( PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3 )
+	{
+		PyObject * py_args = pybind::tuple_new( 4 );
+
+		pybind::tuple_setitem_t( py_args, 0, _t0 );
+		pybind::tuple_setitem_t( py_args, 1, _t1 );
+		pybind::tuple_setitem_t( py_args, 2, _t2 );
+		pybind::tuple_setitem_t( py_args, 3, _t3 );
+
+		pybind::call_native( _obj, py_args );
+
+		pybind::decref( py_args );
+	}
+
+	template<class T0, class T1, class T2, class T3, class T4>
+	inline void call_t( PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4 )
+	{
+		PyObject * py_args = pybind::tuple_new( 5 );
+
+		pybind::tuple_setitem_t( py_args, 0, _t0 );
+		pybind::tuple_setitem_t( py_args, 1, _t1 );
+		pybind::tuple_setitem_t( py_args, 2, _t2 );
+		pybind::tuple_setitem_t( py_args, 3, _t3 );
+		pybind::tuple_setitem_t( py_args, 4, _t4 );
+
+		pybind::call_native( _obj, py_args );
+
+		pybind::decref( py_args );
+	}
+
+	template<class T0, class T1, class T2, class T3, class T4, class T5>
+	inline void call_t( PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4, const T5 & _t5 )
+	{
+		PyObject * py_args = pybind::tuple_new( 5 );
+
+		pybind::tuple_setitem_t( py_args, 0, _t0 );
+		pybind::tuple_setitem_t( py_args, 1, _t1 );
+		pybind::tuple_setitem_t( py_args, 2, _t2 );
+		pybind::tuple_setitem_t( py_args, 3, _t3 );
+		pybind::tuple_setitem_t( py_args, 4, _t4 );
+		pybind::tuple_setitem_t( py_args, 5, _t5 );
+
+		pybind::call_native( _obj, py_args );
+
+		pybind::decref( py_args );
+	}
+
+	template<class T0, class T1, class T2, class T3, class T4, class T5, class T6>
+	inline void call_t( PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4, const T5 & _t5, const T6 & _t6 )
+	{
+		PyObject * py_args = pybind::tuple_new( 5 );
+
+		pybind::tuple_setitem_t( py_args, 0, _t0 );
+		pybind::tuple_setitem_t( py_args, 1, _t1 );
+		pybind::tuple_setitem_t( py_args, 2, _t2 );
+		pybind::tuple_setitem_t( py_args, 3, _t3 );
+		pybind::tuple_setitem_t( py_args, 4, _t4 );
+		pybind::tuple_setitem_t( py_args, 5, _t5 );
+		pybind::tuple_setitem_t( py_args, 6, _t6 );
+
+		pybind::call_native( _obj, py_args );
+
+		pybind::decref( py_args );
+	}
+
+	template<class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7>
+	inline void call_t( PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4, const T5 & _t5, const T6 & _t6, const T7 & _t7 )
+	{
+		PyObject * py_args = pybind::tuple_new( 5 );
+
+		pybind::tuple_setitem_t( py_args, 0, _t0 );
+		pybind::tuple_setitem_t( py_args, 1, _t1 );
+		pybind::tuple_setitem_t( py_args, 2, _t2 );
+		pybind::tuple_setitem_t( py_args, 3, _t3 );
+		pybind::tuple_setitem_t( py_args, 4, _t4 );
+		pybind::tuple_setitem_t( py_args, 5, _t5 );
+		pybind::tuple_setitem_t( py_args, 6, _t6 );
+		pybind::tuple_setitem_t( py_args, 7, _t7 );
+
+		pybind::call_native( _obj, py_args );
+
+		pybind::decref( py_args );
 	}
 }
