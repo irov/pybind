@@ -494,9 +494,7 @@ namespace pybind
 				
 				PyObject * object_type = pybind::list_getitem( _types, index );
 
-				PyObject * obj = pybind::ask( object_type, "(O)", value );
-
-				pybind::decref( value );
+				PyObject * obj = pybind::ask_t( object_type, value );
 
 				if( obj == nullptr )
 				{
