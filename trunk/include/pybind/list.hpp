@@ -9,25 +9,25 @@ namespace pybind
 		class extract_list_operator_t
 		{
 		public:
-			extract_list_operator_t( PyObject * _tuple, PyObject * _value, uint32_t _index )
-				: m_tuple( _tuple )
+			extract_list_operator_t( PyObject * _list, PyObject * _value, uint32_t _index )
+				: m_list( _list )
 				, m_value( _value )
 				, m_index( _index )
 			{
 			}
 
 			extract_list_operator_t( const extract_list_operator_t & _r )
-				: m_tuple( _r.m_tuple )
+				: m_list( _r.m_list )
 				, m_value( _r.m_value )
 				, m_index( _r.index )
 			{
-				pybind::incref( m_tuple );
+				pybind::incref( m_list );
 				pybind::incref( m_value );
 			}
 
 			~extract_list_operator_t()
 			{
-				pybind::decref( m_tuple );
+				pybind::decref( m_list );
 				pybind::decref( m_value );
 			}
 
@@ -60,7 +60,7 @@ namespace pybind
 					return;
 				}
 
-				pybind::tuple_setitem( m_tuple, m_index, py_value );
+				pybind::tuple_setitem( m_list, m_index, py_value );
 
 				pybind::decref( m_value );
 				m_value = py_value;
@@ -68,7 +68,7 @@ namespace pybind
 			}
 
 		protected:
-			PyObject * m_tuple;
+			PyObject * m_list;
 			PyObject * m_value;
 			uint32_t m_index;
 		};
@@ -103,4 +103,11 @@ namespace pybind
 			return this->size() == 0;
 		}
 	};
+
+	inline bool extract_value( PyObject * _obj, pybind::list & _value )
+	{
+		_value = pybind::list( _obj );
+
+		return true;
+	}
 }
