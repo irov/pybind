@@ -659,6 +659,11 @@ namespace pybind
 		Py_ssize_t py_index = (Py_ssize_t)_index;
         PyObject * obj = PyList_GetItem( _obj, py_index );
 
+		if( obj == nullptr )
+		{
+			check_error();
+		}
+
 		return obj;
 	}
     //////////////////////////////////////////////////////////////////////////
@@ -899,9 +904,9 @@ namespace pybind
 
         PyObject * repr = PyObject_Repr( (PyObject *)type );
 
-        if( repr == 0 )
+        if( repr == nullptr )
         {
-            return 0;
+			return nullptr;
         }
 
         const char * str = pybind::string_to_char( repr );
@@ -913,9 +918,9 @@ namespace pybind
 	{
 		PyObject * py_repr = PyObject_Repr( _obj );
 		
-		if( py_repr == 0 )
+		if( py_repr == nullptr )
 		{
-			return 0;
+			return nullptr;
 		}
 
         const char * str = pybind::string_to_char( py_repr );
@@ -927,9 +932,9 @@ namespace pybind
 	{
 		PyObject * py_str = PyObject_Str( _obj );
 
-		if( py_str == 0 )
+		if( py_str == nullptr )
 		{
-			return 0;
+			return nullptr;
 		}
 
 		const char * str = pybind::string_to_char( py_str );
