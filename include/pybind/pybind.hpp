@@ -8,4 +8,7 @@
 #	include "pybind/class.hpp"
 #	include "pybind/system.hpp"
 #	include "pybind/helper.hpp"
+#	include "pybind/object.hpp"
+#	include "pybind/tuple.hpp"
+
 
