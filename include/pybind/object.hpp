@@ -12,12 +12,6 @@ namespace pybind
 		{
 		}
 
-		object( PyObject * _obj )
-			: m_obj( _obj )
-		{
-			pybind::incref( m_obj );
-		}
-
 		object & operator = (const object & _obj)
 		{
 			pybind::decref( m_obj );
@@ -28,9 +22,15 @@ namespace pybind
 		}
 
 		object( const object & _obj )
-		{
-			m_obj = _obj.ptr();
+			: m_obj( _obj.ptr() )
+		{			
 			pybind::incref( m_obj );
+		}
+		
+		explicit object( PyObject * _obj )
+			: m_obj( _obj )
+		{
+			pybind::incref( _obj );
 		}
 
 		~object()
@@ -85,20 +85,17 @@ namespace pybind
 			return pybind::ask_t( m_obj, _t0, _t1, _t2, _t3, _t4 );
 		}
 
-
 		template<class T0, class T1, class T2, class T3, class T4, class T5>
 		detail::extract_operator_t operator () ( const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4, const T5 & _t5 ) const
 		{
 			return pybind::ask_t( m_obj, _t0, _t1, _t2, _t3, _t4, _t5 );
 		}
-
-
+		
 		template<class T0, class T1, class T2, class T3, class T4, class T5, class T6>
 		detail::extract_operator_t operator () ( const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4, const T5 & _t5, const T6 & _t6 ) const
 		{
 			return pybind::ask_t( m_obj, _t0, _t1, _t2, _t3, _t4, _t5, _t6 );
 		}
-
 
 		template<class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7>
 		detail::extract_operator_t operator () ( const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4, const T5 & _t5, const T6 & _t6, const T7 & _t7 ) const
@@ -109,11 +106,27 @@ namespace pybind
 	protected:
 		PyObject * m_obj;
 	};
+	//////////////////////////////////////////////////////////////////////////
+	inline pybind::object ret_none_t()
+	{
+		PyObject * py_none = pybind::ret_none();
 
+		return pybind::object( py_none );
+	}
+	//////////////////////////////////////////////////////////////////////////
 	inline bool extract_value( PyObject * _obj, pybind::object & _value )
 	{
 		_value = pybind::object( _obj );
 
 		return true;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	inline PyObject * ptr_throw( const pybind::object & _value )
+	{
+		PyObject * obj = _value.ptr();
+
+		pybind::incref( obj );
+
+		return obj;
 	}
 }

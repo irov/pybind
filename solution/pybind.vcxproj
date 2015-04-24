@@ -199,6 +199,7 @@
     <ClInclude Include="..\include\pybind\function_proxy_call.hpp" />
     <ClInclude Include="..\include\pybind\functor.hpp" />
     <ClInclude Include="..\include\pybind\functor_adapter.hpp" />
+    <ClInclude Include="..\include\pybind\helper.hpp" />
     <ClInclude Include="..\include\pybind\list.hpp" />
     <ClInclude Include="..\include\pybind\member_adapter.hpp" />
     <ClInclude Include="..\include\pybind\method_adapter.hpp" />
