@@ -10,5 +10,6 @@
 #	include "pybind/helper.hpp"
 #	include "pybind/object.hpp"
 #	include "pybind/tuple.hpp"
+#	include "pybind/list.hpp"
 
 

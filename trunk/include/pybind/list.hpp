@@ -19,7 +19,7 @@ namespace pybind
 			extract_list_operator_t( const extract_list_operator_t & _r )
 				: m_list( _r.m_list )
 				, m_value( _r.m_value )
-				, m_index( _r.index )
+				, m_index( _r.m_index )
 			{
 				pybind::incref( m_list );
 				pybind::incref( m_value );
@@ -78,6 +78,17 @@ namespace pybind
 		: public object
 	{
 	public:
+		list()
+		{
+			m_obj = pybind::list_new( 0 );
+		}
+		
+		explicit list( PyObject * _obj )
+			: pybind::object( _obj )
+		{
+		}
+
+	public:
 		detail::extract_list_operator_t operator [] ( size_t _index )
 		{
 			PyObject * py_item = pybind::list_getitem( m_obj, _index );
@@ -103,11 +114,20 @@ namespace pybind
 			return this->size() == 0;
 		}
 	};
-
+	//////////////////////////////////////////////////////////////////////////
 	inline bool extract_value( PyObject * _obj, pybind::list & _value )
 	{
 		_value = pybind::list( _obj );
 
 		return true;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	inline PyObject * ptr_throw( const pybind::list & _value )
+	{
+		PyObject * obj = _value.ptr();
+
+		pybind::incref( obj );
+
+		return obj;
 	}
 }

@@ -1,10 +1,13 @@
 #	pragma once
 
+#	include <exception>
+
 #	include "exports.hpp"
 
 namespace pybind
 {
 	class pybind_exception
+		: public std::exception
 	{
 	public:
 		pybind_exception()
@@ -18,7 +21,7 @@ namespace pybind
 		}
 
 	public:
-		const char * what() const
+		const char * what() const override
 		{
 			return m_message;
 		}
