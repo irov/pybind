@@ -49,6 +49,11 @@ namespace pybind
 			return m_obj == nullptr;
 		}
 
+		bool is_none() const
+		{
+			return pybind::is_none( m_obj );
+		}
+
 	public:
 		detail::extract_operator_t operator () () const
 		{
