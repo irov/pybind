@@ -2,7 +2,9 @@
 
 #	include "pybind/system.hpp"
 #	include "pybind/exception.hpp"
+#	include "pybind/bindable.hpp"
 #	include "pybind/type_cast.hpp"
+#	include "pybind/type_traits.hpp"
 
 namespace pybind
 {
@@ -182,13 +184,32 @@ namespace pybind
 	PYBIND_API PyObject * ptr_throw( const char * _value );
 	PYBIND_API PyObject * ptr_throw( const wchar_t * _value );
 	PYBIND_API PyObject * ptr_throw( PyObject * _value );
+	PYBIND_API PyObject * ptr_throw( pybind::bindable * _value );
 
+	template<typename T, typename = void>
+	struct ptr_throw_specialized
+	{
+		PyObject * operator () ( const T & _t )
+		{
+			return ptr_throw( _t );
+		}
+	};
+
+	template<typename T>
+	struct ptr_throw_specialized < T, typename detail::enable_if<detail::is_base_of<pybind::bindable, typename detail::remove_ptr<T>::type>::value>::type >
+	{
+		PyObject * operator () ( pybind::bindable * _t )
+		{
+			return ptr_throw( _t );
+		}
+	};
+	
     template<class T>
     PyObject * ptr( const T & _value )
     {
         try
         {
-            PyObject * value = ptr_throw( _value );
+			PyObject * value = ptr_throw_specialized<T>()( _value );
 
             return value;
         }

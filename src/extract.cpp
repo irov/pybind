@@ -500,4 +500,13 @@ namespace pybind
 	{
 		return _value;
 	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * ptr_throw( pybind::bindable * _value )
+	{
+		PyObject * py_obj = _value->getEmbed();
+
+		pybind::incref( py_obj );
+
+		return py_obj;
+	}
 }
