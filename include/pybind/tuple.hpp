@@ -115,6 +115,11 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	inline bool extract_value( PyObject * _obj, pybind::tuple & _value )
 	{ 
+		if( _obj == nullptr )
+		{
+			return false;
+		}
+
 		if( pybind::tuple_check( _obj ) == false )
 		{
 			return false;

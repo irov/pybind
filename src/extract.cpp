@@ -9,6 +9,11 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, bool & _value )
 	{
+		if( _obj == nullptr )
+		{
+			return false;
+		}
+
 		if( PyBool_Check( _obj ) )
 		{
 			_value = (_obj == Py_True);
@@ -37,6 +42,11 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, int8_t & _value )
 	{
+		if( _obj == nullptr )
+		{
+			return false;
+		}
+
 #   if PYBIND_PYTHON_VERSION < 300
 		if( PyInt_Check( _obj ) )
 		{
@@ -62,6 +72,11 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, int16_t & _value )
 	{
+		if( _obj == nullptr )
+		{
+			return false;
+		}
+
 #   if PYBIND_PYTHON_VERSION < 300
 		if( PyInt_Check( _obj ) )
 		{
@@ -87,6 +102,11 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, int32_t & _value )
 	{
+		if( _obj == nullptr )
+		{
+			return false;
+		}
+
 #   if PYBIND_PYTHON_VERSION < 300
 		if( PyInt_Check( _obj ) )
 		{
@@ -112,6 +132,11 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, int64_t & _value )
 	{
+		if( _obj == nullptr )
+		{
+			return false;
+		}
+
 #   if PYBIND_PYTHON_VERSION < 300
 		if( PyInt_Check( _obj ) )
 		{
@@ -137,6 +162,11 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, uint8_t & _value )
 	{
+		if( _obj == nullptr )
+		{
+			return false;
+		}
+
 #   if PYBIND_PYTHON_VERSION < 300
 		if( PyInt_Check( _obj ) )
 		{
@@ -162,6 +192,11 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, uint16_t & _value )
 	{
+		if( _obj == nullptr )
+		{
+			return false;
+		}
+
 #   if PYBIND_PYTHON_VERSION < 300
 		if( PyInt_Check( _obj ) )
 		{
@@ -187,6 +222,11 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, uint32_t & _value )
 	{
+		if( _obj == nullptr )
+		{
+			return false;
+		}
+
 #   if PYBIND_PYTHON_VERSION < 300
 		if( PyInt_Check( _obj ) )
 		{
@@ -212,6 +252,11 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, uint64_t & _value )
 	{
+		if( _obj == nullptr )
+		{
+			return false;
+		}
+
 #   if PYBIND_PYTHON_VERSION < 300
 		if( PyInt_Check( _obj ) )
 		{
@@ -237,6 +282,11 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, long & _value )
 	{
+		if( _obj == nullptr )
+		{
+			return false;
+		}
+
 #   if PYBIND_PYTHON_VERSION < 300
 		if( PyInt_Check( _obj ) )
 		{
@@ -262,6 +312,11 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, unsigned long & _value )
 	{
+		if( _obj == nullptr )
+		{
+			return false;
+		}
+
 #   if PYBIND_PYTHON_VERSION < 300
 		if( PyInt_Check( _obj ) )
 		{
@@ -287,6 +342,11 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, float & _value )
 	{
+		if( _obj == nullptr )
+		{
+			return false;
+		}
+
 		if( PyFloat_Check( _obj ) )
 		{
 			_value = (float)PyFloat_AsDouble( _obj );
@@ -311,6 +371,11 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, double & _value )
 	{
+		if( _obj == nullptr )
+		{
+			return false;
+		}
+
 		if( PyFloat_Check( _obj ) )
 		{
 			_value = (double)PyFloat_AsDouble( _obj );				
@@ -335,6 +400,11 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, const char *& _value )
 	{
+		if( _obj == nullptr )
+		{
+			return false;
+		}
+
 		if( pybind::string_check( _obj ) == true )
 		{
             const char * ch_buff = pybind::string_to_char( _obj );
@@ -356,6 +426,11 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, const wchar_t *& _value )
 	{
+		if( _obj == nullptr )
+		{
+			return false;
+		}
+
 		if( pybind::unicode_check( _obj ) == true )
 		{
 			const wchar_t * ch_buff = pybind::unicode_to_wchar( _obj );
@@ -377,6 +452,11 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, PyObject *& _value )
 	{
+		if( _obj == nullptr )
+		{
+			return false;
+		}
+
 		_value = _obj;
 
 		return true;

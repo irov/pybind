@@ -2,6 +2,7 @@
 
 #	include "pybind/system.hpp"
 #	include "pybind/exception.hpp"
+#	include "pybind/logger.hpp"
 #	include "pybind/bindable.hpp"
 #	include "pybind/type_cast.hpp"
 #	include "pybind/type_traits.hpp"
@@ -30,6 +31,17 @@ namespace pybind
 			static bool extract( PyObject * _obj, T_WOCR & _value )
 			{
 				const std::type_info & tinfo = typeid(T_WOCR);
+
+				if( _obj == nullptr )
+				{
+					const char * type_name = tinfo.name();
+
+					pybind::throw_exception( "extract obj is NULL for '%.256s'"
+						, type_name
+						);
+
+					return false;
+				}
 
 				type_cast * etype = type_down_cast<T_WOCR>::find();
 
@@ -107,11 +119,11 @@ namespace pybind
 	PYBIND_API bool extract_value( PyObject * _obj, PyObject * & _value );
 
     template<class T>
-	typename detail::extract_return<T>::type extract( PyObject * _obj )
+	typename detail::extract_return<T>::type extract_throw( PyObject * _obj )
 	{
         typedef typename detail::extract_return<T>::type TValue;
 		TValue value;
-        
+		       
 		if( extract_value( _obj, value ) == false )
         {
             const std::type_info & tinfo = typeid(TValue);
@@ -123,10 +135,30 @@ namespace pybind
                 , pybind::object_repr_type(_obj)
                 , type_name
                 );
-
-            return value;
         }
         
+		return value;
+	}
+
+	template<class T>
+	typename detail::extract_return<T>::type extract( PyObject * _obj )
+	{
+		typedef typename detail::extract_return<T>::type TValue;
+		TValue value;
+
+		if( extract_value( _obj, value ) == false )
+		{
+			const std::type_info & tinfo = typeid(TValue);
+
+			const char * type_name = tinfo.name();
+
+			pybind::log( "extract invalid %s:%s not cast to '%s'"
+				, pybind::object_repr( _obj )
+				, pybind::object_repr_type( _obj )
+				, type_name
+				);
+		}
+
 		return value;
 	}
 	   
