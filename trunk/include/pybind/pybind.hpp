@@ -11,5 +11,6 @@
 #	include "pybind/object.hpp"
 #	include "pybind/tuple.hpp"
 #	include "pybind/list.hpp"
+#	include "pybind/dict.hpp"
 
 
