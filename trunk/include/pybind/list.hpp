@@ -41,13 +41,13 @@ namespace pybind
 			template<class T>
 			operator T ()
 			{
-				return pybind::extract<T>( m_value );
+				return pybind::extract_throw<T>( m_value );
 			}
 
 			template<class T>
 			bool operator == (const T & _value)
 			{
-				return pybind::extract<T>( m_value ) == _value;
+				return pybind::extract_throw<T>( m_value ) == _value;
 			}
 
 			template<class T>
@@ -117,6 +117,11 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	inline bool extract_value( PyObject * _obj, pybind::list & _value )
 	{
+		if( _obj == nullptr )
+		{
+			return false;
+		}
+
 		if( pybind::list_check( _obj ) == false )
 		{
 			return false;

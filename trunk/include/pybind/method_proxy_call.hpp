@@ -43,7 +43,7 @@ namespace pybind
 			PyObject * _arg0 = tuple_getitem( _arg, 0 );
 
 			return (_proxy->*f)( _obj
-				, extract<typename f_info::param1>( _arg0 )
+				, extract_throw<typename f_info::param1>( _arg0 )
 				);
 		}	
 	};
@@ -59,8 +59,8 @@ namespace pybind
 			PyObject * _arg1 = tuple_getitem( _arg, 1 );
 
 			return (_proxy->*f)( _obj
-				, extract<typename f_info::param1>( _arg0 ) 
-				, extract<typename f_info::param2>( _arg1 )
+				, extract_throw<typename f_info::param1>( _arg0 )
+				, extract_throw<typename f_info::param2>( _arg1 )
 				);
 		}	
 	};
@@ -77,9 +77,9 @@ namespace pybind
 			PyObject * _arg2 = tuple_getitem( _arg, 2 );
 
 			return (_proxy->*f)( _obj
-				, extract<typename f_info::param1>( _arg0 )
-				, extract<typename f_info::param2>( _arg1 )
-				, extract<typename f_info::param3>( _arg2 )
+				, extract_throw<typename f_info::param1>( _arg0 )
+				, extract_throw<typename f_info::param2>( _arg1 )
+				, extract_throw<typename f_info::param3>( _arg2 )
 				);
 		}
 	};
@@ -97,10 +97,10 @@ namespace pybind
 			PyObject * _arg3 = tuple_getitem( _arg, 3 );
 
 			return (_proxy->*f)( _obj
-				, extract<typename f_info::param1>( _arg0 )
-				, extract<typename f_info::param2>( _arg1 )
-				, extract<typename f_info::param3>( _arg2 )
-				, extract<typename f_info::param4>( _arg3 )
+				, extract_throw<typename f_info::param1>( _arg0 )
+				, extract_throw<typename f_info::param2>( _arg1 )
+				, extract_throw<typename f_info::param3>( _arg2 )
+				, extract_throw<typename f_info::param4>( _arg3 )
 				);
 		}
 	};
@@ -119,11 +119,11 @@ namespace pybind
             PyObject * _arg4 = tuple_getitem( _arg, 4 );
 
             return (_proxy->*f)( _obj
-                , extract<typename f_info::param1>( _arg0 )
-                , extract<typename f_info::param2>( _arg1 )
-                , extract<typename f_info::param3>( _arg2 )
-                , extract<typename f_info::param4>( _arg3 )
-                , extract<typename f_info::param5>( _arg4 )
+				, extract_throw<typename f_info::param1>( _arg0 )
+				, extract_throw<typename f_info::param2>( _arg1 )
+				, extract_throw<typename f_info::param3>( _arg2 )
+				, extract_throw<typename f_info::param4>( _arg3 )
+				, extract_throw<typename f_info::param5>( _arg4 )
                 );
         }
     };

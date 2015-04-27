@@ -67,7 +67,7 @@ namespace pybind
 
 			C * obj = static_cast<C*>(impl);
 
-			obj->*m_member = pybind::extract<A>( _args );
+			obj->*m_member = pybind::extract_throw<A>( _args );
 
 			return 1;
 		}
@@ -114,7 +114,7 @@ namespace pybind
 			typedef typename function_parser<FS>::result f_info;
 				
 			(obj->*m_set)(
-				pybind::extract<typename f_info::param0>( _args )
+				pybind::extract_throw<typename f_info::param0>( _args )
 				);
 
 			return 1;
@@ -163,7 +163,7 @@ namespace pybind
 			typedef typename function_parser<FS>::result f_info;
 
 			(*m_set)( obj
-				, pybind::extract<typename f_info::param1>( _args )
+				, pybind::extract_throw<typename f_info::param1>( _args )
 				);
 
 			return 1;

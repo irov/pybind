@@ -900,13 +900,18 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     const char * object_repr_type( PyObject * _obj )
     {
+		if( _obj == nullptr )
+		{
+			return "NULL";
+		}
+
         PyTypeObject * type = Py_TYPE(_obj);
 
         PyObject * repr = PyObject_Repr( (PyObject *)type );
 
         if( repr == nullptr )
         {
-			return nullptr;
+			return "INVALID";
         }
 
         const char * str = pybind::string_to_char( repr );
@@ -916,11 +921,16 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
 	const char * object_repr( PyObject * _obj )
 	{
+		if( _obj == nullptr )
+		{
+			return "NULL";
+		}
+
 		PyObject * py_repr = PyObject_Repr( _obj );
 		
 		if( py_repr == nullptr )
 		{
-			return nullptr;
+			return "INVALID";
 		}
 
         const char * str = pybind::string_to_char( py_repr );
@@ -930,11 +940,16 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	const char * object_str( PyObject * _obj )
 	{
+		if( _obj == nullptr )
+		{
+			return "NULL";
+		}
+
 		PyObject * py_str = PyObject_Str( _obj );
 
 		if( py_str == nullptr )
 		{
-			return nullptr;
+			return "INVALID";
 		}
 
 		const char * str = pybind::string_to_char( py_str );

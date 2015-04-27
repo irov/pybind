@@ -107,7 +107,7 @@ namespace pybind
 
 			s_write_buffer_t( _buffer, _capacity, type, _offset );
 
-			int32_t value = pybind::extract<int32_t>( _obj );
+			int32_t value = pybind::extract_throw<int32_t>( _obj );
 
 			s_write_buffer_t( _buffer, _capacity, value, _offset );
 		}
@@ -117,7 +117,7 @@ namespace pybind
 
 			s_write_buffer_t( _buffer, _capacity, type, _offset );
 
-			int64_t value = pybind::extract<int64_t>( _obj );
+			int64_t value = pybind::extract_throw<int64_t>( _obj );
 
 			s_write_buffer_t( _buffer, _capacity, value, _offset );
 		}
@@ -127,7 +127,7 @@ namespace pybind
 
 			s_write_buffer_t( _buffer, _capacity, type, _offset );
 
-			float value = pybind::extract<float>( _obj );
+			float value = pybind::extract_throw<float>( _obj );
 
 			s_write_buffer_t( _buffer, _capacity, value, _offset );
 		}
