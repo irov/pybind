@@ -22,6 +22,7 @@ namespace pybind
 		{
 			pybind::decref( m_embed );
 			m_embed = _embed;
+			pybind::incref( m_embed );
 
 			this->_embedding( m_embed );
 		}

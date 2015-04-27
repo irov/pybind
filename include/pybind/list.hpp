@@ -117,6 +117,11 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	inline bool extract_value( PyObject * _obj, pybind::list & _value )
 	{
+		if( pybind::list_check( _obj ) == false )
+		{
+			return false;
+		}
+
 		_value = pybind::list( _obj );
 
 		return true;

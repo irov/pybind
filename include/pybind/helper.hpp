@@ -12,7 +12,7 @@ namespace pybind
 		class extract_operator_t
 		{
 		public:
-			extract_operator_t( PyObject * _obj )
+			explicit extract_operator_t( PyObject * _obj )
 				: m_obj( _obj )
 			{
 			}
@@ -143,72 +143,6 @@ namespace pybind
 
 		return pybind::tuple_setitem( _tuple, _it, py_item );
 	}
-	////////////////////////////////////////////////////////////////////////////
-	//template<class T0>
-	//inline bool list_appendtuple_t( PyObject * _obj, const T0 & _t0 )
-	//{
-	//	PyObject * py_tuple = pybind::make_tuple_t( _t0 );
-
-	//	if( py_tuple == nullptr )
-	//	{
-	//		return false;
-	//	}
-
-	//	bool result = pybind::list_appenditem( _obj, py_tuple );
-
-	//	pybind::decref( py_tuple );
-
-	//	return result;
-	//}
-	////////////////////////////////////////////////////////////////////////////
-	//template<class T0, class T1>
-	//inline bool list_appendtuple_t( PyObject * _obj, const T0 & _t0, const T1 & _t1 )
-	//{
-	//	PyObject * py_tuple = pybind::make_tuple_t( _t0, _t1 );
-
-	//	if( py_tuple == nullptr )
-	//	{
-	//		return false;
-	//	}
-
-	//	bool result = pybind::list_appenditem( _obj, py_tuple );
-
-	//	pybind::decref( py_tuple );
-
-	//	return result;
-	//}
-	////////////////////////////////////////////////////////////////////////////
-	//template<class T0, class T1, class T2>
-	//inline bool list_appendtuple_t( const pybind::list & _list, const T0 & _t0, const T1 & _t1, const T2 & _t2 )
-	//{
-	//	pybind::tuple py_tuple = pybind::make_tuple_t( _t0, _t1, _t2 );
-
-	//	if( py_tuple.valid() == false )
-	//	{
-	//		return false;
-	//	}
-
-	//	_list.append( py_tuple );
-	//	
-	//	return true;
-	//}
-	////////////////////////////////////////////////////////////////////////////
-	//template<class T0, class T1, class T2, class T3>
-	//inline bool list_appendtuple_t( PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3 )
-	//{
-	//	PyObject * py_tuple = pybind::make_tuple_t( _t0, _t1, _t2, _t3 );
-
-	//	if( py_tuple == nullptr )
-	//	{
-	//		return false;
-	//	}
-
-	//	bool result = pybind::list_appenditem( _obj, py_tuple );
-
-	//	pybind::decref( py_tuple );
-
-	//	return result;
-	//}
 	//////////////////////////////////////////////////////////////////////////
 	inline detail::extract_operator_t ask_t( PyObject * _obj )
 	{
@@ -304,7 +238,7 @@ namespace pybind
 	template<class T0, class T1, class T2, class T3, class T4, class T5>
 	inline detail::extract_operator_t ask_t( PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4, const T5 & _t5 )
 	{
-		PyObject * py_args = pybind::tuple_new( 5 );
+		PyObject * py_args = pybind::tuple_new( 6 );
 
 		pybind::tuple_setitem_t( py_args, 0, _t0 );
 		pybind::tuple_setitem_t( py_args, 1, _t1 );
@@ -323,7 +257,7 @@ namespace pybind
 	template<class T0, class T1, class T2, class T3, class T4, class T5, class T6>
 	inline detail::extract_operator_t ask_t( PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4, const T5 & _t5, const T6 & _t6 )
 	{
-		PyObject * py_args = pybind::tuple_new( 5 );
+		PyObject * py_args = pybind::tuple_new( 7 );
 
 		pybind::tuple_setitem_t( py_args, 0, _t0 );
 		pybind::tuple_setitem_t( py_args, 1, _t1 );
@@ -343,7 +277,7 @@ namespace pybind
 	template<class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7>
 	inline detail::extract_operator_t ask_t( PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4, const T5 & _t5, const T6 & _t6, const T7 & _t7 )
 	{
-		PyObject * py_args = pybind::tuple_new( 5 );
+		PyObject * py_args = pybind::tuple_new( 8 );
 
 		pybind::tuple_setitem_t( py_args, 0, _t0 );
 		pybind::tuple_setitem_t( py_args, 1, _t1 );
