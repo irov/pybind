@@ -113,6 +113,11 @@ namespace pybind
 		return pybind::tuple(py_tuple);
 	}
 	//////////////////////////////////////////////////////////////////////////
+	inline pybind::tuple make_invalid_tuple_t()
+	{
+		return pybind::tuple( nullptr );
+	}
+	//////////////////////////////////////////////////////////////////////////
 	inline bool extract_value( PyObject * _obj, pybind::tuple & _value )
 	{ 
 		if( _obj == nullptr )
