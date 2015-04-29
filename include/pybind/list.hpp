@@ -55,7 +55,7 @@ namespace pybind
 			{
 				PyObject * py_value = pybind::ptr( _value );
 
-				if( py_item == nullptr )
+				if( py_value == nullptr )
 				{
 					return;
 				}
@@ -64,7 +64,7 @@ namespace pybind
 
 				pybind::decref( m_value );
 				m_value = py_value;
-				pybind::incref( m_value )
+				pybind::incref( m_value );
 			}
 
 		protected:
