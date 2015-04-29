@@ -3,12 +3,14 @@
 #	include "pybind/system.hpp"
 #	include "pybind/exception.hpp"
 #	include "pybind/logger.hpp"
-#	include "pybind/bindable.hpp"
+//#	include "pybind/bindable.hpp"
 #	include "pybind/type_cast.hpp"
 #	include "pybind/type_traits.hpp"
 
 namespace pybind
 {
+	class bindable;
+
 	namespace detail
 	{
 		template<class T>

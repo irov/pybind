@@ -1,6 +1,6 @@
 #	pragma once
 
-#	include "pybind/system.hpp"
+#	include "pybind/object.hpp"
 
 namespace pybind
 {
@@ -8,7 +8,6 @@ namespace pybind
 	{
 	public:
 		bindable()
-			: m_embed( nullptr )
 		{
 		}
 
@@ -18,24 +17,22 @@ namespace pybind
 		}
 
 	public:
-		void setEmbed( PyObject * _embed )
+		void setEmbed( const pybind::object & _embed )
 		{
-			pybind::decref( m_embed );
 			m_embed = _embed;
-			pybind::incref( m_embed );
 
 			this->_embedding( m_embed );
 		}
 
-		PyObject * getEmbed()
+		pybind::object getEmbed()
 		{
-			if( m_embed == nullptr )
+			if( m_embed.is_invalid() == true )
 			{
-				PyObject * embed = this->_embedded();
+				pybind::object embed = this->_embedded();
 
-				if( embed == nullptr )
+				if( embed.is_invalid() == true )
 				{
-					return nullptr;
+					return pybind::make_invalid_object_t();
 				}
 
 				this->setEmbed( embed );
@@ -46,32 +43,26 @@ namespace pybind
 
 		bool isEmbed() const
 		{
-			return m_embed != nullptr;
+			return m_embed.is_valid();
 		}
 
 	public:
 		void unwrap()
 		{
-			if( m_embed != nullptr )
-			{
-				pybind::unwrap( m_embed );
-				pybind::decref( m_embed );
-
-				m_embed = nullptr;
-			}
-		}
+m_embed.unwrap();
+}
 
 	protected:
-		virtual PyObject * _embedded() = 0;
+		virtual pybind::object _embedded() = 0;
 
 	protected:
-		virtual void _embedding( PyObject * _embed )
+		virtual void _embedding( const pybind::object & _embed )
 		{
 			(void)_embed;
 			//Empty
 		}
 
 	protected:
-		PyObject * m_embed;
+		pybind::object m_embed;
 	};
 }

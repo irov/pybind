@@ -493,6 +493,11 @@ namespace pybind
 		//////////////////////////////////////////////////////////////////////////
 		void * unwrap( PyObject * _obj )
 		{
+			if( _obj == nullptr )
+			{
+				return nullptr;
+			}
+
 			void * impl = get_class_impl( _obj );
 
 			py_base_object * py_base = (py_base_object *)_obj;

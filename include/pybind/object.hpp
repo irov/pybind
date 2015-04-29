@@ -51,6 +51,11 @@ namespace pybind
 			return m_obj == nullptr;
 		}
 
+		bool is_valid() const
+		{
+			return m_obj != nullptr;
+		}
+
 		bool is_none() const
 		{
 			return pybind::is_none( m_obj );
@@ -59,6 +64,11 @@ namespace pybind
 		bool is_bool() const
 		{
 			return pybind::bool_check( m_obj );
+		}
+
+		bool is_callable() const
+		{
+			return pybind::is_callable( m_obj );
 		}
 
 	public:
@@ -72,6 +82,12 @@ namespace pybind
 			PyObject * py_attr = pybind::get_attr( m_obj, _name );
 
 			return pybind::object(py_attr);
+		}
+
+	public:
+		void unwrap() const
+		{
+			pybind::unwrap( m_obj );
 		}
 
 	public:
@@ -146,18 +162,30 @@ namespace pybind
 		PyObject * m_obj;
 	};
 	//////////////////////////////////////////////////////////////////////////
-	inline const pybind::object & ret_none_t()
+	inline pybind::object make_none_t()
 	{
-		static pybind::object s_none(pybind::ret_none());
+		PyObject * py_none = pybind::ret_none();
 		
-		return s_none;
+		return pybind::object( py_none );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	inline const pybind::object & ret_invalid_t()
+	inline pybind::object make_true_t()
 	{
-		static pybind::object s_invalid;
+		PyObject * py_true = pybind::ret_true();
 
-		return s_invalid;
+		return pybind::object( py_true );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	inline pybind::object make_false_t()
+	{
+		PyObject * py_false = pybind::ret_false();
+
+		return pybind::object( py_false );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	inline pybind::object make_invalid_object_t()
+	{
+		return pybind::object(nullptr);
 	}
 	//////////////////////////////////////////////////////////////////////////
 	inline bool extract_value( PyObject * _obj, pybind::object & _value )

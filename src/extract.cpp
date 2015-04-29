@@ -1,6 +1,7 @@
 #	include "pybind/extract.hpp"
 
 #	include "pybind/system.hpp"
+#	include "pybind/bindable.hpp"
 
 #	include "config/python.hpp"
 
@@ -583,10 +584,12 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * ptr_throw( pybind::bindable * _value )
 	{
-		PyObject * py_obj = _value->getEmbed();
+		pybind::object py_obj = _value->getEmbed();
 
-		pybind::incref( py_obj );
+		PyObject * py_obj_ptr = py_obj.ptr();
+		
+		pybind::incref( py_obj_ptr );
 
-		return py_obj;
+		return py_obj_ptr;
 	}
 }

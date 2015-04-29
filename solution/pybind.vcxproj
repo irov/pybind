@@ -189,6 +189,7 @@
     <ClInclude Include="..\include\pybind\constructor_placement.hpp" />
     <ClInclude Include="..\include\pybind\convert_adapter.hpp" />
     <ClInclude Include="..\include\pybind\debug.hpp" />
+    <ClInclude Include="..\include\pybind\dict.hpp" />
     <ClInclude Include="..\include\pybind\exception.hpp" />
     <ClInclude Include="..\include\pybind\exports.hpp" />
     <ClInclude Include="..\include\pybind\extract.hpp" />
