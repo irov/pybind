@@ -495,7 +495,7 @@ namespace pybind
 				
 				PyObject * object_type = pybind::list_getitem( _types, index );
 
-				PyObject * obj = pybind::ask_t( object_type, value );
+				PyObject * obj = pybind::call_t( object_type, value );
 
 				if( obj == nullptr )
 				{
