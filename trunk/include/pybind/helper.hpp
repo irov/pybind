@@ -132,16 +132,27 @@ namespace pybind
 	}
 	//////////////////////////////////////////////////////////////////////////
 	template<class T>
-	inline bool tuple_setitem_t( PyObject * _tuple, size_t _it, const T & _item )
+	inline void tuple_setitem_t( PyObject * _tuple, size_t _it, const T & _item )
 	{
 		PyObject * py_item = pybind::ptr( _item );
 
 		if( py_item == nullptr )
 		{
-			return false;
+			const std::type_info & ti = typeid(T);
+			
+			pybind::throw_exception( "tuple set item %d invalid ptr '%s'"
+				, _it
+				, ti.name()
+				);
 		}
 
-		return pybind::tuple_setitem( _tuple, _it, py_item );
+		if( pybind::tuple_setitem( _tuple, _it, py_item ) == false )
+		{
+			pybind::throw_exception( "tuple invalid set item %d value '%s'"
+				, _it
+				, pybind::object_repr( py_item )
+				);
+		}
 	}
 	//////////////////////////////////////////////////////////////////////////
 	inline detail::extract_operator_t call_t( PyObject * _obj )

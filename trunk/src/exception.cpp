@@ -14,7 +14,7 @@ namespace pybind
 
 		pybind_exception ex;
 		char * buff = ex.buff();
-		vsnprintf( buff, 2048 - 1, _format, argList );
+		vsprintf( buff, _format, argList );
 
 		va_end(argList);
 
