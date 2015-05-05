@@ -17,16 +17,16 @@ namespace pybind
 			pybind::decref( m_obj );
 			m_obj = _obj.ptr();
 			pybind::incref( m_obj );
-			
+
 			return *this;
 		}
 
 		object( const object & _obj )
 			: m_obj( _obj.ptr() )
-		{			
+		{
 			pybind::incref( m_obj );
 		}
-		
+
 		explicit object( PyObject * _obj )
 			: m_obj( _obj )
 		{
@@ -44,6 +44,11 @@ namespace pybind
 			return m_obj;
 		}
 
+		void reset()
+		{
+			pybind::decref( m_obj );
+			m_obj = nullptr;
+		}
 
 	public:
 		bool is_invalid() const
@@ -81,7 +86,7 @@ namespace pybind
 		{
 			PyObject * py_attr = pybind::get_attr( m_obj, _name );
 
-			return pybind::object(py_attr);
+			return pybind::object( py_attr );
 		}
 
 	public:
@@ -96,7 +101,7 @@ namespace pybind
 			return pybind::object_repr( m_obj );
 		}
 
-	public:		
+	public:
 		detail::extract_operator_t extract()
 		{
 			pybind::incref( m_obj );
@@ -133,7 +138,7 @@ namespace pybind
 		{
 			return pybind::call_t( m_obj, _t0, _t1, _t2, _t3 );
 		}
-		
+
 		template<class T0, class T1, class T2, class T3, class T4>
 		detail::extract_operator_t operator () ( const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4 ) const
 		{
@@ -145,7 +150,7 @@ namespace pybind
 		{
 			return pybind::call_t( m_obj, _t0, _t1, _t2, _t3, _t4, _t5 );
 		}
-		
+
 		template<class T0, class T1, class T2, class T3, class T4, class T5, class T6>
 		detail::extract_operator_t operator () ( const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4, const T5 & _t5, const T6 & _t6 ) const
 		{
@@ -165,7 +170,7 @@ namespace pybind
 	inline pybind::object make_none_t()
 	{
 		PyObject * py_none = pybind::ret_none();
-		
+
 		return pybind::object( py_none );
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -185,7 +190,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	inline pybind::object make_invalid_object_t()
 	{
-		return pybind::object(nullptr);
+		return pybind::object( nullptr );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	inline bool extract_value( PyObject * _obj, pybind::object & _value )
