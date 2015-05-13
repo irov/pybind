@@ -9,7 +9,7 @@ namespace pybind
 		: public adapter_interface
     {
 	public:
-		virtual long hash( PyObject * _obj, void * _self, const class_type_scope_ptr & _scope ) = 0;
+		virtual long hash( void * _self, const class_type_scope_ptr & _scope ) = 0;
 	};
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<hash_adapter_interface> hash_adapter_interface_ptr;
@@ -27,11 +27,11 @@ namespace pybind
 		}
 
 	public:
-		long hash( PyObject * _obj, void * _self, const class_type_scope_ptr & _scope ) override
+		long hash( void * _self, const class_type_scope_ptr & _scope ) override
 		{
 			C * inst = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_name, m_class_name, _scope ) );
 
-			long hash = (*m_hash)( _obj, inst );
+			long hash = (*m_hash)( inst );
 
 			return hash;
 		}

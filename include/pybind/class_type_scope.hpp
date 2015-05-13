@@ -27,6 +27,7 @@ namespace pybind
         PYBIND_API void * get_class_impl( PyObject * _obj );
 
         PYBIND_API bool reg_class_type_scope( uint32_t _info, const class_type_scope_ptr & _scope );
+		PYBIND_API bool has_class_type_scope( uint32_t _info );
         PYBIND_API const class_type_scope_ptr & get_class_type_scope( uint32_t _info );
 
         PYBIND_API void visit_types_scope( visitor_class_type_scope * _getter );
