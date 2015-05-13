@@ -59,7 +59,7 @@ namespace pybind
 
 					return false;
 				}
-
+				
 				typedef type_cast_result<T_WOCR> type_cast_result_T_WOCR;
 
 				type_cast_result_T_WOCR * etype_impl = static_cast<type_cast_result_T_WOCR *>(etype);
@@ -87,6 +87,19 @@ namespace pybind
                             );
                     }
 					
+					return false;
+				}
+
+				if( pybind::is_wrap( _obj ) == false )
+				{
+					const char * repr_obj = pybind::object_repr( _obj );
+					const char * repr_obj_type = pybind::object_repr_type( _obj );
+
+					pybind::throw_exception( "extract from %.256s type '%.256s' unwrap"
+						, repr_obj
+						, repr_obj_type
+						);
+
 					return false;
 				}
 
