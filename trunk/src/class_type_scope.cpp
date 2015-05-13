@@ -340,6 +340,13 @@ namespace pybind
 
 			return true;
         }
+		//////////////////////////////////////////////////////////////////////////
+		bool has_class_type_scope( uint32_t _info )
+		{
+			const class_type_scope_ptr & scope = modify_class_type_scope( _info );
+
+			return scope != nullptr;
+		}
         //////////////////////////////////////////////////////////////////////////
         const class_type_scope_ptr & get_class_type_scope( uint32_t _info )
         {
@@ -749,7 +756,7 @@ namespace pybind
 
 		try
 		{
-			long hash = adapter->hash( _obj, impl, scope );
+			long hash = adapter->hash( impl, scope );
 
 			return hash;
 		}

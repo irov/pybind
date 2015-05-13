@@ -54,7 +54,7 @@ namespace pybind
 
 			uint32_t tinfo = class_info<B>();
 
-			if( detail::is_declare_base_type<B>() == false )
+			if( detail::has_class_type_scope( tinfo ) == false )
 			{
 				pybind::throw_exception( "class_core::add_base %s not bind base type %s"
 					, _scope->get_name()

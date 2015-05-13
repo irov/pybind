@@ -20,31 +20,7 @@
 #   include "pybind/constructor_placement.hpp"
 
 namespace pybind
-{	
-	namespace detail
-	{
-		template<class T>
-		struct declare_base_type_
-		{
-			static bool value;
-		};
-
-		template<class T>
-		bool declare_base_type_<T>::value = false;
-
-		template<class T>
-		static void declare_base_type()
-		{
-			declare_base_type_<T>::value = true;
-		};
-
-		template<class T>
-		static bool is_declare_base_type()
-		{
-			return declare_base_type_<T>::value;
-		}
-	}
-	
+{
 	typedef bases<void, void, void, void, void, void, void, void, void, void, void, void, void, void, void> no_bases;
 
 	template<class C, class B = no_bases>
@@ -56,8 +32,6 @@ namespace pybind
 	public:
 		base_( const char * _name, void * _user, pybind_new _pynew, pybind_destructor _pydestructor, size_t _pod, PyObject * _module )
 		{
-			detail::declare_base_type<C>();
-
 			m_info = class_info<C>();
 
 			class_type_scope_ptr scope = class_core::create_new_type_scope( m_info, _name, _user, _pynew, _pydestructor, _pod );
