@@ -5,11 +5,10 @@
 
 #	include "pybind/types.hpp"
 #	include "pybind/exports.hpp"
+#	include "pybind/exception.hpp"
 
 namespace pybind
 {
-	//typedef stdex::intrusive_ptr<class class_type_scope> class_type_scope_ptr;
-
     typedef stdex::intrusive_ptr<class repr_adapter_interface> repr_adapter_interface_ptr;
     typedef stdex::intrusive_ptr<class method_adapter_interface> method_adapter_interface_ptr;
     typedef stdex::intrusive_ptr<class member_adapter_interface> member_adapter_interface_ptr;
