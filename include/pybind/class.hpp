@@ -21,7 +21,31 @@
 
 namespace pybind
 {	
-	typedef bases<void,void,void,void,void,void,void> no_bases;
+	namespace detail
+	{
+		template<class T>
+		struct declare_base_type_
+		{
+			static bool value;
+		};
+
+		template<class T>
+		bool declare_base_type_<T>::value = false;
+
+		template<class T>
+		static void declare_base_type()
+		{
+			declare_base_type_<T>::value = true;
+		};
+
+		template<class T>
+		static bool is_declare_base_type()
+		{
+			return declare_base_type_<T>::value;
+		}
+	}
+	
+	typedef bases<void, void, void, void, void, void, void, void, void, void, void, void, void, void, void> no_bases;
 
 	template<class C, class B = no_bases>
 	class base_
@@ -32,6 +56,8 @@ namespace pybind
 	public:
 		base_( const char * _name, void * _user, pybind_new _pynew, pybind_destructor _pydestructor, size_t _pod, PyObject * _module )
 		{
+			detail::declare_base_type<C>();
+
 			m_info = class_info<C>();
 
 			class_type_scope_ptr scope = class_core::create_new_type_scope( m_info, _name, _user, _pynew, _pydestructor, _pod );
@@ -54,15 +80,22 @@ namespace pybind
 		{
 			int arity = B::base_arity;
 
-			if( arity-- > 0 )class_core::add_base<typename B::base0>(_scope, &meta_cast<typename B::base0>);
-			if( arity-- > 0 )class_core::add_base<typename B::base1>(_scope, &meta_cast<typename B::base1>);
-			if( arity-- > 0 )class_core::add_base<typename B::base2>(_scope, &meta_cast<typename B::base2>);
-			if( arity-- > 0 )class_core::add_base<typename B::base3>(_scope, &meta_cast<typename B::base3>);
-			if( arity-- > 0 )class_core::add_base<typename B::base4>(_scope, &meta_cast<typename B::base4>);
-			if( arity-- > 0 )class_core::add_base<typename B::base5>(_scope, &meta_cast<typename B::base5>);
-			if( arity-- > 0 )class_core::add_base<typename B::base6>(_scope, &meta_cast<typename B::base6>);
-			if( arity-- > 0 )class_core::add_base<typename B::base7>(_scope, &meta_cast<typename B::base7>);
-			if( arity-- > 0 )class_core::add_base<typename B::base8>(_scope, &meta_cast<typename B::base8>);
+			if( arity-- > 0 )class_core::add_base<typename B::base0>( _scope, &meta_cast<typename B::base0> );
+			if( arity-- > 0 )class_core::add_base<typename B::base1>( _scope, &meta_cast<typename B::base1> );
+			if( arity-- > 0 )class_core::add_base<typename B::base2>( _scope, &meta_cast<typename B::base2> );
+			if( arity-- > 0 )class_core::add_base<typename B::base3>( _scope, &meta_cast<typename B::base3> );
+			if( arity-- > 0 )class_core::add_base<typename B::base4>( _scope, &meta_cast<typename B::base4> );
+			if( arity-- > 0 )class_core::add_base<typename B::base5>( _scope, &meta_cast<typename B::base5> );
+			if( arity-- > 0 )class_core::add_base<typename B::base6>( _scope, &meta_cast<typename B::base6> );
+			if( arity-- > 0 )class_core::add_base<typename B::base7>( _scope, &meta_cast<typename B::base7> );
+			if( arity-- > 0 )class_core::add_base<typename B::base8>( _scope, &meta_cast<typename B::base8> );
+			if( arity-- > 0 )class_core::add_base<typename B::base9>( _scope, &meta_cast<typename B::base9> );
+			if( arity-- > 0 )class_core::add_base<typename B::base10>( _scope, &meta_cast<typename B::base10> );
+			if( arity-- > 0 )class_core::add_base<typename B::base11>( _scope, &meta_cast<typename B::base11> );
+			if( arity-- > 0 )class_core::add_base<typename B::base12>( _scope, &meta_cast<typename B::base12> );
+			if( arity-- > 0 )class_core::add_base<typename B::base13>( _scope, &meta_cast<typename B::base13> );
+			if( arity-- > 0 )class_core::add_base<typename B::base14>( _scope, &meta_cast<typename B::base14> );
+			if( arity-- > 0 )class_core::add_base<typename B::base15>( _scope, &meta_cast<typename B::base15> );
 		}
 
 		template<class F>
