@@ -397,6 +397,11 @@ namespace pybind
 
 			uint32_t flag = py_base->flag;
 
+			if( py_base->flag & PY_OBJECT_UNWRAP )
+			{
+				return nullptr;
+			}
+
 			if( flag & PY_OBJECT_PTR )
 			{
 				py_ptr_object * py_ptr = (py_ptr_object *)_obj;
