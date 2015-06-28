@@ -49,8 +49,8 @@ namespace pybind
 	public:
 		void unwrap()
 		{
-m_embed.unwrap();
-}
+			m_embed.unwrap();
+		}
 
 	protected:
 		virtual pybind::object _embedded() = 0;
