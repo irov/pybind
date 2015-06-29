@@ -110,7 +110,7 @@ namespace pybind
         uint32_t getObjectCount() const;
 
     public:
-        void intrusive_ptr_destroy();
+		static void intrusive_ptr_destroy( class_type_scope * _ptr );
 
 	public:
 		void * operator new ( size_t _size );

@@ -120,9 +120,9 @@ namespace pybind
 		PYBIND_FREE(_ptr, _size);
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void type_cast::intrusive_ptr_destroy()
+	void type_cast::intrusive_ptr_destroy( type_cast * _ptr )
 	{
-		delete this;
+		delete _ptr;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool type_cast::type_info_cast( PyObject * _obj, uint32_t _tinfo, uint32_t _tptrinfo, void ** _impl )
