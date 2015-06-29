@@ -41,6 +41,11 @@ namespace pybind
 			return m_embed;
 		}
 
+		void removeEmbed()
+		{
+			m_embed.reset();
+		}
+
 		bool isEmbed() const
 		{
 			return m_embed.is_valid();

@@ -65,7 +65,7 @@ namespace pybind
 		public:
 			PyObject * setup( const functor_adapter_interface_ptr & _adapter )
 			{
-                size_t arity = _adapter->getArity();
+				uint32_t arity = _adapter->getArity();
                 const char * name = _adapter->getName();
 
 				m_method.ml_name = name;

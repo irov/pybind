@@ -11,7 +11,7 @@
 namespace pybind
 {	
     //////////////////////////////////////////////////////////////////////////
-    class_type_scope_ptr class_core::create_new_type_scope( uint32_t _info, const char * _name, void * _user, pybind::pybind_new _pynew, pybind::pybind_destructor _pydestructor, size_t _pod )
+	class_type_scope_ptr class_core::create_new_type_scope( uint32_t _info, const char * _name, void * _user, pybind::pybind_new _pynew, pybind::pybind_destructor _pydestructor, uint32_t _pod )
     {
         class_type_scope_ptr scope = new class_type_scope( _name, _info, _user, _pynew, _pydestructor, _pod );
 
@@ -55,11 +55,11 @@ namespace pybind
 		return obj;
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * class_core::create_pod( uint32_t _info, void ** _impl, size_t _size )
+	PyObject * class_core::create_pod( uint32_t _info, void ** _impl, size_t _pod )
     {
         const class_type_scope_ptr & t_scope = detail::get_class_type_scope( _info );
 
-        PyObject * obj = t_scope->create_pod( _impl, _size );
+		PyObject * obj = t_scope->create_pod( _impl, _pod );
 
 		return obj;
     }
