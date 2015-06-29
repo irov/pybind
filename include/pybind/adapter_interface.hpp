@@ -19,7 +19,7 @@ namespace pybind
 		};
 
     public:
-        void intrusive_ptr_destroy();
+		static void intrusive_ptr_destroy( adapter_interface * _ptr );
 
 	public:
 		void * operator new ( size_t _size );
