@@ -30,11 +30,18 @@ namespace pybind
 		typedef B bases_type;
 
 	public:
-		base_( const char * _name, void * _user, pybind_new _pynew, pybind_destructor _pydestructor, size_t _pod, PyObject * _module )
+		base_( const char * _name, void * _user, pybind_new _pynew, pybind_destructor _pydestructor, size_t _size, PyObject * _module )
 		{
 			m_info = class_info<C>();
 
-			class_type_scope_ptr scope = class_core::create_new_type_scope( m_info, _name, _user, _pynew, _pydestructor, _pod );
+			uint32_t pod = 0;
+
+			if( _size <= PYBIND_OBJECT_POD_SIZE )
+			{
+				pod = (uint32_t)_size;
+			}
+
+			class_type_scope_ptr scope = class_core::create_new_type_scope( m_info, _name, _user, _pynew, _pydestructor, pod );
 
 			this->setup_bases( scope );
 
@@ -481,7 +488,7 @@ namespace pybind
 			void * obj_place = nullptr;
 
 			size_t size_C = sizeof(C);
-
+			
 			PyObject * py_obj = class_core::create_pod( tinfo, &obj_place, size_C );
 
 			if( py_obj == nullptr )

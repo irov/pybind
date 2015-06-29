@@ -50,6 +50,13 @@ namespace pybind
 			m_obj = nullptr;
 		}
 
+		uint32_t get_ref() const
+		{
+			uint32_t ref = pybind::refcount( m_obj );
+
+			return ref;
+		}
+
 	public:
 		bool is_invalid() const
 		{

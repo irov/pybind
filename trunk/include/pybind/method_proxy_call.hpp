@@ -161,8 +161,8 @@ namespace pybind
 
 		static PyObject * call( P * _proxy, C * _obj, F f, PyObject * _arg )
 		{
-			size_t arg_size = pybind::tuple_size(_arg);
-            size_t fn_arity = f_info::arity;
+			uint32_t arg_size = pybind::tuple_size( _arg );
+			uint32_t fn_arity = f_info::arity;
 
             if( arg_size + 1 != fn_arity )
             {

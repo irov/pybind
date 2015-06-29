@@ -502,9 +502,9 @@ namespace pybind
 		Py_XDECREF( _obj );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	size_t refcount( PyObject * _obj )
+	uint32_t refcount( PyObject * _obj )
 	{
-		return (size_t)_obj->ob_refcnt;
+		return (uint32_t)_obj->ob_refcnt;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool is_callable( PyObject * _obj )

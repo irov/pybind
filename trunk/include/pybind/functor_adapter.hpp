@@ -10,7 +10,7 @@ namespace pybind
         : public adapter_interface
 	{
 	public:
-		functor_adapter_interface( const char * _name, size_t _arity )
+		functor_adapter_interface( const char * _name, uint32_t _arity )
 			: m_name(_name)
 			, m_arity(_arity)
 		{
@@ -23,7 +23,7 @@ namespace pybind
 		}
 
     public:
-        size_t getArity() const
+		uint32_t getArity() const
 		{
 			return m_arity;
 		}        
@@ -33,7 +33,7 @@ namespace pybind
 
 	protected:
 		const char * m_name;
-		size_t m_arity;
+		uint32_t m_arity;
 	};
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<class functor_adapter_interface> functor_adapter_interface_ptr;
@@ -43,7 +43,7 @@ namespace pybind
 		: public functor_adapter_interface
 	{
 	public:
-		functor_proxy_adapter( const char * _name, size_t _arity, C * _self, M _method )
+		functor_proxy_adapter( const char * _name, uint32_t _arity, C * _self, M _method )
 			: functor_adapter_interface(_name, _arity)
 			, m_self(_self)
 			, m_method(_method)			
