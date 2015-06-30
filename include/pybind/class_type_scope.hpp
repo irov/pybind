@@ -69,7 +69,7 @@ namespace pybind
 	public:
 		const char * get_name() const;
 		uint32_t get_type_id() const;
-		size_t is_pod() const;
+		uint32_t is_pod() const;
 
         void * get_user() const;
 
