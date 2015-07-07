@@ -90,19 +90,6 @@ namespace pybind
 					return false;
 				}
 
-				if( pybind::is_none( _obj ) == false && pybind::is_wrap( _obj ) == false )
-				{
-					const char * repr_obj = pybind::object_repr( _obj );
-					const char * repr_obj_type = pybind::object_repr_type( _obj );
-
-					pybind::throw_exception( "extract from %.256s type '%.256s' unwrap"
-						, repr_obj
-						, repr_obj_type
-						);
-
-					return false;
-				}
-
 				return true;
 			}
 		};
