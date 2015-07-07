@@ -24,6 +24,7 @@ namespace pybind
 	namespace detail
 	{
         PYBIND_API bool is_class( PyObject * _obj );
+		PYBIND_API bool is_type_class( PyObject * _obj );
         PYBIND_API void * get_class_impl( PyObject * _obj );
 
         PYBIND_API bool reg_class_type_scope( uint32_t _info, const class_type_scope_ptr & _scope );
@@ -72,6 +73,14 @@ namespace pybind
 		uint32_t is_pod() const;
 
         void * get_user() const;
+
+		template<class T>
+		T * get_user_t() const
+		{
+			void * ptr = this->get_user();
+
+			return static_cast<T *>(ptr);
+		}
 
         PyTypeObject * get_typemodule() const;
 

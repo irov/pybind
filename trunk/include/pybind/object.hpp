@@ -2,10 +2,20 @@
 
 #	include "pybind/helper.hpp"
 
+#	include "pybind/class_type_scope.hpp"
+
 namespace pybind
 {
 	class object
 	{
+	public:
+		static const pybind::object & get_invalid()
+		{
+			static pybind::object s_obj;
+
+			return s_obj;
+		}
+
 	public:
 		object()
 			: m_obj( nullptr )
@@ -66,6 +76,21 @@ namespace pybind
 		bool is_valid() const
 		{
 			return m_obj != nullptr;
+		}
+
+		bool is_wrap() const
+		{
+			return pybind::detail::is_wrap( m_obj );
+		}
+
+		bool is_class() const
+		{
+			return pybind::detail::is_class( m_obj );
+		}
+
+		bool is_type_class() const
+		{
+			return pybind::detail::is_type_class( m_obj );
 		}
 
 		bool is_none() const

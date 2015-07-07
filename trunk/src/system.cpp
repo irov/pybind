@@ -1093,6 +1093,20 @@ namespace pybind
 		return result;
 	}
 	//////////////////////////////////////////////////////////////////////////
+	bool is_class( PyObject * _value )
+	{
+		bool result = detail::is_class( _value );
+
+		return result;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool is_type_class( PyObject * _value )
+	{
+		bool result = detail::is_type_class( _value );
+
+		return result;
+	}
+	//////////////////////////////////////////////////////////////////////////
 	bool type_initialize( PyObject * _value )
 	{
 		PyTypeObject * type = (PyTypeObject *)_value;
