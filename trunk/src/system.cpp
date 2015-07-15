@@ -857,7 +857,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
 	PyObject * dict_items( PyObject * _dict )
 	{
-        PyObject * obj = PyDict_Items( _dict );
+		PyObject * obj = PyDict_Items( _dict );
 
 		return obj;
 	}

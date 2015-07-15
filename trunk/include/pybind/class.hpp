@@ -30,7 +30,7 @@ namespace pybind
 		typedef B bases_type;
 
 	public:
-		base_( const char * _name, void * _user, pybind_new _pynew, pybind_destructor _pydestructor, size_t _size, PyObject * _module )
+		base_( const char * _name, void * _user, const class_new_interface_ptr & _pynew, const class_destructor_interface_ptr & _pydestructor, size_t _size, PyObject * _module )
 		{
 			m_info = class_info<C>();
 
