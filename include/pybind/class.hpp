@@ -4,6 +4,7 @@
 
 #	include "pybind/class_info.hpp"
 #	include "pybind/class_core.hpp"
+#	include "pybind/class_new_interface.hpp"
 #	include "pybind/class_type_scope.hpp"
 #	include "pybind/function_parser.hpp"
 
@@ -30,7 +31,7 @@ namespace pybind
 		typedef B bases_type;
 
 	public:
-		base_( const char * _name, void * _user, const class_new_interface_ptr & _pynew, const class_destructor_interface_ptr & _pydestructor, size_t _size, PyObject * _module )
+		base_( const char * _name, void * _user, const class_new_interface_ptr & _pynew, const class_destroy_interface_ptr & _pydestructor, size_t _size, PyObject * _module )
 		{
 			m_info = class_info<C>();
 
@@ -300,55 +301,6 @@ namespace pybind
 			return *this;
 		}
         
-		static void * new_( const pybind::class_type_scope_ptr & _scope, PyObject * _obj, PyObject * _args, PyObject * _kwds )
-		{
-            (void)_kwds;
-
-			void * impl = class_core::construct( _scope, _obj, _args );
-
-			return impl;
-		}
-
-        static void * new_interface( const pybind::class_type_scope_ptr & _scope, PyObject * _obj, PyObject * _args, PyObject * _kwds )
-        {
-            (void)_scope;
-            (void)_obj;
-            (void)_args;
-            (void)_kwds;
-
-			pybind::throw_exception("scope %s not support 'new_interface'"
-				, _scope->get_name()
-				);
-
-            return nullptr;
-        }
-
-		static void dealloc_only_python_( const pybind::class_type_scope_ptr & _scope, void * _impl )
-		{
-            (void)_scope;
-            (void)_impl;
-		}
-
-		static void	dealloc_( const pybind::class_type_scope_ptr & _scope, void * _impl )
-		{
-            (void)_scope;
-
-			C * obj = static_cast<C*>(_impl);
-
-			delete obj;
-		}
-
-        static void dealloc_only_destructor_( const pybind::class_type_scope_ptr & _scope, void * _impl )
-        {
-            (void)_scope;
-
-            C * obj = static_cast<C*>(_impl);
-
-            (void)obj;
-
-            obj->~C();
-        }
-
 		static const pybind::class_type_scope_ptr & get_scope()
 		{
 			uint32_t cinfo = class_info<C>();
@@ -360,6 +312,57 @@ namespace pybind
 
     protected:
         uint32_t m_info;
+	};
+
+	class class_new_invalid
+		: public class_new_interface
+	{
+	public:
+		void * call( const pybind::class_type_scope_ptr & _scope, PyObject * _obj, PyObject * _args, PyObject * _kwds ) override
+		{
+			(void)_scope;
+			(void)_obj;
+			(void)_args;
+			(void)_kwds;
+
+			pybind::throw_exception( "scope %s not support 'new_interface'"
+				, _scope->get_name()
+				);
+
+			return nullptr;
+		}
+	};
+
+	template<class C> 
+	class class_destroy_delete
+		: public class_destroy_interface
+	{
+	public:
+		void call( const pybind::class_type_scope_ptr & _scope, void * _impl ) override
+		{
+			(void)_scope;
+
+			C * obj = static_cast<C*>(_impl);
+
+			delete obj;
+		}
+	};
+
+	template<class C>
+	class class_destroy_destructor
+		: public class_destroy_interface
+	{
+	public:
+		void call( const pybind::class_type_scope_ptr & _scope, void * _impl ) override
+		{
+			(void)_scope;
+
+			C * obj = static_cast<C*>(_impl);
+
+			(void)obj;
+
+			obj->~C();
+		}
 	};
 
 	template<class C> 
@@ -511,7 +514,7 @@ namespace pybind
 
 	public:
 		class_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
-			: base_<C,B>( _name, 0, &base_<C,B>::new_, &base_<C,B>::dealloc_, 0, _module )
+			: base_<C,B>( _name, 0, nullptr, new class_destroy_delete<C>, 0, _module )
 		{
 			if( external_extract == true )
 			{
@@ -548,7 +551,7 @@ namespace pybind
 
 	public:
 		proxy_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
-			: base_<C,B>( _name, 0, &base_<C,B>::new_, &base_<C,B>::dealloc_only_python_, 0, _module )
+			: base_<C,B>( _name, 0, nullptr, nullptr, 0, _module )
 		{
 			if( external_extract == true )
 			{
@@ -584,7 +587,7 @@ namespace pybind
         typedef extract_holder_type_ptr<C> extract_type_ptr;
 
     public:
-        superclass_( const char * _name, void * _user, pybind_new _pynew, pybind_destructor _pydestructor, bool external_extract = true, PyObject * _module = 0 )
+		superclass_( const char * _name, void * _user, const class_new_interface_ptr & _pynew, const class_destroy_interface_ptr & _pydestructor, bool external_extract = true, PyObject * _module = 0 )
             : base_<C,B>(_name, _user, _pynew, _pydestructor, 0, _module)
         {
             if( external_extract == true )
@@ -625,7 +628,7 @@ namespace pybind
 
 	public:
 		struct_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
-			: base_<C,B>( _name, 0, &base_<C,B>::new_, &base_<C,B>::dealloc_only_destructor_, sizeof(C), _module )
+			: base_<C,B>( _name, 0, nullptr, nullptr, sizeof(C), _module )
 		{
 			if( external_extract == true )
 			{
@@ -664,7 +667,7 @@ namespace pybind
 
 	public:
 		interface_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
-			: base_<C,B>( _name, 0, &base_<C,B>::new_interface, &base_<C,B>::dealloc_only_python_, 0, _module )
+			: base_<C,B>( _name, 0, new class_new_invalid, nullptr, 0, _module )
 		{
 			if( external_extract == true )
 			{

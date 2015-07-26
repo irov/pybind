@@ -30,9 +30,6 @@ namespace pybind
 	typedef PyObject *(*pybind_getter)(PyObject *, void *);
 	typedef int (*pybind_setter)(PyObject *, PyObject *, void *);
 
-	typedef void * (*pybind_new)( const class_type_scope_ptr & _scope, PyObject * _obj, PyObject * _args, PyObject * _kwds );
-	typedef void (*pybind_destructor)( const class_type_scope_ptr & _scope, void * impl );
-
     class visitor_class_type_scope
     {
     public:

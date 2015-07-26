@@ -11,7 +11,7 @@
 namespace pybind
 {	
     //////////////////////////////////////////////////////////////////////////
-	class_type_scope_ptr class_core::create_new_type_scope( uint32_t _info, const char * _name, void * _user, pybind::pybind_new _pynew, pybind::pybind_destructor _pydestructor, uint32_t _pod )
+	class_type_scope_ptr class_core::create_new_type_scope( uint32_t _info, const char * _name, void * _user, const class_new_interface_ptr & _pynew, const class_destroy_interface_ptr & _pydestructor, uint32_t _pod )
     {
         class_type_scope_ptr scope = new class_type_scope( _name, _info, _user, _pynew, _pydestructor, _pod );
 
