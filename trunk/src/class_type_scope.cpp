@@ -1058,7 +1058,16 @@ namespace pybind
 		{
 			PyObject * py_self = detail::alloc_class( _type, _args, _kwds );
 
-			void * impl = (*scope->m_pynew)(scope, py_self, _args, _kwds);
+			void * impl;
+
+			if( scope->m_pynew != nullptr )
+			{
+				impl = scope->m_pynew->call( scope, py_self, _args, _kwds );
+			}
+			else
+			{
+				impl = class_core::construct( scope, py_self, _args );
+			}
 
 			if( impl == nullptr )
 			{
@@ -1101,7 +1110,11 @@ namespace pybind
 			{
 				void * impl = pybind::detail::get_class_impl( _obj );
 
-				(scope->m_pydestructor)(scope, impl);
+				
+				if( scope->m_pydestructor != nullptr )
+				{
+					scope->m_pydestructor->call( scope, impl );
+				}
 			}
 		}
 		catch( const pybind_exception & _ex )
@@ -1127,7 +1140,16 @@ namespace pybind
 
 			pybind::detail::wrap_pod( py_self, &buff, pod_size );
 
-			void * impl = (*scope->m_pynew)(scope, py_self, _args, _kwds);
+			void * impl;
+
+			if( scope->m_pynew != nullptr )
+			{
+				impl = scope->m_pynew->call( scope, py_self, _args, _kwds );
+			}
+			else
+			{
+				impl = class_core::construct( scope, py_self, _args );
+			}
 
 			(void)impl;
 
@@ -1159,7 +1181,10 @@ namespace pybind
 
 			void * impl = pybind::detail::get_class_impl( _obj );
 
-			(scope->m_pydestructor)(scope, impl);
+			if( scope->m_pydestructor != nullptr )
+			{
+				scope->m_pydestructor->call( scope, impl );
+			}
 		}
 		catch( const pybind_exception & _ex )
 		{
@@ -1171,7 +1196,7 @@ namespace pybind
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////
-	class_type_scope::class_type_scope( const char * _name, uint32_t _typeId, void * _user, pybind_new _pynew, pybind_destructor _pydestructor, uint32_t _pod )
+	class_type_scope::class_type_scope( const char * _name, uint32_t _typeId, void * _user, const class_new_interface_ptr & _pynew, const class_destroy_interface_ptr & _pydestructor, uint32_t _pod )
 		: m_name( _name )
 		, m_typeId( _typeId )
 		, m_user( _user )

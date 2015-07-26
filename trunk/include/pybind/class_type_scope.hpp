@@ -3,6 +3,8 @@
 #	include "pybind/exports.hpp"
 #	include "pybind/types.hpp"
 
+#	include "pybind/class_new_interface.hpp"
+
 #	include "config/stdex.hpp"
 
 #	include <typeinfo>
@@ -60,7 +62,7 @@ namespace pybind
         : public stdex::intrusive_ptr_base<class_type_scope>
 	{
 	public:
-		class_type_scope( const char * _name, uint32_t _typeId, void * _user, pybind_new _pynew, pybind_destructor _pydestructor, uint32_t _pod );
+		class_type_scope( const char * _name, uint32_t _typeId, void * _user, const class_new_interface_ptr & _pynew, const class_destroy_interface_ptr & _pydestructor, uint32_t _pod );
 		~class_type_scope();
 
 	public:
@@ -140,8 +142,8 @@ namespace pybind
 		uint32_t m_basesCount;
         
         void * m_user;
-		pybind_new m_pynew;
-		pybind_destructor m_pydestructor;
+		class_new_interface_ptr m_pynew;
+		class_destroy_interface_ptr m_pydestructor;
 
         constructor_adapter_interface_ptr m_pyconstructor;
 
