@@ -1,7 +1,6 @@
 #	pragma once
 
 #	include "pybind/class_info.hpp"
-#	include "pybind/class_type_scope.hpp"
 
 #	include "pybind/types.hpp"
 #	include "pybind/exports.hpp"
@@ -9,6 +8,8 @@
 
 namespace pybind
 {
+	typedef stdex::intrusive_ptr<class class_new_interface> class_new_interface_ptr;
+	typedef stdex::intrusive_ptr<class class_destroy_interface> class_destroy_interface_ptr;
     typedef stdex::intrusive_ptr<class repr_adapter_interface> repr_adapter_interface_ptr;
     typedef stdex::intrusive_ptr<class method_adapter_interface> method_adapter_interface_ptr;
     typedef stdex::intrusive_ptr<class member_adapter_interface> member_adapter_interface_ptr;
