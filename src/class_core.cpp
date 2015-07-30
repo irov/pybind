@@ -168,6 +168,16 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
     void class_core::add_base_to_scope( const class_type_scope_ptr & _scope, uint32_t _name, uint32_t _base, pybind_metacast cast )
     {
+		if( detail::has_class_type_scope( _base ) == false )
+		{
+			pybind::throw_exception( "class_core::add_base_to_scope %s not bind base type %s"
+				, _scope->get_name()
+				, pybind::detail::get_class_type_info( _base )
+				);
+
+			return;
+		}
+
         const class_type_scope_ptr & basescope = detail::get_class_type_scope( _base );
 
         _scope->add_base( _name, basescope, cast );
