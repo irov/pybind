@@ -1,8 +1,9 @@
 #	pragma once
 
 #	include "pybind/helper.hpp"
+#	include "pybind/detail.hpp"
 
-#	include "pybind/class_type_scope.hpp"
+#	include "pybind/class_type_scope_interface.hpp"
 
 namespace pybind
 {
@@ -85,12 +86,12 @@ namespace pybind
 
 		bool is_class() const
 		{
-			return pybind::detail::is_class( m_obj );
+			return pybind::is_class( m_obj );
 		}
 
 		bool is_type_class() const
 		{
-			return pybind::detail::is_type_class( m_obj );
+			return pybind::is_type_class( m_obj );
 		}
 
 		bool is_none() const

@@ -1,20 +1,20 @@
 #	pragma once
 
-#	include "exports.hpp"
-#	include "types.hpp"
+#	include "pybind/exports.hpp"
+#	include "pybind/types.hpp"
 
 #	include <stdarg.h>
 
 namespace pybind
 {
-	PYBIND_API void visit_class_type_scope( visitor_class_type_scope * _visitor );
-
 	PYBIND_API bool initialize( bool _debug, bool install_sigs, bool _nosite );
 	PYBIND_API void finalize();
 
 	PYBIND_API bool is_initialized();
 
     PYBIND_API uint32_t get_python_version();
+
+	PYBIND_API kernel_interface * get_kernel();
 
 	PYBIND_API void check_error();
 

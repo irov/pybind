@@ -1,10 +1,13 @@
 #	include "pybind/system.hpp"
-#	include "pybind/class_core.hpp"
-#	include "pybind/class_type_scope.hpp"
+
+#	include "pybind/class_type_scope_interface.hpp"
 
 #	ifdef PYBIND_STL_SUPPORT
 #	include "pybind/stl_type_cast.hpp"
 #	endif
+
+#	include "kernel.hpp"
+#	include "pybind/detail.hpp"
 
 #	include "config/python.hpp"
 
@@ -13,7 +16,6 @@
 #	include "function_type.hpp"
 #	include "functor_type.hpp"
 
-
 #   include "static_var.hpp"
 
 #	include <stdexcept>
@@ -21,11 +23,8 @@
 
 namespace pybind
 {
-    //////////////////////////////////////////////////////////////////////////
-    void visit_class_type_scope( visitor_class_type_scope * _visitor )
-    {
-        detail::visit_types_scope( _visitor );
-    }
+	//////////////////////////////////////////////////////////////////////////
+	static kernel_interface * g_kernel = nullptr;
     //////////////////////////////////////////////////////////////////////////
 	bool initialize( bool _debug, bool install_sigs, bool _nosite )
 	{
@@ -78,18 +77,17 @@ namespace pybind
 #   endif
 		}
 
-        if( initialize_class_info() == false )
-        {
-            return false;
-        }
+		kernel * k = new kernel;
 
-        if( initialize_type_cast() == false )
-        {
-            return false;
-        }
+		if( k->initialize() == false )
+		{
+			return false;
+		}
+
+		g_kernel = k;
 
 #	ifdef PYBIND_STL_SUPPORT
-		if( initialize_stl_type_cast() == false )
+		if( initialize_stl_type_cast( g_kernel ) == false )
 		{
 			return false;
 		}
@@ -105,11 +103,6 @@ namespace pybind
             return false;
         }
 		
-        if( initialize_classes() == false )
-        {
-            return false;
-        }
-
 		if( initialize_function() == false )
         {
             return false;
@@ -130,11 +123,9 @@ namespace pybind
 		Py_Finalize();
 
 		finalize_methods();
-		finalize_classes();
 		finalize_function();
 		finalize_functor();
-		finalize_stl_type_cast();
-        finalize_type_cast();		
+		finalize_stl_type_cast( g_kernel );
 	}
     //////////////////////////////////////////////////////////////////////////
 	bool is_initialized()
@@ -161,6 +152,11 @@ namespace pybind
 
         return version;
     }
+	//////////////////////////////////////////////////////////////////////////
+	kernel_interface * get_kernel()
+	{
+		return g_kernel;
+	}
     //////////////////////////////////////////////////////////////////////////
 	void setStdErrorHandle( PyObject * _handle )
 	{
@@ -1095,14 +1091,14 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool is_class( PyObject * _value )
 	{
-		bool result = detail::is_class( _value );
+		bool result = g_kernel->is_class( _value );
 
 		return result;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool is_type_class( PyObject * _value )
 	{
-		bool result = detail::is_type_class( _value );
+		bool result = g_kernel->is_type_class( _value );
 
 		return result;
 	}
@@ -1110,7 +1106,8 @@ namespace pybind
 	bool type_initialize( PyObject * _value )
 	{
 		PyTypeObject * type = (PyTypeObject *)_value;
-		const class_type_scope_ptr & scope = detail::get_class_scope( type );
+
+		const class_type_scope_interface_ptr & scope = g_kernel->get_class_scope( type );
 
 		if( scope == nullptr )
 		{

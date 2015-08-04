@@ -1,7 +1,9 @@
 #	include "member_type.hpp"
 
 #	include "pybind/system.hpp"
-#	include "pybind/class_type_scope.hpp"
+#	include "pybind/detail.hpp"
+
+#	include "pybind/class_type_scope_interface.hpp"
 
 #   include "static_var.hpp"
 
@@ -63,47 +65,77 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	static PyObject * py_getmethod( PyObject * _member, PyObject * _args )
 	{
-		PyObject * py_self = PyTuple_GetItem( _args, 0 );
-
 		py_member_type * mt = (py_member_type *)_member;
 
-		void * impl = detail::get_class_impl( py_self );
+		PyObject * py_self = PyTuple_GetItem( _args, 0 );
 
-		if( impl == nullptr )
+		try
+		{	
+			void * impl = detail::get_class_impl( py_self );
+
+			if( impl == nullptr )
+			{
+				error_message( "py_getmethod: unbind object" );
+
+				return nullptr;
+			}
+
+			kernel_interface * k = pybind::get_kernel();
+
+			const class_type_scope_interface_ptr & scope = k->get_class_scope( py_self->ob_type );
+
+			PyObject * py_method = mt->iadapter->get( k, impl, scope );
+
+			return py_method;
+		}
+		catch( const pybind_exception & _ex )
 		{
-			error_message( "py_getmethod: unbind object" );
-
-			return nullptr;
+			pybind::error_message( "py_getmethod: obj %s method %s invalid call exception '%s'"
+				, pybind::object_str( py_self )
+				, mt->iadapter->getName()
+				, _ex.what()
+				);
 		}
 
-		const class_type_scope_ptr & scope = detail::get_class_scope( py_self->ob_type );
-
-		PyObject * py_method = mt->iadapter->get( impl, scope );
-
-		return py_method;
+		return nullptr;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	static PyObject * py_setmethod( PyObject * _member, PyObject * _args )
 	{
+		py_member_type * mt = (py_member_type *)(_member);
+
 		PyObject * py_self = PyTuple_GetItem( _args, 0 );
 		PyObject * py_value = PyTuple_GetItem( _args, 1 );
 
-		py_member_type * mt = (py_member_type *)(_member);
-
-		void * impl = detail::get_class_impl( py_self );
-
-		if( impl == nullptr )
+		try
 		{
-			error_message( "py_setmethod: unbind object" );
+			void * impl = detail::get_class_impl( py_self );
 
-			return nullptr;
+			if( impl == nullptr )
+			{
+				error_message( "py_setmethod: unbind object" );
+
+				return nullptr;
+			}
+
+			kernel_interface * k = pybind::get_kernel();
+
+			const class_type_scope_interface_ptr & scope = k->get_class_scope( py_self->ob_type );
+
+			mt->iadapter->set( k, impl, py_value, scope );
+
+			Py_RETURN_NONE;
+		}
+		catch( const pybind_exception & _ex )
+		{
+			pybind::error_message( "py_setmethod: obj %s method %s invalid call exception '%s'"
+				, pybind::object_str( py_self )
+				, mt->iadapter->getName()
+				, _ex.what()
+				);
 		}
 
-		const class_type_scope_ptr & scope = detail::get_class_scope( py_self->ob_type );
-
-		mt->iadapter->set( impl, py_value, scope );
-
-		Py_RETURN_NONE;
+		return nullptr;		
 	}
 	//////////////////////////////////////////////////////////////////////////
 	STATIC_DECLARE_VALUE_BEGIN(PyMethodDef, s_getmethod)

@@ -1,7 +1,5 @@
 #	pragma once
 
-#	include "pybind/class_core.hpp"
-
 namespace pybind
 {
     enum PybindOperatorCompare
@@ -18,7 +16,7 @@ namespace pybind
         : public adapter_interface
     {
     public:
-        virtual bool compare( PyObject * _obj, void * _self, const class_type_scope_ptr & _scope, PyObject * _compare, PybindOperatorCompare _op, bool & _result ) = 0;
+		virtual bool compare( kernel_interface * _kernel, PyObject * _obj, void * _self, const class_type_scope_interface_ptr & _scope, PyObject * _compare, PybindOperatorCompare _op, bool & _result ) = 0;
     };
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<compare_adapter_interface> compare_adapter_interface_ptr;
@@ -31,16 +29,17 @@ namespace pybind
         compare_adapter( F _compare )
             : m_compare(_compare)
         {
-            m_class_name = class_info<C*>();
-            m_scope_name = class_info<C>();
         }
 
     public:
-        bool compare( PyObject * _obj, void * _self, const class_type_scope_ptr & _scope, PyObject * _compare, PybindOperatorCompare _op, bool & _result ) override
+		bool compare( kernel_interface * _kernel, PyObject * _obj, void * _self, const class_type_scope_interface_ptr & _scope, PyObject * _compare, PybindOperatorCompare _op, bool & _result ) override
         {
-            C * inst = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_name, m_class_name, _scope ) );
+			uint32_t scope_name = _kernel->class_info<C>();
+			uint32_t class_name = _kernel->class_info<C*>();			
 
-            if( (*m_compare)( _obj, inst, _compare, _op, _result ) == false )
+			C * inst = detail::meta_cast_scope_t<C *>( _self, scope_name, class_name, _scope );
+
+            if( (*m_compare)( _kernel, _obj, inst, _compare, _op, _result ) == false )
             {
                 return false;
             }
@@ -50,9 +49,6 @@ namespace pybind
 
     protected:
         F m_compare;
-
-        size_t m_class_name;
-        size_t m_scope_name;
     };
 }
 

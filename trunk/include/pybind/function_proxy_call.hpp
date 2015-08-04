@@ -5,6 +5,7 @@
 #	include "pybind/types.hpp"
 #	include "pybind/system.hpp"
 #	include "pybind/extract.hpp"
+#	include "pybind/helper.hpp"
 
 namespace pybind
 {
@@ -22,8 +23,6 @@ namespace pybind
 	template<class C, class F,class Ret>
 	struct function_proxy_call_impl<C,F,Ret,1>
 	{
-		typedef typename function_parser<F>::result f_info;
-
 		static Ret call( C * _obj, F f, PyObject * _arg )
 		{
             (void)_arg;
@@ -36,14 +35,10 @@ namespace pybind
 	template<class C, class F,class Ret>
 	struct function_proxy_call_impl<C,F,Ret,2>
 	{
-		typedef typename function_parser<F>::result f_info;
-
 		static Ret call( C * _obj, F f, PyObject * _arg )
 		{
-			PyObject * _arg0 = tuple_getitem( _arg, 0 );
-
 			return (*f)( _obj
-				, extract_throw<typename f_info::param1>( _arg0 )
+				, tuple_getitem_t( _arg, 0 )
 				);
 		}	
 	};
@@ -51,16 +46,11 @@ namespace pybind
 	template<class C, class F,class Ret>
 	struct function_proxy_call_impl<C,F,Ret,3>
 	{
-		typedef typename function_parser<F>::result f_info;
-
 		static Ret call( C * _obj, F f, PyObject * _arg )
 		{
-			PyObject * _arg0 = tuple_getitem( _arg, 0 );
-			PyObject * _arg1 = tuple_getitem( _arg, 1 );
-
 			return (*f)( _obj
-				, extract_throw<typename f_info::param1>( _arg0 )
-				, extract_throw<typename f_info::param2>( _arg1 )
+				, tuple_getitem_t( _arg, 0 )
+				, tuple_getitem_t( _arg, 1 )
 				);
 		}	
 	};
@@ -68,18 +58,12 @@ namespace pybind
 	template<class C, class F,class Ret>
 	struct function_proxy_call_impl<C,F,Ret,4>
 	{
-		typedef typename function_parser<F>::result f_info;
-
 		static Ret call( C * _obj, F f, PyObject * _arg )
 		{
-			PyObject * _arg0 = tuple_getitem( _arg, 0 );
-			PyObject * _arg1 = tuple_getitem( _arg, 1 );
-			PyObject * _arg2 = tuple_getitem( _arg, 2 );
-
 			return (*f)( _obj
-				, extract_throw<typename f_info::param1>( _arg0 )
-				, extract_throw<typename f_info::param2>( _arg1 )
-				, extract_throw<typename f_info::param3>( _arg2 )
+				, tuple_getitem_t( _arg, 0 )
+				, tuple_getitem_t( _arg, 1 )
+				, tuple_getitem_t( _arg, 2 )
 				);
 		}
 	};
@@ -87,20 +71,13 @@ namespace pybind
 	template<class C, class F,class Ret>
 	struct function_proxy_call_impl<C,F,Ret,5>
 	{
-		typedef typename function_parser<F>::result f_info;
-
 		static Ret call( C * _obj, F f, PyObject * _arg )
 		{
-			PyObject * _arg0 = tuple_getitem( _arg, 0 );
-			PyObject * _arg1 = tuple_getitem( _arg, 1 );
-			PyObject * _arg2 = tuple_getitem( _arg, 2 );
-			PyObject * _arg3 = tuple_getitem( _arg, 3 );
-
 			return (*f)( _obj
-				, extract_throw<typename f_info::param1>( _arg0 )
-				, extract_throw<typename f_info::param2>( _arg1 )
-				, extract_throw<typename f_info::param3>( _arg2 )
-				, extract_throw<typename f_info::param4>( _arg3 )
+				, tuple_getitem_t( _arg, 0 )
+				, tuple_getitem_t( _arg, 1 )
+				, tuple_getitem_t( _arg, 2 )
+				, tuple_getitem_t( _arg, 3 )
 				);
 		}
 	};
@@ -108,22 +85,14 @@ namespace pybind
 	template<class C, class F,class Ret>
 	struct function_proxy_call_impl<C,F,Ret,6>
 	{
-		typedef typename function_parser<F>::result f_info;
-
 		static Ret call( C * _obj, F f, PyObject * _arg )
 		{
-			PyObject * _arg0 = tuple_getitem( _arg, 0 );
-			PyObject * _arg1 = tuple_getitem( _arg, 1 );
-			PyObject * _arg2 = tuple_getitem( _arg, 2 );
-			PyObject * _arg3 = tuple_getitem( _arg, 3 );
-			PyObject * _arg4 = tuple_getitem( _arg, 4 );
-
 			return (*f)( _obj
-				, extract_throw<typename f_info::param1>( _arg0 )
-				, extract_throw<typename f_info::param2>( _arg1 )
-				, extract_throw<typename f_info::param3>( _arg2 )
-				, extract_throw<typename f_info::param4>( _arg3 )
-				, extract_throw<typename f_info::param5>( _arg4 )
+				, tuple_getitem_t( _arg, 0 )
+				, tuple_getitem_t( _arg, 1 )
+				, tuple_getitem_t( _arg, 2 )
+				, tuple_getitem_t( _arg, 3 )
+				, tuple_getitem_t( _arg, 4 )
 				);
 		}
 	};

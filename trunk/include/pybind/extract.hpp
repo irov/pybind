@@ -31,11 +31,11 @@ namespace pybind
 			typedef typename extract_return<T>::type T_WOCR;
 
 			static bool extract( PyObject * _obj, T_WOCR & _value )
-			{
-				const std::type_info & tinfo = typeid(T_WOCR);
-
+			{				
 				if( _obj == nullptr )
 				{
+					const std::type_info & tinfo = typeid(T_WOCR);
+
 					const char * type_name = tinfo.name();
 
 					pybind::throw_exception( "extract obj is NULL for '%.256s'"
@@ -45,11 +45,15 @@ namespace pybind
 					return false;
 				}
 
-				type_cast * etype = type_down_cast<T_WOCR>::find();
+				kernel_interface * k = pybind::get_kernel();
+
+				type_cast * etype = type_down_cast<T_WOCR>::find( k );
 
 				if( etype == nullptr )
 				{
 					pybind::check_error();
+
+					const std::type_info & tinfo = typeid(T_WOCR);
 
 					const char * type_name = tinfo.name();
 
@@ -64,11 +68,14 @@ namespace pybind
 
 				type_cast_result_T_WOCR * etype_impl = static_cast<type_cast_result_T_WOCR *>(etype);
 
-				if( etype_impl->apply( _obj, _value ) == false )
+				if( etype_impl->apply( k, _obj, _value ) == false )
 				{
 					pybind::check_error();
 
+					const std::type_info & tinfo = typeid(T_WOCR);
+
                     const char * type_name = tinfo.name();
+
                     const char * repr_obj = pybind::object_repr( _obj );
 					const char * repr_obj_type = pybind::object_repr_type( _obj );
 					
@@ -170,12 +177,14 @@ namespace pybind
 	{
 		typedef typename detail::extract_return<T>::type T_WOCR;
 
-		const std::type_info & tinfo = typeid(T_WOCR);
+		kernel_interface * k = pybind::get_kernel();
 
-		type_cast * etype = detail::type_down_cast<T_WOCR>::find();
+		type_cast * etype = detail::type_down_cast<T_WOCR>::find( k );
 
 		if( etype == nullptr )
 		{
+			const std::type_info & tinfo = typeid(T_WOCR);
+
 			const char * type_name = tinfo.name();
 
 			pybind::throw_exception( "ptr invalid find cast for '%.256s'"
@@ -187,10 +196,12 @@ namespace pybind
 
 		type_cast_result_T_WOCR * etype_impl = static_cast<type_cast_result_T_WOCR *>(etype);
 
-		PyObject * result = etype_impl->wrap( _value );
+		PyObject * result = etype_impl->wrap( k, _value );
 
 		if( result == nullptr )
 		{
+			const std::type_info & tinfo = typeid(T_WOCR);
+
 			const char * type_name = tinfo.name();
 
 			pybind::throw_exception( "ptr invalid wrap '%.256s'"

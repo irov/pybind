@@ -1,13 +1,13 @@
 #	pragma once
 
 #	include "pybind/adapter_interface.hpp"
+#   include "pybind/class_type_scope_interface.hpp"
 
 #	include "pybind/method_call.hpp"
 #	include "pybind/method_proxy_call.hpp"
 #	include "pybind/function_proxy_call.hpp"
 
-#   include "pybind/class_info.hpp"
-#   include "pybind/class_type_scope.hpp"
+#   include "pybind/detail.hpp"
 
 namespace pybind
 {
@@ -28,90 +28,42 @@ namespace pybind
 		}
 
 	public:
-		virtual PyObject * call( void * _self, const class_type_scope_ptr & scope, PyObject * _args, PyObject * _kwds ) = 0;
+		virtual PyObject * call( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & scope, PyObject * _args, PyObject * _kwds ) = 0;
 
 	protected:
 		const char * m_name;
 	};
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<method_adapter_interface> method_adapter_interface_ptr;
-    //////////////////////////////////////////////////////////////////////////
-	template<class F>
-	class method_adapter_helper
-	{
-	public:
-		method_adapter_helper( F _fn )
-			: m_fn(_fn)
-		{
-		}
-
-	protected:
-		F getFn() const
-		{
-			return m_fn;
-		}
-
-	protected:
-		F m_fn;
-	};
-	//////////////////////////////////////////////////////////////////////////
-	template<class C>
-	class class_adapter_helper
-	{
-	protected:
-		class_adapter_helper()
-		{             
-			m_class_id = class_info<C*>();
-			m_scope_id = class_info<C>();
-		}
-
-	protected:
-		uint32_t getClassId() const
-		{
-			return m_class_id;
-		}
-
-		uint32_t getScopeId() const
-		{
-			return m_scope_id;
-		}
-
-	protected:
-		uint32_t m_class_id;
-		uint32_t m_scope_id;
-	};
 	//////////////////////////////////////////////////////////////////////////
 	template<class C, class F>
 	class method_adapter
 		: public method_adapter_interface
-		, public method_adapter_helper<F>
-		, public class_adapter_helper<C>
 	{
 	public:
 		method_adapter( const char * _name, F _fn )
 			: method_adapter_interface(_name)
-			, method_adapter_helper<F>(_fn)
+			, m_fn(_fn)
 		{
 		}
 
 	protected:
-		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
             (void)_kwds;
 
-			uint32_t scopeId = this->getScopeId();
-			uint32_t classId = this->getClassId();
+			uint32_t class_id = _kernel->class_info<C*>();
+			uint32_t scope_id = _kernel->class_info<C>();
 
-			void * meta_impl = detail::meta_cast_scope( _impl, scopeId, classId, _scope );
-
-			C * self = static_cast<C *>(meta_impl);
-
-			F fn = this->getFn();
-
-			PyObject *ret = method_call<C,F>::call( self, fn, _args );
+			C * self = detail::meta_cast_scope_t<C *>( _impl, scope_id, class_id, _scope );
+			
+			PyObject *ret = method_call<C, F>::call( self, m_fn, _args );
 
 			return ret;
 		}		
+
+	protected:
+		F m_fn;
 	};
 	//////////////////////////////////////////////////////////////////////////
     template<class C, class F>
@@ -126,10 +78,11 @@ namespace pybind
         }
 
     protected:
-        PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
         {
-            uint32_t scopeId = this->getScopeId();
-            const char * scopeName = detail::get_class_type_info( scopeId );
+			uint32_t scope_id = _kernel->class_info<C>();
+
+            const char * scopeName = _kernel->get_class_type_info( scope_id );
 
             const char * name = this->getName();
 
@@ -141,7 +94,7 @@ namespace pybind
 
             pybind::check_error();
 
-            PyObject * ret = method_adapter<C, F>::call( _impl, _scope, _args, _kwds );
+			PyObject * ret = method_adapter<C, F>::call( _kernel, _impl, _scope, _args, _kwds );
 
             return ret;
         }
@@ -151,139 +104,123 @@ namespace pybind
     };
 	//////////////////////////////////////////////////////////////////////////
 	template<class C, class P, class F>
-	class method_adapter_proxy_member
+	class method_adapter_proxy
 		: public method_adapter_interface
-		, public method_adapter_helper<F>
-		, public class_adapter_helper<C>
 	{
 	public:
-		method_adapter_proxy_member( const char * _name, F _fn, P * _proxy )
+		method_adapter_proxy( const char * _name, F _fn, P * _proxy )
 			: method_adapter_interface(_name)
-			, method_adapter_helper<F>(_fn)
+			, m_fn(_fn)
 			, m_proxy(_proxy)
 		{
 		}
 
 	protected:
-		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
             (void)_kwds;
 
-			uint32_t scopeId = this->getScopeId();
-			uint32_t classId = this->getClassId();
+			uint32_t class_id = _kernel->class_info<C*>();
+			uint32_t scope_id = _kernel->class_info<C>();
 
-			void * meta_impl = detail::meta_cast_scope( _impl, scopeId, classId, _scope );
+			C * self = detail::meta_cast_scope_t<C *>( _impl, scope_id, class_id, _scope );
 
-			C * self = static_cast<C *>(meta_impl);
-
-            F fn = this->getFn();
-
-			PyObject * ret = method_proxy_call<P,C,F>::call( m_proxy, self, fn, _args );
+			PyObject * ret = method_proxy_call<P, C, F>::call( m_proxy, self, m_fn, _args );
 
 			return ret;
 		}
 
 	protected:
+		F m_fn;
 		P * m_proxy;
 	};
 	//////////////////////////////////////////////////////////////////////////
 	template<class C, class P, class F>
 	class method_adapter_proxy_native
 		: public method_adapter_interface
-		, public method_adapter_helper<F>
-		, public class_adapter_helper<C>
 	{
 	public:
 		method_adapter_proxy_native( const char * _name, F _fn, P * _proxy )
 			: method_adapter_interface(_name)
-			, method_adapter_helper<F>(_fn)
+			, m_fn(_fn)
 			, m_proxy(_proxy)
 		{
 		}
 
 	protected:
-		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
-			uint32_t scopeId = this->getScopeId();
-			uint32_t classId = this->getClassId();
+			uint32_t class_id = _kernel->class_info<C*>();
+			uint32_t scope_id = _kernel->class_info<C>();
 
-			void * meta_impl = detail::meta_cast_scope( _impl, scopeId, classId, _scope );
+			C * self = detail::meta_cast_scope_t<C *>( _impl, scope_id, class_id, _scope );
 
-			C * self = static_cast<C *>(meta_impl);
-
-			F fn = this->getFn();
-
-			PyObject * ret = (m_proxy->*fn)( self, _args, _kwds );
+			PyObject * ret = (m_proxy->*m_fn)(self, _args, _kwds);
 
 			return ret;
 		}
 
 	protected:
-		P * m_proxy;
+		F m_fn;
+		P * m_proxy;		
 	};
 	//////////////////////////////////////////////////////////////////////////
 	template<class C, class F>
 	class method_adapter_proxy_function
 		: public method_adapter_interface
-		, public method_adapter_helper<F>
-		, public class_adapter_helper<C>
 	{
 	public:
 		method_adapter_proxy_function( const char * _name, F _fn )
 			: method_adapter_interface(_name)
-			, method_adapter_helper<F>(_fn)
+			, m_fn(_fn)
 		{
 		}
 
 	protected:
-		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
             (void)_kwds;
 
-			uint32_t scopeId = this->getScopeId();
-			uint32_t classId = this->getClassId();
+			uint32_t class_id = _kernel->class_info<C*>();
+			uint32_t scope_id = _kernel->class_info<C>();
 
-			void * meta_impl = detail::meta_cast_scope( _impl, scopeId, classId, _scope );
+			C * self = detail::meta_cast_scope_t<C *>( _impl, scope_id, class_id, _scope );
 
-			C * self = static_cast<C *>(meta_impl);
-
-			F fn = this->getFn();
-
-			PyObject * ret = function_proxy_call<C,F>::call( self, fn, _args );
+			PyObject * ret = function_proxy_call<C, F>::call( self, m_fn, _args );
 
 			return ret;
 		}
+
+	protected:
+		F m_fn;
 	};
 
 	template<class C, class F>
 	class method_adapter_native
 		: public method_adapter_interface
-		, public method_adapter_helper<F>
-		, public class_adapter_helper<C>
 	{
 	public:
 		method_adapter_native( const char * _name, F _fn )
 			: method_adapter_interface(_name)
-			, method_adapter_helper<F>(_fn)
+			, m_fn(_fn)
 		{
 		}
 
 	protected:
-		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
-			uint32_t scopeId = this->getScopeId();
-			uint32_t classId = this->getClassId();
+			uint32_t class_id = _kernel->class_info<C*>();
+			uint32_t scope_id = _kernel->class_info<C>();
 
-			void * meta_impl = detail::meta_cast_scope( _impl, scopeId, classId, _scope );
+			C * self = detail::meta_cast_scope_t<C *>( _impl, scope_id, class_id, _scope );
 
-			C * self = static_cast<C *>(meta_impl);
-
-            F fn = this->getFn();
-
-			PyObject * ret = (self->*fn)( _args, _kwds );
+			PyObject * ret = (self->*m_fn)(_args, _kwds);
 
 			return ret;
 		}
+
+	protected:
+		F m_fn;
 	};
 }
 

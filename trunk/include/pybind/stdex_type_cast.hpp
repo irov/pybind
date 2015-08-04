@@ -83,26 +83,4 @@ namespace pybind
 			return py_vector;
 		}
 	};
-
-	template<class T, class V = std::vector<T> >
-	struct registration_stl_vector_type_cast
-	{
-		registration_stl_vector_type_cast()
-		{
-			uint32_t id = class_info<V>();
-
-			detail::register_type_info_extract( id, new pybind::extract_stl_vector_type<T, V> );
-		}
-	};
-
-	template<class T, class V = std::vector<T> >
-	struct unregistration_stl_vector_type_cast
-	{	
-		unregistration_stl_vector_type_cast()
-		{
-			uint32_t id = class_info<V>();
-
-			detail::unregister_type_info_extract( id );
-		}
-	};
 }

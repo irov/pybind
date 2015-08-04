@@ -1,6 +1,8 @@
 #	include "method_type.hpp"
 
-#	include "pybind/class_type_scope.hpp"
+#	include "pybind/class_type_scope_interface.hpp"
+
+#	include "pybind/detail.hpp"
 
 #   include "static_var.hpp"
 
@@ -53,12 +55,14 @@ namespace pybind
 				return nullptr;
 			}
 
-			const class_type_scope_ptr & scope = detail::get_class_scope( mct->self->ob_type );
+			kernel_interface * k = pybind::get_kernel();
+
+			const class_type_scope_interface_ptr & scope = k->get_class_scope( mct->self->ob_type );
 
 			method_adapter_interface * adapter = mct->iadapter;
 
 			DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( scope->get_name(), adapter->getName(), _args, _kwds );
-			PyObject * py_value = adapter->call( impl, scope, _args, _kwds );
+			PyObject * py_value = adapter->call( k, impl, scope, _args, _kwds );
 			DEBUG_PYBIND_NOTIFY_END_BIND_CALL( scope->get_name(), adapter->getName(), _args, _kwds );
 
 			return py_value;
