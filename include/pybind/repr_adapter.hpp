@@ -4,10 +4,10 @@
 
 #	include "pybind/function_parser.hpp"
 
-#   include "pybind/class_info.hpp"
-#   include "pybind/class_type_scope.hpp"
+#   include "pybind/class_type_scope_interface.hpp"
 
 #   include "pybind/extract.hpp"
+#   include "pybind/detail.hpp"
 
 namespace pybind
 {
@@ -15,7 +15,7 @@ namespace pybind
 		: public adapter_interface
     {
 	public:
-		virtual PyObject * repr( void * _self, const class_type_scope_ptr & _scope ) = 0;
+		virtual PyObject * repr( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope ) = 0;
 	};
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<repr_adapter_interface> repr_adapter_interface_ptr;
@@ -30,16 +30,17 @@ namespace pybind
 		repr_adapter( F _repr )
 			: m_repr(_repr)
 		{
-            m_class_name = class_info<C*>();
-            m_scope_name = class_info<C>();
 		}
 
 	public:
-		PyObject * repr( void * _self, const class_type_scope_ptr & _scope ) override
+		PyObject * repr( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope ) override
 		{
-			C * c = detail::meta_cast_scope_t<C>( _self, m_scope_name, m_class_name, _scope );
+			uint32_t class_name = _kernel->class_info<C*>();
+			uint32_t scope_name = _kernel->class_info<C>();
 
-			typename f_info::ret_type result = (*m_repr)( c );
+			C * c = detail::meta_cast_scope_t<C *>( _self, scope_name, class_name, _scope );
+
+			typename f_info::ret_type result = (*m_repr)( _kernel, c );
 
 			PyObject * py_result = pybind::ptr( result );
 
@@ -48,9 +49,6 @@ namespace pybind
 
 	protected:
 		F m_repr;
-
-		uint32_t m_class_name;
-		uint32_t m_scope_name;
 	};
 }
 

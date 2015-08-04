@@ -3,7 +3,7 @@
 #	include "pybind/exports.hpp"
 #	include "pybind/types.hpp"
 
-#   include "pybind/class_info.hpp"
+#   include "pybind/kernel_interface.hpp"
 
 #	include "config/stdex.hpp"
 
@@ -29,37 +29,27 @@ namespace pybind
 		void operator delete ( void * _ptr, size_t _size );
 
     protected:
-        bool type_info_cast( PyObject * _obj, uint32_t _tinfo, uint32_t _tptrinfo, void ** _impl );
+		static bool type_info_cast( kernel_interface * _kernel, PyObject * _obj, uint32_t _tinfo, uint32_t _tptrinfo, void ** _impl );
     };
 
     typedef stdex::intrusive_ptr<type_cast> type_cast_ptr;
 
 	namespace detail
 	{
-		PYBIND_API void register_type_info_extract( uint32_t _info, const type_cast_ptr & _type );
-		PYBIND_API void unregister_type_info_extract( uint32_t _info );
-
-		PYBIND_API type_cast * find_type_info_extract( uint32_t _info );
-
-		PYBIND_API void error_invalid_extract( PyObject * _obj, uint32_t _tinfo );
-		PYBIND_API bool convert_object( PyObject * _obj, uint32_t _tinfo, void * _place );
-
-		PYBIND_API bool instance_of_type( PyObject * _obj, uint32_t tinfo );
-
 		template<class T> struct type_down_cast;
 
 		template<class T, class B>
 		struct type_down_cast_find
 		{
-			static type_cast * find()
+			static type_cast * find( kernel_interface * _kernel )
 			{  
-				uint32_t id = class_info<T>();
+				uint32_t id = _kernel->class_info<T>();
 
-				type_cast * etype = find_type_info_extract( id );
+				type_cast * etype = _kernel->find_type_info_extract( id );
 
-				if( etype == 0 )
+				if( etype == nullptr )
 				{
-					return type_down_cast<B>::find();
+					return type_down_cast<B>::find( _kernel );
 				}
 
 				return etype;
@@ -69,8 +59,10 @@ namespace pybind
 		template<class B>
 		struct type_down_cast_find<PyObject, B>
 		{
-			static type_cast * find()
+			static type_cast * find( kernel_interface * _kernel )
 			{  
+				(void)_kernel;
+
 				return nullptr;
 			}
 		};
@@ -78,17 +70,19 @@ namespace pybind
 		template<class T>
 		struct type_down_cast
 		{
-			static type_cast * find()
+			static type_cast * find( kernel_interface * _kernel )
 			{
-				return type_down_cast_find<T, void>::find();
+				return type_down_cast_find<T, void>::find( _kernel );
 			}
 		};
 
 		template<>
 		struct type_down_cast<void>
 		{
-			static type_cast * find()
+			static type_cast * find( kernel_interface * _kernel )
 			{
+				(void)_kernel;
+
 				return nullptr;
 			}
 		};
@@ -96,64 +90,64 @@ namespace pybind
 		template<class T>
 		struct type_down_cast<T *>
 		{
-			static type_cast * find()
+			static type_cast * find( kernel_interface * _kernel )
 			{
-				return type_down_cast_find<T *,T>::find();
+				return type_down_cast_find<T *, T>::find( _kernel );
 			}
 		};
 
 		template<class T>
 		struct type_down_cast<const T *>
 		{
-			static type_cast * find()
+			static type_cast * find( kernel_interface * _kernel )
 			{
-				return type_down_cast_find<const T *,T>::find();
+				return type_down_cast_find<const T *, T>::find( _kernel );
 			}
 		};
 
 		template<class T>
 		struct type_down_cast<T &>
 		{
-			static type_cast * find()
+			static type_cast * find( kernel_interface * _kernel )
 			{
-				return type_down_cast_find<T &,T>::find();
+				return type_down_cast_find<T &, T>::find( _kernel );
 			}
 		};
 
 		template<class T>
 		struct type_down_cast<const T &>
 		{
-			static type_cast * find()
+			static type_cast * find( kernel_interface * _kernel )
 			{
-				return type_down_cast_find<const T &,T>::find();
+				return type_down_cast_find<const T &, T>::find( _kernel );
 			}
 		};
 	}
 
 	template<class T>
-	bool instance_of( PyObject * _obj )
+	bool instance_of( kernel_interface * _kernel, PyObject * _obj )
 	{
-		uint32_t id = class_info<T>();
+		uint32_t id = _kernel->class_info<T>();
 
-		bool result = detail::instance_of_type( _obj, id );
+		bool result = _kernel->instance_of_type( _obj, id );
 
 		return result;
 	}
 
 	template<class T>
-	void registration_type_cast( const type_cast_ptr & _type )
+	void registration_type_cast( kernel_interface * _kernel, const type_cast_ptr & _type )
 	{
-		uint32_t id = class_info<T>();
+		uint32_t id = _kernel->class_info<T>();
 
-		detail::register_type_info_extract( id, _type );
+		_kernel->register_type_info_extract( id, _type );
 	}
 
 	template<class T>
-	void unregistration_type_cast()
+	void unregistration_type_cast( kernel_interface * _kernel )
 	{	
-		uint32_t id = class_info<T>();
+		uint32_t id = _kernel->class_info<T>();
 
-		detail::unregister_type_info_extract( id );
+		_kernel->unregister_type_info_extract( id );
 	}
 
     
@@ -166,10 +160,7 @@ namespace pybind
         typedef const T & TCastRef;
 
 	public:
-        virtual PyObject * wrap( TCastRef t ) = 0;
-		virtual bool apply( PyObject * _obj, TCastValue _value ) = 0;
+        virtual PyObject * wrap( kernel_interface * _kernel, TCastRef t ) = 0;
+		virtual bool apply( kernel_interface * _kernel, PyObject * _obj, TCastValue _value ) = 0;
 	};
-
-    PYBIND_API bool initialize_type_cast();
-    PYBIND_API void finalize_type_cast();
 }

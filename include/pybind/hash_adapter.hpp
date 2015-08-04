@@ -2,14 +2,13 @@
 
 #   include "pybind/adapter_interface.hpp"
 
-
 namespace pybind
 {
 	class hash_adapter_interface
 		: public adapter_interface
     {
 	public:
-		virtual long hash( void * _self, const class_type_scope_ptr & _scope ) = 0;
+		virtual long hash( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope ) = 0;
 	};
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<hash_adapter_interface> hash_adapter_interface_ptr;
@@ -22,25 +21,23 @@ namespace pybind
 		hash_adapter( F _hash )
 			: m_hash(_hash)
 		{
-            m_class_name = class_info<C*>();
-            m_scope_name = class_info<C>();
 		}
 
 	public:
-		long hash( void * _self, const class_type_scope_ptr & _scope ) override
+		long hash( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope ) override
 		{
-			C * inst = static_cast<C*>( detail::meta_cast_scope( _self, m_scope_name, m_class_name, _scope ) );
+			uint32_t class_name = _kernel->class_info<C*>();
+			uint32_t scope_name = _kernel->class_info<C>();
 
-			long hash = (*m_hash)( inst );
+			C * inst = static_cast<C*>( detail::meta_cast_scope( _self, scope_name, class_name, _scope ) );
+
+			long hash = (*m_hash)( _kernel, inst );
 
 			return hash;
 		}
 
 	protected:
 		F m_hash;
-
-		size_t m_class_name;
-		size_t m_scope_name;
 	};
 }
 

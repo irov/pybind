@@ -3,6 +3,8 @@
 #	include "system.hpp"
 #	include "extract.hpp"
 
+#	include "stddef.h"
+
 namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
@@ -99,7 +101,7 @@ namespace pybind
 	}
 	//////////////////////////////////////////////////////////////////////////
 	template<class T>
-	PYBIND_API bool dict_setstring_t( PyObject * _dict, const char * _name, const T & _value )
+	inline bool dict_setstring_t( PyObject * _dict, const char * _name, const T & _value )
 	{
 		PyObject * py_value = pybind::ptr( _value );
 
