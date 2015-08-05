@@ -1,7 +1,6 @@
 #	pragma once
 
 #	include "pybind/adapter_interface.hpp"
-#   include "pybind/class_type_scope_interface.hpp"
 
 #	include "pybind/method_call.hpp"
 #	include "pybind/method_proxy_call.hpp"
@@ -28,7 +27,7 @@ namespace pybind
 		}
 
 	public:
-		virtual PyObject * call( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & scope, PyObject * _args, PyObject * _kwds ) = 0;
+		virtual PyObject * call( void * _self, const class_type_scope_ptr & scope, PyObject * _args, PyObject * _kwds ) = 0;
 
 	protected:
 		const char * m_name;
@@ -48,12 +47,12 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
             (void)_kwds;
 
-			uint32_t class_id = _kernel->class_info<C*>();
-			uint32_t scope_id = _kernel->class_info<C>();
+			uint32_t class_id = detail::class_info<C*>();
+			uint32_t scope_id = detail::class_info<C>();
 
 			C * self = detail::meta_cast_scope_t<C *>( _impl, scope_id, class_id, _scope );
 			
@@ -78,11 +77,11 @@ namespace pybind
         }
 
     protected:
-		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
         {
-			uint32_t scope_id = _kernel->class_info<C>();
+			uint32_t scope_id = detail::class_info<C>();
 
-            const char * scopeName = _kernel->get_class_type_info( scope_id );
+			const char * scopeName = detail::get_class_type_info( scope_id );
 
             const char * name = this->getName();
 
@@ -94,7 +93,7 @@ namespace pybind
 
             pybind::check_error();
 
-			PyObject * ret = method_adapter<C, F>::call( _kernel, _impl, _scope, _args, _kwds );
+			PyObject * ret = method_adapter<C, F>::call( _impl, _scope, _args, _kwds );
 
             return ret;
         }
@@ -116,12 +115,12 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
             (void)_kwds;
 
-			uint32_t class_id = _kernel->class_info<C*>();
-			uint32_t scope_id = _kernel->class_info<C>();
+			uint32_t class_id = detail::class_info<C*>();
+			uint32_t scope_id = detail::class_info<C>();
 
 			C * self = detail::meta_cast_scope_t<C *>( _impl, scope_id, class_id, _scope );
 
@@ -148,10 +147,10 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
-			uint32_t class_id = _kernel->class_info<C*>();
-			uint32_t scope_id = _kernel->class_info<C>();
+			uint32_t class_id = detail::class_info<C*>();
+			uint32_t scope_id = detail::class_info<C>();
 
 			C * self = detail::meta_cast_scope_t<C *>( _impl, scope_id, class_id, _scope );
 
@@ -177,12 +176,12 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
             (void)_kwds;
 
-			uint32_t class_id = _kernel->class_info<C*>();
-			uint32_t scope_id = _kernel->class_info<C>();
+			uint32_t class_id = detail::class_info<C*>();
+			uint32_t scope_id = detail::class_info<C>();
 
 			C * self = detail::meta_cast_scope_t<C *>( _impl, scope_id, class_id, _scope );
 
@@ -207,10 +206,10 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
-			uint32_t class_id = _kernel->class_info<C*>();
-			uint32_t scope_id = _kernel->class_info<C>();
+			uint32_t class_id = detail::class_info<C*>();
+			uint32_t scope_id = detail::class_info<C>();
 
 			C * self = detail::meta_cast_scope_t<C *>( _impl, scope_id, class_id, _scope );
 

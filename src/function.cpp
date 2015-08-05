@@ -3,7 +3,6 @@
 #	include "pybind/system.hpp"
 
 #	include "function_type.hpp"
-#   include "static_var.hpp"
 
 #	include "pybind/debug.hpp"
 

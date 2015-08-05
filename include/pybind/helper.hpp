@@ -11,6 +11,24 @@ namespace pybind
 	namespace detail
 	{
 		//////////////////////////////////////////////////////////////////////////
+		class import_operator_t
+		{
+		public:
+			template<class T>
+			import_operator_t( const T & _value )
+			{
+				m_obj = pybind::ptr_throw( _value );
+			}
+
+			operator PyObject * () const
+			{
+				return m_obj;
+			}
+
+		protected:
+			PyObject * m_obj;
+		};
+		//////////////////////////////////////////////////////////////////////////
 		class extract_operator_t
 		{
 		public:

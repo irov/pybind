@@ -5,7 +5,6 @@
 #	include "pybind/kernel_interface.hpp"
 
 #	include "pybind/class_type_scope_interface.hpp"
-#	include "pybind/function_parser.hpp"
 
 #	include "pybind/new_adapter.hpp"
 #	include "pybind/destroy_adapter.hpp"
@@ -39,9 +38,9 @@ namespace pybind
 	public:
 		base_( const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, size_t _size, PyObject * _module )
 		{
-			m_kernel = pybind::get_kernel();
+			kernel_interface * kernel = kernel_holder_ptr::get();
 
-			uint32_t info = m_kernel->class_info<C>();
+			uint32_t info = kernel->class_info<C>();
 
 			uint32_t pod = 0;
 
@@ -50,7 +49,7 @@ namespace pybind
 				pod = (uint32_t)_size;
 			}
 
-			m_scope = m_kernel->create_new_type_scope( info, _name, _user, _pynew, _pydestructor, pod );
+			m_scope = kernel->create_new_type_scope( info, _name, _user, _pynew, _pydestructor, pod );
 
 			this->setup_bases();
 
@@ -68,24 +67,26 @@ namespace pybind
 
 		void setup_bases()
 		{
+			kernel_interface * kernel = kernel_holder_ptr::get();
+
 			int arity = B::base_arity;
 
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base0>( m_kernel, &meta_cast<typename B::base0> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base1>( m_kernel, &meta_cast<typename B::base1> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base2>( m_kernel, &meta_cast<typename B::base2> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base3>( m_kernel, &meta_cast<typename B::base3> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base4>( m_kernel, &meta_cast<typename B::base4> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base5>( m_kernel, &meta_cast<typename B::base5> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base6>( m_kernel, &meta_cast<typename B::base6> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base7>( m_kernel, &meta_cast<typename B::base7> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base8>( m_kernel, &meta_cast<typename B::base8> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base9>( m_kernel, &meta_cast<typename B::base9> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base10>( m_kernel, &meta_cast<typename B::base10> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base11>( m_kernel, &meta_cast<typename B::base11> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base12>( m_kernel, &meta_cast<typename B::base12> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base13>( m_kernel, &meta_cast<typename B::base13> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base14>( m_kernel, &meta_cast<typename B::base14> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base15>( m_kernel, &meta_cast<typename B::base15> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base0>( kernel, &meta_cast<typename B::base0> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base1>( kernel, &meta_cast<typename B::base1> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base2>( kernel, &meta_cast<typename B::base2> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base3>( kernel, &meta_cast<typename B::base3> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base4>( kernel, &meta_cast<typename B::base4> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base5>( kernel, &meta_cast<typename B::base5> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base6>( kernel, &meta_cast<typename B::base6> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base7>( kernel, &meta_cast<typename B::base7> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base8>( kernel, &meta_cast<typename B::base8> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base9>( kernel, &meta_cast<typename B::base9> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base10>( kernel, &meta_cast<typename B::base10> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base11>( kernel, &meta_cast<typename B::base11> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base12>( kernel, &meta_cast<typename B::base12> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base13>( kernel, &meta_cast<typename B::base13> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base14>( kernel, &meta_cast<typename B::base14> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base15>( kernel, &meta_cast<typename B::base15> );
 		}
 
 		template<class F>
@@ -317,12 +318,12 @@ namespace pybind
 	protected:
 		void setup_extract( const type_cast_ptr & _type )
 		{
-			pybind::registration_type_cast<C>(m_kernel, _type);
+			kernel_interface * kernel = kernel_holder_ptr::get();
+
+			pybind::registration_type_cast<C>(kernel, _type);
 		}
 
 	protected:
-		kernel_interface * m_kernel;
-
 		class_type_scope_interface_ptr m_scope;
 	};
 

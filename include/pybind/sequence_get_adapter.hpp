@@ -6,10 +6,10 @@
 #	include "pybind/method_proxy_call.hpp"
 #	include "pybind/function_proxy_call.hpp"
 
-#   include "pybind/class_type_scope_interface.hpp"
-
 namespace pybind
 {
+	//////////////////////////////////////////////////////////////////////////
+	typedef stdex::intrusive_ptr<class class_type_scope> class_type_scope_ptr;
 	//////////////////////////////////////////////////////////////////////////
 	class sequence_get_adapter_interface
 		: public adapter_interface
@@ -27,7 +27,7 @@ namespace pybind
 		}
 
 	public:
-		virtual PyObject * call( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & scope, size_t _index ) = 0;
+		virtual PyObject * call( void * _self, const class_type_scope_ptr & scope, size_t _index ) = 0;
 
 	protected:
 		const char * m_name;
@@ -39,8 +39,6 @@ namespace pybind
 	class sequence_get_adapter
 		: public sequence_get_adapter_interface
 	{
-		typedef typename function_parser<F>::result f_info;
-
 	public:
 		sequence_get_adapter( const char * _name, F _fn )
 			: sequence_get_adapter_interface(_name)
@@ -49,18 +47,16 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, size_t _index ) override
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, size_t _index ) override
 		{
-			uint32_t class_id = _kernel->class_info<C*>();
-			uint32_t scope_id = _kernel->class_info<C>();
+			uint32_t class_id = detail::class_info<C*>();
+			uint32_t scope_id = detail::class_info<C>();
 
 			C * self = detail::meta_cast_scope_t<C *>( _impl, scope_id, class_id, _scope );
 			
-			typename f_info::ret_type result = (self->*m_fn)(_kernel
-				, _index 
+			PyObject * py_result = (detail::import_operator_t)(self->*m_fn)(
+				_index 
 				);
-
-			PyObject * py_result = pybind::ptr( result );
 
 			return py_result;
 		}		
@@ -73,8 +69,6 @@ namespace pybind
     class sequence_get_adapter_depricated
         : public sequence_get_adapter<C, F>
     {
-		typedef typename function_parser<F>::result f_info;
-
     public:
         sequence_get_adapter_depricated( const char * _name, F _fn, const char * _doc )
             : sequence_get_adapter<C, F>(_name, _fn)
@@ -83,11 +77,11 @@ namespace pybind
         }
 
     protected:
-		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, size_t _index ) override
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, size_t _index ) override
         {
-			uint32_t scope_id = _kernel->class_info<C>();
+			uint32_t scope_id = detail::class_info<C>();
 
-            const char * scopeName = _kernel->get_class_type_info( scope_id );
+			const char * scopeName = detail::get_class_type_info( scope_id );
 
             const char * name = this->getName();
 
@@ -99,7 +93,7 @@ namespace pybind
 
             pybind::check_error();
 
-			PyObject * ret = sequence_get_adapter<C, F>::call( _kernel, _impl, _scope
+			PyObject * ret = sequence_get_adapter<C, F>::call( _impl, _scope
 				, _index
 				);
 
@@ -114,8 +108,6 @@ namespace pybind
 	class sequence_get_adapter_proxy
 		: public sequence_get_adapter_interface
 	{
-		typedef typename function_parser<F>::result f_info;
-
 	public:
 		sequence_get_adapter_proxy( const char * _name, F _fn, P * _proxy )
 			: sequence_get_adapter_interface(_name)
@@ -125,18 +117,16 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, size_t _index ) override
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, size_t _index ) override
 		{
-			uint32_t class_id = _kernel->class_info<C*>();
-			uint32_t scope_id = _kernel->class_info<C>();
+			uint32_t class_id = detail::class_info<C*>();
+			uint32_t scope_id = detail::class_info<C>();
 
 			C * self = detail::meta_cast_scope_t<C *>( _impl, scope_id, class_id, _scope );
 
-			typename f_info::ret_type result = (m_proxy->*m_fn)(_kernel, self
+			PyObject * py_result = (detail::import_operator_t)(m_proxy->*m_fn)( self
 				, _index
 				);
-
-			PyObject * py_result = pybind::ptr( result );
 
 			return py_result;
 		}
@@ -150,8 +140,6 @@ namespace pybind
 	class sequence_get_adapter_proxy_function
 		: public sequence_get_adapter_interface
 	{
-		typedef typename function_parser<F>::result f_info;
-
 	public:
 		sequence_get_adapter_proxy_function( const char * _name, F _fn )
 			: sequence_get_adapter_interface(_name)
@@ -160,18 +148,16 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, size_t _index ) override
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, size_t _index ) override
 		{
-			uint32_t class_id = _kernel->class_info<C*>();
-			uint32_t scope_id = _kernel->class_info<C>();
+			uint32_t class_id = detail::class_info<C*>();
+			uint32_t scope_id = detail::class_info<C>();
 
 			C * self = detail::meta_cast_scope_t<C *>( _impl, scope_id, class_id, _scope );
 
-			typename f_info::ret_type result = (*m_fn)(_kernel, self
+			PyObject * py_result = (detail::import_operator_t)(*m_fn)(self
 				, _index
 				);
-
-			PyObject * py_result = pybind::ptr( result );
 
 			return py_result;
 		}

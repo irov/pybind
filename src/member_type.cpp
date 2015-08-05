@@ -3,12 +3,23 @@
 #	include "pybind/system.hpp"
 #	include "pybind/detail.hpp"
 
-#	include "pybind/class_type_scope_interface.hpp"
+#	include "pybind/class_type_scope.hpp"
 
-#   include "static_var.hpp"
+#	include "pod.hpp"
 
 namespace pybind
 {
+	struct member_scope
+	{
+		PyTypeObject member_type;
+	};
+	//////////////////////////////////////////////////////////////////////////
+	static member_scope & get_scope()
+	{
+		static member_scope k;
+
+		return k;
+	}
 	//////////////////////////////////////////////////////////////////////////
 	static void py_dealloc( PyObject * _obj )
 	{
@@ -19,11 +30,123 @@ namespace pybind
 		PyObject_Free(_obj);
 	}
 	//////////////////////////////////////////////////////////////////////////
-	STATIC_DECLARE_VALUE_BEGIN(PyTypeObject, s_member_type)
+	static PyObject * py_getmethod( PyObject * _member, PyObject * _args )
 	{
-		PyVarObject_HEAD_INIT(&PyType_Type, 0)
+		py_member_type * mt = (py_member_type *)_member;
+
+		PyObject * py_self = PyTuple_GetItem( _args, 0 );
+
+		try
+		{	
+			void * impl = detail::get_class_impl( py_self );
+
+			if( impl == nullptr )
+			{
+				error_message( "py_getmethod: unbind object" );
+
+				return nullptr;
+			}
+
+			const class_type_scope_ptr & scope = detail::get_class_scope( py_self->ob_type );
+
+			PyObject * py_method = mt->iadapter->get( impl, scope );
+
+			return py_method;
+		}
+		catch( const pybind_exception & _ex )
+		{
+			pybind::error_message( "py_getmethod: obj %s method %s invalid call exception '%s'"
+				, pybind::object_str( py_self )
+				, mt->iadapter->getName()
+				, _ex.what()
+				);
+		}
+
+		return nullptr;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	static PyObject * py_setmethod( PyObject * _member, PyObject * _args )
+	{
+		py_member_type * mt = (py_member_type *)(_member);
+
+		PyObject * py_self = PyTuple_GetItem( _args, 0 );
+		PyObject * py_value = PyTuple_GetItem( _args, 1 );
+
+		try
+		{
+			void * impl = detail::get_class_impl( py_self );
+
+			if( impl == nullptr )
+			{
+				error_message( "py_setmethod: unbind object" );
+
+				return nullptr;
+			}
+
+			const class_type_scope_ptr & scope = detail::get_class_scope( py_self->ob_type );
+
+			mt->iadapter->set( impl, py_value, scope );
+
+			Py_RETURN_NONE;
+		}
+		catch( const pybind_exception & _ex )
+		{
+			pybind::error_message( "py_setmethod: obj %s method %s invalid call exception '%s'"
+				, pybind::object_str( py_self )
+				, mt->iadapter->getName()
+				, _ex.what()
+				);
+		}
+
+		return nullptr;		
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * member_type_scope::instance( const member_adapter_interface_ptr & _iadapter )
+	{
+		member_scope & k = get_scope();
+
+		py_member_type * py_member = (py_member_type *)PyType_GenericAlloc( &k.member_type, 0 );
+		
+		stdex::intrusive_ptr_setup( py_member->iadapter, _iadapter );
+
+		//////////////////////////////////////////////////////////////////////////
+		static PyMethodDef getmethod =
+		{
+			"getmethod",
+			&py_getmethod,
+			METH_CLASS | METH_VARARGS,
+			"Embedding function cpp"
+		};
+		//////////////////////////////////////////////////////////////////////////
+		static PyMethodDef setmethod =
+		{
+			"setmethod",
+			&py_setmethod,
+			METH_CLASS | METH_VARARGS,
+			"Embedding function cpp"
+		};
+
+		PyObject * py_get = PyCFunction_New( &getmethod, (PyObject*)py_member );
+		PyObject * py_set = PyCFunction_New( &setmethod, (PyObject*)py_member );
+
+		Py_DecRef( (PyObject *)py_member );
+
+		PyObject * py_result = PyObject_CallFunction( (PyObject*)&PyProperty_Type, const_cast<char *>("OOss"), py_get, py_set, 0, "member_type_scope");		
+		Py_DecRef( py_get );
+		Py_DecRef( py_set );
+
+		return py_result;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool initialize_members()
+	{
+		member_scope & k = get_scope();
+	
+		PyTypeObject member_type =
+		{
+			PyVarObject_HEAD_INIT( &PyType_Type, 0 )
 			"member_type_scope",
-			sizeof(py_member_type),
+			sizeof( py_member_type ),
 			0,
 			&py_dealloc,                             /* tp_dealloc */
 			0,                    /* tp_print */
@@ -60,128 +183,14 @@ namespace pybind
 			0,                                          /* tp_alloc */
 			0,                                 /* tp_new */
 			0,                               /* tp_free */
-	}
-	STATIC_DECLARE_VALUE_END();
-	//////////////////////////////////////////////////////////////////////////
-	static PyObject * py_getmethod( PyObject * _member, PyObject * _args )
-	{
-		py_member_type * mt = (py_member_type *)_member;
+		};
 
-		PyObject * py_self = PyTuple_GetItem( _args, 0 );
+		k.member_type = member_type;
 
-		try
-		{	
-			void * impl = detail::get_class_impl( py_self );
-
-			if( impl == nullptr )
-			{
-				error_message( "py_getmethod: unbind object" );
-
-				return nullptr;
-			}
-
-			kernel_interface * k = pybind::get_kernel();
-
-			const class_type_scope_interface_ptr & scope = k->get_class_scope( py_self->ob_type );
-
-			PyObject * py_method = mt->iadapter->get( k, impl, scope );
-
-			return py_method;
-		}
-		catch( const pybind_exception & _ex )
-		{
-			pybind::error_message( "py_getmethod: obj %s method %s invalid call exception '%s'"
-				, pybind::object_str( py_self )
-				, mt->iadapter->getName()
-				, _ex.what()
-				);
-		}
-
-		return nullptr;
-	}
-	//////////////////////////////////////////////////////////////////////////
-	static PyObject * py_setmethod( PyObject * _member, PyObject * _args )
-	{
-		py_member_type * mt = (py_member_type *)(_member);
-
-		PyObject * py_self = PyTuple_GetItem( _args, 0 );
-		PyObject * py_value = PyTuple_GetItem( _args, 1 );
-
-		try
-		{
-			void * impl = detail::get_class_impl( py_self );
-
-			if( impl == nullptr )
-			{
-				error_message( "py_setmethod: unbind object" );
-
-				return nullptr;
-			}
-
-			kernel_interface * k = pybind::get_kernel();
-
-			const class_type_scope_interface_ptr & scope = k->get_class_scope( py_self->ob_type );
-
-			mt->iadapter->set( k, impl, py_value, scope );
-
-			Py_RETURN_NONE;
-		}
-		catch( const pybind_exception & _ex )
-		{
-			pybind::error_message( "py_setmethod: obj %s method %s invalid call exception '%s'"
-				, pybind::object_str( py_self )
-				, mt->iadapter->getName()
-				, _ex.what()
-				);
-		}
-
-		return nullptr;		
-	}
-	//////////////////////////////////////////////////////////////////////////
-	STATIC_DECLARE_VALUE_BEGIN(PyMethodDef, s_getmethod)
-	{
-		"getmethod",
-			&py_getmethod,
-			METH_CLASS | METH_VARARGS,
-			"Embedding function cpp"
-	}
-	STATIC_DECLARE_VALUE_END();
-	//////////////////////////////////////////////////////////////////////////
-	STATIC_DECLARE_VALUE_BEGIN(PyMethodDef, s_setmethod)
-	{
-		"setmethod",
-			&py_setmethod,
-			METH_CLASS | METH_VARARGS,
-			"Embedding function cpp"
-	}
-	STATIC_DECLARE_VALUE_END();
-	//////////////////////////////////////////////////////////////////////////
-	PyObject * member_type_scope::instance( const member_adapter_interface_ptr & _iadapter )
-	{
-		py_member_type * py_member = (py_member_type *)PyType_GenericAlloc( &STATIC_VAR(s_member_type), 0 );
-		
-		stdex::intrusive_ptr_setup( py_member->iadapter, _iadapter );
-
-		PyObject * py_get = PyCFunction_New( &STATIC_VAR(s_getmethod), (PyObject*)py_member );
-		PyObject * py_set = PyCFunction_New( &STATIC_VAR(s_setmethod), (PyObject*)py_member );
-
-		Py_DecRef( (PyObject *)py_member );
-
-		PyObject * py_result = PyObject_CallFunction( (PyObject*)&PyProperty_Type, const_cast<char *>("OOss"), py_get, py_set, 0, "member_type_scope");		
-		Py_DecRef( py_get );
-		Py_DecRef( py_set );
-
-		return py_result;
-	}
-	//////////////////////////////////////////////////////////////////////////
-	bool initialize_members()
-	{
-		PyTypeObject * member_type = &STATIC_VAR(s_member_type);
-
-		if( PyType_Ready( member_type ) < 0 )
+		if( PyType_Ready( &k.member_type ) < 0 )
 		{
 			printf("invalid embedding class '%s' \n"
-                , member_type->tp_name
+				, k.member_type.tp_name
                 );
 
             return false;
@@ -192,6 +201,5 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void finalize_members()
 	{
-		Py_DecRef( (PyObject *)&STATIC_VAR(s_member_type) );
 	}
 }

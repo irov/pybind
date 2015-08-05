@@ -15,7 +15,7 @@ namespace pybind
 			: public pybind::type_cast_result<std::string>
 		{
 		public:
-			bool apply( kernel_interface * _kernel, PyObject * _obj, std::string & _value ) override
+			bool apply( PyObject * _obj, std::string & _value ) override
 			{
 				if( pybind::string_check( _obj ) == true )
 				{
@@ -38,7 +38,7 @@ namespace pybind
 			}
 
 		public:
-			PyObject * wrap( kernel_interface * _kernel, pybind::type_cast_result<std::string>::TCastRef _value ) override
+			PyObject * wrap( pybind::type_cast_result<std::string>::TCastRef _value ) override
 			{
 				PyObject * py_value = pybind::string_from_char_size( _value.c_str(), _value.size() );
 
@@ -50,7 +50,7 @@ namespace pybind
 			: public pybind::type_cast_result<std::wstring>
 		{
 		public:
-			bool apply( kernel_interface * _kernel, PyObject * _obj, std::wstring & _value ) override
+			bool apply( PyObject * _obj, std::wstring & _value ) override
 			{
 				if( pybind::unicode_check( _obj ) == true )
 				{
@@ -73,7 +73,7 @@ namespace pybind
 			}
 
 		public:
-			PyObject * wrap( kernel_interface * _kernel, pybind::type_cast_result<std::wstring>::TCastRef _value ) override
+			PyObject * wrap( pybind::type_cast_result<std::wstring>::TCastRef _value ) override
 			{
 				PyObject * py_value = pybind::unicode_from_wchar_size( _value.c_str(), _value.size() );
 
@@ -85,7 +85,7 @@ namespace pybind
 			: public pybind::type_cast_result<stdex::string>
 		{
 		public:
-			bool apply( kernel_interface * _kernel, PyObject * _obj, stdex::string & _value ) override
+			bool apply( PyObject * _obj, stdex::string & _value ) override
 			{
 				if( pybind::string_check( _obj ) == true )
 				{
@@ -108,7 +108,7 @@ namespace pybind
 			}
 
 		public:
-			PyObject * wrap( kernel_interface * _kernel, pybind::type_cast_result<stdex::string>::TCastRef _value ) override
+			PyObject * wrap( pybind::type_cast_result<stdex::string>::TCastRef _value ) override
 			{
 				PyObject * py_value = pybind::string_from_char_size( _value.c_str(), _value.size() );
 
@@ -120,7 +120,7 @@ namespace pybind
 			: public pybind::type_cast_result<stdex::wstring>
 		{
 		public:
-			bool apply( kernel_interface * _kernel, PyObject * _obj, stdex::wstring & _value ) override
+			bool apply( PyObject * _obj, stdex::wstring & _value ) override
 			{
 				if( pybind::unicode_check( _obj ) == true )
 				{
@@ -143,7 +143,7 @@ namespace pybind
 			}
 
 		public:
-			PyObject * wrap( kernel_interface * _kernel, pybind::type_cast_result<stdex::wstring>::TCastRef _value ) override
+			PyObject * wrap( pybind::type_cast_result<stdex::wstring>::TCastRef _value ) override
 			{
 				PyObject * py_value = pybind::unicode_from_wchar_size( _value.c_str(), _value.size() );
 
@@ -152,29 +152,29 @@ namespace pybind
 		};
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool initialize_stl_type_cast( kernel_interface * _kernel )
+	bool initialize_stl_type_cast()
 	{
-		pybind::registration_type_cast<std::string>(_kernel, new helper::extract_stl_string_type);
-		pybind::registration_type_cast<std::wstring>(_kernel, new helper::extract_stl_wstring_type);
+		pybind::registration_type_cast<std::string>(new helper::extract_stl_string_type);
+		pybind::registration_type_cast<std::wstring>(new helper::extract_stl_wstring_type);
 
-		pybind::registration_stl_vector_type_cast<std::string, std::vector<std::string> >(_kernel);
-		pybind::registration_stl_vector_type_cast<std::wstring, std::vector<std::wstring> >(_kernel);
+		pybind::registration_stl_vector_type_cast<std::string, std::vector<std::string> >();
+		pybind::registration_stl_vector_type_cast<std::wstring, std::vector<std::wstring> >();
 
-		pybind::registration_type_cast<stdex::string>(_kernel, new helper::extract_stdex_stl_string_type);
-		pybind::registration_type_cast<stdex::wstring>(_kernel, new helper::extract_stdex_stl_wstring_type);
+		pybind::registration_type_cast<stdex::string>(new helper::extract_stdex_stl_string_type);
+		pybind::registration_type_cast<stdex::wstring>(new helper::extract_stdex_stl_wstring_type);
 
-		pybind::registration_stl_vector_type_cast<stdex::string, stdex::vector<stdex::string> >(_kernel);
-		pybind::registration_stl_vector_type_cast<stdex::wstring, stdex::vector<stdex::wstring> >(_kernel);
+		pybind::registration_stl_vector_type_cast<stdex::string, stdex::vector<stdex::string> >();
+		pybind::registration_stl_vector_type_cast<stdex::wstring, stdex::vector<stdex::wstring> >();
 		
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void finalize_stl_type_cast( kernel_interface * _kernel )
+	void finalize_stl_type_cast()
 	{
-		pybind::unregistration_stl_vector_type_cast<std::string, std::vector<std::string> >(_kernel);
-		pybind::unregistration_stl_vector_type_cast<std::wstring, std::vector<std::wstring> >(_kernel);
+		pybind::unregistration_stl_vector_type_cast<std::string, std::vector<std::string> >();
+		pybind::unregistration_stl_vector_type_cast<std::wstring, std::vector<std::wstring> >();
 
-		pybind::unregistration_stl_vector_type_cast<stdex::string, stdex::vector<stdex::string> >(_kernel);
-		pybind::unregistration_stl_vector_type_cast<stdex::wstring, stdex::vector<stdex::wstring> >(_kernel);
+		pybind::unregistration_stl_vector_type_cast<stdex::string, stdex::vector<stdex::string> >();
+		pybind::unregistration_stl_vector_type_cast<stdex::wstring, stdex::vector<stdex::wstring> >();
 	}
 }
