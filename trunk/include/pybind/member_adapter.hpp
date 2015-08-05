@@ -2,11 +2,9 @@
 
 #	include "pybind/adapter_interface.hpp"
 
-#	include "pybind/class_type_scope_interface.hpp"
-
-#   include "pybind/function_parser.hpp"
-
 #   include "pybind/extract.hpp"
+
+#   include "pybind/helper.hpp"
 #   include "pybind/detail.hpp"
 
 namespace pybind
@@ -27,8 +25,8 @@ namespace pybind
 		}
 
 	public:
-		virtual PyObject * get( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope ) = 0;
-		virtual int set( kernel_interface * _kernel, void * _self, PyObject * _args, const class_type_scope_interface_ptr & _scope ) = 0;
+		virtual PyObject * get( void * _self, const class_type_scope_ptr & _scope ) = 0;
+		virtual int set( void * _self, PyObject * _args, const class_type_scope_ptr & _scope ) = 0;
 
 	protected:
 		const char * m_name;
@@ -48,10 +46,10 @@ namespace pybind
 		}
 
 	public:
-		PyObject * get( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope ) override
+		PyObject * get( void * _self, const class_type_scope_ptr & _scope ) override
 		{
-			uint32_t class_id = _kernel->class_info<C*>();
-			uint32_t scope_id = _kernel->class_info<C>();
+			uint32_t class_id = detail::class_info<C*>();
+			uint32_t scope_id = detail::class_info<C>();
 
 			C * obj = detail::meta_cast_scope_t<C *>( _self, scope_id, class_id, _scope );
 
@@ -60,10 +58,10 @@ namespace pybind
 			return py_value;
 		}
 
-		int set( kernel_interface * _kernel, void * _self, PyObject * _args, const class_type_scope_interface_ptr & _scope ) override
+		int set( void * _self, PyObject * _args, const class_type_scope_ptr & _scope ) override
 		{
-			uint32_t class_id = _kernel->class_info<C*>();
-			uint32_t scope_id = _kernel->class_info<C>();
+			uint32_t class_id = detail::class_info<C*>();
+			uint32_t scope_id = detail::class_info<C>();
 
 			C * obj = detail::meta_cast_scope_t<C *>( _self, scope_id, class_id, _scope );
 
@@ -89,29 +87,27 @@ namespace pybind
 		}
 
 	public:
-		PyObject * get( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope ) override
+		PyObject * get( void * _self, const class_type_scope_ptr & _scope ) override
 		{
-			uint32_t class_id = _kernel->class_info<C*>();
-			uint32_t scope_id = _kernel->class_info<C>();
+			uint32_t class_id = detail::class_info<C*>();
+			uint32_t scope_id = detail::class_info<C>();
 
 			C * obj = detail::meta_cast_scope_t<C *>( _self, scope_id, class_id, _scope );
 			
-			PyObject * py_value = pybind::ptr_throw( (obj->*m_get)() );
+			PyObject * py_value = (detail::import_operator_t)(obj->*m_get)();
 
 			return py_value;
 		}
 
-		int set( kernel_interface * _kernel, void * _self, PyObject * _args, const class_type_scope_interface_ptr & _scope ) override
+		int set( void * _self, PyObject * _args, const class_type_scope_ptr & _scope ) override
 		{
-			uint32_t class_id = _kernel->class_info<C*>();
-			uint32_t scope_id = _kernel->class_info<C>();
+			uint32_t class_id = detail::class_info<C*>();
+			uint32_t scope_id = detail::class_info<C>();
 
 			C * obj = detail::meta_cast_scope_t<C *>( _self, scope_id, class_id, _scope );
-			
-			typedef typename function_parser<FS>::result f_info;
-				
+							
 			(obj->*m_set)(
-				pybind::extract_throw<typename f_info::param0>( _args )
+				detail::extract_operator_t( _args )
 				);
 
 			return 1;
@@ -135,29 +131,27 @@ namespace pybind
 		}
 
 	public:
-		PyObject * get( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope ) override
+		PyObject * get( void * _self, const class_type_scope_ptr & _scope ) override
 		{
-			uint32_t class_id = _kernel->class_info<C*>();
-			uint32_t scope_id = _kernel->class_info<C>();
+			uint32_t class_id = detail::class_info<C*>();
+			uint32_t scope_id = detail::class_info<C>();
 
 			C * obj = detail::meta_cast_scope_t<C *>( _self, scope_id, class_id, _scope );
 
-			PyObject * py_value = pybind::ptr_throw( (*m_get)( obj ) );
+			PyObject * py_value = (detail::import_operator_t)(*m_get)(obj);
 
 			return py_value;
 		}
 
-		int set( kernel_interface * _kernel, void * _self, PyObject * _args, const class_type_scope_interface_ptr & _scope ) override
+		int set( void * _self, PyObject * _args, const class_type_scope_ptr & _scope ) override
 		{
-			uint32_t class_id = _kernel->class_info<C*>();
-			uint32_t scope_id = _kernel->class_info<C>();
+			uint32_t class_id = detail::class_info<C*>();
+			uint32_t scope_id = detail::class_info<C>();
 
 			C * obj = detail::meta_cast_scope_t<C *>( _self, scope_id, class_id, _scope );
-			
-			typedef typename function_parser<FS>::result f_info;
-
+						
 			(*m_set)( obj
-				, pybind::extract_throw<typename f_info::param1>( _args )
+				, detail::extract_operator_t( _args )
 				);
 
 			return 1;

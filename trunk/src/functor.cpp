@@ -4,7 +4,6 @@
 #	include "config/python.hpp"
 
 #	include "functor_type.hpp"
-#   include "static_var.hpp"
 
 #	include "pybind/debug.hpp"
 

@@ -12,12 +12,13 @@ namespace pybind
 	template<class P, class C, class F,class Ret, int i>
 	struct method_proxy_call_impl
 	{
-		//static Ret call( P * _proxy, C * _obj, F f, PyObject * _arg );
+		static Ret call( P * _proxy, C * _obj, F f, PyObject * _arg );
 	};
 
 	template<class P, class C, class F,class Ret>
 	struct method_proxy_call_impl<P,C,F,Ret,0>
 	{
+		static Ret call( P * _proxy, C * _obj, F f, PyObject * _arg );		
 	};
 
 	template<class P, class C, class F,class Ret>
@@ -104,9 +105,9 @@ namespace pybind
 
 		static PyObject * call( P * _proxy, C * _obj, F f, PyObject * _arg )
 		{
-			Ret result = method_proxy_call_impl<P,C,F,Ret,f_info::arity>::call( _proxy, _obj, f, _arg );
+			PyObject * py_result = (detail::import_operator_t)method_proxy_call_impl<P, C, F, Ret, f_info::arity>::call( _proxy, _obj, f, _arg );
 
-			return ptr_throw( result );
+			return py_result;
 		}
 	};
 

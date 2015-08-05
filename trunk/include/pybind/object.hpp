@@ -3,8 +3,6 @@
 #	include "pybind/helper.hpp"
 #	include "pybind/detail.hpp"
 
-#	include "pybind/class_type_scope_interface.hpp"
-
 namespace pybind
 {
 	class object

@@ -1,12 +1,11 @@
 #	include "pybind/system.hpp"
 
-#	include "pybind/class_type_scope_interface.hpp"
+#	include "pybind/class_type_scope.hpp"
 
 #	ifdef PYBIND_STL_SUPPORT
 #	include "pybind/stl_type_cast.hpp"
 #	endif
 
-#	include "kernel.hpp"
 #	include "pybind/detail.hpp"
 
 #	include "config/python.hpp"
@@ -16,15 +15,22 @@
 #	include "function_type.hpp"
 #	include "functor_type.hpp"
 
-#   include "static_var.hpp"
-
 #	include <stdexcept>
 #	include <stdio.h>
 
 namespace pybind
 {
+	struct system_scope
+	{
+		PyObject * current_module;
+	};
 	//////////////////////////////////////////////////////////////////////////
-	static kernel_interface * g_kernel = nullptr;
+	static system_scope & get_scope()
+	{
+		static system_scope k;
+
+		return k;
+	}
     //////////////////////////////////////////////////////////////////////////
 	bool initialize( bool _debug, bool install_sigs, bool _nosite )
 	{
@@ -77,17 +83,12 @@ namespace pybind
 #   endif
 		}
 
-		kernel * k = new kernel;
+		system_scope & k = get_scope();
 
-		if( k->initialize() == false )
-		{
-			return false;
-		}
-
-		g_kernel = k;
+		k.current_module = nullptr;
 
 #	ifdef PYBIND_STL_SUPPORT
-		if( initialize_stl_type_cast( g_kernel ) == false )
+		if( initialize_stl_type_cast() == false )
 		{
 			return false;
 		}
@@ -125,7 +126,10 @@ namespace pybind
 		finalize_methods();
 		finalize_function();
 		finalize_functor();
-		finalize_stl_type_cast( g_kernel );
+
+#	ifdef PYBIND_STL_SUPPORT
+		finalize_stl_type_cast();
+#	endif
 	}
     //////////////////////////////////////////////////////////////////////////
 	bool is_initialized()
@@ -152,11 +156,6 @@ namespace pybind
 
         return version;
     }
-	//////////////////////////////////////////////////////////////////////////
-	kernel_interface * get_kernel()
-	{
-		return g_kernel;
-	}
     //////////////////////////////////////////////////////////////////////////
 	void setStdErrorHandle( PyObject * _handle )
 	{
@@ -292,16 +291,18 @@ namespace pybind
         return code;
     }
     //////////////////////////////////////////////////////////////////////////
-    STATIC_DECLARE_VALUE(PyObject *, s_current_module, 0);
-    //////////////////////////////////////////////////////////////////////////
 	void set_currentmodule( PyObject * _module )
 	{
-		STATIC_VAR(s_current_module) = _module;
+		system_scope & k = get_scope();
+
+		k.current_module = _module;
 	}
     //////////////////////////////////////////////////////////////////////////
 	PyObject * get_currentmodule()
 	{
-		return STATIC_VAR(s_current_module);
+		system_scope & k = get_scope();
+
+		return k.current_module;
 	}
     //////////////////////////////////////////////////////////////////////////
 	PyObject * ask_native( PyObject * _obj, PyObject * _args )
@@ -1091,14 +1092,14 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool is_class( PyObject * _value )
 	{
-		bool result = g_kernel->is_class( _value );
+		bool result = detail::is_class( _value );
 
 		return result;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool is_type_class( PyObject * _value )
 	{
-		bool result = g_kernel->is_type_class( _value );
+		bool result = detail::is_type_class( _value );
 
 		return result;
 	}
@@ -1107,7 +1108,7 @@ namespace pybind
 	{
 		PyTypeObject * type = (PyTypeObject *)_value;
 
-		const class_type_scope_interface_ptr & scope = g_kernel->get_class_scope( type );
+		const class_type_scope_ptr & scope = detail::get_class_scope( type );
 
 		if( scope == nullptr )
 		{

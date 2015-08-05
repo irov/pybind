@@ -45,9 +45,7 @@ namespace pybind
 					return false;
 				}
 
-				kernel_interface * k = pybind::get_kernel();
-
-				type_cast * etype = type_down_cast<T_WOCR>::find( k );
+				type_cast * etype = type_down_cast<T_WOCR>::find();
 
 				if( etype == nullptr )
 				{
@@ -68,7 +66,7 @@ namespace pybind
 
 				type_cast_result_T_WOCR * etype_impl = static_cast<type_cast_result_T_WOCR *>(etype);
 
-				if( etype_impl->apply( k, _obj, _value ) == false )
+				if( etype_impl->apply( _obj, _value ) == false )
 				{
 					pybind::check_error();
 
@@ -177,9 +175,7 @@ namespace pybind
 	{
 		typedef typename detail::extract_return<T>::type T_WOCR;
 
-		kernel_interface * k = pybind::get_kernel();
-
-		type_cast * etype = detail::type_down_cast<T_WOCR>::find( k );
+		type_cast * etype = detail::type_down_cast<T_WOCR>::find();
 
 		if( etype == nullptr )
 		{
@@ -196,7 +192,7 @@ namespace pybind
 
 		type_cast_result_T_WOCR * etype_impl = static_cast<type_cast_result_T_WOCR *>(etype);
 
-		PyObject * result = etype_impl->wrap( k, _value );
+		PyObject * result = etype_impl->wrap( _value );
 
 		if( result == nullptr )
 		{

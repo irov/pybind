@@ -13,10 +13,8 @@ namespace pybind
 	{
 		typedef typename pybind::type_cast_result<V>::TCastRef TCastRef;
 
-		bool apply( kernel_interface * _kernel, PyObject * _obj, V & _vector ) override
+		bool apply( PyObject * _obj, V & _vector ) override
 		{
-			(void)_kernel;
-
 			if( pybind::tuple_check( _obj ) == true )
 			{
 				size_t size = pybind::tuple_size( _obj );
@@ -63,10 +61,8 @@ namespace pybind
 			return true;
 		}
 
-		PyObject * wrap( kernel_interface * _kernel, TCastRef _vector ) override
+		PyObject * wrap( TCastRef _vector ) override
 		{
-			(void)_kernel;
-
 			size_t vector_size = _vector.size();
 
 			PyObject * py_vector = pybind::list_new( vector_size );
@@ -94,10 +90,8 @@ namespace pybind
 	{
 		typedef typename pybind::type_cast_result<M>::TCastRef TCastRef;
 
-		bool apply( kernel_interface * _kernel, PyObject * _obj, M & _map ) override
+		bool apply( PyObject * _obj, M & _map ) override
 		{
-			(void)_kernel;
-
 			if( pybind::dict_check( _obj ) == true )
 			{
 				size_t dict_pos = 0;
@@ -129,10 +123,8 @@ namespace pybind
 			return true;
 		}
 
-		PyObject * wrap( kernel_interface * _kernel, TCastRef _value ) override
+		PyObject * wrap( TCastRef _value ) override
 		{
-			(void)_kernel;
-
 			PyObject * py_dict = pybind::dict_new();
 
 			for( typename M::const_iterator
@@ -158,37 +150,37 @@ namespace pybind
 	};
 
 	template<class T, class V>	
-	inline void registration_stl_vector_type_cast( kernel_interface * _kernel )
+	inline void registration_stl_vector_type_cast()
 	{
-		uint32_t id = _kernel->class_info<V>();
+		uint32_t id = detail::class_info<V>();
 
-		_kernel->register_type_info_extract( id, new pybind::extract_stl_vector_type<T, V> );
+		detail::register_type_info_extract( id, new pybind::extract_stl_vector_type<T, V> );
 	}
 
 	template<class T, class V>
-	inline void unregistration_stl_vector_type_cast( kernel_interface * _kernel )
+	inline void unregistration_stl_vector_type_cast()
 	{
-		uint32_t id = _kernel->class_info<V>();
+		uint32_t id = detail::class_info<V>();
 
-		_kernel->unregister_type_info_extract( id );
+		detail::unregister_type_info_extract( id );
 	}
 
 	template<class K, class V, class M>
-	inline void registration_stl_map_type_cast( kernel_interface * _kernel )
+	inline void registration_stl_map_type_cast()
 	{
-		uint32_t id = _kernel->class_info<M>();
+		uint32_t id = detail::class_info<M>();
 
-		_kernel->register_type_info_extract( id, new pybind::extract_stl_map_type<K, V, M> );
+		detail::register_type_info_extract( id, new pybind::extract_stl_map_type<K, V, M> );
 	}
 	
 	template<class K, class V, class M>
-	inline void unregistration_stl_map_type_cast( kernel_interface * _kernel )
+	inline void unregistration_stl_map_type_cast()
 	{
-		uint32_t id = _kernel->class_info<M>();
+		uint32_t id = detail::class_info<M>();
 
-		_kernel->unregister_type_info_extract( id );
+		detail::unregister_type_info_extract( id );
 	}
 
-	PYBIND_API bool initialize_stl_type_cast( kernel_interface * _kernel );
-	PYBIND_API void finalize_stl_type_cast( kernel_interface * _kernel );
+	PYBIND_API bool initialize_stl_type_cast();
+	PYBIND_API void finalize_stl_type_cast();
 }

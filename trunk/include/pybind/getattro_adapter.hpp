@@ -6,12 +6,12 @@
 #	include "pybind/method_proxy_call.hpp"
 #	include "pybind/function_proxy_call.hpp"
 
-#   include "pybind/class_type_scope_interface.hpp"
-
 #	include "pybind/detail.hpp"
 
 namespace pybind
 {
+	//////////////////////////////////////////////////////////////////////////
+	typedef stdex::intrusive_ptr<class class_type_scope> class_type_scope_ptr;
 	//////////////////////////////////////////////////////////////////////////
 	class getattro_adapter_interface
 		: public adapter_interface
@@ -29,7 +29,7 @@ namespace pybind
 		}
 
 	public:
-		virtual PyObject * call( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope, PyObject * _key ) = 0;
+		virtual PyObject * call( void * _self, const class_type_scope_ptr & _scope, PyObject * _key ) = 0;
 
 	protected:
 		const char * m_name;
@@ -41,8 +41,6 @@ namespace pybind
 	class getattro_adapter
 		: public getattro_adapter_interface
 	{
-		typedef typename function_parser<F>::result f_info;
-
 	public:
 		getattro_adapter( const char * _name, F _fn )
 			: getattro_adapter_interface( _name )
@@ -51,18 +49,16 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _key ) override
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _key ) override
 		{
-			uint32_t class_id = _kernel->class_info<C*>();
-			uint32_t scope_id = _kernel->class_info<C>();
+			uint32_t class_id = detail::class_info<C*>();
+			uint32_t scope_id = detail::class_info<C>();
 
 			C * self = detail::meta_cast_scope_t<C *>( _impl, scope_id, class_id, _scope );
 			
-			typename f_info::ret_type result = (self->*m_fn)(_kernel
-				, extract_throw<typename f_info::param1>( _key )
+			PyObject * py_result = (detail::import_operator_t)(self->*m_fn)(
+				detail::extract_operator_t( _key )
 				);
-
-			PyObject * py_result = pybind::ptr( result );
 
 			return py_result;
 		}		
@@ -83,11 +79,11 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _key ) override
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _key ) override
 		{
-			uint32_t scope_id = _kernel->class_info<C>();
+			uint32_t scope_id = detail::class_info<C>();
 
-			const char * scopeName = _kernel->get_class_type_info( scope_id );
+			const char * scopeName = detail::get_class_type_info( scope_id );
 
 			const char * name = this->getName();
 
@@ -99,7 +95,7 @@ namespace pybind
 
 			pybind::check_error();
 
-			PyObject * ret = getattro_adapter<C, F>::call( _kernel, _impl, _scope, _key );
+			PyObject * ret = getattro_adapter<C, F>::call( _impl, _scope, _key );
 
 			return ret;
 		}
@@ -112,8 +108,6 @@ namespace pybind
 	class getattro_adapter_proxy
 		: public getattro_adapter_interface
 	{
-		typedef typename function_parser<F>::result f_info;
-
 	public:
 		getattro_adapter_proxy( const char * _name, F _fn, P * _proxy )
 			: getattro_adapter_interface( _name )
@@ -123,18 +117,16 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _key ) override
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _key ) override
 		{
-			uint32_t class_id = _kernel->class_info<C*>();
-			uint32_t scope_id = _kernel->class_info<C>();
+			uint32_t class_id = detail::class_info<C*>();
+			uint32_t scope_id = detail::class_info<C>();
 
 			C * self = detail::meta_cast_scope_t<C *>( _impl, scope_id, class_id, _scope );
 			
-			typename f_info::ret_type result = (m_proxy->*m_fn)(_kernel, self
-				, extract_throw<typename f_info::param2>( _key )
+			PyObject * py_result = (detail::import_operator_t)(m_proxy->*m_fn)(self
+				, detail::extract_operator_t( _key )
 				);
-
-			PyObject * py_result = pybind::ptr( result );
 
 			return py_result;
 		}
@@ -148,8 +140,6 @@ namespace pybind
 	class getattro_adapter_proxy_function
 		: public getattro_adapter_interface
 	{
-		typedef typename function_parser<F>::result f_info;
-
 	public:
 		getattro_adapter_proxy_function( const char * _name, F _fn )
 			: getattro_adapter_interface( _name )
@@ -158,18 +148,16 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _key ) override
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _key ) override
 		{
-			uint32_t class_id = _kernel->class_info<C*>();
-			uint32_t scope_id = _kernel->class_info<C>();
+			uint32_t class_id = detail::class_info<C*>();
+			uint32_t scope_id = detail::class_info<C>();
 
 			C * self = detail::meta_cast_scope_t<C *>( _impl, scope_id, class_id, _scope );
 
-			typename f_info::ret_type result = (*m_fn)(_kernel, self
-				, extract_throw<typename f_info::param2>( _key )
+			PyObject * py_result = (detail::import_operator_t)(*m_fn)( self
+				, detail::extract_operator_t( _key )
 				);
-
-			PyObject * py_result = pybind::ptr( result );
 
 			return py_result;
 		}
