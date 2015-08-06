@@ -19,8 +19,6 @@ extern "C"
 
 namespace pybind
 {
-	class kernel_interface;
-
 	typedef stdex::intrusive_ptr<class class_type_scope> class_type_scope_ptr;
 
 	typedef void * (*pybind_metacast)( void * );

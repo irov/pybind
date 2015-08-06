@@ -135,8 +135,6 @@ namespace pybind
 	public:
 		detail::extract_operator_t extract()
 		{
-			pybind::incref( m_obj );
-
 			return detail::extract_operator_t( m_obj );
 		}
 

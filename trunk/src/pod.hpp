@@ -2,6 +2,8 @@
 
 #	include "config/python.hpp"
 
+#	include "pybind/types.hpp"
+
 namespace pybind
 {
 	namespace detail
@@ -53,9 +55,8 @@ namespace pybind
 		};
 		//////////////////////////////////////////////////////////////////////////
 		PyTypeObject * get_pod_type( uint32_t _pod );
-		void * get_class_impl( PyObject * _obj );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool pod_initialize();
-	void pod_finalize();
+	bool initialize_pod();
+	void finalize_pod();
 }

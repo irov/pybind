@@ -10,6 +10,8 @@
 
 #	include "config/python.hpp"
 
+#	include "pod.hpp"
+
 #	include "method_type.hpp"
 #	include "member_type.hpp"
 #	include "function_type.hpp"
@@ -87,6 +89,16 @@ namespace pybind
 
 		k.current_module = nullptr;
 
+		if( initialize_pod() == false )
+		{
+			return false;
+		}
+
+		if( initialize_detail() == false )
+		{
+			return false;
+		}
+
 #	ifdef PYBIND_STL_SUPPORT
 		if( initialize_stl_type_cast() == false )
 		{
@@ -130,6 +142,9 @@ namespace pybind
 #	ifdef PYBIND_STL_SUPPORT
 		finalize_stl_type_cast();
 #	endif
+
+		finalize_detail();
+		finalize_pod();
 	}
     //////////////////////////////////////////////////////////////////////////
 	bool is_initialized()

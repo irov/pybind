@@ -47,6 +47,14 @@ namespace pybind
 
 		void * get_user() const;
 
+		template<class T>
+		T * get_user_t() const
+		{
+			void * ptr = this->get_user();
+
+			return static_cast<T *>(ptr);
+		}
+
 		PyTypeObject * get_typemodule() const;
 
 		void * construct( PyObject * _obj, PyObject * _args );
@@ -54,6 +62,27 @@ namespace pybind
 		void add_method( const method_adapter_interface_ptr & _ifunc );
 		void add_member( const member_adapter_interface_ptr & _imember );
 		void add_base( uint32_t _info, const class_type_scope_ptr & _scope, pybind_metacast _cast );
+
+		template<class B>
+		void add_base_t( pybind_metacast _cast )
+		{
+			uint32_t tptrinfo = detail::class_info<B*>();
+			uint32_t tinfo = detail::class_info<B>();
+
+			if( detail::has_class_type_scope( tinfo ) == false )
+			{
+				pybind::throw_exception( "class_type_scope_interface::add_base_t %s not bind base type %s"
+					, this->get_name()
+					, detail::get_class_type_info( tinfo )
+					);
+
+				return;
+			}
+
+			const class_type_scope_ptr & basescope = detail::get_class_type_scope( tinfo );
+
+			this->add_base( tptrinfo, basescope, _cast );
+		}
 
 		void set_construct( const constructor_adapter_interface_ptr & _iconstruct );
 		void set_convert( const convert_adapter_interface_ptr & _iconvert );
