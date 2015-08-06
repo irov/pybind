@@ -1,9 +1,9 @@
 #	pragma once
 
-#	include "pybind/function_parser.hpp"
-
 #	include "pybind/extract.hpp"
 #	include "pybind/helper.hpp"
+
+#	include "stdex/function_traits.h"
 
 namespace pybind
 {
@@ -182,7 +182,7 @@ namespace pybind
 	template<class F, class Ret>
 	struct function_call_ret_impl
 	{
-		typedef typename function_parser<F>::result f_info;
+		typedef typename stdex::function_traits<F>::result f_info;
 
 		static PyObject * call( F f, PyObject * _arg )
 		{
@@ -195,7 +195,7 @@ namespace pybind
 	template<class F>
 	struct function_call_ret_impl<F,void>
 	{
-		typedef typename function_parser<F>::result f_info;
+		typedef typename stdex::function_traits<F>::result f_info;
 
 		static PyObject * call( F f, PyObject * _arg )
 		{
@@ -208,7 +208,7 @@ namespace pybind
 	template<class F>
 	struct function_call
 	{
-		typedef typename function_parser<F>::result f_info;
+		typedef typename stdex::function_traits<F>::result f_info;
 
 		static PyObject * call( F f, PyObject * _arg )
         {

@@ -28,8 +28,6 @@ namespace pybind
 		{
 			PyObject * py_object = pybind::dict_get( m_obj, _name );
 
-			pybind::incref( py_object );
-
 			return detail::extract_operator_t(py_object);
 		}
 
