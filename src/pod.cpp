@@ -69,68 +69,9 @@ namespace pybind
 
 			return py_pybind_type;
 		}
-		//////////////////////////////////////////////////////////////////////////
-		void * get_class_impl( PyObject * _obj )
-		{
-			py_base_object * py_base = (py_base_object *)_obj;
-
-			uint32_t flag = py_base->flag;
-
-			if( flag & PY_OBJECT_PTR )
-			{
-				py_ptr_object * py_ptr = (py_ptr_object *)_obj;
-
-				void * impl = py_ptr->impl;
-
-				return impl;
-			}
-			else if( flag & PY_OBJECT_POD8 )
-			{
-				py_pod8_object * py_pod = (py_pod8_object *)_obj;
-
-				void * impl = (void *)py_pod->buff;
-
-				return impl;
-			}
-			else if( flag & PY_OBJECT_POD16 )
-			{
-				py_pod16_object * py_pod = (py_pod16_object *)_obj;
-
-				void * impl = (void *)py_pod->buff;
-
-				return impl;
-			}
-			else if( flag & PY_OBJECT_POD32 )
-			{
-				py_pod32_object * py_pod = (py_pod32_object *)_obj;
-
-				void * impl = (void *)py_pod->buff;
-
-				return impl;
-			}
-			else if( flag & PY_OBJECT_POD64 )
-			{
-				py_pod64_object * py_pod = (py_pod64_object *)_obj;
-
-				void * impl = (void *)py_pod->buff;
-
-				return impl;
-			}
-			else if( flag & PY_OBJECT_UNWRAP )
-			{
-				return nullptr;
-			}
-
-			pybind::throw_exception( "obj %s not wrap pybind (impl)"
-				, pybind::object_str( _obj )
-				);
-
-			return nullptr;
-		}
 	}
-
 	//////////////////////////////////////////////////////////////////////////
-	bool pod_initialize()
+	bool initialize_pod()
 	{
 		detail::pod_scope & k = detail::get_pod();
 
@@ -395,7 +336,7 @@ namespace pybind
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void pod_finalize()
+	void finalize_pod()
 	{
 
 	}

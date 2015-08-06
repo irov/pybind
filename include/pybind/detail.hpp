@@ -93,12 +93,12 @@ namespace pybind
 
 		PYBIND_API void error_invalid_extract( PyObject * _obj, uint32_t _tinfo );
 		PYBIND_API bool instance_of_type( PyObject * _obj, uint32_t _tinfo );
-
-		PYBIND_API PyTypeObject * get_pod_type( uint32_t _pod );
+		
+		PYBIND_API void * get_class_impl( PyObject * _obj );
 
 		PYBIND_API PyObject * get_str_class_type_scope_();
 	}
 
-	PYBIND_API bool detail_initialize();
-	PYBIND_API void detail_finalize();
+	PYBIND_API bool initialize_detail();
+	PYBIND_API void finalize_detail();
 }

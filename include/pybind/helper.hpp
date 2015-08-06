@@ -35,6 +35,7 @@ namespace pybind
 			explicit extract_operator_t( PyObject * _obj )
 				: m_obj( _obj )
 			{
+				pybind::incref( m_obj );
 			}
 
 			extract_operator_t( const extract_operator_t & _r )
@@ -50,8 +51,6 @@ namespace pybind
 
 			operator PyObject * ()
 			{
-				pybind::incref( m_obj );
-
 				return m_obj;
 			}
 
@@ -82,8 +81,6 @@ namespace pybind
 				, _it
 				);
 		}
-
-		pybind::incref( py_item );
 
 		return detail::extract_operator_t( py_item );
 	}
@@ -145,8 +142,6 @@ namespace pybind
 				, _it
 				);
 		}
-
-		pybind::incref( py_item );
 
 		return detail::extract_operator_t( py_item );
 	}
@@ -328,8 +323,6 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	inline detail::extract_operator_t extract_t( PyObject * _obj )
 	{
-		pybind::incref( _obj );
-
 		return detail::extract_operator_t( _obj );
 	}
 }

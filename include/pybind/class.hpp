@@ -2,9 +2,7 @@
 
 #	include "pybind/bases.hpp"
 
-#	include "pybind/kernel_interface.hpp"
-
-#	include "pybind/class_type_scope_interface.hpp"
+#	include "pybind/class_type_scope.hpp"
 
 #	include "pybind/new_adapter.hpp"
 #	include "pybind/destroy_adapter.hpp"
@@ -38,9 +36,7 @@ namespace pybind
 	public:
 		base_( const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, size_t _size, PyObject * _module )
 		{
-			kernel_interface * kernel = kernel_holder_ptr::get();
-
-			uint32_t info = kernel->class_info<C>();
+			uint32_t info = detail::class_info<C>();
 
 			uint32_t pod = 0;
 
@@ -49,7 +45,7 @@ namespace pybind
 				pod = (uint32_t)_size;
 			}
 
-			m_scope = kernel->create_new_type_scope( info, _name, _user, _pynew, _pydestructor, pod );
+			m_scope = detail::create_new_type_scope( info, _name, _user, _pynew, _pydestructor, pod );
 
 			this->setup_bases();
 
@@ -67,26 +63,24 @@ namespace pybind
 
 		void setup_bases()
 		{
-			kernel_interface * kernel = kernel_holder_ptr::get();
-
 			int arity = B::base_arity;
 
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base0>( kernel, &meta_cast<typename B::base0> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base1>( kernel, &meta_cast<typename B::base1> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base2>( kernel, &meta_cast<typename B::base2> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base3>( kernel, &meta_cast<typename B::base3> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base4>( kernel, &meta_cast<typename B::base4> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base5>( kernel, &meta_cast<typename B::base5> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base6>( kernel, &meta_cast<typename B::base6> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base7>( kernel, &meta_cast<typename B::base7> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base8>( kernel, &meta_cast<typename B::base8> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base9>( kernel, &meta_cast<typename B::base9> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base10>( kernel, &meta_cast<typename B::base10> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base11>( kernel, &meta_cast<typename B::base11> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base12>( kernel, &meta_cast<typename B::base12> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base13>( kernel, &meta_cast<typename B::base13> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base14>( kernel, &meta_cast<typename B::base14> );
-			if( arity-- > 0 )m_scope->add_base_t<typename B::base15>( kernel, &meta_cast<typename B::base15> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base0>( &meta_cast<typename B::base0> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base1>( &meta_cast<typename B::base1> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base2>( &meta_cast<typename B::base2> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base3>( &meta_cast<typename B::base3> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base4>( &meta_cast<typename B::base4> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base5>( &meta_cast<typename B::base5> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base6>( &meta_cast<typename B::base6> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base7>( &meta_cast<typename B::base7> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base8>( &meta_cast<typename B::base8> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base9>( &meta_cast<typename B::base9> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base10>( &meta_cast<typename B::base10> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base11>( &meta_cast<typename B::base11> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base12>( &meta_cast<typename B::base12> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base13>( &meta_cast<typename B::base13> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base14>( &meta_cast<typename B::base14> );
+			if( arity-- > 0 )m_scope->add_base_t<typename B::base15>( &meta_cast<typename B::base15> );
 		}
 
 		template<class F>
@@ -310,7 +304,7 @@ namespace pybind
 			return *this;
 		}
 
-		const pybind::class_type_scope_interface_ptr & get_scope() const
+		const pybind::class_type_scope_ptr & get_scope() const
 		{
 			return m_scope;
 		}
@@ -318,20 +312,18 @@ namespace pybind
 	protected:
 		void setup_extract( const type_cast_ptr & _type )
 		{
-			kernel_interface * kernel = kernel_holder_ptr::get();
-
-			pybind::registration_type_cast<C>(kernel, _type);
+			pybind::registration_type_cast<C>(_type);
 		}
 
 	protected:
-		class_type_scope_interface_ptr m_scope;
+		class_type_scope_ptr m_scope;
 	};
 
 	class class_new_invalid
 		: public new_adapter_interface
 	{
 	public:
-		void * call( const pybind::class_type_scope_interface_ptr & _scope, PyObject * _obj, PyObject * _args, PyObject * _kwds ) override
+		void * call( const pybind::class_type_scope_ptr & _scope, PyObject * _obj, PyObject * _args, PyObject * _kwds ) override
 		{
 			(void)_scope;
 			(void)_obj;
@@ -351,7 +343,7 @@ namespace pybind
 		: public destroy_adapter_interface
 	{
 	public:
-		void call( const pybind::class_type_scope_interface_ptr & _scope, void * _impl ) override
+		void call( const pybind::class_type_scope_ptr & _scope, void * _impl ) override
 		{
 			(void)_scope;
 
@@ -366,7 +358,7 @@ namespace pybind
 		: public destroy_adapter_interface
 	{
 	public:
-		void call( const pybind::class_type_scope_interface_ptr & _scope, void * _impl ) override
+		void call( const pybind::class_type_scope_ptr & _scope, void * _impl ) override
 		{
 			(void)_scope;
 
@@ -382,7 +374,7 @@ namespace pybind
 	struct extract_class_type_ptr
 		: public type_cast_result<C *>
 	{
-		bool apply( kernel_interface * _kernel, PyObject * _obj, typename type_cast_result<C *>::TCastValue _value ) override
+		bool apply( PyObject * _obj, typename type_cast_result<C *>::TCastValue _value ) override
 		{
 			if( pybind::is_none( _obj ) == true )
 			{
@@ -391,13 +383,13 @@ namespace pybind
 				return true;
 			}
 
-			uint32_t tinfo = _kernel->class_info<C>();
-			uint32_t tptrinfo = _kernel->class_info<C *>();
+			uint32_t tinfo = detail::class_info<C>();
+			uint32_t tptrinfo = detail::class_info<C *>();
 
 			void * impl;
-			if( this->type_info_cast( _kernel, _obj, tinfo, tptrinfo, &impl ) == false )
+			if( this->type_info_cast( __obj, tinfo, tptrinfo, &impl ) == false )
 			{
-				_kernel->error_invalid_extract( _obj, tinfo );
+				detail::error_invalid_extract( _obj, tinfo );
 
 				_value = nullptr;
 
@@ -409,14 +401,14 @@ namespace pybind
 			return true;
 		}
 
-		PyObject * wrap( kernel_interface * _kernel, typename type_cast_result<C *>::TCastRef _value ) override
+		PyObject * wrap( typename type_cast_result<C *>::TCastRef _value ) override
 		{
 			if( _value == nullptr )
 			{
 				return pybind::ret_none();
 			}
 
-			const class_type_scope_interface_ptr & scope = _kernel->class_scope<C>();
+			const class_type_scope_ptr & scope = detail::class_scope<C>();
 
 			PyObject * py_obj = scope->create_class( (void *)_value );
 
@@ -428,7 +420,7 @@ namespace pybind
 	struct extract_holder_type_ptr
 		: public type_cast_result<C *>
 	{
-		bool apply( kernel_interface * _kernel, PyObject * _obj, typename type_cast_result<C *>::TCastValue _value ) override
+		bool apply( PyObject * _obj, typename type_cast_result<C *>::TCastValue _value ) override
 		{
 			if( pybind::is_none( _obj ) == true )
 			{
@@ -437,13 +429,13 @@ namespace pybind
 				return true;
 			}
 
-			uint32_t tinfo = _kernel->class_info<C>();
-			uint32_t tptrinfo = _kernel->class_info<C *>();
+			uint32_t tinfo = detail::class_info<C>();
+			uint32_t tptrinfo = detail::class_info<C *>();
 
 			void * impl;
-			if( type_cast::type_info_cast( _kernel, _obj, tinfo, tptrinfo, &impl ) == false )
+			if( type_cast::type_info_cast( _obj, tinfo, tptrinfo, &impl ) == false )
 			{
-				_kernel->error_invalid_extract( _obj, tinfo );
+				detail::error_invalid_extract( _obj, tinfo );
 
 				_value = nullptr;
 
@@ -455,14 +447,14 @@ namespace pybind
 			return true;
 		}
 
-		PyObject * wrap( kernel_interface * _kernel, typename type_cast_result<C *>::TCastRef _value ) override
+		PyObject * wrap( typename type_cast_result<C *>::TCastRef _value ) override
 		{
 			if( _value == nullptr )
 			{
 				return pybind::ret_none();
 			}
 
-			const class_type_scope_interface_ptr & scope = _kernel->class_scope<C>();
+			const class_type_scope_ptr & scope = detail::class_scope<C>();
 
 			PyObject * py_obj = scope->create_holder( (void *)_value );
 
@@ -474,28 +466,28 @@ namespace pybind
 	struct extract_struct_type_ref
 		: public type_cast_result<C>
 	{
-		bool apply( kernel_interface * _kernel, PyObject * _obj, typename type_cast_result<C>::TCastValue _value ) override
+		bool apply( PyObject * _obj, typename type_cast_result<C>::TCastValue _value ) override
 		{
-			uint32_t tinfo = _kernel->class_info<C>();
-			uint32_t tptrinfo = _kernel->class_info<C *>();
+			uint32_t tinfo = detail::class_info<C>();
+			uint32_t tptrinfo = detail::class_info<C *>();
 
 			void * impl;
-			if( type_cast::type_info_cast( _kernel, _obj, tinfo, tptrinfo, &impl ) == false )
+			if( type_cast::type_info_cast( _obj, tinfo, tptrinfo, &impl ) == false )
 			{
-				const class_type_scope_interface_ptr & scope = _kernel->get_class_type_scope( tinfo );
+				const class_type_scope_ptr & scope = pybind::detail::get_class_type_scope( tinfo );
 
 				const convert_adapter_interface_ptr & convert = scope->get_convert_adapter();
 
 				if( convert == nullptr )
 				{
-					_kernel->error_invalid_extract( _obj, tinfo );
+					detail::error_invalid_extract( _obj, tinfo );
 
 					return false;
 				}
 
-				if( convert->convert( _kernel, _obj, &_value ) == false )
+				if( convert->convert( _obj, &_value ) == false )
 				{
-					_kernel->error_invalid_extract( _obj, tinfo );
+					detail::error_invalid_extract( _obj, tinfo );
 
 					return false;
 				}
@@ -508,15 +500,15 @@ namespace pybind
 			return true;
 		}
 
-		PyObject * wrap( kernel_interface * _kernel, const C & _class )
+		PyObject * wrap( const C & _class ) override
 		{
-			uint32_t tinfo = _kernel->class_info<C>();
+			uint32_t tinfo = detail::class_info<C>();
 
 			void * obj_place = nullptr;
 
 			size_t size_C = sizeof( C );
 
-			const class_type_scope_interface_ptr & scope = _kernel->get_class_type_scope( tinfo );
+			const class_type_scope_ptr & scope = detail::get_class_type_scope( tinfo );
 
 			PyObject * py_obj = scope->create_pod( &obj_place, size_C );
 
@@ -555,7 +547,7 @@ namespace pybind
 			constructor_adapter_interface_ptr ctr =
 				new constructor_new<C, init<C0, C1, C2, C3, C4, C5> >();
 
-			const pybind::class_type_scope_interface_ptr & scope = base_<C, B>::get_scope();
+			const pybind::class_type_scope_ptr & scope = base_<C, B>::get_scope();
 
 			scope->set_construct( ctr );
 
@@ -587,7 +579,7 @@ namespace pybind
 			constructor_adapter_interface_ptr ctr =
 				new constructor_new<C, init<C0, C1, C2, C3, C4, C5> >();
 
-			const class_type_scope_interface_ptr & scope = base_<C, B>::get_scope();
+			const class_type_scope_ptr & scope = base_<C, B>::get_scope();
 
 			scope->set_construct( ctr );
 
@@ -621,7 +613,7 @@ namespace pybind
 			constructor_adapter_interface_ptr ctr =
 				new constructor_new<C, init<C0, C1, C2, C3, C4, C5> >();
 
-			const class_type_scope_interface_ptr & scope = base_<C, B>::get_scope();
+			const class_type_scope_ptr & scope = base_<C, B>::get_scope();
 
 			scope->set_construct( ctr );
 
@@ -655,7 +647,7 @@ namespace pybind
 			constructor_adapter_interface_ptr ctr =
 				new constructor_placement<C, init<C0, C1, C2, C3, C4, C5> >();
 
-			const class_type_scope_interface_ptr & scope = base_<C, B>::get_scope();
+			const class_type_scope_ptr & scope = base_<C, B>::get_scope();
 
 			scope->set_construct( ctr );
 
@@ -682,9 +674,9 @@ namespace pybind
 	};
 
 	template<class T>
-	PyTypeObject * get_typemodule( kernel_interface * _kernel )
+	PyTypeObject * get_typemodule()
 	{
-		const class_type_scope_interface_ptr & scope = _kernel->class_scope<T>();
+		const class_type_scope_ptr & scope = detail::class_scope<T>();
 
 		PyTypeObject * typemodule = scope->get_typemodule();
 
