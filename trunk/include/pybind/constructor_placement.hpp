@@ -24,11 +24,9 @@ namespace pybind
 	{
 		static C * call( void * _impl, PyObject * _args )
 		{
-			PyObject * arg0 = tuple_getitem( _args, 0 );
-
-			typename P::param0 param0 = extract_throw<typename P::param0>( arg0 );
-
-			return new (_impl) C( param0 );
+			return new (_impl)C( 
+				tuple_getitem_t( _args, 0 )
+				);
 		}
 	};
 
@@ -37,13 +35,10 @@ namespace pybind
 	{
 		static C * call( void * _impl, PyObject * _args )
 		{
-			PyObject * arg0 = tuple_getitem( _args, 0 );
-			PyObject * arg1 = tuple_getitem( _args, 1 );
-
-			typename P::param0 param0 = extract_throw<typename P::param0>( arg0 );
-			typename P::param1 param1 = extract_throw<typename P::param1>( arg1 );
-
-			return new (_impl) C( param0, param1 );
+			return new (_impl)C( 
+				tuple_getitem_t( _args, 0 ),
+				tuple_getitem_t( _args, 1 )
+				);
 		}
 	};
 
@@ -52,15 +47,11 @@ namespace pybind
 	{
 		static C * call( void * _impl, PyObject * _args )
 		{
-			PyObject * arg0 = tuple_getitem( _args, 0 );
-			PyObject * arg1 = tuple_getitem( _args, 1 );
-			PyObject * arg2 = tuple_getitem( _args, 2 );
-
-			typename P::param0 param0 = extract_throw<typename P::param0>( arg0 );
-			typename P::param1 param1 = extract_throw<typename P::param1>( arg1 );
-			typename P::param2 param2 = extract_throw<typename P::param2>( arg2 );
-
-			return new (_impl) C( param0, param1, param2 );
+			return new (_impl)C( 
+				tuple_getitem_t( _args, 0 ),
+				tuple_getitem_t( _args, 1 ),
+				tuple_getitem_t( _args, 2 )
+				);
 		}
 	};
 
@@ -69,17 +60,12 @@ namespace pybind
 	{
 		static C * call( void * _impl, PyObject * _args )
 		{
-			PyObject * arg0 = tuple_getitem( _args, 0 );
-			PyObject * arg1 = tuple_getitem( _args, 1 );
-			PyObject * arg2 = tuple_getitem( _args, 2 );
-			PyObject * arg3 = tuple_getitem( _args, 3 );
-
-			typename P::param0 param0 = extract_throw<typename P::param0>( arg0 );
-			typename P::param1 param1 = extract_throw<typename P::param1>( arg1 );
-			typename P::param2 param2 = extract_throw<typename P::param2>( arg2 );
-			typename P::param3 param3 = extract_throw<typename P::param3>( arg3 );
-
-			return new (_impl) C( param0, param1, param2, param3 );
+			return new (_impl)C( 
+				tuple_getitem_t( _args, 0 ),
+				tuple_getitem_t( _args, 1 ),
+				tuple_getitem_t( _args, 2 ),
+				tuple_getitem_t( _args, 3 )
+				);
 		}
 	};
 

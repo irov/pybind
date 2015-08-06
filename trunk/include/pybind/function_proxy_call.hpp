@@ -1,11 +1,12 @@
 #	pragma once
 
 #	include "pybind/exports.hpp"
-#	include "pybind/function_parser.hpp"
 #	include "pybind/types.hpp"
 #	include "pybind/system.hpp"
 #	include "pybind/extract.hpp"
 #	include "pybind/helper.hpp"
+
+#	include "stdex/function_traits.h"
 
 namespace pybind
 {
@@ -100,7 +101,7 @@ namespace pybind
 	template<class C, class F,class Ret>
 	struct function_proxy_call_ret_impl
 	{
-		typedef typename function_parser<F>::result f_info;
+		typedef typename stdex::function_traits<F>::result f_info;
 
 		static PyObject * call( C * _obj, F f, PyObject * _arg )
 		{
@@ -113,7 +114,7 @@ namespace pybind
 	template<class C, class F>
 	struct function_proxy_call_ret_impl<C,F,void>
 	{
-		typedef typename function_parser<F>::result f_info;
+		typedef typename stdex::function_traits<F>::result f_info;
 
 		static PyObject * call( C * _obj, F f, PyObject * _arg )
 		{
@@ -126,7 +127,7 @@ namespace pybind
 	template<class C, class F>
 	struct function_proxy_call
 	{
-		typedef typename function_parser<F>::result f_info;
+		typedef typename stdex::function_traits<F>::result f_info;
 
 		static PyObject * call( C * _obj, F f, PyObject * _arg )
 		{
