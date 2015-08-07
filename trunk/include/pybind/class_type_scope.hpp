@@ -3,6 +3,7 @@
 #	include "pybind/exports.hpp"
 #	include "pybind/types.hpp"
 #	include "pybind/exception.hpp"
+#	include "pybind/detail.hpp"
 
 #	include "config/stdex.hpp"
 

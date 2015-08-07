@@ -387,7 +387,7 @@ namespace pybind
 			uint32_t tptrinfo = detail::class_info<C *>();
 
 			void * impl;
-			if( this->type_info_cast( __obj, tinfo, tptrinfo, &impl ) == false )
+			if( this->type_info_cast( _obj, tinfo, tptrinfo, &impl ) == false )
 			{
 				detail::error_invalid_extract( _obj, tinfo );
 
