@@ -189,7 +189,7 @@ namespace pybind
 
 		if( PyType_Ready( &k.member_type ) < 0 )
 		{
-			printf("invalid embedding class '%s' \n"
+			pybind::log("invalid embedding class '%s' \n"
 				, k.member_type.tp_name
                 );
 

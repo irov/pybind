@@ -1,8 +1,8 @@
 #	pragma once
 
-#	include <exception>
-
 #	include "exports.hpp"
+
+#	include <exception>
 
 namespace pybind
 {
@@ -10,14 +10,9 @@ namespace pybind
 		: public std::exception
 	{
 	public:
-		pybind_exception()
+		pybind_exception( const char * _message )
+			: m_message(_message)
 		{
-		}
-
-	public:
-		char * buff()
-		{
-			return m_message;
 		}
 
 	public:
@@ -27,7 +22,7 @@ namespace pybind
 		}
 
 	protected:
-		char m_message[2048];
+		const char * m_message;
 	};
 
 	PYBIND_API void throw_exception( const char * _format, ... );

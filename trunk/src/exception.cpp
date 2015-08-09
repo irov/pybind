@@ -12,12 +12,11 @@ namespace pybind
 
 		va_start(argList, _format);
 
-		pybind_exception ex;
-		char * buff = ex.buff();
-		vsprintf( buff, _format, argList );
+		char message[2048];		
+		vsnprintf( message, 2048, _format, argList );
 
 		va_end(argList);
 
-        throw ex;
+		throw pybind_exception(message);
     }
 }
