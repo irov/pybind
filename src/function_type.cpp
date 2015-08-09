@@ -86,7 +86,7 @@ namespace pybind
 
 		if( PyType_Ready( &k.function_type ) < 0 )
 		{
-			printf("invalid embedding class '%s'\n"
+			pybind::log("invalid embedding class '%s'\n"
 				, k.function_type.tp_name
                 );					
 

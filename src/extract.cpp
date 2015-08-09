@@ -3,6 +3,11 @@
 #	include "pybind/system.hpp"
 #	include "pybind/bindable.hpp"
 
+#	include "pybind/object.hpp"
+#	include "pybind/list.hpp"
+#	include "pybind/tuple.hpp"
+#	include "pybind/dict.hpp"
+
 #	include "config/python.hpp"
 
 namespace pybind
@@ -495,6 +500,69 @@ namespace pybind
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
+	bool extract_value( PyObject * _obj, pybind::object & _value )
+	{
+		if( _obj == nullptr )
+		{
+			return false;
+		}
+
+		_value = pybind::object( _obj );
+
+		return true;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool extract_value( PyObject * _obj, pybind::list & _value )
+	{
+		if( _obj == nullptr )
+		{
+			return false;
+		}
+
+		if( pybind::list_check( _obj ) == false )
+		{
+			return false;
+		}
+
+		_value = pybind::list( _obj );
+
+		return true;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool extract_value( PyObject * _obj, pybind::tuple & _value )
+	{
+		if( _obj == nullptr )
+		{
+			return false;
+		}
+
+		if( pybind::tuple_check( _obj ) == false )
+		{
+			return false;
+		}
+
+		_value = pybind::tuple( _obj );
+
+		return true;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool extract_value( PyObject * _obj, pybind::dict & _value )
+	{
+		if( _obj == nullptr )
+		{
+			return false;
+		}
+
+		if( pybind::dict_check( _obj ) == false )
+		{
+			return false;
+		}
+
+		_value = pybind::dict( _obj );
+
+		return true;
+	}
+	//////////////////////////////////////////////////////////////////////////
 	PyObject * ptr_throw( bool _value )
 	{
 		if( _value == true )
@@ -625,12 +693,51 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * ptr_throw( pybind::bindable * _value )
 	{
-		pybind::object py_obj = _value->getEmbed();
+		if( _value == nullptr )
+		{
+			return pybind::ret_none();
+		}
 
-		PyObject * py_obj_ptr = py_obj.ptr();
-		
-		pybind::incref( py_obj_ptr );
+		PyObject * py_obj = _value->getEmbed();
+	
+		pybind::incref( py_obj );
 
-		return py_obj_ptr;
+		return py_obj;
+	}
+	////////////////////////////////////////////////////////////////////////////
+	PyObject * ptr_throw( const pybind::object & _value )
+	{
+		PyObject * obj = _value.ptr();
+
+		pybind::incref( obj );
+
+		return obj;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * ptr_throw( const pybind::list & _value )
+	{
+		PyObject * obj = _value.ptr();
+
+		pybind::incref( obj );
+
+		return obj;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * ptr_throw( const pybind::tuple & _value )
+	{
+		PyObject * obj = _value.ptr();
+
+		pybind::incref( obj );
+
+		return obj;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * ptr_throw( const pybind::dict & _value )
+	{
+		PyObject * obj = _value.ptr();
+
+		pybind::incref( obj );
+
+		return obj;
 	}
 }

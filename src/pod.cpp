@@ -4,6 +4,7 @@
 
 #	include "pybind/exception.hpp"
 #	include "pybind/system.hpp"
+#	include "pybind/logger.hpp"
 
 namespace pybind
 {
@@ -300,35 +301,45 @@ namespace pybind
 
 		if( PyType_Ready( &k.ptr_type ) < 0 )
 		{
-			printf( "invalid embedding class '%s' \n", k.ptr_type.tp_name );
+			pybind::log( "invalid embedding class '%s' \n"
+				, k.ptr_type.tp_name 
+				);
 
 			return false;
 		}
 
 		if( PyType_Ready( &k.pod64_type ) < 0 )
 		{
-			printf( "invalid embedding class '%s' \n", k.pod64_type.tp_name );
+			pybind::log( "invalid embedding class '%s' \n"
+				, k.pod64_type.tp_name 
+				);
 
 			return false;
 		}
 
 		if( PyType_Ready( &k.pod32_type ) < 0 )
 		{
-			printf( "invalid embedding class '%s' \n", k.pod32_type.tp_name );
+			pybind::log( "invalid embedding class '%s' \n"
+				, k.pod32_type.tp_name 
+				);
 
 			return false;
 		}
 
 		if( PyType_Ready( &k.pod16_type ) < 0 )
 		{
-			printf( "invalid embedding class '%s' \n", k.pod16_type.tp_name );
+			pybind::log( "invalid embedding class '%s' \n"
+				, k.pod16_type.tp_name 
+				);
 
 			return false;
 		}
 
 		if( PyType_Ready( &k.pod8_type ) < 0 )
 		{
-			printf( "invalid embedding class '%s' \n", k.pod8_type.tp_name );
+			pybind::log( "invalid embedding class '%s' \n"
+				, k.pod8_type.tp_name 
+				);
 
 			return false;
 		}

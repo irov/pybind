@@ -4,143 +4,31 @@
 
 namespace pybind
 {
-	class tuple
+	class PYBIND_API tuple
 		: public pybind::object
 	{
 	public:		
-		tuple()
-		{
-		}
-		
-		explicit tuple( PyObject * _obj )
-			: pybind::object( _obj )
-		{
-		}
+		tuple();
+
+		explicit tuple( PyObject * _obj, borrowed );
+		explicit tuple( PyObject * _obj );
 
 	public:
-		detail::extract_operator_t operator [] ( size_t _index )
-		{
-			return pybind::tuple_getitem_t( m_obj, _index );
-		}
+		detail::extract_operator_t operator [] ( size_t _index ) const;
 
 	public:
-		size_t size() const
-		{
-			return pybind::tuple_size( m_obj );
-		}
-
-		bool empty() const
-		{
-			return this->size() == 0;
-		}
+		size_t size() const;
+		bool empty() const;
 	};
 	//////////////////////////////////////////////////////////////////////////	
-	inline pybind::tuple make_tuple_t()
-	{
-		PyObject * py_tuple = pybind::tuple_new( 0 );
-
-		if( py_tuple == nullptr )
-		{
-			pybind::throw_exception( "make_tuple_t 0" );
-		}
-
-		return pybind::tuple( py_tuple );
-	}
-	//////////////////////////////////////////////////////////////////////////
-	template<class T0>
-	inline pybind::tuple make_tuple_t( const T0 & _t0 )
-	{
-		PyObject * py_tuple = pybind::tuple_new( 1 );
-
-		if( py_tuple == nullptr )
-		{
-			pybind::throw_exception( "make_tuple_t 1" );
-		}
-
-		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
-
-		return pybind::tuple(py_tuple);
-	}
-	//////////////////////////////////////////////////////////////////////////
-	template<class T0, class T1>
-	inline pybind::tuple make_tuple_t( const T0 & _t0, const T1 & _t1 )
-	{
-		PyObject * py_tuple = pybind::tuple_new( 2 );
-
-		if( py_tuple == nullptr )
-		{
-			pybind::throw_exception( "make_tuple_t 2" );
-		}
-
-		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
-		pybind::tuple_setitem_t( py_tuple, 1, _t1 );
-
-		return pybind::tuple(py_tuple);
-	}
-	//////////////////////////////////////////////////////////////////////////
-	template<class T0, class T1, class T2>
-	inline pybind::tuple make_tuple_t( const T0 & _t0, const T1 & _t1, const T2 & _t2 )
-	{
-		PyObject * py_tuple = pybind::tuple_new( 3 );
-
-		if( py_tuple == nullptr )
-		{
-			pybind::throw_exception( "make_tuple_t 3" );
-		}
-
-		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
-		pybind::tuple_setitem_t( py_tuple, 1, _t1 );
-		pybind::tuple_setitem_t( py_tuple, 2, _t2 );
-
-		return pybind::tuple(py_tuple);
-	}
-	//////////////////////////////////////////////////////////////////////////
-	template<class T0, class T1, class T2, class T3>
-	inline pybind::tuple make_tuple_t( const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3 )
-	{
-		PyObject * py_tuple = pybind::tuple_new( 4 );
-
-		if( py_tuple == nullptr )
-		{
-			pybind::throw_exception( "make_tuple_t 4" );			
-		}
-
-		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
-		pybind::tuple_setitem_t( py_tuple, 1, _t1 );
-		pybind::tuple_setitem_t( py_tuple, 2, _t2 );
-		pybind::tuple_setitem_t( py_tuple, 3, _t3 );
-
-		return pybind::tuple(py_tuple);
-	}
-	//////////////////////////////////////////////////////////////////////////
-	inline pybind::tuple make_invalid_tuple_t()
-	{
-		return pybind::tuple( nullptr );
-	}
-	//////////////////////////////////////////////////////////////////////////
-	inline bool extract_value( PyObject * _obj, pybind::tuple & _value )
-	{ 
-		if( _obj == nullptr )
-		{
-			return false;
-		}
-
-		if( pybind::tuple_check( _obj ) == false )
-		{
-			return false;
-		}
-
-		_value = pybind::tuple( _obj );
-
-		return true;
-	}
-	//////////////////////////////////////////////////////////////////////////
-	inline PyObject * ptr_throw( const pybind::tuple & _value )
-	{
-		PyObject * obj = _value.ptr();
-
-		pybind::incref( obj );
-
-		return obj;
-	}
+	PYBIND_API pybind::tuple make_tuple_t();
+	PYBIND_API pybind::tuple make_tuple_t( const detail::import_operator_t & _t0 );
+	PYBIND_API pybind::tuple make_tuple_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1 );
+	PYBIND_API pybind::tuple make_tuple_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2 );
+	PYBIND_API pybind::tuple make_tuple_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3 );
+	PYBIND_API pybind::tuple make_tuple_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4 );
+	PYBIND_API pybind::tuple make_tuple_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5 );
+	PYBIND_API pybind::tuple make_tuple_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6 );
+	PYBIND_API pybind::tuple make_tuple_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::import_operator_t & _t7 );
+	PYBIND_API pybind::tuple make_invalid_tuple_t();
 }

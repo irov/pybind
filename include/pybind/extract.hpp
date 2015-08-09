@@ -3,13 +3,16 @@
 #	include "pybind/system.hpp"
 #	include "pybind/exception.hpp"
 #	include "pybind/logger.hpp"
-//#	include "pybind/bindable.hpp"
+#	include "pybind/bindable.hpp"
 #	include "pybind/type_cast.hpp"
 #	include "pybind/type_traits.hpp"
 
 namespace pybind
 {
-	class bindable;
+	class object;
+	class list;
+	class tuple;
+	class dict;
 
 	namespace detail
 	{
@@ -125,6 +128,10 @@ namespace pybind
 	PYBIND_API bool extract_value( PyObject * _obj, const char * & _value );
 	PYBIND_API bool extract_value( PyObject * _obj, const wchar_t * & _value );
 	PYBIND_API bool extract_value( PyObject * _obj, PyObject * & _value );
+	PYBIND_API bool extract_value( PyObject * _obj, pybind::object & _value );
+	PYBIND_API bool extract_value( PyObject * _obj, pybind::list & _value );
+	PYBIND_API bool extract_value( PyObject * _obj, pybind::tuple & _value );
+	PYBIND_API bool extract_value( PyObject * _obj, pybind::dict & _value );
 
     template<class T>
 	typename detail::extract_return<T>::type extract_throw( PyObject * _obj )
@@ -174,15 +181,14 @@ namespace pybind
 	PyObject * ptr_throw( const T & _value )
 	{
 		typedef typename detail::extract_return<T>::type T_WOCR;
-
+				
 		type_cast * etype = detail::type_down_cast<T_WOCR>::find();
 
 		if( etype == nullptr )
 		{
 			const std::type_info & tinfo = typeid(T_WOCR);
-
 			const char * type_name = tinfo.name();
-
+		
 			pybind::throw_exception( "ptr invalid find cast for '%.256s'"
 				, type_name
 				);
@@ -227,7 +233,11 @@ namespace pybind
 	PYBIND_API PyObject * ptr_throw( const char * _value );
 	PYBIND_API PyObject * ptr_throw( const wchar_t * _value );
 	PYBIND_API PyObject * ptr_throw( PyObject * _value );
-	PYBIND_API PyObject * ptr_throw( pybind::bindable * _value );
+	PYBIND_API PyObject * ptr_throw( pybind::bindable * _value );	
+	PYBIND_API PyObject * ptr_throw( const pybind::object & _value );
+	PYBIND_API PyObject * ptr_throw( const pybind::list & _value );
+	PYBIND_API PyObject * ptr_throw( const pybind::tuple & _value );
+	PYBIND_API PyObject * ptr_throw( const pybind::dict & _value );
 
 	template<typename T, typename = void>
 	struct ptr_throw_specialized
