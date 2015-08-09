@@ -178,7 +178,7 @@ namespace pybind
 	}
 	   
 	template<class T>
-	PyObject * ptr_throw( const T & _value )
+	PyObject * ptr_throw_i( const T & _value )
 	{
 		typedef typename detail::extract_return<T>::type T_WOCR;
 				
@@ -214,37 +214,37 @@ namespace pybind
 		return result;
 	}
 
-	PYBIND_API PyObject * ptr_throw( bool _value );
-	PYBIND_API PyObject * ptr_throw( int8_t _value );
-	PYBIND_API PyObject * ptr_throw( int16_t _value );
-	PYBIND_API PyObject * ptr_throw( int32_t _value );
-	PYBIND_API PyObject * ptr_throw( int64_t _value );
-	PYBIND_API PyObject * ptr_throw( uint8_t _value );
-	PYBIND_API PyObject * ptr_throw( uint16_t _value );
-	PYBIND_API PyObject * ptr_throw( uint32_t _value );	
-	PYBIND_API PyObject * ptr_throw( uint64_t _value );	
-	PYBIND_API PyObject * ptr_throw( wchar_t _value );
-	PYBIND_API PyObject * ptr_throw( long _value );
-	PYBIND_API PyObject * ptr_throw( unsigned long _value );
-	PYBIND_API PyObject * ptr_throw( float _value );
-	PYBIND_API PyObject * ptr_throw( double _value );
-	PYBIND_API PyObject * ptr_throw( char * _value );
-	PYBIND_API PyObject * ptr_throw( wchar_t * _value );
-	PYBIND_API PyObject * ptr_throw( const char * _value );
-	PYBIND_API PyObject * ptr_throw( const wchar_t * _value );
-	PYBIND_API PyObject * ptr_throw( PyObject * _value );
-	PYBIND_API PyObject * ptr_throw( pybind::bindable * _value );	
-	PYBIND_API PyObject * ptr_throw( const pybind::object & _value );
-	PYBIND_API PyObject * ptr_throw( const pybind::list & _value );
-	PYBIND_API PyObject * ptr_throw( const pybind::tuple & _value );
-	PYBIND_API PyObject * ptr_throw( const pybind::dict & _value );
+	PYBIND_API PyObject * ptr_throw_i( bool _value );
+	PYBIND_API PyObject * ptr_throw_i( int8_t _value );
+	PYBIND_API PyObject * ptr_throw_i( int16_t _value );
+	PYBIND_API PyObject * ptr_throw_i( int32_t _value );
+	PYBIND_API PyObject * ptr_throw_i( int64_t _value );
+	PYBIND_API PyObject * ptr_throw_i( uint8_t _value );
+	PYBIND_API PyObject * ptr_throw_i( uint16_t _value );
+	PYBIND_API PyObject * ptr_throw_i( uint32_t _value );	
+	PYBIND_API PyObject * ptr_throw_i( uint64_t _value );	
+	PYBIND_API PyObject * ptr_throw_i( wchar_t _value );
+	PYBIND_API PyObject * ptr_throw_i( long _value );
+	PYBIND_API PyObject * ptr_throw_i( unsigned long _value );
+	PYBIND_API PyObject * ptr_throw_i( float _value );
+	PYBIND_API PyObject * ptr_throw_i( double _value );
+	PYBIND_API PyObject * ptr_throw_i( char * _value );
+	PYBIND_API PyObject * ptr_throw_i( wchar_t * _value );
+	PYBIND_API PyObject * ptr_throw_i( const char * _value );
+	PYBIND_API PyObject * ptr_throw_i( const wchar_t * _value );
+	PYBIND_API PyObject * ptr_throw_i( PyObject * _value );
+	PYBIND_API PyObject * ptr_throw_i( pybind::bindable * _value );	
+	PYBIND_API PyObject * ptr_throw_i( const pybind::object & _value );
+	PYBIND_API PyObject * ptr_throw_i( const pybind::list & _value );
+	PYBIND_API PyObject * ptr_throw_i( const pybind::tuple & _value );
+	PYBIND_API PyObject * ptr_throw_i( const pybind::dict & _value );
 
 	template<typename T, typename = void>
 	struct ptr_throw_specialized
 	{
 		PyObject * operator () ( const T & _t )
 		{
-			return ptr_throw( _t );
+			return ptr_throw_i( _t );
 		}
 	};
 
@@ -253,9 +253,17 @@ namespace pybind
 	{
 		PyObject * operator () ( pybind::bindable * _t )
 		{
-			return ptr_throw( _t );
+			return ptr_throw_i( _t );
 		}
 	};
+
+	template<class T>
+	PyObject * ptr_throw( const T & _value )
+	{ 
+		PyObject * py_ptr = ptr_throw_specialized<T>()(_value);
+
+		return py_ptr;
+	}
 	
     template<class T>
     PyObject * ptr( const T & _value )
