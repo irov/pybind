@@ -33,6 +33,7 @@ namespace pybind
 	object::object( PyObject * _obj, borrowed _br )
 		: m_obj(_obj)
 	{
+		(void)_br;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	object::object( PyObject * _obj )
