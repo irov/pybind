@@ -39,7 +39,7 @@ namespace pybind
 	object::object( PyObject * _obj )
 		: m_obj( _obj )
 	{
-		pybind::incref( _obj );
+		pybind::incref( m_obj );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	object::~object()

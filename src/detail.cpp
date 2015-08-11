@@ -158,7 +158,7 @@ namespace pybind
 		{
 			const char * info_name = _info.name();
 
-			const class_info_desc_t * desc = detail::find_class_info_desc_name( info_name );
+			const class_info_desc_t * desc = pybind::detail::find_class_info_desc_name( info_name );
 
 			if( desc != nullptr )
 			{
@@ -167,7 +167,7 @@ namespace pybind
 				return id;
 			}
 
-			class_info_desc_t * new_desc = detail::alloc_class_info_desc();
+			class_info_desc_t * new_desc = pybind::detail::alloc_class_info_desc();
 
 			if( new_desc == nullptr )
 			{

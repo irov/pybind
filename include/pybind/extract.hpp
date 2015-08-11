@@ -270,7 +270,7 @@ namespace pybind
     {
         try
         {
-			PyObject * value = ptr_throw_specialized<T>()( _value );
+			PyObject * value = ptr_throw( _value );
 
             return value;
         }

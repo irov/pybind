@@ -43,9 +43,6 @@ namespace pybind
 	{
 		static Ret call( C * _obj, F f, PyObject * _arg )
 		{
-			tuple_getitem_t( _arg, 0 );
-			tuple_getitem_t( _arg, 1 );
-
 			return (_obj->*f)(
 				tuple_getitem_t( _arg, 0 ),
 				tuple_getitem_t( _arg, 1 )
