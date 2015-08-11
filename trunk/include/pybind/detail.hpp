@@ -48,7 +48,7 @@ namespace pybind
 			{
 				const std::type_info & ti = typeid(T);
 
-				uint32_t id = detail::get_class_type_id( ti );
+				uint32_t id = pybind::detail::get_class_type_id( ti );
 
 				type_id = id;
 			}
@@ -79,9 +79,9 @@ namespace pybind
 		template<class T>
 		const class_type_scope_ptr & class_scope()
 		{
-			uint32_t ti = detail::class_info<T>();
+			uint32_t ti = pybind::detail::class_info<T>();
 
-			const class_type_scope_ptr & scope = detail::get_class_type_scope( ti );
+			const class_type_scope_ptr & scope = pybind::detail::get_class_type_scope( ti );
 
 			return scope;
 		}
