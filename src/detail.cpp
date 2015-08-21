@@ -413,7 +413,11 @@ namespace pybind
 
 			uint32_t flag = py_base->flag;
 
-			if( flag & PY_OBJECT_PTR )
+			if( flag & PY_OBJECT_UNWRAP )
+			{
+				return nullptr;
+			}
+			else if( flag & PY_OBJECT_PTR )
 			{
 				py_ptr_object * py_ptr = (py_ptr_object *)_obj;
 
@@ -452,10 +456,6 @@ namespace pybind
 				void * impl = (void *)py_pod->buff;
 
 				return impl;
-			}
-			else if( flag & PY_OBJECT_UNWRAP )
-			{
-				return nullptr;
 			}
 
 			pybind::throw_exception( "obj %s not wrap pybind (impl)"
