@@ -83,6 +83,15 @@ namespace pybind
 			*_impl = (void *)py_pod->buff;
 		}
 		//////////////////////////////////////////////////////////////////////////
+		static void wrap_pod4( PyObject * _obj, void ** _impl )
+		{
+			py_pod4_object * py_pod = (py_pod4_object *)_obj;
+
+			py_pod->flag |= PY_OBJECT_POD4;
+
+			*_impl = (void *)py_pod->buff;
+		}
+		//////////////////////////////////////////////////////////////////////////
 		static void wrap_pod( PyObject * _obj, void ** _impl, size_t _size )
 		{
 			if( _size > PYBIND_OBJECT_POD_SIZE )
@@ -108,9 +117,13 @@ namespace pybind
 			{
 				wrap_pod16( _obj, _impl );
 			}
-			else
+			else if( _size > 4 )
 			{
 				wrap_pod8( _obj, _impl );
+			}
+			else
+			{
+				wrap_pod4( _obj, _impl );
 			}
 		}
 		//////////////////////////////////////////////////////////////////////////

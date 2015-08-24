@@ -425,6 +425,14 @@ namespace pybind
 
 				return impl;
 			}
+			else if( flag & PY_OBJECT_POD4 )
+			{
+				py_pod4_object * py_pod = (py_pod4_object *)_obj;
+
+				void * impl = (void *)py_pod->buff;
+
+				return impl;
+			}
 			else if( flag & PY_OBJECT_POD8 )
 			{
 				py_pod8_object * py_pod = (py_pod8_object *)_obj;

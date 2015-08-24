@@ -11,18 +11,23 @@ namespace pybind
 	namespace detail
 	{
 		//////////////////////////////////////////////////////////////////////////
-		class import_operator_t
+		class return_operator_t
 		{
 		public:
-			import_operator_t( const import_operator_t  & _op )
-				: m_obj(_op.m_obj)
+			return_operator_t( const return_operator_t & _op )
+				: m_obj( _op.m_obj )
+			{
+			}
+
+			return_operator_t( PyObject * _value )
+				: m_obj( _value )
 			{
 			}
 
 			template<class T>
-			import_operator_t( const T & _value )
+			return_operator_t( const T & _value )
 				: m_obj( ptr_throw_specialized<T>()(_value) )
-			{				
+			{
 			}
 
 		public:
@@ -35,42 +40,85 @@ namespace pybind
 			PyObject * m_obj;
 		};
 		//////////////////////////////////////////////////////////////////////////
-		class borrowed_import_operator_t
-			: public import_operator_t
+		class import_operator_t
 		{
 		public:
-			borrowed_import_operator_t( const import_operator_t  & _op )
-				: import_operator_t( _op )
+			import_operator_t( const import_operator_t  & _op )
+				: m_obj(_op.m_obj)
+			{
+				pybind::incref( m_obj );
+			}
+						
+			import_operator_t( PyObject * _value )
+				: m_obj( _value )
 			{
 			}
 
 			template<class T>
-			borrowed_import_operator_t( const T & _value )
-				: import_operator_t( _value )
-			{
+			import_operator_t( const T & _value )
+				: m_obj( ptr_throw_specialized<T>()(_value) )
+			{				
 			}
 
-			~borrowed_import_operator_t()
+		public:
+			~import_operator_t()
 			{
 				pybind::decref( m_obj );
 			}
+
+		public:
+			operator PyObject * () const
+			{
+				return m_obj;
+			}
+
+		protected:
+			PyObject * m_obj;
 		};
+		////////////////////////////////////////////////////////////////////////////
+		//class borrowed_import_operator_t
+		//	: public import_operator_t
+		//{
+		//public:
+		//	borrowed_import_operator_t( const import_operator_t  & _op )
+		//		: import_operator_t( _op )
+		//	{
+		//	}
+
+		//	borrowed_import_operator_t( PyObject * _value )
+		//		: import_operator_t( _value )
+		//	{
+		//		pybind::incref( _value );
+		//	}
+
+		//	template<class T>
+		//	borrowed_import_operator_t( const T & _value )
+		//		: import_operator_t( _value )
+		//	{
+		//	}
+
+		//	~borrowed_import_operator_t()
+		//	{
+		//		pybind::decref( m_obj );
+		//	}
+		//};
 		//////////////////////////////////////////////////////////////////////////
 		class extract_operator_t
 		{
 		public:
-			explicit extract_operator_t( PyObject * _obj )
-				: m_obj( _obj )
-			{
-				pybind::incref( m_obj );
-			}
-
 			extract_operator_t( const extract_operator_t & _r )
 				: m_obj( _r.m_obj )
 			{
 				pybind::incref( m_obj );
 			}
 
+			extract_operator_t( PyObject * _obj )
+				: m_obj( _obj )
+			{
+				pybind::incref( m_obj );
+			}
+
+		public:
 			~extract_operator_t()
 			{
 				pybind::decref( m_obj );
@@ -168,8 +216,8 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	PYBIND_API detail::extract_operator_t list_getitem_t( PyObject * _list, size_t _it );
 	PYBIND_API bool list_setitem_t( PyObject * _list, size_t _it, const detail::import_operator_t & _item );
-	PYBIND_API bool list_appenditem_t( PyObject * _obj, const detail::borrowed_import_operator_t & _item );
-	PYBIND_API bool dict_setstring_t( PyObject * _dict, const char * _name, const detail::borrowed_import_operator_t & _value );
+	PYBIND_API bool list_appenditem_t( PyObject * _obj, const detail::import_operator_t & _item );
+	PYBIND_API bool dict_setstring_t( PyObject * _dict, const char * _name, const detail::import_operator_t & _value );
 	PYBIND_API detail::extract_operator_t tuple_getitem_t( PyObject * _tuple, size_t _it );
 	PYBIND_API bool tuple_setitem_t( PyObject * _tuple, size_t _it, const detail::import_operator_t & _item );
 	PYBIND_API detail::extract_operator_t ask_tuple( PyObject * _obj, const pybind::tuple & _tuple );

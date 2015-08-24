@@ -94,7 +94,7 @@ namespace pybind
 
 			C * obj = detail::meta_cast_scope_t<C *>( _self, scope_id, class_id, _scope );
 			
-			PyObject * py_value = (detail::import_operator_t)(obj->*m_get)();
+			PyObject * py_value = (detail::return_operator_t)(obj->*m_get)();
 
 			return py_value;
 		}
@@ -138,7 +138,7 @@ namespace pybind
 
 			C * obj = detail::meta_cast_scope_t<C *>( _self, scope_id, class_id, _scope );
 
-			PyObject * py_value = (detail::import_operator_t)(*m_get)(obj);
+			PyObject * py_value = (detail::return_operator_t)(*m_get)(obj);
 
 			return py_value;
 		}

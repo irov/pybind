@@ -186,7 +186,7 @@ namespace pybind
 
 		static PyObject * call( F f, PyObject * _arg )
 		{
-			PyObject * py_result = (detail::import_operator_t)function_call_impl<F, Ret, f_info::arity>::call( f, _arg );
+			PyObject * py_result = (detail::return_operator_t)function_call_impl<F, Ret, f_info::arity>::call( f, _arg );
 
 			return py_result;
 		}
