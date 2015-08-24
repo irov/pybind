@@ -75,9 +75,7 @@ namespace pybind
 			{
 				const T & value = _vector[it];
 
-				PyObject * py_value = pybind::ptr_throw( value );
-
-				pybind::list_setitem( py_vector, it, py_value );
+				pybind::list_setitem_t( py_vector, it, value );
 			}
 
 			return py_vector;

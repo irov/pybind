@@ -27,6 +27,7 @@ namespace pybind
 
 	public:
 		PyObject * ptr() const;
+		PyObject * ret() const;
 
 		void reset();
 		uint32_t get_ref() const;

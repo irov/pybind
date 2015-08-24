@@ -14,19 +14,21 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool list_setitem_t( PyObject * _list, size_t _it, const detail::import_operator_t & _item )
 	{
-		return pybind::list_setitem( _list, _it, _item );
+		bool result = pybind::list_setitem( _list, _it, _item );
+
+		return result;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool list_appenditem_t( PyObject * _obj, const detail::borrowed_import_operator_t & _item )
+	bool list_appenditem_t( PyObject * _obj, const detail::import_operator_t & _item )
 	{
 		bool result = pybind::list_appenditem( _obj, _item );
 
 		return result;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool dict_setstring_t( PyObject * _dict, const char * _name, const detail::borrowed_import_operator_t & _value )
+	bool dict_setstring_t( PyObject * _dict, const char * _name, const detail::import_operator_t & _value )
 	{
-		bool result = pybind::dict_setstring( _dict, _name, _value );
+ 		bool result = pybind::dict_setstring( _dict, _name, _value );
 
 		return result;
 	}
@@ -40,7 +42,9 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool tuple_setitem_t( PyObject * _tuple, size_t _it, const detail::import_operator_t & _item )
 	{
-		return pybind::tuple_setitem( _tuple, _it, _item );
+		bool result = pybind::tuple_setitem( _tuple, _it, _item );
+
+		return result;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	detail::extract_operator_t ask_tuple( PyObject * _obj, const pybind::tuple & _tuple )

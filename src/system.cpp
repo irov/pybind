@@ -691,6 +691,8 @@ namespace pybind
             return false;
         }
 
+		//Py_DECREF( _item );
+
         return true;
     }
 	//////////////////////////////////////////////////////////////////////////
@@ -719,6 +721,24 @@ namespace pybind
 
             return false;
         }
+
+		Py_INCREF( _item );
+
+		return true;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool list_appenditem( PyObject * _obj, PyObject * _item )
+	{
+		int res = PyList_Append( _obj, _item );
+
+		if( res == -1 )
+		{
+			check_error();
+
+			return false;
+		}
+
+		//Py_DECREF( _item );
 
 		return true;
 	}
@@ -779,20 +799,6 @@ namespace pybind
 		return (size_t)size;
 	}
     //////////////////////////////////////////////////////////////////////////
-	bool list_appenditem( PyObject * _obj, PyObject * _item )
-	{
-        int res = PyList_Append( _obj, _item );
-
-        if( res == -1 )
-        {
-            check_error();
-
-            return false;
-        }
-
-		return true;
-	}
-    //////////////////////////////////////////////////////////////////////////
 	bool dict_setstring( PyObject * _dict, const char * _name, PyObject * _value )
 	{
         int res = PyDict_SetItemString( _dict, _name, _value );
@@ -803,6 +809,8 @@ namespace pybind
 
             return false;
         }
+
+		//Py_DECREF( _value );
 
 		return true;
 	}
@@ -817,6 +825,8 @@ namespace pybind
 
             return false;
         }
+
+		//Py_DECREF( _value );
 
         return true;
     }
@@ -872,6 +882,32 @@ namespace pybind
 		PyObject * obj = PyDict_Items( _dict );
 
 		return obj;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * tuple_new( size_t _size )
+	{
+		Py_ssize_t py_size = (Py_ssize_t)_size;
+		PyObject * obj = PyTuple_New( py_size );
+
+		return obj;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool tuple_setitem( PyObject * _tuple, size_t _index, PyObject * _value )
+	{
+		Py_ssize_t py_index = (Py_ssize_t)_index;
+
+		int res = PyTuple_SetItem( _tuple, py_index, _value );
+
+		if( res != 0 )
+		{
+			check_error();
+
+			return false;
+		}
+
+		Py_INCREF( _value );
+
+		return true;
 	}
     //////////////////////////////////////////////////////////////////////////
 	bool tuple_check( PyObject * _tuple )
@@ -1020,29 +1056,6 @@ namespace pybind
         va_end( valist );
 
         PyErr_SetString( PyExc_RuntimeError, buffer );		 
-	}
-    //////////////////////////////////////////////////////////////////////////
-	bool tuple_setitem( PyObject * _tuple, size_t _index, PyObject * _value )
-	{
-		Py_ssize_t py_index = (Py_ssize_t)_index;
-        int res = PyTuple_SetItem( _tuple, py_index, _value );
-
-        if( res != 0 )
-        {
-            check_error();
-
-            return false;
-        }
-
-		return true;
-	}
-    //////////////////////////////////////////////////////////////////////////
-	PyObject * tuple_new( size_t _size )
-	{
-		Py_ssize_t py_size = (Py_ssize_t)_size;
-        PyObject * obj = PyTuple_New( py_size );
-
-		return obj;
 	}
     //////////////////////////////////////////////////////////////////////////
 	PyObject * build_value( const char * _format, ... )
@@ -1339,8 +1352,7 @@ namespace pybind
 #   if PYBIND_PYTHON_VERSION < 300
         PyObject * py_meta_path = PySys_GetObject( const_cast<char *>("meta_path") );
 
-        pybind::list_insert( py_meta_path, 0, _finder );
-        pybind::decref( _finder );
+        pybind::list_insert( py_meta_path, 0, _finder );        
 #   endif
 
 #   if PYBIND_PYTHON_VERSION >= 330

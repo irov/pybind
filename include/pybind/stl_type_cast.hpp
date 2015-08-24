@@ -3,6 +3,8 @@
 #	include "pybind/type_cast.hpp"
 #	include "pybind/extract.hpp"
 
+#	include "pybind/list.hpp"
+
 #	include <utility>
 
 namespace pybind
@@ -65,22 +67,11 @@ namespace pybind
 		{
 			size_t vector_size = _vector.size();
 
-			PyObject * py_vector = pybind::list_new( vector_size );
+			pybind::list py_vector = pybind::make_list_t( vector_size );
 
-			for( typename V::size_type
-				it = 0,
-				it_end = vector_size;
-			it != it_end;
-			++it )
-			{
-				const T & value = _vector[it];
+			py_vector.assign( _vector.begin(), _vector.end() );
 
-				PyObject * py_value = pybind::ptr_throw( value );
-
-				pybind::list_setitem( py_vector, it, py_value );
-			}
-
-			return py_vector;
+			return py_vector.ret();
 		}
 	};
 

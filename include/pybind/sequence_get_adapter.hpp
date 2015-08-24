@@ -54,7 +54,7 @@ namespace pybind
 
 			C * self = detail::meta_cast_scope_t<C *>( _impl, scope_id, class_id, _scope );
 			
-			PyObject * py_result = (detail::import_operator_t)(self->*m_fn)(
+			PyObject * py_result = (detail::return_operator_t)(self->*m_fn)(
 				_index 
 				);
 
@@ -124,7 +124,7 @@ namespace pybind
 
 			C * self = detail::meta_cast_scope_t<C *>( _impl, scope_id, class_id, _scope );
 
-			PyObject * py_result = (detail::import_operator_t)(m_proxy->*m_fn)( self
+			PyObject * py_result = (detail::return_operator_t)(m_proxy->*m_fn)(self
 				, _index
 				);
 
@@ -155,7 +155,7 @@ namespace pybind
 
 			C * self = detail::meta_cast_scope_t<C *>( _impl, scope_id, class_id, _scope );
 
-			PyObject * py_result = (detail::import_operator_t)(*m_fn)(self
+			PyObject * py_result = (detail::return_operator_t)(*m_fn)(self
 				, _index
 				);
 

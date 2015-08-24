@@ -13,10 +13,11 @@ namespace pybind
 		static const uint32_t PY_OBJECT_HOLDER = 0x00000001;
 
 		static const uint32_t PY_OBJECT_PTR = 0x00000002;
-		static const uint32_t PY_OBJECT_POD8 = 0x00000010;
-		static const uint32_t PY_OBJECT_POD16 = 0x00000020;
-		static const uint32_t PY_OBJECT_POD32 = 0x00000040;
-		static const uint32_t PY_OBJECT_POD64 = 0x00000080;
+		static const uint32_t PY_OBJECT_POD4 = 0x0000040;
+		static const uint32_t PY_OBJECT_POD8 = 0x0000080;
+		static const uint32_t PY_OBJECT_POD16 = 0x00000100;
+		static const uint32_t PY_OBJECT_POD32 = 0x00000200;
+		static const uint32_t PY_OBJECT_POD64 = 0x00000400;
 		//////////////////////////////////////////////////////////////////////////
 		struct py_base_object
 		{
@@ -28,6 +29,12 @@ namespace pybind
 			: public py_base_object
 		{
 			void * impl;
+		};
+		//////////////////////////////////////////////////////////////////////////
+		struct py_pod4_object
+			: public py_base_object
+		{
+			uint8_t buff[4];
 		};
 		//////////////////////////////////////////////////////////////////////////
 		struct py_pod8_object

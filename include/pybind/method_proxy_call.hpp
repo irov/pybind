@@ -106,7 +106,7 @@ namespace pybind
 
 		static PyObject * call( P * _proxy, C * _obj, F f, PyObject * _arg )
 		{
-			PyObject * py_result = (detail::import_operator_t)method_proxy_call_impl<P, C, F, Ret, f_info::arity>::call( _proxy, _obj, f, _arg );
+			PyObject * py_result = (detail::return_operator_t)method_proxy_call_impl<P, C, F, Ret, f_info::arity>::call( _proxy, _obj, f, _arg );
 
 			return py_result;
 		}
