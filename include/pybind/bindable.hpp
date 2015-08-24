@@ -36,6 +36,8 @@ namespace pybind
 				PyObject * embed = this->_embedded();
 
 				this->setEmbed( embed );
+
+				pybind::decref( embed );
 			}
 
 			return m_embed;
