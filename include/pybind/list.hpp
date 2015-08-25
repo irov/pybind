@@ -22,16 +22,11 @@ namespace pybind
 		void append( const detail::import_operator_t & _t );
 
 		template<class It>
-		void assign( It _begin, It _end )
+		void append( It _begin, It _end )
 		{
-			size_t index = 0;
-
-			It it = _begin;
-			for( ; it != _end; ++it )
+			for( It it = _begin; it != _end; ++it )
 			{
-				this->operator [] ( index ) = *it;
-
-				++index;
+				this->append( *it );
 			}
 		}
 

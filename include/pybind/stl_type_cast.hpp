@@ -69,7 +69,7 @@ namespace pybind
 
 			pybind::list py_vector = pybind::make_list_t( vector_size );
 
-			py_vector.assign( _vector.begin(), _vector.end() );
+			py_vector.append( _vector.begin(), _vector.end() );
 
 			return py_vector.ret();
 		}
