@@ -1,6 +1,7 @@
 #	pragma once
 
 #	include "pybind/object.hpp"
+#	include "pybind/list_helper.hpp"
 
 namespace pybind
 { 
@@ -11,12 +12,12 @@ namespace pybind
 		list();
 		list( size_t _size );
 
-		explicit list( PyObject * _obj, borrowed );
+		explicit list( PyObject * _obj, pybind::borrowed );
 		explicit list( PyObject * _obj );
 
 	public:
-		detail::extract_operator_t operator [] ( size_t _index ) const;
-		detail::extract_list_operator_t operator [] ( size_t _index );
+		detail::set_list_operator_t operator [] ( size_t _index );
+		detail::extract_operator_t operator [] ( size_t _index ) const;		
 
 	public:
 		void append( const detail::import_operator_t & _t );
@@ -35,6 +36,5 @@ namespace pybind
 		bool empty() const;
 	};
 	//////////////////////////////////////////////////////////////////////////
-	PYBIND_API pybind::list make_list_t( size_t _size );
 	PYBIND_API pybind::list make_invalid_list_t();
 }

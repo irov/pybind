@@ -105,9 +105,14 @@ namespace pybind
 	PYBIND_API size_t dict_size( PyObject * _obj );
 	PYBIND_API bool dict_set( PyObject * _dict, PyObject * _name, PyObject * _value );
     PYBIND_API bool dict_setstring( PyObject * _dict, const char * _name, PyObject * _value );
-    PYBIND_API bool dict_remove( PyObject * _dict, const char * _name );	
-	PYBIND_API PyObject * dict_get( PyObject * _dict, const char * _name );
-	PYBIND_API bool dict_contains( PyObject * _dict, const char * _name );	
+    PYBIND_API bool dict_remove( PyObject * _dict, PyObject * _name );	
+	PYBIND_API bool dict_removestring( PyObject * _dict, const char * _name );
+	PYBIND_API PyObject * dict_getstring( PyObject * _dict, const char * _key );
+	PYBIND_API PyObject * dict_get( PyObject * _dict, PyObject * _name );
+	PYBIND_API size_t dict_contains( PyObject * _dict, PyObject * _name );
+	PYBIND_API size_t dict_containsstring( PyObject * _dict, const char * _name );
+	PYBIND_API bool dict_exist( PyObject * _dict, PyObject * _name );
+	PYBIND_API bool dict_existstring( PyObject * _dict, const char * _name );
 	PYBIND_API bool dict_next( PyObject * _dict, size_t & _pos, PyObject ** _key, PyObject ** _value );
 
 	PYBIND_API PyObject * dict_items( PyObject * _dict );

@@ -154,7 +154,7 @@ namespace pybind
 
 			const char * name = _adapter->getName();
 
-			module_addobject( _module, name, py_func );
+			pybind::module_addobject( _module, name, py_func );
 		}
 	}
 }

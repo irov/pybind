@@ -54,7 +54,7 @@ namespace pybind
 		const char * repr() const;
 
 	public:
-		detail::extract_operator_t extract();
+		detail::extract_operator_t extract() const;
 
 	public:
 		detail::extract_operator_t operator () () const;
@@ -74,5 +74,6 @@ namespace pybind
 	PYBIND_API pybind::object make_none_t();
 	PYBIND_API pybind::object make_true_t();
 	PYBIND_API pybind::object make_false_t();
+	PYBIND_API pybind::object make_object_t( const detail::import_operator_t & _t0 );
 	PYBIND_API pybind::object make_invalid_object_t();
 }

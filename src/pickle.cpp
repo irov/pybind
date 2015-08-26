@@ -438,7 +438,7 @@ namespace pybind
 				{
 					PyObject * element = s_obj_unpickle( _buffer, _capacity, _carriage, _types );
 					
-					pybind::tuple_setitem( obj, i, element );
+					pybind::tuple_setitem_t( obj, i, element );
 				}
 
 				return obj;
