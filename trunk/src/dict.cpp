@@ -4,8 +4,8 @@ namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
 	dict::dict()
+		: pybind::object( pybind::dict_new(), borrowed() )
 	{
-		m_obj = pybind::dict_new();
 	}
 	//////////////////////////////////////////////////////////////////////////
 	dict::dict( PyObject * _obj, borrowed _br )
@@ -18,19 +18,29 @@ namespace pybind
 	{
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool dict::contains( const char * _name ) const
+	size_t dict::exist( const detail::import_operator_t & _name ) const
+	{
+		return pybind::dict_exist( m_obj, _name );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	size_t dict::contains( const detail::import_operator_t & _name ) const
 	{
 		return pybind::dict_contains( m_obj, _name );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	detail::extract_operator_t dict::operator [] ( const char * _name ) const
+	detail::set_dict_operator_t dict::operator [] ( const detail::import_operator_t & _name )
+	{
+		return detail::set_dict_operator_t( m_obj, _name );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	detail::extract_operator_t dict::operator [] ( const detail::import_operator_t & _name ) const
 	{
 		PyObject * py_object = pybind::dict_get( m_obj, _name );
 
 		return detail::extract_operator_t( py_object );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void dict::remove( const char * _name ) const
+	void dict::remove( const detail::import_operator_t & _name ) const
 	{
 		pybind::dict_remove( m_obj, _name );
 	}

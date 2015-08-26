@@ -47,6 +47,25 @@ namespace pybind
 		return result;
 	}
 	//////////////////////////////////////////////////////////////////////////
+	bool dict_set_t( PyObject * _dict, const detail::import_operator_t & _name, const detail::import_operator_t & _value )
+	{
+		bool result = dict_set( _dict, _name, _value );
+
+		return result;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	detail::extract_operator_t dict_get_t( PyObject * _dict, const detail::import_operator_t & _key )
+	{
+		PyObject * py_item = pybind::dict_get( _dict, _key );
+
+		return detail::extract_operator_t( py_item );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool dict_remove_t( PyObject * _dict, const detail::import_operator_t & _key )
+	{
+		return dict_remove( _dict, _key );
+	}
+	//////////////////////////////////////////////////////////////////////////
 	detail::extract_operator_t ask_tuple( PyObject * _obj, const pybind::tuple & _tuple )
 	{
 		PyObject * py_result = pybind::ask_native( _obj, _tuple.ptr() );

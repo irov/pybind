@@ -688,7 +688,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * ptr_throw_i( PyObject * _value )
 	{		
-		//pybind::incref( _value );
+		pybind::incref( _value );
 
 		return _value;
 	}

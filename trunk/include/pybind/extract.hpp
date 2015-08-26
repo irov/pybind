@@ -232,8 +232,8 @@ namespace pybind
 	PYBIND_API PyObject * ptr_throw_i( wchar_t * _value );
 	PYBIND_API PyObject * ptr_throw_i( const char * _value );
 	PYBIND_API PyObject * ptr_throw_i( const wchar_t * _value );
-	PYBIND_API PyObject * ptr_throw_i( PyObject * _value );
-	PYBIND_API PyObject * ptr_throw_i( pybind::bindable * _value );	
+	PYBIND_API PyObject * ptr_throw_i( PyObject * _value );	
+	PYBIND_API PyObject * ptr_throw_i( pybind::bindable * _value );		
 	PYBIND_API PyObject * ptr_throw_i( const pybind::object & _value );
 	PYBIND_API PyObject * ptr_throw_i( const pybind::list & _value );
 	PYBIND_API PyObject * ptr_throw_i( const pybind::tuple & _value );

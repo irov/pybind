@@ -419,7 +419,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
 	void call_method( PyObject * _obj, const char * _method, const char * _format, ... )
 	{
-
 		va_list valist;
 		va_start(valist, _format);
 
@@ -831,9 +830,9 @@ namespace pybind
         return true;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool dict_remove( PyObject * _dict, const char * _name )
+	bool dict_removestring( PyObject * _dict, const char * _key )
     {
-        int res = PyDict_DelItemString( _dict, _name );
+		int res = PyDict_DelItemString( _dict, _key );
 
         if( res == -1 )
         {
@@ -844,24 +843,66 @@ namespace pybind
 
         return true;
     }
-    //////////////////////////////////////////////////////////////////////////
-	PyObject * dict_get( PyObject * _dict, const char * _name )
+	//////////////////////////////////////////////////////////////////////////
+	bool dict_remove( PyObject * _dict, PyObject * _key )
 	{
-        PyObject * obj = PyDict_GetItemString( _dict, _name );
+		int res = PyDict_DelItem( _dict, _key );
+
+		if( res == -1 )
+		{
+			check_error();
+
+			return false;
+		}
+
+		return true;
+	}
+    //////////////////////////////////////////////////////////////////////////
+	PyObject * dict_getstring( PyObject * _dict, const char * _key )
+	{
+		PyObject * obj = PyDict_GetItemString( _dict, _key );
 
 		return obj;
 	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * dict_get( PyObject * _dict, PyObject * _key )
+	{
+		PyObject * obj = PyDict_GetItem( _dict, _key );
+
+		return obj;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	size_t dict_contains( PyObject * _dict, PyObject * _key )
+	{
+		int contains = PyDict_Contains( _dict, _key );
+
+		return (size_t)contains;
+	}
     //////////////////////////////////////////////////////////////////////////
-	bool dict_contains( PyObject * _dict, const char * _name )
+	size_t dict_containsstring( PyObject * _dict, const char * _key )
 	{
 #   if PYBIND_PYTHON_VERSION < 300
-		PyObject * kv = PyString_FromString( _name );
+		PyObject * kv = PyString_FromString( _key );
 #	else
-		PyObject * kv = PyUnicode_FromString( _name );
+		PyObject * kv = PyUnicode_FromString( _key );
 #	endif
 
-		int contains = PyDict_Contains( _dict, kv );
+		int contains = pybind::dict_contains( _dict, kv );
 		Py_DECREF( kv );
+
+		return (size_t)contains;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool dict_exist( PyObject * _dict, PyObject * _key )
+	{
+		size_t contains = pybind::dict_contains( _dict, _key );
+
+		return contains == 1;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool dict_existstring( PyObject * _dict, const char * _key )
+	{
+		size_t contains = pybind::dict_containsstring( _dict, _key );
 
 		return contains == 1;
 	}
