@@ -4,12 +4,12 @@ namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
 	list::list()
-		: pybind::object( pybind::tuple_new( 0 ), pybind::borrowed() )
+		: pybind::object( pybind::list_new( 0 ), pybind::borrowed() )
 	{
 	}
 	//////////////////////////////////////////////////////////////////////////
 	list::list( size_t _size )
-		: pybind::object( pybind::tuple_new( _size ), pybind::borrowed() )
+		: pybind::object( pybind::list_new( _size ), pybind::borrowed() )
 	{
 	}
 	//////////////////////////////////////////////////////////////////////////
