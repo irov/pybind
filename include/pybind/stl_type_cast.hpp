@@ -25,13 +25,7 @@ namespace pybind
 
 				for( size_t it = 0; it != size; ++it )
 				{
-					PyObject * py_value = pybind::tuple_getitem( _obj, it );
-
-					T value;
-					if( pybind::extract_value( py_value, value ) == false )
-					{
-						return false;
-					}
+					T value = pybind::tuple_getitem_t( _obj, it );
 
 					_vector.push_back( value );
 				}
@@ -44,13 +38,7 @@ namespace pybind
 
 				for( size_t it = 0; it != size; ++it )
 				{
-					PyObject * py_value = pybind::list_getitem( _obj, it );
-
-					T value;
-					if( pybind::extract_value( py_value, value ) == false )
-					{
-						return false;
-					}
+					T value = pybind::list_getitem_t( _obj, it );
 
 					_vector.push_back( value );
 				}
@@ -65,11 +53,7 @@ namespace pybind
 
 		PyObject * wrap( TCastRef _vector ) override
 		{
-			size_t vector_size = _vector.size();
-
-			pybind::list py_vector( vector_size );
-
-			py_vector.append( _vector.begin(), _vector.end() );
+			pybind::list py_vector = pybind::make_list_container_t( _vector );
 
 			return py_vector.ret();
 		}

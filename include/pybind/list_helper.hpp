@@ -30,13 +30,13 @@ namespace pybind
 		public:
 			void operator = (const import_operator_t & _value)
 			{
-				pybind::tuple_setitem_t( m_list, m_index, _value );
+				pybind::list_setitem_t( m_list, m_index, _value );
 			}
 
 		public:
 			operator PyObject * ()
 			{
-				PyObject * obj = pybind::tuple_getitem( m_list, m_index );
+				PyObject * obj = pybind::list_getitem( m_list, m_index );
 
 				return obj;
 			}
@@ -44,13 +44,13 @@ namespace pybind
 			template<class T>
 			operator T ()
 			{
-				return pybind::tuple_getitem_t( m_list, m_index );
+				return pybind::list_getitem_t( m_list, m_index );
 			}
 
 			template<class T>
 			bool operator == (const T & _value)
 			{
-				return pybind::tuple_getitem_t( m_list, m_index ) == _value;
+				return pybind::list_getitem_t( m_list, m_index ) == _value;
 			}
 
 		protected:
