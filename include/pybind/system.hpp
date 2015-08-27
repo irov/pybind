@@ -115,6 +115,23 @@ namespace pybind
 	PYBIND_API bool dict_existstring( PyObject * _dict, const char * _name );
 	PYBIND_API bool dict_next( PyObject * _dict, size_t & _pos, PyObject ** _key, PyObject ** _value );
 
+	template<class K, class V>
+	PYBIND_API bool dict_next_t( PyObject * _dict, size_t & _pos, K & _key, V & _value )
+	{
+		PyObject * py_key;
+		PyObject * py_value;
+
+		if( pybind::dict_next( _dict, _pos, &py_key, &py_value ) == false )
+		{
+			return false;
+		}
+
+		_key = pybind::extract<K>( py_key );
+		_value = pybind::extract<V>( py_value );
+
+		return true;
+	}
+
 	PYBIND_API PyObject * dict_items( PyObject * _dict );
 
 	PYBIND_API PyObject * tuple_new( size_t _it );

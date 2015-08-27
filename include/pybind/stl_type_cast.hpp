@@ -71,22 +71,10 @@ namespace pybind
 			{
 				size_t dict_pos = 0;
 
-				PyObject * py_key;
-				PyObject * py_value;
-				while( pybind::dict_next( _obj, dict_pos, &py_key, &py_value ) == true )
+				K key;
+				V value;
+				while( pybind::dict_next_t( _obj, dict_pos, key, value ) == true )
 				{
-					K key;
-					if( pybind::extract_value( py_key, key ) == false )
-					{
-						return false;
-					}
-
-					V value;
-					if( pybind::extract_value( py_value, value ) == false )
-					{
-						return false;
-					}
-
 					_map.insert( std::make_pair(key, value) );
 				}
 			}
@@ -111,13 +99,7 @@ namespace pybind
 				const K & key = it->first;
 				const V & value = it->second;
 
-				PyObject * py_key = pybind::ptr_throw( key );
-				PyObject * py_value = pybind::ptr_throw( value );
-
-				pybind::dict_set( py_dict, py_key, py_value );
-
-				pybind::decref( py_key );
-				pybind::decref( py_value );
+				pybind::dict_set_t( py_dict, key, value );
 			}
 
 			return py_dict;
