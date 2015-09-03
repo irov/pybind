@@ -20,8 +20,8 @@ namespace pybind
 	{
 		PyObject_VAR_HEAD;
 
-		PyLinkedNode * node_root;
-		PyLinkedNode * node_last;
+		PyLinkedNode * root;
+		PyLinkedNode * last;
 
 		Py_ssize_t size;
 	};
@@ -41,7 +41,7 @@ namespace pybind
 	static int
 		linked_clear( PyLinkedObject *a )
 	{
-		PyLinkedNode * node = a->node_root;
+		PyLinkedNode * node = a->root;
 
 		while( node != nullptr )
 		{
@@ -56,8 +56,8 @@ namespace pybind
 			node = next;
 		}
 
-		a->node_root = nullptr;
-		a->node_last = nullptr;
+		a->root = nullptr;
+		a->last = nullptr;
 		a->size = 0;
 
 		return 0;
@@ -82,7 +82,7 @@ namespace pybind
 	static int
 		linked_contains( PyLinkedObject *a, PyObject *el )
 	{
-		PyLinkedNode * node = a->node_root;
+		PyLinkedNode * node = a->root;
 
 		while( node != nullptr )
 		{
@@ -104,7 +104,7 @@ namespace pybind
 	{
 		Py_ssize_t index = 0;
 
-		PyLinkedNode * node = a->node_root;
+		PyLinkedNode * node = a->root;
 
 		while( node != nullptr )
 		{
@@ -130,7 +130,7 @@ namespace pybind
 	{
 		Py_ssize_t index = 0;
 
-		PyLinkedNode * node = a->node_root;
+		PyLinkedNode * node = a->root;
 
 		while( node != nullptr )
 		{
@@ -162,15 +162,15 @@ namespace pybind
 
 		node->next = nullptr;
 
-		if( self->node_last == nullptr )
+		if( self->last == nullptr )
 		{
-			self->node_root = node;
-			self->node_last = node;
+			self->root = node;
+			self->last = node;
 		}
 		else
 		{
-			node_link( self->node_last, node );
-			self->node_last = node;
+			node_link( self->last, node );
+			self->last = node;
 		}
 
 		self->size++;
@@ -178,16 +178,16 @@ namespace pybind
 		Py_RETURN_NONE;
 	}
 
-	static PyObject * linkedcopy( PyLinkedObject *self )
+	static PyObject * linkedclone( PyLinkedObject *self )
 	{ 
 		PyLinkedObject * new_linked = PyObject_GC_New( PyLinkedObject, &PyLinked_Type );
 
-		new_linked->node_last = nullptr;
-		new_linked->node_root = nullptr;
+		new_linked->last = nullptr;
+		new_linked->root = nullptr;
 
 		new_linked->size = 0;
 
-		PyLinkedNode * node = self->node_root;
+		PyLinkedNode * node = self->root;
 
 		while( node != nullptr )
 		{
@@ -201,7 +201,7 @@ namespace pybind
 
 	static PyObject * linkedempty( PyLinkedObject *self )
 	{
-		if( self->node_root == nullptr )
+		if( self->root == nullptr )
 		{
 			Py_RETURN_TRUE;
 		}
@@ -212,7 +212,7 @@ namespace pybind
 	static PyObject *
 		linkedremove( PyLinkedObject *self, PyObject *v )
 	{
-		if( self->node_root == nullptr )
+		if( self->root == nullptr )
 		{
 			PyErr_SetString( PyExc_ValueError, "linked.remove(x): x not in list" );
 
@@ -221,20 +221,20 @@ namespace pybind
 
 		--self->size;
 
-		if( PyObject_RichCompareBool( self->node_root->value, v, Py_EQ ) > 0 )
+		if( PyObject_RichCompareBool( self->root->value, v, Py_EQ ) > 0 )
 		{
-			Py_DECREF( self->node_root->value );
+			Py_DECREF( self->root->value );
 
-			PyLinkedNode * node_free = self->node_root;
+			PyLinkedNode * node_free = self->root;
 
-			if( self->node_last == self->node_root )
+			if( self->last == self->root )
 			{
-				self->node_last = nullptr;
-				self->node_root = nullptr;
+				self->last = nullptr;
+				self->root = nullptr;
 			}
 			else
 			{
-				self->node_root = self->node_root->next;
+				self->root = self->root->next;
 			}
 
 			PyMem_FREE( node_free );
@@ -242,7 +242,7 @@ namespace pybind
 			Py_RETURN_NONE;
 		}
 
-		PyLinkedNode * node = self->node_root;
+		PyLinkedNode * node = self->root;
 
 		while( node->next != nullptr )
 		{
@@ -253,9 +253,9 @@ namespace pybind
 				continue;
 			}
 
-			if( node->next == self->node_last )
+			if( node->next == self->last )
 			{
-				self->node_last = node;
+				self->last = node;
 			}
 
 			node->next = node->next->next;
@@ -269,7 +269,7 @@ namespace pybind
 	static int
 		linked_traverse( PyLinkedObject *self, visitproc visit, void *arg )
 	{
-		PyLinkedNode * node = self->node_root;
+		PyLinkedNode * node = self->root;
 
 		while( node != nullptr )
 		{
@@ -300,7 +300,7 @@ namespace pybind
 		Py_INCREF( seq );
 		it->linked = seq;
 
-		it->node = seq->node_root;
+		it->node = seq->root;
 
 		_PyObject_GC_TRACK( it );
 
@@ -310,8 +310,8 @@ namespace pybind
 
 	PyDoc_STRVAR( append_doc,
 		"L.append(object) -- append object to end" );
-	PyDoc_STRVAR( copy_doc,
-		"L.copy() -- copy linked" );
+	PyDoc_STRVAR( clone_doc,
+		"L.clone() -- clone linked" );
 	PyDoc_STRVAR( empty_doc,
 		"L.empty() -- is empty linked" );
 	PyDoc_STRVAR( remove_doc,
@@ -320,7 +320,7 @@ namespace pybind
 
 	static PyMethodDef linked_methods[] = {
 		{"append", (PyCFunction)linkedappend, METH_O, append_doc},
-		{"copy", (PyCFunction)linkedcopy, METH_NOARGS, copy_doc},
+		{"clone", (PyCFunction)linkedclone, METH_NOARGS, clone_doc},
 		{"empty", (PyCFunction)linkedempty, METH_NOARGS, empty_doc},
 		{"remove", (PyCFunction)linkedremove, METH_O, remove_doc},
 		{NULL, NULL}           /* sentinel */
