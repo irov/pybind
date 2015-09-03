@@ -17,6 +17,8 @@
 #	include "function_type.hpp"
 #	include "functor_type.hpp"
 
+#	include "linked.hpp"
+
 #	include <stdexcept>
 #	include <stdio.h>
 
@@ -127,6 +129,11 @@ namespace pybind
         }
         
 		//initialize_default_type_cast();
+
+		if( initialize_linked() == false )
+		{
+			return false;
+		}
 
         return true;
 	}

@@ -94,6 +94,7 @@
     <ClInclude Include="..\include\pybind\destroy_adapter.hpp" />
     <ClInclude Include="..\include\pybind\detail.hpp" />
     <ClInclude Include="..\include\pybind\dict.hpp" />
+    <ClInclude Include="..\include\pybind\dict_helper.hpp" />
     <ClInclude Include="..\include\pybind\exception.hpp" />
     <ClInclude Include="..\include\pybind\exports.hpp" />
     <ClInclude Include="..\include\pybind\extract.hpp" />
@@ -108,6 +109,7 @@
     <ClInclude Include="..\include\pybind\hash_adapter.hpp" />
     <ClInclude Include="..\include\pybind\helper.hpp" />
     <ClInclude Include="..\include\pybind\list.hpp" />
+    <ClInclude Include="..\include\pybind\list_helper.hpp" />
     <ClInclude Include="..\include\pybind\logger.hpp" />
     <ClInclude Include="..\include\pybind\mapping_adapter.hpp" />
     <ClInclude Include="..\include\pybind\member_adapter.hpp" />
@@ -130,6 +132,7 @@
     <ClInclude Include="..\include\pybind\type_traits.hpp" />
     <ClInclude Include="..\src\function_type.hpp" />
     <ClInclude Include="..\src\functor_type.hpp" />
+    <ClInclude Include="..\src\linked.hpp" />
     <ClInclude Include="..\src\member_type.hpp" />
     <ClInclude Include="..\src\method_type.hpp" />
     <ClInclude Include="..\src\pod.hpp" />
@@ -147,6 +150,7 @@
     <ClCompile Include="..\src\functor.cpp" />
     <ClCompile Include="..\src\functor_type.cpp" />
     <ClCompile Include="..\src\helper.cpp" />
+    <ClCompile Include="..\src\linked.cpp" />
     <ClCompile Include="..\src\list.cpp" />
     <ClCompile Include="..\src\logger.cpp" />
     <ClCompile Include="..\src\member_type.cpp" />
