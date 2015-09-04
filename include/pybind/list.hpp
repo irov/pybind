@@ -10,8 +10,9 @@ namespace pybind
 	{
 	public:
 		list();
-		list( size_t _size );
+		explicit list( size_t _size );
 
+	public:
 		explicit list( PyObject * _obj, pybind::borrowed );
 		explicit list( PyObject * _obj );
 
@@ -47,8 +48,10 @@ namespace pybind
 		bool empty() const;
 	};
 	//////////////////////////////////////////////////////////////////////////
+	PYBIND_API bool list_check_t( const pybind::object & _obj );
+	//////////////////////////////////////////////////////////////////////////
 	template<class C>
-	PYBIND_API pybind::list make_list_container_t( const C & _c )
+	inline pybind::list make_list_container_t( const C & _c )
 	{
 		pybind::list l( _c.size() );
 

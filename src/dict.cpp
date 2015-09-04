@@ -7,6 +7,11 @@ namespace pybind
 		: pybind::object( pybind::dict_new(), borrowed() )
 	{
 	}
+	dict::dict( size_t _presized )
+		: pybind::object( pybind::dict_new_presized(_presized), borrowed() )
+	{
+
+	}
 	//////////////////////////////////////////////////////////////////////////
 	dict::dict( PyObject * _obj, borrowed _br )
 		: pybind::object( _obj, _br )

@@ -36,6 +36,12 @@ namespace pybind
 		(void)_br;
 	}
 	//////////////////////////////////////////////////////////////////////////
+	object::object( invalid _iv )
+		: m_obj(nullptr)
+	{
+		(void)_iv;
+	}
+	//////////////////////////////////////////////////////////////////////////
 	object::object( PyObject * _obj )
 		: m_obj( _obj )
 	{
@@ -121,7 +127,7 @@ namespace pybind
 	{
 		PyObject * py_attr = pybind::get_attr( m_obj, _name );
 
-		return pybind::object( py_attr );
+		return pybind::object( py_attr, pybind::borrowed() );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void object::unwrap() const
@@ -188,29 +194,30 @@ namespace pybind
 	{
 		PyObject * py_none = pybind::ret_none();
 
-		return pybind::object( py_none );
+		return pybind::object( py_none, pybind::borrowed() );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	pybind::object make_true_t()
 	{
 		PyObject * py_true = pybind::ret_true();
 
-		return pybind::object( py_true );
+		return pybind::object( py_true, pybind::borrowed() );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	pybind::object make_false_t()
 	{
 		PyObject * py_false = pybind::ret_false();
 
-		return pybind::object( py_false );
+		return pybind::object( py_false, pybind::borrowed() );
 	}
+	//////////////////////////////////////////////////////////////////////////
 	pybind::object make_object_t( const detail::import_operator_t & _t0 )
 	{
-		return pybind::object( _t0 );
+		return pybind::object( _t0, pybind::borrowed() );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	pybind::object make_invalid_object_t()
 	{
-		return pybind::object( nullptr );
+		return pybind::object( pybind::invalid() );
 	}
 }

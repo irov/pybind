@@ -40,6 +40,8 @@ namespace pybind
 				pybind::decref( embed );
 			}
 
+			pybind::incref( m_embed );
+
 			return m_embed;
 		}
 

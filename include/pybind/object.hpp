@@ -9,6 +9,10 @@ namespace pybind
 	{
 	};
 
+	class invalid
+	{
+	};
+
 	class PYBIND_API object
 	{
 	public:
@@ -20,6 +24,8 @@ namespace pybind
 
 		explicit object( PyObject * _obj, borrowed );
 		explicit object( PyObject * _obj );
+
+		explicit object( invalid );
 
 		object & operator = (const object & _obj);
 

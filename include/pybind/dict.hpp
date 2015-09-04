@@ -10,7 +10,9 @@ namespace pybind
 	{
 	public:		
 		dict();
+		explicit dict( size_t _presized );
 
+	public:
 		explicit dict( PyObject * _obj, borrowed );
 		explicit dict( PyObject * _obj );
 

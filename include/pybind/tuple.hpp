@@ -9,8 +9,8 @@ namespace pybind
 	{
 	public:		
 		tuple();
-		tuple( size_t _size );
 
+	public:
 		explicit tuple( PyObject * _obj, borrowed );
 		explicit tuple( PyObject * _obj );
 

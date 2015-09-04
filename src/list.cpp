@@ -50,6 +50,11 @@ namespace pybind
 		return this->size() == 0;
 	}
 	//////////////////////////////////////////////////////////////////////////
+	bool list_check_t( const pybind::object & _obj )
+	{
+		return pybind::list_check( _obj.ptr() );
+	}
+	//////////////////////////////////////////////////////////////////////////
 	pybind::list make_invalid_list_t()
 	{
 		return pybind::list( nullptr, pybind::borrowed() );

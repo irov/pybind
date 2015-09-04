@@ -8,11 +8,6 @@ namespace pybind
 	{
 	}
 	//////////////////////////////////////////////////////////////////////////
-	tuple::tuple( size_t _size )
-		: pybind::object( pybind::tuple_new( _size ) )
-	{
-	}
-	//////////////////////////////////////////////////////////////////////////
 	tuple::tuple( PyObject * _obj, borrowed _br )
 		: pybind::object( _obj, _br )
 	{
