@@ -123,7 +123,7 @@ namespace pybind
 	PYBIND_API bool list_appenditem_t( PyObject * _obj, const detail::import_operator_t & _item );
 	//////////////////////////////////////////////////////////////////////////
 	template<class It>
-	PYBIND_API bool list_appenditems_t( PyObject * _obj, It _begin, It _end )
+	inline bool list_appenditems_t( PyObject * _obj, It _begin, It _end )
 	{
 		for( It it = _begin; it != _end; ++it )
 		{
@@ -143,7 +143,7 @@ namespace pybind
 	PYBIND_API detail::extract_operator_t dict_get_t( PyObject * _dict, const detail::import_operator_t & _key );
 	PYBIND_API bool dict_remove_t( PyObject * _dict, const detail::import_operator_t & _key );
 	template<class K, class V>
-	PYBIND_API bool dict_next_t( PyObject * _dict, size_t & _pos, K & _key, V & _value )
+	inline bool dict_next_t( PyObject * _dict, size_t & _pos, K & _key, V & _value )
 	{
 		PyObject * py_key;
 		PyObject * py_value;
@@ -157,6 +157,19 @@ namespace pybind
 		_value = pybind::extract<V>( py_value );
 
 		return true;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	template<class It>
+	inline void foreach_t( const pybind::object & _cb, It _begin, It _end )
+	{
+		for( It
+			it = _begin,
+			it_end = _end;
+		it != it_end;
+		++it )
+		{
+			_cb( *it );
+		}
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PYBIND_API detail::extract_operator_t ask_tuple( PyObject * _obj, const pybind::tuple & _tuple );	
