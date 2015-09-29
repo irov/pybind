@@ -178,6 +178,61 @@ namespace pybind
 		Py_RETURN_NONE;
 	}
 
+	static PyObject *
+		linkedpushfront( PyLinkedObject *self, PyObject *v )
+	{
+		PyLinkedNode * node = PyMem_New( PyLinkedNode, 1 );
+
+		node->value = v;
+		Py_INCREF( node->value );
+
+		node->next = nullptr;
+
+		if( self->root == nullptr )
+		{
+			self->root = node;
+			self->last = node;
+		}
+		else
+		{
+			PyLinkedNode * root = self->root;
+
+			self->root = node;
+
+			node_link( node, root );
+		}
+
+		self->size++;
+
+		Py_RETURN_NONE;
+	}
+
+	static PyObject *
+		linkedpopfront( PyLinkedObject *self )
+	{
+		if( self->root == nullptr )
+		{
+			PyErr_SetString( PyExc_IndexError, "linked empty" );
+
+			return NULL;
+		}
+
+		PyLinkedNode * pop_node = self->root;
+
+		self->root = self->root->next;
+
+		if( self->root == nullptr )
+		{
+			self->last = nullptr;			
+		}
+
+		PyObject * pop_value = pop_node->value;
+
+		PyMem_FREE( pop_node );
+
+		return pop_value;
+	}
+	
 	static PyObject * linkedclone( PyLinkedObject *self )
 	{ 
 		PyLinkedObject * new_linked = PyObject_GC_New( PyLinkedObject, &PyLinked_Type );
@@ -320,12 +375,14 @@ namespace pybind
 
 	static PyMethodDef linked_methods[] = {
 		{"append", (PyCFunction)linkedappend, METH_O, append_doc},
+		{"push_front", (PyCFunction)linkedpushfront, METH_O, append_doc},
+		{"pop_front", (PyCFunction)linkedpopfront, METH_O, append_doc},
 		{"clone", (PyCFunction)linkedclone, METH_NOARGS, clone_doc},
 		{"empty", (PyCFunction)linkedempty, METH_NOARGS, empty_doc},
 		{"remove", (PyCFunction)linkedremove, METH_O, remove_doc},
 		{NULL, NULL}           /* sentinel */
 	};
-
+		
 	static PySequenceMethods linked_as_sequence = {
 		(lenfunc)linked_length,                       /* sq_length */
 		0,                    /* sq_concat */
