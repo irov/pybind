@@ -341,12 +341,6 @@ namespace pybind
 	static PyObject *
 		linked_iter( PyLinkedObject * seq )
 	{
-		if( !PyLinked_CheckExact( seq ) )
-		{
-			PyErr_BadInternalCall();
-			return NULL;
-		}
-
 		PyLinkedIterator * it = PyObject_GC_New( PyLinkedIterator, &PyLinkedIter_Type );
 
 		if( it == NULL )
