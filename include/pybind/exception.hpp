@@ -15,6 +15,10 @@ namespace pybind
 		{
 		}
 
+		~pybind_exception() throw()
+		{
+		}
+
 	public:
 		const char * what() const throw() override
 		{
