@@ -42,7 +42,7 @@ namespace pybind
 		{
 			if( _debug == false )
 			{
-				Py_OptimizeFlag = 2;			
+				Py_OptimizeFlag = 2;
 			}
 
 			if( _nosite == true )
@@ -67,7 +67,9 @@ namespace pybind
 			wchar_t pySearchPath[] = L".";
 			Py_SetPythonHome( pySearchPath );
 
-			_Py_InitializeEx_Private( install_sigs?1:0, 1 );
+			Py_SetStandardStreamEncoding( "utf-8", nullptr );
+
+			Py_InitializeEx( install_sigs ? 1 : 0 );
 #   elif PYBIND_PYTHON_VERSION >= 320
 			wchar_t pyProgramName[] = L"pybind";
 			Py_SetProgramName( pyProgramName );
