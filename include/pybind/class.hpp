@@ -16,6 +16,7 @@
 #	include "pybind/getattro_adapter.hpp"
 #	include "pybind/sequence_get_adapter.hpp"
 #	include "pybind/sequence_set_adapter.hpp"
+#	include "pybind/number_binary_adapter.hpp"
 
 #	include "pybind/type_cast.hpp"
 #	include "pybind/exception.hpp"
@@ -281,7 +282,6 @@ namespace pybind
 			return *this;
 		}
 
-
 		template<class F>
 		base_ & def_static_sequence_get( F _fn )
 		{
@@ -300,6 +300,138 @@ namespace pybind
 				new sequence_set_adapter_proxy_function<C, F>( "static_sequence_set", _fn );
 
 			m_scope->set_sequence_set( iadapter );
+
+			return *this;
+		}
+
+		template<class F>
+		base_ & def_add( F _fn )
+		{
+			number_binary_adapter_interface_ptr iadapter =
+				new number_binary_adapter<C, F>( "add", _fn );
+
+			m_scope->set_number_add( iadapter );
+
+			return *this;
+		}
+
+		template<class F>
+		base_ & def_static_add( F _fn )
+		{
+			number_binary_adapter_interface_ptr iadapter =
+				new number_binary_adapter_proxy_function<C, F>( "static_add", _fn );
+
+			m_scope->set_number_add( iadapter );
+
+			return *this;
+		}
+
+		template<class P, class F>
+		base_ & def_proxy_static_add( P * _proxy, F f )
+		{
+			number_binary_adapter_interface_ptr iadapter =
+				new number_binary_adapter_proxy<C, P, F>( "proxy_static_add", f, _proxy );
+
+			m_scope->set_number_add( iadapter );
+
+			return *this;
+		}
+
+		template<class F>
+		base_ & def_sub( F _fn )
+		{
+			number_binary_adapter_interface_ptr iadapter =
+				new number_binary_adapter<C, F>( "sub", _fn );
+
+			m_scope->set_number_sub( iadapter );
+
+			return *this;
+		}
+
+		template<class F>
+		base_ & def_static_sub( F _fn )
+		{
+			number_binary_adapter_interface_ptr iadapter =
+				new number_binary_adapter_proxy_function<C, F>( "static_sub", _fn );
+
+			m_scope->set_number_sub( iadapter );
+
+			return *this;
+		}
+
+		template<class P, class F>
+		base_ & def_proxy_static_sub( P * _proxy, F f )
+		{
+			number_binary_adapter_interface_ptr iadapter =
+				new number_binary_adapter_proxy<C, P, F>( "proxy_static_sub", f, _proxy );
+
+			m_scope->set_number_sub( iadapter );
+
+			return *this;
+		}
+
+		template<class F>
+		base_ & def_mul( F _fn )
+		{
+			number_binary_adapter_interface_ptr iadapter =
+				new number_binary_adapter<C, F>( "mul", _fn );
+
+			m_scope->set_number_mul( iadapter );
+
+			return *this;
+		}
+
+		template<class F>
+		base_ & def_static_mul( F _fn )
+		{
+			number_binary_adapter_interface_ptr iadapter =
+				new number_binary_adapter_proxy_function<C, F>( "static_mul", _fn );
+
+			m_scope->set_number_mul( iadapter );
+
+			return *this;
+		}
+
+		template<class P, class F>
+		base_ & def_proxy_static_mul( P * _proxy, F f )
+		{
+			number_binary_adapter_interface_ptr iadapter =
+				new number_binary_adapter_proxy<C, P, F>( "proxy_static_mul", f, _proxy );
+
+			m_scope->set_number_mul( iadapter );
+
+			return *this;
+		}
+
+		template<class F>
+		base_ & def_div( F _fn )
+		{
+			number_binary_adapter_interface_ptr iadapter =
+				new number_binary_adapter<C, F>( "div", _fn );
+
+			m_scope->set_number_div( iadapter );
+
+			return *this;
+		}
+
+		template<class F>
+		base_ & def_static_div( F _fn )
+		{
+			number_binary_adapter_interface_ptr iadapter =
+				new number_binary_adapter_proxy_function<C, F>( "static_div", _fn );
+
+			m_scope->set_number_div( iadapter );
+
+			return *this;
+		}
+
+		template<class P, class F>
+		base_ & def_proxy_static_div( P * _proxy, F f )
+		{
+			number_binary_adapter_interface_ptr iadapter =
+				new number_binary_adapter_proxy<C, P, F>( "proxy_static_div", f, _proxy );
+
+			m_scope->set_number_div( iadapter );
 
 			return *this;
 		}

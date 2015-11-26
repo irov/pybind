@@ -117,6 +117,7 @@
     <ClInclude Include="..\include\pybind\method_call.hpp" />
     <ClInclude Include="..\include\pybind\method_proxy_call.hpp" />
     <ClInclude Include="..\include\pybind\new_adapter.hpp" />
+    <ClInclude Include="..\include\pybind\number_binary_adapter.hpp" />
     <ClInclude Include="..\include\pybind\object.hpp" />
     <ClInclude Include="..\include\pybind\pickle.hpp" />
     <ClInclude Include="..\include\pybind\pybind.hpp" />

@@ -36,6 +36,19 @@ namespace pybind
 			return obj;
 		}
 
+		template<class C>
+		inline C * meta_cast_class_t( void * _self, const class_type_scope_ptr & _scope )
+		{
+			uint32_t scope_name = detail::class_info<C>();
+			uint32_t class_name = detail::class_info<C *>();
+
+			void * impl = meta_cast_scope_t<C *>( _self, scope_name, class_name, _scope );
+
+			C * obj = static_cast<C *>(impl);
+
+			return obj;
+		}
+
 		PYBIND_API uint32_t get_class_type_id( const std::type_info & _info );
 		PYBIND_API const char * get_class_type_info( uint32_t _id );
 

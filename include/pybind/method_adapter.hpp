@@ -51,10 +51,7 @@ namespace pybind
 		{
             (void)_kwds;
 
-			uint32_t class_id = detail::class_info<C*>();
-			uint32_t scope_id = detail::class_info<C>();
-
-			C * self = detail::meta_cast_scope_t<C *>( _impl, scope_id, class_id, _scope );
+			C * self = detail::meta_cast_class_t<C>( _impl, _scope );
 			
 			PyObject *ret = method_call<C, F>::call( self, m_fn, _args );
 
@@ -119,10 +116,7 @@ namespace pybind
 		{
             (void)_kwds;
 
-			uint32_t class_id = detail::class_info<C*>();
-			uint32_t scope_id = detail::class_info<C>();
-
-			C * self = detail::meta_cast_scope_t<C *>( _impl, scope_id, class_id, _scope );
+			C * self = detail::meta_cast_class_t<C>( _impl, _scope );
 
 			PyObject * ret = method_proxy_call<P, C, F>::call( m_proxy, self, m_fn, _args );
 
@@ -149,10 +143,7 @@ namespace pybind
 	protected:
 		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
-			uint32_t class_id = detail::class_info<C*>();
-			uint32_t scope_id = detail::class_info<C>();
-
-			C * self = detail::meta_cast_scope_t<C *>( _impl, scope_id, class_id, _scope );
+			C * self = detail::meta_cast_class_t<C>( _impl, _scope );
 
 			PyObject * ret = (m_proxy->*m_fn)(self, _args, _kwds);
 
@@ -180,10 +171,7 @@ namespace pybind
 		{
             (void)_kwds;
 
-			uint32_t class_id = detail::class_info<C*>();
-			uint32_t scope_id = detail::class_info<C>();
-
-			C * self = detail::meta_cast_scope_t<C *>( _impl, scope_id, class_id, _scope );
+			C * self = detail::meta_cast_class_t<C>( _impl, _scope );
 
 			PyObject * ret = function_proxy_call<C, F>::call( self, m_fn, _args );
 
@@ -208,10 +196,7 @@ namespace pybind
 	protected:
 		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
-			uint32_t class_id = detail::class_info<C*>();
-			uint32_t scope_id = detail::class_info<C>();
-
-			C * self = detail::meta_cast_scope_t<C *>( _impl, scope_id, class_id, _scope );
+			C * self = detail::meta_cast_class_t<C>( _impl, _scope );
 
 			PyObject * ret = (self->*m_fn)(_args, _kwds);
 

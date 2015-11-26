@@ -13,6 +13,7 @@
 #	include "pybind/mapping_adapter.hpp"
 #	include "pybind/sequence_get_adapter.hpp"
 #	include "pybind/sequence_set_adapter.hpp"
+#	include "pybind/number_binary_adapter.hpp"
 
 #	include "pod.hpp"
 #	include "pybind/detail.hpp"
@@ -505,19 +506,6 @@ namespace pybind
 		return -1;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	static PySequenceMethods py_as_sequence = {
-		(lenfunc)0,                       /* sq_length */
-		(binaryfunc)0,                    /* sq_concat */
-		(ssizeargfunc)0,                  /* sq_repeat */
-		(ssizeargfunc)&py_item_get,                    /* sq_item */
-		(ssizessizeargfunc)0,              /* sq_slice */
-		(ssizeobjargproc)&py_item_set,             /* sq_ass_item */
-		(ssizessizeobjargproc)0,       /* sq_ass_slice */
-		(objobjproc)0,                  /* sq_contains */
-		(binaryfunc)0,            /* sq_inplace_concat */
-		(ssizeargfunc)0,          /* sq_inplace_repeat */
-	};
-	//////////////////////////////////////////////////////////////////////////
 	static PyObject * py_new_class( PyTypeObject * _type, PyObject * _args, PyObject * _kwds )
 	{		
 		const class_type_scope_ptr & scope = detail::get_class_scope( _type );
@@ -964,6 +952,19 @@ namespace pybind
 		m_pytypeobject->tp_as_mapping = &py_as_mapping;
 	}
 	//////////////////////////////////////////////////////////////////////////
+	static PySequenceMethods py_as_sequence = {
+		(lenfunc)0,                       /* sq_length */
+		(binaryfunc)0,                    /* sq_concat */
+		(ssizeargfunc)0,                  /* sq_repeat */
+		(ssizeargfunc)&py_item_get,                    /* sq_item */
+		(ssizessizeargfunc)0,              /* sq_slice */
+		(ssizeobjargproc)&py_item_set,             /* sq_ass_item */
+		(ssizessizeobjargproc)0,       /* sq_ass_slice */
+		(objobjproc)0,                  /* sq_contains */
+		(binaryfunc)0,            /* sq_inplace_concat */
+		(ssizeargfunc)0,          /* sq_inplace_repeat */
+	};
+	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::set_sequence_get( const sequence_get_adapter_interface_ptr & _isequence )
 	{
 		m_sequence_get = _isequence;
@@ -976,6 +977,214 @@ namespace pybind
 		m_sequence_set = _isequence;
 
 		m_pytypeobject->tp_as_sequence = &py_as_sequence;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	static PyObject * py_nb_method( PyObject * _obj, PyObject * _value, const class_type_scope_ptr & _scope, const number_binary_adapter_interface_ptr & _adapter )
+	{
+		void * impl = pybind::detail::get_class_impl( _obj );
+
+		if( impl == nullptr )
+		{
+			pybind::error_message( "pybind: subscript unbind object" );
+
+			return nullptr;
+		}
+
+		try
+		{
+			DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( _scope->get_name(), _adapter->getName(), nullptr, nullptr );
+			PyObject * res = _adapter->call( impl, _scope, _value );
+			DEBUG_PYBIND_NOTIFY_END_BIND_CALL( _scope->get_name(), _adapter->getName(), nullptr, nullptr );
+
+			return res;
+		}
+		catch( const pybind_exception & _ex )
+		{
+			pybind::error_message( "obj %s py_nb_add invalid call '%s' error '%s'\n"
+				, pybind::object_str( _obj )
+				, _adapter->getName()
+				, _ex.what()
+				);
+		}
+
+		return nullptr;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	static PyObject * py_nb_add( PyObject * _obj, PyObject * _value )
+	{
+		PyTypeObject * objtype = Py_TYPE( _obj );
+
+		const class_type_scope_ptr & scope = detail::get_class_scope( objtype );
+
+		const number_binary_adapter_interface_ptr & adapter = scope->get_number_add_adapter();
+
+		PyObject * result = py_nb_method( _obj, _value, scope, adapter );
+
+		return result;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	static PyObject * py_nb_subtract( PyObject * _obj, PyObject * _value )
+	{
+		PyTypeObject * objtype = Py_TYPE( _obj );
+
+		const class_type_scope_ptr & scope = detail::get_class_scope( objtype );
+
+		const number_binary_adapter_interface_ptr & adapter = scope->get_number_sub_adapter();
+
+		PyObject * result = py_nb_method( _obj, _value, scope, adapter );
+
+		return result;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	static PyObject * py_nb_multiply( PyObject * _obj, PyObject * _value )
+	{
+		PyTypeObject * objtype = Py_TYPE( _obj );
+
+		const class_type_scope_ptr & scope = detail::get_class_scope( objtype );
+
+		const number_binary_adapter_interface_ptr & adapter = scope->get_number_mul_adapter();
+
+		PyObject * result = py_nb_method( _obj, _value, scope, adapter );
+
+		return result;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	static PyObject * py_nb_divide( PyObject * _obj, PyObject * _value )
+	{
+		PyTypeObject * objtype = Py_TYPE( _obj );
+
+		const class_type_scope_ptr & scope = detail::get_class_scope( objtype );
+
+		const number_binary_adapter_interface_ptr & adapter = scope->get_number_div_adapter();
+
+		PyObject * result = py_nb_method( _obj, _value, scope, adapter );
+
+		return result;
+	}
+	//////////////////////////////////////////////////////////////////////////
+#	if PYBIND_PYTHON_VERSION < 300
+	static PyNumberMethods py_as_number = {
+		(binaryfunc)py_nb_add,
+		(binaryfunc)py_nb_subtract,
+		(binaryfunc)py_nb_multiply,
+		(binaryfunc)py_nb_divide,
+		(binaryfunc)0, /*nb_remainder*/
+		(binaryfunc)0, /*nb_divmod*/
+		(ternaryfunc)0, /*nb_power*/
+		(unaryfunc)0, /*nb_negative*/
+		(unaryfunc)0, /*nb_positive*/
+		(unaryfunc)0, /*nb_absolute*/
+		(inquiry) 0, /*nb_nonzero*/
+		(unaryfunc)0, /*nb_invert*/
+		(binaryfunc)0, /*nb_lshift*/
+		(binaryfunc)0, /*nb_rshift*/
+		(binaryfunc)0, /*nb_and*/
+		(binaryfunc)0, /*nb_xor*/
+		(binaryfunc)0, /*nb_or*/
+		(coercion)0, /*nb_coerce*/
+		(unaryfunc)0, /*nb_int*/
+		(unaryfunc)0, /*nb_long*/
+		(unaryfunc)0, /*nb_float*/
+		(unaryfunc)0, /*nb_oct*/
+		(unaryfunc)0, /*nb_hex*/
+		/* Added in release 2.0 */
+		(binaryfunc)py_nb_add, /*nb_inplace_add*/
+		(binaryfunc)py_nb_subtract, /*nb_inplace_subtract*/
+		(binaryfunc)py_nb_multiply, /*nb_inplace_multiply*/
+		(binaryfunc)py_nb_divide, /*nb_inplace_divide*/
+		(binaryfunc)0, /*nb_inplace_remainder*/
+		(ternaryfunc)0, /*nb_inplace_power*/
+		(binaryfunc)0, /*nb_inplace_lshift*/
+		(binaryfunc)0, /*nb_inplace_rshift*/
+		(binaryfunc)0, /*nb_inplace_and*/
+		(binaryfunc)0, /*nb_inplace_xor*/
+		(binaryfunc)0, /*nb_inplace_or*/
+
+		/* Added in release 2.2 */
+		/* The following require the Py_TPFLAGS_HAVE_CLASS flag */
+		(binaryfunc)0, /*nb_floor_divide*/
+		(binaryfunc)0, /*nb_true_divide*/
+		(binaryfunc)0, /*nb_inplace_floor_divide*/
+		(binaryfunc) 0, /*nb_inplace_true_divide*/
+
+		/* Added in release 2.5 */
+		(unaryfunc) 0, /*nb_index*/
+	};
+#	else
+	static PyNumberMethods py_as_number = {
+		/* Number implementations must check *both*
+		arguments for proper type and implement the necessary conversions
+		in the slot functions themselves. */
+
+		(binaryfunc)py_nb_add,
+		(binaryfunc)py_nb_subtract,
+		(binaryfunc)py_nb_multiply,
+		(binaryfunc)py_nb_divide,
+		(binaryfunc)0, /*nb_divmod*/
+		(ternaryfunc)0, /*nb_power*/
+		(unaryfunc)0, /*nb_negative*/
+		(unaryfunc)0, /*nb_positive*/
+		(unaryfunc)0, /*nb_absolute*/
+		(inquiry)0, /*nb_bool*/
+		(unaryfunc)0, /*nb_invert*/
+		(binaryfunc)0, /*nb_lshift*/
+		(binaryfunc)0, /*nb_rshift*/
+		(binaryfunc)0, /*nb_and*/
+		(binaryfunc)0, /*nb_xor*/
+		(binaryfunc)0, /*nb_or*/
+		(unaryfunc)0, /*nb_int*/
+		0,
+		(unaryfunc)0, /*nb_float*/
+
+		(binaryfunc)py_nb_add, /*nb_inplace_add*/
+		(binaryfunc)py_nb_subtract, /*nb_inplace_subtract*/
+		(binaryfunc)py_nb_multiply, /*nb_inplace_multiply*/
+		(binaryfunc)py_nb_divide, /*nb_inplace_remainder*/
+		(ternaryfunc)0, /*nb_inplace_power*/
+		(binaryfunc)0, /*nb_inplace_lshift*/
+		(binaryfunc)0, /*nb_inplace_rshift*/
+		(binaryfunc)0, /*nb_inplace_and*/
+		(binaryfunc)0, /*nb_inplace_xor*/
+		(binaryfunc)0, /*nb_inplace_or*/
+
+		(binaryfunc)0, /*nb_floor_divide*/
+		(binaryfunc)0, /*nb_true_divide*/
+		(binaryfunc)0, /*nb_inplace_floor_divide*/
+		(binaryfunc)0, /*nb_inplace_true_divide*/
+
+		(unaryfunc)0, /*nb_index*/
+
+		(binaryfunc)0, /*nb_matrix_multiply*/
+		(binaryfunc)0, /*nb_inplace_matrix_multiply*/
+	};
+#	endif
+	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::set_number_add( const number_binary_adapter_interface_ptr & _iadapter )
+	{ 
+		m_number_add = _iadapter;
+
+		m_pytypeobject->tp_as_number = &py_as_number;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::set_number_sub( const number_binary_adapter_interface_ptr & _iadapter )
+	{ 
+		m_number_sub = _iadapter;
+
+		m_pytypeobject->tp_as_number = &py_as_number;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::set_number_mul( const number_binary_adapter_interface_ptr & _iadapter )
+	{ 
+		m_number_mul = _iadapter;
+
+		m_pytypeobject->tp_as_number = &py_as_number;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::set_number_div( const number_binary_adapter_interface_ptr & _iadapter )
+	{ 
+		m_number_div = _iadapter;
+
+		m_pytypeobject->tp_as_number = &py_as_number;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void * class_type_scope::construct( PyObject * _obj, PyObject * _args )

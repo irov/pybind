@@ -48,10 +48,7 @@ namespace pybind
 	public:
 		PyObject * get( void * _self, const class_type_scope_ptr & _scope ) override
 		{
-			uint32_t class_id = detail::class_info<C*>();
-			uint32_t scope_id = detail::class_info<C>();
-
-			C * obj = detail::meta_cast_scope_t<C *>( _self, scope_id, class_id, _scope );
+			C * obj = detail::meta_cast_class_t<C>( _self, _scope );
 
 			PyObject * py_value = pybind::ptr_throw( obj->*m_member );
 
@@ -60,10 +57,7 @@ namespace pybind
 
 		int set( void * _self, PyObject * _args, const class_type_scope_ptr & _scope ) override
 		{
-			uint32_t class_id = detail::class_info<C*>();
-			uint32_t scope_id = detail::class_info<C>();
-
-			C * obj = detail::meta_cast_scope_t<C *>( _self, scope_id, class_id, _scope );
+			C * obj = detail::meta_cast_class_t<C>( _self, _scope );
 
 			obj->*m_member = pybind::extract_throw<A>( _args );
 
@@ -89,10 +83,7 @@ namespace pybind
 	public:
 		PyObject * get( void * _self, const class_type_scope_ptr & _scope ) override
 		{
-			uint32_t class_id = detail::class_info<C*>();
-			uint32_t scope_id = detail::class_info<C>();
-
-			C * obj = detail::meta_cast_scope_t<C *>( _self, scope_id, class_id, _scope );
+			C * obj = detail::meta_cast_class_t<C>( _self, _scope );
 			
 			PyObject * py_value = (detail::return_operator_t)(obj->*m_get)();
 
@@ -101,10 +92,7 @@ namespace pybind
 
 		int set( void * _self, PyObject * _args, const class_type_scope_ptr & _scope ) override
 		{
-			uint32_t class_id = detail::class_info<C*>();
-			uint32_t scope_id = detail::class_info<C>();
-
-			C * obj = detail::meta_cast_scope_t<C *>( _self, scope_id, class_id, _scope );
+			C * obj = detail::meta_cast_class_t<C>( _self, _scope );
 							
 			(obj->*m_set)(
 				detail::extract_operator_t( _args )
@@ -133,10 +121,7 @@ namespace pybind
 	public:
 		PyObject * get( void * _self, const class_type_scope_ptr & _scope ) override
 		{
-			uint32_t class_id = detail::class_info<C*>();
-			uint32_t scope_id = detail::class_info<C>();
-
-			C * obj = detail::meta_cast_scope_t<C *>( _self, scope_id, class_id, _scope );
+			C * obj = detail::meta_cast_class_t<C>( _self, _scope );
 
 			PyObject * py_value = (detail::return_operator_t)(*m_get)(obj);
 
@@ -145,10 +130,7 @@ namespace pybind
 
 		int set( void * _self, PyObject * _args, const class_type_scope_ptr & _scope ) override
 		{
-			uint32_t class_id = detail::class_info<C*>();
-			uint32_t scope_id = detail::class_info<C>();
-
-			C * obj = detail::meta_cast_scope_t<C *>( _self, scope_id, class_id, _scope );
+			C * obj = detail::meta_cast_class_t<C>( _self, _scope );
 						
 			(*m_set)( obj
 				, detail::extract_operator_t( _args )

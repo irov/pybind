@@ -33,10 +33,7 @@ namespace pybind
 	public:
 		PyObject * repr( void * _self, const class_type_scope_ptr & _scope ) override
 		{
-			uint32_t class_name = detail::class_info<C*>();
-			uint32_t scope_name = detail::class_info<C>();
-
-			C * c = detail::meta_cast_scope_t<C *>( _self, scope_name, class_name, _scope );
+			C * c = detail::meta_cast_class_t<C>( _self, _scope );
 
 			PyObject * py_result = (detail::return_operator_t)(*m_repr)(c);
 
