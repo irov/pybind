@@ -997,7 +997,7 @@ namespace pybind
 		return res;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	static PyObject * py_nb_add( PyObject * _obj, PyObject * _value )
+	static PyObject * py_nb_add_2( PyObject * _obj, PyObject * _value )
 	{
 		PyTypeObject * objtype = Py_TYPE( _obj );
 
@@ -1043,7 +1043,17 @@ namespace pybind
 		return nullptr;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	static PyObject * py_nb_subtract( PyObject * _obj, PyObject * _value )
+	static PyObject * py_nb_add( PyObject * _obj, PyObject * _value )
+	{
+		if( detail::is_class( _obj ) == true )
+		{
+			return py_nb_add_2( _obj, _value );
+		}
+		
+		return py_nb_add_2( _value, _obj );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	static PyObject * py_nb_subtract_2( PyObject * _obj, PyObject * _value )
 	{
 		PyTypeObject * objtype = Py_TYPE( _obj );
 
@@ -1089,7 +1099,17 @@ namespace pybind
 		return nullptr;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	static PyObject * py_nb_multiply( PyObject * _obj, PyObject * _value )
+	static PyObject * py_nb_subtract( PyObject * _obj, PyObject * _value )
+	{
+		if( detail::is_class( _obj ) == true )
+		{
+			return py_nb_subtract_2( _obj, _value );
+		}
+
+		return py_nb_subtract_2( _value, _obj );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	static PyObject * py_nb_multiply_2( PyObject * _obj, PyObject * _value )
 	{
 		PyTypeObject * objtype = Py_TYPE( _obj );
 
@@ -1138,7 +1158,17 @@ namespace pybind
 		return nullptr;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	static PyObject * py_nb_divide( PyObject * _obj, PyObject * _value )
+	static PyObject * py_nb_multiply( PyObject * _obj, PyObject * _value )
+	{
+		if( detail::is_class( _obj ) == true )
+		{
+			return py_nb_multiply_2( _obj, _value );
+		}
+
+		return py_nb_multiply_2( _value, _obj );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	static PyObject * py_nb_divide_2( PyObject * _obj, PyObject * _value )
 	{
 		PyTypeObject * objtype = Py_TYPE( _obj );
 
@@ -1182,6 +1212,16 @@ namespace pybind
 		}
 
 		return nullptr;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	static PyObject * py_nb_divide( PyObject * _obj, PyObject * _value )
+	{
+		if( detail::is_class( _obj ) == true )
+		{
+			return py_nb_divide_2( _obj, _value );
+		}
+
+		return py_nb_divide_2( _value, _obj );
 	}
 	//////////////////////////////////////////////////////////////////////////
 #	if PYBIND_PYTHON_VERSION < 300
