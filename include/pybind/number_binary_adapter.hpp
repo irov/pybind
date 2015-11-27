@@ -117,5 +117,113 @@ namespace pybind
 	protected:
 		F m_fn;
 	};
+	//////////////////////////////////////////////////////////////////////////
+	template<class C, class V>
+	class number_binary_adapter_operator_add
+		: public number_binary_adapter_interface
+	{
+	public:
+		number_binary_adapter_operator_add( const char * _name )
+			: number_binary_adapter_interface( _name )
+		{
+		}
+
+	protected:
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _value ) override
+		{
+			C * self = detail::meta_cast_class_t<C>( _impl, _scope );
+
+			V value;
+			if( pybind::extract_value( _value, value, true ) == false )
+			{
+				return nullptr;
+			}
+
+			PyObject * py_result = (detail::return_operator_t)(*self + value);
+
+			return py_result;
+		}
+	};
+	//////////////////////////////////////////////////////////////////////////
+	template<class C, class V>
+	class number_binary_adapter_operator_sub
+		: public number_binary_adapter_interface
+	{
+	public:
+		number_binary_adapter_operator_sub( const char * _name )
+			: number_binary_adapter_interface( _name )
+		{
+		}
+
+	protected:
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _value ) override
+		{
+			C * self = detail::meta_cast_class_t<C>( _impl, _scope );
+
+			V value;
+			if( pybind::extract_value( _value, value, true ) == false )
+			{
+				return nullptr;
+			}
+
+			PyObject * py_result = (detail::return_operator_t)(*self - value);
+
+			return py_result;
+		}
+	};
+	//////////////////////////////////////////////////////////////////////////
+	template<class C, class V>
+	class number_binary_adapter_operator_mul
+		: public number_binary_adapter_interface
+	{
+	public:
+		number_binary_adapter_operator_mul( const char * _name )
+			: number_binary_adapter_interface( _name )
+		{
+		}
+
+	protected:
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _value ) override
+		{
+			C * self = detail::meta_cast_class_t<C>( _impl, _scope );
+
+			V value;
+			if( pybind::extract_value( _value, value, true ) == false )
+			{
+				return nullptr;
+			}
+
+			PyObject * py_result = (detail::return_operator_t)(*self * value);
+
+			return py_result;
+		}
+	};
+	//////////////////////////////////////////////////////////////////////////
+	template<class C, class V>
+	class number_binary_adapter_operator_div
+		: public number_binary_adapter_interface
+	{
+	public:
+		number_binary_adapter_operator_div( const char * _name )
+			: number_binary_adapter_interface( _name )
+		{
+		}
+
+	protected:
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _value ) override
+		{
+			C * self = detail::meta_cast_class_t<C>( _impl, _scope );
+
+			V value;
+			if( pybind::extract_value( _value, value, true ) == false )
+			{
+				return nullptr;
+			}
+
+			PyObject * py_result = (detail::return_operator_t)(*self / value);
+
+			return py_result;
+		}
+	};
 }
 

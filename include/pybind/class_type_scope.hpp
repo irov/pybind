@@ -101,7 +101,11 @@ namespace pybind
 		void set_number_sub( const number_binary_adapter_interface_ptr & _iadapter );
 		void set_number_mul( const number_binary_adapter_interface_ptr & _iadapter );
 		void set_number_div( const number_binary_adapter_interface_ptr & _iadapter );
-        
+		void add_number_add( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter );
+		void add_number_sub( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter );
+		void add_number_mul( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter );
+		void add_number_div( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter );
+
 
 		PyObject * create_class( void * _impl );
 		PyObject * create_holder( void * _impl );
@@ -124,11 +128,17 @@ namespace pybind
 		inline const getattro_adapter_interface_ptr & get_getattro_adapter() const;
 		inline const mapping_adapter_interface_ptr & get_mapping_adapter() const;
 		inline const sequence_get_adapter_interface_ptr & get_sequence_get_adapter() const;
-		inline const sequence_set_adapter_interface_ptr & get_sequence_set_adapter() const;		
+		inline const sequence_set_adapter_interface_ptr & get_sequence_set_adapter() const;
+
 		inline const number_binary_adapter_interface_ptr & get_number_add_adapter() const;
 		inline const number_binary_adapter_interface_ptr & get_number_sub_adapter() const;
 		inline const number_binary_adapter_interface_ptr & get_number_mul_adapter() const;
 		inline const number_binary_adapter_interface_ptr & get_number_div_adapter() const;
+
+		inline const number_binary_adapter_interface_ptr & get_number_add_adapters( uint32_t _typeId ) const;
+		inline const number_binary_adapter_interface_ptr & get_number_sub_adapters( uint32_t _typeId ) const;
+		inline const number_binary_adapter_interface_ptr & get_number_mul_adapters( uint32_t _typeId ) const;
+		inline const number_binary_adapter_interface_ptr & get_number_div_adapters( uint32_t _typeId ) const;
 		
     public:
         void addObject( PyObject * _obj );
@@ -172,11 +182,17 @@ namespace pybind
 		getattro_adapter_interface_ptr m_getattro;
 		mapping_adapter_interface_ptr m_mapping;
 		sequence_get_adapter_interface_ptr m_sequence_get;
-		sequence_set_adapter_interface_ptr m_sequence_set;		
+		sequence_set_adapter_interface_ptr m_sequence_set;
+
 		number_binary_adapter_interface_ptr m_number_add;
 		number_binary_adapter_interface_ptr m_number_sub;
 		number_binary_adapter_interface_ptr m_number_mul;
 		number_binary_adapter_interface_ptr m_number_div;
+				
+		number_binary_adapter_interface_ptr m_number_adds[PYBIND_TYPE_COUNT];
+		number_binary_adapter_interface_ptr m_number_subs[PYBIND_TYPE_COUNT];
+		number_binary_adapter_interface_ptr m_number_muls[PYBIND_TYPE_COUNT];
+		number_binary_adapter_interface_ptr m_number_divs[PYBIND_TYPE_COUNT];
 
 		PyTypeObject * m_pytypeobject;
 
@@ -263,6 +279,26 @@ namespace pybind
 	inline const number_binary_adapter_interface_ptr & class_type_scope::get_number_div_adapter() const
 	{
 		return m_number_div;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	inline const number_binary_adapter_interface_ptr & class_type_scope::get_number_add_adapters( uint32_t _typeId ) const
+	{
+		return m_number_adds[_typeId];
+	}
+	//////////////////////////////////////////////////////////////////////////
+	inline const number_binary_adapter_interface_ptr & class_type_scope::get_number_sub_adapters( uint32_t _typeId ) const
+	{
+		return m_number_subs[_typeId];
+	}
+	//////////////////////////////////////////////////////////////////////////
+	inline const number_binary_adapter_interface_ptr & class_type_scope::get_number_mul_adapters( uint32_t _typeId ) const
+	{
+		return m_number_muls[_typeId];
+	}
+	//////////////////////////////////////////////////////////////////////////
+	inline const number_binary_adapter_interface_ptr & class_type_scope::get_number_div_adapters( uint32_t _typeId ) const
+	{
+		return m_number_divs[_typeId];
 	}
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<class_type_scope> class_type_scope_ptr;

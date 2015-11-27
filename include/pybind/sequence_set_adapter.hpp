@@ -151,5 +151,24 @@ namespace pybind
 	protected:
 		F m_fn;
 	};
+	//////////////////////////////////////////////////////////////////////////
+	template<class C>
+	class sequence_set_adapter_operator
+		: public sequence_set_adapter_interface
+	{
+	public:
+		sequence_set_adapter_operator( const char * _name )
+			: sequence_set_adapter_interface( _name )
+		{
+		}
+
+	protected:
+		void call( void * _impl, const class_type_scope_ptr & _scope, size_t _index, PyObject * _value ) override
+		{
+			C * self = detail::meta_cast_class_t<C>( _impl, _scope );
+
+			self->operator [] ( _index ) = detail::extract_operator_t( _value );
+		}
+	};
 }
 

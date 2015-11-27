@@ -303,6 +303,21 @@ namespace pybind
 
 			return *this;
 		}
+				
+		base_ & def_operator_getset()
+		{
+			sequence_set_adapter_interface_ptr iadapter_set =
+				new sequence_set_adapter_operator<C>( "operator_set" );
+
+			m_scope->set_sequence_set( iadapter_set );
+
+			sequence_get_adapter_interface_ptr iadapter_get =
+				new sequence_get_adapter_operator<C>( "operator_get" );
+
+			m_scope->set_sequence_get( iadapter_get );
+
+			return *this;
+		}
 
 		template<class F>
 		base_ & def_add( F _fn )
@@ -337,6 +352,29 @@ namespace pybind
 			return *this;
 		}
 
+		template<class V>
+		base_ & def_operator_add_t()
+		{
+			number_binary_adapter_interface_ptr iadapter =
+				new number_binary_adapter_operator_add<C, V>( "operator_add" );
+
+			uint32_t typeId = detail::class_info<V>();
+
+			m_scope->add_number_add( typeId, iadapter );
+
+			return *this;
+		}
+
+		base_ & def_operator_add()
+		{
+			number_binary_adapter_interface_ptr iadapter =
+				new number_binary_adapter_operator_add<C, C>( "operator_add" );
+
+			m_scope->set_number_add( iadapter );
+
+			return *this;
+		}
+
 		template<class F>
 		base_ & def_sub( F _fn )
 		{
@@ -353,6 +391,29 @@ namespace pybind
 		{
 			number_binary_adapter_interface_ptr iadapter =
 				new number_binary_adapter_proxy_function<C, F>( "static_sub", _fn );
+
+			m_scope->set_number_sub( iadapter );
+
+			return *this;
+		}
+
+		template<class V>
+		base_ & def_operator_sub_t()
+		{
+			number_binary_adapter_interface_ptr iadapter =
+				new number_binary_adapter_operator_sub<C, V>( "operator_sub" );
+
+			uint32_t typeId = detail::class_info<V>();
+
+			m_scope->add_number_sub( typeId, iadapter );
+
+			return *this;
+		}
+
+		base_ & def_operator_sub()
+		{
+			number_binary_adapter_interface_ptr iadapter =
+				new number_binary_adapter_operator_sub<C, C>( "operator_sub" );
 
 			m_scope->set_number_sub( iadapter );
 
@@ -403,6 +464,29 @@ namespace pybind
 			return *this;
 		}
 
+		template<class V>
+		base_ & def_operator_mul_t()
+		{
+			number_binary_adapter_interface_ptr iadapter =
+				new number_binary_adapter_operator_mul<C, V>( "operator_mul" );
+
+			uint32_t typeId = detail::class_info<V>();
+
+			m_scope->add_number_mul( typeId, iadapter );
+
+			return *this;
+		}
+
+		base_ & def_operator_mul()
+		{
+			number_binary_adapter_interface_ptr iadapter =
+				new number_binary_adapter_operator_mul<C, C>( "operator_mul" );
+
+			m_scope->set_number_mul( iadapter );
+
+			return *this;
+		}
+
 		template<class F>
 		base_ & def_div( F _fn )
 		{
@@ -430,6 +514,29 @@ namespace pybind
 		{
 			number_binary_adapter_interface_ptr iadapter =
 				new number_binary_adapter_proxy<C, P, F>( "proxy_static_div", f, _proxy );
+
+			m_scope->set_number_div( iadapter );
+
+			return *this;
+		}
+
+		template<class V>
+		base_ & def_operator_div_t()
+		{
+			number_binary_adapter_interface_ptr iadapter =
+				new number_binary_adapter_operator_div<C, V>( "operator_div" );
+
+			uint32_t typeId = detail::class_info<V>();
+
+			m_scope->add_number_div( typeId, iadapter );
+
+			return *this;
+		}
+
+		base_ & def_operator_div()
+		{
+			number_binary_adapter_interface_ptr iadapter =
+				new number_binary_adapter_operator_div<C, C>( "operator_div" );
 
 			m_scope->set_number_div( iadapter );
 
@@ -506,7 +613,7 @@ namespace pybind
 	struct extract_class_type_ptr
 		: public type_cast_result<C *>
 	{
-		bool apply( PyObject * _obj, typename type_cast_result<C *>::TCastValue _value ) override
+		bool apply( PyObject * _obj, typename type_cast_result<C *>::TCastValue _value, bool _nothrow ) override
 		{
 			if( pybind::is_none( _obj ) == true )
 			{
@@ -521,7 +628,10 @@ namespace pybind
 			void * impl;
 			if( this->type_info_cast( _obj, tinfo, tptrinfo, &impl ) == false )
 			{
-				detail::error_invalid_extract( _obj, tinfo );
+				if( _nothrow == false )
+				{
+					detail::error_invalid_extract( _obj, tinfo );
+				}
 
 				_value = nullptr;
 
@@ -552,7 +662,7 @@ namespace pybind
 	struct extract_holder_type_ptr
 		: public type_cast_result<C *>
 	{
-		bool apply( PyObject * _obj, typename type_cast_result<C *>::TCastValue _value ) override
+		bool apply( PyObject * _obj, typename type_cast_result<C *>::TCastValue _value, bool _nothrow ) override
 		{
 			if( pybind::is_none( _obj ) == true )
 			{
@@ -567,7 +677,10 @@ namespace pybind
 			void * impl;
 			if( type_cast::type_info_cast( _obj, tinfo, tptrinfo, &impl ) == false )
 			{
-				detail::error_invalid_extract( _obj, tinfo );
+				if( _nothrow == false )
+				{
+					detail::error_invalid_extract( _obj, tinfo );
+				}
 
 				_value = nullptr;
 
@@ -598,7 +711,7 @@ namespace pybind
 	struct extract_struct_type_ref
 		: public type_cast_result<C>
 	{
-		bool apply( PyObject * _obj, typename type_cast_result<C>::TCastValue _value ) override
+		bool apply( PyObject * _obj, typename type_cast_result<C>::TCastValue _value, bool _nothrow ) override
 		{
 			uint32_t tinfo = detail::class_info<C>();
 			uint32_t tptrinfo = detail::class_info<C *>();
@@ -612,14 +725,20 @@ namespace pybind
 
 				if( convert == nullptr )
 				{
-					detail::error_invalid_extract( _obj, tinfo );
+					if( _nothrow == false )
+					{
+						detail::error_invalid_extract( _obj, tinfo );
+					}
 
 					return false;
 				}
 
 				if( convert->convert( _obj, &_value ) == false )
 				{
-					detail::error_invalid_extract( _obj, tinfo );
+					if( _nothrow == false )
+					{
+						detail::error_invalid_extract( _obj, tinfo );
+					}
 
 					return false;
 				}

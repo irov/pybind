@@ -989,25 +989,12 @@ namespace pybind
 
 			return nullptr;
 		}
+		
+		DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( _scope->get_name(), _adapter->getName(), nullptr, nullptr );
+		PyObject * res = _adapter->call( impl, _scope, _value );
+		DEBUG_PYBIND_NOTIFY_END_BIND_CALL( _scope->get_name(), _adapter->getName(), nullptr, nullptr );
 
-		try
-		{
-			DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( _scope->get_name(), _adapter->getName(), nullptr, nullptr );
-			PyObject * res = _adapter->call( impl, _scope, _value );
-			DEBUG_PYBIND_NOTIFY_END_BIND_CALL( _scope->get_name(), _adapter->getName(), nullptr, nullptr );
-
-			return res;
-		}
-		catch( const pybind_exception & _ex )
-		{
-			pybind::error_message( "obj %s py_nb_add invalid call '%s' error '%s'\n"
-				, pybind::object_str( _obj )
-				, _adapter->getName()
-				, _ex.what()
-				);
-		}
-
-		return nullptr;
+		return res;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	static PyObject * py_nb_add( PyObject * _obj, PyObject * _value )
@@ -1018,9 +1005,42 @@ namespace pybind
 
 		const number_binary_adapter_interface_ptr & adapter = scope->get_number_add_adapter();
 
-		PyObject * result = py_nb_method( _obj, _value, scope, adapter );
+		if( adapter != nullptr )
+		{
+			try
+			{
+				PyObject * result = py_nb_method( _obj, _value, scope, adapter );
 
-		return result;
+				return result;
+			}
+			catch( const pybind_exception & )
+			{
+			}
+		}
+
+		uint32_t type_id = detail::get_object_type_id( _value );
+
+		if( type_id == 0 )
+		{
+			return nullptr;
+		}
+
+		const number_binary_adapter_interface_ptr & adapters = scope->get_number_add_adapters( type_id );
+
+		if( adapters != nullptr )
+		{
+			try
+			{
+				PyObject * result = py_nb_method( _obj, _value, scope, adapters );
+
+				return result;
+			}
+			catch( const pybind_exception & )
+			{
+			}
+		}
+
+		return nullptr;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	static PyObject * py_nb_subtract( PyObject * _obj, PyObject * _value )
@@ -1031,9 +1051,42 @@ namespace pybind
 
 		const number_binary_adapter_interface_ptr & adapter = scope->get_number_sub_adapter();
 
-		PyObject * result = py_nb_method( _obj, _value, scope, adapter );
+		if( adapter != nullptr )
+		{
+			try
+			{
+				PyObject * result = py_nb_method( _obj, _value, scope, adapter );
 
-		return result;
+				return result;
+			}
+			catch( const pybind_exception & )
+			{
+			}
+		}
+
+		uint32_t type_id = detail::get_object_type_id( _value );
+
+		if( type_id == 0 )
+		{
+			return nullptr;
+		}
+
+		const number_binary_adapter_interface_ptr & adapters = scope->get_number_sub_adapters( type_id );
+
+		if( adapters != nullptr )
+		{
+			try
+			{
+				PyObject * result = py_nb_method( _obj, _value, scope, adapters );
+
+				return result;
+			}
+			catch( const pybind_exception & )
+			{
+			}
+		}
+
+		return nullptr;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	static PyObject * py_nb_multiply( PyObject * _obj, PyObject * _value )
@@ -1044,9 +1097,45 @@ namespace pybind
 
 		const number_binary_adapter_interface_ptr & adapter = scope->get_number_mul_adapter();
 
-		PyObject * result = py_nb_method( _obj, _value, scope, adapter );
+		if( adapter != nullptr )
+		{
+			try
+			{
+				PyObject * result = py_nb_method( _obj, _value, scope, adapter );
 
-		return result;
+				if( result != nullptr )
+				{
+					return result;
+				}
+			}
+			catch( const pybind_exception & )
+			{
+			}
+		}
+
+		uint32_t type_id = detail::get_object_type_id( _value );
+
+		if( type_id == 0 )
+		{
+			return nullptr;
+		}
+
+		const number_binary_adapter_interface_ptr & adapters = scope->get_number_mul_adapters( type_id );
+
+		if( adapters != nullptr )
+		{
+			try
+			{
+				PyObject * result = py_nb_method( _obj, _value, scope, adapters );
+
+				return result;
+			}
+			catch( const pybind_exception & )
+			{
+			}
+		}
+
+		return nullptr;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	static PyObject * py_nb_divide( PyObject * _obj, PyObject * _value )
@@ -1057,9 +1146,42 @@ namespace pybind
 
 		const number_binary_adapter_interface_ptr & adapter = scope->get_number_div_adapter();
 
-		PyObject * result = py_nb_method( _obj, _value, scope, adapter );
+		if( adapter != nullptr )
+		{
+			try
+			{
+				PyObject * result = py_nb_method( _obj, _value, scope, adapter );
 
-		return result;
+				return result;
+			}
+			catch( const pybind_exception & )
+			{
+			}
+		}
+
+		uint32_t type_id = detail::get_object_type_id( _value );
+
+		if( type_id == 0 )
+		{
+			return nullptr;
+		}
+
+		const number_binary_adapter_interface_ptr & adapters = scope->get_number_div_adapters( type_id );
+
+		if( adapters != nullptr )
+		{
+			try
+			{
+				PyObject * result = py_nb_method( _obj, _value, scope, adapters );
+
+				return result;
+			}
+			catch( const pybind_exception & )
+			{
+			}
+		}
+
+		return nullptr;
 	}
 	//////////////////////////////////////////////////////////////////////////
 #	if PYBIND_PYTHON_VERSION < 300
@@ -1160,29 +1282,57 @@ namespace pybind
 #	endif
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::set_number_add( const number_binary_adapter_interface_ptr & _iadapter )
-	{ 
+	{
 		m_number_add = _iadapter;
 
 		m_pytypeobject->tp_as_number = &py_as_number;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::set_number_sub( const number_binary_adapter_interface_ptr & _iadapter )
-	{ 
+	{
 		m_number_sub = _iadapter;
 
 		m_pytypeobject->tp_as_number = &py_as_number;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::set_number_mul( const number_binary_adapter_interface_ptr & _iadapter )
-	{ 
+	{
 		m_number_mul = _iadapter;
 
 		m_pytypeobject->tp_as_number = &py_as_number;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::set_number_div( const number_binary_adapter_interface_ptr & _iadapter )
-	{ 
+	{
 		m_number_div = _iadapter;
+
+		m_pytypeobject->tp_as_number = &py_as_number;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::add_number_add( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
+	{ 
+		m_number_adds[_typeId] = _iadapter;
+
+		m_pytypeobject->tp_as_number = &py_as_number;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::add_number_sub( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
+	{ 
+		m_number_subs[_typeId] = _iadapter;
+
+		m_pytypeobject->tp_as_number = &py_as_number;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::add_number_mul( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
+	{ 
+		m_number_muls[_typeId] = _iadapter;
+
+		m_pytypeobject->tp_as_number = &py_as_number;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::add_number_div( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
+	{ 
+		m_number_divs[_typeId] = _iadapter;
 
 		m_pytypeobject->tp_as_number = &py_as_number;
 	}

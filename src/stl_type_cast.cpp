@@ -15,8 +15,10 @@ namespace pybind
 			: public pybind::type_cast_result<std::string>
 		{
 		public:
-			bool apply( PyObject * _obj, std::string & _value ) override
+			bool apply( PyObject * _obj, std::string & _value, bool _nothrow ) override
 			{
+				(void)_nothrow;
+
 				if( pybind::string_check( _obj ) == true )
 				{
 					size_t size;
@@ -50,8 +52,10 @@ namespace pybind
 			: public pybind::type_cast_result<std::wstring>
 		{
 		public:
-			bool apply( PyObject * _obj, std::wstring & _value ) override
+			bool apply( PyObject * _obj, std::wstring & _value, bool _nothrow ) override
 			{
+				(void)_nothrow;
+
 				if( pybind::unicode_check( _obj ) == true )
 				{
 					size_t size = 0;
@@ -85,8 +89,10 @@ namespace pybind
 			: public pybind::type_cast_result<stdex::string>
 		{
 		public:
-			bool apply( PyObject * _obj, stdex::string & _value ) override
+			bool apply( PyObject * _obj, stdex::string & _value, bool _nothrow ) override
 			{
+				(void)_nothrow;
+
 				if( pybind::string_check( _obj ) == true )
 				{
 					size_t size;
@@ -120,8 +126,10 @@ namespace pybind
 			: public pybind::type_cast_result<stdex::wstring>
 		{
 		public:
-			bool apply( PyObject * _obj, stdex::wstring & _value ) override
+			bool apply( PyObject * _obj, stdex::wstring & _value, bool _nothrow ) override
 			{
+				(void)_nothrow;
+
 				if( pybind::unicode_check( _obj ) == true )
 				{
 					size_t size = 0;

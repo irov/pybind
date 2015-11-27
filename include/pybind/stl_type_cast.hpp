@@ -15,8 +15,10 @@ namespace pybind
 	{
 		typedef typename pybind::type_cast_result<V>::TCastRef TCastRef;
 
-		bool apply( PyObject * _obj, V & _vector ) override
+		bool apply( PyObject * _obj, V & _vector, bool _nothrow ) override
 		{
+			(void)_nothrow;
+
 			if( pybind::tuple_check( _obj ) == true )
 			{
 				size_t size = pybind::tuple_size( _obj );
@@ -65,8 +67,10 @@ namespace pybind
 	{
 		typedef typename pybind::type_cast_result<M>::TCastRef TCastRef;
 
-		bool apply( PyObject * _obj, M & _map ) override
+		bool apply( PyObject * _obj, M & _map, bool _nothrow ) override
 		{
+			(void)_nothrow;
+
 			if( pybind::dict_check( _obj ) == true )
 			{
 				size_t dict_pos = 0;

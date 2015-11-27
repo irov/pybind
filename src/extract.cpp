@@ -13,7 +13,7 @@
 namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, bool & _value )
+	bool extract_value( PyObject * _obj, bool & _value, bool _nothrow )
 	{
 		if( _obj == nullptr )
 		{
@@ -46,7 +46,7 @@ namespace pybind
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, int8_t & _value )
+	bool extract_value( PyObject * _obj, int8_t & _value, bool _nothrow )
 	{
 		if( _obj == nullptr )
 		{
@@ -76,7 +76,7 @@ namespace pybind
 			return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, int16_t & _value )
+	bool extract_value( PyObject * _obj, int16_t & _value, bool _nothrow )
 	{
 		if( _obj == nullptr )
 		{
@@ -106,7 +106,7 @@ namespace pybind
 			return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, int32_t & _value )
+	bool extract_value( PyObject * _obj, int32_t & _value, bool _nothrow )
 	{
 		if( _obj == nullptr )
 		{
@@ -136,7 +136,7 @@ namespace pybind
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, int64_t & _value )
+	bool extract_value( PyObject * _obj, int64_t & _value, bool _nothrow )
 	{
 		if( _obj == nullptr )
 		{
@@ -166,7 +166,7 @@ namespace pybind
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, uint8_t & _value )
+	bool extract_value( PyObject * _obj, uint8_t & _value, bool _nothrow )
 	{
 		if( _obj == nullptr )
 		{
@@ -196,7 +196,7 @@ namespace pybind
 			return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, uint16_t & _value )
+	bool extract_value( PyObject * _obj, uint16_t & _value, bool _nothrow )
 	{
 		if( _obj == nullptr )
 		{
@@ -226,7 +226,7 @@ namespace pybind
 			return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, uint32_t & _value )
+	bool extract_value( PyObject * _obj, uint32_t & _value, bool _nothrow )
 	{
 		if( _obj == nullptr )
 		{
@@ -256,7 +256,7 @@ namespace pybind
 		return true;
 	}
     //////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, uint64_t & _value )
+	bool extract_value( PyObject * _obj, uint64_t & _value, bool _nothrow )
 	{
 		if( _obj == nullptr )
 		{
@@ -286,7 +286,7 @@ namespace pybind
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, wchar_t & _value )
+	bool extract_value( PyObject * _obj, wchar_t & _value, bool _nothrow )
 	{
 		if( _obj == nullptr )
 		{
@@ -318,7 +318,7 @@ namespace pybind
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, long & _value )
+	bool extract_value( PyObject * _obj, long & _value, bool _nothrow )
 	{
 		if( _obj == nullptr )
 		{
@@ -348,7 +348,7 @@ namespace pybind
 			return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, unsigned long & _value )
+	bool extract_value( PyObject * _obj, unsigned long & _value, bool _nothrow )
 	{
 		if( _obj == nullptr )
 		{
@@ -378,7 +378,7 @@ namespace pybind
 			return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, float & _value )
+	bool extract_value( PyObject * _obj, float & _value, bool _nothrow )
 	{
 		if( _obj == nullptr )
 		{
@@ -407,7 +407,7 @@ namespace pybind
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, double & _value )
+	bool extract_value( PyObject * _obj, double & _value, bool _nothrow )
 	{
 		if( _obj == nullptr )
 		{
@@ -436,7 +436,7 @@ namespace pybind
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, const char *& _value )
+	bool extract_value( PyObject * _obj, const char *& _value, bool _nothrow )
 	{
 		if( _obj == nullptr )
 		{
@@ -462,7 +462,7 @@ namespace pybind
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, const wchar_t *& _value )
+	bool extract_value( PyObject * _obj, const wchar_t *& _value, bool _nothrow )
 	{
 		if( _obj == nullptr )
 		{
@@ -488,7 +488,7 @@ namespace pybind
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, PyObject *& _value )
+	bool extract_value( PyObject * _obj, PyObject *& _value, bool _nothrow )
 	{
 		if( _obj == nullptr )
 		{
@@ -500,7 +500,7 @@ namespace pybind
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, pybind::object & _value )
+	bool extract_value( PyObject * _obj, pybind::object & _value, bool _nothrow )
 	{
 		if( _obj == nullptr )
 		{
@@ -512,7 +512,7 @@ namespace pybind
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, pybind::list & _value )
+	bool extract_value( PyObject * _obj, pybind::list & _value, bool _nothrow )
 	{
 		if( _obj == nullptr )
 		{
@@ -529,7 +529,7 @@ namespace pybind
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, pybind::tuple & _value )
+	bool extract_value( PyObject * _obj, pybind::tuple & _value, bool _nothrow )
 	{
 		if( _obj == nullptr )
 		{
@@ -546,7 +546,7 @@ namespace pybind
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, pybind::dict & _value )
+	bool extract_value( PyObject * _obj, pybind::dict & _value, bool _nothrow )
 	{
 		if( _obj == nullptr )
 		{

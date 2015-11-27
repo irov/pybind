@@ -157,6 +157,6 @@ namespace pybind
 
 	public:
         virtual PyObject * wrap( TCastRef t ) = 0;
-		virtual bool apply( PyObject * _obj, TCastValue _value ) = 0;
+		virtual bool apply( PyObject * _obj, TCastValue _value, bool _nothrow ) = 0;
 	};
 }

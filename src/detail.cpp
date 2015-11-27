@@ -87,7 +87,7 @@ namespace pybind
 			return id;
 		}
 		//////////////////////////////////////////////////////////////////////////
-		const class_info_desc_t * find_class_info_desc_name( const char * _name )
+		uint32_t find_class_info_desc_name( const char * _name )
 		{
 			detail_scope & k = get_scope();
 
@@ -95,7 +95,7 @@ namespace pybind
 			{
 				const class_info_desc_t & desc = k.class_info_desc[index];
 
-				if( desc.id == 0 )
+				if( desc.name == nullptr )
 				{
 					continue;
 				}
@@ -105,88 +105,78 @@ namespace pybind
 					continue;
 				}
 
-				return &desc;
+				return index;
 			}
 
-			return nullptr;
+			return 0;
 		}
 		//////////////////////////////////////////////////////////////////////////
-		const class_info_desc_t * find_class_info_desc_id( uint32_t _id )
+		const class_info_desc_t * get_class_info_desc_id( uint32_t _typeId )
 		{
-			detail_scope & k = get_scope();
-
-			for( uint32_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
-			{
-				const class_info_desc_t & desc = k.class_info_desc[index];
-
-				if( desc.id == 0 )
-				{
-					continue;
-				}
-
-				if( desc.id != _id )
-				{
-					continue;
-				}
-
-				return &desc;
+			if( _typeId >= PYBIND_TYPE_COUNT )
+			{ 
+				return nullptr;
 			}
 
-			return nullptr;
+			detail_scope & k = get_scope();
+
+			const class_info_desc_t & desc = k.class_info_desc[_typeId];
+
+			if( desc.name == nullptr )
+			{
+				return nullptr;
+			}
+
+			return &desc;
 		}
 		//////////////////////////////////////////////////////////////////////////
-		class_info_desc_t * alloc_class_info_desc()
+		bool set_class_info_desc( uint32_t _typeId, const char * _info )
 		{
-			detail_scope & k = get_scope();
-
-			for( uint32_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
+			if( _typeId >= PYBIND_TYPE_COUNT )
 			{
-				class_info_desc_t & desc = k.class_info_desc[index];
-
-				if( desc.id != 0 )
-				{
-					continue;
-				}
-
-				return &desc;
+				return false;
 			}
 
-			return nullptr;
+			detail_scope & k = get_scope();
+
+			class_info_desc_t & desc = k.class_info_desc[_typeId];
+
+			if( desc.name != nullptr )
+			{
+				return false;
+			}
+
+			desc.name = _info;
+
+			return true;
 		}
 		//////////////////////////////////////////////////////////////////////////
 		uint32_t get_class_type_id( const std::type_info & _info )
 		{
 			const char * info_name = _info.name();
 
-			const class_info_desc_t * desc = pybind::detail::find_class_info_desc_name( info_name );
+			uint32_t id = pybind::detail::find_class_info_desc_name( info_name );
 
-			if( desc != nullptr )
+			if( id != 0 )
 			{
-				uint32_t id = desc->id;
-
 				return id;
 			}
 
-			class_info_desc_t * new_desc = pybind::detail::alloc_class_info_desc();
-
-			if( new_desc == nullptr )
+			uint32_t new_id = detail::get_next_id();
+			
+			if( pybind::detail::set_class_info_desc( new_id, info_name ) == false )
 			{
 				pybind::throw_exception( "invalid create new type info" );
 
 				return 0;
 			}
 
-			uint32_t new_id = detail::get_next_id();
-
-			new_desc->id = new_id;
-			new_desc->name = info_name;
-
 			return new_id;
 		}
 		//////////////////////////////////////////////////////////////////////////
 		const char * get_class_type_info( uint32_t _id )
 		{
-			const class_info_desc_t * desc = detail::find_class_info_desc_id( _id );
+			const class_info_desc_t * desc = detail::get_class_info_desc_id( _id );
 
 			if( desc == nullptr )
 			{
@@ -275,6 +265,69 @@ namespace pybind
 			}
 		}
 		//////////////////////////////////////////////////////////////////////////
+		uint32_t get_object_type_id( PyObject * _obj )
+		{
+			detail_scope & k = get_scope();
+
+			PyTypeObject * objtype = Py_TYPE( _obj );
+
+			PyObject * py_scope = PyObject_GetAttr( (PyObject*)objtype, k.str_pybind_class_type_scope );
+
+			if( py_scope == nullptr )
+			{
+				if( _obj == Py_None )
+				{
+					return 0;
+				}
+#   if PYBIND_PYTHON_VERSION < 300
+				else if( PyInt_Check( _obj ) == true )
+				{
+					return detail::class_info<int>();
+				}
+#	endif
+				else if( PyLong_Check( _obj ) == true )
+				{
+					return detail::class_info<float>();
+				}
+				else if( PyFloat_Check( _obj ) == true )
+				{
+					return detail::class_info<float>();
+				}
+#   if PYBIND_PYTHON_VERSION < 300
+				else if( PyString_Check( _obj ) == true )
+				{
+					return detail::class_info<const char *>();
+				}
+#	endif
+				else if( PyUnicode_Check( _obj ) == true )
+				{
+					return detail::class_info<const wchar_t *>();
+				}
+
+				pybind::throw_exception( "obj %s not wrap pybind (scope)"
+						, pybind::object_str( (PyObject *)objtype )
+						);
+
+				return 0;
+			}
+
+			uint32_t id;
+			if( pybind::extract_value( py_scope, id, false ) == false )
+			{
+				Py_DECREF( py_scope );
+
+				pybind::throw_exception( "obj %s incorrect wrap pybind (scope)"
+					, pybind::object_str( (PyObject *)objtype )
+					);
+
+				return 0;
+			}
+
+			Py_DECREF( py_scope );
+
+			return id;
+		}
+		//////////////////////////////////////////////////////////////////////////
 		const class_type_scope_ptr & get_class_scope( PyTypeObject * _type )
 		{
 			detail_scope & k = get_scope();
@@ -291,7 +344,7 @@ namespace pybind
 			}
 
 			uint32_t id;
-			if( pybind::extract_value( py_scope, id ) == false )
+			if( pybind::extract_value( py_scope, id, false ) == false )
 			{
 				pybind::throw_exception( "obj %s incorrect wrap pybind (scope)"
 					, pybind::object_str( (PyObject *)_type )
@@ -485,14 +538,13 @@ namespace pybind
 	{
 		detail::detail_scope & k = detail::get_scope();
 
-		k.enumerator = 0;
+		k.enumerator = 4;
 		k.str_pybind_class_type_scope = nullptr;
 
 		for( uint32_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
 		{
 			detail::class_info_desc_t & desc = k.class_info_desc[index];
 
-			desc.id = 0;
 			desc.name = nullptr;
 		}
 
@@ -501,7 +553,7 @@ namespace pybind
 #   else
 		k.str_pybind_class_type_scope = pybind::string_from_char( "__pybind_class_type_scope" );
 #   endif
-
+		
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -523,9 +575,6 @@ namespace pybind
 
 			k.type_cast[index] = nullptr;
 
-			k.class_info_desc[index];
-
-			k.class_info_desc[index].id = 0;
 			k.class_info_desc[index].name = nullptr;
 		}
 
