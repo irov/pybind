@@ -51,6 +51,7 @@ namespace pybind
 	object::~object()
 	{
 		pybind::decref( m_obj );
+		m_obj = nullptr;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * object::ptr() const

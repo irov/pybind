@@ -164,28 +164,62 @@ namespace pybind
 		return value;
 	}
 
+	template<typename T>
+	struct extract_specialized
+	{
+		typename detail::extract_return<T>::type operator () ( PyObject * _obj )
+		{
+			typedef typename detail::extract_return<T>::type TValue;
+			TValue value;
+
+			if( extract_value( _obj, value, true ) == false )
+			{
+				const std::type_info & tinfo = typeid(TValue);
+
+				const char * type_name = tinfo.name();
+
+				pybind::log( "extract invalid %s:%s not cast to '%s'"
+					, pybind::object_repr( _obj )
+					, pybind::object_repr_type( _obj )
+					, type_name
+					);
+			}
+
+			return value;
+		}
+	};
+
+	template<typename T>
+	struct extract_specialized<T *>
+	{
+		typename detail::extract_return<T *>::type operator () ( PyObject * _obj )
+		{
+			typedef typename detail::extract_return<T *>::type TValue;
+			TValue value = nullptr;
+
+			if( extract_value( _obj, value, true ) == false )
+			{
+				const std::type_info & tinfo = typeid(TValue);
+
+				const char * type_name = tinfo.name();
+
+				pybind::log( "extract invalid %s:%s not cast to '%s'"
+					, pybind::object_repr( _obj )
+					, pybind::object_repr_type( _obj )
+					, type_name
+					);
+			}
+
+			return value;
+		}
+	};
+
 	template<class T>
 	typename detail::extract_return<T>::type extract( PyObject * _obj )
 	{
-		typedef typename detail::extract_return<T>::type TValue;
-		TValue value;
-
-		if( extract_value( _obj, value, true ) == false )
-		{
-			const std::type_info & tinfo = typeid(TValue);
-
-			const char * type_name = tinfo.name();
-
-			pybind::log( "extract invalid %s:%s not cast to '%s'"
-				, pybind::object_repr( _obj )
-				, pybind::object_repr_type( _obj )
-				, type_name
-				);
-		}
-
-		return value;
+		return extract_specialized<T>()(_obj);		
 	}
-	   
+
 	template<class T>
 	PyObject * ptr_throw_i( const T & _value )
 	{
