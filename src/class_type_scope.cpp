@@ -14,6 +14,7 @@
 #	include "pybind/sequence_get_adapter.hpp"
 #	include "pybind/sequence_set_adapter.hpp"
 #	include "pybind/number_binary_adapter.hpp"
+#	include "pybind/smart_pointer_adapter.hpp"
 
 #	include "pod.hpp"
 #	include "pybind/detail.hpp"
@@ -536,6 +537,13 @@ namespace pybind
 
 			pybind::detail::wrap( py_self, impl, false );
 
+			const smart_pointer_adapter_interface_ptr & smart_pointer_adapter = scope->get_smart_pointer();
+
+			if( smart_pointer_adapter != nullptr )
+			{
+				smart_pointer_adapter->incref( impl, scope );
+			}
+
 			scope->addObject( py_self );
 
 			return py_self;
@@ -562,12 +570,19 @@ namespace pybind
 		{
 			scope->removeObject( _obj );
 
+			void * impl = pybind::detail::get_class_impl( _obj );
+
+			const smart_pointer_adapter_interface_ptr & smart_pointer_adapter = scope->get_smart_pointer();
+
+			if( smart_pointer_adapter != nullptr )
+			{
+				smart_pointer_adapter->decref( impl, scope );
+			}
+
 			bool holder = pybind::detail::is_holder( _obj );
 
 			if( holder == false )
 			{
-				void * impl = pybind::detail::get_class_impl( _obj );
-
 				const destroy_adapter_interface_ptr & adapter = scope->get_destroy_adapter();
 								
 				if( adapter != nullptr )
@@ -612,7 +627,12 @@ namespace pybind
 				impl = scope->construct( py_self, _args );
 			}
 
-			(void)impl;
+			const smart_pointer_adapter_interface_ptr & smart_pointer_adapter = scope->get_smart_pointer();
+
+			if( smart_pointer_adapter != nullptr )
+			{
+				smart_pointer_adapter->incref( impl, scope );
+			}
 
 			scope->addObject( py_self );
 
@@ -641,6 +661,13 @@ namespace pybind
 			scope->removeObject( _obj );
 
 			void * impl = pybind::detail::get_class_impl( _obj );
+
+			const smart_pointer_adapter_interface_ptr & smart_pointer_adapter = scope->get_smart_pointer();
+
+			if( smart_pointer_adapter != nullptr )
+			{
+				smart_pointer_adapter->decref( impl, scope );
+			}
 
 			const destroy_adapter_interface_ptr & adapter = scope->get_destroy_adapter();
 
@@ -1375,6 +1402,11 @@ namespace pybind
 		m_number_divs[_typeId] = _iadapter;
 
 		m_pytypeobject->tp_as_number = &py_as_number;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::set_smart_pointer( const smart_pointer_adapter_interface_ptr & _iadapter )
+	{
+		m_smart_pointer = _iadapter;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void * class_type_scope::construct( PyObject * _obj, PyObject * _args )

@@ -17,6 +17,7 @@
 #	include "pybind/sequence_get_adapter.hpp"
 #	include "pybind/sequence_set_adapter.hpp"
 #	include "pybind/number_binary_adapter.hpp"
+#	include "pybind/smart_pointer_adapter.hpp"
 
 #	include "pybind/type_cast.hpp"
 #	include "pybind/exception.hpp"
@@ -541,6 +542,22 @@ namespace pybind
 			m_scope->set_number_div( iadapter );
 
 			return *this;
+		}
+
+		template<class FI, class FD>
+		base_ & def_static_proxy_smart_pointer( FI _incref, FD _decref )
+		{
+			smart_pointer_adapter_interface_ptr iadapter =
+				new smart_pointer_adapter_proxy_function<C, FI, FD>( "smart_pointer", _incref, _decref );
+
+			m_scope->set_smart_pointer( iadapter );
+
+			return *this;
+		}
+
+		base_ & def_smart_pointer()
+		{
+			return def_static_proxy_smart_pointer( &C::intrusive_ptr_add_ref, &C::intrusive_ptr_dec_ref );
 		}
 
 		const pybind::class_type_scope_ptr & get_scope() const

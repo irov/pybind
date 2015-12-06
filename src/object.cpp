@@ -119,12 +119,12 @@ namespace pybind
 		return pybind::is_callable( m_obj );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool object::has_attr( const char * _name ) const
+	bool object::has_attr( const detail::import_operator_t & _name ) const
 	{
 		return pybind::has_attr( m_obj, _name );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	pybind::object object::get_attr( const char * _name ) const
+	pybind::object object::get_attr( const detail::import_operator_t & _name ) const
 	{
 		PyObject * py_attr = pybind::get_attr( m_obj, _name );
 

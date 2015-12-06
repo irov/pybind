@@ -31,6 +31,7 @@ namespace pybind
 	typedef stdex::intrusive_ptr<class sequence_set_adapter_interface> sequence_set_adapter_interface_ptr;
 
 	typedef stdex::intrusive_ptr<class number_binary_adapter_interface> number_binary_adapter_interface_ptr;
+	typedef stdex::intrusive_ptr<class smart_pointer_adapter_interface> smart_pointer_adapter_interface_ptr;
 	//////////////////////////////////////////////////////////////////////////
 	class PYBIND_API class_type_scope
 		: public stdex::intrusive_ptr_base<class_type_scope>
@@ -105,6 +106,7 @@ namespace pybind
 		void add_number_sub( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter );
 		void add_number_mul( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter );
 		void add_number_div( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter );
+		void set_smart_pointer( const smart_pointer_adapter_interface_ptr & _iadapter );
 
 
 		PyObject * create_class( void * _impl );
@@ -139,6 +141,8 @@ namespace pybind
 		inline const number_binary_adapter_interface_ptr & get_number_sub_adapters( uint32_t _typeId ) const;
 		inline const number_binary_adapter_interface_ptr & get_number_mul_adapters( uint32_t _typeId ) const;
 		inline const number_binary_adapter_interface_ptr & get_number_div_adapters( uint32_t _typeId ) const;
+
+		inline const smart_pointer_adapter_interface_ptr & get_smart_pointer() const;
 		
     public:
         void addObject( PyObject * _obj );
@@ -193,6 +197,8 @@ namespace pybind
 		number_binary_adapter_interface_ptr m_number_subs[PYBIND_TYPE_COUNT];
 		number_binary_adapter_interface_ptr m_number_muls[PYBIND_TYPE_COUNT];
 		number_binary_adapter_interface_ptr m_number_divs[PYBIND_TYPE_COUNT];
+
+		smart_pointer_adapter_interface_ptr m_smart_pointer;
 
 		PyTypeObject * m_pytypeobject;
 
@@ -299,6 +305,11 @@ namespace pybind
 	inline const number_binary_adapter_interface_ptr & class_type_scope::get_number_div_adapters( uint32_t _typeId ) const
 	{
 		return m_number_divs[_typeId];
+	}
+	//////////////////////////////////////////////////////////////////////////
+	inline const smart_pointer_adapter_interface_ptr & class_type_scope::get_smart_pointer() const
+	{
+		return m_smart_pointer;
 	}
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<class_type_scope> class_type_scope_ptr;

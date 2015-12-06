@@ -5,7 +5,9 @@
 #	include "pybind/logger.hpp"
 #	include "pybind/bindable.hpp"
 #	include "pybind/type_cast.hpp"
-#	include "pybind/type_traits.hpp"
+
+#	include "stdex/mpl.h"
+#	include "stdex/intrusive_ptr.h"
 
 namespace pybind
 {
@@ -17,21 +19,9 @@ namespace pybind
 	namespace detail
 	{
 		template<class T>
-		struct extract_return
-		{
-			typedef T type;
-		};
-
-		template<class T>
-		struct extract_return<const T &>
-		{
-			typedef T type;
-		};
-
-		template<class T>
 		struct extract_check
 		{
-			typedef typename extract_return<T>::type T_WOCR;
+			typedef typename stdex::mpl::remove_cref<T>::type T_WOCR;
 
 			static bool extract( PyObject * _obj, T_WOCR & _value, bool _nothrow )
 			{				
@@ -143,14 +133,14 @@ namespace pybind
 	PYBIND_API bool extract_value( PyObject * _obj, pybind::dict & _value, bool _nothrow );
 
     template<class T>
-	typename detail::extract_return<T>::type extract_throw( PyObject * _obj )
+	typename stdex::mpl::remove_cref<T>::type extract_throw( PyObject * _obj )
 	{
-        typedef typename detail::extract_return<T>::type TValue;
-		TValue value;
+		typedef typename stdex::mpl::remove_cref<T>::type type_value;
+		type_value value;
 		       
 		if( extract_value( _obj, value, false ) == false )
         {
-            const std::type_info & tinfo = typeid(TValue);
+			const std::type_info & tinfo = typeid(type_value);
             
             const char * type_name = tinfo.name();
 
@@ -167,14 +157,14 @@ namespace pybind
 	template<typename T>
 	struct extract_specialized
 	{
-		typename detail::extract_return<T>::type operator () ( PyObject * _obj )
+		typename stdex::mpl::remove_cref<T>::type operator () ( PyObject * _obj )
 		{
-			typedef typename detail::extract_return<T>::type TValue;
-			TValue value;
+			typedef typename stdex::mpl::remove_cref<T>::type type_value;
+			type_value value;
 
 			if( extract_value( _obj, value, true ) == false )
 			{
-				const std::type_info & tinfo = typeid(TValue);
+				const std::type_info & tinfo = typeid(type_value);
 
 				const char * type_name = tinfo.name();
 
@@ -192,14 +182,37 @@ namespace pybind
 	template<typename T>
 	struct extract_specialized<T *>
 	{
-		typename detail::extract_return<T *>::type operator () ( PyObject * _obj )
+		typename T * operator () ( PyObject * _obj )
 		{
-			typedef typename detail::extract_return<T *>::type TValue;
-			TValue value = nullptr;
+			T * value = nullptr;
 
 			if( extract_value( _obj, value, true ) == false )
 			{
-				const std::type_info & tinfo = typeid(TValue);
+				const std::type_info & tinfo = typeid(T *);
+
+				const char * type_name = tinfo.name();
+
+				pybind::log( "extract invalid %s:%s not cast to '%s'"
+					, pybind::object_repr( _obj )
+					, pybind::object_repr_type( _obj )
+					, type_name
+					);
+			}
+
+			return value;
+		}
+	};
+
+	template<typename T>
+	struct extract_specialized<stdex::intrusive_ptr<T> >
+	{
+		typename T * operator () ( PyObject * _obj )
+		{
+			T * value = nullptr;
+
+			if( extract_value( _obj, value, true ) == false )
+			{
+				const std::type_info & tinfo = typeid(T *);
 
 				const char * type_name = tinfo.name();
 
@@ -215,7 +228,7 @@ namespace pybind
 	};
 
 	template<class T>
-	typename detail::extract_return<T>::type extract( PyObject * _obj )
+	typename stdex::mpl::remove_cref<T>::type extract( PyObject * _obj )
 	{
 		return extract_specialized<T>()(_obj);		
 	}
@@ -223,7 +236,7 @@ namespace pybind
 	template<class T>
 	PyObject * ptr_throw_i( const T & _value )
 	{
-		typedef typename detail::extract_return<T>::type T_WOCR;
+		typedef typename stdex::mpl::remove_cref<T>::type T_WOCR;
 				
 		type_cast * etype = detail::type_down_cast<T_WOCR>::find();
 
@@ -292,7 +305,18 @@ namespace pybind
 	};
 
 	template<typename T>
-	struct ptr_throw_specialized < T, typename detail::enable_if<detail::is_base_of<pybind::bindable, typename detail::remove_ptr<T>::type>::value>::type >
+	struct ptr_throw_specialized < stdex::intrusive_ptr<T> >
+	{
+		PyObject * operator () ( const stdex::intrusive_ptr<T> & _t )
+		{
+			T * t_ptr = _t.get();
+
+			return ptr_throw_i( t_ptr );
+		}
+	};
+
+	template<typename T>
+	struct ptr_throw_specialized < T, typename stdex::mpl::enable_if<stdex::mpl::is_base_of<pybind::bindable, typename stdex::mpl::remove_ptr<T>::type>::value>::type >
 	{
 		PyObject * operator () ( pybind::bindable * _t )
 		{

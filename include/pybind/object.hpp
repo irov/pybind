@@ -49,9 +49,8 @@ namespace pybind
 		bool is_callable() const;
 
 	public:
-		bool has_attr( const char * _name ) const;
-
-		pybind::object get_attr( const char * _name ) const;
+		bool has_attr( const detail::import_operator_t & _name ) const;
+		pybind::object get_attr( const detail::import_operator_t & _name ) const;
 
 	public:
 		void unwrap() const;
