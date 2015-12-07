@@ -115,7 +115,6 @@ namespace pybind
 		}
 
 	protected:
-	protected:
 		void incref( void * _impl, const class_type_scope_ptr & _scope ) override
 		{
 			C * self = detail::meta_cast_class_t<C>( _impl, _scope );

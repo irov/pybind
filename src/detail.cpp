@@ -272,22 +272,23 @@ namespace pybind
 			PyTypeObject * objtype = Py_TYPE( _obj );
 
 			PyObject * py_scope = PyObject_GetAttr( (PyObject*)objtype, k.str_pybind_class_type_scope );
+			PyErr_Clear();
 
 			if( py_scope == nullptr )
 			{
 				if( _obj == Py_None )
-				{
+				{					
 					return 0;
 				}
 #   if PYBIND_PYTHON_VERSION < 300
 				else if( PyInt_Check( _obj ) == true )
-				{
+				{					
 					return detail::class_info<int>();
 				}
 #	endif
 				else if( PyLong_Check( _obj ) == true )
 				{
-					return detail::class_info<float>();
+					return detail::class_info<int>();
 				}
 				else if( PyFloat_Check( _obj ) == true )
 				{
@@ -333,6 +334,7 @@ namespace pybind
 			detail_scope & k = get_scope();
 
 			PyObject * py_scope = PyObject_GetAttr( (PyObject*)_type, k.str_pybind_class_type_scope );
+			PyErr_Clear();
 
 			if( py_scope == nullptr )
 			{
