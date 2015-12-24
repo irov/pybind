@@ -182,7 +182,7 @@ namespace pybind
 	template<typename T>
 	struct extract_specialized<T *>
 	{
-		typename T * operator () ( PyObject * _obj )
+		T * operator () ( PyObject * _obj )
 		{
 			T * value = nullptr;
 
@@ -206,7 +206,7 @@ namespace pybind
 	template<typename T>
 	struct extract_specialized<stdex::intrusive_ptr<T> >
 	{
-		typename T * operator () ( PyObject * _obj )
+		T * operator () ( PyObject * _obj )
 		{
 			T * value = nullptr;
 

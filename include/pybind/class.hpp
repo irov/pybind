@@ -353,7 +353,7 @@ namespace pybind
 			return *this;
 		}
 
-		template<class V, class VC = V>
+		template<class V, class VC>
 		base_ & def_operator_add_t()
 		{
 			number_binary_adapter_interface_ptr iadapter =
@@ -364,6 +364,12 @@ namespace pybind
 			m_scope->add_number_add( typeId, iadapter );
 
 			return *this;
+		}
+
+		template<class V>
+		base_ & def_operator_add_t()
+		{
+			return def_operator_add_t<V, V>();
 		}
 
 		base_ & def_operator_add()
@@ -398,7 +404,7 @@ namespace pybind
 			return *this;
 		}
 
-		template<class V, class VC = V>
+		template<class V, class VC>
 		base_ & def_operator_sub_t()
 		{
 			number_binary_adapter_interface_ptr iadapter =
@@ -409,6 +415,12 @@ namespace pybind
 			m_scope->add_number_sub( typeId, iadapter );
 
 			return *this;
+		}
+
+		template<class V>
+		base_ & def_operator_sub_t()
+		{
+			return def_operator_sub_t<V, V>();
 		}
 
 		base_ & def_operator_sub()
@@ -465,7 +477,7 @@ namespace pybind
 			return *this;
 		}
 
-		template<class V, class VC = V>
+		template<class V, class VC>
 		base_ & def_operator_mul_t()
 		{
 			number_binary_adapter_interface_ptr iadapter =
@@ -476,6 +488,12 @@ namespace pybind
 			m_scope->add_number_mul( typeId, iadapter );
 
 			return *this;
+		}
+
+		template<class V>
+		base_ & def_operator_mul_t()
+		{
+			return def_operator_mul_t<V, V>();
 		}
 
 		base_ & def_operator_mul()
@@ -521,7 +539,7 @@ namespace pybind
 			return *this;
 		}
 
-		template<class V, class VC = V>
+		template<class V, class VC>
 		base_ & def_operator_div_t()
 		{
 			number_binary_adapter_interface_ptr iadapter =
@@ -532,6 +550,12 @@ namespace pybind
 			m_scope->add_number_div( typeId, iadapter );
 
 			return *this;
+		}
+
+		template<class V>
+		base_ & def_operator_div_t()
+		{
+			return def_operator_div_t<V, V>();
 		}
 
 		base_ & def_operator_div()

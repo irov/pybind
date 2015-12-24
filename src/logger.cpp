@@ -36,9 +36,8 @@ namespace pybind
 
 		va_start( argList, _format );
 
-		char str[2048];
-
-		vsnprintf( str, 2048 - 1, _format, argList );
+		char str[4096] = {0};
+		vsprintf( str, _format, argList );
 
 		va_end( argList );		
 
