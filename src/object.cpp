@@ -214,7 +214,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	pybind::object make_object_t( const detail::import_operator_t & _t0 )
 	{
-		return pybind::object( _t0, pybind::borrowed() );
+		return pybind::object( _t0 );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	pybind::object make_invalid_object_t()
