@@ -77,6 +77,16 @@ namespace pybind
 			return scope;
 		}
 
+		template<class T>
+		PyObject * create_holder_t( T * _ptr )
+		{
+			const pybind::class_type_scope_ptr & scope = pybind::detail::class_scope<T>();
+
+			PyObject * py_obj = scope->create_holder( _ptr );
+
+			return py_obj;
+		}
+
 		PYBIND_API void * meta_cast_scope( void * _self, uint32_t _scope_name, uint32_t _class_name, const class_type_scope_ptr & _scope );
 
 		template<class T>
