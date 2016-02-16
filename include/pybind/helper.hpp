@@ -64,7 +64,7 @@ namespace pybind
 				return m_obj;
 			}
 
-			PyObject * get() const
+			PyObject * ptr() const
 			{
 				return m_obj;
 			}
@@ -95,7 +95,7 @@ namespace pybind
 			}
 
 			import_operator_t( const extract_operator_t  & _op )
-				: m_obj( _op.get() )
+				: m_obj( _op.ptr() )
 			{
 				pybind::incref( m_obj );
 			}
@@ -124,6 +124,12 @@ namespace pybind
 				return m_obj;
 			}
 
+		public:
+			PyObject * ptr() const
+			{
+				return m_obj;
+			}
+
 		protected:
 			PyObject * m_obj;
 		};
@@ -148,6 +154,15 @@ namespace pybind
 			{
 				pybind::incref( m_args );
 			}
+						
+			args_operator_t & operator = (const args_operator_t & _args)
+			{
+				pybind::decref( m_args );
+				m_args = _args.ptr();
+				pybind::incref( m_args );
+
+				return *this;
+			}
 
 		public:
 			~args_operator_t()
@@ -163,6 +178,12 @@ namespace pybind
 
 		public:
 			operator PyObject * () const
+			{
+				return m_args;
+			}
+
+		public:
+			PyObject * ptr() const
 			{
 				return m_args;
 			}

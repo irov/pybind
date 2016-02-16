@@ -9,6 +9,11 @@ namespace pybind
 		//////////////////////////////////////////////////////////////////////////
 		size_t args_operator_t::size() const
 		{
+			if( m_args == nullptr )
+			{
+				return 0;
+			}
+
 			size_t args_size = pybind::tuple_size( m_args );
 
 			return args_size;
