@@ -3,7 +3,9 @@
 #	include "pybind/adapter_interface.hpp"
 
 #	include "pybind/method_call.hpp"
+#	include "pybind/method_args_call.hpp"
 #	include "pybind/method_proxy_call.hpp"
+#	include "pybind/method_proxy_args_call.hpp"
 #	include "pybind/function_proxy_call.hpp"
 
 #   include "pybind/detail.hpp"
@@ -57,6 +59,33 @@ namespace pybind
 
 			return ret;
 		}		
+
+	protected:
+		F m_fn;
+	};
+	//////////////////////////////////////////////////////////////////////////
+	template<class C, class F>
+	class method_adapter_args
+		: public method_adapter_interface
+	{
+	public:
+		method_adapter_args( const char * _name, F _fn )
+			: method_adapter_interface( _name )
+			, m_fn( _fn )
+		{
+		}
+
+	protected:
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		{
+			(void)_kwds;
+
+			C * self = detail::meta_cast_class_t<C>( _impl, _scope );
+
+			PyObject *ret = method_args_call<C, F>::call( self, m_fn, _args );
+
+			return ret;
+		}
 
 	protected:
 		F m_fn;
@@ -119,6 +148,35 @@ namespace pybind
 			C * self = detail::meta_cast_class_t<C>( _impl, _scope );
 
 			PyObject * ret = method_proxy_call<P, C, F>::call( m_proxy, self, m_fn, _args );
+
+			return ret;
+		}
+
+	protected:
+		F m_fn;
+		P * m_proxy;
+	};
+	//////////////////////////////////////////////////////////////////////////
+	template<class C, class P, class F>
+	class method_adapter_proxy_args
+		: public method_adapter_interface
+	{
+	public:
+		method_adapter_proxy_args( const char * _name, F _fn, P * _proxy )
+			: method_adapter_interface( _name )
+			, m_fn( _fn )
+			, m_proxy( _proxy )
+		{
+		}
+
+	protected:
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		{
+			(void)_kwds;
+
+			C * self = detail::meta_cast_class_t<C>( _impl, _scope );
+
+			PyObject * ret = method_proxy_args_call<P, C, F>::call( m_proxy, self, m_fn, _args );
 
 			return ret;
 		}

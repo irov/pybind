@@ -124,6 +124,8 @@ namespace pybind
 	PYBIND_API bool tuple_check( PyObject * _tuple );
 	PYBIND_API size_t tuple_size( PyObject * _tuple );
 	PYBIND_API PyObject * tuple_getitem( PyObject * _tuple, size_t _it );
+	PYBIND_API PyObject * tuple_slice( PyObject * _tuple, size_t _low, size_t _high );
+	PYBIND_API PyObject * tuple_slice_tail( PyObject * _tuple, size_t _size );
 	PYBIND_API bool tuple_setitem( PyObject * _tuple, size_t _it, PyObject * _value );
 
 	PYBIND_API PyObject * object_dir( PyObject * _obj );

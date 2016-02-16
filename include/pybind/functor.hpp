@@ -30,5 +30,18 @@ namespace pybind
 			);
 	}
 
+	template<class C, class F>
+	void def_functor_args( const char * _name, C * _self, F _method, PyObject * _module = 0 )
+	{
+		typedef typename stdex::function_traits<F>::result t_info;
+
+		functor_adapter_interface_ptr imethod =
+			new functor_proxy_adapter_args<typename t_info::class_type, F>( _name, t_info::arity, _self, _method );
+
+		detail::def_functor(
+			imethod,
+			_module
+			);
+	}
 }
 

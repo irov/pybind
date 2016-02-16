@@ -31,5 +31,16 @@ namespace pybind
 	PYBIND_API pybind::tuple make_tuple_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5 );
 	PYBIND_API pybind::tuple make_tuple_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6 );
 	PYBIND_API pybind::tuple make_tuple_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::import_operator_t & _t7 );
+	//////////////////////////////////////////////////////////////////////////
+	PYBIND_API pybind::tuple make_tuple_args_t( const detail::args_operator_t & _args );
+	PYBIND_API pybind::tuple make_tuple_args_t( const detail::import_operator_t & _t0, const detail::args_operator_t & _args );
+	PYBIND_API pybind::tuple make_tuple_args_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::args_operator_t & _args );
+	PYBIND_API pybind::tuple make_tuple_args_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::args_operator_t & _args );
+	PYBIND_API pybind::tuple make_tuple_args_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::args_operator_t & _args );
+	PYBIND_API pybind::tuple make_tuple_args_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::args_operator_t & _args );
+	PYBIND_API pybind::tuple make_tuple_args_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::args_operator_t & _args );
+	PYBIND_API pybind::tuple make_tuple_args_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::args_operator_t & _args );
+	PYBIND_API pybind::tuple make_tuple_args_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::import_operator_t & _t7, const detail::args_operator_t & _args );
+	//////////////////////////////////////////////////////////////////////////
 	PYBIND_API pybind::tuple make_invalid_tuple_t();
 }

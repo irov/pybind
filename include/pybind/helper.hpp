@@ -40,43 +40,6 @@ namespace pybind
 			PyObject * m_obj;
 		};
 		//////////////////////////////////////////////////////////////////////////
-		class import_operator_t
-		{
-		public:
-			import_operator_t( const import_operator_t  & _op )
-				: m_obj(_op.m_obj)
-			{
-				pybind::incref( m_obj );
-			}
-						
-			import_operator_t( PyObject * _value )
-				: m_obj( _value )
-			{
-				pybind::incref( m_obj );
-			}
-
-			template<class T>
-			import_operator_t( const T & _value )
-				: m_obj( ptr_throw_specialized<T>()(_value) )
-			{				
-			}
-
-		public:
-			~import_operator_t()
-			{
-				pybind::decref( m_obj );
-			}
-
-		public:
-			operator PyObject * () const
-			{
-				return m_obj;
-			}
-
-		protected:
-			PyObject * m_obj;
-		};
-		//////////////////////////////////////////////////////////////////////////
 		class extract_operator_t
 		{
 		public:
@@ -101,6 +64,11 @@ namespace pybind
 				return m_obj;
 			}
 
+			PyObject * get() const
+			{
+				return m_obj;
+			}
+
 			template<class T>
 			operator T ()
 			{
@@ -115,6 +83,92 @@ namespace pybind
 
 		protected:
 			PyObject * m_obj;
+		};
+		//////////////////////////////////////////////////////////////////////////
+		class import_operator_t
+		{
+		public:
+			import_operator_t( const import_operator_t  & _op )
+				: m_obj( _op.m_obj )
+			{
+				pybind::incref( m_obj );
+			}
+
+			import_operator_t( const extract_operator_t  & _op )
+				: m_obj( _op.get() )
+			{
+				pybind::incref( m_obj );
+			}
+
+			import_operator_t( PyObject * _value )
+				: m_obj( _value )
+			{
+				pybind::incref( m_obj );
+			}
+
+			template<class T>
+			import_operator_t( const T & _value )
+				: m_obj( ptr_throw_specialized<T>()(_value) )
+			{
+			}
+
+		public:
+			~import_operator_t()
+			{
+				pybind::decref( m_obj );
+			}
+
+		public:
+			operator PyObject * () const
+			{
+				return m_obj;
+			}
+
+		protected:
+			PyObject * m_obj;
+		};
+		//////////////////////////////////////////////////////////////////////////
+		class args_operator_t
+		{
+		public:
+			args_operator_t()
+				: m_args( nullptr )
+			{
+			}
+
+		public:
+			args_operator_t( const args_operator_t & _r )
+				: m_args( _r.m_args )
+			{
+				pybind::incref( m_args );
+			}
+
+			explicit args_operator_t( PyObject * _args )
+				: m_args( _args )
+			{
+				pybind::incref( m_args );
+			}
+
+		public:
+			~args_operator_t()
+			{
+				pybind::decref( m_args );
+			}
+
+		public:
+			size_t size() const;
+
+		public:
+			detail::extract_operator_t operator [] ( size_t _index ) const;
+
+		public:
+			operator PyObject * () const
+			{
+				return m_args;
+			}
+
+		protected:
+			PyObject * m_args;
 		};
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -136,8 +190,9 @@ namespace pybind
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////	
+	PYBIND_API detail::args_operator_t make_args_t( PyObject * _tuple, size_t _size );
 	PYBIND_API detail::extract_operator_t tuple_getitem_t( PyObject * _tuple, size_t _it );
-	PYBIND_API bool tuple_setitem_t( PyObject * _tuple, size_t _it, const detail::import_operator_t & _item );	
+	PYBIND_API bool tuple_setitem_t( PyObject * _tuple, size_t _it, const detail::import_operator_t & _item );
 	PYBIND_API bool dict_setstring_t( PyObject * _dict, const char * _name, const detail::import_operator_t & _value );
 	PYBIND_API bool dict_set_t( PyObject * _dict, const detail::import_operator_t & _name, const detail::import_operator_t & _value );
 	PYBIND_API detail::extract_operator_t dict_get_t( PyObject * _dict, const detail::import_operator_t & _key );
@@ -173,6 +228,7 @@ namespace pybind
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PYBIND_API detail::extract_operator_t ask_tuple( PyObject * _obj, const pybind::tuple & _tuple );	
+	//////////////////////////////////////////////////////////////////////////
 	PYBIND_API detail::extract_operator_t call_t( PyObject * _obj );
 	PYBIND_API detail::extract_operator_t call_t( PyObject * _obj, const detail::import_operator_t & _t0 );
 	PYBIND_API detail::extract_operator_t call_t( PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1 );
@@ -182,5 +238,16 @@ namespace pybind
 	PYBIND_API detail::extract_operator_t call_t( PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5 );
 	PYBIND_API detail::extract_operator_t call_t( PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6 );
 	PYBIND_API detail::extract_operator_t call_t( PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::import_operator_t & _t7 );
+	//////////////////////////////////////////////////////////////////////////
+	PYBIND_API detail::extract_operator_t call_args_t( PyObject * _obj, const detail::args_operator_t & _args );
+	PYBIND_API detail::extract_operator_t call_args_t( PyObject * _obj, const detail::import_operator_t & _t0, const detail::args_operator_t & _args );
+	PYBIND_API detail::extract_operator_t call_args_t( PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::args_operator_t & _args );
+	PYBIND_API detail::extract_operator_t call_args_t( PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::args_operator_t & _args );
+	PYBIND_API detail::extract_operator_t call_args_t( PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::args_operator_t & _args );
+	PYBIND_API detail::extract_operator_t call_args_t( PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::args_operator_t & _args );
+	PYBIND_API detail::extract_operator_t call_args_t( PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::args_operator_t & _args );
+	PYBIND_API detail::extract_operator_t call_args_t( PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::args_operator_t & _args );
+	PYBIND_API detail::extract_operator_t call_args_t( PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::import_operator_t & _t7, const detail::args_operator_t & _args );
+	//////////////////////////////////////////////////////////////////////////
 	PYBIND_API detail::extract_operator_t extract_t( PyObject * _obj );
 }

@@ -114,7 +114,9 @@
     <ClInclude Include="..\include\pybind\mapping_adapter.hpp" />
     <ClInclude Include="..\include\pybind\member_adapter.hpp" />
     <ClInclude Include="..\include\pybind\method_adapter.hpp" />
+    <ClInclude Include="..\include\pybind\method_args_call.hpp" />
     <ClInclude Include="..\include\pybind\method_call.hpp" />
+    <ClInclude Include="..\include\pybind\method_proxy_args_call.hpp" />
     <ClInclude Include="..\include\pybind\method_proxy_call.hpp" />
     <ClInclude Include="..\include\pybind\new_adapter.hpp" />
     <ClInclude Include="..\include\pybind\number_binary_adapter.hpp" />

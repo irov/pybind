@@ -72,6 +72,17 @@ namespace pybind
 		detail::extract_operator_t operator () ( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6 ) const;
 		detail::extract_operator_t operator () ( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::import_operator_t & _t7 ) const;
 
+	public:
+		detail::extract_operator_t operator () ( const detail::args_operator_t & _args ) const;
+		detail::extract_operator_t operator () ( const detail::import_operator_t & _t0, const detail::args_operator_t & _args ) const;
+		detail::extract_operator_t operator () ( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::args_operator_t & _args ) const;
+		detail::extract_operator_t operator () ( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::args_operator_t & _args ) const;
+		detail::extract_operator_t operator () ( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::args_operator_t & _args ) const;
+		detail::extract_operator_t operator () ( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::args_operator_t & _args ) const;
+		detail::extract_operator_t operator () ( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::args_operator_t & _args ) const;
+		detail::extract_operator_t operator () ( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::args_operator_t & _args ) const;
+		detail::extract_operator_t operator () ( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::import_operator_t & _t7, const detail::args_operator_t & _args ) const;
+
 	protected:
 		PyObject * m_obj;
 	};

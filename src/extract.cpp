@@ -702,7 +702,7 @@ namespace pybind
 
 		PyObject * py_obj = _value->getEmbed();
 	
-		pybind::incref( py_obj );
+		//pybind::incref( py_obj );
 
 		return py_obj;
 	}

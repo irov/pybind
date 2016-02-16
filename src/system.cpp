@@ -995,6 +995,22 @@ namespace pybind
 
 		return obj;
 	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * tuple_slice( PyObject * _tuple, size_t _low, size_t _high )
+	{ 
+		PyObject * obj_slice = PyTuple_GetSlice( _tuple, _low, _high );
+
+		return obj_slice;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * tuple_slice_tail( PyObject * _tuple, size_t _size )
+	{
+		Py_ssize_t size = PyTuple_Size( _tuple );
+
+		PyObject * obj_slice = tuple_slice( _tuple, _size, size );
+
+		return obj_slice;
+	}
     //////////////////////////////////////////////////////////////////////////
 	PyObject * object_dir( PyObject * _obj )
 	{
