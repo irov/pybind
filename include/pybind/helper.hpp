@@ -88,6 +88,11 @@ namespace pybind
 		class import_operator_t
 		{
 		public:
+			import_operator_t()
+				: m_obj(nullptr)
+			{
+			}
+
 			import_operator_t( const import_operator_t  & _op )
 				: m_obj( _op.m_obj )
 			{
