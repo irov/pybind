@@ -372,6 +372,13 @@ namespace pybind
 			return scope;
 		}
 		//////////////////////////////////////////////////////////////////////////
+		PyObject * scope_create_holder( const class_type_scope_ptr & _scope, void * _ptr )
+		{
+			PyObject * py_obj = _scope->create_holder( _ptr );
+
+			return py_obj;
+		}
+		//////////////////////////////////////////////////////////////////////////
 		bool is_class( PyObject * _obj )
 		{
 			PyTypeObject * objtype = Py_TYPE( _obj );

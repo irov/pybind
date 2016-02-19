@@ -77,12 +77,14 @@ namespace pybind
 			return scope;
 		}
 
+		PYBIND_API PyObject * scope_create_holder( const class_type_scope_ptr & _scope, void * _ptr );
+
 		template<class T>
 		PyObject * create_holder_t( T * _ptr )
 		{
 			const pybind::class_type_scope_ptr & scope = pybind::detail::class_scope<T>();
 
-			PyObject * py_obj = scope->create_holder( _ptr );
+			PyObject * py_obj = detail::scope_create_holder( scope, _ptr );
 
 			return py_obj;
 		}
