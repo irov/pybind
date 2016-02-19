@@ -28,6 +28,7 @@ namespace pybind
 		explicit object( invalid );
 
 		object & operator = (const object & _obj);
+		object & operator = ( nullptr_t );
 
 		~object();
 

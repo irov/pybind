@@ -15,15 +15,6 @@ namespace pybind
 	{
 	}
 	//////////////////////////////////////////////////////////////////////////
-	object & object::operator = (const object & _obj)
-	{
-		pybind::decref( m_obj );
-		m_obj = _obj.ptr();
-		pybind::incref( m_obj );
-
-		return *this;
-	}
-	//////////////////////////////////////////////////////////////////////////
 	object::object( const object & _obj )
 		: m_obj( _obj.ptr() )
 	{
@@ -52,6 +43,23 @@ namespace pybind
 	{
 		pybind::decref( m_obj );
 		m_obj = nullptr;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	object & object::operator = (const object & _obj)
+	{
+		pybind::decref( m_obj );
+		m_obj = _obj.ptr();
+		pybind::incref( m_obj );
+
+		return *this;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	object & object::operator = (nullptr_t)
+	{
+		pybind::decref( m_obj );
+		m_obj = nullptr;
+
+		return *this;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * object::ptr() const
