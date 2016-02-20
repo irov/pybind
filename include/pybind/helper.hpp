@@ -169,13 +169,8 @@ namespace pybind
 				return *this;
 			}
 
-			args_operator_t & operator = ( nullptr_t )
-			{
-				pybind::decref( m_args );
-				m_args = nullptr;
-
-				return *this;
-			}
+		public:
+			void reset();
 
 		public:
 			~args_operator_t()

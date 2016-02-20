@@ -7,6 +7,12 @@ namespace pybind
 	namespace detail
 	{
 		//////////////////////////////////////////////////////////////////////////
+		void args_operator_t::reset()
+		{
+			pybind::decref( m_args );
+			m_args = nullptr;
+		}
+		//////////////////////////////////////////////////////////////////////////
 		size_t args_operator_t::size() const
 		{
 			if( m_args == nullptr )

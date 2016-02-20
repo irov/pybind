@@ -54,14 +54,6 @@ namespace pybind
 		return *this;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	object & object::operator = (nullptr_t)
-	{
-		pybind::decref( m_obj );
-		m_obj = nullptr;
-
-		return *this;
-	}
-	//////////////////////////////////////////////////////////////////////////
 	PyObject * object::ptr() const
 	{
 		return m_obj;
