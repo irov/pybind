@@ -57,6 +57,7 @@ namespace pybind
 #	endif
 
 #   if PYBIND_PYTHON_VERSION >= 330
+			Py_UnbufferedStdioFlag = 1;
 			Py_DontWriteBytecodeFlag = 1;
 #	endif
 
@@ -67,7 +68,7 @@ namespace pybind
 			wchar_t pySearchPath[] = L".";
 			Py_SetPythonHome( pySearchPath );
 
-			Py_SetStandardStreamEncoding( "utf-8", nullptr );
+			Py_SetStandardStreamEncoding( "utf-8", "utf-8" );
 
 			Py_InitializeEx( install_sigs ? 1 : 0 );
 #   elif PYBIND_PYTHON_VERSION >= 320
