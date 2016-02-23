@@ -1409,6 +1409,15 @@ namespace pybind
 		m_smart_pointer = _iadapter;
 	}
 	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::set_as_string()
+	{
+#   if PYBIND_PYTHON_VERSION < 300
+		m_pytypeobject->tp_flags |= Py_TPFLAGS_STRING_SUBCLASS;
+#	else
+		m_pytypeobject->tp_flags |= Py_TPFLAGS_UNICODE_SUBCLASS;
+#	endif
+	}
+	//////////////////////////////////////////////////////////////////////////
 	void * class_type_scope::construct( PyObject * _obj, PyObject * _args )
 	{
 		if( m_constructor == nullptr )

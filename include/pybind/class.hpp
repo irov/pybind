@@ -600,10 +600,17 @@ namespace pybind
 
 			return *this;
 		}
-
+		
 		base_ & def_smart_pointer()
 		{
 			return def_static_proxy_smart_pointer( &C::intrusive_ptr_add_ref, &C::intrusive_ptr_dec_ref );
+		}
+
+		base_ & def_as_string()
+		{
+			m_scope->set_as_string();
+
+			return *this;
 		}
 
 		const pybind::class_type_scope_ptr & get_scope() const

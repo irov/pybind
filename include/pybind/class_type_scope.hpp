@@ -108,6 +108,7 @@ namespace pybind
 		void add_number_div( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter );
 		void set_smart_pointer( const smart_pointer_adapter_interface_ptr & _iadapter );
 
+		void set_as_string();
 
 		PyObject * create_class( void * _impl );
 		PyObject * create_holder( void * _impl );
