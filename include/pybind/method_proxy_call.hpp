@@ -17,12 +17,6 @@ namespace pybind
 	};
 
 	template<class P, class C, class F,class Ret>
-	struct method_proxy_call_impl<P,C,F,Ret,0>
-	{
-		static Ret call( P * _proxy, C * _obj, F f, PyObject * _arg );		
-	};
-
-	template<class P, class C, class F,class Ret>
 	struct method_proxy_call_impl<P,C,F,Ret,1>
 	{
 		static Ret call( P * _proxy, C * _obj, F f, PyObject * _arg )
@@ -265,8 +259,8 @@ namespace pybind
 
 		static PyObject * call( P * _proxy, C * _obj, F f, PyObject * _arg )
 		{
-			uint32_t arg_size = pybind::tuple_size( _arg );
-			uint32_t fn_arity = f_info::arity;
+			size_t arg_size = pybind::tuple_size( _arg );
+			size_t fn_arity = f_info::arity;
 
             if( arg_size + 1 != fn_arity )
             {

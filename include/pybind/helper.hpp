@@ -38,6 +38,61 @@ namespace pybind
 
 		protected:
 			PyObject * m_obj;
+
+		private:
+			return_operator_t & operator = (const return_operator_t &);
+		};
+		//////////////////////////////////////////////////////////////////////////
+		class import_operator_t
+		{
+		public:
+			import_operator_t()
+				: m_obj( nullptr )
+			{
+			}
+
+			import_operator_t( const import_operator_t  & _op )
+				: m_obj( _op.m_obj )
+			{
+				pybind::incref( m_obj );
+			}
+
+			import_operator_t( PyObject * _value )
+				: m_obj( _value )
+			{
+				pybind::incref( m_obj );
+			}
+
+		public:
+			template<class T>
+			import_operator_t( const T & _value )
+				: m_obj( ptr_throw_specialized<T>()(_value) )
+			{
+			}
+
+		public:
+			~import_operator_t()
+			{
+				pybind::decref( m_obj );
+			}
+
+		public:
+			operator PyObject * () const
+			{
+				return m_obj;
+			}
+
+		public:
+			PyObject * ptr() const
+			{
+				return m_obj;
+			}
+
+		protected:
+			PyObject * m_obj;
+
+		private:
+			import_operator_t & operator = (const import_operator_t &);
 		};
 		//////////////////////////////////////////////////////////////////////////
 		class extract_operator_t
@@ -75,6 +130,11 @@ namespace pybind
 				return pybind::extract<T>( m_obj );
 			}
 
+			operator import_operator_t ()
+			{
+				return import_operator_t( m_obj );
+			}
+
 			template<class T>
 			bool operator == (const T & _value)
 			{
@@ -83,60 +143,9 @@ namespace pybind
 
 		protected:
 			PyObject * m_obj;
-		};
-		//////////////////////////////////////////////////////////////////////////
-		class import_operator_t
-		{
-		public:
-			import_operator_t()
-				: m_obj(nullptr)
-			{
-			}
 
-			import_operator_t( const import_operator_t  & _op )
-				: m_obj( _op.m_obj )
-			{
-				pybind::incref( m_obj );
-			}
-
-			import_operator_t( const extract_operator_t  & _op )
-				: m_obj( _op.ptr() )
-			{
-				pybind::incref( m_obj );
-			}
-
-			import_operator_t( PyObject * _value )
-				: m_obj( _value )
-			{
-				pybind::incref( m_obj );
-			}
-
-			template<class T>
-			import_operator_t( const T & _value )
-				: m_obj( ptr_throw_specialized<T>()(_value) )
-			{
-			}
-
-		public:
-			~import_operator_t()
-			{
-				pybind::decref( m_obj );
-			}
-
-		public:
-			operator PyObject * () const
-			{
-				return m_obj;
-			}
-
-		public:
-			PyObject * ptr() const
-			{
-				return m_obj;
-			}
-
-		protected:
-			PyObject * m_obj;
+		private:
+			extract_operator_t & operator = (const extract_operator_t &);
 		};
 		//////////////////////////////////////////////////////////////////////////
 		class args_operator_t
@@ -159,7 +168,7 @@ namespace pybind
 			{
 				pybind::incref( m_args );
 			}
-						
+
 			args_operator_t & operator = (const args_operator_t & _args)
 			{
 				pybind::decref( m_args );
@@ -241,19 +250,6 @@ namespace pybind
 		_value = pybind::extract<V>( py_value );
 
 		return true;
-	}
-	//////////////////////////////////////////////////////////////////////////
-	template<class It>
-	inline void foreach_t( const pybind::object & _cb, It _begin, It _end )
-	{
-		for( It
-			it = _begin,
-			it_end = _end;
-		it != it_end;
-		++it )
-		{
-			_cb( *it );
-		}
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PYBIND_API detail::extract_operator_t ask_tuple( PyObject * _obj, const pybind::tuple & _tuple );	

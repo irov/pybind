@@ -53,7 +53,7 @@ namespace pybind
 
 						const char * type_name = tinfo.name();
 
-						pybind::throw_exception( "extract invalid find cast for '%.256s'"
+						pybind::throw_exception( "extract: extract invalid find cast for '%.256s'"
 							, type_name
 							);
 					}
@@ -144,7 +144,7 @@ namespace pybind
             
             const char * type_name = tinfo.name();
 
-            pybind::throw_exception( "extract invalid %s:%s not cast to '%s'"
+            pybind::throw_exception( "extract_throw: extract invalid %s:%s not cast to '%s'"
                 , pybind::object_repr(_obj)
                 , pybind::object_repr_type(_obj)
                 , type_name
@@ -168,7 +168,7 @@ namespace pybind
 
 				const char * type_name = tinfo.name();
 
-				pybind::log( "extract invalid %s:%s not cast to '%s'"
+				pybind::log( "extract_value<T>: extract invalid %s:%s not cast to '%s'"
 					, pybind::object_repr( _obj )
 					, pybind::object_repr_type( _obj )
 					, type_name
@@ -192,7 +192,7 @@ namespace pybind
 
 				const char * type_name = tinfo.name();
 
-				pybind::log( "extract invalid %s:%s not cast to '%s'"
+				pybind::log( "extract_value<T*>: extract invalid %s:%s not cast to '%s'"
 					, pybind::object_repr( _obj )
 					, pybind::object_repr_type( _obj )
 					, type_name
@@ -216,7 +216,7 @@ namespace pybind
 
 				const char * type_name = tinfo.name();
 
-				pybind::log( "extract invalid %s:%s not cast to '%s'"
+				pybind::log( "extract_value<intrusive>: extract invalid %s:%s not cast to '%s'"
 					, pybind::object_repr( _obj )
 					, pybind::object_repr_type( _obj )
 					, type_name

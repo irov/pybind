@@ -165,9 +165,8 @@ namespace pybind
 				tuple_getitem_t( _arg, 5 ),
 				tuple_getitem_t( _arg, 6 ),
 				tuple_getitem_t( _arg, 7 ),
-				tuple_getitem_t( _arg, 8 ),
-				tuple_getitem_t( _arg, 9 )
-				, make_args_t( _arg, 10 )
+				tuple_getitem_t( _arg, 8 )
+				, make_args_t( _arg, 9 )
 				);
 		}
 	};
@@ -205,8 +204,8 @@ namespace pybind
 
 		static PyObject * call( C * _self, F f, PyObject * _arg )
 		{
-			uint32_t arg_size = (_arg) ? pybind::tuple_size( _arg ) : 0;
-			uint32_t fn_arity = f_info::arity;
+			size_t arg_size = (_arg) ? pybind::tuple_size( _arg ) : 0;
+			size_t fn_arity = f_info::arity;
 
 			if( arg_size + 1 < fn_arity )
 			{

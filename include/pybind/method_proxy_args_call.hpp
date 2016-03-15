@@ -17,24 +17,6 @@ namespace pybind
 	};
 
 	template<class P, class C, class F,class Ret>
-	struct method_proxy_args_call_impl<P, C, F, Ret, 0>
-	{
-		static Ret call( P * _proxy, C * _obj, F f, PyObject * _arg );		
-	};
-
-	template<class P, class C, class F,class Ret>
-	struct method_proxy_args_call_impl<P, C, F, Ret, 1>
-	{
-		static Ret call( P * _proxy, C * _obj, F f, PyObject * _arg )
-		{
-            (void)_arg;
-
-			return (_proxy->*f)( _obj
-				);
-		}
-	};
-
-	template<class P, class C, class F,class Ret>
 	struct method_proxy_args_call_impl<P, C, F, Ret, 2>
 	{
 		static Ret call( P * _proxy, C * _obj, F f, PyObject * _arg )
@@ -189,6 +171,50 @@ namespace pybind
 		}
 	};
 
+	template<class P, class C, class F, class Ret>
+	struct method_proxy_args_call_impl<P, C, F, Ret, 12>
+	{
+		static Ret call( P * _proxy, C * _obj, F f, PyObject * _arg )
+		{
+			return (_proxy->*f)(_obj
+				, tuple_getitem_t( _arg, 0 )
+				, tuple_getitem_t( _arg, 1 )
+				, tuple_getitem_t( _arg, 2 )
+				, tuple_getitem_t( _arg, 3 )
+				, tuple_getitem_t( _arg, 4 )
+				, tuple_getitem_t( _arg, 5 )
+				, tuple_getitem_t( _arg, 6 )
+				, tuple_getitem_t( _arg, 7 )
+				, tuple_getitem_t( _arg, 8 )
+				, tuple_getitem_t( _arg, 9 )
+				, make_args_t( _arg, 10 )
+				);
+		}
+	};
+
+	template<class P, class C, class F, class Ret>
+	struct method_proxy_args_call_impl<P, C, F, Ret, 13>
+	{
+		static Ret call( P * _proxy, C * _obj, F f, PyObject * _arg )
+		{
+			return (_proxy->*f)(_obj
+				, tuple_getitem_t( _arg, 0 )
+				, tuple_getitem_t( _arg, 1 )
+				, tuple_getitem_t( _arg, 2 )
+				, tuple_getitem_t( _arg, 3 )
+				, tuple_getitem_t( _arg, 4 )
+				, tuple_getitem_t( _arg, 5 )
+				, tuple_getitem_t( _arg, 6 )
+				, tuple_getitem_t( _arg, 7 )
+				, tuple_getitem_t( _arg, 8 )
+				, tuple_getitem_t( _arg, 9 )
+				, tuple_getitem_t( _arg, 10 )
+				, make_args_t( _arg, 11 )
+				);
+		}
+	};
+
+
 	template<class P, class C, class F,class Ret>
 	struct method_proxy_args_call_ret_impl
 	{
@@ -222,8 +248,8 @@ namespace pybind
 
 		static PyObject * call( P * _proxy, C * _obj, F f, PyObject * _arg )
 		{
-			uint32_t arg_size = pybind::tuple_size( _arg );
-			uint32_t fn_arity = f_info::arity;
+			size_t arg_size = pybind::tuple_size( _arg );
+			size_t fn_arity = f_info::arity;
 
             if( arg_size + 2 < fn_arity )
             {

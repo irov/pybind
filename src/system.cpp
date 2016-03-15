@@ -57,7 +57,6 @@ namespace pybind
 #	endif
 
 #   if PYBIND_PYTHON_VERSION >= 330
-			Py_UnbufferedStdioFlag = 1;
 			Py_DontWriteBytecodeFlag = 1;
 #	endif
 
