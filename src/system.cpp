@@ -302,6 +302,15 @@ namespace pybind
 
         return module;
     }
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * module_reload( PyObject * _module )
+	{
+		PyObject * reload_module = PyImport_ReloadModule( _module );
+
+		check_error();
+
+		return reload_module;
+	}
     //////////////////////////////////////////////////////////////////////////
     bool code_check( PyObject * _code )
     {
