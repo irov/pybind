@@ -214,6 +214,52 @@ namespace pybind
 		}
 	};
 
+	template<class P, class C, class F, class Ret>
+	struct method_proxy_args_call_impl<P, C, F, Ret, 14>
+	{
+		static Ret call( P * _proxy, C * _obj, F f, PyObject * _arg )
+		{
+			return (_proxy->*f)(_obj
+				, tuple_getitem_t( _arg, 0 )
+				, tuple_getitem_t( _arg, 1 )
+				, tuple_getitem_t( _arg, 2 )
+				, tuple_getitem_t( _arg, 3 )
+				, tuple_getitem_t( _arg, 4 )
+				, tuple_getitem_t( _arg, 5 )
+				, tuple_getitem_t( _arg, 6 )
+				, tuple_getitem_t( _arg, 7 )
+				, tuple_getitem_t( _arg, 8 )
+				, tuple_getitem_t( _arg, 9 )
+				, tuple_getitem_t( _arg, 10 )
+				, tuple_getitem_t( _arg, 11 )
+				, make_args_t( _arg, 12 )
+				);
+		}
+	};
+	
+	template<class P, class C, class F, class Ret>
+	struct method_proxy_args_call_impl<P, C, F, Ret, 15>
+	{
+		static Ret call( P * _proxy, C * _obj, F f, PyObject * _arg )
+		{
+			return (_proxy->*f)(_obj
+				, tuple_getitem_t( _arg, 0 )
+				, tuple_getitem_t( _arg, 1 )
+				, tuple_getitem_t( _arg, 2 )
+				, tuple_getitem_t( _arg, 3 )
+				, tuple_getitem_t( _arg, 4 )
+				, tuple_getitem_t( _arg, 5 )
+				, tuple_getitem_t( _arg, 6 )
+				, tuple_getitem_t( _arg, 7 )
+				, tuple_getitem_t( _arg, 8 )
+				, tuple_getitem_t( _arg, 9 )
+				, tuple_getitem_t( _arg, 10 )
+				, tuple_getitem_t( _arg, 11 )
+				, tuple_getitem_t( _arg, 12 )
+				, make_args_t( _arg, 13 )
+				);
+		}
+	};
 
 	template<class P, class C, class F,class Ret>
 	struct method_proxy_args_call_ret_impl
