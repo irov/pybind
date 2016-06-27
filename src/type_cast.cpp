@@ -39,6 +39,8 @@ namespace pybind
 
 		if( detail::is_wrap( _obj ) == false )
 		{
+			pybind::error_message( "type_info_cast: unwrap object" );
+
 			return false;
 		}
 
