@@ -3,7 +3,6 @@
 #	include "pybind/exports.hpp"
 #	include "pybind/types.hpp"
 #	include "pybind/exception.hpp"
-#	include "pybind/detail.hpp"
 
 #	include "config/stdex.hpp"
 
@@ -70,20 +69,22 @@ namespace pybind
 		template<class B>
 		void add_base_t( pybind_metacast _cast )
 		{
-			uint32_t tptrinfo = detail::class_info<B*>();
-			uint32_t tinfo = detail::class_info<B>();
+			kernel_interface * kernel = pybind::get_kernel();
 
-			if( detail::has_class_type_scope( tinfo ) == false )
+			uint32_t tptrinfo = kernel->class_info<B*>();
+			uint32_t tinfo = kernel->class_info<B>();
+
+			if( kernel->has_class_type_scope( tinfo ) == false )
 			{
 				pybind::throw_exception( "class_type_scope_interface::add_base_t %s not bind base type %s"
 					, this->get_name()
-					, detail::get_class_type_info( tinfo )
+					, kernel->get_class_type_info( tinfo )
 					);
 
 				return;
 			}
 
-			const class_type_scope_ptr & basescope = detail::get_class_type_scope( tinfo );
+			const class_type_scope_ptr & basescope = kernel->get_class_type_scope( tinfo );
 
 			this->add_base( tptrinfo, basescope, _cast );
 		}

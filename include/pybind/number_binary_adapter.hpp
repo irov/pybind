@@ -131,7 +131,9 @@ namespace pybind
 	protected:
 		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _value ) override
 		{
-			C * self = detail::meta_cast_class_t<C>( _impl, _scope );
+			kernel_interface * kernel = pybind::get_kernel();
+
+			C * self = kernel->meta_cast_class_t<C>( _impl, _scope );
 
 			V value;
 			if( pybind::extract_value( _value, value, true ) == false )
@@ -158,7 +160,9 @@ namespace pybind
 	protected:
 		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _value ) override
 		{
-			C * self = detail::meta_cast_class_t<C>( _impl, _scope );
+			kernel_interface * kernel = pybind::get_kernel();
+
+			C * self = kernel->meta_cast_class_t<C>( _impl, _scope );
 
 			V value;
 			if( pybind::extract_value( _value, value, true ) == false )
@@ -185,7 +189,9 @@ namespace pybind
 	protected:
 		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _value ) override
 		{
-			C * self = detail::meta_cast_class_t<C>( _impl, _scope );
+			kernel_interface * kernel = pybind::get_kernel();
+
+			C * self = kernel->meta_cast_class_t<C>( _impl, _scope );
 
 			V value;
 			if( pybind::extract_value( _value, value, true ) == false )
@@ -212,7 +218,9 @@ namespace pybind
 	protected:
 		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _value ) override
 		{
-			C * self = detail::meta_cast_class_t<C>( _impl, _scope );
+			kernel_interface * kernel = pybind::get_kernel();
+
+			C * self = kernel->meta_cast_class_t<C>( _impl, _scope );
 
 			V value;
 			if( pybind::extract_value( _value, value, true ) == false )

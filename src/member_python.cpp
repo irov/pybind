@@ -1,27 +1,20 @@
-#	include "member_type.hpp"
+#	include "member_python.hpp"
 
 #	include "pybind/system.hpp"
-#	include "pybind/detail.hpp"
 
 #	include "pybind/class_type_scope.hpp"
 
-#	include "pod.hpp"
-
 namespace pybind
 {
-	struct member_scope
+	//////////////////////////////////////////////////////////////////////////
+	struct py_member_type
 	{
-		PyTypeObject member_type;
+		PyObject_HEAD
+
+		member_adapter_interface * iadapter;
 	};
 	//////////////////////////////////////////////////////////////////////////
-	static member_scope & get_scope()
-	{
-		static member_scope k;
-
-		return k;
-	}
-	//////////////////////////////////////////////////////////////////////////
-	static void py_dealloc( PyObject * _obj )
+	static void py_member_dealloc( PyObject * _obj )
 	{
 		py_member_type * mt = (py_member_type *)(_obj);
 
@@ -38,7 +31,9 @@ namespace pybind
 
 		try
 		{	
-			void * impl = detail::get_class_impl( py_self );
+			kernel_interface * kernel = pybind::get_kernel();
+
+			void * impl = kernel->get_class_impl( py_self );
 
 			if( impl == nullptr )
 			{
@@ -47,7 +42,7 @@ namespace pybind
 				return nullptr;
 			}
 
-			const class_type_scope_ptr & scope = detail::get_class_scope( py_self->ob_type );
+			const class_type_scope_ptr & scope = kernel->get_class_scope( py_self->ob_type );
 
 			PyObject * py_method = mt->iadapter->get( impl, scope );
 
@@ -74,7 +69,9 @@ namespace pybind
 
 		try
 		{
-			void * impl = detail::get_class_impl( py_self );
+			kernel_interface * kernel = pybind::get_kernel();
+
+			void * impl = kernel->get_class_impl( py_self );
 
 			if( impl == nullptr )
 			{
@@ -83,7 +80,7 @@ namespace pybind
 				return nullptr;
 			}
 
-			const class_type_scope_ptr & scope = detail::get_class_scope( py_self->ob_type );
+			const class_type_scope_ptr & scope = kernel->get_class_scope( py_self->ob_type );
 
 			mt->iadapter->set( impl, py_value, scope );
 
@@ -101,54 +98,25 @@ namespace pybind
 		return nullptr;		
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * member_type_scope::instance( const member_adapter_interface_ptr & _iadapter )
+	bool member_python::initialize()
 	{
-		member_scope & k = get_scope();
+		m_setmethod.ml_name = "setmethod";
+		m_setmethod.ml_meth = &py_setmethod;
+		m_setmethod.ml_flags = METH_CLASS | METH_VARARGS;
+		m_setmethod.ml_doc = "pybind embedding member set";
 
-		py_member_type * py_member = (py_member_type *)PyType_GenericAlloc( &k.member_type, 0 );
-		
-		stdex::intrusive_ptr_setup( py_member->iadapter, _iadapter );
+		m_getmethod.ml_name = "getmethod";
+		m_getmethod.ml_meth = &py_getmethod;
+		m_getmethod.ml_flags = METH_CLASS | METH_VARARGS;
+		m_getmethod.ml_doc = "pybind embedding member get";
 
-		//////////////////////////////////////////////////////////////////////////
-		static PyMethodDef getmethod =
-		{
-			"getmethod",
-			&py_getmethod,
-			METH_CLASS | METH_VARARGS,
-			"Embedding function cpp"
-		};
-		//////////////////////////////////////////////////////////////////////////
-		static PyMethodDef setmethod =
-		{
-			"setmethod",
-			&py_setmethod,
-			METH_CLASS | METH_VARARGS,
-			"Embedding function cpp"
-		};
-
-		PyObject * py_get = PyCFunction_New( &getmethod, (PyObject*)py_member );
-		PyObject * py_set = PyCFunction_New( &setmethod, (PyObject*)py_member );
-
-		Py_DecRef( (PyObject *)py_member );
-
-		PyObject * py_result = PyObject_CallFunction( (PyObject*)&PyProperty_Type, const_cast<char *>("OOss"), py_get, py_set, 0, "member_type_scope");		
-		Py_DecRef( py_get );
-		Py_DecRef( py_set );
-
-		return py_result;
-	}
-	//////////////////////////////////////////////////////////////////////////
-	bool initialize_members()
-	{
-		member_scope & k = get_scope();
-	
 		PyTypeObject member_type =
 		{
 			PyVarObject_HEAD_INIT( &PyType_Type, 0 )
 			"member_type_scope",
 			sizeof( py_member_type ),
 			0,
-			&py_dealloc,                             /* tp_dealloc */
+			&py_member_dealloc,                             /* tp_dealloc */
 			0,                    /* tp_print */
 			0,                                          /* tp_getattr */
 			0,                                          /* tp_setattr */
@@ -185,21 +153,40 @@ namespace pybind
 			0,                               /* tp_free */
 		};
 
-		k.member_type = member_type;
+		m_member_type = member_type;
 
-		if( PyType_Ready( &k.member_type ) < 0 )
+		if( PyType_Ready( &m_member_type ) < 0 )
 		{
-			pybind::log("invalid embedding class '%s' \n"
-				, k.member_type.tp_name
-                );
+			pybind::log( "invalid embedding member type '%s' \n"
+				, m_member_type.tp_name
+				);
 
-            return false;
+			return false;
 		}
 
-        return true;
+		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void finalize_members()
+	void member_python::finalize()
 	{
+
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * member_python::create_member_adapter( const member_adapter_interface_ptr & _iadapter )
+	{
+		py_member_type * py_member = (py_member_type *)PyType_GenericAlloc( &m_member_type, 0 );
+		
+		stdex::intrusive_ptr_setup( py_member->iadapter, _iadapter );
+		
+		PyObject * py_get = PyCFunction_New( &m_getmethod, (PyObject*)py_member );
+		PyObject * py_set = PyCFunction_New( &m_setmethod, (PyObject*)py_member );
+
+		Py_DecRef( (PyObject *)py_member );
+
+		PyObject * py_result = PyObject_CallFunction( (PyObject*)&PyProperty_Type, const_cast<char *>("OOss"), py_get, py_set, 0, "member_type_scope");		
+		Py_DecRef( py_get );
+		Py_DecRef( py_set );
+
+		return py_result;
 	}
 }

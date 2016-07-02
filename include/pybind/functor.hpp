@@ -11,9 +11,7 @@ namespace pybind
 {
 	namespace detail
 	{
-		PYBIND_API void def_functor(			
-			const functor_adapter_interface_ptr & _adapter,
-			PyObject * _module );
+		PYBIND_API void def_functor( const functor_adapter_interface_ptr & _adapter, bool _native, PyObject * _module );
 	}
 
 	template<class C, class F>
@@ -24,10 +22,7 @@ namespace pybind
 		functor_adapter_interface_ptr imethod =
 			new functor_proxy_adapter<typename t_info::class_type, F>(_name, t_info::arity, _self, _method );
 
-		detail::def_functor(
-			imethod,
-            _module
-			);
+		detail::def_functor( imethod, false, _module );
 	}
 
 	template<class C, class F>
@@ -38,10 +33,7 @@ namespace pybind
 		functor_adapter_interface_ptr imethod =
 			new functor_proxy_adapter_args<typename t_info::class_type, F>( _name, t_info::arity, _self, _method );
 
-		detail::def_functor(
-			imethod,
-			_module
-			);
+		detail::def_functor( imethod, false, _module );
 	}
 }
 

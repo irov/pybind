@@ -8,432 +8,139 @@
 #	include "pybind/tuple.hpp"
 #	include "pybind/dict.hpp"
 
-#	include "config/python.hpp"
-
 namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, bool & _value, bool _nothrow )
 	{
-		if( _obj == nullptr )
-		{
-			return false;
-		}
+		(void)_nothrow;
 
-		if( PyBool_Check( _obj ) )
-		{
-			_value = (_obj == Py_True);
-		}
-#   if PYBIND_PYTHON_VERSION < 300
-		else if( PyInt_Check( _obj ) )
-		{
-			_value = (PyInt_AsLong( _obj ) != 0);
-		}
-#	endif
-		else if( PyLong_Check( _obj ) )
-		{
-			_value = (PyLong_AsLong( _obj ) != 0);				
-		}
-		else if( PyFloat_Check( _obj ) )
-		{
-			_value = (PyFloat_AsDouble( _obj ) != 0.0);
-		}
-		else
-		{
-			return false;
-		}
+		bool successful = pybind::extract_bool( _obj, _value );
 
-		return true;
+		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, int8_t & _value, bool _nothrow )
 	{
-		if( _obj == nullptr )
-		{
-			return false;
-		}
+		(void)_nothrow;
 
-#   if PYBIND_PYTHON_VERSION < 300
-		if( PyInt_Check( _obj ) )
-		{
-			_value = (int8_t)PyInt_AsLong( _obj );
-		} else 
-#	endif
+		bool successful = pybind::extract_int8( _obj, _value );
 
-			if( PyLong_Check( _obj ) )
-			{
-				_value = (int8_t)PyLong_AsLong( _obj );
-			}
-			else if( PyFloat_Check( _obj ) )
-			{
-				_value = (int8_t)PyFloat_AsDouble( _obj );				
-			}
-			else
-			{
-				return false;
-			}
-
-			return true;
+		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, int16_t & _value, bool _nothrow )
 	{
-		if( _obj == nullptr )
-		{
-			return false;
-		}
+		(void)_nothrow;
 
-#   if PYBIND_PYTHON_VERSION < 300
-		if( PyInt_Check( _obj ) )
-		{
-			_value = (int16_t)PyInt_AsLong( _obj );
-		} else 
-#	endif
+		bool successful = pybind::extract_int16( _obj, _value );
 
-			if( PyLong_Check( _obj ) )
-			{
-				_value = (int16_t)PyLong_AsLong( _obj );
-			}
-			else if( PyFloat_Check( _obj ) )
-			{
-				_value = (int16_t)PyFloat_AsDouble( _obj );				
-			}
-			else
-			{
-				return false;
-			}
-
-			return true;
+		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, int32_t & _value, bool _nothrow )
 	{
-		if( _obj == nullptr )
-		{
-			return false;
-		}
+		(void)_nothrow;
 
-#   if PYBIND_PYTHON_VERSION < 300
-		if( PyInt_Check( _obj ) )
-		{
-			_value = (int32_t)PyInt_AsLong( _obj );
-		} else
-#	endif
+		bool successful = pybind::extract_int32( _obj, _value );
 
-		if( PyLong_Check( _obj ) )
-		{
-			_value = (int32_t)PyLong_AsLong( _obj );
-		}
-		else if( PyFloat_Check( _obj ) )
-		{
-			_value = (int32_t)PyFloat_AsDouble( _obj );				
-		}
-		else
-		{
-			return false;
-		}
-
-		return true;
+		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, int64_t & _value, bool _nothrow )
 	{
-		if( _obj == nullptr )
-		{
-			return false;
-		}
+		(void)_nothrow;
 
-#   if PYBIND_PYTHON_VERSION < 300
-		if( PyInt_Check( _obj ) )
-		{
-			_value = (int64_t)PyInt_AsLong( _obj );
-		} else
-#	endif
+		bool successful = pybind::extract_int64( _obj, _value );
 
-		if( PyLong_Check( _obj ) )
-		{				
-			_value = (int64_t)PyLong_AsLongLong( _obj );
-		}
-		else if( PyFloat_Check( _obj ) )
-		{				
-			_value = (int64_t)PyFloat_AsDouble( _obj );
-		}
-		else
-		{
-			return false;
-		}
-
-		return true;
+		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, uint8_t & _value, bool _nothrow )
 	{
-		if( _obj == nullptr )
-		{
-			return false;
-		}
+		(void)_nothrow;
 
-#   if PYBIND_PYTHON_VERSION < 300
-		if( PyInt_Check( _obj ) )
-		{
-			_value = (uint8_t)PyInt_AsUnsignedLongMask( _obj );
-		} else
-#	endif
+		bool successful = pybind::extract_uint8( _obj, _value );
 
-			if( PyLong_Check( _obj ) )
-			{				
-				_value = (uint8_t)PyLong_AsUnsignedLong( _obj );
-			}
-			else if( PyFloat_Check( _obj ) )
-			{				
-				_value = (uint8_t)PyFloat_AsDouble( _obj );
-			}
-			else
-			{
-				return false;
-			}
-
-			return true;
+		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, uint16_t & _value, bool _nothrow )
 	{
-		if( _obj == nullptr )
-		{
-			return false;
-		}
+		(void)_nothrow;
 
-#   if PYBIND_PYTHON_VERSION < 300
-		if( PyInt_Check( _obj ) )
-		{
-			_value = (uint16_t)PyInt_AsUnsignedLongMask( _obj );
-		} else
-#	endif
+		bool successful = pybind::extract_uint16( _obj, _value );
 
-			if( PyLong_Check( _obj ) )
-			{				
-				_value = (uint16_t)PyLong_AsUnsignedLong( _obj );
-			}
-			else if( PyFloat_Check( _obj ) )
-			{				
-				_value = (uint16_t)PyFloat_AsDouble( _obj );
-			}
-			else
-			{
-				return false;
-			}
-
-			return true;
+		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, uint32_t & _value, bool _nothrow )
 	{
-		if( _obj == nullptr )
-		{
-			return false;
-		}
+		(void)_nothrow;
 
-#   if PYBIND_PYTHON_VERSION < 300
-		if( PyInt_Check( _obj ) )
-		{
-			_value = (uint32_t)PyInt_AsUnsignedLongMask( _obj );
-		} else
-#	endif
+		bool successful = pybind::extract_uint32( _obj, _value );
 
-		if( PyLong_Check( _obj ) )
-		{				
-			_value = (uint32_t)PyLong_AsUnsignedLong( _obj );
-		}
-		else if( PyFloat_Check( _obj ) )
-		{				
-			_value = (uint32_t)PyFloat_AsDouble( _obj );
-		}
-		else
-		{
-			return false;
-		}
-
-		return true;
+		return successful;
 	}
     //////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, uint64_t & _value, bool _nothrow )
 	{
-		if( _obj == nullptr )
-		{
-			return false;
-		}
+		(void)_nothrow;
 
-#   if PYBIND_PYTHON_VERSION < 300
-		if( PyInt_Check( _obj ) )
-		{
-			_value = (uint64_t)PyInt_AsUnsignedLongLongMask( _obj );
-		} else
-#	endif
+		bool successful = pybind::extract_uint64( _obj, _value );
 
-		if( PyLong_Check( _obj ) )
-		{				
-			_value = (uint64_t)PyLong_AsUnsignedLongLong( _obj );
-		}
-		else if( PyFloat_Check( _obj ) )
-		{				
-			_value = (uint64_t)PyFloat_AsDouble( _obj );
-		}
-		else
-		{
-			return false;
-		}
-        
-		return true;
+		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, wchar_t & _value, bool _nothrow )
 	{
-		if( _obj == nullptr )
-		{
-			return false;
-		}
+		(void)_nothrow;
 
-		if( pybind::unicode_check( _obj ) == true )
-		{
-			size_t sz;
-			const wchar_t * ch_buff = pybind::unicode_to_wchar_and_size( _obj, sz );
+		bool successful = pybind::extract_wchar( _obj, _value );
 
-			if( ch_buff == nullptr )
-			{
-				return false;
-			}
-
-			if( sz != 1 )
-			{
-				return false;
-			}
-
-			_value = ch_buff[0];
-		}
-		else
-		{
-			return false;
-		}
-
-		return true;
+		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, long & _value, bool _nothrow )
 	{
-		if( _obj == nullptr )
-		{
-			return false;
-		}
+		(void)_nothrow;
 
-#   if PYBIND_PYTHON_VERSION < 300
-		if( PyInt_Check( _obj ) )
-		{
-			_value = (long)PyInt_AsLong( _obj );
-		} else
-#	endif
+		int64_t int64_value;
+		bool successful = pybind::extract_int64( _obj, int64_value );
 
-			if( PyLong_Check( _obj ) )
-			{				
-				_value = (long)PyLong_AsLong( _obj );
-			}
-			else if( PyFloat_Check( _obj ) )
-			{				
-				_value = (long)PyFloat_AsDouble( _obj );
-			}
-			else
-			{
-				return false;
-			}
+		_value = (long)int64_value;
 
-			return true;
+		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, unsigned long & _value, bool _nothrow )
 	{
-		if( _obj == nullptr )
-		{
-			return false;
-		}
+		(void)_nothrow;
 
-#   if PYBIND_PYTHON_VERSION < 300
-		if( PyInt_Check( _obj ) )
-		{
-			_value = (unsigned long)PyInt_AsUnsignedLongMask( _obj );
-		} else
-#	endif
+		uint64_t uint64_value;
+		bool successful = pybind::extract_uint64( _obj, uint64_value );
 
-			if( PyLong_Check( _obj ) )
-			{				
-				_value = (unsigned long)PyLong_AsUnsignedLong( _obj );
-			}
-			else if( PyFloat_Check( _obj ) )
-			{				
-				_value = (unsigned long)PyFloat_AsDouble( _obj );
-			}
-			else
-			{
-				return false;
-			}
+		_value = (unsigned long)uint64_value;
 
-			return true;
+		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, float & _value, bool _nothrow )
 	{
-		if( _obj == nullptr )
-		{
-			return false;
-		}
+		(void)_nothrow;
 
-		if( PyFloat_Check( _obj ) )
-		{
-			_value = (float)PyFloat_AsDouble( _obj );
-		}
-#   if PYBIND_PYTHON_VERSION < 300
-		else if( PyInt_Check( _obj ) )
-		{
-			_value = (float)PyInt_AsLong( _obj );
-		}
-#	endif
-		else if( PyLong_Check( _obj ) )
-		{
-			_value = (float)PyLong_AsLong( _obj );
-		}
-		else
-		{
-			return false;
-		}
+		bool successful = pybind::extract_float( _obj, _value );
 
-		return true;
+		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, double & _value, bool _nothrow )
 	{
-		if( _obj == nullptr )
-		{
-			return false;
-		}
+		(void)_nothrow;
 
-		if( PyFloat_Check( _obj ) )
-		{
-			_value = (double)PyFloat_AsDouble( _obj );				
-		}
-		else if( PyLong_Check( _obj ) )
-		{
-			_value = (double)PyLong_AsDouble( _obj );
-		}
-#   if PYBIND_PYTHON_VERSION < 300
-		else if( PyInt_Check( _obj ) )
-		{
-			_value = (double)PyInt_AsLong( _obj );				
-		}
-#	endif
-		else
-		{
-			return false;
-		}
+		bool successful = pybind::extract_double( _obj, _value );
 
-		return true;
+		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, const char *& _value, bool _nothrow )
@@ -565,76 +272,47 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * ptr_throw_i( bool _value )
 	{
-		if( _value == true )
-		{
-			Py_RETURN_TRUE;
-		}
-		
-		Py_RETURN_FALSE;
+		return pybind::ptr_bool( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * ptr_throw_i( int8_t _value )
 	{
-#   if PYBIND_PYTHON_VERSION < 300
-		return PyInt_FromLong( _value );
-#	else
-		return PyLong_FromLong( _value );
-#	endif
+		return pybind::ptr_int8( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * ptr_throw_i( int16_t _value )
 	{
-#   if PYBIND_PYTHON_VERSION < 300
-		return PyInt_FromLong( _value );
-#	else
-		return PyLong_FromLong( _value );
-#	endif
+		return pybind::ptr_int16( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * ptr_throw_i( int32_t _value )
 	{
-#   if PYBIND_PYTHON_VERSION < 300
-		return PyInt_FromLong( _value );
-#	else
-		return PyLong_FromLong( _value );
-#	endif
+		return pybind::ptr_int32( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * ptr_throw_i( int64_t _value )
 	{
-		return PyLong_FromLongLong( _value );
+		return pybind::ptr_int64( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * ptr_throw_i( uint8_t _value )
 	{
-#   if PYBIND_PYTHON_VERSION < 300
-		return PyInt_FromLong( _value );
-#	else
-		return PyLong_FromLong( _value );
-#	endif
+		return pybind::ptr_uint8( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * ptr_throw_i( uint16_t _value )
 	{
-#   if PYBIND_PYTHON_VERSION < 300
-		return PyInt_FromLong( _value );
-#	else
-		return PyLong_FromLong( _value );
-#	endif
+		return pybind::ptr_uint16( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * ptr_throw_i( uint32_t _value )
 	{
-#   if PYBIND_PYTHON_VERSION < 300
-		return PyInt_FromLong( _value );
-#	else
-		return PyLong_FromLong( _value );
-#	endif
+		return pybind::ptr_uint32( _value );
 	}
     //////////////////////////////////////////////////////////////////////////
 	PyObject * ptr_throw_i( uint64_t _value )
 	{
-		return PyLong_FromUnsignedLongLong( _value );
+		return pybind::ptr_uint64( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * ptr_throw_i( wchar_t _value )
@@ -648,22 +326,22 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * ptr_throw_i( long _value )
 	{
-		return PyLong_FromLong( _value );
+		return pybind::ptr_long( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * ptr_throw_i( unsigned long _value )
 	{
-		return PyLong_FromUnsignedLong( _value );
+		return pybind::ptr_ulong( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * ptr_throw_i( float _value )
 	{
-		return PyFloat_FromDouble( _value );
+		return pybind::ptr_float( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * ptr_throw_i( double _value )
 	{
-		return PyFloat_FromDouble( _value );
+		return pybind::ptr_double( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * ptr_throw_i( char * _value )

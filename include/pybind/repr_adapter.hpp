@@ -4,7 +4,6 @@
 
 #   include "pybind/extract.hpp"
 #   include "pybind/helper.hpp"
-#   include "pybind/detail.hpp"
 
 namespace pybind
 {
@@ -33,7 +32,9 @@ namespace pybind
 	public:
 		PyObject * repr( void * _self, const class_type_scope_ptr & _scope ) override
 		{
-			C * c = detail::meta_cast_class_t<C>( _self, _scope );
+			kernel_interface * kernel = pybind::get_kernel();
+
+			C * c = kernel->meta_cast_class_t<C>( _self, _scope );
 
 			PyObject * py_result = (detail::return_operator_t)(*m_repr)(c);
 

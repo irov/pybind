@@ -6,8 +6,6 @@
 #	include "pybind/method_proxy_call.hpp"
 #	include "pybind/function_proxy_call.hpp"
 
-#   include "pybind/detail.hpp"
-
 namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
@@ -117,14 +115,18 @@ namespace pybind
 	protected:
 		void incref( void * _impl, const class_type_scope_ptr & _scope ) override
 		{
-			C * self = detail::meta_cast_class_t<C>( _impl, _scope );
+			kernel_interface * kernel = pybind::get_kernel();
+
+			C * self = kernel->meta_cast_class_t<C>( _impl, _scope );
 
 			(*m_incref)(self);
 		}
 
 		void decref( void * _impl, const class_type_scope_ptr & _scope ) override
 		{
-			C * self = detail::meta_cast_class_t<C>( _impl, _scope );
+			kernel_interface * kernel = pybind::get_kernel();
+
+			C * self = kernel->meta_cast_class_t<C>( _impl, _scope );
 
 			(*m_decref)(self);
 		}

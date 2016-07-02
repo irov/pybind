@@ -165,7 +165,9 @@ namespace pybind
 	protected:
 		void call( void * _impl, const class_type_scope_ptr & _scope, size_t _index, PyObject * _value ) override
 		{
-			C * self = detail::meta_cast_class_t<C>( _impl, _scope );
+			kernel_interface * kernel = pybind::get_kernel();
+
+			C * self = kernel->meta_cast_class_t<C>( _impl, _scope );
 
 			self->operator [] ( _index ) = detail::extract_operator_t( _value );
 		}

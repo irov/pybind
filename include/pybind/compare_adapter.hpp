@@ -37,7 +37,9 @@ namespace pybind
     public:
 		bool compare( PyObject * _obj, void * _self, const class_type_scope_ptr & _scope, PyObject * _compare, PybindOperatorCompare _op, bool & _result ) override
         {
-			C * inst = detail::meta_cast_class_t<C>( _self, _scope );
+			kernel_interface * kernel = pybind::get_kernel();
+
+			C * inst = kernel->meta_cast_class_t<C>( _self, _scope );
 
             if( (*m_compare)( _obj, inst, _compare, _op, _result ) == false )
             {

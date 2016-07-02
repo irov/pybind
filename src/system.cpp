@@ -6,18 +6,9 @@
 #	include "pybind/stl_type_cast.hpp"
 #	endif
 
-#	include "pybind/detail.hpp"
-
 #	include "config/python.hpp"
 
-#	include "pod.hpp"
-
-#	include "method_type.hpp"
-#	include "member_type.hpp"
-#	include "function_type.hpp"
-#	include "functor_type.hpp"
-
-#	include "linked.hpp"
+#	include "kernel_python.hpp"
 
 #	include <stdexcept>
 #	include <stdio.h>
@@ -26,7 +17,7 @@ namespace pybind
 {
 	struct system_scope
 	{
-		PyObject * current_module;
+		kernel_interface * current_kernel;
 	};
 	//////////////////////////////////////////////////////////////////////////
 	static system_scope & get_scope()
@@ -91,51 +82,41 @@ namespace pybind
 
 		system_scope & k = get_scope();
 
-		k.current_module = nullptr;
+		k.current_kernel = new kernel_python;
 
-		if( initialize_pod() == false )
+		if( k.current_kernel->initialize() == false )
 		{
 			return false;
 		}
-
-		if( initialize_detail() == false )
-		{
-			return false;
-		}
-
+	
 #	ifdef PYBIND_STL_SUPPORT
 		if( initialize_stl_type_cast() == false )
 		{
 			return false;
 		}
 #	endif
-
-		if( initialize_methods() == false )
-        {
-            return false;
-        }
 		
-        if( initialize_members() == false )
-        {
-            return false;
-        }
+		//if( initialize_methods() == false )
+  //      {
+  //          return false;
+  //      }
 		
-		if( initialize_function() == false )
-        {
-            return false;
-        }
+        //if( initialize_members() == false )
+        //{
+        //    return false;
+        //}
+		
+		//if( initialize_function() == false )
+  //      {
+  //          return false;
+  //      }
 
-		if( initialize_functor() == false )
-        {
-            return false;
-        }
+		//if( initialize_functor() == false )
+  //      {
+  //          return false;
+  //      }
         
 		//initialize_default_type_cast();
-
-		if( initialize_linked() == false )
-		{
-			return false;
-		}
 
         return true;
 	}
@@ -144,16 +125,19 @@ namespace pybind
 	{	
 		Py_Finalize();
 
-		finalize_methods();
-		finalize_function();
-		finalize_functor();
-
 #	ifdef PYBIND_STL_SUPPORT
 		finalize_stl_type_cast();
 #	endif
 
-		finalize_detail();
-		finalize_pod();
+		system_scope & k = get_scope();
+
+		k.current_kernel->finalize();
+		
+		delete k.current_kernel;
+
+		//finalize_methods();
+		//finalize_function();
+		//finalize_functor();
 	}
     //////////////////////////////////////////////////////////////////////////
 	bool is_initialized()
@@ -180,6 +164,20 @@ namespace pybind
 
         return version;
     }
+	//////////////////////////////////////////////////////////////////////////
+	kernel_interface * get_kernel()
+	{
+		system_scope & scope = get_scope();
+
+		return scope.current_kernel;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void set_kernel( kernel_interface * _kernel )
+	{
+		system_scope & scope = get_scope();
+
+		scope.current_kernel = _kernel;
+	}
     //////////////////////////////////////////////////////////////////////////
 	void setStdErrorHandle( PyObject * _handle )
 	{
@@ -328,14 +326,16 @@ namespace pybind
 	{
 		system_scope & k = get_scope();
 
-		k.current_module = _module;
+		k.current_kernel->set_current_module( _module );
 	}
     //////////////////////////////////////////////////////////////////////////
 	PyObject * get_currentmodule()
 	{
 		system_scope & k = get_scope();
 
-		return k.current_module;
+		PyObject * module = k.current_kernel->get_current_module();
+
+		return module;
 	}
     //////////////////////////////////////////////////////////////////////////
 	PyObject * ask_native( PyObject * _obj, PyObject * _args )
@@ -666,6 +666,305 @@ namespace pybind
 		int result = PyFloat_Check( _obj );
 
 		return result == 1;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool extract_bool( PyObject * _obj, bool & _value )
+	{
+		if( _obj == nullptr )
+		{
+			return false;
+		}
+
+		if( PyBool_Check( _obj ) )
+		{
+			_value = (_obj == Py_True);
+		}
+#   if PYBIND_PYTHON_VERSION < 300
+		else if( PyInt_Check( _obj ) )
+		{
+			_value = (PyInt_AsLong( _obj ) != 0);
+		}
+#	endif
+		else if( PyFloat_Check( _obj ) )
+		{
+			_value = (PyFloat_AsDouble( _obj ) != 0.0);
+		}
+		else if( PyLong_Check( _obj ) )
+		{
+			_value = (PyLong_AsLong( _obj ) != 0);
+		}
+		else
+		{
+			return false;
+		}
+
+		return true;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	template<class T>
+	static bool extract_int_t( PyObject * _obj, T & _value )
+	{
+		if( _obj == nullptr )
+		{
+			return false;
+		}
+
+#   if PYBIND_PYTHON_VERSION < 300
+		else if( PyInt_Check( _obj ) )
+		{
+			_value = (T)PyInt_AS_LONG( _obj );
+		}
+#	endif
+		else if( PyLong_Check( _obj ) )
+		{
+			_value = (T)PyLong_AsLongLong( _obj );
+		}
+		else if( PyFloat_Check( _obj ) )
+		{
+			_value = (T)PyFloat_AsDouble( _obj );
+		}
+		else if( PyBool_Check( _obj ) )
+		{
+			_value = (T)(_obj == Py_True);
+		}
+		else
+		{
+			return false;
+		}
+
+		return true;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool extract_int8( PyObject * _obj, int8_t & _value )
+	{
+		return extract_int_t<int8_t>( _obj, _value );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool extract_int16( PyObject * _obj, int16_t & _value )
+	{
+		return extract_int_t<int16_t>( _obj, _value );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool extract_int32( PyObject * _obj, int32_t & _value )
+	{
+		return extract_int_t<int32_t>( _obj, _value );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool extract_int64( PyObject * _obj, int64_t & _value )
+	{
+		return extract_int_t<int64_t>( _obj, _value );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	template<class T>
+	static bool extract_unsigned_int_t( PyObject * _obj, T & _value )
+	{
+		if( _obj == nullptr )
+		{
+			return false;
+		}
+
+#   if PYBIND_PYTHON_VERSION < 300
+		if( PyInt_Check( _obj ) )
+		{
+			_value = (T)PyInt_AS_LONG( _obj );
+		} 
+		else
+#	endif
+		if( PyLong_Check( _obj ) )
+		{
+			_value = (T)PyLong_AsUnsignedLong( _obj );
+		}
+		else if( PyFloat_Check( _obj ) )
+		{
+			_value = (T)PyFloat_AsDouble( _obj );
+		}
+		else if( PyBool_Check( _obj ) )
+		{
+			_value = (T)(_obj == Py_True);
+		}
+		else
+		{
+			return false;
+		}
+
+		return true;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool extract_uint8( PyObject * _obj, uint8_t & _value )
+	{
+		return extract_unsigned_int_t<uint8_t>( _obj, _value );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool extract_uint16( PyObject * _obj, uint16_t & _value )
+	{
+		return extract_unsigned_int_t<uint16_t>( _obj, _value );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool extract_uint32( PyObject * _obj, uint32_t & _value )
+	{
+		return extract_unsigned_int_t<uint32_t>( _obj, _value );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool extract_uint64( PyObject * _obj, uint64_t & _value )
+	{
+		return extract_unsigned_int_t<uint64_t>( _obj, _value );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	template<class T>
+	static bool extract_float_t( PyObject * _obj, T & _value )
+	{
+		if( _obj == nullptr )
+		{
+			return false;
+		}
+
+		if( PyFloat_Check( _obj ) )
+		{
+			_value = (T)PyFloat_AsDouble( _obj );
+		}
+#   if PYBIND_PYTHON_VERSION < 300
+		else if( PyInt_Check( _obj ) )
+		{
+			_value = (T)PyInt_AsLong( _obj );
+		}
+#	endif
+		else if( PyLong_Check( _obj ) )
+		{
+			_value = (T)PyLong_AsDouble( _obj );
+		}
+		else if( PyBool_Check( _obj ) )
+		{
+			_value = (T)(_obj == Py_True);
+		}
+		else
+		{
+			return false;
+		}
+
+		return true;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool extract_float( PyObject * _obj, float & _value )
+	{
+		return extract_float_t<float>(_obj, _value );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool extract_double( PyObject * _obj, double & _value )
+	{
+		return extract_float_t<double>( _obj, _value );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool extract_wchar( PyObject * _obj, wchar_t & _value )
+	{
+		if( _obj == nullptr )
+		{
+			return false;
+		}
+
+		if( PyUnicode_CheckExact( _obj ) == true )
+		{
+			const wchar_t * ch_buff = PyUnicode_AS_UNICODE( _obj );
+
+			if( ch_buff == nullptr )
+			{
+				return false;
+			}
+
+			Py_ssize_t sz = PyUnicode_GET_SIZE( _obj );
+
+			if( sz != 1 )
+			{
+				return false;
+			}
+
+			_value = ch_buff[0];
+		}
+		else
+		{
+			return false;
+		}
+
+		return true;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * ptr_bool( bool _value )
+	{
+		if( _value == true )
+		{
+			Py_RETURN_TRUE;
+		}
+
+		Py_RETURN_FALSE;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	template<class T>
+	static PyObject * ptr_int_t( T _value )
+	{
+#   if PYBIND_PYTHON_VERSION < 300
+		return PyInt_FromLong( _value );
+#	else
+		return PyLong_FromLong( _value );
+#	endif
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * ptr_int8( int8_t _value )
+	{
+		return ptr_int_t<int8_t>( _value );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * ptr_int16( int16_t _value )
+	{
+		return ptr_int_t<int16_t>( _value );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * ptr_int32( int32_t _value )
+	{
+		return ptr_int_t<int32_t>( _value );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * ptr_int64( int64_t _value )
+	{
+		return PyLong_FromLongLong( _value );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * ptr_uint8( uint8_t _value )
+	{
+		return ptr_int_t<uint8_t>( _value );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * ptr_uint16( uint16_t _value )
+	{
+		return ptr_int_t<uint16_t>( _value );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * ptr_uint32( uint32_t _value )
+	{
+		return ptr_int_t<uint32_t>( _value );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * ptr_uint64( uint64_t _value )
+	{
+		return PyLong_FromUnsignedLongLong( _value );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * ptr_float( float _value )
+	{
+		return PyFloat_FromDouble( _value );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * ptr_double( double _value )
+	{
+		return PyFloat_FromDouble( _value );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * ptr_long( long _value )
+	{
+		return PyLong_FromLong( _value );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * ptr_ulong( unsigned long _value )
+	{
+		return PyLong_FromUnsignedLong( _value );
 	}
     //////////////////////////////////////////////////////////////////////////
 	PyObject * list_new( size_t _size )
@@ -1146,6 +1445,11 @@ namespace pybind
 
         PyErr_SetString( PyExc_RuntimeError, buffer );		 
 	}
+	//////////////////////////////////////////////////////////////////////////
+	void error_clear()
+	{
+		PyErr_Clear();
+	}
     //////////////////////////////////////////////////////////////////////////
 	PyObject * build_value( const char * _format, ... )
 	{
@@ -1197,35 +1501,45 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void unwrap( PyObject * _value )
 	{
-		detail::unwrap( _value );
+		kernel_interface * kernel = pybind::get_kernel();
+		
+		kernel->unwrap( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool is_wrap( PyObject * _value )
 	{
-		bool result = detail::is_wrap( _value );
+		kernel_interface * kernel = pybind::get_kernel();
+
+		bool result = kernel->is_wrap( _value );
 
 		return result;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool is_class( PyObject * _value )
 	{
-		bool result = detail::is_class( _value );
+		kernel_interface * kernel = pybind::get_kernel();
+
+		bool result = kernel->is_class( _value );
 
 		return result;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool is_type_class( PyObject * _value )
 	{
-		bool result = detail::is_type_class( _value );
+		kernel_interface * kernel = pybind::get_kernel();
+
+		bool result = kernel->is_type_class( _value );
 
 		return result;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool type_initialize( PyObject * _value )
 	{
+		kernel_interface * kernel = pybind::get_kernel();
+
 		PyTypeObject * type = (PyTypeObject *)_value;
 
-		const class_type_scope_ptr & scope = detail::get_class_scope( type );
+		const class_type_scope_ptr & scope = kernel->get_class_scope( type );
 
 		if( scope == nullptr )
 		{

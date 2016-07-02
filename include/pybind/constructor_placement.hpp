@@ -87,7 +87,9 @@ namespace pybind
 				return nullptr;
 			}
 
-            void * impl = pybind::detail::get_class_impl( _obj );
+			kernel_interface * kernel = pybind::get_kernel();
+
+			void * impl = kernel->get_class_impl( _obj );
 
 			if( impl == nullptr )
 			{

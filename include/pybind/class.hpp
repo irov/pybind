@@ -19,7 +19,7 @@
 #	include "pybind/number_binary_adapter.hpp"
 #	include "pybind/smart_pointer_adapter.hpp"
 
-#	include "pybind/type_cast.hpp"
+#	include "pybind/type_cast_result.hpp"
 #	include "pybind/exception.hpp"
 
 #   include "pybind/constructor_new.hpp"
@@ -38,7 +38,9 @@ namespace pybind
 	public:
 		base_( const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, size_t _size, PyObject * _module )
 		{
-			uint32_t info = detail::class_info<C>();
+			kernel_interface * kernel = pybind::get_kernel();
+
+			uint32_t info = kernel->class_info<C>();
 
 			uint32_t pod = 0;
 
@@ -47,7 +49,7 @@ namespace pybind
 				pod = (uint32_t)_size;
 			}
 
-			m_scope = detail::create_new_type_scope( info, _name, _user, _pynew, _pydestructor, pod );
+			m_scope = kernel->create_new_type_scope( info, _name, _user, _pynew, _pydestructor, pod );
 
 			this->setup_bases();
 
@@ -504,8 +506,10 @@ namespace pybind
 		{
 			number_binary_adapter_interface_ptr iadapter =
 				new number_binary_adapter_operator_mul<C, V>( "operator_mul" );
+						
+			kernel_interface * kernel = pybind::get_kernel();
 
-			uint32_t typeId = detail::class_info<VC>();
+			uint32_t typeId = kernel->class_info<VC>();
 
 			m_scope->add_number_mul( typeId, iadapter );
 
@@ -567,7 +571,9 @@ namespace pybind
 			number_binary_adapter_interface_ptr iadapter =
 				new number_binary_adapter_operator_div<C, V>( "operator_div" );
 
-			uint32_t typeId = detail::class_info<VC>();
+			kernel_interface * kernel = pybind::get_kernel();
+
+			uint32_t typeId = kernel->class_info<VC>();
 
 			m_scope->add_number_div( typeId, iadapter );
 
@@ -603,7 +609,7 @@ namespace pybind
 		
 		base_ & def_smart_pointer()
 		{
-			return def_static_proxy_smart_pointer( &C::intrusive_ptr_add_ref, &C::intrusive_ptr_dec_ref );
+			return this->def_static_proxy_smart_pointer( &C::intrusive_ptr_add_ref, &C::intrusive_ptr_dec_ref );
 		}
 
 		base_ & def_as_string()
@@ -692,15 +698,17 @@ namespace pybind
 				return true;
 			}
 
-			uint32_t tinfo = detail::class_info<C>();
-			uint32_t tptrinfo = detail::class_info<C *>();
+			kernel_interface * kernel = pybind::get_kernel();
+
+			uint32_t tinfo = kernel->class_info<C>();
+			uint32_t tptrinfo = kernel->class_info<C *>();
 
 			void * impl;
 			if( this->type_info_cast( _obj, tinfo, tptrinfo, &impl ) == false )
 			{
 				if( _nothrow == false )
 				{
-					detail::error_invalid_extract( _obj, tinfo );
+					kernel->error_invalid_extract( _obj, tinfo );
 				}
 
 				_value = nullptr;
@@ -720,7 +728,9 @@ namespace pybind
 				return pybind::ret_none();
 			}
 
-			const class_type_scope_ptr & scope = detail::class_scope<C>();
+			kernel_interface * kernel = pybind::get_kernel();
+
+			const class_type_scope_ptr & scope = kernel->class_scope<C>();
 
 			PyObject * py_obj = scope->create_class( (void *)_value );
 
@@ -741,15 +751,17 @@ namespace pybind
 				return true;
 			}
 
-			uint32_t tinfo = detail::class_info<C>();
-			uint32_t tptrinfo = detail::class_info<C *>();
+			pybind::kernel_interface * kernel = pybind::get_kernel();
+
+			uint32_t tinfo = kernel->class_info<C>();
+			uint32_t tptrinfo = kernel->class_info<C *>();
 
 			void * impl;
 			if( type_cast::type_info_cast( _obj, tinfo, tptrinfo, &impl ) == false )
 			{
 				if( _nothrow == false )
 				{
-					detail::error_invalid_extract( _obj, tinfo );
+					kernel->error_invalid_extract( _obj, tinfo );
 				}
 
 				_value = nullptr;
@@ -769,7 +781,9 @@ namespace pybind
 				return pybind::ret_none();
 			}
 
-			const class_type_scope_ptr & scope = detail::class_scope<C>();
+			pybind::kernel_interface * kernel = pybind::get_kernel();
+
+			const class_type_scope_ptr & scope = kernel->class_scope<C>();
 
 			PyObject * py_obj = scope->create_holder( (void *)_value );
 
@@ -783,13 +797,15 @@ namespace pybind
 	{
 		bool apply( PyObject * _obj, typename type_cast_result<C>::TCastValue _value, bool _nothrow ) override
 		{
-			uint32_t tinfo = detail::class_info<C>();
-			uint32_t tptrinfo = detail::class_info<C *>();
+			pybind::kernel_interface * kernel = pybind::get_kernel();
+
+			uint32_t tinfo = kernel->class_info<C>();
+			uint32_t tptrinfo = kernel->class_info<C *>();
 
 			void * impl;
 			if( type_cast::type_info_cast( _obj, tinfo, tptrinfo, &impl ) == false )
 			{
-				const class_type_scope_ptr & scope = pybind::detail::get_class_type_scope( tinfo );
+				const class_type_scope_ptr & scope = kernel->get_class_type_scope( tinfo );
 
 				const convert_adapter_interface_ptr & convert = scope->get_convert_adapter();
 
@@ -797,7 +813,7 @@ namespace pybind
 				{
 					if( _nothrow == false )
 					{
-						detail::error_invalid_extract( _obj, tinfo );
+						kernel->error_invalid_extract( _obj, tinfo );
 					}
 
 					return false;
@@ -807,7 +823,7 @@ namespace pybind
 				{
 					if( _nothrow == false )
 					{
-						detail::error_invalid_extract( _obj, tinfo );
+						kernel->error_invalid_extract( _obj, tinfo );
 					}
 
 					return false;
@@ -823,13 +839,15 @@ namespace pybind
 
 		PyObject * wrap( const C & _class ) override
 		{
-			uint32_t tinfo = detail::class_info<C>();
+			pybind::kernel_interface * kernel = pybind::get_kernel();
+
+			uint32_t tinfo = kernel->class_info<C>();
 
 			void * obj_place = nullptr;
 
 			size_t size_C = sizeof( C );
 
-			const class_type_scope_ptr & scope = detail::get_class_type_scope( tinfo );
+			const class_type_scope_ptr & scope = kernel->get_class_type_scope( tinfo );
 
 			PyObject * py_obj = scope->create_pod( &obj_place, size_C );
 

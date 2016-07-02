@@ -1,0 +1,37 @@
+#	pragma once
+
+#	include "pybind/adapter_interface.hpp"
+
+#   include "pybind/types.hpp"
+
+namespace pybind
+{
+	//////////////////////////////////////////////////////////////////////////
+	typedef stdex::intrusive_ptr<class class_type_scope> class_type_scope_ptr;
+	//////////////////////////////////////////////////////////////////////////
+	class member_adapter_interface
+		: public adapter_interface
+	{
+	public:
+		member_adapter_interface( const char * _name )
+			: m_name(_name)
+		{
+		}
+
+	public:
+		inline const char * getName() const
+		{
+			return m_name;
+		}
+
+	public:
+		virtual PyObject * get( void * _self, const class_type_scope_ptr & _scope ) = 0;
+		virtual int set( void * _self, PyObject * _args, const class_type_scope_ptr & _scope ) = 0;
+
+	protected:
+		const char * m_name;
+	};
+    //////////////////////////////////////////////////////////////////////////
+    typedef stdex::intrusive_ptr<member_adapter_interface> member_adapter_interface_ptr;
+}
+

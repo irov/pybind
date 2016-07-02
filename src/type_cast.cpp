@@ -3,12 +3,8 @@
 #	include "pybind/class_type_scope.hpp"
 
 #	include "pybind/system.hpp"
-#	include "pybind/detail.hpp"
-
-#	include "pod.hpp"
 
 #	include "config/config.hpp"
-#	include "config/python.hpp"
 
 namespace pybind
 {
@@ -32,19 +28,21 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool type_cast::type_info_cast( PyObject * _obj, uint32_t _tinfo, uint32_t _tptrinfo, void ** _impl )
 	{
-		if( detail::is_class( _obj ) == false )
+		kernel_interface * kernel = pybind::get_kernel();
+
+		if( kernel->is_class( _obj ) == false )
 		{
 			return false;
 		}
 
-		if( detail::is_wrap( _obj ) == false )
+		if( kernel->is_wrap( _obj ) == false )
 		{
 			pybind::error_message( "type_info_cast: unwrap object" );
 
 			return false;
 		}
 
-		void * impl = detail::get_class_impl( _obj );
+		void * impl = kernel->get_class_impl( _obj );
 
 		if( impl == nullptr )
 		{
@@ -53,8 +51,9 @@ namespace pybind
 			return false;
 		}
 
-		const class_type_scope_ptr & scope = detail::get_class_scope( _obj->ob_type );
-		const class_type_scope_ptr & cur_scope = detail::get_class_type_scope( _tinfo );
+		PyTypeObject * py_type = kernel->get_object_type( _obj );
+		const class_type_scope_ptr & scope = kernel->get_class_scope( py_type );
+		const class_type_scope_ptr & cur_scope = kernel->get_class_type_scope( _tinfo );
 
 		if( cur_scope != scope )
 		{

@@ -1,11 +1,8 @@
 #	pragma once
 
-#	include "pybind/function_adapter.hpp"
-
 #	include "pybind/types.hpp"
-#	include "pybind/exports.hpp"
 
-#	include "pybind/system.hpp"
+#	include "pybind/function_adapter.hpp"
 
 #	include "stdex/function_traits.h"
 
@@ -14,7 +11,6 @@ namespace pybind
 	namespace detail
 	{
 		PYBIND_API void def_function_adapter( const function_adapter_interface_ptr & _adapter, bool _native, PyObject * _module );
-        PYBIND_API PyObject * create_function_adapter( const function_adapter_interface_ptr & _adapter, bool _native );
 	}
 
 	template<class F>

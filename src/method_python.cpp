@@ -1,33 +1,19 @@
-#	include "method_type.hpp"
+#	include "method_python.hpp"
 
 #	include "pybind/class_type_scope.hpp"
 
-#	include "pybind/detail.hpp"
-
-#	include "pod.hpp"
-
-#	include "config/python.hpp"
+#	include "pybind/system.hpp"
+#	include "pybind/logger.hpp"
 
 #	include "pybind/debug.hpp"
 
 namespace pybind
 {
-	struct method_scope
-	{
-		PyTypeObject method_caller_type;
-		PyTypeObject method_generator_type;
-	};
-	//////////////////////////////////////////////////////////////////////////
-	static method_scope & get_scope()
-	{
-		static method_scope k;
-
-		return k;
-	}
 	//////////////////////////////////////////////////////////////////////////
 	struct py_method_generator_type
 	{
 		PyObject_HEAD
+		PyTypeObject * method_caller_type;
 		method_adapter_interface * iadapter;
 		PyTypeObject * classtype;
 	};
@@ -39,7 +25,7 @@ namespace pybind
 		PyObject * self;
 	};
 	//////////////////////////////////////////////////////////////////////////
-	static void descr_destr( PyObject * _obj )
+	static void py_method_descr_destr( PyObject * _obj )
 	{
 		py_method_caller_type * mct = (py_method_caller_type *)_obj;
 
@@ -50,13 +36,15 @@ namespace pybind
 		PyObject_Free( _obj );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	static PyObject * descr_call2( PyObject * _obj, PyObject * _args , PyObject * _kwds )
+	static PyObject * py_method_descr_call2( PyObject * _obj, PyObject * _args, PyObject * _kwds )
 	{
 		py_method_caller_type * mct = (py_method_caller_type *)_obj;
 
 		try
 		{
-			void * impl = detail::get_class_impl( mct->self );
+			kernel_interface * kernel = pybind::get_kernel();
+
+			void * impl = kernel->get_class_impl( mct->self );
 
 			if( impl == nullptr )
 			{
@@ -67,7 +55,7 @@ namespace pybind
 				return nullptr;
 			}
 
-			const class_type_scope_ptr & scope = detail::get_class_scope( mct->self->ob_type );
+			const class_type_scope_ptr & scope = kernel->get_class_scope( mct->self->ob_type );
 
 			method_adapter_interface * adapter = mct->iadapter;
 
@@ -89,7 +77,7 @@ namespace pybind
 		return nullptr;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	static int descr_check( py_method_generator_type * _descr, PyObject * _obj, PyObject ** _pres )
+	static int py_method_descr_check( py_method_generator_type * _descr, PyObject * _obj, PyObject ** _pres )
 	{
 		if( _obj == nullptr )
 		{
@@ -114,20 +102,18 @@ namespace pybind
 		return 0;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	static PyObject * method_get( py_method_generator_type * _descr, PyObject * _obj, PyObject * _type )
+	static PyObject * py_method_method_get( py_method_generator_type * _descr, PyObject * _obj, PyObject * _type )
 	{
         (void)_type;
 
 		PyObject *res;
 
-		if( descr_check( _descr, _obj, &res ) == 1 )
+		if( py_method_descr_check( _descr, _obj, &res ) == 1 )
 		{
 			return res;
 		}
 
-		method_scope & k = get_scope();
-
-		py_method_caller_type * mct = (py_method_caller_type *)PyType_GenericAlloc( &k.method_caller_type, 0 );
+		py_method_caller_type * mct = (py_method_caller_type *)PyType_GenericAlloc( _descr->method_caller_type, 0 );
 
 		stdex::intrusive_ptr_setup( mct->iadapter, _descr->iadapter );
 
@@ -137,7 +123,7 @@ namespace pybind
 		return (PyObject*)mct;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	static PyObject * descr_call( py_method_generator_type * _descr, PyObject * _args , PyObject * _kwds )
+	static PyObject * py_method_descr_call( py_method_generator_type * _descr, PyObject * _args, PyObject * _kwds )
 	{
 		Py_ssize_t argc = PyTuple_GET_SIZE(_args);
 
@@ -150,9 +136,8 @@ namespace pybind
 			return nullptr;
 		}
 
-		method_scope & k = get_scope();
 
-		py_method_caller_type * mct = (py_method_caller_type *)PyType_GenericAlloc( &k.method_caller_type, 0 );
+		py_method_caller_type * mct = (py_method_caller_type *)PyType_GenericAlloc( _descr->method_caller_type, 0 );
 		stdex::intrusive_ptr_setup( mct->iadapter, _descr->iadapter );
 
 		mct->self = PyTuple_GetItem(_args, 0);
@@ -164,45 +149,28 @@ namespace pybind
 		return py_method;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	static void descr_destr2( PyObject * _obj )
+	static void py_method_descr_destr2( PyObject * _obj )
 	{
 		py_method_generator_type * mgt = (py_method_generator_type *)_obj;
 
+		Py_DECREF( (PyObject *)mgt->method_caller_type );
+
 		stdex::intrusive_ptr_release( mgt->iadapter );
 
-		Py_DECREF( (PyObject *)mgt->classtype );
+		Py_XDECREF( (PyObject *)mgt->classtype );
 
 		PyObject_Free( _obj );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * method_type_scope::instance( const method_adapter_interface_ptr & _ifunc, PyTypeObject * _type )
+	bool method_python::initialize()
 	{
-		method_scope & k = get_scope();
-
-		py_method_generator_type * self = (py_method_generator_type *)PyType_GenericAlloc( &k.method_generator_type, 0 );
-
-		stdex::intrusive_ptr_setup( self->iadapter, _ifunc );
-
-        if( _type != nullptr )
-        {		    
-		    self->classtype = _type;
-			Py_INCREF( (PyObject *)self->classtype );
-        }
-		
-		return (PyObject*)self;
-	}
-	//////////////////////////////////////////////////////////////////////////
-	bool initialize_methods()
-	{
-		method_scope & k = get_scope();
-
 		PyTypeObject method_caller_type =
 		{
 			PyVarObject_HEAD_INIT( &PyType_Type, 0 )
 			"pybind_method_caller_type",
 			sizeof( py_method_caller_type ),
 			0,
-			(destructor)descr_destr,					/* tp_dealloc */
+			(destructor)py_method_descr_destr,					/* tp_dealloc */
 			0,					/* tp_print */
 			0,					/* tp_getattr */
 			0,					/* tp_setattr */
@@ -212,7 +180,7 @@ namespace pybind
 			0,					/* tp_as_sequence */
 			0,					/* tp_as_mapping */
 			0,					/* tp_hash */
-			(ternaryfunc)descr_call2, /* tp_call */
+			(ternaryfunc)py_method_descr_call2, /* tp_call */
 			0,					/* tp_str */
 			0,					/* tp_getattro */
 			0,					/* tp_setattro */
@@ -237,21 +205,24 @@ namespace pybind
 		//////////////////////////////////////////////////////////////////////////
 #   if PYBIND_PYTHON_VERSION < 300 
 		//////////////////////////////////////////////////////////////////////////
-		static PyMemberDef descr_members [] =
+		PyMemberDef descr_members [] = 
 		{
 			{const_cast<char*>("__objclass__"), T_OBJECT, offsetof( py_method_generator_type, classtype ), READONLY},
 			//{const_cast<char*>("__name__"), T_OBJECT, offsetof(py_method_generator_type, methodname), READONLY},
 			{0}
-		};
+		};				
 #	else
 		//////////////////////////////////////////////////////////////////////////
-		static PyMemberDef descr_members [] =
+		PyMemberDef descr_members[] =
 		{
 			{"__objclass__", T_OBJECT, offsetof( py_method_generator_type, classtype ), READONLY, "__objclass__"},
 			//{"__name__", T_OBJECT, offsetof(py_method_generator_type, methodname), READONLY, "__name__"},
 			{0}
 		};
 #	endif
+		
+		m_descr_members[0] = descr_members[0];
+		m_descr_members[1] = descr_members[1];
 
 		PyTypeObject method_generator_type =
 		{
@@ -259,7 +230,7 @@ namespace pybind
 			"pybind_method_generator_type",
 			sizeof( py_method_generator_type ),
 			0,
-			(destructor)descr_destr2,					/* tp_dealloc */
+			(destructor)py_method_descr_destr2,					/* tp_dealloc */
 			0,					/* tp_print */
 			0,					/* tp_getattr */
 			0,					/* tp_setattr */
@@ -269,7 +240,7 @@ namespace pybind
 			0,					/* tp_as_sequence */
 			0,					/* tp_as_mapping */
 			0,					/* tp_hash */
-			(ternaryfunc)descr_call,					/* tp_call */
+			(ternaryfunc)py_method_descr_call,					/* tp_call */
 			0,					/* tp_str */
 			0,					/* tp_getattro */
 			0,					/* tp_setattro */
@@ -283,39 +254,62 @@ namespace pybind
 			0,					/* tp_iter */
 			0,					/* tp_iternext */
 			0,					/* tp_methods */
-			descr_members,		/* tp_members */
+			m_descr_members,		/* tp_members */
 			0,					/* tp_getset */
 			0,					/* tp_base */
 			0,					/* tp_dict */
-			(descrgetfunc)method_get,		/* tp_descr_get */
+			(descrgetfunc)py_method_method_get,		/* tp_descr_get */
 			0,					/* tp_descr_set */
 		};
 
-		k.method_caller_type = method_caller_type;
-		k.method_generator_type = method_generator_type;
+		m_method_caller_type = method_caller_type;
+		m_method_generator_type = method_generator_type;
 
-		if( PyType_Ready( &k.method_generator_type ) < 0 )
+		if( PyType_Ready( &m_method_generator_type ) < 0 )
 		{
 			pybind::log( "invalid embedding class '%s'\n"
-				, k.method_generator_type.tp_name
-                );
+				, m_method_generator_type.tp_name
+				);
 
-            return false;
+			return false;
 		}
 
-		if( PyType_Ready( &k.method_caller_type ) < 0 )
+		if( PyType_Ready( &m_method_caller_type ) < 0 )
 		{
 			pybind::log( "invalid embedding class '%s'\n"
-				, k.method_caller_type.tp_name
-                );
+				, m_method_caller_type.tp_name
+				);
 
-            return false;
+			return false;
 		}
 
-        return true;
+		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void finalize_methods()
+	void method_python::finalize()
 	{
+
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * method_python::create_method_adapter( const method_adapter_interface_ptr & _ifunc, PyTypeObject * _type )
+	{
+		py_method_generator_type * generator = (py_method_generator_type *)PyType_GenericAlloc( &m_method_generator_type, 0 );
+
+		generator->method_caller_type = &m_method_caller_type;
+		Py_INCREF( (PyObject *)generator->method_caller_type );
+
+		stdex::intrusive_ptr_setup( generator->iadapter, _ifunc );
+
+        if( _type != nullptr )
+        {		    
+			generator->classtype = _type;
+			Py_INCREF( (PyObject *)generator->classtype );
+        }
+		else
+		{
+			generator->classtype = nullptr;
+		}
+		
+		return (PyObject*)generator;
 	}
 }

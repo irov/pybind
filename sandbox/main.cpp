@@ -38,7 +38,9 @@ public:
 
 	PyObject * _embedded() override
 	{
-		const pybind::class_type_scope_ptr & scope = pybind::detail::class_scope<Bar>();
+		pybind::kernel_interface * kernel = pybind::get_kernel();
+
+		const pybind::class_type_scope_ptr & scope = kernel->class_scope<Bar>();
 
 		PyObject * py_obj = scope->create_holder( this );
 
@@ -202,7 +204,7 @@ void test_function_4( const pybind::object & _cb )
 {
 	Bar * b = new Bar;
 
-	_cb( b );
+	_cb.call( b );
 
 	delete b;
 }

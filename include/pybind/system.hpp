@@ -3,6 +3,8 @@
 #	include "pybind/exports.hpp"
 #	include "pybind/types.hpp"
 
+#	include "pybind/kernel.hpp"
+
 #	include <stdarg.h>
 
 namespace pybind
@@ -13,6 +15,9 @@ namespace pybind
 	PYBIND_API bool is_initialized();
 
     PYBIND_API uint32_t get_python_version();
+
+	PYBIND_API kernel_interface * get_kernel();
+	PYBIND_API void set_kernel( kernel_interface * _kernel );
 	
 	PYBIND_API void check_error();
 
@@ -89,8 +94,37 @@ namespace pybind
 	PYBIND_API bool check_type( PyObject * _obj );
 
 	PYBIND_API bool int_check( PyObject * _obj );
+	
 	PYBIND_API bool long_check( PyObject * _obj );
+	
 	PYBIND_API bool float_check( PyObject * _obj );
+
+	PYBIND_API bool extract_bool( PyObject * _obj, bool & _value );
+	PYBIND_API bool extract_int8( PyObject * _obj, int8_t & _value );
+	PYBIND_API bool extract_int16( PyObject * _obj, int16_t & _value );
+	PYBIND_API bool extract_int32( PyObject * _obj, int32_t & _value );
+	PYBIND_API bool extract_int64( PyObject * _obj, int64_t & _value );
+	PYBIND_API bool extract_uint8( PyObject * _obj, uint8_t & _value );
+	PYBIND_API bool extract_uint16( PyObject * _obj, uint16_t & _value );
+	PYBIND_API bool extract_uint32( PyObject * _obj, uint32_t & _value );
+	PYBIND_API bool extract_uint64( PyObject * _obj, uint64_t & _value );
+	PYBIND_API bool extract_float( PyObject * _obj, float & _value );
+	PYBIND_API bool extract_double( PyObject * _obj, double & _value );
+	PYBIND_API bool extract_wchar( PyObject * _obj, wchar_t & _value );
+
+	PYBIND_API PyObject * ptr_bool( bool _value );
+	PYBIND_API PyObject * ptr_int8( int8_t _value );
+	PYBIND_API PyObject * ptr_int16( int16_t _value );
+	PYBIND_API PyObject * ptr_int32( int32_t _value );
+	PYBIND_API PyObject * ptr_int64( int64_t _value );
+	PYBIND_API PyObject * ptr_uint8( uint8_t _value );
+	PYBIND_API PyObject * ptr_uint16( uint16_t _value );
+	PYBIND_API PyObject * ptr_uint32( uint32_t _value );
+	PYBIND_API PyObject * ptr_uint64( uint64_t _value );
+	PYBIND_API PyObject * ptr_float( float _value );
+	PYBIND_API PyObject * ptr_double( double _value );
+	PYBIND_API PyObject * ptr_long( long _value );
+	PYBIND_API PyObject * ptr_ulong( unsigned long _value );
 		
 	PYBIND_API PyObject * list_new( size_t _size );
 	PYBIND_API bool list_check( PyObject * _list );
@@ -138,9 +172,9 @@ namespace pybind
 
     PYBIND_API void error_traceback( const char * _message, ... );
 	PYBIND_API void error_message( const char * _message, ... );
+	PYBIND_API void error_clear();
 	PYBIND_API PyObject * build_value( const char * _format, ... );
 	PYBIND_API PyObject * build_value_va( const char * _format, va_list _va );
-
 
 	PYBIND_API void unwrap( PyObject * _value );
 	PYBIND_API bool is_wrap( PyObject * _value );

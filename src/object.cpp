@@ -1,5 +1,7 @@
 #	include "pybind/object.hpp"
 
+#	include "pybind/system.hpp"
+
 namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
@@ -91,7 +93,9 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool object::is_wrap() const
 	{
-		return pybind::detail::is_wrap( m_obj );
+		bool successful = pybind::is_wrap( m_obj );
+
+		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool object::is_class() const

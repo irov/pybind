@@ -1,6 +1,6 @@
 #	pragma once
 
-#	include "pybind/type_cast.hpp"
+#	include "pybind/type_cast_result.hpp"
 #	include "pybind/extract.hpp"
 
 #	include "pybind/list.hpp"
@@ -113,33 +113,33 @@ namespace pybind
 	template<class T, class V>	
 	inline void registration_stl_vector_type_cast()
 	{
-		uint32_t id = detail::class_info<V>();
+		kernel_interface * kernel = pybind::get_kernel();
 
-		detail::register_type_info_extract( id, new pybind::extract_stl_vector_type<T, V> );
+		kernel->register_type_info_extract_t<V>( new pybind::extract_stl_vector_type<T, V> );
 	}
 
 	template<class T, class V>
 	inline void unregistration_stl_vector_type_cast()
 	{
-		uint32_t id = detail::class_info<V>();
-
-		detail::unregister_type_info_extract( id );
+		kernel_interface * kernel = pybind::get_kernel();
+		
+		kernel->unregister_type_info_extract_t<V>();
 	}
 
 	template<class K, class V, class M>
 	inline void registration_stl_map_type_cast()
 	{
-		uint32_t id = detail::class_info<M>();
+		kernel_interface * kernel = pybind::get_kernel();
 
-		detail::register_type_info_extract( id, new pybind::extract_stl_map_type<K, V, M> );
+		kernel->register_type_info_extract_t<M>( new pybind::extract_stl_map_type<K, V, M> );
 	}
 	
 	template<class K, class V, class M>
 	inline void unregistration_stl_map_type_cast()
-	{
-		uint32_t id = detail::class_info<M>();
+	{	
+		kernel_interface * kernel = pybind::get_kernel();
 
-		detail::unregister_type_info_extract( id );
+		kernel->unregister_type_info_extract_t<M>();
 	}
 
 	PYBIND_API bool initialize_stl_type_cast();
