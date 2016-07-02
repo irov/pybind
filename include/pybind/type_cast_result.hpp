@@ -2,6 +2,8 @@
 
 #	include "pybind/type_cast.hpp"
 
+#	include "pybind/system.hpp"
+
 namespace pybind
 {
 	namespace detail

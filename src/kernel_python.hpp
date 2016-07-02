@@ -27,6 +27,8 @@ namespace pybind
 		void def_function_adapter( const function_adapter_interface_ptr & _adapter, bool _native, PyObject * _module ) override;
 		void def_functor_adapter( const functor_adapter_interface_ptr & _adapter, bool _native, PyObject * _module ) override;
 
+		PyObject * create_function_adapter( const function_adapter_interface_ptr & _adapter, bool _native ) override;
+
 		PyObject * create_member( const member_adapter_interface_ptr & _iadapter ) override;
 		PyObject * create_method( const method_adapter_interface_ptr & _iadapter, PyTypeObject * _type );
 		

@@ -49,7 +49,9 @@ namespace pybind
 	protected:
 		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _key ) override
 		{
-			C * self = detail::meta_cast_class_t<C>( _impl, _scope );
+			kernel_interface * kernel = pybind::get_kernel();
+
+			C * self = kernel->meta_cast_class_t<C>( _impl, _scope );
 			
 			PyObject * py_result = (detail::return_operator_t)(self->*m_fn)(
 				detail::extract_operator_t( _key )
@@ -76,9 +78,9 @@ namespace pybind
     protected:
 		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _key ) override
         {
-			uint32_t scope_id = detail::class_info<C>();
+			kernel_interface * kernel = pybind::get_kernel();
 
-			const char * scopeName = detail::get_class_type_info( scope_id );
+			const char * scopeName = kernel->get_class_type_info_t<C>();
 
             const char * name = this->getName();
 
@@ -114,7 +116,9 @@ namespace pybind
 	protected:
 		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _key ) override
 		{
-			C * self = detail::meta_cast_class_t<C>( _impl, _scope );
+			kernel_interface * kernel = pybind::get_kernel();
+
+			C * self = kernel->meta_cast_class_t<C>( _impl, _scope );
 
 			PyObject * py_result = (detail::return_operator_t)(m_proxy->*m_fn)(self
 				, detail::extract_operator_t( _key )
@@ -142,7 +146,9 @@ namespace pybind
 	protected:
 		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _key ) override
 		{
-			C * self = detail::meta_cast_class_t<C>( _impl, _scope );
+			kernel_interface * kernel = pybind::get_kernel();
+
+			C * self = kernel->meta_cast_class_t<C>( _impl, _scope );
 
 			PyObject * py_result = (detail::return_operator_t)(*m_fn)(self
 				, detail::extract_operator_t( _key )

@@ -9,6 +9,8 @@
 #	include "stdex/mpl.h"
 #	include "stdex/intrusive_ptr.h"
 
+#	include <typeinfo>
+
 namespace pybind
 {
 	class object;

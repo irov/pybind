@@ -56,7 +56,9 @@ namespace pybind
 		{
 			(void)_kwds;
 
-			C * self = detail::meta_cast_class_t<C>( _impl, _scope );
+			kernel_interface * kernel = pybind::get_kernel();
+
+			C * self = kernel->meta_cast_class_t<C>( _impl, _scope );
 
 			PyObject *ret = method_args_call<C, F>::call( self, m_fn, _args );
 

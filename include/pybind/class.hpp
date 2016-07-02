@@ -383,7 +383,9 @@ namespace pybind
 			number_binary_adapter_interface_ptr iadapter =
 				new number_binary_adapter_operator_add<C, V>( "operator_add" );
 
-			uint32_t typeId = detail::class_info<VC>();
+			kernel_interface * kernel = pybind::get_kernel();
+
+			uint32_t typeId = kernel->class_info<VC>();
 
 			m_scope->add_number_add( typeId, iadapter );
 
@@ -434,7 +436,9 @@ namespace pybind
 			number_binary_adapter_interface_ptr iadapter =
 				new number_binary_adapter_operator_sub<C, V>( "operator_sub" );
 
-			uint32_t typeId = detail::class_info<VC>();
+			kernel_interface * kernel = pybind::get_kernel();
+
+			uint32_t typeId = kernel->class_info<VC>();
 
 			m_scope->add_number_sub( typeId, iadapter );
 
@@ -1015,7 +1019,9 @@ namespace pybind
 	template<class T>
 	PyTypeObject * get_typemodule()
 	{
-		const class_type_scope_ptr & scope = detail::class_scope<T>();
+		kernel_interface * kernel = pybind::get_kernel();
+
+		const class_type_scope_ptr & scope = kernel->class_scope<T>();
 
 		PyTypeObject * typemodule = scope->get_typemodule();
 
