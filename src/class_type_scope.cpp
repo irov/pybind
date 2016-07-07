@@ -928,7 +928,7 @@ namespace pybind
 		m_pytypeobject->tp_as_sequence = &py_as_sequence;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	static PyObject * py_nb_method( kernel_interface * _kernel, PyObject * _obj, PyObject * _value, const class_type_scope_ptr & _scope, const number_binary_adapter_interface_ptr & _adapter )
+	static PyObject * py_nb_method( kernel_interface * _kernel, PyObject * _obj, PyObject * _value, const class_type_scope_ptr & _scope, const number_binary_adapter_interface_ptr & _adapter, bool _rotate )
 	{
 		void * impl = _kernel->get_class_impl( _obj );
 
@@ -940,13 +940,13 @@ namespace pybind
 		}
 		
 		DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( _scope->get_name(), _adapter->getName(), nullptr, nullptr );
-		PyObject * res = _adapter->call( impl, _scope, _value );
+		PyObject * res = _adapter->call( impl, _scope, _value, _rotate );
 		DEBUG_PYBIND_NOTIFY_END_BIND_CALL( _scope->get_name(), _adapter->getName(), nullptr, nullptr );
 
 		return res;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	static PyObject * py_nb_add_2( kernel_interface * _kernel, PyObject * _obj, PyObject * _value )
+	static PyObject * py_nb_add_2( kernel_interface * _kernel, PyObject * _obj, PyObject * _value, bool _rotate )
 	{
 		PyTypeObject * objtype = Py_TYPE( _obj );
 
@@ -958,7 +958,7 @@ namespace pybind
 		{
 			try
 			{
-				PyObject * result = py_nb_method( _kernel, _obj, _value, scope, adapter );
+				PyObject * result = py_nb_method( _kernel, _obj, _value, scope, adapter, _rotate );
 
 				return result;
 			}
@@ -980,7 +980,7 @@ namespace pybind
 		{
 			try
 			{
-				PyObject * result = py_nb_method( _kernel, _obj, _value, scope, adapters );
+				PyObject * result = py_nb_method( _kernel, _obj, _value, scope, adapters, _rotate );
 
 				return result;
 			}
@@ -998,13 +998,13 @@ namespace pybind
 
 		if( kernel->is_class( _obj ) == true )
 		{
-			return py_nb_add_2( kernel, _obj, _value );
+			return py_nb_add_2( kernel, _obj, _value, false );
 		}
 		
-		return py_nb_add_2( kernel, _value, _obj );
+		return py_nb_add_2( kernel, _value, _obj, true );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	static PyObject * py_nb_subtract_2( kernel_interface * _kernel, PyObject * _obj, PyObject * _value )
+	static PyObject * py_nb_subtract_2( kernel_interface * _kernel, PyObject * _obj, PyObject * _value, bool _rotate )
 	{
 		PyTypeObject * objtype = Py_TYPE( _obj );
 
@@ -1016,7 +1016,7 @@ namespace pybind
 		{
 			try
 			{
-				PyObject * result = py_nb_method( _kernel, _obj, _value, scope, adapter );
+				PyObject * result = py_nb_method( _kernel, _obj, _value, scope, adapter, _rotate );
 
 				return result;
 			}
@@ -1038,7 +1038,7 @@ namespace pybind
 		{
 			try
 			{
-				PyObject * result = py_nb_method( _kernel, _obj, _value, scope, adapters );
+				PyObject * result = py_nb_method( _kernel, _obj, _value, scope, adapters, _rotate );
 
 				return result;
 			}
@@ -1056,13 +1056,13 @@ namespace pybind
 
 		if( kernel->is_class( _obj ) == true )
 		{
-			return py_nb_subtract_2( kernel, _obj, _value );
+			return py_nb_subtract_2( kernel, _obj, _value, false );
 		}
 
-		return py_nb_subtract_2( kernel, _value, _obj );
+		return py_nb_subtract_2( kernel, _value, _obj, true );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	static PyObject * py_nb_multiply_2( kernel_interface * _kernel, PyObject * _obj, PyObject * _value )
+	static PyObject * py_nb_multiply_2( kernel_interface * _kernel, PyObject * _obj, PyObject * _value, bool _rotate )
 	{
 		PyTypeObject * objtype = Py_TYPE( _obj );
 
@@ -1074,7 +1074,7 @@ namespace pybind
 		{
 			try
 			{
-				PyObject * result = py_nb_method( _kernel, _obj, _value, scope, adapter );
+				PyObject * result = py_nb_method( _kernel, _obj, _value, scope, adapter, _rotate );
 
 				if( result != nullptr )
 				{
@@ -1099,7 +1099,7 @@ namespace pybind
 		{
 			try
 			{
-				PyObject * result = py_nb_method( _kernel, _obj, _value, scope, adapters );
+				PyObject * result = py_nb_method( _kernel, _obj, _value, scope, adapters, _rotate );
 
 				return result;
 			}
@@ -1117,13 +1117,13 @@ namespace pybind
 
 		if( kernel->is_class( _obj ) == true )
 		{
-			return py_nb_multiply_2( kernel, _obj, _value );
+			return py_nb_multiply_2( kernel, _obj, _value, false );
 		}
 
-		return py_nb_multiply_2( kernel, _value, _obj );
+		return py_nb_multiply_2( kernel, _value, _obj, true );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	static PyObject * py_nb_divide_2( kernel_interface * _kernel, PyObject * _obj, PyObject * _value )
+	static PyObject * py_nb_divide_2( kernel_interface * _kernel, PyObject * _obj, PyObject * _value, bool _rotate )
 	{
 		PyTypeObject * objtype = Py_TYPE( _obj );
 
@@ -1135,7 +1135,7 @@ namespace pybind
 		{
 			try
 			{
-				PyObject * result = py_nb_method( _kernel, _obj, _value, scope, adapter );
+				PyObject * result = py_nb_method( _kernel, _obj, _value, scope, adapter, _rotate );
 
 				return result;
 			}
@@ -1157,7 +1157,7 @@ namespace pybind
 		{
 			try
 			{
-				PyObject * result = py_nb_method( _kernel, _obj, _value, scope, adapters );
+				PyObject * result = py_nb_method( _kernel, _obj, _value, scope, adapters, _rotate );
 
 				return result;
 			}
@@ -1175,10 +1175,10 @@ namespace pybind
 
 		if( kernel->is_class( _obj ) == true )
 		{
-			return py_nb_divide_2( kernel, _obj, _value );
+			return py_nb_divide_2( kernel, _obj, _value, false );
 		}
 
-		return py_nb_divide_2( kernel, _value, _obj );
+		return py_nb_divide_2( kernel, _value, _obj, true );
 	}
 	//////////////////////////////////////////////////////////////////////////
 #	if PYBIND_PYTHON_VERSION < 300

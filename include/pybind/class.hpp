@@ -40,14 +40,14 @@ namespace pybind
 		{
 			kernel_interface * kernel = pybind::get_kernel();
 
-			uint32_t info = kernel->class_info<C>();
-
 			uint32_t pod = 0;
 
 			if( _size <= PYBIND_OBJECT_POD_SIZE )
 			{
 				pod = (uint32_t)_size;
 			}
+
+			uint32_t info = kernel->class_info<C>();
 
 			m_scope = kernel->create_new_type_scope( info, _name, _user, _pynew, _pydestructor, pod );
 
@@ -573,7 +573,7 @@ namespace pybind
 		base_ & def_operator_div_t()
 		{
 			number_binary_adapter_interface_ptr iadapter =
-				new number_binary_adapter_operator_div<C, V>( "operator_div" );
+				new number_binary_adapter_operator_div_nr<C, V>( "operator_div_nr" );
 
 			kernel_interface * kernel = pybind::get_kernel();
 

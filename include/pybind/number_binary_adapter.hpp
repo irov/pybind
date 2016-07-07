@@ -27,7 +27,7 @@ namespace pybind
 		}
 
 	public:
-		virtual PyObject * call( void * _self, const class_type_scope_ptr & _scope, PyObject * _value ) = 0;
+		virtual PyObject * call( void * _self, const class_type_scope_ptr & _scope, PyObject * _value, bool _rotate ) = 0;
 
 	protected:
 		const char * m_name;
@@ -47,7 +47,7 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _value ) override
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _value, bool _rotate ) override
 		{
 			kernel_interface * kernel = pybind::get_kernel();
 
@@ -55,6 +55,7 @@ namespace pybind
 			
 			PyObject * py_result = (detail::return_operator_t)(self->*m_fn)(
 				detail::extract_operator_t( _value )
+				, _rotate
 				);
 
 			return py_result;
@@ -77,7 +78,7 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _value ) override
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _value, bool _rotate ) override
 		{
 			kernel_interface * kernel = pybind::get_kernel();
 
@@ -85,6 +86,7 @@ namespace pybind
 
 			PyObject * py_result = (detail::return_operator_t)(m_proxy->*m_fn)(self
 				, detail::extract_operator_t( _value )
+				, _rotate
 				);
 
 			return py_result;
@@ -107,7 +109,7 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _value ) override
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _value, bool _rotate ) override
 		{
 			kernel_interface * kernel = pybind::get_kernel();
 
@@ -115,6 +117,7 @@ namespace pybind
 
 			PyObject * py_result = (detail::return_operator_t)(*m_fn)(self
 				, detail::extract_operator_t( _value )
+				, _rotate
 				);
 
 			return py_result;
@@ -135,8 +138,10 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _value ) override
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _value, bool _rotate ) override
 		{
+			(void)_rotate;
+
 			kernel_interface * kernel = pybind::get_kernel();
 
 			C * self = kernel->meta_cast_class_t<C>( _impl, _scope );
@@ -164,7 +169,7 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _value ) override
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _value, bool _rotate ) override
 		{
 			kernel_interface * kernel = pybind::get_kernel();
 
@@ -176,7 +181,7 @@ namespace pybind
 				return nullptr;
 			}
 
-			PyObject * py_result = (detail::return_operator_t)(*self - value);
+			PyObject * py_result = (detail::return_operator_t)( (_rotate == false) ? (*self - value) : (value - *self) );
 
 			return py_result;
 		}
@@ -193,8 +198,10 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _value ) override
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _value, bool _rotate ) override
 		{
+			(void)_rotate;
+
 			kernel_interface * kernel = pybind::get_kernel();
 
 			C * self = kernel->meta_cast_class_t<C>( _impl, _scope );
@@ -222,8 +229,42 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _value ) override
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _value, bool _rotate ) override
 		{
+			kernel_interface * kernel = pybind::get_kernel();
+
+			C * self = kernel->meta_cast_class_t<C>( _impl, _scope );
+
+			V value;
+			if( pybind::extract_value( _value, value, true ) == false )
+			{
+				return nullptr;
+			}
+
+			PyObject * py_result = (detail::return_operator_t)((_rotate == false) ? (*self / value) : (value / *self));
+
+			return py_result;
+		}
+	};
+	//////////////////////////////////////////////////////////////////////////
+	template<class C, class V>
+	class number_binary_adapter_operator_div_nr
+		: public number_binary_adapter_interface
+	{
+	public:
+		number_binary_adapter_operator_div_nr( const char * _name )
+			: number_binary_adapter_interface( _name )
+		{
+		}
+
+	protected:
+		PyObject * call( void * _impl, const class_type_scope_ptr & _scope, PyObject * _value, bool _rotate ) override
+		{
+			if( _rotate == true )
+			{
+				return nullptr;
+			}
+
 			kernel_interface * kernel = pybind::get_kernel();
 
 			C * self = kernel->meta_cast_class_t<C>( _impl, _scope );
