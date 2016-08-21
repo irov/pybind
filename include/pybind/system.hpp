@@ -16,9 +16,6 @@ namespace pybind
 
     PYBIND_API uint32_t get_python_version();
 
-	PYBIND_API kernel_interface * get_kernel();
-	PYBIND_API void set_kernel( kernel_interface * _kernel );
-	
 	PYBIND_API void check_error();
 
 	PYBIND_API void setStdErrorHandle( PyObject * _handle );

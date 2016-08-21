@@ -833,6 +833,27 @@ namespace pybind
 		Py_DECREF( py_type_method );
 	}
 	//////////////////////////////////////////////////////////////////////////
+	method_adapter_interface * class_type_scope::get_method( const char * _name )
+	{
+		PyObject * py_method = PyDict_GetItemString( m_pytypeobject->tp_dict, _name );
+
+		if( py_method == nullptr )
+		{
+			pybind::throw_exception( "scope %s get_method %s python error"
+				, this->m_name
+				, _name
+				);
+
+			return nullptr;
+		}
+
+		kernel_interface * kernel = pybind::get_kernel();
+
+		method_adapter_interface * iadapter = kernel->get_method_adapter( py_method );
+
+		return iadapter;
+	}
+	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::add_member( const member_adapter_interface_ptr & _imember )
 	{
 		kernel_interface * kernel = pybind::get_kernel();

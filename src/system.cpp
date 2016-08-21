@@ -15,17 +15,6 @@
 
 namespace pybind
 {
-	struct system_scope
-	{
-		kernel_interface * current_kernel;
-	};
-	//////////////////////////////////////////////////////////////////////////
-	static system_scope & get_scope()
-	{
-		static system_scope k;
-
-		return k;
-	}
     //////////////////////////////////////////////////////////////////////////
 	bool initialize( bool _debug, bool install_sigs, bool _nosite )
 	{
@@ -80,14 +69,14 @@ namespace pybind
 #   endif
 		}
 
-		system_scope & k = get_scope();
+		kernel_interface * kernel = new kernel_python;
 
-		k.current_kernel = new kernel_python;
-
-		if( k.current_kernel->initialize() == false )
+		if( kernel->initialize() == false )
 		{
 			return false;
 		}
+
+		pybind::set_kernel( kernel );
 	
 #	ifdef PYBIND_STL_SUPPORT
 		if( initialize_stl_type_cast() == false )
@@ -129,11 +118,12 @@ namespace pybind
 		finalize_stl_type_cast();
 #	endif
 
-		system_scope & k = get_scope();
+		kernel_interface * kernel = pybind::get_kernel();
 
-		k.current_kernel->finalize();
-		
-		delete k.current_kernel;
+		kernel->finalize();		
+		delete kernel;
+
+		pybind::set_kernel( nullptr );
 
 		//finalize_methods();
 		//finalize_function();
@@ -164,20 +154,6 @@ namespace pybind
 
         return version;
     }
-	//////////////////////////////////////////////////////////////////////////
-	kernel_interface * get_kernel()
-	{
-		system_scope & scope = get_scope();
-
-		return scope.current_kernel;
-	}
-	//////////////////////////////////////////////////////////////////////////
-	void set_kernel( kernel_interface * _kernel )
-	{
-		system_scope & scope = get_scope();
-
-		scope.current_kernel = _kernel;
-	}
     //////////////////////////////////////////////////////////////////////////
 	void setStdErrorHandle( PyObject * _handle )
 	{
@@ -324,16 +300,16 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
 	void set_currentmodule( PyObject * _module )
 	{
-		system_scope & k = get_scope();
+		kernel_interface * kernel = pybind::get_kernel();
 
-		k.current_kernel->set_current_module( _module );
+		kernel->set_current_module( _module );
 	}
     //////////////////////////////////////////////////////////////////////////
 	PyObject * get_currentmodule()
 	{
-		system_scope & k = get_scope();
+		kernel_interface * kernel = pybind::get_kernel();
 
-		PyObject * module = k.current_kernel->get_current_module();
+		PyObject * module = kernel->get_current_module();
 
 		return module;
 	}

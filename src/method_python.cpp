@@ -312,4 +312,13 @@ namespace pybind
 		
 		return (PyObject*)generator;
 	}
+	//////////////////////////////////////////////////////////////////////////
+	method_adapter_interface * method_python::get_method_adapter( PyObject * _obj )
+	{
+		py_method_generator_type * method = (py_method_generator_type *)_obj;
+
+		method_adapter_interface * iadapter = method->iadapter;
+
+		return iadapter;
+	}
 }

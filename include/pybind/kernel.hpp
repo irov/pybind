@@ -1,5 +1,6 @@
 #	pragma once
 
+#	include "pybind/exports.hpp"
 #	include "pybind/types.hpp"
 
 #	include "pybind/function_interface.hpp"
@@ -17,6 +18,9 @@ namespace pybind
 	typedef stdex::intrusive_ptr<class new_adapter_interface> new_adapter_interface_ptr;
 	typedef stdex::intrusive_ptr<class destroy_adapter_interface> destroy_adapter_interface_ptr;
 
+	PYBIND_API class kernel_interface * get_kernel();
+	PYBIND_API void set_kernel( class kernel_interface * _kernel );
+
 	class kernel_interface
 	{
 	public:
@@ -31,6 +35,7 @@ namespace pybind
 
 		virtual PyObject * create_member( const member_adapter_interface_ptr & _iadapter ) = 0;
 		virtual PyObject * create_method( const method_adapter_interface_ptr & _ifunc, PyTypeObject * _type ) = 0;
+		virtual method_adapter_interface * get_method_adapter( PyObject * _obj ) = 0;
 
 		virtual PyTypeObject * get_pod_type( uint32_t _pod ) = 0;
 
@@ -165,5 +170,7 @@ namespace pybind
 		virtual void * get_class_impl( PyObject * _obj ) = 0;
 
 		virtual PyObject * get_str_class_type_scope() = 0;
+
+		virtual PyObject * call_method( void * _self, const class_type_scope_ptr & _scope, const char * _name, PyObject * _args ) = 0;
 	};
 }

@@ -30,7 +30,8 @@ namespace pybind
 		PyObject * create_function_adapter( const function_adapter_interface_ptr & _adapter, bool _native ) override;
 
 		PyObject * create_member( const member_adapter_interface_ptr & _iadapter ) override;
-		PyObject * create_method( const method_adapter_interface_ptr & _iadapter, PyTypeObject * _type );
+		PyObject * create_method( const method_adapter_interface_ptr & _iadapter, PyTypeObject * _type ) override;
+		method_adapter_interface * get_method_adapter( PyObject * _obj ) override;
 		
 	public:
 		PyTypeObject * get_pod_type( uint32_t _pod ) override;
@@ -78,6 +79,8 @@ namespace pybind
 		void * get_class_impl( PyObject * _obj ) override;
 
 		PyObject * get_str_class_type_scope() override;
+
+		PyObject * call_method( void * _self, const class_type_scope_ptr & _scope, const char * _name, PyObject * _args ) override;
 
 	protected:
 		function_python m_functions;

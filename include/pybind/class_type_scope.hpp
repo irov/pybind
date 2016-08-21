@@ -65,6 +65,7 @@ namespace pybind
 		void * construct( PyObject * _obj, PyObject * _args );
 		
 		void add_method( const method_adapter_interface_ptr & _ifunc );
+		method_adapter_interface * get_method( const char * _name );
 		void add_member( const member_adapter_interface_ptr & _imember );
 		void add_base( uint32_t _info, const class_type_scope_ptr & _scope, pybind_metacast _cast );
 

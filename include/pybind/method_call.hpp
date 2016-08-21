@@ -182,6 +182,49 @@ namespace pybind
 		}
 	};
 
+	template<class C, class F, class Ret>
+	struct method_call_impl<C, F, Ret, 11>
+	{
+		static Ret call( C * _obj, F f, PyObject * _arg )
+		{
+			return (_obj->*f)(
+				tuple_getitem_t( _arg, 0 ),
+				tuple_getitem_t( _arg, 1 ),
+				tuple_getitem_t( _arg, 2 ),
+				tuple_getitem_t( _arg, 3 ),
+				tuple_getitem_t( _arg, 4 ),
+				tuple_getitem_t( _arg, 5 ),
+				tuple_getitem_t( _arg, 6 ),
+				tuple_getitem_t( _arg, 7 ),
+				tuple_getitem_t( _arg, 8 ),
+				tuple_getitem_t( _arg, 9 ),
+				tuple_getitem_t( _arg, 10 )
+				);
+		}
+	};
+
+	template<class C, class F, class Ret>
+	struct method_call_impl<C, F, Ret, 12>
+	{
+		static Ret call( C * _obj, F f, PyObject * _arg )
+		{
+			return (_obj->*f)(
+				tuple_getitem_t( _arg, 0 ),
+				tuple_getitem_t( _arg, 1 ),
+				tuple_getitem_t( _arg, 2 ),
+				tuple_getitem_t( _arg, 3 ),
+				tuple_getitem_t( _arg, 4 ),
+				tuple_getitem_t( _arg, 5 ),
+				tuple_getitem_t( _arg, 6 ),
+				tuple_getitem_t( _arg, 7 ),
+				tuple_getitem_t( _arg, 8 ),
+				tuple_getitem_t( _arg, 9 ),
+				tuple_getitem_t( _arg, 10 ),
+				tuple_getitem_t( _arg, 11 )
+				);
+		}
+	};
+
 	template<class C, class F,class Ret>
 	struct method_call_ret_impl
 	{

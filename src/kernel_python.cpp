@@ -4,6 +4,7 @@
 #	include "pybind/exception.hpp"
 
 #	include "pybind/class_type_scope.hpp"
+#	include "pybind/method_interface.hpp"
 
 namespace pybind
 {
@@ -158,6 +159,13 @@ namespace pybind
 		PyObject * py_member = m_methods.create_method_adapter( _iadapter, _type );
 
 		return py_member;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	method_adapter_interface * kernel_python::get_method_adapter( PyObject * _obj )
+	{
+		method_adapter_interface * iadapter = m_methods.get_method_adapter( _obj );
+
+		return iadapter;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PyTypeObject * kernel_python::get_pod_type( uint32_t _pod )
@@ -586,5 +594,14 @@ namespace pybind
 	PyObject * kernel_python::get_str_class_type_scope()
 	{
 		return m_str_pybind_class_type_scope;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	PyObject * kernel_python::call_method( void * _self, const class_type_scope_ptr & _scope, const char * _name, PyObject * _args )
+	{
+		method_adapter_interface * iadapter = _scope->get_method( _name );
+
+		PyObject * py_result = iadapter->call( _self, _scope, _args, nullptr );
+
+		return py_result;
 	}
 }

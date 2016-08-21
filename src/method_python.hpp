@@ -14,6 +14,7 @@ namespace pybind
 
 	public:
 		PyObject * create_method_adapter( const method_adapter_interface_ptr & _ifunc, PyTypeObject * _type );
+		method_adapter_interface * get_method_adapter( PyObject * _obj );
 
 	protected:
 		PyTypeObject m_method_caller_type;

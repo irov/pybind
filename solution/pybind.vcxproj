@@ -108,6 +108,7 @@
     <ClInclude Include="..\include\pybind\getattro_adapter.hpp" />
     <ClInclude Include="..\include\pybind\hash_adapter.hpp" />
     <ClInclude Include="..\include\pybind\helper.hpp" />
+    <ClInclude Include="..\include\pybind\internal_call.hpp" />
     <ClInclude Include="..\include\pybind\kernel.hpp" />
     <ClInclude Include="..\include\pybind\list.hpp" />
     <ClInclude Include="..\include\pybind\list_helper.hpp" />
@@ -157,6 +158,7 @@
     <ClCompile Include="..\src\functor.cpp" />
     <ClCompile Include="..\src\functor_python.cpp" />
     <ClCompile Include="..\src\helper.cpp" />
+    <ClCompile Include="..\src\kernel.cpp" />
     <ClCompile Include="..\src\kernel_python.cpp" />
     <ClCompile Include="..\src\list.cpp" />
     <ClCompile Include="..\src\logger.cpp" />
