@@ -68,7 +68,7 @@ namespace pybind
 		PyTypeObject * objtype = Py_TYPE( _obj );
 
 		const class_type_scope_ptr & scope = kernel->get_class_scope( objtype );
-		
+
 		const method_adapter_interface_ptr & adapter = scope->get_call_adapter();
 
 		try
@@ -181,7 +181,7 @@ namespace pybind
 		}
 
 		PyTypeObject * objtype = Py_TYPE( _obj );
-				
+
 		const class_type_scope_ptr & scope = kernel->get_class_scope( objtype );
 
 		PybindOperatorCompare pybind_op = POC_Less;
@@ -414,7 +414,7 @@ namespace pybind
 	}
 	//////////////////////////////////////////////////////////////////////////
 	static PyObject * py_new_class( PyTypeObject * _type, PyObject * _args, PyObject * _kwds )
-	{		
+	{
 		kernel_interface * kernel = pybind::get_kernel();
 
 		const class_type_scope_ptr & scope = kernel->get_class_scope( _type );
@@ -445,12 +445,7 @@ namespace pybind
 
 			pybind::detail::wrap_pod_ptr( py_self, impl, false );
 
-			const smart_pointer_adapter_interface_ptr & smart_pointer_adapter = scope->get_smart_pointer();
-
-			if( smart_pointer_adapter != nullptr )
-			{
-				smart_pointer_adapter->incref( impl, scope );
-			}
+			scope->incref_smart_pointer( impl );
 
 			scope->addObject( py_self );
 
@@ -473,7 +468,7 @@ namespace pybind
 		kernel_interface * kernel = pybind::get_kernel();
 
 		PyTypeObject * objtype = Py_TYPE( _obj );
-		
+
 		const class_type_scope_ptr & scope = kernel->get_class_scope( objtype );
 
 		try
@@ -482,19 +477,14 @@ namespace pybind
 
 			void * impl = kernel->get_class_impl( _obj );
 
-			const smart_pointer_adapter_interface_ptr & smart_pointer_adapter = scope->get_smart_pointer();
-
-			if( smart_pointer_adapter != nullptr )
-			{
-				smart_pointer_adapter->decref( impl, scope );
-			}
+			scope->decref_smart_pointer( impl );
 
 			bool holder = pybind::detail::is_pod_holder( _obj );
 
 			if( holder == false )
 			{
 				const destroy_adapter_interface_ptr & adapter = scope->get_destroy_adapter();
-								
+
 				if( adapter != nullptr )
 				{
 					adapter->call( scope, impl );
@@ -512,7 +502,7 @@ namespace pybind
 	}
 	//////////////////////////////////////////////////////////////////////////
 	static PyObject * py_new_pod( PyTypeObject * _type, PyObject * _args, PyObject * _kwds )
-	{		
+	{
 		kernel_interface * kernel = pybind::get_kernel();
 
 		const class_type_scope_ptr & scope = kernel->get_class_scope( _type );
@@ -539,12 +529,7 @@ namespace pybind
 				impl = scope->construct( py_self, _args );
 			}
 
-			const smart_pointer_adapter_interface_ptr & smart_pointer_adapter = scope->get_smart_pointer();
-
-			if( smart_pointer_adapter != nullptr )
-			{
-				smart_pointer_adapter->incref( impl, scope );
-			}
+			scope->incref_smart_pointer( impl );
 
 			scope->addObject( py_self );
 
@@ -576,12 +561,7 @@ namespace pybind
 
 			void * impl = kernel->get_class_impl( _obj );
 
-			const smart_pointer_adapter_interface_ptr & smart_pointer_adapter = scope->get_smart_pointer();
-
-			if( smart_pointer_adapter != nullptr )
-			{
-				smart_pointer_adapter->decref( impl, scope );
-			}
+			scope->decref_smart_pointer( impl );
 
 			const destroy_adapter_interface_ptr & adapter = scope->get_destroy_adapter();
 
@@ -652,11 +632,18 @@ namespace pybind
 			for( uint32_t i = 0; i != m_basesCount; ++i )
 			{
 				Metacast & mc = m_bases[i];
-				
+
 				PyTypeObject * py_base = mc.scope->get_typemodule();
 
 				Py_INCREF( (PyObject *)py_base );
 				PyTuple_SetItem( py_bases, index++, (PyObject*)py_base );
+
+				const smart_pointer_adapter_interface_ptr & base_smart_pointer = mc.scope->get_smart_pointer();
+
+				if( m_smart_pointer == nullptr && base_smart_pointer != nullptr )
+				{
+					m_smart_pointer = base_smart_pointer;
+				}
 			}
 		}
 		else
@@ -664,7 +651,7 @@ namespace pybind
 			py_bases = PyTuple_New( 1 );
 
 			kernel_interface * kernel = pybind::get_kernel();
-						
+
 			PyTypeObject * py_pybind_type = kernel->get_pod_type( m_pod );
 
 			if( py_pybind_type == nullptr )
@@ -706,8 +693,8 @@ namespace pybind
 			return;
 		}
 
-        if( m_pod == 0 )
-        {
+		if( m_pod == 0 )
+		{
 			m_pytypeobject->tp_new = py_new_class;
 			m_pytypeobject->tp_del = py_del_class;
 		}
@@ -959,7 +946,7 @@ namespace pybind
 
 			return nullptr;
 		}
-		
+
 		DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( _scope->get_name(), _adapter->getName(), nullptr, nullptr );
 		PyObject * res = _adapter->call( impl, _scope, _value, _rotate );
 		DEBUG_PYBIND_NOTIFY_END_BIND_CALL( _scope->get_name(), _adapter->getName(), nullptr, nullptr );
@@ -1021,7 +1008,7 @@ namespace pybind
 		{
 			return py_nb_add_2( kernel, _obj, _value, false );
 		}
-		
+
 		return py_nb_add_2( kernel, _value, _obj, true );
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -1214,7 +1201,7 @@ namespace pybind
 		(unaryfunc)0, /*nb_negative*/
 		(unaryfunc)0, /*nb_positive*/
 		(unaryfunc)0, /*nb_absolute*/
-		(inquiry) 0, /*nb_nonzero*/
+		(inquiry)0, /*nb_nonzero*/
 		(unaryfunc)0, /*nb_invert*/
 		(binaryfunc)0, /*nb_lshift*/
 		(binaryfunc)0, /*nb_rshift*/
@@ -1245,10 +1232,10 @@ namespace pybind
 		(binaryfunc)0, /*nb_floor_divide*/
 		(binaryfunc)0, /*nb_true_divide*/
 		(binaryfunc)0, /*nb_inplace_floor_divide*/
-		(binaryfunc) 0, /*nb_inplace_true_divide*/
+		(binaryfunc)0, /*nb_inplace_true_divide*/
 
 		/* Added in release 2.5 */
-		(unaryfunc) 0, /*nb_index*/
+		(unaryfunc)0, /*nb_index*/
 	};
 #	else
 	static PyNumberMethods py_as_number = {
@@ -1328,28 +1315,28 @@ namespace pybind
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::add_number_add( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
-	{ 
+	{
 		m_number_adds[_typeId] = _iadapter;
 
 		m_pytypeobject->tp_as_number = &py_as_number;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::add_number_sub( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
-	{ 
+	{
 		m_number_subs[_typeId] = _iadapter;
 
 		m_pytypeobject->tp_as_number = &py_as_number;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::add_number_mul( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
-	{ 
+	{
 		m_number_muls[_typeId] = _iadapter;
 
 		m_pytypeobject->tp_as_number = &py_as_number;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::add_number_div( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
-	{ 
+	{
 		m_number_divs[_typeId] = _iadapter;
 
 		m_pytypeobject->tp_as_number = &py_as_number;
@@ -1469,6 +1456,8 @@ namespace pybind
 
 		pybind::detail::wrap_pod_ptr( py_self, _impl, true );
 
+		this->incref_smart_pointer( _impl );
+
 		this->addObject( py_self );
 
 		return py_self;
@@ -1513,12 +1502,28 @@ namespace pybind
 	{
 		return PYBIND_MALLOC( _size );
 	}
-		//////////////////////////////////////////////////////////////////////////
-		void class_type_scope::operator delete (void * _ptr, size_t _size)
+	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::operator delete (void * _ptr, size_t _size)
 	{
 		(void)_size;
 
 		PYBIND_FREE( _ptr, _size );
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::incref_smart_pointer( void * _impl )
+	{
+		if( m_smart_pointer != nullptr )
+		{
+			m_smart_pointer->incref( _impl, this );
+		}
+	}
+	//////////////////////////////////////////////////////////////////////////
+	void class_type_scope::decref_smart_pointer( void * _impl )
+	{
+		if( m_smart_pointer != nullptr )
+		{
+			m_smart_pointer->decref( _impl, this );
+		}
 	}
 	//////////////////////////////////////////////////////////////////////////
 #	ifdef PYBIND_VISIT_OBJECTS

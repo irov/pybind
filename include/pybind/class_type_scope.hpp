@@ -148,6 +148,10 @@ namespace pybind
 		inline const number_binary_adapter_interface_ptr & get_number_div_adapters( uint32_t _typeId ) const;
 
 		inline const smart_pointer_adapter_interface_ptr & get_smart_pointer() const;
+
+	public:
+		void incref_smart_pointer( void * _impl );
+		void decref_smart_pointer( void * _impl );
 		
     public:
         void addObject( PyObject * _obj );
