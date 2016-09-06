@@ -2,6 +2,7 @@
 
 #	include "pybind/kernel.hpp"
 #	include "pybind/helper.hpp"
+#	include "pybind/tuple.hpp"
 
 namespace pybind
 {
