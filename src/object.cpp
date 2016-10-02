@@ -44,7 +44,9 @@ namespace pybind
 	object::~object()
 	{
 		pybind::decref( m_obj );
+#	ifdef _DEBUG
 		m_obj = nullptr;
+#	endif
 	}
 	//////////////////////////////////////////////////////////////////////////
 	object & object::operator = (const object & _obj)
