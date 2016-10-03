@@ -209,7 +209,7 @@ namespace pybind
 				s_obj_pickle( value, _types, _buffer, _capacity, _offset );
 			}
 		}
-		else if( pybind::has_attr_str( _obj, "value" ) == true )
+		else if( pybind::has_attrstring( _obj, "value" ) == true )
 		{
 			uint8_t type = PICKLE_OBJECT;
 
@@ -230,7 +230,7 @@ namespace pybind
 
 				s_write_size_t( _buffer, _capacity, index, _offset );
 				
-				PyObject * obj_value = pybind::get_attr_str( _obj, "value" );
+				PyObject * obj_value = pybind::get_attrstring( _obj, "value" );
 
 				s_obj_pickle( obj_value, _types, _buffer, _capacity, _offset );
 

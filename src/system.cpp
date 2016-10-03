@@ -582,14 +582,14 @@ namespace pybind
 		return obj;
 	}
     //////////////////////////////////////////////////////////////////////////
-	bool has_attr_str( PyObject * _obj, const char * _attr )
+	bool has_attrstring( PyObject * _obj, const char * _attr )
 	{
         int value = PyObject_HasAttrString( _obj, _attr );
 		
         return value == 1;
 	}
     //////////////////////////////////////////////////////////////////////////
-	PyObject * get_attr_str( PyObject * _obj, const char * _attr )
+	PyObject * get_attrstring( PyObject * _obj, const char * _attr )
 	{
         PyObject * obj = PyObject_GetAttrString( _obj, _attr );
 
