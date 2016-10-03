@@ -1188,11 +1188,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
 	size_t dict_containsstring( PyObject * _dict, const char * _key )
 	{
-#   if PYBIND_PYTHON_VERSION < 300
-		PyObject * kv = PyString_FromString( _key );
-#	else
-		PyObject * kv = PyUnicode_FromString( _key );
-#	endif
+        PyObject * kv = string_from_char( _key );
 
 		int contains = pybind::dict_contains( _dict, kv );
 		Py_DECREF( kv );
@@ -1570,7 +1566,11 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     long string_hash( PyObject * _string )
     {
+#   if PYBIND_PYTHON_VERSION < 300
         return ((PyStringObject *)_string)->ob_shash;
+#	else
+        return ((PyUnicodeObject *)_string)->_base._base.hash;
+#	endif                
     }
 	//////////////////////////////////////////////////////////////////////////
 	const char * string_to_char( PyObject * _string )
