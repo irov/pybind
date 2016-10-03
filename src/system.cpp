@@ -1567,6 +1567,11 @@ namespace pybind
 
 		return (size_t)size;
 	}
+    //////////////////////////////////////////////////////////////////////////
+    long string_hash( PyObject * _string )
+    {
+        return ((PyStringObject *)_string)->ob_shash;
+    }
 	//////////////////////////////////////////////////////////////////////////
 	const char * string_to_char( PyObject * _string )
 	{
