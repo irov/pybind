@@ -41,12 +41,9 @@ namespace pybind
 
 			C * inst = kernel->meta_cast_class_t<C>( _self, _scope );
 
-            if( (*m_compare)( _obj, inst, _compare, _op, _result ) == false )
-            {
-                return false;
-            }
-
-            return true;
+            bool successful = (*m_compare)(_obj, inst, _compare, _op, _result);
+            
+            return successful;
         }
 
     protected:
