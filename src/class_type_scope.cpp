@@ -686,6 +686,8 @@ namespace pybind
 
 		if( m_pytypeobject == nullptr )
 		{
+			pybind::check_error();
+
 			pybind::throw_exception( "scope %s initialize invalide not create type"
 				, m_name
 				);
