@@ -42,7 +42,7 @@ public:
 
 		const pybind::class_type_scope_ptr & scope = kernel->class_scope<Bar>();
 
-		PyObject * py_obj = scope->create_holder( this );
+		PyObject * py_obj = scope->create_holder( kernel, this );
 
 		return py_obj;
 	}

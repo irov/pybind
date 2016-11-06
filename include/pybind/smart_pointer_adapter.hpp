@@ -25,8 +25,8 @@ namespace pybind
 		}
 
 	public:
-		virtual void incref( void * _self, const class_type_scope_ptr & scope ) = 0;
-		virtual void decref( void * _self, const class_type_scope_ptr & scope ) = 0;
+		virtual void incref( kernel_interface * _kernel, void * _self, const class_type_scope_ptr & scope ) = 0;
+		virtual void decref( kernel_interface * _kernel, void * _self, const class_type_scope_ptr & scope ) = 0;
 
 	protected:
 		const char * m_name;
@@ -47,20 +47,16 @@ namespace pybind
 		}
 
 	protected:
-		void incref( void * _impl, const class_type_scope_ptr & _scope ) override
+		void incref( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope ) override
 		{            
-			kernel_interface * kernel = pybind::get_kernel();
-
-			C * self = kernel->meta_cast_class_t<C>( _impl, _scope );
+			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 			
 			(self->*m_incref)();
 		}		
 
-		void decref( void * _impl, const class_type_scope_ptr & _scope ) override
+		void decref( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope ) override
 		{
-			kernel_interface * kernel = pybind::get_kernel();
-
-			C * self = kernel->meta_cast_class_t<C>( _impl, _scope );
+			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
 			(self->*m_decref)();
 		}
@@ -84,20 +80,16 @@ namespace pybind
 		}
 
 	protected:
-		void incref( void * _impl, const class_type_scope_ptr & _scope ) override
+		void incref( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope ) override
 		{
-			kernel_interface * kernel = pybind::get_kernel();
-
-			C * self = kernel->meta_cast_class_t<C>( _impl, _scope );
+			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
 			(m_proxy->*m_incref)(self);
 		}
 
-		void decref( void * _impl, const class_type_scope_ptr & _scope ) override
+		void decref( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope ) override
 		{
-			kernel_interface * kernel = pybind::get_kernel();
-
-			C * self = kernel->meta_cast_class_t<C>( _impl, _scope );
+			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
 			(m_proxy->*m_decref)(self);
 		}
@@ -121,20 +113,16 @@ namespace pybind
 		}
 
 	protected:
-		void incref( void * _impl, const class_type_scope_ptr & _scope ) override
-		{
-			kernel_interface * kernel = pybind::get_kernel();
-
-			C * self = kernel->meta_cast_class_t<C>( _impl, _scope );
+		void incref( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope ) override
+		{			
+			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
 			(*m_incref)(self);
 		}
 
-		void decref( void * _impl, const class_type_scope_ptr & _scope ) override
+		void decref( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope ) override
 		{
-			kernel_interface * kernel = pybind::get_kernel();
-
-			C * self = kernel->meta_cast_class_t<C>( _impl, _scope );
+			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
 			(*m_decref)(self);
 		}

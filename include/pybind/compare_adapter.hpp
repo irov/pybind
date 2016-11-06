@@ -19,7 +19,7 @@ namespace pybind
         : public adapter_interface
     {
     public:
-		virtual bool compare( PyObject * _obj, void * _self, const class_type_scope_ptr & _scope, PyObject * _compare, PybindOperatorCompare _op, bool & _result ) = 0;
+		virtual bool compare( kernel_interface * _kernel, PyObject * _obj, void * _self, const class_type_scope_ptr & _scope, PyObject * _compare, PybindOperatorCompare _op, bool & _result ) = 0;
     };
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<compare_adapter_interface> compare_adapter_interface_ptr;
@@ -35,11 +35,9 @@ namespace pybind
         }
 
     public:
-		bool compare( PyObject * _obj, void * _self, const class_type_scope_ptr & _scope, PyObject * _compare, PybindOperatorCompare _op, bool & _result ) override
-        {
-			kernel_interface * kernel = pybind::get_kernel();
-
-			C * inst = kernel->meta_cast_class_t<C>( _self, _scope );
+		bool compare( kernel_interface * _kernel, PyObject * _obj, void * _self, const class_type_scope_ptr & _scope, PyObject * _compare, PybindOperatorCompare _op, bool & _result ) override
+        {			
+			C * inst = _kernel->meta_cast_class_t<C>( _self, _scope );
 
             bool successful = (*m_compare)(_obj, inst, _compare, _op, _result);
             

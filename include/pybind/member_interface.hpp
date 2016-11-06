@@ -7,6 +7,8 @@
 namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
+	class kernel_interface;
+	//////////////////////////////////////////////////////////////////////////
 	typedef stdex::intrusive_ptr<class class_type_scope> class_type_scope_ptr;
 	//////////////////////////////////////////////////////////////////////////
 	class member_adapter_interface
@@ -25,8 +27,8 @@ namespace pybind
 		}
 
 	public:
-		virtual PyObject * get( void * _self, const class_type_scope_ptr & _scope ) = 0;
-		virtual int set( void * _self, PyObject * _args, const class_type_scope_ptr & _scope ) = 0;
+		virtual PyObject * get( kernel_interface * _kernel, void * _self, const class_type_scope_ptr & _scope ) = 0;
+		virtual int set( kernel_interface * _kernel, void * _self, PyObject * _args, const class_type_scope_ptr & _scope ) = 0;
 
 	protected:
 		const char * m_name;

@@ -82,8 +82,9 @@ namespace pybind
 		}
 
 	public:
-		void * call( PyObject * _obj, PyObject * _args ) override
+		void * call( kernel_interface * _kernel, PyObject * _obj, PyObject * _args ) override
 		{
+			(void)_kernel;
             (void)_obj;
 
 			if( this->valid( _args ) == false )

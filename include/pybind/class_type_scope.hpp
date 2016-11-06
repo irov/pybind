@@ -62,7 +62,7 @@ namespace pybind
 
 		PyTypeObject * get_typemodule() const;
 
-		void * construct( PyObject * _obj, PyObject * _args );
+		void * construct( kernel_interface * _kernel, PyObject * _obj, PyObject * _args );
 		
 		void add_method( const method_adapter_interface_ptr & _ifunc );
 		method_adapter_interface * get_method( const char * _name );
@@ -115,7 +115,7 @@ namespace pybind
 		void set_as_string();
 
 		PyObject * create_class( void * _impl );
-		PyObject * create_holder( void * _impl );
+		PyObject * create_holder( kernel_interface * _kernel, void * _impl );
 		PyObject * create_pod( void ** _impl, size_t _pod );
 
 		void * metacast( uint32_t _info, void * _impl );
@@ -150,8 +150,8 @@ namespace pybind
 		inline const smart_pointer_adapter_interface_ptr & get_smart_pointer() const;
 
 	public:
-		void incref_smart_pointer( void * _impl );
-		void decref_smart_pointer( void * _impl );
+		void incref_smart_pointer( kernel_interface * _kernel, void * _impl );
+		void decref_smart_pointer( kernel_interface * _kernel, void * _impl );
 		
     public:
         void addObject( PyObject * _obj );

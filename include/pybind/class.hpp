@@ -787,9 +787,7 @@ namespace pybind
 
 			pybind::kernel_interface * kernel = pybind::get_kernel();
 
-			const class_type_scope_ptr & scope = kernel->class_scope<C>();
-
-			PyObject * py_obj = scope->create_holder( (void *)_value );
+			PyObject * py_obj = kernel->scope_create_holder_t( _value );
 
 			return py_obj;
 		}

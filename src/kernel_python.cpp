@@ -493,7 +493,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * kernel_python::scope_create_holder( const class_type_scope_ptr & _scope, void * _ptr )
 	{
-		PyObject * py_obj = _scope->create_holder( _ptr );
+		PyObject * py_obj = _scope->create_holder( this, _ptr );
 
 		return py_obj;
 	}
@@ -600,7 +600,7 @@ namespace pybind
 	{
 		method_adapter_interface * iadapter = _scope->get_method( _name );
 
-		PyObject * py_result = iadapter->call( _self, _scope, _args, nullptr );
+		PyObject * py_result = iadapter->call( this, _self, _scope, _args, nullptr );
 
 		return py_result;
 	}

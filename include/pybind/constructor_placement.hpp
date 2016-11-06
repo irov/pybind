@@ -80,16 +80,14 @@ namespace pybind
 		}
 
 	public:
-		void * call( PyObject * _obj, PyObject * _args ) override
+		void * call( kernel_interface * _kernel, PyObject * _obj, PyObject * _args ) override
 		{
 			if( this->valid( _args ) == false )
 			{
 				return nullptr;
 			}
 
-			kernel_interface * kernel = pybind::get_kernel();
-
-			void * impl = kernel->get_class_impl( _obj );
+			void * impl = _kernel->get_class_impl( _obj );
 
 			if( impl == nullptr )
 			{

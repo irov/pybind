@@ -21,22 +21,18 @@ namespace pybind
 		}
 
 	public:
-		PyObject * get( void * _self, const class_type_scope_ptr & _scope ) override
+		PyObject * get( kernel_interface * _kernel, void * _self, const class_type_scope_ptr & _scope ) override
 		{
-			kernel_interface * kernel = pybind::get_kernel();
-
-			C * obj = kernel->meta_cast_class_t<C>( _self, _scope );
+			C * obj = _kernel->meta_cast_class_t<C>( _self, _scope );
 
 			PyObject * py_value = pybind::ptr_throw( obj->*m_member );
 
 			return py_value;
 		}
 
-		int set( void * _self, PyObject * _args, const class_type_scope_ptr & _scope ) override
+		int set( kernel_interface * _kernel, void * _self, PyObject * _args, const class_type_scope_ptr & _scope ) override
 		{
-			kernel_interface * kernel = pybind::get_kernel();
-
-			C * obj = kernel->meta_cast_class_t<C>( _self, _scope );
+			C * obj = _kernel->meta_cast_class_t<C>( _self, _scope );
 
 			obj->*m_member = pybind::extract_throw<A>( _args );
 
@@ -60,22 +56,18 @@ namespace pybind
 		}
 
 	public:
-		PyObject * get( void * _self, const class_type_scope_ptr & _scope ) override
+		PyObject * get( kernel_interface * _kernel, void * _self, const class_type_scope_ptr & _scope ) override
 		{
-			kernel_interface * kernel = pybind::get_kernel();
-
-			C * obj = kernel->meta_cast_class_t<C>( _self, _scope );
+			C * obj = _kernel->meta_cast_class_t<C>( _self, _scope );
 			
 			PyObject * py_value = (detail::return_operator_t)(obj->*m_get)();
 
 			return py_value;
 		}
 
-		int set( void * _self, PyObject * _args, const class_type_scope_ptr & _scope ) override
+		int set( kernel_interface * _kernel, void * _self, PyObject * _args, const class_type_scope_ptr & _scope ) override
 		{
-			kernel_interface * kernel = pybind::get_kernel();
-
-			C * obj = kernel->meta_cast_class_t<C>( _self, _scope );
+			C * obj = _kernel->meta_cast_class_t<C>( _self, _scope );
 							
 			(obj->*m_set)(
 				detail::extract_operator_t( _args )
@@ -102,22 +94,18 @@ namespace pybind
 		}
 
 	public:
-		PyObject * get( void * _self, const class_type_scope_ptr & _scope ) override
+		PyObject * get( kernel_interface * _kernel, void * _self, const class_type_scope_ptr & _scope ) override
 		{
-			kernel_interface * kernel = pybind::get_kernel();
-
-			C * obj = kernel->meta_cast_class_t<C>( _self, _scope );
+			C * obj = _kernel->meta_cast_class_t<C>( _self, _scope );
 
 			PyObject * py_value = (detail::return_operator_t)(*m_get)(obj);
 
 			return py_value;
 		}
 
-		int set( void * _self, PyObject * _args, const class_type_scope_ptr & _scope ) override
+		int set( kernel_interface * _kernel, void * _self, PyObject * _args, const class_type_scope_ptr & _scope ) override
 		{
-			kernel_interface * kernel = pybind::get_kernel();
-
-			C * obj = kernel->meta_cast_class_t<C>( _self, _scope );
+			C * obj = _kernel->meta_cast_class_t<C>( _self, _scope );
 						
 			(*m_set)( obj
 				, detail::extract_operator_t( _args )

@@ -27,7 +27,7 @@ namespace pybind
 		}
 
 	public:
-		virtual void call( void * _self, const class_type_scope_ptr & scope, size_t _index, PyObject * _value ) = 0;
+		virtual void call( kernel_interface * _kernel, void * _self, const class_type_scope_ptr & scope, size_t _index, PyObject * _value ) = 0;
 
 	protected:
 		const char * m_name;
@@ -47,11 +47,9 @@ namespace pybind
 		}
 
 	protected:
-		void call( void * _impl, const class_type_scope_ptr & _scope, size_t _index, PyObject * _value ) override
+		void call( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope, size_t _index, PyObject * _value ) override
 		{
-			kernel_interface * kernel = pybind::get_kernel();
-
-			C * self = kernel->meta_cast_class_t<C>( _impl, _scope );
+			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
 			(self->*m_fn)( _index
 				, detail::extract_operator_t( _value )
@@ -74,11 +72,9 @@ namespace pybind
         }
 
     protected:
-		void call( void * _impl, const class_type_scope_ptr & _scope, size_t _index, PyObject * _value ) override
+		void call( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope, size_t _index, PyObject * _value ) override
         {
-			kernel_interface * kernel = pybind::get_kernel();
-
-			const char * scopeName = kernel->get_class_type_info_t<C>();
+			const char * scopeName = _kernel->get_class_type_info_t<C>();
 
             const char * name = this->getName();
 
@@ -113,11 +109,9 @@ namespace pybind
 		}
 
 	protected:
-		void call( void * _impl, const class_type_scope_ptr & _scope, size_t _index, PyObject * _value ) override
+		void call( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope, size_t _index, PyObject * _value ) override
 		{
-			kernel_interface * kernel = pybind::get_kernel();
-
-			C * self = kernel->meta_cast_class_t<C>( _impl, _scope );
+			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
 			(m_proxy->*m_fn)(self
 				, _index
@@ -142,11 +136,9 @@ namespace pybind
 		}
 
 	protected:
-		void call( void * _impl, const class_type_scope_ptr & _scope, size_t _index, PyObject * _value ) override
+		void call( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope, size_t _index, PyObject * _value ) override
 		{
-			kernel_interface * kernel = pybind::get_kernel();
-
-			C * self = kernel->meta_cast_class_t<C>( _impl, _scope );
+			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
 			(*m_fn)( self
 				, _index
@@ -169,11 +161,9 @@ namespace pybind
 		}
 
 	protected:
-		void call( void * _impl, const class_type_scope_ptr & _scope, size_t _index, PyObject * _value ) override
+		void call( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope, size_t _index, PyObject * _value ) override
 		{
-			kernel_interface * kernel = pybind::get_kernel();
-
-			C * self = kernel->meta_cast_class_t<C>( _impl, _scope );
+			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
 			self->operator [] ( _index ) = detail::extract_operator_t( _value );
 		}

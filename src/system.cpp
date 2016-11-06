@@ -1365,9 +1365,9 @@ namespace pybind
 		return str;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	long object_hash( PyObject * _obj )
+	int64_t object_hash( PyObject * _obj )
 	{
-		long py_hash = PyObject_Hash( _obj );
+		int64_t py_hash = (int64_t)PyObject_Hash( _obj );
 
 		return py_hash;
 	}
@@ -1564,13 +1564,15 @@ namespace pybind
 		return (size_t)size;
 	}
     //////////////////////////////////////////////////////////////////////////
-    long string_hash( PyObject * _string )
+	int64_t string_hash( PyObject * _string )
     {
 #   if PYBIND_PYTHON_VERSION < 300
-        return ((PyStringObject *)_string)->ob_shash;
+		int64_t hash = (int64_t)( (PyStringObject *)_string )->ob_shash;
 #	else
-        return ((PyUnicodeObject *)_string)->_base._base.hash;
+		int64_t hash = (int64_t)( (PyUnicodeObject *)_string )->_base._base.hash;
 #	endif                
+
+		return hash;
     }
 	//////////////////////////////////////////////////////////////////////////
 	const char * string_to_char( PyObject * _string )

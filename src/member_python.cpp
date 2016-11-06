@@ -44,7 +44,7 @@ namespace pybind
 
 			const class_type_scope_ptr & scope = kernel->get_class_scope( py_self->ob_type );
 
-			PyObject * py_method = mt->iadapter->get( impl, scope );
+			PyObject * py_method = mt->iadapter->get( kernel, impl, scope );
 
 			return py_method;
 		}
@@ -82,7 +82,7 @@ namespace pybind
 
 			const class_type_scope_ptr & scope = kernel->get_class_scope( py_self->ob_type );
 
-			mt->iadapter->set( impl, py_value, scope );
+			mt->iadapter->set( kernel, impl, py_value, scope );
 
 			Py_RETURN_NONE;
 		}

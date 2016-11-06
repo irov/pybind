@@ -128,7 +128,7 @@ namespace pybind
 		virtual PyObject * scope_create_holder( const class_type_scope_ptr & _scope, void * _ptr ) = 0;
 
 		template<class T>
-		PyObject * create_holder_t( T * _ptr )
+		PyObject * scope_create_holder_t( T * _ptr )
 		{
 			const pybind::class_type_scope_ptr & scope = this->class_scope<T>();
 

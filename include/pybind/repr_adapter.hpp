@@ -14,7 +14,7 @@ namespace pybind
 		: public adapter_interface
     {
 	public:
-		virtual PyObject * repr( void * _self, const class_type_scope_ptr & _scope ) = 0;
+		virtual PyObject * repr( kernel_interface * _kernel, void * _self, const class_type_scope_ptr & _scope ) = 0;
 	};
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<repr_adapter_interface> repr_adapter_interface_ptr;
@@ -30,11 +30,9 @@ namespace pybind
 		}
 
 	public:
-		PyObject * repr( void * _self, const class_type_scope_ptr & _scope ) override
+		PyObject * repr( kernel_interface * _kernel, void * _self, const class_type_scope_ptr & _scope ) override
 		{
-			kernel_interface * kernel = pybind::get_kernel();
-
-			C * c = kernel->meta_cast_class_t<C>( _self, _scope );
+			C * c = _kernel->meta_cast_class_t<C>( _self, _scope );
 
 			PyObject * py_result = (detail::return_operator_t)(*m_repr)(c);
 

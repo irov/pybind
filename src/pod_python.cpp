@@ -13,6 +13,7 @@ namespace pybind
 	{
 		PyObject_HEAD
 			uint32_t flag;
+		int64_t hash;
 	};
 	//////////////////////////////////////////////////////////////////////////
 	struct py_ptr_object
@@ -73,6 +74,8 @@ namespace pybind
 			py_ptr->impl = _impl;
 
 			py_ptr->flag |= PY_OBJECT_PTR;
+
+			py_ptr->hash = -1;
 
 			if( _holder == true )
 			{
@@ -138,6 +141,10 @@ namespace pybind
 				return;
 			}
 
+			py_ptr_object * py_ptr = (py_ptr_object *)_obj;
+
+			py_ptr->hash = -1;
+
 			if( _size > 32 )
 			{
 				wrap_pod64( _obj, _impl );
@@ -158,6 +165,22 @@ namespace pybind
 			{
 				wrap_pod4( _obj, _impl );
 			}
+		}
+		//////////////////////////////////////////////////////////////////////////
+		int64_t get_pod_hash( PyObject * _obj )
+		{
+			py_base_object * py_base = (py_base_object *)_obj;
+
+			int64_t hash = py_base->hash;
+
+			return hash;
+		}
+		//////////////////////////////////////////////////////////////////////////
+		void set_pod_hash( PyObject * _obj, int64_t _hash )
+		{
+			py_base_object * py_base = (py_base_object *)_obj;
+
+			py_base->hash = _hash;
 		}
 		//////////////////////////////////////////////////////////////////////////
 		void * get_pod_impl( PyObject * _obj )

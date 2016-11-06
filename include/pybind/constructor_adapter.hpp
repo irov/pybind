@@ -45,7 +45,7 @@ namespace pybind
 		}
 
 	public:
-		virtual void * call( PyObject * _obj, PyObject * _args ) = 0;
+		virtual void * call( kernel_interface * _kernel, PyObject * _obj, PyObject * _args ) = 0;
 
 	protected:
 		size_t m_arity;

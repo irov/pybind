@@ -74,7 +74,7 @@ namespace pybind
 		try
 		{
 			DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( scope->get_name(), adapter->getName(), _args, _kwds );
-			PyObject * ret = adapter->call( impl, scope, _args, _kwds );
+			PyObject * ret = adapter->call( kernel, impl, scope, _args, _kwds );
 			DEBUG_PYBIND_NOTIFY_END_BIND_CALL( scope->get_name(), adapter->getName(), _args, _kwds );
 
 			return ret;
@@ -112,7 +112,7 @@ namespace pybind
 
 		try
 		{
-			PyObject * ret = adapter->repr( impl, scope );
+			PyObject * ret = adapter->repr( kernel, impl, scope );
 
 			return ret;
 		}
@@ -129,6 +129,15 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	static long py_hash( PyObject * _obj )
 	{
+		int64_t hash = detail::get_pod_hash( _obj );
+
+		if( hash != -1 )
+		{
+			long py_hash = (long)hash;
+
+			return py_hash;
+		}
+
 		kernel_interface * kernel = pybind::get_kernel();
 
 		void * impl = kernel->get_class_impl( _obj );
@@ -148,9 +157,13 @@ namespace pybind
 
 		try
 		{
-			long hash = adapter->hash( impl, scope );
+			int64_t hash = adapter->hash( kernel, impl, scope );
 
-			return hash;
+			detail::set_pod_hash( _obj, hash );
+
+			long py_hash = (long)hash;					
+
+			return py_hash;
 		}
 		catch( const pybind_exception & _ex )
 		{
@@ -226,7 +239,7 @@ namespace pybind
 
 			const compare_adapter_interface_ptr & adapter = scope->get_compare_adapter();
 
-			if( adapter->compare( _obj, impl, scope, _compare, pybind_op, test_result ) == false )
+			if( adapter->compare( kernel, _obj, impl, scope, _compare, pybind_op, test_result ) == false )
 			{
 				Py_INCREF( Py_NotImplemented );
 
@@ -273,7 +286,7 @@ namespace pybind
 		try
 		{
 			DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( scope->get_name(), adapter->getName(), _key, nullptr );
-			PyObject * res = adapter->call( impl, scope, _key );
+			PyObject * res = adapter->call( kernel, impl, scope, _key );
 			DEBUG_PYBIND_NOTIFY_END_BIND_CALL( scope->get_name(), adapter->getName(), _key, nullptr );
 
 			return res;
@@ -312,7 +325,7 @@ namespace pybind
 		try
 		{
 			DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( scope->get_name(), adapter->getName(), _key, nullptr );
-			PyObject * res = adapter->call( impl, scope, _key );
+			PyObject * res = adapter->call( kernel, impl, scope, _key );
 			DEBUG_PYBIND_NOTIFY_END_BIND_CALL( scope->get_name(), adapter->getName(), _key, nullptr );
 
 			return res;
@@ -357,7 +370,7 @@ namespace pybind
 		try
 		{
 			DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( scope->get_name(), adapter->getName(), nullptr, nullptr );
-			PyObject * res = adapter->call( impl, scope, (size_t)_index );
+			PyObject * res = adapter->call( kernel, impl, scope, (size_t)_index );
 			DEBUG_PYBIND_NOTIFY_END_BIND_CALL( scope->get_name(), adapter->getName(), nullptr, nullptr );
 
 			return res;
@@ -396,7 +409,7 @@ namespace pybind
 		try
 		{
 			DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( scope->get_name(), adapter->getName(), nullptr, nullptr );
-			adapter->call( impl, scope, _index, _value );
+			adapter->call( kernel, impl, scope, _index, _value );
 			DEBUG_PYBIND_NOTIFY_END_BIND_CALL( scope->get_name(), adapter->getName(), nullptr, nullptr );
 
 			return 0;
@@ -433,7 +446,7 @@ namespace pybind
 			}
 			else
 			{
-				impl = scope->construct( py_self, _args );
+				impl = scope->construct( kernel, py_self, _args );
 			}
 
 			if( impl == nullptr )
@@ -445,7 +458,7 @@ namespace pybind
 
 			pybind::detail::wrap_pod_ptr( py_self, impl, false );
 
-			scope->incref_smart_pointer( impl );
+			scope->incref_smart_pointer( kernel, impl );
 
 			scope->addObject( py_self );
 
@@ -477,7 +490,7 @@ namespace pybind
 
 			void * impl = kernel->get_class_impl( _obj );
 
-			scope->decref_smart_pointer( impl );
+			scope->decref_smart_pointer( kernel, impl );
 
 			bool holder = pybind::detail::is_pod_holder( _obj );
 
@@ -526,10 +539,10 @@ namespace pybind
 			}
 			else
 			{
-				impl = scope->construct( py_self, _args );
+				impl = scope->construct( kernel, py_self, _args );
 			}
 
-			scope->incref_smart_pointer( impl );
+			scope->incref_smart_pointer( kernel, impl );
 
 			scope->addObject( py_self );
 
@@ -561,7 +574,7 @@ namespace pybind
 
 			void * impl = kernel->get_class_impl( _obj );
 
-			scope->decref_smart_pointer( impl );
+			scope->decref_smart_pointer( kernel, impl );
 
 			const destroy_adapter_interface_ptr & adapter = scope->get_destroy_adapter();
 
@@ -950,7 +963,7 @@ namespace pybind
 		}
 
 		DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( _scope->get_name(), _adapter->getName(), nullptr, nullptr );
-		PyObject * res = _adapter->call( impl, _scope, _value, _rotate );
+		PyObject * res = _adapter->call( _kernel, impl, _scope, _value, _rotate );
 		DEBUG_PYBIND_NOTIFY_END_BIND_CALL( _scope->get_name(), _adapter->getName(), nullptr, nullptr );
 
 		return res;
@@ -1358,14 +1371,14 @@ namespace pybind
 #	endif
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void * class_type_scope::construct( PyObject * _obj, PyObject * _args )
+	void * class_type_scope::construct( kernel_interface * _kernel, PyObject * _obj, PyObject * _args )
 	{
 		if( m_constructor == nullptr )
 		{
 			return nullptr;
 		}
 
-		void * obj = m_constructor->call( _obj, _args );
+		void * obj = m_constructor->call( _kernel, _obj, _args );
 
 		return obj;
 	}
@@ -1447,7 +1460,7 @@ namespace pybind
 		return py_self;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * class_type_scope::create_holder( void * _impl )
+	PyObject * class_type_scope::create_holder( kernel_interface * _kernel, void * _impl )
 	{
 		if( m_pod != 0 )
 		{
@@ -1458,7 +1471,7 @@ namespace pybind
 
 		pybind::detail::wrap_pod_ptr( py_self, _impl, true );
 
-		this->incref_smart_pointer( _impl );
+		this->incref_smart_pointer( _kernel, _impl );
 
 		this->addObject( py_self );
 
@@ -1512,19 +1525,19 @@ namespace pybind
 		PYBIND_FREE( _ptr, _size );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_type_scope::incref_smart_pointer( void * _impl )
+	void class_type_scope::incref_smart_pointer( kernel_interface * _kernel, void * _impl )
 	{
 		if( m_smart_pointer != nullptr )
 		{
-			m_smart_pointer->incref( _impl, this );
+			m_smart_pointer->incref( _kernel, _impl, this );
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_type_scope::decref_smart_pointer( void * _impl )
+	void class_type_scope::decref_smart_pointer( kernel_interface * _kernel, void * _impl )
 	{
 		if( m_smart_pointer != nullptr )
 		{
-			m_smart_pointer->decref( _impl, this );
+			m_smart_pointer->decref( _kernel, _impl, this );
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////
