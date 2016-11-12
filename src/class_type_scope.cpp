@@ -129,13 +129,13 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	static long py_hash( PyObject * _obj )
 	{
-		int64_t hash = detail::get_pod_hash( _obj );
+		int64_t pod_hash = detail::get_pod_hash( _obj );
 
-		if( hash != -1 )
+		if( pod_hash != -1 )
 		{
-			long py_hash = (long)hash;
+			long py_pod_hash = (long)pod_hash;
 
-			return py_hash;
+			return py_pod_hash;
 		}
 
 		kernel_interface * kernel = pybind::get_kernel();

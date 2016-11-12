@@ -83,7 +83,7 @@ namespace pybind
 			}
 		}
 		//////////////////////////////////////////////////////////////////////////
-		inline void wrap_pod64( PyObject * _obj, void ** _impl )
+		inline static void wrap_pod64( PyObject * _obj, void ** _impl )
 		{
 			py_pod64_object * py_pod = (py_pod64_object *)_obj;
 
@@ -92,7 +92,7 @@ namespace pybind
 			*_impl = (void *)py_pod->buff;
 		}
 		//////////////////////////////////////////////////////////////////////////
-		inline void wrap_pod32( PyObject * _obj, void ** _impl )
+		inline static void wrap_pod32( PyObject * _obj, void ** _impl )
 		{
 			py_pod32_object * py_pod = (py_pod32_object *)_obj;
 
@@ -101,7 +101,7 @@ namespace pybind
 			*_impl = (void *)py_pod->buff;
 		}
 		//////////////////////////////////////////////////////////////////////////
-		inline void wrap_pod16( PyObject * _obj, void ** _impl )
+		inline static void wrap_pod16( PyObject * _obj, void ** _impl )
 		{
 			py_pod16_object * py_pod = (py_pod16_object *)_obj;
 
@@ -110,7 +110,7 @@ namespace pybind
 			*_impl = (void *)py_pod->buff;
 		}
 		//////////////////////////////////////////////////////////////////////////
-		inline void wrap_pod8( PyObject * _obj, void ** _impl )
+		inline static void wrap_pod8( PyObject * _obj, void ** _impl )
 		{
 			py_pod8_object * py_pod = (py_pod8_object *)_obj;
 
@@ -119,7 +119,7 @@ namespace pybind
 			*_impl = (void *)py_pod->buff;
 		}
 		//////////////////////////////////////////////////////////////////////////
-		inline void wrap_pod4( PyObject * _obj, void ** _impl )
+		inline static void wrap_pod4( PyObject * _obj, void ** _impl )
 		{
 			py_pod4_object * py_pod = (py_pod4_object *)_obj;
 
@@ -312,51 +312,6 @@ namespace pybind
 		Py_INCREF( (PyObject *)py_pybind_type );
 
 		return py_pybind_type;
-	}
-	//////////////////////////////////////////////////////////////////////////
-	static void wrap_pod64( PyObject * _obj, void ** _impl )
-	{
-		py_pod64_object * py_pod = (py_pod64_object *)_obj;
-
-		py_pod->flag |= PY_OBJECT_POD64;
-
-		*_impl = (void *)py_pod->buff;
-	}
-	//////////////////////////////////////////////////////////////////////////
-	static void wrap_pod32( PyObject * _obj, void ** _impl )
-	{
-		py_pod32_object * py_pod = (py_pod32_object *)_obj;
-
-		py_pod->flag |= PY_OBJECT_POD32;
-
-		*_impl = (void *)py_pod->buff;
-	}
-	//////////////////////////////////////////////////////////////////////////
-	static void wrap_pod16( PyObject * _obj, void ** _impl )
-	{
-		py_pod16_object * py_pod = (py_pod16_object *)_obj;
-
-		py_pod->flag |= PY_OBJECT_POD16;
-
-		*_impl = (void *)py_pod->buff;
-	}
-	//////////////////////////////////////////////////////////////////////////
-	static void wrap_pod8( PyObject * _obj, void ** _impl )
-	{
-		py_pod8_object * py_pod = (py_pod8_object *)_obj;
-
-		py_pod->flag |= PY_OBJECT_POD8;
-
-		*_impl = (void *)py_pod->buff;
-	}
-	//////////////////////////////////////////////////////////////////////////
-	static void wrap_pod4( PyObject * _obj, void ** _impl )
-	{
-		py_pod4_object * py_pod = (py_pod4_object *)_obj;
-
-		py_pod->flag |= PY_OBJECT_POD4;
-
-		*_impl = (void *)py_pod->buff;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool pod_python::initialize()
