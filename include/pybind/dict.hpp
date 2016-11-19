@@ -17,7 +17,7 @@ namespace pybind
 		explicit dict( PyObject * _obj );
 
 	public:
-		size_t exist( const detail::import_operator_t & _name ) const;
+        bool exist( const detail::import_operator_t & _name ) const;
 		size_t contains( const detail::import_operator_t & _name ) const;
 
 	public:

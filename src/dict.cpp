@@ -23,7 +23,7 @@ namespace pybind
 	{
 	}
 	//////////////////////////////////////////////////////////////////////////
-	size_t dict::exist( const detail::import_operator_t & _name ) const
+	bool dict::exist( const detail::import_operator_t & _name ) const
 	{
 		return pybind::dict_exist( m_obj, _name );
 	}
