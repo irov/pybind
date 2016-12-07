@@ -34,7 +34,7 @@ namespace pybind
 		method_adapter_interface * get_method_adapter( PyObject * _obj ) override;
 		
 	public:
-		PyTypeObject * get_pod_type( uint32_t _pod ) override;
+		PyTypeObject * get_pod_type( uint32_t _pod, bool _hash ) override;
 
 	public:
 		void set_current_module( PyObject * _module ) override;
@@ -56,7 +56,7 @@ namespace pybind
 		void unregister_type_info_extract( uint32_t _info ) override;
 		type_cast * find_type_info_extract( uint32_t _info ) override;
 
-		class_type_scope_ptr create_new_type_scope( uint32_t _info, const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod ) override;
+		class_type_scope_ptr create_new_type_scope( uint32_t _info, const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash ) override;
 
 		bool has_class_type_scope( uint32_t _info ) override;
 		const class_type_scope_ptr & get_class_type_scope( uint32_t _info ) override;

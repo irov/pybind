@@ -36,7 +36,7 @@ namespace pybind
 		typedef B bases_type;
 
 	public:
-		base_( const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, size_t _size, PyObject * _module )
+		base_( const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, size_t _size, bool _hash, PyObject * _module )
 		{
 			kernel_interface * kernel = pybind::get_kernel();
 
@@ -49,7 +49,7 @@ namespace pybind
 
 			uint32_t info = kernel->class_info<C>();
 
-			m_scope = kernel->create_new_type_scope( info, _name, _user, _pynew, _pydestructor, pod );
+			m_scope = kernel->create_new_type_scope( info, _name, _user, _pynew, _pydestructor, pod, _hash );
 
 			this->setup_bases();
 
@@ -847,11 +847,9 @@ namespace pybind
 
 			void * obj_place = nullptr;
 
-			size_t size_C = sizeof( C );
-
 			const class_type_scope_ptr & scope = kernel->get_class_type_scope( tinfo );
 
-			PyObject * py_obj = scope->create_pod( &obj_place, size_C );
+			PyObject * py_obj = scope->create_pod( &obj_place );
 
 			if( py_obj == nullptr )
 			{
@@ -873,7 +871,7 @@ namespace pybind
 
 	public:
 		class_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
-			: base_<C, B>( _name, 0, nullptr, new class_destroy_delete<C>, 0, _module )
+			: base_<C, B>( _name, 0, nullptr, new class_destroy_delete<C>, 0, false, _module )
 		{
 			if( external_extract == true )
 			{
@@ -905,7 +903,7 @@ namespace pybind
 
 	public:
 		proxy_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
-			: base_<C, B>( _name, 0, nullptr, nullptr, 0, _module )
+			: base_<C, B>( _name, 0, nullptr, nullptr, 0, false, _module )
 		{
 			if( external_extract == true )
 			{
@@ -937,7 +935,7 @@ namespace pybind
 
 	public:
 		superclass_( const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, bool external_extract = true, PyObject * _module = 0 )
-			: base_<C, B>( _name, _user, _pynew, _pydestructor, 0, _module )
+			: base_<C, B>( _name, _user, _pynew, _pydestructor, 0, false, _module )
 		{
 			if( external_extract == true )
 			{
@@ -971,7 +969,7 @@ namespace pybind
 
 	public:
 		struct_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
-			: base_<C, B>( _name, 0, nullptr, nullptr, sizeof( C ), _module )
+			: base_<C, B>( _name, 0, nullptr, nullptr, sizeof( C ), false, _module )
 		{
 			if( external_extract == true )
 			{
@@ -997,6 +995,40 @@ namespace pybind
 	};
 
 	template<class C, class B = no_bases>
+	class structhash_
+		: public base_<C, B>
+	{
+	public:
+		typedef extract_struct_type_ref<C> extract_type_ref;
+
+	public:
+		structhash_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
+			: base_<C, B>( _name, 0, nullptr, nullptr, sizeof( C ), true, _module )
+		{
+			if( external_extract == true )
+			{
+				this->setup_extract( new extract_type_ref );
+			}
+		}
+
+	public:
+		template<class C0, class C1, class C2, class C3, class C4, class C5>
+		structhash_ & def_constructor( const init<C0, C1, C2, C3, C4, C5> & _init )
+		{
+			(void)_init;
+
+			constructor_adapter_interface_ptr ctr =
+				new constructor_placement<C, init<C0, C1, C2, C3, C4, C5> >();
+
+			const class_type_scope_ptr & scope = base_<C, B>::get_scope();
+
+			scope->set_construct( ctr );
+
+			return *this;
+		}
+	};
+
+	template<class C, class B = no_bases>
 	class interface_
 		: public base_<C, B>
 	{
@@ -1005,7 +1037,7 @@ namespace pybind
 
 	public:
 		interface_( const char * _name, bool external_extract = true, PyObject * _module = 0 )
-			: base_<C, B>( _name, 0, new class_new_invalid, nullptr, 0, _module )
+			: base_<C, B>( _name, 0, new class_new_invalid, nullptr, 0, false, _module )
 		{
 			if( external_extract == true )
 			{

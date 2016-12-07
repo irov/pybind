@@ -13,7 +13,7 @@ namespace pybind
 	{
 		PyObject_HEAD
 			uint32_t flag;
-		int64_t hash;
+		//int64_t hash;
 	};
 	//////////////////////////////////////////////////////////////////////////
 	struct py_ptr_object
@@ -22,34 +22,24 @@ namespace pybind
 		void * impl;
 	};
 	//////////////////////////////////////////////////////////////////////////
-	struct py_pod4_object
-		: public py_ptr_object
+	template<size_t I>
+	struct py_pod_object
+		: public py_base_object
 	{
-		uint8_t buff[4];
+		uint8_t buff[4 << I];
 	};
 	//////////////////////////////////////////////////////////////////////////
-	struct py_pod8_object
-		: public py_ptr_object
+	struct py_hash_object
+		: public py_base_object
 	{
-		uint8_t buff[8];
+		uint64_t hash;
 	};
 	//////////////////////////////////////////////////////////////////////////
-	struct py_pod16_object
-		: public py_ptr_object
+	template<size_t I>
+	struct py_pod_hash_object
+		: public py_hash_object
 	{
-		uint8_t buff[16];
-	};
-	//////////////////////////////////////////////////////////////////////////
-	struct py_pod32_object
-		: public py_ptr_object
-	{
-		uint8_t buff[32];
-	};
-	//////////////////////////////////////////////////////////////////////////
-	struct py_pod64_object
-		: public py_ptr_object
-	{
-		uint8_t buff[64];
+		uint8_t buff[4 << I];
 	};
 	//////////////////////////////////////////////////////////////////////////
 	namespace detail
@@ -74,61 +64,64 @@ namespace pybind
 			py_ptr->impl = _impl;
 
 			py_ptr->flag |= PY_OBJECT_PTR;
-
-			py_ptr->hash = -1;
-
+			
 			if( _holder == true )
 			{
 				py_ptr->flag |= PY_OBJECT_HOLDER;
 			}
 		}
 		//////////////////////////////////////////////////////////////////////////
-		inline static void wrap_pod64( PyObject * _obj, void ** _impl )
+		template<size_t I>
+		inline static void wrap_pod_I( PyObject * _obj, void ** _impl )
 		{
-			py_pod64_object * py_pod = (py_pod64_object *)_obj;
+			py_pod_object<I> * py_pod = (py_pod_object<I> *)_obj;
 
-			py_pod->flag |= PY_OBJECT_POD64;
+			py_pod->flag |= PY_OBJECT_POD << I;
 
 			*_impl = (void *)py_pod->buff;
 		}
 		//////////////////////////////////////////////////////////////////////////
-		inline static void wrap_pod32( PyObject * _obj, void ** _impl )
+		template<size_t I>
+		inline static void wrap_pod_hash_I( PyObject * _obj, void ** _impl )
 		{
-			py_pod32_object * py_pod = (py_pod32_object *)_obj;
+			py_pod_hash_object<I> * py_pod_hash = (py_pod_hash_object<I> *)_obj;
 
-			py_pod->flag |= PY_OBJECT_POD32;
+			py_pod_hash->flag |= PY_OBJECT_POD << I;
+			py_pod_hash->flag |= PY_OBJECT_HASH;
+			py_pod_hash->hash = -1;
 
-			*_impl = (void *)py_pod->buff;
+			*_impl = (void *)py_pod_hash->buff;
 		}
 		//////////////////////////////////////////////////////////////////////////
-		inline static void wrap_pod16( PyObject * _obj, void ** _impl )
-		{
-			py_pod16_object * py_pod = (py_pod16_object *)_obj;
-
-			py_pod->flag |= PY_OBJECT_POD16;
-
-			*_impl = (void *)py_pod->buff;
-		}
+		static const uint32_t s_pod_type_matrix[] = {
+			0, 0, 0, 0,
+			1, 1, 1, 1,
+			2, 2, 2, 2, 2, 2, 2, 2,
+			3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+			4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
+		};
 		//////////////////////////////////////////////////////////////////////////
-		inline static void wrap_pod8( PyObject * _obj, void ** _impl )
-		{
-			py_pod8_object * py_pod = (py_pod8_object *)_obj;
-
-			py_pod->flag |= PY_OBJECT_POD8;
-
-			*_impl = (void *)py_pod->buff;
-		}
+		typedef void( *t_wrap_pod4_f )(PyObject *, void **);
 		//////////////////////////////////////////////////////////////////////////
-		inline static void wrap_pod4( PyObject * _obj, void ** _impl )
+		static t_wrap_pod4_f s_pod_type_generator[] =
 		{
-			py_pod4_object * py_pod = (py_pod4_object *)_obj;
-
-			py_pod->flag |= PY_OBJECT_POD4;
-
-			*_impl = (void *)py_pod->buff;
-		}
+			wrap_pod_I<0>,
+			wrap_pod_I<1>,
+			wrap_pod_I<2>,
+			wrap_pod_I<3>,
+			wrap_pod_I<4>
+		};
 		//////////////////////////////////////////////////////////////////////////
-		void wrap_pod( PyObject * _obj, void ** _impl, size_t _size )
+		static t_wrap_pod4_f s_pod_hash_type_generator[] =
+		{
+			wrap_pod_hash_I<0>,
+			wrap_pod_hash_I<1>,
+			wrap_pod_hash_I<2>,
+			wrap_pod_hash_I<3>,
+			wrap_pod_hash_I<4>
+		};
+		//////////////////////////////////////////////////////////////////////////
+		void wrap_pod( PyObject * _obj, void ** _impl, size_t _size, bool _hash )
 		{
 			if( _size > PYBIND_OBJECT_POD_SIZE )
 			{
@@ -140,36 +133,26 @@ namespace pybind
 
 				return;
 			}
+				
+			uint32_t pod_matrix_index = s_pod_type_matrix[_size];
 
-			py_ptr_object * py_ptr = (py_ptr_object *)_obj;
+			if( _hash == false )
+			{
+				t_wrap_pod4_f pod_generator = s_pod_type_generator[pod_matrix_index];
 
-			py_ptr->hash = -1;
-
-			if( _size > 32 )
-			{
-				wrap_pod64( _obj, _impl );
-			}
-			else if( _size > 16 )
-			{
-				wrap_pod32( _obj, _impl );
-			}
-			else if( _size > 8 )
-			{
-				wrap_pod16( _obj, _impl );
-			}
-			else if( _size > 4 )
-			{
-				wrap_pod8( _obj, _impl );
+				(*pod_generator)(_obj, _impl);
 			}
 			else
 			{
-				wrap_pod4( _obj, _impl );
+				t_wrap_pod4_f pod_hash_generator = s_pod_hash_type_generator[pod_matrix_index];
+
+				(*pod_hash_generator)(_obj, _impl);
 			}
 		}
 		//////////////////////////////////////////////////////////////////////////
 		int64_t get_pod_hash( PyObject * _obj )
 		{
-			py_base_object * py_base = (py_base_object *)_obj;
+			py_hash_object * py_base = (py_hash_object *)_obj;
 
 			int64_t hash = py_base->hash;
 
@@ -178,7 +161,7 @@ namespace pybind
 		//////////////////////////////////////////////////////////////////////////
 		void set_pod_hash( PyObject * _obj, int64_t _hash )
 		{
-			py_base_object * py_base = (py_base_object *)_obj;
+			py_hash_object * py_base = (py_hash_object *)_obj;
 
 			py_base->hash = _hash;
 		}
@@ -193,7 +176,8 @@ namespace pybind
 			{
 				return nullptr;
 			}
-			else if( flag & PY_OBJECT_PTR )
+			
+			if( flag & PY_OBJECT_PTR )
 			{
 				py_ptr_object * py_ptr = (py_ptr_object *)_obj;
 
@@ -201,45 +185,92 @@ namespace pybind
 
 				return impl;
 			}
-			else if( flag & PY_OBJECT_POD4 )
+			
+			if( flag & PY_OBJECT_HASH )
 			{
-				py_pod4_object * py_pod = (py_pod4_object *)_obj;
+				if( flag & PY_OBJECT_POD4 )
+				{
+					py_pod_hash_object<0> * py_pod = (py_pod_hash_object<0> *)_obj;
 
-				void * impl = (void *)py_pod->buff;
+					void * impl = (void *)py_pod->buff;
 
-				return impl;
+					return impl;
+				}
+				else if( flag & PY_OBJECT_POD8 )
+				{
+					py_pod_hash_object<1> * py_pod = (py_pod_hash_object<1> *)_obj;
+
+					void * impl = (void *)py_pod->buff;
+
+					return impl;
+				}
+				else if( flag & PY_OBJECT_POD16 )
+				{
+					py_pod_hash_object<2> * py_pod = (py_pod_hash_object<2> *)_obj;
+
+					void * impl = (void *)py_pod->buff;
+
+					return impl;
+				}
+				else if( flag & PY_OBJECT_POD32 )
+				{
+					py_pod_hash_object<3> * py_pod = (py_pod_hash_object<3> *)_obj;
+
+					void * impl = (void *)py_pod->buff;
+
+					return impl;
+				}
+				else if( flag & PY_OBJECT_POD64 )
+				{
+					py_pod_hash_object<4> * py_pod = (py_pod_hash_object<4> *)_obj;
+
+					void * impl = (void *)py_pod->buff;
+
+					return impl;
+				}
 			}
-			else if( flag & PY_OBJECT_POD8 )
+			else
 			{
-				py_pod8_object * py_pod = (py_pod8_object *)_obj;
+				if( flag & PY_OBJECT_POD4 )
+				{
+					py_pod_object<0> * py_pod = (py_pod_object<0> *)_obj;
 
-				void * impl = (void *)py_pod->buff;
+					void * impl = (void *)py_pod->buff;
 
-				return impl;
-			}
-			else if( flag & PY_OBJECT_POD16 )
-			{
-				py_pod16_object * py_pod = (py_pod16_object *)_obj;
+					return impl;
+				}
+				else if( flag & PY_OBJECT_POD8 )
+				{
+					py_pod_object<1> * py_pod = (py_pod_object<1> *)_obj;
 
-				void * impl = (void *)py_pod->buff;
+					void * impl = (void *)py_pod->buff;
 
-				return impl;
-			}
-			else if( flag & PY_OBJECT_POD32 )
-			{
-				py_pod32_object * py_pod = (py_pod32_object *)_obj;
+					return impl;
+				}
+				else if( flag & PY_OBJECT_POD16 )
+				{
+					py_pod_object<2> * py_pod = (py_pod_object<2> *)_obj;
 
-				void * impl = (void *)py_pod->buff;
+					void * impl = (void *)py_pod->buff;
 
-				return impl;
-			}
-			else if( flag & PY_OBJECT_POD64 )
-			{
-				py_pod64_object * py_pod = (py_pod64_object *)_obj;
+					return impl;
+				}
+				else if( flag & PY_OBJECT_POD32 )
+				{
+					py_pod_object<3> * py_pod = (py_pod_object<3> *)_obj;
 
-				void * impl = (void *)py_pod->buff;
+					void * impl = (void *)py_pod->buff;
 
-				return impl;
+					return impl;
+				}
+				else if( flag & PY_OBJECT_POD64 )
+				{
+					py_pod_object<4> * py_pod = (py_pod_object<4> *)_obj;
+
+					void * impl = (void *)py_pod->buff;
+
+					return impl;
+				}
 			}
 
 			pybind::throw_exception( "obj %s not wrap pybind (impl)"
@@ -276,7 +307,7 @@ namespace pybind
 		objtype->tp_free( _obj );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyTypeObject * pod_python::get_pod_type( uint32_t _pod )
+	PyTypeObject * pod_python::get_pod_type( uint32_t _pod, bool _hash )
 	{
 		PyTypeObject * py_pybind_type;
 
@@ -284,29 +315,56 @@ namespace pybind
 		{
 			return nullptr;
 		}
-		else if( _pod > 32 )
+
+		if( _pod == 0 )
 		{
-			py_pybind_type = &m_pod64_type;
+			py_pybind_type = &m_ptr_type;
 		}
-		else if( _pod > 16 )
+		else if( _hash == false )
 		{
-			py_pybind_type = &m_pod32_type;
-		}
-		else if( _pod > 8 )
-		{
-			py_pybind_type = &m_pod16_type;
-		}
-		else if( _pod > 4 )
-		{
-			py_pybind_type = &m_pod8_type;
-		}
-		else if( _pod > 0 )
-		{
-			py_pybind_type = &m_pod4_type;
+			if( _pod > 32 )
+			{
+				py_pybind_type = &m_pod_type[4];
+			}
+			else if( _pod > 16 )
+			{
+				py_pybind_type = &m_pod_type[3];
+			}
+			else if( _pod > 8 )
+			{
+				py_pybind_type = &m_pod_type[2];
+			}
+			else if( _pod > 4 )
+			{
+				py_pybind_type = &m_pod_type[1];
+			}
+			else if( _pod > 0 )
+			{
+				py_pybind_type = &m_pod_type[0];
+			}
 		}
 		else
 		{
-			py_pybind_type = &m_ptr_type;
+			if( _pod > 32 )
+			{
+				py_pybind_type = &m_pod_hash_type[4];
+			}
+			else if( _pod > 16 )
+			{
+				py_pybind_type = &m_pod_hash_type[3];
+			}
+			else if( _pod > 8 )
+			{
+				py_pybind_type = &m_pod_hash_type[2];
+			}
+			else if( _pod > 4 )
+			{
+				py_pybind_type = &m_pod_hash_type[1];
+			}
+			else if( _pod > 0 )
+			{
+				py_pybind_type = &m_pod_hash_type[0];
+			}
 		}
 
 		Py_INCREF( (PyObject *)py_pybind_type );
@@ -314,274 +372,69 @@ namespace pybind
 		return py_pybind_type;
 	}
 	//////////////////////////////////////////////////////////////////////////
+	static PyTypeObject __make_pod_type( const char * _name, size_t _size )
+	{
+		PyTypeObject pod_type =
+		{
+			PyVarObject_HEAD_INIT( &PyType_Type, 0 )
+			_name,
+			_size,
+			0,
+			&py_dealloc,                             /* tp_dealloc */
+			0,                    /* tp_print */
+			0,                                          /* tp_getattr */
+			0,                                          /* tp_setattr */
+			0,                                          /* tp_compare */
+			0,                                /* tp_repr */
+			0,                          /* tp_as_number */
+			0,                        /* tp_as_sequence */
+			0,                         /* tp_as_mapping */
+			0,                      /* tp_hash */
+			0,                                          /* tp_call */
+			0,                                 /* tp_str */
+			0,                    /* tp_getattro */
+			0,                                          /* tp_setattro */
+			0,                          /* tp_as_buffer */
+			Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,              /* tp_flags */
+			0,                                 /* tp_doc */
+			0,                                          /* tp_traverse */
+			0,                                          /* tp_clear */
+			0,            /* tp_richcompare */
+			0,                                          /* tp_weaklistoffset */
+			0,                                          /* tp_iter */
+			0,                                          /* tp_iternext */
+			0,                             /* tp_methods */
+			0,                                          /* tp_members */
+			0,                                          /* tp_getset */
+			0,                         /* tp_base */
+			0,                                          /* tp_dict */
+			0,                                          /* tp_descr_get */
+			0,                                          /* tp_descr_set */
+			0,                                          /* tp_dictoffset */
+			0,                                          /* tp_init */
+			0,                                          /* tp_alloc */
+			0,                                 /* tp_new */
+			0,                               /* tp_free */
+		};
+
+		return pod_type;
+	}
+	//////////////////////////////////////////////////////////////////////////
 	bool pod_python::initialize()
 	{
-		//////////////////////////////////////////////////////////////////////////
-		PyTypeObject pod4_type =
-		{
-			PyVarObject_HEAD_INIT( &PyType_Type, 0 )
-			"pybind_pod4_type",
-			sizeof( py_pod4_object ),
-			0,
-			&py_dealloc,                             /* tp_dealloc */
-			0,                    /* tp_print */
-			0,                                          /* tp_getattr */
-			0,                                          /* tp_setattr */
-			0,                                          /* tp_compare */
-			0,                                /* tp_repr */
-			0,                          /* tp_as_number */
-			0,                        /* tp_as_sequence */
-			0,                         /* tp_as_mapping */
-			0,                      /* tp_hash */
-			0,                                          /* tp_call */
-			0,                                 /* tp_str */
-			0,                    /* tp_getattro */
-			0,                                          /* tp_setattro */
-			0,                          /* tp_as_buffer */
-			Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,              /* tp_flags */
-			0,                                 /* tp_doc */
-			0,                                          /* tp_traverse */
-			0,                                          /* tp_clear */
-			0,            /* tp_richcompare */
-			0,                                          /* tp_weaklistoffset */
-			0,                                          /* tp_iter */
-			0,                                          /* tp_iternext */
-			0,                             /* tp_methods */
-			0,                                          /* tp_members */
-			0,                                          /* tp_getset */
-			0,                         /* tp_base */
-			0,                                          /* tp_dict */
-			0,                                          /* tp_descr_get */
-			0,                                          /* tp_descr_set */
-			0,                                          /* tp_dictoffset */
-			0,                                          /* tp_init */
-			0,                                          /* tp_alloc */
-			0,                                 /* tp_new */
-			0,                               /* tp_free */
-		};
-		//////////////////////////////////////////////////////////////////////////
-		PyTypeObject pod8_type =
-		{
-			PyVarObject_HEAD_INIT( &PyType_Type, 0 )
-			"pybind_pod8_type",
-			sizeof( py_pod8_object ),
-			0,
-			&py_dealloc,                             /* tp_dealloc */
-			0,                    /* tp_print */
-			0,                                          /* tp_getattr */
-			0,                                          /* tp_setattr */
-			0,                                          /* tp_compare */
-			0,                                /* tp_repr */
-			0,                          /* tp_as_number */
-			0,                        /* tp_as_sequence */
-			0,                         /* tp_as_mapping */
-			0,                      /* tp_hash */
-			0,                                          /* tp_call */
-			0,                                 /* tp_str */
-			0,                    /* tp_getattro */
-			0,                                          /* tp_setattro */
-			0,                          /* tp_as_buffer */
-			Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,              /* tp_flags */
-			0,                                 /* tp_doc */
-			0,                                          /* tp_traverse */
-			0,                                          /* tp_clear */
-			0,            /* tp_richcompare */
-			0,                                          /* tp_weaklistoffset */
-			0,                                          /* tp_iter */
-			0,                                          /* tp_iternext */
-			0,                             /* tp_methods */
-			0,                                          /* tp_members */
-			0,                                          /* tp_getset */
-			0,                         /* tp_base */
-			0,                                          /* tp_dict */
-			0,                                          /* tp_descr_get */
-			0,                                          /* tp_descr_set */
-			0,                                          /* tp_dictoffset */
-			0,                                          /* tp_init */
-			0,                                          /* tp_alloc */
-			0,                                 /* tp_new */
-			0,                               /* tp_free */
-		};
-		//////////////////////////////////////////////////////////////////////////
-		PyTypeObject pod16_type =
-		{
-			PyVarObject_HEAD_INIT( &PyType_Type, 0 )
-			"pybind_pod16_type",
-			sizeof( py_pod16_object ),
-			0,
-			&py_dealloc,                             /* tp_dealloc */
-			0,                    /* tp_print */
-			0,                                          /* tp_getattr */
-			0,                                          /* tp_setattr */
-			0,                                          /* tp_compare */
-			0,                                /* tp_repr */
-			0,                          /* tp_as_number */
-			0,                        /* tp_as_sequence */
-			0,                         /* tp_as_mapping */
-			0,                      /* tp_hash */
-			0,                                          /* tp_call */
-			0,                                 /* tp_str */
-			0,                    /* tp_getattro */
-			0,                                          /* tp_setattro */
-			0,                          /* tp_as_buffer */
-			Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,              /* tp_flags */
-			0,                                 /* tp_doc */
-			0,                                          /* tp_traverse */
-			0,                                          /* tp_clear */
-			0,            /* tp_richcompare */
-			0,                                          /* tp_weaklistoffset */
-			0,                                          /* tp_iter */
-			0,                                          /* tp_iternext */
-			0,                             /* tp_methods */
-			0,                                          /* tp_members */
-			0,                                          /* tp_getset */
-			0,                         /* tp_base */
-			0,                                          /* tp_dict */
-			0,                                          /* tp_descr_get */
-			0,                                          /* tp_descr_set */
-			0,                                          /* tp_dictoffset */
-			0,                                          /* tp_init */
-			0,                                          /* tp_alloc */
-			0,                                 /* tp_new */
-			0,                               /* tp_free */
-		};
-		//////////////////////////////////////////////////////////////////////////
-		PyTypeObject pod32_type =
-		{
-			PyVarObject_HEAD_INIT( &PyType_Type, 0 )
-			"pybind_pod32_type",
-			sizeof( py_pod32_object ),
-			0,
-			&py_dealloc,                             /* tp_dealloc */
-			0,                    /* tp_print */
-			0,                                          /* tp_getattr */
-			0,                                          /* tp_setattr */
-			0,                                          /* tp_compare */
-			0,                                /* tp_repr */
-			0,                          /* tp_as_number */
-			0,                        /* tp_as_sequence */
-			0,                         /* tp_as_mapping */
-			0,                      /* tp_hash */
-			0,                                          /* tp_call */
-			0,                                 /* tp_str */
-			0,                    /* tp_getattro */
-			0,                                          /* tp_setattro */
-			0,                          /* tp_as_buffer */
-			Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,              /* tp_flags */
-			0,                                 /* tp_doc */
-			0,                                          /* tp_traverse */
-			0,                                          /* tp_clear */
-			0,            /* tp_richcompare */
-			0,                                          /* tp_weaklistoffset */
-			0,                                          /* tp_iter */
-			0,                                          /* tp_iternext */
-			0,                             /* tp_methods */
-			0,                                          /* tp_members */
-			0,                                          /* tp_getset */
-			0,                         /* tp_base */
-			0,                                          /* tp_dict */
-			0,                                          /* tp_descr_get */
-			0,                                          /* tp_descr_set */
-			0,                                          /* tp_dictoffset */
-			0,                                          /* tp_init */
-			0,                                          /* tp_alloc */
-			0,                                 /* tp_new */
-			0,                               /* tp_free */
-		};
-		//////////////////////////////////////////////////////////////////////////
-		PyTypeObject pod64_type =
-		{
-			PyVarObject_HEAD_INIT( &PyType_Type, 0 )
-			"pybind_pod64_type",
-			sizeof( py_pod64_object ),
-			0,
-			&py_dealloc,                             /* tp_dealloc */
-			0,                    /* tp_print */
-			0,                                          /* tp_getattr */
-			0,                                          /* tp_setattr */
-			0,                                          /* tp_compare */
-			0,                                /* tp_repr */
-			0,                          /* tp_as_number */
-			0,                        /* tp_as_sequence */
-			0,                         /* tp_as_mapping */
-			0,                      /* tp_hash */
-			0,                                          /* tp_call */
-			0,                                 /* tp_str */
-			0,                    /* tp_getattro */
-			0,                                          /* tp_setattro */
-			0,                          /* tp_as_buffer */
-			Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,              /* tp_flags */
-			0,                                 /* tp_doc */
-			0,                                          /* tp_traverse */
-			0,                                          /* tp_clear */
-			0,            /* tp_richcompare */
-			0,                                          /* tp_weaklistoffset */
-			0,                                          /* tp_iter */
-			0,                                          /* tp_iternext */
-			0,                             /* tp_methods */
-			0,                                          /* tp_members */
-			0,                                          /* tp_getset */
-			0,                         /* tp_base */
-			0,                                          /* tp_dict */
-			0,                                          /* tp_descr_get */
-			0,                                          /* tp_descr_set */
-			0,                                          /* tp_dictoffset */
-			0,                                          /* tp_init */
-			0,                                          /* tp_alloc */
-			0,                                 /* tp_new */
-			0,                               /* tp_free */
-		};
-		//////////////////////////////////////////////////////////////////////////
-		PyTypeObject ptr_type =
-		{
-			PyVarObject_HEAD_INIT( &PyType_Type, 0 )
-			"pybind_ptr_type",
-			sizeof( py_ptr_object ),
-			0,
-			&py_dealloc,                             /* tp_dealloc */
-			0,                    /* tp_print */
-			0,                                          /* tp_getattr */
-			0,                                          /* tp_setattr */
-			0,                                          /* tp_compare */
-			0,                                /* tp_repr */
-			0,                          /* tp_as_number */
-			0,                        /* tp_as_sequence */
-			0,                         /* tp_as_mapping */
-			0,                      /* tp_hash */
-			0,                                          /* tp_call */
-			0,                                 /* tp_str */
-			0,                    /* tp_getattro */
-			0,                                          /* tp_setattro */
-			0,                          /* tp_as_buffer */
-			Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,              /* tp_flags */
-			0,                                 /* tp_doc */
-			0,                                          /* tp_traverse */
-			0,                                          /* tp_clear */
-			0,            /* tp_richcompare */
-			0,                                          /* tp_weaklistoffset */
-			0,                                          /* tp_iter */
-			0,                                          /* tp_iternext */
-			0,                             /* tp_methods */
-			0,                                          /* tp_members */
-			0,                                          /* tp_getset */
-			0,                         /* tp_base */
-			0,                                          /* tp_dict */
-			0,                                          /* tp_descr_get */
-			0,                                          /* tp_descr_set */
-			0,                                          /* tp_dictoffset */
-			0,                                          /* tp_init */
-			0,                        /* tp_alloc */
-			0,                          /* tp_new */
-			0,                               /* tp_free */
-		};
+		m_pod_type[0] = __make_pod_type( "pybind_pod4_type", sizeof( py_pod_object<0> ) );
+		m_pod_type[1] = __make_pod_type( "pybind_pod8_type", sizeof( py_pod_object<1> ) );
+		m_pod_type[2] = __make_pod_type( "pybind_pod16_type", sizeof( py_pod_object<2> ) );
+		m_pod_type[3] = __make_pod_type( "pybind_pod32_type", sizeof( py_pod_object<3> ) );
+		m_pod_type[4] = __make_pod_type( "pybind_pod64_type", sizeof( py_pod_object<4> ) );
 
-		m_pod4_type = pod4_type;
-		m_pod8_type = pod8_type;
-		m_pod16_type = pod16_type;
-		m_pod32_type = pod32_type;
-		m_pod64_type = pod64_type;
+		m_pod_hash_type[0] = __make_pod_type( "pybind_pod4_hash_type", sizeof( py_pod_hash_object<0> ) );
+		m_pod_hash_type[1] = __make_pod_type( "pybind_pod8_hash_type", sizeof( py_pod_hash_object<1> ) );
+		m_pod_hash_type[2] = __make_pod_type( "pybind_pod16_hash_type", sizeof( py_pod_hash_object<2> ) );
+		m_pod_hash_type[3] = __make_pod_type( "pybind_pod32_hash_type", sizeof( py_pod_hash_object<3> ) );
+		m_pod_hash_type[4] = __make_pod_type( "pybind_pod64_hash_type", sizeof( py_pod_hash_object<4> ) );
 
-		m_ptr_type = ptr_type;
+		m_ptr_type = __make_pod_type( "pybind_ptr_type", sizeof( py_ptr_object ) );
 
 		if( PyType_Ready( &m_ptr_type ) < 0 )
 		{
@@ -592,49 +445,28 @@ namespace pybind
 			return false;
 		}
 
-		if( PyType_Ready( &m_pod64_type ) < 0 )
+		for( uint32_t i = 0; i != 5; ++i )
 		{
-			pybind::log( "invalid embedding class '%s' \n"
-				, m_pod64_type.tp_name
-				);
+			if( PyType_Ready( &m_pod_type[i] ) < 0 )
+			{
+				pybind::log( "invalid embedding class '%s' \n"
+					, m_pod_type[i].tp_name
+					);
 
-			return false;
+				return false;
+			}
 		}
 
-		if( PyType_Ready( &m_pod32_type ) < 0 )
+		for( uint32_t i = 0; i != 5; ++i )
 		{
-			pybind::log( "invalid embedding class '%s' \n"
-				, m_pod32_type.tp_name
-				);
+			if( PyType_Ready( &m_pod_hash_type[i] ) < 0 )
+			{
+				pybind::log( "invalid embedding class '%s' \n"
+					, m_pod_hash_type[i].tp_name
+					);
 
-			return false;
-		}
-
-		if( PyType_Ready( &m_pod16_type ) < 0 )
-		{
-			pybind::log( "invalid embedding class '%s' \n"
-				, m_pod16_type.tp_name
-				);
-
-			return false;
-		}
-
-		if( PyType_Ready( &m_pod8_type ) < 0 )
-		{
-			pybind::log( "invalid embedding class '%s' \n"
-				, m_pod8_type.tp_name
-				);
-
-			return false;
-		}
-
-		if( PyType_Ready( &m_pod4_type ) < 0 )
-		{
-			pybind::log( "invalid embedding class '%s' \n"
-				, m_pod4_type.tp_name
-				);
-
-			return false;
+				return false;
+			}
 		}
 
 		return true;

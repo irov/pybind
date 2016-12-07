@@ -38,7 +38,7 @@ namespace pybind
 		: public stdex::intrusive_ptr_base<class_type_scope>
 	{
 	public:
-		class_type_scope( const char * _name, uint32_t _typeId, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod );
+		class_type_scope( const char * _name, uint32_t _typeId, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash );
 		~class_type_scope();
 
 	public:
@@ -48,7 +48,8 @@ namespace pybind
 	public:
 		const char * get_name() const;
 		uint32_t get_type_id() const;
-		uint32_t is_pod() const;
+		uint32_t get_pod_size() const;
+		bool get_pod_hash() const;
 
 		void * get_user() const;
 
@@ -116,7 +117,7 @@ namespace pybind
 
 		PyObject * create_class( void * _impl );
 		PyObject * create_holder( kernel_interface * _kernel, void * _impl );
-		PyObject * create_pod( void ** _impl, size_t _pod );
+		PyObject * create_pod( void ** _impl );
 
 		void * metacast( uint32_t _info, void * _impl );
 		void type_initialize( PyTypeObject * _type );
@@ -209,11 +210,12 @@ namespace pybind
 
 		smart_pointer_adapter_interface_ptr m_smart_pointer;
 
+		uint32_t m_objectCount;
+
 		PyTypeObject * m_pytypeobject;
 
-		uint32_t m_pod;
-
-        uint32_t m_objectCount;
+		uint32_t m_pod_size;
+		bool m_pod_hash;        
 	};
 	//////////////////////////////////////////////////////////////////////////
 	inline const new_adapter_interface_ptr & class_type_scope::get_new_adapter() const

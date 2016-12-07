@@ -168,9 +168,9 @@ namespace pybind
 		return iadapter;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyTypeObject * kernel_python::get_pod_type( uint32_t _pod )
+	PyTypeObject * kernel_python::get_pod_type( uint32_t _pod, bool _hash )
 	{
-		PyTypeObject * py_pod_type = m_pods.get_pod_type( _pod );
+		PyTypeObject * py_pod_type = m_pods.get_pod_type( _pod, _hash );
 
 		return py_pod_type;
 	}
@@ -337,9 +337,9 @@ namespace pybind
 		return t;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	class_type_scope_ptr kernel_python::create_new_type_scope( uint32_t _info, const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod )
+	class_type_scope_ptr kernel_python::create_new_type_scope( uint32_t _info, const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash )
 	{
-		class_type_scope_ptr scope = new class_type_scope( _name, _info, _user, _pynew, _pydestructor, _pod );
+		class_type_scope_ptr scope = new class_type_scope( _name, _info, _user, _pynew, _pydestructor, _pod, _hash );
 
 		m_class_type_scopes[_info] = scope;
 

@@ -525,9 +525,10 @@ namespace pybind
 			PyObject * py_self = detail::alloc_class( _type, _args, _kwds );
 
 			void * buff = nullptr;
-			uint32_t pod_size = scope->is_pod();
+			uint32_t pod_size = scope->get_pod_size();
+			bool pod_hash = scope->get_pod_hash();
 
-			pybind::detail::wrap_pod( py_self, &buff, pod_size );
+			pybind::detail::wrap_pod( py_self, &buff, pod_size, pod_hash );
 
 			void * impl;
 
@@ -593,16 +594,17 @@ namespace pybind
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////
-	class_type_scope::class_type_scope( const char * _name, uint32_t _typeId, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod )
+	class_type_scope::class_type_scope( const char * _name, uint32_t _typeId, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash )
 		: m_name( _name )
 		, m_typeId( _typeId )
 		, m_user( _user )
 		, m_objectCount( 0 )
 		, m_new( _pynew )
 		, m_destructor( _pydestructor )
-		, m_pod( _pod )
-		, m_pytypeobject( nullptr )
 		, m_basesCount( 0 )
+		, m_pytypeobject( nullptr )
+		, m_pod_size( _pod )
+		, m_pod_hash( _hash )
 	{
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -665,13 +667,14 @@ namespace pybind
 
 			kernel_interface * kernel = pybind::get_kernel();
 
-			PyTypeObject * py_pybind_type = kernel->get_pod_type( m_pod );
+			PyTypeObject * py_pybind_type = kernel->get_pod_type( m_pod_size, m_pod_hash );
 
 			if( py_pybind_type == nullptr )
 			{
-				pybind::throw_exception( "scope %s initialize not pod %d"
+				pybind::throw_exception( "scope %s initialize not pod %d (hash %d)"
 					, m_name
-					, m_pod
+					, m_pod_size
+					, m_pod_hash
 					);
 			}
 
@@ -708,7 +711,7 @@ namespace pybind
 			return;
 		}
 
-		if( m_pod == 0 )
+		if( m_pod_size == 0 )
 		{
 			m_pytypeobject->tp_new = py_new_class;
 			m_pytypeobject->tp_del = py_del_class;
@@ -778,9 +781,14 @@ namespace pybind
 		return m_typeId;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	uint32_t class_type_scope::is_pod() const
+	uint32_t class_type_scope::get_pod_size() const
 	{
-		return m_pod;
+		return m_pod_size;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	bool class_type_scope::get_pod_hash() const
+	{
+		return m_pod_hash;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void * class_type_scope::get_user() const
@@ -1446,7 +1454,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * class_type_scope::create_class( void * _impl )
 	{
-		if( m_pod != 0 )
+		if( m_pod_size != 0 )
 		{
 			return nullptr;
 		}
@@ -1462,7 +1470,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * class_type_scope::create_holder( kernel_interface * _kernel, void * _impl )
 	{
-		if( m_pod != 0 )
+		if( m_pod_size != 0 )
 		{
 			return nullptr;
 		}
@@ -1478,11 +1486,11 @@ namespace pybind
 		return py_self;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * class_type_scope::create_pod( void ** _impl, size_t _size )
+	PyObject * class_type_scope::create_pod( void ** _impl )
 	{
 		PyObject * py_self = pybind::detail::alloc_class( m_pytypeobject, nullptr, nullptr );
 
-		pybind::detail::wrap_pod( py_self, _impl, _size );
+		pybind::detail::wrap_pod( py_self, _impl, m_pod_size, m_pod_hash );
 
 		this->addObject( py_self );
 

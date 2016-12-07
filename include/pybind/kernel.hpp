@@ -37,7 +37,7 @@ namespace pybind
 		virtual PyObject * create_method( const method_adapter_interface_ptr & _ifunc, PyTypeObject * _type ) = 0;
 		virtual method_adapter_interface * get_method_adapter( PyObject * _obj ) = 0;
 
-		virtual PyTypeObject * get_pod_type( uint32_t _pod ) = 0;
+		virtual PyTypeObject * get_pod_type( uint32_t _pod, bool _hash ) = 0;
 
 	public:
 		virtual void set_current_module( PyObject * _module ) = 0;
@@ -104,7 +104,7 @@ namespace pybind
 
 		virtual type_cast * find_type_info_extract( uint32_t _info ) = 0;
 
-		virtual class_type_scope_ptr create_new_type_scope( uint32_t _info, const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod ) = 0;
+		virtual class_type_scope_ptr create_new_type_scope( uint32_t _info, const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash ) = 0;
 
 		virtual bool has_class_type_scope( uint32_t _info ) = 0;
 		virtual const class_type_scope_ptr & get_class_type_scope( uint32_t _info ) = 0;
