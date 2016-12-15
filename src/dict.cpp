@@ -28,9 +28,11 @@ namespace pybind
 		return pybind::dict_exist( m_obj, _name );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	size_t dict::contains( const detail::import_operator_t & _name ) const
+	pybind::object dict::get( const detail::import_operator_t & _name ) const
 	{
-		return pybind::dict_contains( m_obj, _name );
+		PyObject * py_attr = pybind::dict_get( m_obj, _name );
+
+		return pybind::object( py_attr );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	detail::set_dict_operator_t dict::operator [] ( const detail::import_operator_t & _name )
@@ -41,7 +43,7 @@ namespace pybind
 	detail::extract_operator_t dict::operator [] ( const detail::import_operator_t & _name ) const
 	{
 		PyObject * py_object = pybind::dict_get( m_obj, _name );
-
+		
 		return detail::extract_operator_t( py_object );
 	}
 	//////////////////////////////////////////////////////////////////////////

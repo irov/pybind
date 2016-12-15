@@ -13,5 +13,6 @@
 #	include "pybind/tuple.hpp"
 #	include "pybind/list.hpp"
 #	include "pybind/dict.hpp"
+#	include "pybind/module.hpp"
 
 

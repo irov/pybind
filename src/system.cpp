@@ -1177,37 +1177,29 @@ namespace pybind
 		PyObject * obj = PyDict_GetItem( _dict, _key );
 
 		return obj;
-	}
-	//////////////////////////////////////////////////////////////////////////
-	size_t dict_contains( PyObject * _dict, PyObject * _key )
-	{
-		int contains = PyDict_Contains( _dict, _key );
-
-		return (size_t)contains;
-	}
-    //////////////////////////////////////////////////////////////////////////
-	size_t dict_containsstring( PyObject * _dict, const char * _key )
-	{
-        PyObject * kv = string_from_char( _key );
-
-		int contains = pybind::dict_contains( _dict, kv );
-		Py_DECREF( kv );
-
-		return (size_t)contains;
-	}
+	}	
 	//////////////////////////////////////////////////////////////////////////
 	bool dict_exist( PyObject * _dict, PyObject * _key )
 	{
-		size_t contains = pybind::dict_contains( _dict, _key );
+		int contains = PyDict_Contains( _dict, _key );
 
-		return contains == 1;
+		if( contains == 1 )
+		{
+			return true;
+		}
+
+		return false;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool dict_existstring( PyObject * _dict, const char * _key )
 	{
-		size_t contains = pybind::dict_containsstring( _dict, _key );
+		PyObject * kv = string_from_char( _key );
 
-		return contains == 1;
+		bool result = dict_exist( _dict, kv );
+
+		Py_DECREF( kv );
+
+		return result;
 	}
     //////////////////////////////////////////////////////////////////////////
 	bool dict_next( PyObject * _dict, size_t & _pos, PyObject ** _key, PyObject ** _value )

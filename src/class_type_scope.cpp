@@ -1372,11 +1372,11 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::set_as_string()
 	{
-#   if PYBIND_PYTHON_VERSION < 300
-		m_pytypeobject->tp_flags |= Py_TPFLAGS_STRING_SUBCLASS;
-#	else
-		m_pytypeobject->tp_flags |= Py_TPFLAGS_UNICODE_SUBCLASS;
-#	endif
+//#   if PYBIND_PYTHON_VERSION < 300
+//		m_pytypeobject->tp_flags |= Py_TPFLAGS_STRING_SUBCLASS;
+//#	else
+//		m_pytypeobject->tp_flags |= Py_TPFLAGS_UNICODE_SUBCLASS;
+//#	endif
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void * class_type_scope::construct( kernel_interface * _kernel, PyObject * _obj, PyObject * _args )

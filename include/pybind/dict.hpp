@@ -18,12 +18,12 @@ namespace pybind
 
 	public:
         bool exist( const detail::import_operator_t & _name ) const;
-		size_t contains( const detail::import_operator_t & _name ) const;
+		pybind::object get( const detail::import_operator_t & _name ) const;
 
 	public:
 		detail::set_dict_operator_t operator [] ( const detail::import_operator_t & _name );
 		detail::extract_operator_t operator [] ( const detail::import_operator_t & _name ) const;
-
+		
 	public:
 		void remove( const detail::import_operator_t & _name ) const;
 
