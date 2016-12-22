@@ -145,6 +145,8 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, const char *& _value, bool _nothrow )
 	{
+        (void)_nothrow;
+
 		if( _obj == nullptr )
 		{
 			return false;
@@ -171,6 +173,8 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, const wchar_t *& _value, bool _nothrow )
 	{
+        (void)_nothrow;
+
 		if( _obj == nullptr )
 		{
 			return false;
@@ -197,6 +201,8 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, PyObject *& _value, bool _nothrow )
 	{
+        (void)_nothrow;
+
 		if( _obj == nullptr )
 		{
 			return false;
@@ -209,6 +215,8 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, pybind::object & _value, bool _nothrow )
 	{
+        (void)_nothrow;
+
 		if( _obj == nullptr )
 		{
 			return false;
@@ -221,6 +229,8 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, pybind::list & _value, bool _nothrow )
 	{
+        (void)_nothrow;
+
 		if( _obj == nullptr )
 		{
 			return false;
@@ -238,6 +248,8 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, pybind::tuple & _value, bool _nothrow )
 	{
+        (void)_nothrow;
+
 		if( _obj == nullptr )
 		{
 			return false;
@@ -255,6 +267,8 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool extract_value( PyObject * _obj, pybind::dict & _value, bool _nothrow )
 	{
+        (void)_nothrow;
+
 		if( _obj == nullptr )
 		{
 			return false;

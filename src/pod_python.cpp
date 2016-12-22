@@ -88,7 +88,7 @@ namespace pybind
 
 			py_pod_hash->flag |= PY_OBJECT_POD << I;
 			py_pod_hash->flag |= PY_OBJECT_HASH;
-			py_pod_hash->hash = -1;
+			py_pod_hash->hash = (uint64_t )-1;
 
 			*_impl = (void *)py_pod_hash->buff;
 		}
@@ -338,7 +338,7 @@ namespace pybind
 			{
 				py_pybind_type = &m_pod_type[1];
 			}
-			else if( _pod > 0 )
+			else
 			{
 				py_pybind_type = &m_pod_type[0];
 			}
@@ -361,7 +361,7 @@ namespace pybind
 			{
 				py_pybind_type = &m_pod_hash_type[1];
 			}
-			else if( _pod > 0 )
+			else
 			{
 				py_pybind_type = &m_pod_hash_type[0];
 			}
@@ -378,7 +378,7 @@ namespace pybind
 		{
 			PyVarObject_HEAD_INIT( &PyType_Type, 0 )
 			_name,
-			_size,
+			(Py_ssize_t)_size,
 			0,
 			&py_dealloc,                             /* tp_dealloc */
 			0,                    /* tp_print */
