@@ -1,6 +1,6 @@
 #	pragma once
 
-#	include "pybind/constructor_adapter.hpp"
+#	include "pybind/adapter/constructor_adapter.hpp"
 
 namespace pybind
 {

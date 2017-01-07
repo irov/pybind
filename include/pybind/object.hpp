@@ -1,24 +1,20 @@
 #	pragma once
 
+#   include "pybind/base.hpp"
+
 #	include "pybind/helper.hpp"
 
 namespace pybind
 {
-	class borrowed
-	{
-	};
-
-	class invalid
-	{
-	};
-
 	class PYBIND_API object
+        : public base
 	{
 	public:
 		static const pybind::object & get_invalid();
 
 	public:
 		object();
+        object( const base & _base );
 		object( const object & _obj );
 
 		explicit object( PyObject * _obj, borrowed );
@@ -31,31 +27,8 @@ namespace pybind
 		~object();
 
 	public:
-		PyObject * ptr() const;
-		PyObject * ret() const;
-
-		void reset();
-		uint32_t get_ref() const;
-
-	public:
-		bool is_invalid() const;
-		bool is_valid() const;
-		bool is_wrap() const;
-		bool is_class() const;
-		bool is_type_class() const;
-		bool is_none() const;
-		bool is_bool() const;
-		bool is_callable() const;
-
-	public:
 		bool has_attr( const detail::import_operator_t & _name ) const;
 		pybind::object get_attr( const detail::import_operator_t & _name ) const;
-
-	public:
-		void unwrap() const;
-
-	public:
-		const char * repr() const;
 
 	public:
 		detail::extract_operator_t extract() const;
@@ -81,9 +54,6 @@ namespace pybind
 		detail::extract_operator_t call_args( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::args_operator_t & _args ) const;
 		detail::extract_operator_t call_args( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::args_operator_t & _args ) const;
 		detail::extract_operator_t call_args( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::import_operator_t & _t7, const detail::args_operator_t & _args ) const;
-
-	protected:
-		PyObject * m_obj;
 	};
 	//////////////////////////////////////////////////////////////////////////
 	template<class It>

@@ -4,7 +4,8 @@
 #	include "pybind/exception.hpp"
 #	include "pybind/logger.hpp"
 #	include "pybind/bindable.hpp"
-#	include "pybind/type_cast_result.hpp"
+
+#	include "pybind/helper/type_cast_result.hpp"
 
 #	include "stdex/mpl.h"
 #	include "stdex/intrusive_ptr.h"

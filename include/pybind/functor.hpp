@@ -1,6 +1,6 @@
 #	pragma once
 
-#	include "pybind/functor_adapter.hpp"
+#	include "pybind/adapter/functor_adapter.hpp"
 
 #	include "pybind/types.hpp"
 #	include "pybind/exports.hpp"

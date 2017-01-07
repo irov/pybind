@@ -2,7 +2,7 @@
 
 #	include "pybind/types.hpp"
 
-#	include "pybind/function_adapter.hpp"
+#	include "pybind/adapter/function_adapter.hpp"
 
 #	include "stdex/function_traits.h"
 

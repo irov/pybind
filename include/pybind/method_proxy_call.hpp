@@ -265,8 +265,8 @@ namespace pybind
             if( arg_size + 1 != fn_arity )
             {
 				pybind::throw_exception("invalid proxy method call args is not equal %d != %d\n"
-                    , arg_size + 1
-                    , fn_arity
+                    , (uint32_t)arg_size + 1
+                    , (uint32_t)fn_arity
                     );
 
                 return nullptr;

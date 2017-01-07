@@ -12,6 +12,10 @@ namespace pybind
 	public:
 		module();
 
+        module( const base & _base );
+        module( const object & _obj );
+        module( const module & _module );
+
 	public:
 		explicit module( PyObject * _obj, pybind::borrowed );
 		explicit module( PyObject * _obj );
