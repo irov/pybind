@@ -509,12 +509,9 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool kernel_python::is_type_class( PyObject * _type )
 	{
-		if( pybind::has_attr( _type, m_str_pybind_class_type_scope ) == 0 )
-		{
-			return false;
-		}
+		bool successful = pybind::has_attr( _type, m_str_pybind_class_type_scope );
 
-		return true;
+		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void * kernel_python::check_registred_class( PyObject * _obj, uint32_t _info )

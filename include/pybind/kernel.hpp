@@ -24,6 +24,10 @@ namespace pybind
 	class kernel_interface
 	{
 	public:
+		kernel_interface() {};
+		virtual ~kernel_interface() {};
+
+	public:
 		virtual bool initialize() = 0;
 		virtual void finalize() = 0;
 
