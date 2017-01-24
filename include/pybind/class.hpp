@@ -1,7 +1,6 @@
 #	pragma once
 
-#	include "pybind/helper/bases_helper.hpp"
-#	include "pybind/helper/type_cast_result.hpp"
+#	include "pybind/type_cast_result.hpp"
 
 #	include "pybind/class_type_scope.hpp"
 
@@ -19,6 +18,8 @@
 #	include "pybind/adapter/sequence_set_adapter.hpp"
 #	include "pybind/adapter/number_binary_adapter.hpp"
 #	include "pybind/adapter/smart_pointer_adapter.hpp"
+
+#	include "pybind/helper/bases_helper.hpp"
 
 #	include "pybind/exception.hpp"
 
@@ -642,7 +643,9 @@ namespace pybind
 	protected:
 		void setup_extract( const type_cast_ptr & _type )
 		{
-			pybind::registration_type_cast<C>(_type);
+			kernel_interface * kernel = pybind::get_kernel();
+
+			pybind::registration_type_cast<C>(kernel, _type);
 		}
 
 	protected:
@@ -832,7 +835,7 @@ namespace pybind
 					return false;
 				}
 
-				if( convert->convert( _obj, &_value ) == false )
+				if( convert->convert( kernel, _obj, &_value ) == false )
 				{
 					if( _nothrow == false )
 					{

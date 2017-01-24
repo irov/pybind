@@ -9,7 +9,7 @@ namespace pybind
 		: public adapter_interface
 	{
 	public:
-		virtual bool convert( PyObject * _obj, void * _place ) = 0;
+		virtual bool convert( pybind::kernel_interface * _kernel, PyObject * _obj, void * _place ) = 0;
 	};
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<convert_adapter_interface> convert_adapter_interface_ptr;
@@ -26,11 +26,11 @@ namespace pybind
 		}
 
 	public:
-		bool convert( PyObject * _obj, void * _place ) override
+		bool convert( pybind::kernel_interface * _kernel, PyObject * _obj, void * _place ) override
 		{
 			C * c = static_cast<C *>(_place);
 
-			bool result = (*m_convert)(_obj, c, m_user);
+			bool result = (*m_convert)(_kernel, _obj, c, m_user);
 
 			return result;
 		}

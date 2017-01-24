@@ -160,29 +160,29 @@ namespace pybind
 		};
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool initialize_stl_type_cast()
+	bool initialize_stl_type_cast( kernel_interface * _kernel )
 	{
-		pybind::registration_type_cast<std::string>(new helper::extract_stl_string_type);
-		pybind::registration_type_cast<std::wstring>(new helper::extract_stl_wstring_type);
+		pybind::registration_type_cast<std::string>(_kernel, new helper::extract_stl_string_type);
+		pybind::registration_type_cast<std::wstring>(_kernel, new helper::extract_stl_wstring_type);
 
-		pybind::registration_stl_vector_type_cast<std::string, std::vector<std::string> >();
-		pybind::registration_stl_vector_type_cast<std::wstring, std::vector<std::wstring> >();
+		pybind::registration_stl_vector_type_cast<std::string, std::vector<std::string> >(_kernel);
+		pybind::registration_stl_vector_type_cast<std::wstring, std::vector<std::wstring> >(_kernel);
 
-		pybind::registration_type_cast<stdex::string>(new helper::extract_stdex_stl_string_type);
-		pybind::registration_type_cast<stdex::wstring>(new helper::extract_stdex_stl_wstring_type);
+		pybind::registration_type_cast<stdex::string>(_kernel, new helper::extract_stdex_stl_string_type);
+		pybind::registration_type_cast<stdex::wstring>(_kernel, new helper::extract_stdex_stl_wstring_type);
 
-		pybind::registration_stl_vector_type_cast<stdex::string, stdex::vector<stdex::string> >();
-		pybind::registration_stl_vector_type_cast<stdex::wstring, stdex::vector<stdex::wstring> >();
+		pybind::registration_stl_vector_type_cast<stdex::string, stdex::vector<stdex::string> >(_kernel);
+		pybind::registration_stl_vector_type_cast<stdex::wstring, stdex::vector<stdex::wstring> >(_kernel);
 		
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void finalize_stl_type_cast()
+	void finalize_stl_type_cast( kernel_interface * _kernel )
 	{
-		pybind::unregistration_stl_vector_type_cast<std::string, std::vector<std::string> >();
-		pybind::unregistration_stl_vector_type_cast<std::wstring, std::vector<std::wstring> >();
+		pybind::unregistration_stl_vector_type_cast<std::string, std::vector<std::string> >(_kernel);
+		pybind::unregistration_stl_vector_type_cast<std::wstring, std::vector<std::wstring> >(_kernel);
 
-		pybind::unregistration_stl_vector_type_cast<stdex::string, stdex::vector<stdex::string> >();
-		pybind::unregistration_stl_vector_type_cast<stdex::wstring, stdex::vector<stdex::wstring> >();
+		pybind::unregistration_stl_vector_type_cast<stdex::string, stdex::vector<stdex::string> >(_kernel);
+		pybind::unregistration_stl_vector_type_cast<stdex::wstring, stdex::vector<stdex::wstring> >(_kernel);
 	}
 }

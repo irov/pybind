@@ -79,7 +79,7 @@ namespace pybind
 		pybind::set_kernel( kernel );
 	
 #	ifdef PYBIND_STL_SUPPORT
-		if( initialize_stl_type_cast() == false )
+		if( initialize_stl_type_cast( kernel ) == false )
 		{
 			return false;
 		}
@@ -114,11 +114,11 @@ namespace pybind
 	{	
 		Py_Finalize();
 
-#	ifdef PYBIND_STL_SUPPORT
-		finalize_stl_type_cast();
-#	endif
-
 		kernel_interface * kernel = pybind::get_kernel();
+
+#	ifdef PYBIND_STL_SUPPORT
+		finalize_stl_type_cast( kernel );
+#	endif			
 
 		kernel->finalize();		
 		delete kernel;

@@ -5,7 +5,7 @@
 #	include "pybind/logger.hpp"
 #	include "pybind/bindable.hpp"
 
-#	include "pybind/helper/type_cast_result.hpp"
+#	include "pybind/type_cast_result.hpp"
 
 #	include "stdex/mpl.h"
 #	include "stdex/intrusive_ptr.h"
@@ -44,7 +44,9 @@ namespace pybind
 					return false;
 				}
 
-				type_cast * etype = type_down_cast<T_WOCR>::find();
+				kernel_interface * kernel = pybind::get_kernel();
+
+				type_cast * etype = type_down_cast<T_WOCR>::find( kernel );
 
 				if( etype == nullptr )
 				{
@@ -239,9 +241,11 @@ namespace pybind
 	template<class T>
 	PyObject * ptr_throw_i( const T & _value )
 	{
+		kernel_interface * kernel = pybind::get_kernel();
+
 		typedef typename stdex::mpl::remove_cref<T>::type T_WOCR;
 				
-		type_cast * etype = detail::type_down_cast<T_WOCR>::find();
+		type_cast * etype = detail::type_down_cast<T_WOCR>::find( kernel );
 
 		if( etype == nullptr )
 		{
