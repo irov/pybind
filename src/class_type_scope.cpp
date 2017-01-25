@@ -619,7 +619,7 @@ namespace pybind
 
 		if( py_module == nullptr )
 		{
-			py_module = pybind::get_currentmodule();
+			py_module = m_kernel->get_current_module();
 
 			if( py_module == nullptr )
 			{

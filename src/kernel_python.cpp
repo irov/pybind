@@ -102,7 +102,7 @@ namespace pybind
 
 		if( _module == nullptr )
 		{
-			_module = get_currentmodule();
+			_module = this->get_current_module();
 
 			if( _module == nullptr )
 			{
@@ -124,7 +124,7 @@ namespace pybind
 
 		if( _module == nullptr )
 		{
-			_module = get_currentmodule();
+			_module = this->get_current_module();
 
 			if( _module == nullptr )
 			{
