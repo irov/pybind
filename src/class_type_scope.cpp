@@ -594,8 +594,9 @@ namespace pybind
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////
-	class_type_scope::class_type_scope( const char * _name, uint32_t _typeId, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash )
-		: m_name( _name )
+	class_type_scope::class_type_scope( kernel_interface * _kernel, const char * _name, uint32_t _typeId, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash )
+		: m_kernel( _kernel )
+		, m_name( _name )
 		, m_typeId( _typeId )
 		, m_user( _user )
 		, m_objectCount( 0 )
@@ -665,9 +666,7 @@ namespace pybind
 		{
 			py_bases = PyTuple_New( 1 );
 
-			kernel_interface * kernel = pybind::get_kernel();
-
-			PyTypeObject * py_pybind_type = kernel->get_pod_type( m_pod_size, m_pod_hash );
+			PyTypeObject * py_pybind_type = m_kernel->get_pod_type( m_pod_size, m_pod_hash );
 
 			if( py_pybind_type == nullptr )
 			{
@@ -685,9 +684,7 @@ namespace pybind
 
 		PyObject * py_pybind_scope_id = pybind::ptr_throw( m_typeId );
 
-		kernel_interface * kernel = pybind::get_kernel();
-
-		PyObject * py_str_class_type_scope = kernel->get_str_class_type_scope();
+		PyObject * py_str_class_type_scope = m_kernel->get_str_class_type_scope();
 
 		PyDict_SetItem( py_dict, py_str_class_type_scope, py_pybind_scope_id );
 		Py_DECREF( py_pybind_scope_id );
@@ -824,9 +821,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::add_method( const method_adapter_interface_ptr & _ifunc )
 	{
-		kernel_interface * kernel = pybind::get_kernel();
-
-		PyObject * py_type_method = kernel->create_method( _ifunc, m_pytypeobject );
+		PyObject * py_type_method = m_kernel->create_method( _ifunc, m_pytypeobject );
 
 		const char * name = _ifunc->getName();
 
@@ -856,19 +851,15 @@ namespace pybind
 
 			return nullptr;
 		}
-
-		kernel_interface * kernel = pybind::get_kernel();
-
-		method_adapter_interface * iadapter = kernel->get_method_adapter( py_method );
+		
+		method_adapter_interface * iadapter = m_kernel->get_method_adapter( py_method );
 
 		return iadapter;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::add_member( const member_adapter_interface_ptr & _imember )
 	{
-		kernel_interface * kernel = pybind::get_kernel();
-
-		PyObject * py_member = kernel->create_member( _imember );
+		PyObject * py_member = m_kernel->create_member( _imember );
 
 		const char * name = _imember->getName();
 

@@ -272,9 +272,7 @@ namespace pybind
 	{
 		const char * info_name = _info.name();
 
-		kernel_interface * kernel = pybind::get_kernel();
-
-		uint32_t id = kernel->find_class_info_desc_name( info_name );
+		uint32_t id = this->find_class_info_desc_name( info_name );
 
 		if( id != 0 )
 		{
@@ -339,7 +337,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	class_type_scope_ptr kernel_python::create_new_type_scope( uint32_t _info, const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash )
 	{
-		class_type_scope_ptr scope = new class_type_scope( _name, _info, _user, _pynew, _pydestructor, _pod, _hash );
+		class_type_scope_ptr scope = new class_type_scope( this, _name, _info, _user, _pynew, _pydestructor, _pod, _hash );
 
 		m_class_type_scopes[_info] = scope;
 

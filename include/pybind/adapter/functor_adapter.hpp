@@ -21,8 +21,9 @@ namespace pybind
 		}
 
 	public:
-		PyObject * call( PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( kernel_interface * _kernel, PyObject * _args, PyObject * _kwds ) override
 		{
+			(void)_kernel;
             (void)_kwds;
 
 			PyObject * ret = method_call<C,M>::call( m_self, m_method, _args );
@@ -48,8 +49,9 @@ namespace pybind
 		}
 
 	public:
-		PyObject * call( PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( kernel_interface * _kernel, PyObject * _args, PyObject * _kwds ) override
 		{
+			(void)_kernel;
 			(void)_kwds;
 
 			PyObject * ret = method_args_call<C, M>::call( m_self, m_method, _args );

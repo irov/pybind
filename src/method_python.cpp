@@ -38,12 +38,12 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	static PyObject * py_method_descr_call2( PyObject * _obj, PyObject * _args, PyObject * _kwds )
 	{
+		kernel_interface * kernel = pybind::get_kernel();
+
 		py_method_caller_type * mct = (py_method_caller_type *)_obj;
 
 		try
 		{
-			kernel_interface * kernel = pybind::get_kernel();
-
 			void * impl = kernel->get_class_impl( mct->self );
 
 			if( impl == nullptr )

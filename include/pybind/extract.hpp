@@ -70,7 +70,7 @@ namespace pybind
 
 				type_cast_result_T_WOCR * etype_impl = static_cast<type_cast_result_T_WOCR *>(etype);
 
-				if( etype_impl->apply( _obj, _value, false ) == false )
+				if( etype_impl->apply( kernel, _obj, _value, false ) == false )
 				{
 					if( _nothrow == false )
 					{
@@ -261,7 +261,7 @@ namespace pybind
 
 		type_cast_result_T_WOCR * etype_impl = static_cast<type_cast_result_T_WOCR *>(etype);
 
-		PyObject * result = etype_impl->wrap( _value );
+		PyObject * result = etype_impl->wrap( kernel, _value );
 
 		if( result == nullptr )
 		{

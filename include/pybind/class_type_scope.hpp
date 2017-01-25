@@ -38,7 +38,7 @@ namespace pybind
 		: public stdex::intrusive_ptr_base<class_type_scope>
 	{
 	public:
-		class_type_scope( const char * _name, uint32_t _typeId, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash );
+		class_type_scope( kernel_interface * _kernel, const char * _name, uint32_t _typeId, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash );
 		~class_type_scope();
 
 	public:
@@ -73,22 +73,20 @@ namespace pybind
 		template<class B>
 		void add_base_t( pybind_metacast _cast )
 		{
-			kernel_interface * kernel = pybind::get_kernel();
+			uint32_t tptrinfo = m_kernel->class_info<B*>();
+			uint32_t tinfo = m_kernel->class_info<B>();
 
-			uint32_t tptrinfo = kernel->class_info<B*>();
-			uint32_t tinfo = kernel->class_info<B>();
-
-			if( kernel->has_class_type_scope( tinfo ) == false )
+			if( m_kernel->has_class_type_scope( tinfo ) == false )
 			{
 				pybind::throw_exception( "class_type_scope_interface::add_base_t %s not bind base type %s"
 					, this->get_name()
-					, kernel->get_class_type_info( tinfo )
+					, m_kernel->get_class_type_info( tinfo )
 					);
 
 				return;
 			}
 
-			const class_type_scope_ptr & basescope = kernel->get_class_type_scope( tinfo );
+			const class_type_scope_ptr & basescope = m_kernel->get_class_type_scope( tinfo );
 
 			this->add_base( tptrinfo, basescope, _cast );
 		}
@@ -168,6 +166,8 @@ namespace pybind
 		void operator delete ( void * _ptr, size_t _size );
 
 	protected:
+		kernel_interface * m_kernel;
+
         const char * m_name;
         uint32_t m_typeId;
 

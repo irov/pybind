@@ -41,8 +41,9 @@ namespace pybind
 		}
 		
 	protected:
-		PyObject * call( PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( kernel_interface * _kernel, PyObject * _args, PyObject * _kwds ) override
 		{
+			(void)_kernel;
             (void)_kwds;
 
 			F fn = this->getFn();

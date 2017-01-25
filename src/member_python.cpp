@@ -25,14 +25,14 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	static PyObject * py_getmethod( PyObject * _member, PyObject * _args )
 	{
+		kernel_interface * kernel = pybind::get_kernel();
+
 		py_member_type * mt = (py_member_type *)_member;
 
 		PyObject * py_self = PyTuple_GetItem( _args, 0 );
 
 		try
 		{	
-			kernel_interface * kernel = pybind::get_kernel();
-
 			void * impl = kernel->get_class_impl( py_self );
 
 			if( impl == nullptr )
@@ -62,6 +62,8 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	static PyObject * py_setmethod( PyObject * _member, PyObject * _args )
 	{
+		kernel_interface * kernel = pybind::get_kernel();
+
 		py_member_type * mt = (py_member_type *)(_member);
 
 		PyObject * py_self = PyTuple_GetItem( _args, 0 );
@@ -69,8 +71,6 @@ namespace pybind
 
 		try
 		{
-			kernel_interface * kernel = pybind::get_kernel();
-
 			void * impl = kernel->get_class_impl( py_self );
 
 			if( impl == nullptr )

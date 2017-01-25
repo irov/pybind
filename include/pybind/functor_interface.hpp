@@ -7,6 +7,8 @@
 namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
+	class kernel_interface;
+	//////////////////////////////////////////////////////////////////////////
 	class functor_adapter_interface
         : public adapter_interface
 	{
@@ -30,7 +32,7 @@ namespace pybind
 		}        
 
 	public:
-		virtual PyObject * call( PyObject * _args, PyObject * _kwds ) = 0;
+		virtual PyObject * call( kernel_interface * _kernel, PyObject * _args, PyObject * _kwds ) = 0;
 
 	protected:
 		const char * m_name;

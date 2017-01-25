@@ -15,8 +15,9 @@ namespace pybind
 	{
 		typedef typename pybind::type_cast_result<V>::TCastRef TCastRef;
 
-		bool apply( PyObject * _obj, V & _vector, bool _nothrow ) override
+		bool apply( kernel_interface * _kernel, PyObject * _obj, V & _vector, bool _nothrow ) override
 		{
+			(void)_kernel;
 			(void)_nothrow;
 
 			if( pybind::tuple_check( _obj ) == true )
@@ -53,8 +54,10 @@ namespace pybind
 			return true;
 		}
 
-		PyObject * wrap( TCastRef _vector ) override
+		PyObject * wrap( kernel_interface * _kernel, TCastRef _vector ) override
 		{
+			(void)_kernel;
+
 			pybind::list py_vector = pybind::make_list_container_t( _vector );
 
 			return py_vector.ret();
@@ -67,8 +70,9 @@ namespace pybind
 	{
 		typedef typename pybind::type_cast_result<M>::TCastRef TCastRef;
 
-		bool apply( PyObject * _obj, M & _map, bool _nothrow ) override
+		bool apply( kernel_interface * _kernel, PyObject * _obj, M & _map, bool _nothrow ) override
 		{
+			(void)_kernel;
 			(void)_nothrow;
 
 			if( pybind::dict_check( _obj ) == true )
@@ -90,8 +94,10 @@ namespace pybind
 			return true;
 		}
 
-		PyObject * wrap( TCastRef _value ) override
+		PyObject * wrap( kernel_interface * _kernel, TCastRef _value ) override
 		{
+			(void)_kernel;
+
 			PyObject * py_dict = pybind::dict_new();
 
 			for( typename M::const_iterator

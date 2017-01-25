@@ -36,12 +36,14 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	static PyObject * py_functor_kwds( PyObject * _obj, PyObject * _args, PyObject * _kwds )
 	{
+		kernel_interface * kernel = pybind::get_kernel();
+
 		functor_adapter_interface * adapter = py_functor_extract_adapter( _obj );
 
 		try
 		{
 			DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( "", adapter->getName(), _args, _kwds );
-			PyObject * ret = adapter->call( _args, _kwds );
+			PyObject * ret = adapter->call( kernel, _args, _kwds );
 			DEBUG_PYBIND_NOTIFY_END_BIND_CALL( "", adapter->getName(), _args, _kwds );
 
 			return ret;
