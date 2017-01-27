@@ -22,6 +22,16 @@ namespace pybind
 		: pybind::object( _obj )
 	{
 	}
+    //////////////////////////////////////////////////////////////////////////
+    dict::iterator dict::begin() const
+    {
+        return dict_iterator( m_obj );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    dict::iterator dict::end() const
+    {
+        return dict::iterator( m_obj, t_dict_iterator_end_tag() );
+    }
 	//////////////////////////////////////////////////////////////////////////
 	bool dict::exist( const detail::import_operator_t & _name ) const
 	{
