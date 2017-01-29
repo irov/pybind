@@ -42,5 +42,20 @@ namespace pybind
 	PYBIND_API pybind::tuple make_tuple_args_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::args_operator_t & _args );
 	PYBIND_API pybind::tuple make_tuple_args_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::import_operator_t & _t7, const detail::args_operator_t & _args );
 	//////////////////////////////////////////////////////////////////////////
+    template<class C>
+    inline pybind::tuple make_tuple_container_t( const C & _c )
+    {
+        typename C::size_type size = _c.size();
+
+        PyObject * py_tuple = pybind::tuple_new( size );
+
+        for( typename C::size_type i = 0; i != size; ++i )
+        {
+            pybind::tuple_setitem_t( py_tuple, i, _c[i] );
+        }
+
+        return pybind::tuple( py_tuple, pybind::borrowed() );
+    }
+    //////////////////////////////////////////////////////////////////////////
 	PYBIND_API pybind::tuple make_invalid_tuple_t();
 }

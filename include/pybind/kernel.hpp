@@ -36,6 +36,7 @@ namespace pybind
 		virtual void def_functor_adapter( const functor_adapter_interface_ptr & _adapter, bool _native, PyObject * _module ) = 0;
 
 		virtual PyObject * create_function_adapter( const function_adapter_interface_ptr & _adapter, bool _native ) = 0;
+        virtual PyObject * create_functor_adapter( const functor_adapter_interface_ptr & _adapter, bool _native ) = 0;
 
 		virtual PyObject * create_member( const member_adapter_interface_ptr & _iadapter ) = 0;
 		virtual PyObject * create_method( const method_adapter_interface_ptr & _ifunc, PyTypeObject * _type ) = 0;

@@ -146,6 +146,13 @@ namespace pybind
 
 		return py_func;
 	}
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * kernel_python::create_functor_adapter( const functor_adapter_interface_ptr & _adapter, bool _native )
+    {
+        PyObject * py_func = m_functors.create_functor_adapter( _adapter, _native );
+
+        return py_func;
+    }
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * kernel_python::create_member( const member_adapter_interface_ptr & _iadapter )
 	{
