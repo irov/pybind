@@ -7,14 +7,15 @@ namespace pybind
 	template<class C, class P, int i>
 	struct call_constructor_new_impl
 	{
-		static C * call( PyObject * _obj, PyObject * _args );
+		static C * call( kernel_interface * _kernel, PyObject * _obj, PyObject * _args );
 	};
 
 	template<class C, class P>
 	struct call_constructor_new_impl<C, P, 0>
 	{
-		static C * call( PyObject * _args )
+		static C * call( kernel_interface * _kernel, PyObject * _args )
 		{
+			(void)_kernel;
             (void)_args;
 
 			return new C();	
@@ -24,10 +25,10 @@ namespace pybind
 	template<class C, class P>
 	struct call_constructor_new_impl<C, P, 1>
 	{
-		static C * call( PyObject * _args )
+		static C * call( kernel_interface * _kernel, PyObject * _args )
 		{
 			return new C( 
-				tuple_getitem_t( _args, 0 )
+				tuple_getitem_t( _kernel, _args, 0 )
 				);
 		}
 	};
@@ -35,11 +36,11 @@ namespace pybind
 	template<class C, class P>
 	struct call_constructor_new_impl<C, P, 2>
 	{
-		static C * call( PyObject * _args )
+		static C * call( kernel_interface * _kernel, PyObject * _args )
 		{
-			return new C( 
-				tuple_getitem_t( _args, 0 ),
-				tuple_getitem_t( _args, 1 )
+			return new C(
+				tuple_getitem_t( _kernel, _args, 0 ),
+				tuple_getitem_t( _kernel, _args, 1 )
 				);
 		}
 	};
@@ -47,12 +48,12 @@ namespace pybind
 	template<class C, class P>
 	struct call_constructor_new_impl<C, P, 3>
 	{
-		static C * call( PyObject * _args )
+		static C * call( kernel_interface * _kernel, PyObject * _args )
 		{
 			return new C( 
-				tuple_getitem_t( _args, 0 ),
-				tuple_getitem_t( _args, 1 ),
-				tuple_getitem_t( _args, 2 )
+				tuple_getitem_t( _kernel, _args, 0 ),
+				tuple_getitem_t( _kernel, _args, 1 ),
+				tuple_getitem_t( _kernel, _args, 2 )
 				);
 		}
 	};
@@ -60,13 +61,13 @@ namespace pybind
 	template<class C, class P>
 	struct call_constructor_new_impl<C, P, 4>
 	{
-		static C * call( PyObject * _args )
+		static C * call( kernel_interface * _kernel, PyObject * _args )
 		{
 			return new C( 
-				tuple_getitem_t( _args, 0 ),
-				tuple_getitem_t( _args, 1 ),
-				tuple_getitem_t( _args, 2 ),
-				tuple_getitem_t( _args, 3 )
+				tuple_getitem_t( _kernel, _args, 0 ),
+				tuple_getitem_t( _kernel, _args, 1 ),
+				tuple_getitem_t( _kernel, _args, 2 ),
+				tuple_getitem_t( _kernel, _args, 3 )
 				);
 		}
 	};
@@ -92,7 +93,7 @@ namespace pybind
 				return nullptr;
 			}
 
-			void * impl = call_constructor_new_impl<C, P, P::base_arity>::call( _args );
+			void * impl = call_constructor_new_impl<C, P, P::base_arity>::call( _kernel, _args );
 
 			return impl;
 		}

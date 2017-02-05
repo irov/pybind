@@ -13,14 +13,15 @@ namespace pybind
 	template<class C, class F,class Ret, int i>
 	struct function_proxy_call_impl
 	{
-		static Ret call( C * _obj, F f, PyObject * _arg );
+		static Ret call( pybind::kernel_interface * _kernel, C * _obj, F f, PyObject * _arg );
 	};
 
 	template<class C, class F,class Ret>
 	struct function_proxy_call_impl<C,F,Ret,1>
 	{
-		static Ret call( C * _obj, F f, PyObject * _arg )
+		static Ret call( pybind::kernel_interface * _kernel, C * _obj, F f, PyObject * _arg )
 		{
+			(void)_kernel;
             (void)_arg;
 
 			return (*f)( _obj
@@ -31,10 +32,10 @@ namespace pybind
 	template<class C, class F,class Ret>
 	struct function_proxy_call_impl<C,F,Ret,2>
 	{
-		static Ret call( C * _obj, F f, PyObject * _arg )
+		static Ret call( pybind::kernel_interface * _kernel, C * _obj, F f, PyObject * _arg )
 		{
 			return (*f)( _obj
-				, tuple_getitem_t( _arg, 0 )
+				, tuple_getitem_t( _kernel, _arg, 0 )
 				);
 		}	
 	};
@@ -42,11 +43,11 @@ namespace pybind
 	template<class C, class F,class Ret>
 	struct function_proxy_call_impl<C,F,Ret,3>
 	{
-		static Ret call( C * _obj, F f, PyObject * _arg )
+		static Ret call( pybind::kernel_interface * _kernel, C * _obj, F f, PyObject * _arg )
 		{
 			return (*f)( _obj
-				, tuple_getitem_t( _arg, 0 )
-				, tuple_getitem_t( _arg, 1 )
+				, tuple_getitem_t( _kernel, _arg, 0 )
+				, tuple_getitem_t( _kernel, _arg, 1 )
 				);
 		}	
 	};
@@ -54,12 +55,12 @@ namespace pybind
 	template<class C, class F,class Ret>
 	struct function_proxy_call_impl<C,F,Ret,4>
 	{
-		static Ret call( C * _obj, F f, PyObject * _arg )
+		static Ret call( pybind::kernel_interface * _kernel, C * _obj, F f, PyObject * _arg )
 		{
 			return (*f)( _obj
-				, tuple_getitem_t( _arg, 0 )
-				, tuple_getitem_t( _arg, 1 )
-				, tuple_getitem_t( _arg, 2 )
+				, tuple_getitem_t( _kernel, _arg, 0 )
+				, tuple_getitem_t( _kernel, _arg, 1 )
+				, tuple_getitem_t( _kernel, _arg, 2 )
 				);
 		}
 	};
@@ -67,13 +68,13 @@ namespace pybind
 	template<class C, class F,class Ret>
 	struct function_proxy_call_impl<C,F,Ret,5>
 	{
-		static Ret call( C * _obj, F f, PyObject * _arg )
+		static Ret call( pybind::kernel_interface * _kernel, C * _obj, F f, PyObject * _arg )
 		{
 			return (*f)( _obj
-				, tuple_getitem_t( _arg, 0 )
-				, tuple_getitem_t( _arg, 1 )
-				, tuple_getitem_t( _arg, 2 )
-				, tuple_getitem_t( _arg, 3 )
+				, tuple_getitem_t( _kernel, _arg, 0 )
+				, tuple_getitem_t( _kernel, _arg, 1 )
+				, tuple_getitem_t( _kernel, _arg, 2 )
+				, tuple_getitem_t( _kernel, _arg, 3 )
 				);
 		}
 	};
@@ -81,14 +82,14 @@ namespace pybind
 	template<class C, class F,class Ret>
 	struct function_proxy_call_impl<C,F,Ret,6>
 	{
-		static Ret call( C * _obj, F f, PyObject * _arg )
+		static Ret call( pybind::kernel_interface * _kernel, C * _obj, F f, PyObject * _arg )
 		{
 			return (*f)( _obj
-				, tuple_getitem_t( _arg, 0 )
-				, tuple_getitem_t( _arg, 1 )
-				, tuple_getitem_t( _arg, 2 )
-				, tuple_getitem_t( _arg, 3 )
-				, tuple_getitem_t( _arg, 4 )
+				, tuple_getitem_t( _kernel, _arg, 0 )
+				, tuple_getitem_t( _kernel, _arg, 1 )
+				, tuple_getitem_t( _kernel, _arg, 2 )
+				, tuple_getitem_t( _kernel, _arg, 3 )
+				, tuple_getitem_t( _kernel, _arg, 4 )
 				);
 		}
 	};
@@ -98,9 +99,9 @@ namespace pybind
 	{
 		typedef typename stdex::function_traits<F>::result f_info;
 
-		static PyObject * call( C * _obj, F f, PyObject * _arg )
+		static PyObject * call( pybind::kernel_interface * _kernel, C * _obj, F f, PyObject * _arg )
 		{
-			PyObject * py_result = (detail::return_operator_t)function_proxy_call_impl<C, F, Ret, f_info::arity>::call( _obj, f, _arg );
+			PyObject * py_result = detail::return_operator_t( _kernel, function_proxy_call_impl<C, F, Ret, f_info::arity>::call( _kernel, _obj, f, _arg ) );
 
 			return py_result;
 		}
@@ -111,9 +112,9 @@ namespace pybind
 	{
 		typedef typename stdex::function_traits<F>::result f_info;
 
-		static PyObject * call( C * _obj, F f, PyObject * _arg )
+		static PyObject * call( pybind::kernel_interface * _kernel, C * _obj, F f, PyObject * _arg )
 		{
-			function_proxy_call_impl<C,F,void,f_info::arity>::call( _obj, f, _arg );
+			function_proxy_call_impl<C,F,void,f_info::arity>::call( _kernel, _obj, f, _arg );
 
 			return pybind::ret_none();
 		}
@@ -124,7 +125,7 @@ namespace pybind
 	{
 		typedef typename stdex::function_traits<F>::result f_info;
 
-		static PyObject * call( C * _obj, F f, PyObject * _arg )
+		static PyObject * call( pybind::kernel_interface * _kernel, C * _obj, F f, PyObject * _arg )
 		{
 			size_t arg_size = pybind::tuple_size( _arg );
 			size_t fn_arity = f_info::arity;
@@ -139,7 +140,7 @@ namespace pybind
 				return nullptr;
 			}
 
-			PyObject * ret = function_proxy_call_ret_impl<C,F,typename f_info::ret_type>::call( _obj, f, _arg );
+			PyObject * ret = function_proxy_call_ret_impl<C,F,typename f_info::ret_type>::call( _kernel, _obj, f, _arg );
 
 			return ret;
 		}

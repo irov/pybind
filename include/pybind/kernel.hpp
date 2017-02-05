@@ -172,6 +172,16 @@ namespace pybind
 		virtual void error_invalid_extract( PyObject * _obj, uint32_t _tinfo ) = 0;
 		virtual bool instance_of_type( PyObject * _obj, uint32_t _tinfo ) = 0;
 
+		template<class C>
+		C * get_class_impl_t( PyObject * _obj )
+		{
+			void * impl = this->get_class_impl( _obj );
+
+			C * obj = static_cast<C *>(impl);
+
+			return obj;
+		}
+
 		virtual void * get_class_impl( PyObject * _obj ) = 0;
 
 		virtual PyObject * get_str_class_type_scope() = 0;

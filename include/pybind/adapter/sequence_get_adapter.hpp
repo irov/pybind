@@ -170,7 +170,7 @@ namespace pybind
 		{
 			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
-			PyObject * py_result = (detail::return_operator_t)(self->operator [] ( _index ));
+			PyObject * py_result = detail::return_operator_t( _kernel, self->operator [] ( _index ) );
 
 			return py_result;
 		}

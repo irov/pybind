@@ -99,6 +99,17 @@ namespace pybind
 		}
 
 		template<class F>
+		base_ & def_kernel( const char * _name, F f )
+		{
+			method_adapter_interface_ptr iadapter =
+				new method_adapter_kernel<C, F>( _name, f );
+
+			m_scope->add_method( iadapter );
+
+			return *this;
+		}
+
+		template<class F>
 		base_ & def_args( const char * _name, F f )
 		{
 			method_adapter_interface_ptr iadapter =
@@ -125,6 +136,17 @@ namespace pybind
 		{
 			method_adapter_interface_ptr iadapter =
 				new method_adapter_native<C, F>( _name, f );
+
+			m_scope->add_method( iadapter );
+
+			return *this;
+		}
+
+		template<class F>
+		base_ & def_native_kernel( const char * _name, F f )
+		{
+			method_adapter_interface_ptr iadapter =
+				new method_adapter_native_kernel<C, F>( _name, f );
 
 			m_scope->add_method( iadapter );
 
@@ -164,6 +186,17 @@ namespace pybind
 			return *this;
 		}
 
+		template<class F>
+		base_ & def_static_kernel( const char * _name, F f )
+		{
+			method_adapter_interface_ptr iadapter =
+				new method_adapter_proxy_function_kernel<C, F>( _name, f );
+
+			m_scope->add_method( iadapter );
+
+			return *this;
+		}
+
 		template<class P, class F>
 		base_ & def_proxy_static( const char * _name, P * _proxy, F f )
 		{
@@ -174,6 +207,17 @@ namespace pybind
 
 			return *this;
 		}
+
+		template<class P, class F>
+		base_ & def_proxy_static_kernel( const char * _name, P * _proxy, F f )
+		{
+			method_adapter_interface_ptr iadapter =
+				new method_adapter_proxy_kernel<C, P, F>( _name, f, _proxy );
+
+			m_scope->add_method( iadapter );
+
+			return *this;
+		}		
 
 		template<class P, class F>
 		base_ & def_proxy_args_static( const char * _name, P * _proxy, F f )
@@ -196,6 +240,18 @@ namespace pybind
 
 			return *this;
 		}
+
+		template<class P, class F>
+		base_ & def_proxy_native_kernel( const char * _name, P * _proxy, F f )
+		{
+			method_adapter_interface_ptr iadapter =
+				new method_adapter_proxy_native_kernel<C, P, F>( _name, f, _proxy );
+
+			m_scope->add_method( iadapter );
+
+			return *this;
+		}
+
 
 		template<class A>
 		base_ & def_member( const char * _name, A C:: * a )
@@ -704,7 +760,7 @@ namespace pybind
 			uint32_t tptrinfo = _kernel->class_info<C *>();
 
 			void * impl;
-			if( this->type_info_cast( _obj, tinfo, tptrinfo, &impl ) == false )
+			if( this->type_info_cast( _kernel, _obj, tinfo, tptrinfo, &impl ) == false )
 			{
 				if( _nothrow == false )
 				{

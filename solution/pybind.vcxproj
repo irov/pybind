@@ -17,6 +17,7 @@
     <ClCompile Include="..\src\class_type_scope.cpp" />
     <ClCompile Include="..\src\debug.cpp" />
     <ClCompile Include="..\src\dict.cpp" />
+    <ClCompile Include="..\src\dict_iterator.cpp" />
     <ClCompile Include="..\src\exception.cpp" />
     <ClCompile Include="..\src\extract.cpp" />
     <ClCompile Include="..\src\function.cpp" />
@@ -65,6 +66,7 @@
     <ClInclude Include="..\include\pybind\helper.hpp" />
     <ClInclude Include="..\include\pybind\helper\bases_helper.hpp" />
     <ClInclude Include="..\include\pybind\helper\dict_helper.hpp" />
+    <ClInclude Include="..\include\pybind\helper\dict_iterator.hpp" />
     <ClInclude Include="..\include\pybind\helper\list_helper.hpp" />
     <ClInclude Include="..\include\pybind\helper\type_cast.hpp" />
     <ClInclude Include="..\include\pybind\helper\type_cast_result.hpp" />
@@ -76,6 +78,7 @@
     <ClInclude Include="..\include\pybind\method_args_call.hpp" />
     <ClInclude Include="..\include\pybind\method_call.hpp" />
     <ClInclude Include="..\include\pybind\method_interface.hpp" />
+    <ClInclude Include="..\include\pybind\method_kernel_call.hpp" />
     <ClInclude Include="..\include\pybind\method_proxy_args_call.hpp" />
     <ClInclude Include="..\include\pybind\method_proxy_call.hpp" />
     <ClInclude Include="..\include\pybind\module.hpp" />

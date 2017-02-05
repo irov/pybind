@@ -7,14 +7,16 @@ namespace pybind
 	template<class C, class P, int i>
 	struct call_constructor_placement_impl
 	{
-		static C * call( void * _impl, PyObject * _args );
+		static C * call( kernel_interface * _kernel, void * _impl, PyObject * _args );
 	};
 
 	template<class C, class P>
 	struct call_constructor_placement_impl<C, P, 0>
 	{
-		static C * call( void * _impl, PyObject * _args )
+		static C * call( kernel_interface * _kernel, void * _impl, PyObject * _args )
 		{
+			(void)_kernel;
+
 			return new (_impl) C();	
 		}
 	};
@@ -22,10 +24,10 @@ namespace pybind
 	template<class C, class P>
 	struct call_constructor_placement_impl<C, P, 1>
 	{
-		static C * call( void * _impl, PyObject * _args )
+		static C * call( kernel_interface * _kernel, void * _impl, PyObject * _args )
 		{
 			return new (_impl)C( 
-				tuple_getitem_t( _args, 0 )
+				tuple_getitem_t( _kernel, _args, 0 )
 				);
 		}
 	};
@@ -33,11 +35,11 @@ namespace pybind
 	template<class C, class P>
 	struct call_constructor_placement_impl<C, P, 2>
 	{
-		static C * call( void * _impl, PyObject * _args )
+		static C * call( kernel_interface * _kernel, void * _impl, PyObject * _args )
 		{
 			return new (_impl)C( 
-				tuple_getitem_t( _args, 0 ),
-				tuple_getitem_t( _args, 1 )
+				tuple_getitem_t( _kernel, _args, 0 ),
+				tuple_getitem_t( _kernel, _args, 1 )
 				);
 		}
 	};
@@ -45,12 +47,12 @@ namespace pybind
 	template<class C, class P>
 	struct call_constructor_placement_impl<C, P, 3>
 	{
-		static C * call( void * _impl, PyObject * _args )
+		static C * call( kernel_interface * _kernel, void * _impl, PyObject * _args )
 		{
 			return new (_impl)C( 
-				tuple_getitem_t( _args, 0 ),
-				tuple_getitem_t( _args, 1 ),
-				tuple_getitem_t( _args, 2 )
+				tuple_getitem_t( _kernel, _args, 0 ),
+				tuple_getitem_t( _kernel, _args, 1 ),
+				tuple_getitem_t( _kernel, _args, 2 )
 				);
 		}
 	};
@@ -58,13 +60,13 @@ namespace pybind
 	template<class C, class P>
 	struct call_constructor_placement_impl<C, P, 4>
 	{
-		static C * call( void * _impl, PyObject * _args )
+		static C * call( kernel_interface * _kernel, void * _impl, PyObject * _args )
 		{
 			return new (_impl)C( 
-				tuple_getitem_t( _args, 0 ),
-				tuple_getitem_t( _args, 1 ),
-				tuple_getitem_t( _args, 2 ),
-				tuple_getitem_t( _args, 3 )
+				tuple_getitem_t( _kernel, _args, 0 ),
+				tuple_getitem_t( _kernel, _args, 1 ),
+				tuple_getitem_t( _kernel, _args, 2 ),
+				tuple_getitem_t( _kernel, _args, 3 )
 				);
 		}
 	};
@@ -87,16 +89,14 @@ namespace pybind
 				return nullptr;
 			}
 
-			void * impl = _kernel->get_class_impl( _obj );
+			C * self = _kernel->get_class_impl_t<C>( _obj );
 
-			if( impl == nullptr )
+			if( self == nullptr )
 			{
 				return nullptr;
 			}
 
-            C * self = static_cast<C *>(impl);
-
-			C * obj = call_constructor_placement_impl<C, P, P::base_arity>::call( self,  _args );
+			C * obj = call_constructor_placement_impl<C, P, P::base_arity>::call( _kernel, self,  _args );
 
 			return obj;
 		}

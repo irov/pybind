@@ -436,7 +436,7 @@ namespace pybind
 		}
 
 		uint32_t id;
-		if( pybind::extract_value( py_scope, id, false ) == false )
+		if( pybind::extract_value( this, py_scope, id, false ) == false )
 		{
 			pybind::decref( py_scope );
 
@@ -468,7 +468,7 @@ namespace pybind
 		}
 
 		uint32_t id;
-		if( pybind::extract_value( py_scope, id, false ) == false )
+		if( pybind::extract_value( this, py_scope, id, false ) == false )
 		{
 			pybind::decref( py_scope );
 

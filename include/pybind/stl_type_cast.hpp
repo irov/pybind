@@ -28,7 +28,7 @@ namespace pybind
 
 				for( size_t it = 0; it != size; ++it )
 				{
-					T value = pybind::tuple_getitem_t( _obj, it );
+					T value = pybind::tuple_getitem_t( _kernel, _obj, it );
 
 					_vector.push_back( value );
 				}
@@ -41,7 +41,7 @@ namespace pybind
 
 				for( size_t it = 0; it != size; ++it )
 				{
-					T value = pybind::list_getitem_t( _obj, it );
+					T value = pybind::list_getitem_t( _kernel, _obj, it );
 
 					_vector.push_back( value );
 				}
@@ -58,7 +58,7 @@ namespace pybind
 		{
 			(void)_kernel;
 
-			pybind::list py_vector = pybind::make_list_container_t( _vector );
+			pybind::list py_vector = pybind::make_list_container_t( _kernel, _vector );
 
 			return py_vector.ret();
 		}
@@ -81,7 +81,7 @@ namespace pybind
 
 				K key;
 				V value;
-				while( pybind::dict_next_t( _obj, dict_pos, key, value ) == true )
+				while( pybind::dict_next_t( _kernel, _obj, dict_pos, key, value ) == true )
 				{
 					_map.insert( std::make_pair(key, value) );
 				}
@@ -109,7 +109,7 @@ namespace pybind
 				const K & key = it->first;
 				const V & value = it->second;
 
-				pybind::dict_set_t( py_dict, key, value );
+				pybind::dict_set_t( _kernel, py_dict, key, value );
 			}
 
 			return py_dict;

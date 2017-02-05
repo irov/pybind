@@ -16,7 +16,7 @@
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
-	bool initialize( bool _debug, bool install_sigs, bool _nosite )
+	kernel_interface * initialize( bool _debug, bool install_sigs, bool _nosite )
 	{
 		if( Py_IsInitialized() == 0 )
 		{
@@ -73,7 +73,7 @@ namespace pybind
 
 		if( kernel->initialize() == false )
 		{
-			return false;
+			return nullptr;
 		}
 
 		pybind::set_kernel( kernel );
@@ -81,7 +81,7 @@ namespace pybind
 #	ifdef PYBIND_STL_SUPPORT
 		if( initialize_stl_type_cast( kernel ) == false )
 		{
-			return false;
+			return nullptr;
 		}
 #	endif
 		
@@ -107,7 +107,7 @@ namespace pybind
         
 		//initialize_default_type_cast();
 
-        return true;
+        return kernel;
 	}
     //////////////////////////////////////////////////////////////////////////
 	void finalize()

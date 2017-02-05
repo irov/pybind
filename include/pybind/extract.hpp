@@ -26,7 +26,7 @@ namespace pybind
 		{
 			typedef typename stdex::mpl::remove_cref<T>::type T_WOCR;
 
-			static bool extract( PyObject * _obj, T_WOCR & _value, bool _nothrow )
+			static bool extract( kernel_interface * _kernel, PyObject * _obj, T_WOCR & _value, bool _nothrow )
 			{				
 				if( _obj == nullptr )
 				{
@@ -44,9 +44,7 @@ namespace pybind
 					return false;
 				}
 
-				kernel_interface * kernel = pybind::get_kernel();
-
-				type_cast * etype = type_down_cast<T_WOCR>::find( kernel );
+				type_cast * etype = type_down_cast<T_WOCR>::find( _kernel );
 
 				if( etype == nullptr )
 				{
@@ -70,7 +68,7 @@ namespace pybind
 
 				type_cast_result_T_WOCR * etype_impl = static_cast<type_cast_result_T_WOCR *>(etype);
 
-				if( etype_impl->apply( kernel, _obj, _value, false ) == false )
+				if( etype_impl->apply( _kernel, _obj, _value, false ) == false )
 				{
 					if( _nothrow == false )
 					{
@@ -108,42 +106,42 @@ namespace pybind
 	}
 
 	template<class T>
-	bool extract_value( PyObject * _obj, T & _value, bool _nothrow )
+	bool extract_value( kernel_interface * _kernel, PyObject * _obj, T & _value, bool _nothrow )
 	{
-		bool result = detail::extract_check<T>::extract( _obj, _value, _nothrow );
+		bool result = detail::extract_check<T>::extract( _kernel, _obj, _value, _nothrow );
 
         return result;
 	}
 
-	PYBIND_API bool extract_value( PyObject * _obj, bool & _value, bool _nothrow );
-	PYBIND_API bool extract_value( PyObject * _obj, int8_t & _value, bool _nothrow );
-	PYBIND_API bool extract_value( PyObject * _obj, int16_t & _value, bool _nothrow );
-	PYBIND_API bool extract_value( PyObject * _obj, int32_t & _value, bool _nothrow );
-	PYBIND_API bool extract_value( PyObject * _obj, int64_t & _value, bool _nothrow );
-	PYBIND_API bool extract_value( PyObject * _obj, uint8_t & _value, bool _nothrow );
-	PYBIND_API bool extract_value( PyObject * _obj, uint16_t & _value, bool _nothrow );
-	PYBIND_API bool extract_value( PyObject * _obj, uint32_t & _value, bool _nothrow );
-	PYBIND_API bool extract_value( PyObject * _obj, uint64_t & _value, bool _nothrow );
-	PYBIND_API bool extract_value( PyObject * _obj, wchar_t & _value, bool _nothrow );
-	PYBIND_API bool extract_value( PyObject * _obj, long & _value, bool _nothrow );
-	PYBIND_API bool extract_value( PyObject * _obj, unsigned long & _value, bool _nothrow );
-	PYBIND_API bool extract_value( PyObject * _obj, float & _value, bool _nothrow );
-	PYBIND_API bool extract_value( PyObject * _obj, double & _value, bool _nothrow );
-	PYBIND_API bool extract_value( PyObject * _obj, const char * & _value, bool _nothrow );
-	PYBIND_API bool extract_value( PyObject * _obj, const wchar_t * & _value, bool _nothrow );
-	PYBIND_API bool extract_value( PyObject * _obj, PyObject * & _value, bool _nothrow );
-	PYBIND_API bool extract_value( PyObject * _obj, pybind::object & _value, bool _nothrow );
-	PYBIND_API bool extract_value( PyObject * _obj, pybind::list & _value, bool _nothrow );
-	PYBIND_API bool extract_value( PyObject * _obj, pybind::tuple & _value, bool _nothrow );
-	PYBIND_API bool extract_value( PyObject * _obj, pybind::dict & _value, bool _nothrow );
+	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, bool & _value, bool _nothrow );
+	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, int8_t & _value, bool _nothrow );
+	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, int16_t & _value, bool _nothrow );
+	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, int32_t & _value, bool _nothrow );
+	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, int64_t & _value, bool _nothrow );
+	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, uint8_t & _value, bool _nothrow );
+	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, uint16_t & _value, bool _nothrow );
+	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, uint32_t & _value, bool _nothrow );
+	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, uint64_t & _value, bool _nothrow );
+	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, wchar_t & _value, bool _nothrow );
+	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, long & _value, bool _nothrow );
+	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, unsigned long & _value, bool _nothrow );
+	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, float & _value, bool _nothrow );
+	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, double & _value, bool _nothrow );
+	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, const char * & _value, bool _nothrow );
+	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, const wchar_t * & _value, bool _nothrow );
+	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, PyObject * & _value, bool _nothrow );
+	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, pybind::object & _value, bool _nothrow );
+	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, pybind::list & _value, bool _nothrow );
+	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, pybind::tuple & _value, bool _nothrow );
+	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, pybind::dict & _value, bool _nothrow );
 
     template<class T>
-	typename stdex::mpl::remove_cref<T>::type extract_throw( PyObject * _obj )
+	typename stdex::mpl::remove_cref<T>::type extract_throw( kernel_interface * _kernel, PyObject * _obj )
 	{
 		typedef typename stdex::mpl::remove_cref<T>::type type_value;
 		type_value value;
 		       
-		if( extract_value( _obj, value, false ) == false )
+		if( extract_value( _kernel, _obj, value, false ) == false )
         {
 			const std::type_info & tinfo = typeid(type_value);
             
@@ -162,12 +160,12 @@ namespace pybind
 	template<typename T>
 	struct extract_specialized
 	{
-		typename stdex::mpl::remove_cref<T>::type operator () ( PyObject * _obj )
+		typename stdex::mpl::remove_cref<T>::type operator () ( kernel_interface * _kernel, PyObject * _obj )
 		{
 			typedef typename stdex::mpl::remove_cref<T>::type type_value;
 			type_value value;
 
-			if( extract_value( _obj, value, true ) == false )
+			if( extract_value( _kernel, _obj, value, true ) == false )
 			{
 				const std::type_info & tinfo = typeid(type_value);
 
@@ -187,11 +185,11 @@ namespace pybind
 	template<typename T>
 	struct extract_specialized<T *>
 	{
-		T * operator () ( PyObject * _obj )
+		T * operator () ( kernel_interface * _kernel, PyObject * _obj )
 		{
 			T * value = nullptr;
 
-			if( extract_value( _obj, value, true ) == false )
+			if( extract_value( _kernel, _obj, value, true ) == false )
 			{
 				const std::type_info & tinfo = typeid(T *);
 
@@ -211,11 +209,11 @@ namespace pybind
 	template<typename T>
 	struct extract_specialized<stdex::intrusive_ptr<T> >
 	{
-		T * operator () ( PyObject * _obj )
+		T * operator () ( kernel_interface * _kernel, PyObject * _obj )
 		{
 			T * value = nullptr;
 
-			if( extract_value( _obj, value, true ) == false )
+			if( extract_value( _kernel, _obj, value, true ) == false )
 			{
 				const std::type_info & tinfo = typeid(T *);
 
@@ -233,19 +231,17 @@ namespace pybind
 	};
 
 	template<class T>
-	typename stdex::mpl::remove_cref<T>::type extract( PyObject * _obj )
+	typename stdex::mpl::remove_cref<T>::type extract( kernel_interface * _kernel, PyObject * _obj )
 	{
-		return extract_specialized<T>()(_obj);		
+		return extract_specialized<T>()(_kernel, _obj);		
 	}
 
 	template<class T>
-	PyObject * ptr_throw_i( const T & _value )
+	PyObject * ptr_throw_i( kernel_interface * _kernel, const T & _value )
 	{
-		kernel_interface * kernel = pybind::get_kernel();
-
 		typedef typename stdex::mpl::remove_cref<T>::type T_WOCR;
 				
-		type_cast * etype = detail::type_down_cast<T_WOCR>::find( kernel );
+		type_cast * etype = detail::type_down_cast<T_WOCR>::find( _kernel );
 
 		if( etype == nullptr )
 		{
@@ -261,7 +257,7 @@ namespace pybind
 
 		type_cast_result_T_WOCR * etype_impl = static_cast<type_cast_result_T_WOCR *>(etype);
 
-		PyObject * result = etype_impl->wrap( kernel, _value );
+		PyObject * result = etype_impl->wrap( _kernel, _value );
 
 		if( result == nullptr )
 		{
@@ -277,74 +273,74 @@ namespace pybind
 		return result;
 	}
 
-	PYBIND_API PyObject * ptr_throw_i( bool _value );
-	PYBIND_API PyObject * ptr_throw_i( int8_t _value );
-	PYBIND_API PyObject * ptr_throw_i( int16_t _value );
-	PYBIND_API PyObject * ptr_throw_i( int32_t _value );
-	PYBIND_API PyObject * ptr_throw_i( int64_t _value );
-	PYBIND_API PyObject * ptr_throw_i( uint8_t _value );
-	PYBIND_API PyObject * ptr_throw_i( uint16_t _value );
-	PYBIND_API PyObject * ptr_throw_i( uint32_t _value );	
-	PYBIND_API PyObject * ptr_throw_i( uint64_t _value );	
-	PYBIND_API PyObject * ptr_throw_i( wchar_t _value );
-	PYBIND_API PyObject * ptr_throw_i( long _value );
-	PYBIND_API PyObject * ptr_throw_i( unsigned long _value );
-	PYBIND_API PyObject * ptr_throw_i( float _value );
-	PYBIND_API PyObject * ptr_throw_i( double _value );
-	PYBIND_API PyObject * ptr_throw_i( char * _value );
-	PYBIND_API PyObject * ptr_throw_i( wchar_t * _value );
-	PYBIND_API PyObject * ptr_throw_i( const char * _value );
-	PYBIND_API PyObject * ptr_throw_i( const wchar_t * _value );
-	PYBIND_API PyObject * ptr_throw_i( PyObject * _value );	
-	PYBIND_API PyObject * ptr_throw_i( pybind::bindable * _value );		
-	PYBIND_API PyObject * ptr_throw_i( const pybind::object & _value );
-	PYBIND_API PyObject * ptr_throw_i( const pybind::list & _value );
-	PYBIND_API PyObject * ptr_throw_i( const pybind::tuple & _value );
-	PYBIND_API PyObject * ptr_throw_i( const pybind::dict & _value );
+	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, bool _value );
+	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, int8_t _value );
+	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, int16_t _value );
+	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, int32_t _value );
+	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, int64_t _value );
+	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, uint8_t _value );
+	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, uint16_t _value );
+	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, uint32_t _value );	
+	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, uint64_t _value );	
+	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, wchar_t _value );
+	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, long _value );
+	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, unsigned long _value );
+	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, float _value );
+	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, double _value );
+	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, char * _value );
+	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, wchar_t * _value );
+	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, const char * _value );
+	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, const wchar_t * _value );
+	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, PyObject * _value );	
+	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, pybind::bindable * _value );		
+	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::object & _value );
+	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::tuple & _value );
+	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::list & _value );
+	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::dict & _value );
 
 	template<typename T, typename = void>
 	struct ptr_throw_specialized
 	{
-		PyObject * operator () ( const T & _t )
+		PyObject * operator () ( kernel_interface * _kernel, const T & _t )
 		{
-			return ptr_throw_i( _t );
+			return ptr_throw_i( _kernel, _t );
 		}
 	};
 
 	template<typename T>
 	struct ptr_throw_specialized < stdex::intrusive_ptr<T> >
 	{
-		PyObject * operator () ( const stdex::intrusive_ptr<T> & _t )
+		PyObject * operator () ( kernel_interface * _kernel, const stdex::intrusive_ptr<T> & _t )
 		{
 			T * t_ptr = _t.get();
 
-			return ptr_throw_i( t_ptr );
+			return ptr_throw_i( _kernel, t_ptr );
 		}
 	};
 
 	template<typename T>
 	struct ptr_throw_specialized < T, typename stdex::mpl::enable_if<stdex::mpl::is_base_of<pybind::bindable, typename stdex::mpl::remove_ptr<T>::type>::value>::type >
 	{
-		PyObject * operator () ( pybind::bindable * _t )
+		PyObject * operator () ( kernel_interface * _kernel, pybind::bindable * _t )
 		{
-			return ptr_throw_i( _t );
+			return ptr_throw_i( _kernel, _t );
 		}
 	};
 
 	template<class T>
-	PyObject * ptr_throw( const T & _value )
+	PyObject * ptr_throw( kernel_interface * _kernel, const T & _value )
 	{ 
-		PyObject * py_ptr = ptr_throw_specialized<T>()(_value);
+		PyObject * py_ptr = ptr_throw_specialized<T>()(_kernel, _value);
 
 		return py_ptr;
 	}
 	
     template<class T>
-    PyObject * ptr( const T & _value )
+	PyObject * ptr( kernel_interface * _kernel, const T & _value )
     {
         try
         {
-			PyObject * value = ptr_throw( _value );
+			PyObject * value = ptr_throw( _kernel, _value );
 
             return value;
         }

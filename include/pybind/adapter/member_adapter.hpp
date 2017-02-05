@@ -25,7 +25,7 @@ namespace pybind
 		{
 			C * obj = _kernel->meta_cast_class_t<C>( _self, _scope );
 
-			PyObject * py_value = pybind::ptr_throw( obj->*m_member );
+			PyObject * py_value = pybind::ptr_throw( _kernel, obj->*m_member );
 
 			return py_value;
 		}
@@ -34,7 +34,7 @@ namespace pybind
 		{
 			C * obj = _kernel->meta_cast_class_t<C>( _self, _scope );
 
-			obj->*m_member = pybind::extract_throw<A>( _args );
+			obj->*m_member = pybind::extract_throw<A>( _kernel, _args );
 
 			return 1;
 		}
@@ -60,7 +60,7 @@ namespace pybind
 		{
 			C * obj = _kernel->meta_cast_class_t<C>( _self, _scope );
 			
-			PyObject * py_value = (detail::return_operator_t)(obj->*m_get)();
+			PyObject * py_value = detail::return_operator_t( _kernel, (obj->*m_get)() );
 
 			return py_value;
 		}
@@ -70,7 +70,7 @@ namespace pybind
 			C * obj = _kernel->meta_cast_class_t<C>( _self, _scope );
 							
 			(obj->*m_set)(
-				detail::extract_operator_t( _args )
+				detail::extract_operator_t( _kernel, _args )
 				);
 
 			return 1;

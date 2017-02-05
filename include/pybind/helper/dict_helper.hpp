@@ -11,14 +11,16 @@ namespace pybind
 		class set_dict_operator_t
 		{
 		public:
-			set_dict_operator_t( PyObject * _dict, PyObject * _key )
-				: m_dict( _dict )
+			set_dict_operator_t( kernel_interface * _kernel, PyObject * _dict, PyObject * _key )
+				: m_kernel( _kernel )
+				, m_dict( _dict )
 				, m_key( _key )
 			{
 			}
 
 			set_dict_operator_t( const set_dict_operator_t & _r )
-				: m_dict( _r.m_dict )
+				: m_kernel( _r.m_kernel )
+				, m_dict( _r.m_dict )
 				, m_key( _r.m_key )
 			{
 			}
@@ -28,9 +30,17 @@ namespace pybind
 			}
 
 		public:
-			void operator = (const import_operator_t & _value)
+			template<class T>
+			set_dict_operator_t & operator = (const T & _value)
+			{
+				return this->operator = (import_operator_t( m_kernel, _value ));
+			}
+
+			set_dict_operator_t & operator = (const import_operator_t & _value)
 			{				
-				pybind::dict_set_t( m_dict, m_key, _value );
+				pybind::dict_set_t( m_kernel, m_dict, m_key, _value );
+
+				return *this;
 			}
 
 		public:
@@ -44,16 +54,18 @@ namespace pybind
 			template<class T>
 			operator T ()
 			{
-				return pybind::dict_get_t( m_dict, m_key );
+				return pybind::dict_get_t( m_kernel, m_dict, m_key );
 			}
 
 			template<class T>
 			bool operator == (const T & _value)
 			{
-				return pybind::dict_get_t( m_dict, m_key ) == _value;
+				return pybind::dict_get_t( m_kernel, m_dict, m_key ) == _value;
 			}
 
 		protected:
+			kernel_interface * m_kernel;
+
 			PyObject * m_dict;
 			PyObject * m_key;
 		};

@@ -12,8 +12,8 @@ namespace pybind
     class PYBIND_API dict_iterator
     {
     protected:
-        explicit dict_iterator( PyObject * _obj );
-        explicit dict_iterator( PyObject * _obj, t_dict_iterator_end_tag );
+        explicit dict_iterator( kernel_interface * _kernel, PyObject * _obj );
+		explicit dict_iterator( kernel_interface * _kernel, PyObject * _obj, t_dict_iterator_end_tag );
 
     public:
         dict_iterator & operator = ( const dict_iterator & _it );
@@ -31,6 +31,8 @@ namespace pybind
         detail::extract_operator_t value() const;
 
     protected:
+		kernel_interface * m_kernel;
+
         PyObject * m_obj;
         size_t m_pos;
 

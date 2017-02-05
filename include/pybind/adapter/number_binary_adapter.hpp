@@ -139,12 +139,12 @@ namespace pybind
 			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
 			V value;
-			if( pybind::extract_value( _value, value, true ) == false )
+			if( pybind::extract_value( _kernel, _value, value, true ) == false )
 			{
 				return nullptr;
 			}
 
-			PyObject * py_result = (detail::return_operator_t)(*self + value);
+			PyObject * py_result = detail::return_operator_t( _kernel, (*self + value));
 
 			return py_result;
 		}
@@ -166,12 +166,12 @@ namespace pybind
 			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
 			V value;
-			if( pybind::extract_value( _value, value, true ) == false )
+			if( pybind::extract_value( _kernel, _value, value, true ) == false )
 			{
 				return nullptr;
 			}
 
-			PyObject * py_result = (detail::return_operator_t)( (_rotate == false) ? (*self - value) : (value - *self) );
+			PyObject * py_result = detail::return_operator_t( _kernel, (_rotate == false) ? (*self - value) : (value - *self) );
 
 			return py_result;
 		}
@@ -195,12 +195,12 @@ namespace pybind
 			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
 			V value;
-			if( pybind::extract_value( _value, value, true ) == false )
+			if( pybind::extract_value( _kernel, _value, value, true ) == false )
 			{
 				return nullptr;
 			}
 
-			PyObject * py_result = (detail::return_operator_t)(*self * value);
+			PyObject * py_result = detail::return_operator_t( _kernel, (*self * value) );
 
 			return py_result;
 		}
@@ -222,12 +222,12 @@ namespace pybind
 			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
 			V value;
-			if( pybind::extract_value( _value, value, true ) == false )
+			if( pybind::extract_value( _kernel, _value, value, true ) == false )
 			{
 				return nullptr;
 			}
 
-			PyObject * py_result = (detail::return_operator_t)((_rotate == false) ? (*self / value) : (value / *self));
+			PyObject * py_result = detail::return_operator_t( _kernel, (_rotate == false) ? (*self / value) : (value / *self) );
 
 			return py_result;
 		}
@@ -254,12 +254,12 @@ namespace pybind
 			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
 			V value;
-			if( pybind::extract_value( _value, value, true ) == false )
+			if( pybind::extract_value( _kernel, _value, value, true ) == false )
 			{
 				return nullptr;
 			}
 
-			PyObject * py_result = (detail::return_operator_t)(*self / value);
+			PyObject * py_result = detail::return_operator_t( _kernel, *self / value );
 
 			return py_result;
 		}

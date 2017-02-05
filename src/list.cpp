@@ -3,23 +3,33 @@
 namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
-	list::list()
-		: pybind::object( pybind::list_new( 0 ), pybind::borrowed() )
+	list::list( kernel_interface * _kernel )
+		: pybind::object( _kernel, pybind::list_new( 0 ), pybind::borrowed() )
 	{
 	}
 	//////////////////////////////////////////////////////////////////////////
-	list::list( size_t _size )
-		: pybind::object( pybind::list_new( _size ), pybind::borrowed() )
+	list::list( const list & _list )
+		: pybind::object( _list.kernel(), _list.ptr() )
 	{
 	}
 	//////////////////////////////////////////////////////////////////////////
-	list::list( PyObject * _obj, pybind::borrowed _br )
-		: pybind::object( _obj, _br )
+	list::list( pybind::invalid _iv )
+		: object(_iv)
+	{
+	}
+	//////////////////////////////////////////////////////////////////////////
+	list::list( kernel_interface * _kernel, size_t _size )
+		: pybind::object( _kernel, pybind::list_new( _size ), pybind::borrowed() )
+	{
+	}
+	//////////////////////////////////////////////////////////////////////////
+	list::list( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed _br )
+		: pybind::object( _kernel, _obj, _br )
 	{ 
 	}
 	//////////////////////////////////////////////////////////////////////////
-	list::list( PyObject * _obj )
-		: pybind::object( _obj )
+	list::list( kernel_interface * _kernel, PyObject * _obj )
+		: pybind::object( _kernel, _obj )
 	{
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -27,17 +37,19 @@ namespace pybind
 	{
 		PyObject * py_item = pybind::list_getitem( m_obj, _index );
 
-		return detail::extract_operator_t( py_item );
+		return detail::extract_operator_t( m_kernel, py_item );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	detail::set_list_operator_t list::operator [] ( size_t _index )
 	{
-		return detail::set_list_operator_t( m_obj, _index );
+		return detail::set_list_operator_t( m_kernel, m_obj, _index );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void list::append( const detail::import_operator_t & _t )
+	list & list::append( const detail::import_operator_t & _t )
 	{
-		pybind::list_appenditem_t( m_obj, _t );
+		pybind::list_appenditem_t( m_kernel, m_obj, _t );
+
+		return *this;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	size_t list::size() const
@@ -57,6 +69,6 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	pybind::list make_invalid_list_t()
 	{
-		return pybind::list( nullptr, pybind::borrowed() );
+		return pybind::list( invalid() );
 	}
 }

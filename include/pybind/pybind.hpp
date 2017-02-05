@@ -4,6 +4,7 @@
 #	include "pybind/extract.hpp"
 #	include "pybind/internal_call.hpp"
 
+#	include "pybind/kernel.hpp"
 #	include "pybind/function.hpp"
 #	include "pybind/functor.hpp"
 #	include "pybind/class.hpp"

@@ -9,28 +9,39 @@ namespace pybind
 	class PYBIND_API list
 		: public object
 	{
+	public:		
+		list( kernel_interface * _kernel );
+		list( const list & _list );
+				
 	public:
-		list();
-		explicit list( size_t _size );
-
-	public:
-		explicit list( PyObject * _obj, pybind::borrowed );
-		explicit list( PyObject * _obj );
+		explicit list( pybind::invalid );
+		explicit list( kernel_interface * _kernel, size_t _size );
+		explicit list( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed );
+		explicit list( kernel_interface * _kernel, PyObject * _obj );
 
 	public:
 		detail::set_list_operator_t operator [] ( size_t _index );
 		detail::extract_operator_t operator [] ( size_t _index ) const;		
 
 	public:
-		void append( const detail::import_operator_t & _t );
+		template<class T>
+		list & append( const T & _t )
+		{
+			return this->append( detail::import_operator_t( m_kernel, _t ) );
+		}
+			
+		list & append( const detail::import_operator_t & _t );
 		
+	public:
 		template<class It>
-		void append( It _begin, It _end )
+		list & append( It _begin, It _end )
 		{
 			for( It it = _begin; it != _end; ++it )
 			{
 				this->append( *it );
 			}
+
+			return *this;
 		}
 
 		template<class It>
@@ -49,12 +60,36 @@ namespace pybind
 		bool empty() const;
 	};
 	//////////////////////////////////////////////////////////////////////////
+	template<>
+	struct extract_specialized<pybind::list>
+	{
+		pybind::list operator () ( kernel_interface * _kernel, PyObject * _obj )
+		{
+			pybind::list value( _kernel );
+
+			if( extract_value( _kernel, _obj, value, true ) == false )
+			{
+				const std::type_info & tinfo = typeid(pybind::list);
+
+				const char * type_name = tinfo.name();
+
+				pybind::log( "extract_value<T>: extract invalid %s:%s not cast to '%s'"
+					, pybind::object_repr( _obj )
+					, pybind::object_repr_type( _obj )
+					, type_name
+					);
+			}
+
+			return value;
+		}
+	};
+	//////////////////////////////////////////////////////////////////////////
 	PYBIND_API bool list_check_t( const pybind::object & _obj );
 	//////////////////////////////////////////////////////////////////////////
 	template<class C>
-	inline pybind::list make_list_container_t( const C & _c )
+	inline pybind::list make_list_container_t( kernel_interface * _kernel, const C & _c )
 	{
-		pybind::list l( _c.size() );
+		pybind::list l( _kernel, _c.size() );
 
 		l.fill( 0, _c.begin(), _c.end() );
 

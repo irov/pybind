@@ -3,24 +3,28 @@
 namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
-	tuple::tuple()
-		: pybind::object( pybind::tuple_new( 0 ) )
+	tuple::tuple( kernel_interface * _kernel )
+		: pybind::object( _kernel, pybind::tuple_new( 0 ) )
 	{
 	}
 	//////////////////////////////////////////////////////////////////////////
-	tuple::tuple( PyObject * _obj, borrowed _br )
-		: pybind::object( _obj, _br )
+	tuple::tuple( borrowed )
 	{
 	}
 	//////////////////////////////////////////////////////////////////////////
-	tuple::tuple( PyObject * _obj )
-		: pybind::object( _obj )
+	tuple::tuple( kernel_interface * _kernel, PyObject * _obj, borrowed _br )
+		: pybind::object( _kernel, _obj, _br )
+	{
+	}
+	//////////////////////////////////////////////////////////////////////////
+	tuple::tuple( kernel_interface * _kernel, PyObject * _obj )
+		: pybind::object( _kernel, _obj )
 	{
 	}
 	//////////////////////////////////////////////////////////////////////////
 	detail::extract_operator_t tuple::operator[]( size_t _index ) const
 	{
-		return pybind::tuple_getitem_t( m_obj, _index );
+		return pybind::tuple_getitem_t( m_kernel, m_obj, _index );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	size_t tuple::size() const
@@ -33,7 +37,7 @@ namespace pybind
 		return this->size() == 0;
 	}
 	//////////////////////////////////////////////////////////////////////////	
-	pybind::tuple make_tuple_t()
+	pybind::tuple make_tuple_t( kernel_interface * _kernel )
 	{
 		PyObject * py_tuple = pybind::tuple_new( 0 );
 
@@ -42,10 +46,10 @@ namespace pybind
 			pybind::throw_exception( "make_tuple_t 0" );
 		}
 
-		return pybind::tuple( py_tuple, pybind::borrowed() );
+		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	pybind::tuple make_tuple_t( const detail::import_operator_t & _t0 )
+	pybind::tuple make_tuple_t( kernel_interface * _kernel, const detail::import_operator_t & _t0 )
 	{
 		PyObject * py_tuple = pybind::tuple_new( 1 );
 
@@ -54,12 +58,12 @@ namespace pybind
 			pybind::throw_exception( "make_tuple_t 1" );
 		}
 
-		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 0, _t0 );
 
-		return pybind::tuple( py_tuple, pybind::borrowed() );
+		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	pybind::tuple make_tuple_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1 )
+	pybind::tuple make_tuple_t( kernel_interface * _kernel, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1 )
 	{
 		PyObject * py_tuple = pybind::tuple_new( 2 );
 
@@ -68,13 +72,13 @@ namespace pybind
 			pybind::throw_exception( "make_tuple_t 2" );
 		}
 
-		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
-		pybind::tuple_setitem_t( py_tuple, 1, _t1 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 0, _t0 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 1, _t1 );
 
-		return pybind::tuple( py_tuple, pybind::borrowed() );
+		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	pybind::tuple make_tuple_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2 )
+	pybind::tuple make_tuple_t( kernel_interface * _kernel, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2 )
 	{
 		PyObject * py_tuple = pybind::tuple_new( 3 );
 
@@ -83,14 +87,14 @@ namespace pybind
 			pybind::throw_exception( "make_tuple_t 3" );
 		}
 
-		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
-		pybind::tuple_setitem_t( py_tuple, 1, _t1 );
-		pybind::tuple_setitem_t( py_tuple, 2, _t2 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 0, _t0 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 1, _t1 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 2, _t2 );
 
-		return pybind::tuple( py_tuple, pybind::borrowed() );
+		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	pybind::tuple make_tuple_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3 )
+	pybind::tuple make_tuple_t( kernel_interface * _kernel, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3 )
 	{
 		PyObject * py_tuple = pybind::tuple_new( 4 );
 
@@ -99,15 +103,15 @@ namespace pybind
 			pybind::throw_exception( "make_tuple_t 4" );
 		}
 
-		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
-		pybind::tuple_setitem_t( py_tuple, 1, _t1 );
-		pybind::tuple_setitem_t( py_tuple, 2, _t2 );
-		pybind::tuple_setitem_t( py_tuple, 3, _t3 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 0, _t0 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 1, _t1 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 2, _t2 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 3, _t3 );
 
-		return pybind::tuple( py_tuple, pybind::borrowed() );
+		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	pybind::tuple make_tuple_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4 )
+	pybind::tuple make_tuple_t( kernel_interface * _kernel, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4 )
 	{
 		PyObject * py_tuple = pybind::tuple_new( 5 );
 
@@ -116,16 +120,16 @@ namespace pybind
 			pybind::throw_exception( "make_tuple_t 5" );
 		}
 
-		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
-		pybind::tuple_setitem_t( py_tuple, 1, _t1 );
-		pybind::tuple_setitem_t( py_tuple, 2, _t2 );
-		pybind::tuple_setitem_t( py_tuple, 3, _t3 );
-		pybind::tuple_setitem_t( py_tuple, 4, _t4 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 0, _t0 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 1, _t1 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 2, _t2 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 3, _t3 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 4, _t4 );
 
-		return pybind::tuple( py_tuple, pybind::borrowed() );
+		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	pybind::tuple make_tuple_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5 )
+	pybind::tuple make_tuple_t( kernel_interface * _kernel, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5 )
 	{ 
 		PyObject * py_tuple = pybind::tuple_new( 6 );
 
@@ -134,17 +138,17 @@ namespace pybind
 			pybind::throw_exception( "make_tuple_t 6" );
 		}
 
-		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
-		pybind::tuple_setitem_t( py_tuple, 1, _t1 );
-		pybind::tuple_setitem_t( py_tuple, 2, _t2 );
-		pybind::tuple_setitem_t( py_tuple, 3, _t3 );
-		pybind::tuple_setitem_t( py_tuple, 4, _t4 );
-		pybind::tuple_setitem_t( py_tuple, 5, _t5 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 0, _t0 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 1, _t1 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 2, _t2 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 3, _t3 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 4, _t4 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 5, _t5 );
 
-		return pybind::tuple( py_tuple, pybind::borrowed() );
+		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	pybind::tuple make_tuple_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6 )
+	pybind::tuple make_tuple_t( kernel_interface * _kernel, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6 )
 	{
 		PyObject * py_tuple = pybind::tuple_new( 7 );
 
@@ -153,18 +157,18 @@ namespace pybind
 			pybind::throw_exception( "make_tuple_t 7" );
 		}
 
-		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
-		pybind::tuple_setitem_t( py_tuple, 1, _t1 );
-		pybind::tuple_setitem_t( py_tuple, 2, _t2 );
-		pybind::tuple_setitem_t( py_tuple, 3, _t3 );
-		pybind::tuple_setitem_t( py_tuple, 4, _t4 );
-		pybind::tuple_setitem_t( py_tuple, 5, _t5 );
-		pybind::tuple_setitem_t( py_tuple, 6, _t6 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 0, _t0 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 1, _t1 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 2, _t2 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 3, _t3 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 4, _t4 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 5, _t5 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 6, _t6 );
 
-		return pybind::tuple( py_tuple, pybind::borrowed() );
+		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	pybind::tuple make_tuple_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::import_operator_t & _t7 )
+	pybind::tuple make_tuple_t( kernel_interface * _kernel, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::import_operator_t & _t7 )
 	{ 
 		PyObject * py_tuple = pybind::tuple_new( 8 );
 
@@ -173,19 +177,19 @@ namespace pybind
 			pybind::throw_exception( "make_tuple_t 8" );
 		}
 
-		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
-		pybind::tuple_setitem_t( py_tuple, 1, _t1 );
-		pybind::tuple_setitem_t( py_tuple, 2, _t2 );
-		pybind::tuple_setitem_t( py_tuple, 3, _t3 );
-		pybind::tuple_setitem_t( py_tuple, 4, _t4 );
-		pybind::tuple_setitem_t( py_tuple, 5, _t5 );
-		pybind::tuple_setitem_t( py_tuple, 6, _t6 );
-		pybind::tuple_setitem_t( py_tuple, 7, _t7 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 0, _t0 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 1, _t1 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 2, _t2 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 3, _t3 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 4, _t4 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 5, _t5 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 6, _t6 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 7, _t7 );
 
-		return pybind::tuple( py_tuple, pybind::borrowed() );
+		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
 	}
 	//////////////////////////////////////////////////////////////////////////	
-	pybind::tuple make_tuple_args_t( const detail::args_operator_t & _args )
+	pybind::tuple make_tuple_args_t( kernel_interface * _kernel, const detail::args_operator_t & _args )
 	{
 		size_t args_size = _args.size();
 
@@ -198,13 +202,13 @@ namespace pybind
 
 		for( size_t i = 0; i != args_size; ++i )
 		{
-			pybind::tuple_setitem_t( py_tuple, 0 + i, _args[i] );
+			pybind::tuple_setitem_t( _kernel, py_tuple, 0 + i, _args[i] );
 		}
 
-		return pybind::tuple( py_tuple, pybind::borrowed() );
+		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	pybind::tuple make_tuple_args_t( const detail::import_operator_t & _t0, const detail::args_operator_t & _args )
+	pybind::tuple make_tuple_args_t( kernel_interface * _kernel, const detail::import_operator_t & _t0, const detail::args_operator_t & _args )
 	{
 		size_t args_size = _args.size();
 
@@ -215,17 +219,17 @@ namespace pybind
 			pybind::throw_exception( "make_tuple_t 1" );
 		}
 
-		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 0, _t0 );
 
 		for( size_t i = 0; i != args_size; ++i )
 		{
-			pybind::tuple_setitem_t( py_tuple, 1 + i, _args[i] );
+			pybind::tuple_setitem_t( _kernel, py_tuple, 1 + i, _args[i] );
 		}
 
-		return pybind::tuple( py_tuple, pybind::borrowed() );
+		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	pybind::tuple make_tuple_args_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::args_operator_t & _args )
+	pybind::tuple make_tuple_args_t( kernel_interface * _kernel, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::args_operator_t & _args )
 	{
 		size_t args_size = _args.size();
 
@@ -236,18 +240,18 @@ namespace pybind
 			pybind::throw_exception( "make_tuple_t 2" );
 		}
 
-		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
-		pybind::tuple_setitem_t( py_tuple, 1, _t1 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 0, _t0 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 1, _t1 );
 
 		for( size_t i = 0; i != args_size; ++i )
 		{
-			pybind::tuple_setitem_t( py_tuple, 2 + i, _args[i] );
+			pybind::tuple_setitem_t( _kernel, py_tuple, 2 + i, _args[i] );
 		}
 
-		return pybind::tuple( py_tuple, pybind::borrowed() );
+		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	pybind::tuple make_tuple_args_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::args_operator_t & _args )
+	pybind::tuple make_tuple_args_t( kernel_interface * _kernel, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::args_operator_t & _args )
 	{
 		size_t args_size = _args.size();
 
@@ -258,19 +262,19 @@ namespace pybind
 			pybind::throw_exception( "make_tuple_t 3" );
 		}
 
-		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
-		pybind::tuple_setitem_t( py_tuple, 1, _t1 );
-		pybind::tuple_setitem_t( py_tuple, 2, _t2 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 0, _t0 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 1, _t1 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 2, _t2 );
 
 		for( size_t i = 0; i != args_size; ++i )
 		{
-			pybind::tuple_setitem_t( py_tuple, 3 + i, _args[i] );
+			pybind::tuple_setitem_t( _kernel, py_tuple, 3 + i, _args[i] );
 		}
 
-		return pybind::tuple( py_tuple, pybind::borrowed() );
+		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	pybind::tuple make_tuple_args_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::args_operator_t & _args )
+	pybind::tuple make_tuple_args_t( kernel_interface * _kernel, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::args_operator_t & _args )
 	{
 		size_t args_size = _args.size();
 
@@ -281,20 +285,20 @@ namespace pybind
 			pybind::throw_exception( "make_tuple_t 4" );
 		}
 
-		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
-		pybind::tuple_setitem_t( py_tuple, 1, _t1 );
-		pybind::tuple_setitem_t( py_tuple, 2, _t2 );
-		pybind::tuple_setitem_t( py_tuple, 3, _t3 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 0, _t0 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 1, _t1 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 2, _t2 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 3, _t3 );
 
 		for( size_t i = 0; i != args_size; ++i )
 		{
-			pybind::tuple_setitem_t( py_tuple, 4 + i, _args[i] );
+			pybind::tuple_setitem_t( _kernel, py_tuple, 4 + i, _args[i] );
 		}
 
-		return pybind::tuple( py_tuple, pybind::borrowed() );
+		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	pybind::tuple make_tuple_args_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::args_operator_t & _args )
+	pybind::tuple make_tuple_args_t( kernel_interface * _kernel, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::args_operator_t & _args )
 	{
 		size_t args_size = _args.size();
 
@@ -305,21 +309,21 @@ namespace pybind
 			pybind::throw_exception( "make_tuple_t 5" );
 		}
 
-		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
-		pybind::tuple_setitem_t( py_tuple, 1, _t1 );
-		pybind::tuple_setitem_t( py_tuple, 2, _t2 );
-		pybind::tuple_setitem_t( py_tuple, 3, _t3 );
-		pybind::tuple_setitem_t( py_tuple, 4, _t4 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 0, _t0 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 1, _t1 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 2, _t2 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 3, _t3 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 4, _t4 );
 
 		for( size_t i = 0; i != args_size; ++i )
 		{
-			pybind::tuple_setitem_t( py_tuple, 5 + i, _args[i] );
+			pybind::tuple_setitem_t( _kernel, py_tuple, 5 + i, _args[i] );
 		}
 
-		return pybind::tuple( py_tuple, pybind::borrowed() );
+		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	pybind::tuple make_tuple_args_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::args_operator_t & _args )
+	pybind::tuple make_tuple_args_t( kernel_interface * _kernel, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::args_operator_t & _args )
 	{
 		size_t args_size = _args.size();
 
@@ -330,22 +334,22 @@ namespace pybind
 			pybind::throw_exception( "make_tuple_t 6" );
 		}
 
-		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
-		pybind::tuple_setitem_t( py_tuple, 1, _t1 );
-		pybind::tuple_setitem_t( py_tuple, 2, _t2 );
-		pybind::tuple_setitem_t( py_tuple, 3, _t3 );
-		pybind::tuple_setitem_t( py_tuple, 4, _t4 );
-		pybind::tuple_setitem_t( py_tuple, 5, _t5 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 0, _t0 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 1, _t1 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 2, _t2 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 3, _t3 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 4, _t4 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 5, _t5 );
 
 		for( size_t i = 0; i != args_size; ++i )
 		{
-			pybind::tuple_setitem_t( py_tuple, 6 + i, _args[i] );
+			pybind::tuple_setitem_t( _kernel, py_tuple, 6 + i, _args[i] );
 		}
 
-		return pybind::tuple( py_tuple, pybind::borrowed() );
+		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	pybind::tuple make_tuple_args_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::args_operator_t & _args )
+	pybind::tuple make_tuple_args_t( kernel_interface * _kernel, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::args_operator_t & _args )
 	{
 		size_t args_size = _args.size();
 
@@ -356,23 +360,23 @@ namespace pybind
 			pybind::throw_exception( "make_tuple_t 7" );
 		}
 
-		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
-		pybind::tuple_setitem_t( py_tuple, 1, _t1 );
-		pybind::tuple_setitem_t( py_tuple, 2, _t2 );
-		pybind::tuple_setitem_t( py_tuple, 3, _t3 );
-		pybind::tuple_setitem_t( py_tuple, 4, _t4 );
-		pybind::tuple_setitem_t( py_tuple, 5, _t5 );
-		pybind::tuple_setitem_t( py_tuple, 6, _t6 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 0, _t0 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 1, _t1 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 2, _t2 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 3, _t3 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 4, _t4 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 5, _t5 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 6, _t6 );
 
 		for( size_t i = 0; i != args_size; ++i )
 		{
-			pybind::tuple_setitem_t( py_tuple, 7 + i, _args[i] );
+			pybind::tuple_setitem_t( _kernel, py_tuple, 7 + i, _args[i] );
 		}
 
-		return pybind::tuple( py_tuple, pybind::borrowed() );
+		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	pybind::tuple make_tuple_args_t( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::import_operator_t & _t7, const detail::args_operator_t & _args )
+	pybind::tuple make_tuple_args_t( kernel_interface * _kernel, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::import_operator_t & _t7, const detail::args_operator_t & _args )
 	{
 		size_t args_size = _args.size();
 
@@ -383,25 +387,25 @@ namespace pybind
 			pybind::throw_exception( "make_tuple_t 8" );
 		}
 
-		pybind::tuple_setitem_t( py_tuple, 0, _t0 );
-		pybind::tuple_setitem_t( py_tuple, 1, _t1 );
-		pybind::tuple_setitem_t( py_tuple, 2, _t2 );
-		pybind::tuple_setitem_t( py_tuple, 3, _t3 );
-		pybind::tuple_setitem_t( py_tuple, 4, _t4 );
-		pybind::tuple_setitem_t( py_tuple, 5, _t5 );
-		pybind::tuple_setitem_t( py_tuple, 6, _t6 );
-		pybind::tuple_setitem_t( py_tuple, 7, _t7 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 0, _t0 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 1, _t1 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 2, _t2 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 3, _t3 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 4, _t4 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 5, _t5 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 6, _t6 );
+		pybind::tuple_setitem_t( _kernel, py_tuple, 7, _t7 );
 
 		for( size_t i = 0; i != args_size; ++i )
 		{
-			pybind::tuple_setitem_t( py_tuple, 8 + i, _args[i] );
+			pybind::tuple_setitem_t( _kernel, py_tuple, 8 + i, _args[i] );
 		}
 
-		return pybind::tuple( py_tuple, pybind::borrowed() );
+		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	pybind::tuple make_invalid_tuple_t()
+	pybind::tuple make_invalid_tuple_t( kernel_interface * _kernel )
 	{
-		return pybind::tuple( nullptr, pybind::borrowed() );
+		return pybind::tuple( pybind::borrowed() );
 	}
 }

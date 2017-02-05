@@ -18,17 +18,17 @@ namespace pybind
     }
     //////////////////////////////////////////////////////////////////////////
     module::module( const module & _module )
-        : object( _module.ptr() )
+		: object( _module.kernel(), _module.ptr() )
     {
     }
 	//////////////////////////////////////////////////////////////////////////
-	module::module( PyObject * _obj, pybind::borrowed _br )
-		: pybind::object( _obj, _br )
+	module::module( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed _br )
+		: pybind::object( _kernel, _obj, _br )
 	{ 
 	}
 	//////////////////////////////////////////////////////////////////////////
-	module::module( PyObject * _obj )
-		: pybind::object( _obj )
+	module::module( kernel_interface * _kernel, PyObject * _obj )
+		: pybind::object( _kernel, _obj )
 	{
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -41,19 +41,19 @@ namespace pybind
 		return result;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	pybind::object module::get_attr( const detail::import_operator_t & _name ) const
+	detail::extract_operator_t module::get_attr( const detail::import_operator_t & _name ) const
 	{
 		PyObject * module_dict = pybind::module_dict( m_obj );
 
 		PyObject * py_attr = pybind::dict_get( module_dict, _name );
 
-		return pybind::object( py_attr );
+		return detail::extract_operator_t( m_kernel, py_attr );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	pybind::dict module::get_dict() const
 	{
 		PyObject * module_dict = pybind::module_dict( m_obj );
 
-		return pybind::dict( module_dict );
+		return pybind::dict( m_kernel, module_dict );
 	}
 }

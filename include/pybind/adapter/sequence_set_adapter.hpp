@@ -165,7 +165,7 @@ namespace pybind
 		{
 			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
-			self->operator [] ( _index ) = detail::extract_operator_t( _value );
+			self->operator [] ( _index ) = detail::extract_operator_t( _kernel, _value );
 		}
 	};
 }

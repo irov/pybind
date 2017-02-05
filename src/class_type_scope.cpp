@@ -682,7 +682,7 @@ namespace pybind
 
 		PyObject * py_dict = PyDict_New();
 
-		PyObject * py_pybind_scope_id = pybind::ptr_throw( m_typeId );
+		PyObject * py_pybind_scope_id = pybind::ptr_throw( m_kernel, m_typeId );
 
 		PyObject * py_str_class_type_scope = m_kernel->get_str_class_type_scope();
 

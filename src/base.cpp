@@ -5,31 +5,36 @@
 namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
-    base::base()
-		: m_obj( nullptr )
+	base::base()
+		: m_kernel( nullptr )
+		, m_obj( nullptr )
 	{
 	}
 	//////////////////////////////////////////////////////////////////////////
-    base::base( const base & _obj )
-		: m_obj( _obj.ptr() )
+	base::base( const base & _base )
+		: m_kernel( _base.m_kernel )
+		, m_obj( _base.ptr() )
 	{
 		pybind::incref( m_obj );
 	}
 	//////////////////////////////////////////////////////////////////////////
-    base::base( PyObject * _obj, borrowed _br )
-		: m_obj(_obj)
+	base::base( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed _br )
+		: m_kernel(_kernel)
+		, m_obj(_obj)
 	{
 		(void)_br;
 	}
 	//////////////////////////////////////////////////////////////////////////
-    base::base( invalid _iv )
-		: m_obj(nullptr)
+	base::base( pybind::invalid _iv )
+		: m_kernel(nullptr)
+		, m_obj(nullptr)
 	{
 		(void)_iv;
 	}
 	//////////////////////////////////////////////////////////////////////////
-    base::base( PyObject * _obj )
-		: m_obj( _obj )
+	base::base( kernel_interface * _kernel, PyObject * _obj )
+		: m_kernel( _kernel )
+		, m_obj( _obj )
 	{
 		pybind::incref( m_obj );
 	}
@@ -44,11 +49,18 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
     base & base::operator = (const base & _obj)
 	{
+		m_kernel = _obj.m_kernel;
+
 		pybind::decref( m_obj );
 		m_obj = _obj.ptr();
 		pybind::incref( m_obj );
 
 		return *this;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	kernel_interface * base::kernel() const
+	{
+		return m_kernel;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * base::ptr() const

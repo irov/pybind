@@ -11,7 +11,7 @@
 namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, bool & _value, bool _nothrow )
+	bool extract_value( kernel_interface * _kernel, PyObject * _obj, bool & _value, bool _nothrow )
 	{
 		(void)_nothrow;
 
@@ -20,7 +20,7 @@ namespace pybind
 		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, int8_t & _value, bool _nothrow )
+	bool extract_value( kernel_interface * _kernel, PyObject * _obj, int8_t & _value, bool _nothrow )
 	{
 		(void)_nothrow;
 
@@ -29,7 +29,7 @@ namespace pybind
 		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, int16_t & _value, bool _nothrow )
+	bool extract_value( kernel_interface * _kernel, PyObject * _obj, int16_t & _value, bool _nothrow )
 	{
 		(void)_nothrow;
 
@@ -38,7 +38,7 @@ namespace pybind
 		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, int32_t & _value, bool _nothrow )
+	bool extract_value( kernel_interface * _kernel, PyObject * _obj, int32_t & _value, bool _nothrow )
 	{
 		(void)_nothrow;
 
@@ -47,7 +47,7 @@ namespace pybind
 		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, int64_t & _value, bool _nothrow )
+	bool extract_value( kernel_interface * _kernel, PyObject * _obj, int64_t & _value, bool _nothrow )
 	{
 		(void)_nothrow;
 
@@ -56,7 +56,7 @@ namespace pybind
 		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, uint8_t & _value, bool _nothrow )
+	bool extract_value( kernel_interface * _kernel, PyObject * _obj, uint8_t & _value, bool _nothrow )
 	{
 		(void)_nothrow;
 
@@ -65,7 +65,7 @@ namespace pybind
 		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, uint16_t & _value, bool _nothrow )
+	bool extract_value( kernel_interface * _kernel, PyObject * _obj, uint16_t & _value, bool _nothrow )
 	{
 		(void)_nothrow;
 
@@ -74,7 +74,7 @@ namespace pybind
 		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, uint32_t & _value, bool _nothrow )
+	bool extract_value( kernel_interface * _kernel, PyObject * _obj, uint32_t & _value, bool _nothrow )
 	{
 		(void)_nothrow;
 
@@ -83,7 +83,7 @@ namespace pybind
 		return successful;
 	}
     //////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, uint64_t & _value, bool _nothrow )
+	bool extract_value( kernel_interface * _kernel, PyObject * _obj, uint64_t & _value, bool _nothrow )
 	{
 		(void)_nothrow;
 
@@ -92,7 +92,7 @@ namespace pybind
 		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, wchar_t & _value, bool _nothrow )
+	bool extract_value( kernel_interface * _kernel, PyObject * _obj, wchar_t & _value, bool _nothrow )
 	{
 		(void)_nothrow;
 
@@ -101,7 +101,7 @@ namespace pybind
 		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, long & _value, bool _nothrow )
+	bool extract_value( kernel_interface * _kernel, PyObject * _obj, long & _value, bool _nothrow )
 	{
 		(void)_nothrow;
 
@@ -113,7 +113,7 @@ namespace pybind
 		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, unsigned long & _value, bool _nothrow )
+	bool extract_value( kernel_interface * _kernel, PyObject * _obj, unsigned long & _value, bool _nothrow )
 	{
 		(void)_nothrow;
 
@@ -125,7 +125,7 @@ namespace pybind
 		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, float & _value, bool _nothrow )
+	bool extract_value( kernel_interface * _kernel, PyObject * _obj, float & _value, bool _nothrow )
 	{
 		(void)_nothrow;
 
@@ -134,7 +134,7 @@ namespace pybind
 		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, double & _value, bool _nothrow )
+	bool extract_value( kernel_interface * _kernel, PyObject * _obj, double & _value, bool _nothrow )
 	{
 		(void)_nothrow;
 
@@ -143,7 +143,7 @@ namespace pybind
 		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, const char *& _value, bool _nothrow )
+	bool extract_value( kernel_interface * _kernel, PyObject * _obj, const char *& _value, bool _nothrow )
 	{
         (void)_nothrow;
 
@@ -171,7 +171,7 @@ namespace pybind
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, const wchar_t *& _value, bool _nothrow )
+	bool extract_value( kernel_interface * _kernel, PyObject * _obj, const wchar_t *& _value, bool _nothrow )
 	{
         (void)_nothrow;
 
@@ -199,7 +199,7 @@ namespace pybind
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, PyObject *& _value, bool _nothrow )
+	bool extract_value( kernel_interface * _kernel, PyObject * _obj, PyObject *& _value, bool _nothrow )
 	{
         (void)_nothrow;
 
@@ -213,7 +213,7 @@ namespace pybind
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, pybind::object & _value, bool _nothrow )
+	bool extract_value( kernel_interface * _kernel, PyObject * _obj, pybind::object & _value, bool _nothrow )
 	{
         (void)_nothrow;
 
@@ -222,12 +222,12 @@ namespace pybind
 			return false;
 		}
 
-		_value = pybind::object( _obj );
+		_value = pybind::object( _kernel, _obj );
 
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, pybind::list & _value, bool _nothrow )
+	bool extract_value( kernel_interface * _kernel, PyObject * _obj, pybind::list & _value, bool _nothrow )
 	{
         (void)_nothrow;
 
@@ -241,12 +241,12 @@ namespace pybind
 			return false;
 		}
 
-		_value = pybind::list( _obj );
+		_value = pybind::list( _kernel, _obj );
 
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, pybind::tuple & _value, bool _nothrow )
+	bool extract_value( kernel_interface * _kernel, PyObject * _obj, pybind::tuple & _value, bool _nothrow )
 	{
         (void)_nothrow;
 
@@ -260,12 +260,12 @@ namespace pybind
 			return false;
 		}
 
-		_value = pybind::tuple( _obj );
+		_value = pybind::tuple( _kernel, _obj );
 
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool extract_value( PyObject * _obj, pybind::dict & _value, bool _nothrow )
+	bool extract_value( kernel_interface * _kernel, PyObject * _obj, pybind::dict & _value, bool _nothrow )
 	{
         (void)_nothrow;
 
@@ -279,37 +279,37 @@ namespace pybind
 			return false;
 		}
 
-		_value = pybind::dict( _obj );
+		_value = pybind::dict( _kernel, _obj );
 
 		return true;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw_i( bool _value )
+	PyObject * ptr_throw_i( kernel_interface * _kernel, bool _value )
 	{
 		return pybind::ptr_bool( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw_i( int8_t _value )
+	PyObject * ptr_throw_i( kernel_interface * _kernel, int8_t _value )
 	{
 		return pybind::ptr_int8( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw_i( int16_t _value )
+	PyObject * ptr_throw_i( kernel_interface * _kernel, int16_t _value )
 	{
 		return pybind::ptr_int16( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw_i( int32_t _value )
+	PyObject * ptr_throw_i( kernel_interface * _kernel, int32_t _value )
 	{
 		return pybind::ptr_int32( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw_i( int64_t _value )
+	PyObject * ptr_throw_i( kernel_interface * _kernel, int64_t _value )
 	{
 		return pybind::ptr_int64( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw_i( uint8_t _value )
+	PyObject * ptr_throw_i( kernel_interface * _kernel, uint8_t _value )
 	{
 		return pybind::ptr_uint8( _value );
 	}
@@ -319,17 +319,17 @@ namespace pybind
 		return pybind::ptr_uint16( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw_i( uint32_t _value )
+	PyObject * ptr_throw_i( kernel_interface * _kernel, uint32_t _value )
 	{
 		return pybind::ptr_uint32( _value );
 	}
     //////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw_i( uint64_t _value )
+	PyObject * ptr_throw_i( kernel_interface * _kernel, uint64_t _value )
 	{
 		return pybind::ptr_uint64( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw_i( wchar_t _value )
+	PyObject * ptr_throw_i( kernel_interface * _kernel, wchar_t _value )
 	{
 		wchar_t tmp[2];
 		tmp[0] = _value;
@@ -338,54 +338,54 @@ namespace pybind
 		return pybind::unicode_from_wchar( tmp );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw_i( long _value )
+	PyObject * ptr_throw_i( kernel_interface * _kernel, long _value )
 	{
 		return pybind::ptr_long( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw_i( unsigned long _value )
+	PyObject * ptr_throw_i( kernel_interface * _kernel, unsigned long _value )
 	{
 		return pybind::ptr_ulong( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw_i( float _value )
+	PyObject * ptr_throw_i( kernel_interface * _kernel, float _value )
 	{
 		return pybind::ptr_float( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw_i( double _value )
+	PyObject * ptr_throw_i( kernel_interface * _kernel, double _value )
 	{
 		return pybind::ptr_double( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw_i( char * _value )
+	PyObject * ptr_throw_i( kernel_interface * _kernel, char * _value )
 	{
 		return pybind::string_from_char( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw_i( wchar_t * _value )
+	PyObject * ptr_throw_i( kernel_interface * _kernel, wchar_t * _value )
 	{
 		return pybind::unicode_from_wchar( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw_i( const char * _value )
+	PyObject * ptr_throw_i( kernel_interface * _kernel, const char * _value )
 	{
 		return pybind::string_from_char( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw_i( const wchar_t * _value )
+	PyObject * ptr_throw_i( kernel_interface * _kernel, const wchar_t * _value )
 	{
 		return pybind::unicode_from_wchar( _value );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw_i( PyObject * _value )
+	PyObject * ptr_throw_i( kernel_interface * _kernel, PyObject * _value )
 	{		
 		pybind::incref( _value );
 
 		return _value;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw_i( pybind::bindable * _value )
+	PyObject * ptr_throw_i( kernel_interface * _kernel, pybind::bindable * _value )
 	{
 		if( _value == nullptr )
 		{
@@ -399,7 +399,7 @@ namespace pybind
 		return py_obj;
 	}
 	////////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw_i( const pybind::object & _value )
+	PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::object & _value )
 	{
 		PyObject * obj = _value.ptr();
 
@@ -408,7 +408,7 @@ namespace pybind
 		return obj;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw_i( const pybind::list & _value )
+	PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::list & _value )
 	{
 		PyObject * obj = _value.ptr();
 
@@ -417,7 +417,7 @@ namespace pybind
 		return obj;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw_i( const pybind::tuple & _value )
+	PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::tuple & _value )
 	{
 		PyObject * obj = _value.ptr();
 
@@ -426,7 +426,7 @@ namespace pybind
 		return obj;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw_i( const pybind::dict & _value )
+	PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::dict & _value )
 	{
 		PyObject * obj = _value.ptr();
 

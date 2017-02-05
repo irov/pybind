@@ -39,7 +39,7 @@ namespace pybind
         {			
 			C * inst = _kernel->meta_cast_class_t<C>( _self, _scope );
 
-            bool successful = (*m_compare)(_obj, inst, _compare, _op, _result);
+			bool successful = (*m_compare)(_kernel, _obj, inst, _compare, _op, _result);
             
             return successful;
         }

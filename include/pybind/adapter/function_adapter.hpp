@@ -48,7 +48,7 @@ namespace pybind
 
 			F fn = this->getFn();
 
-			PyObject *ret = function_call<F>::call( fn, _args );
+			PyObject *ret = function_call<F>::call( _kernel, fn, _args );
 
 			return ret;
 		}
@@ -67,11 +67,11 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( kernel_interface * _kernel, PyObject * _args, PyObject * _kwds ) override
 		{
 			F fn = this->getFn();
 
-			PyObject * ret = fn(_args, _kwds);
+			PyObject * ret = fn( _kernel, _args, _kwds );
 
 			return ret;
 		}

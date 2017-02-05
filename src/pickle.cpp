@@ -87,7 +87,7 @@ namespace pybind
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////
-	static void s_obj_pickle( PyObject * _obj, PyObject * _types, void * _buffer, size_t _capacity, size_t & _offset )
+	static void s_obj_pickle( kernel_interface * _kernel, PyObject * _obj, PyObject * _types, void * _buffer, size_t _capacity, size_t & _offset )
 	{
 		if( pybind::is_none( _obj ) == true )
 		{
@@ -107,7 +107,7 @@ namespace pybind
 
 			s_write_buffer_t( _buffer, _capacity, type, _offset );
 
-			int32_t value = pybind::extract_throw<int32_t>( _obj );
+			int32_t value = pybind::extract_throw<int32_t>( _kernel, _obj );
 
 			s_write_buffer_t( _buffer, _capacity, value, _offset );
 		}
@@ -117,7 +117,7 @@ namespace pybind
 
 			s_write_buffer_t( _buffer, _capacity, type, _offset );
 
-			int64_t value = pybind::extract_throw<int64_t>( _obj );
+			int64_t value = pybind::extract_throw<int64_t>( _kernel, _obj );
 
 			s_write_buffer_t( _buffer, _capacity, value, _offset );
 		}
@@ -127,7 +127,7 @@ namespace pybind
 
 			s_write_buffer_t( _buffer, _capacity, type, _offset );
 
-			float value = pybind::extract_throw<float>( _obj );
+			float value = pybind::extract_throw<float>( _kernel, _obj );
 
 			s_write_buffer_t( _buffer, _capacity, value, _offset );
 		}
@@ -169,7 +169,7 @@ namespace pybind
 			{
 				PyObject * element = pybind::tuple_getitem( _obj, i );
 
-				s_obj_pickle( element, _types, _buffer, _capacity, _offset );
+				s_obj_pickle( _kernel, element, _types, _buffer, _capacity, _offset );
 			}
 		}
 		else if( pybind::list_check( _obj ) == true )
@@ -186,7 +186,7 @@ namespace pybind
 			{
 				PyObject * element = pybind::list_getitem( _obj, i );
 
-				s_obj_pickle( element, _types, _buffer, _capacity, _offset );
+				s_obj_pickle( _kernel, element, _types, _buffer, _capacity, _offset );
 			}
 		}
 		else if( pybind::dict_check( _obj ) == true )
@@ -205,8 +205,8 @@ namespace pybind
 			PyObject * value;
 			while( pybind::dict_next( _obj, pos, &key, &value ) == true )
 			{
-				s_obj_pickle( key, _types, _buffer, _capacity, _offset );
-				s_obj_pickle( value, _types, _buffer, _capacity, _offset );
+				s_obj_pickle( _kernel, key, _types, _buffer, _capacity, _offset );
+				s_obj_pickle( _kernel, value, _types, _buffer, _capacity, _offset );
 			}
 		}
 		else if( pybind::has_attrstring( _obj, "value" ) == true )
@@ -232,7 +232,7 @@ namespace pybind
 				
 				PyObject * obj_value = pybind::get_attrstring( _obj, "value" );
 
-				s_obj_pickle( obj_value, _types, _buffer, _capacity, _offset );
+				s_obj_pickle( _kernel, obj_value, _types, _buffer, _capacity, _offset );
 
 				pybind::decref( obj_value );
 
@@ -253,7 +253,7 @@ namespace pybind
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool pickle( PyObject * _obj, PyObject * _types, void * _buffer, size_t _capacity, size_t & _size )
+	bool pickle( kernel_interface * _kernel, PyObject * _obj, PyObject * _types, void * _buffer, size_t _capacity, size_t & _size )
 	{		
 		if( pybind::list_check( _types ) == false )
 		{
@@ -263,7 +263,7 @@ namespace pybind
 		try
 		{
 			_size = 0;
-			s_obj_pickle( _obj, _types, _buffer, _capacity, _size );
+			s_obj_pickle( _kernel, _obj, _types, _buffer, _capacity, _size );
 		}
 		catch( const pybind::pybind_exception & _ex )
 		{
@@ -331,7 +331,7 @@ namespace pybind
 		}		
 	}	
 	//////////////////////////////////////////////////////////////////////////
-	static PyObject * s_obj_unpickle( const void * _buffer, const size_t _capacity, size_t & _carriage, PyObject * _types )
+	static PyObject * s_obj_unpickle( kernel_interface * _kernel, const void * _buffer, const size_t _capacity, size_t & _carriage, PyObject * _types )
 	{
 		uint8_t type;
 		s_read_buffer_t( _buffer, _capacity, _carriage, type );
@@ -361,7 +361,7 @@ namespace pybind
 				int32_t value;
 				s_read_buffer_t( _buffer, _capacity, _carriage, value );
 
-				PyObject * obj = pybind::ptr_throw( value );
+				PyObject * obj = pybind::ptr_throw( _kernel, value );
 
 				return obj;
 			}break;
@@ -370,7 +370,7 @@ namespace pybind
 				int64_t value;
 				s_read_buffer_t( _buffer, _capacity, _carriage, value );
 
-				PyObject * obj = pybind::ptr_throw( value );
+				PyObject * obj = pybind::ptr_throw( _kernel, value );
 
 				return obj;
 			}break;
@@ -379,7 +379,7 @@ namespace pybind
 				float value;
 				s_read_buffer_t( _buffer, _capacity, _carriage, value );
 
-				PyObject * obj = pybind::ptr_throw( value );
+				PyObject * obj = pybind::ptr_throw( _kernel, value );
 
 				return obj;
 			}break;
@@ -436,9 +436,9 @@ namespace pybind
 
 				for( size_t i = 0; i != count; ++i )
 				{
-					PyObject * element = s_obj_unpickle( _buffer, _capacity, _carriage, _types );
+					PyObject * element = s_obj_unpickle( _kernel, _buffer, _capacity, _carriage, _types );
 					
-					pybind::tuple_setitem_t( obj, i, element );
+					pybind::tuple_setitem_t( _kernel, obj, i, element );
 				}
 
 				return obj;
@@ -452,9 +452,9 @@ namespace pybind
 
 				for( size_t i = 0; i != count; ++i )
 				{
-					PyObject * element = s_obj_unpickle( _buffer, _capacity, _carriage, _types );
+					PyObject * element = s_obj_unpickle( _kernel, _buffer, _capacity, _carriage, _types );
 
-					pybind::list_setitem_t( obj, i, element );
+					pybind::list_setitem_t( _kernel, obj, i, element );
 				}
 
 				return obj;
@@ -468,8 +468,8 @@ namespace pybind
 
 				for( size_t i = 0; i != count; ++i )
 				{
-					PyObject * key = s_obj_unpickle( _buffer, _capacity, _carriage, _types );
-					PyObject * value = s_obj_unpickle( _buffer, _capacity, _carriage, _types );
+					PyObject * key = s_obj_unpickle( _kernel, _buffer, _capacity, _carriage, _types );
+					PyObject * value = s_obj_unpickle( _kernel, _buffer, _capacity, _carriage, _types );
 
 					pybind::dict_set( obj, key, value );
 				}
@@ -491,11 +491,11 @@ namespace pybind
 						);
 				}
 
-				PyObject * value = s_obj_unpickle( _buffer, _capacity, _carriage, _types );
+				PyObject * value = s_obj_unpickle( _kernel, _buffer, _capacity, _carriage, _types );
 				
 				PyObject * object_type = pybind::list_getitem( _types, index );
 
-				PyObject * obj = pybind::call_t( object_type, value );
+				PyObject * obj = pybind::call_t( _kernel, object_type, value );
 
 				if( obj == nullptr )
 				{
@@ -518,13 +518,13 @@ namespace pybind
 		return nullptr;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PYBIND_API PyObject * unpickle( const void * _buffer, size_t _capacity, PyObject * _types )
+	PYBIND_API PyObject * unpickle( kernel_interface * _kernel, const void * _buffer, size_t _capacity, PyObject * _types )
 	{
 		size_t carriage = 0;
 		
 		try
 		{
-			PyObject * obj = s_obj_unpickle( _buffer, _capacity, carriage, _types );
+			PyObject * obj = s_obj_unpickle( _kernel, _buffer, _capacity, carriage, _types );
 
 			return obj;
 		}

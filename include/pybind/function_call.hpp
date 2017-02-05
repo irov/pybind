@@ -10,13 +10,13 @@ namespace pybind
 	template<class F, class Ret, int i>
 	struct function_call_impl
 	{
-		static Ret call( F f, PyObject * _arg );
+		static Ret call( kernel_interface * _kernel, F f, PyObject * _arg );
 	};
 
 	template<class F, class Ret>
 	struct function_call_impl<F,Ret,0>
 	{
-		static Ret call( F f, PyObject * _arg )
+		static Ret call( kernel_interface * _kernel, F f, PyObject * _arg )
 		{
 			(void)_arg;
 
@@ -27,10 +27,10 @@ namespace pybind
 	template<class F, class Ret>
 	struct function_call_impl<F,Ret,1>
 	{
-		static Ret call( F f, PyObject * _arg )
+		static Ret call( kernel_interface * _kernel, F f, PyObject * _arg )
 		{
 			return (f)( 
-				tuple_getitem_t( _arg, 0 )
+				tuple_getitem_t( _kernel, _arg, 0 )
 				);
 		}	
 	};
@@ -38,11 +38,11 @@ namespace pybind
 	template<class F, class Ret>
 	struct function_call_impl<F,Ret,2>
 	{
-		static Ret call( F f, PyObject * _arg )
+		static Ret call( kernel_interface * _kernel, F f, PyObject * _arg )
 		{
 			return (f)( 
-				tuple_getitem_t( _arg, 0 ),
-				tuple_getitem_t( _arg, 1 )
+				tuple_getitem_t( _kernel, _arg, 0 ),
+				tuple_getitem_t( _kernel, _arg, 1 )
 				);
 		}
 	};
@@ -50,12 +50,12 @@ namespace pybind
 	template<class F, class Ret>
 	struct function_call_impl<F,Ret,3>
 	{
-		static Ret call( F f, PyObject * _arg )
+		static Ret call( kernel_interface * _kernel, F f, PyObject * _arg )
 		{
 			return (f)( 
-				tuple_getitem_t( _arg, 0 ),
-				tuple_getitem_t( _arg, 1 ),
-				tuple_getitem_t( _arg, 2 )
+				tuple_getitem_t( _kernel, _arg, 0 ),
+				tuple_getitem_t( _kernel, _arg, 1 ),
+				tuple_getitem_t( _kernel, _arg, 2 )
 				);
 		}
 	};
@@ -63,13 +63,13 @@ namespace pybind
 	template<class F, class Ret>
 	struct function_call_impl<F,Ret,4>
 	{
-		static Ret call( F f, PyObject * _arg )
+		static Ret call( kernel_interface * _kernel, F f, PyObject * _arg )
 		{
 			return (f)( 
-				tuple_getitem_t( _arg, 0 ),
-				tuple_getitem_t( _arg, 1 ),
-				tuple_getitem_t( _arg, 2 ),
-				tuple_getitem_t( _arg, 3 )
+				tuple_getitem_t( _kernel, _arg, 0 ),
+				tuple_getitem_t( _kernel, _arg, 1 ),
+				tuple_getitem_t( _kernel, _arg, 2 ),
+				tuple_getitem_t( _kernel, _arg, 3 )
 				);
 		}
 	};
@@ -77,14 +77,14 @@ namespace pybind
 	template<class F, class Ret>
 	struct function_call_impl<F,Ret,5>
 	{
-		static Ret call( F f, PyObject * _arg )
+		static Ret call( kernel_interface * _kernel, F f, PyObject * _arg )
 		{
 			return (f)( 
-				tuple_getitem_t( _arg, 0 ),
-				tuple_getitem_t( _arg, 1 ),
-				tuple_getitem_t( _arg, 2 ),
-				tuple_getitem_t( _arg, 3 ),
-				tuple_getitem_t( _arg, 4 )
+				tuple_getitem_t( _kernel, _arg, 0 ),
+				tuple_getitem_t( _kernel, _arg, 1 ),
+				tuple_getitem_t( _kernel, _arg, 2 ),
+				tuple_getitem_t( _kernel, _arg, 3 ),
+				tuple_getitem_t( _kernel, _arg, 4 )
 				);
 		}
 	};
@@ -92,15 +92,15 @@ namespace pybind
 	template<class F, class Ret>
 	struct function_call_impl<F,Ret,6>
 	{
-		static Ret call( F f, PyObject * _arg )
+		static Ret call( kernel_interface * _kernel, F f, PyObject * _arg )
 		{
 			return (f)( 
-				tuple_getitem_t( _arg, 0 ),
-				tuple_getitem_t( _arg, 1 ),
-				tuple_getitem_t( _arg, 2 ),
-				tuple_getitem_t( _arg, 3 ),
-				tuple_getitem_t( _arg, 4 ),
-				tuple_getitem_t( _arg, 5 )
+				tuple_getitem_t( _kernel, _arg, 0 ),
+				tuple_getitem_t( _kernel, _arg, 1 ),
+				tuple_getitem_t( _kernel, _arg, 2 ),
+				tuple_getitem_t( _kernel, _arg, 3 ),
+				tuple_getitem_t( _kernel, _arg, 4 ),
+				tuple_getitem_t( _kernel, _arg, 5 )
 				);
 		}
 	};
@@ -108,16 +108,16 @@ namespace pybind
 	template<class F, class Ret>
 	struct function_call_impl<F,Ret,7>
 	{
-		static Ret call( F f, PyObject * _arg )
+		static Ret call( kernel_interface * _kernel, F f, PyObject * _arg )
 		{
 			return (f)( 
-				tuple_getitem_t( _arg, 0 ),
-				tuple_getitem_t( _arg, 1 ),
-				tuple_getitem_t( _arg, 2 ),
-				tuple_getitem_t( _arg, 3 ),
-				tuple_getitem_t( _arg, 4 ),
-				tuple_getitem_t( _arg, 5 ),
-				tuple_getitem_t( _arg, 6 )
+				tuple_getitem_t( _kernel, _arg, 0 ),
+				tuple_getitem_t( _kernel, _arg, 1 ),
+				tuple_getitem_t( _kernel, _arg, 2 ),
+				tuple_getitem_t( _kernel, _arg, 3 ),
+				tuple_getitem_t( _kernel, _arg, 4 ),
+				tuple_getitem_t( _kernel, _arg, 5 ),
+				tuple_getitem_t( _kernel, _arg, 6 )
 				);
 		}
 	};
@@ -128,14 +128,14 @@ namespace pybind
 		static Ret call( F f, PyObject * _arg )
 		{
 			return (f)( 
-				tuple_getitem_t( _arg, 0 ),
-				tuple_getitem_t( _arg, 1 ),
-				tuple_getitem_t( _arg, 2 ),
-				tuple_getitem_t( _arg, 3 ),
-				tuple_getitem_t( _arg, 4 ),
-				tuple_getitem_t( _arg, 5 ),
-				tuple_getitem_t( _arg, 6 ),
-				tuple_getitem_t( _arg, 7 )
+				tuple_getitem_t( _kernel, _arg, 0 ),
+				tuple_getitem_t( _kernel, _arg, 1 ),
+				tuple_getitem_t( _kernel, _arg, 2 ),
+				tuple_getitem_t( _kernel, _arg, 3 ),
+				tuple_getitem_t( _kernel, _arg, 4 ),
+				tuple_getitem_t( _kernel, _arg, 5 ),
+				tuple_getitem_t( _kernel, _arg, 6 ),
+				tuple_getitem_t( _kernel, _arg, 7 )
 				);
 		}
 	};
@@ -146,15 +146,15 @@ namespace pybind
 		static Ret call( F f, PyObject * _arg )
 		{
 			return (f)( 
-				tuple_getitem_t( _arg, 0 ),
-				tuple_getitem_t( _arg, 1 ),
-				tuple_getitem_t( _arg, 2 ),
-				tuple_getitem_t( _arg, 3 ),
-				tuple_getitem_t( _arg, 4 ),
-				tuple_getitem_t( _arg, 5 ),
-				tuple_getitem_t( _arg, 6 ),
-				tuple_getitem_t( _arg, 7 ),
-				tuple_getitem_t( _arg, 8 )
+				tuple_getitem_t( _kernel, _arg, 0 ),
+				tuple_getitem_t( _kernel, _arg, 1 ),
+				tuple_getitem_t( _kernel, _arg, 2 ),
+				tuple_getitem_t( _kernel, _arg, 3 ),
+				tuple_getitem_t( _kernel, _arg, 4 ),
+				tuple_getitem_t( _kernel, _arg, 5 ),
+				tuple_getitem_t( _kernel, _arg, 6 ),
+				tuple_getitem_t( _kernel, _arg, 7 ),
+				tuple_getitem_t( _kernel, _arg, 8 )
 				);
 		}
 	};
@@ -165,16 +165,16 @@ namespace pybind
 		static Ret call( F f, PyObject * _arg )
 		{
 			return (f)( 
-				tuple_getitem_t( _arg, 0 ),
-				tuple_getitem_t( _arg, 1 ),
-				tuple_getitem_t( _arg, 2 ),
-				tuple_getitem_t( _arg, 3 ),
-				tuple_getitem_t( _arg, 4 ),
-				tuple_getitem_t( _arg, 5 ),
-				tuple_getitem_t( _arg, 6 ),
-				tuple_getitem_t( _arg, 7 ),
-				tuple_getitem_t( _arg, 8 ),
-				tuple_getitem_t( _arg, 9 )
+				tuple_getitem_t( _kernel, _arg, 0 ),
+				tuple_getitem_t( _kernel, _arg, 1 ),
+				tuple_getitem_t( _kernel, _arg, 2 ),
+				tuple_getitem_t( _kernel, _arg, 3 ),
+				tuple_getitem_t( _kernel, _arg, 4 ),
+				tuple_getitem_t( _kernel, _arg, 5 ),
+				tuple_getitem_t( _kernel, _arg, 6 ),
+				tuple_getitem_t( _kernel, _arg, 7 ),
+				tuple_getitem_t( _kernel, _arg, 8 ),
+				tuple_getitem_t( _kernel, _arg, 9 )
 				);
 		}
 	};
@@ -184,9 +184,9 @@ namespace pybind
 	{
 		typedef typename stdex::function_traits<F>::result f_info;
 
-		static PyObject * call( F f, PyObject * _arg )
+		static PyObject * call( kernel_interface * _kernel, F f, PyObject * _arg )
 		{
-			PyObject * py_result = (detail::return_operator_t)function_call_impl<F, Ret, f_info::arity>::call( f, _arg );
+			PyObject * py_result = detail::return_operator_t( _kernel, function_call_impl<F, Ret, f_info::arity>::call( _kernel, f, _arg ) );
 
 			return py_result;
 		}
@@ -197,9 +197,9 @@ namespace pybind
 	{
 		typedef typename stdex::function_traits<F>::result f_info;
 
-		static PyObject * call( F f, PyObject * _arg )
+		static PyObject * call( kernel_interface * _kernel, F f, PyObject * _arg )
 		{
-			function_call_impl<F,void,f_info::arity>::call( f, _arg );
+			function_call_impl<F, void, f_info::arity>::call( _kernel, f, _arg );
 
 			return ret_none();
 		}
@@ -210,7 +210,7 @@ namespace pybind
 	{
 		typedef typename stdex::function_traits<F>::result f_info;
 
-		static PyObject * call( F f, PyObject * _arg )
+		static PyObject * call( kernel_interface * _kernel, F f, PyObject * _arg )
         {
 			size_t arg_size = (_arg) ? pybind::tuple_size( _arg ) : 0;
 			size_t fn_arity = f_info::arity;
@@ -225,7 +225,7 @@ namespace pybind
 				return nullptr;
 			}
 
-			PyObject * ret = function_call_ret_impl<F,typename f_info::ret_type>::call( f, _arg );
+			PyObject * ret = function_call_ret_impl<F, typename f_info::ret_type>::call( _kernel, f, _arg );
 
 			return ret;
 		}
