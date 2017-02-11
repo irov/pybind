@@ -164,6 +164,17 @@ namespace pybind
             return *this;
         }
 
+        template<class F>
+        base_ & def_static_native_kernel( const char * _name, F f )
+        {
+            method_adapter_interface_ptr iadapter =
+                new method_adapter_static_native_kernel<C, F>( _name, f );
+
+            m_scope->add_method( iadapter );
+
+            return *this;
+        }
+
 		template<class F>
 		base_ & def_convert( F f, void * _user )
 		{

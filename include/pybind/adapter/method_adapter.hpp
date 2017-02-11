@@ -400,5 +400,30 @@ namespace pybind
     protected:
         F m_fn;
     };
+
+    template<class C, class F>
+    class method_adapter_static_native_kernel
+        : public method_adapter_interface
+    {
+    public:
+        method_adapter_static_native_kernel( const char * _name, F _fn )
+            : method_adapter_interface( _name )
+            , m_fn( _fn )
+        {
+        }
+
+    protected:
+        PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+        {
+            C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
+
+            PyObject * ret = (*m_fn)(_kernel, self, _args, _kwds);
+
+            return ret;
+        }
+
+    protected:
+        F m_fn;
+    };    
 }
 
