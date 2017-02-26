@@ -52,7 +52,7 @@ namespace pybind
 			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
 			(self->*m_fn)( _index
-				, detail::extract_operator_t( _value )
+				, detail::extract_operator_t( _kernel, _value )
 				);
 		}		
 
@@ -86,7 +86,7 @@ namespace pybind
 
             pybind::check_error();
 
-			sequence_get_adapter<C, F>::call( _impl, _scope
+			sequence_get_adapter<C, F>::call( _kernel, _impl, _scope
 				, _index
 				, _value 
 				);
@@ -115,7 +115,7 @@ namespace pybind
 
 			(m_proxy->*m_fn)(self
 				, _index
-				, detail::extract_operator_t( _value )
+				, detail::extract_operator_t( _kernel, _value )
 				);
 		}
 
@@ -142,7 +142,7 @@ namespace pybind
 
 			(*m_fn)( self
 				, _index
-				, detail::extract_operator_t( _value )
+				, detail::extract_operator_t( _kernel, _value )
 				);
 		}
 
