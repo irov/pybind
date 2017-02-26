@@ -15,7 +15,7 @@ namespace pybind
 
 		PyObject * py_result = _kernel->call_method( _self, scope, _name, args );
 
-		return py_result;
+        return detail::extract_operator_t( _kernel, py_result );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	template<class T, class A0>
@@ -27,7 +27,7 @@ namespace pybind
 
 		PyObject * py_result = _kernel->call_method( _self, scope, _name, args );
 
-		return py_result;
+        return detail::extract_operator_t( _kernel, py_result );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	template<class T, class A0, class A1>
@@ -39,6 +39,6 @@ namespace pybind
 
 		PyObject * py_result = _kernel->call_method( _self, scope, _name, args );
 
-		return py_result;
+        return detail::extract_operator_t( _kernel, py_result );
 	}
 }
