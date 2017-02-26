@@ -45,6 +45,23 @@
     <ClInclude Include="..\include\config\config.hpp" />
     <ClInclude Include="..\include\config\python.hpp" />
     <ClInclude Include="..\include\config\stdex.hpp" />
+    <ClInclude Include="..\include\pybind\adapter\compare_adapter.hpp" />
+    <ClInclude Include="..\include\pybind\adapter\constructor_adapter.hpp" />
+    <ClInclude Include="..\include\pybind\adapter\convert_adapter.hpp" />
+    <ClInclude Include="..\include\pybind\adapter\destroy_adapter.hpp" />
+    <ClInclude Include="..\include\pybind\adapter\function_adapter.hpp" />
+    <ClInclude Include="..\include\pybind\adapter\functor_adapter.hpp" />
+    <ClInclude Include="..\include\pybind\adapter\getattro_adapter.hpp" />
+    <ClInclude Include="..\include\pybind\adapter\hash_adapter.hpp" />
+    <ClInclude Include="..\include\pybind\adapter\mapping_adapter.hpp" />
+    <ClInclude Include="..\include\pybind\adapter\member_adapter.hpp" />
+    <ClInclude Include="..\include\pybind\adapter\method_adapter.hpp" />
+    <ClInclude Include="..\include\pybind\adapter\new_adapter.hpp" />
+    <ClInclude Include="..\include\pybind\adapter\number_binary_adapter.hpp" />
+    <ClInclude Include="..\include\pybind\adapter\repr_adapter.hpp" />
+    <ClInclude Include="..\include\pybind\adapter\sequence_get_adapter.hpp" />
+    <ClInclude Include="..\include\pybind\adapter\sequence_set_adapter.hpp" />
+    <ClInclude Include="..\include\pybind\adapter\smart_pointer_adapter.hpp" />
     <ClInclude Include="..\include\pybind\adapter_interface.hpp" />
     <ClInclude Include="..\include\pybind\base.hpp" />
     <ClInclude Include="..\include\pybind\bindable.hpp" />
@@ -106,7 +123,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
