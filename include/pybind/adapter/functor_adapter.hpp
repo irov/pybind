@@ -3,6 +3,7 @@
 #   include "pybind/functor_interface.hpp"
 
 #	include "pybind/method_call.hpp"
+#	include "pybind/method_kernel_call.hpp"
 #	include "pybind/method_args_call.hpp"
 
 namespace pybind
