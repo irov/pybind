@@ -108,7 +108,7 @@ namespace pybind
 			C * obj = _kernel->meta_cast_class_t<C>( _self, _scope );
 						
 			(*m_set)( obj
-				, detail::extract_operator_t( _args )
+				, detail::extract_operator_t( _kernel, _args )
 				);
 
 			return 1;
