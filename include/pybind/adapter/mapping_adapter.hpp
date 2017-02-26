@@ -51,9 +51,9 @@ namespace pybind
 		{
 			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 			
-			PyObject * py_result = (detail::return_operator_t)(self->*m_fn)(
-				detail::extract_operator_t( _key )
-				);
+            PyObject * py_result = detail::return_operator_t( _kernel, (self->*m_fn)(
+                detail::extract_operator_t( _kernel, _key )
+            ) );
 
 			return py_result;
 		}		
@@ -88,7 +88,7 @@ namespace pybind
 
             pybind::check_error();
 
-			PyObject * ret = mapping_adapter<C, F>::call( _impl, _scope, _key );
+			PyObject * ret = mapping_adapter<C, F>::call( _kernel, _impl, _scope, _key );
 
 			return ret;
         }
@@ -114,9 +114,9 @@ namespace pybind
 		{
 			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
-			PyObject * py_result = (detail::return_operator_t)(m_proxy->*m_fn)(self
-				, detail::extract_operator_t( _key )
-				);
+            PyObject * py_result = detail::return_operator_t( _kernel, (m_proxy->*m_fn)(self
+                , detail::extract_operator_t( _kernel, _key )
+            ) );
 
 			return py_result;
 		}
@@ -142,9 +142,9 @@ namespace pybind
 		{
 			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
-			PyObject * py_result = (detail::return_operator_t)(*m_fn)(self
-				, detail::extract_operator_t( _key )
-				);
+            PyObject * py_result = detail::return_operator_t( _kernel, (*m_fn)(self
+                , detail::extract_operator_t( _kernel, _key )
+            ) );
 
 			return py_result;
 		}

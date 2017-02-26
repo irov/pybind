@@ -98,7 +98,7 @@ namespace pybind
 		{
 			C * obj = _kernel->meta_cast_class_t<C>( _self, _scope );
 
-			PyObject * py_value = (detail::return_operator_t)(*m_get)(obj);
+            PyObject * py_value = detail::return_operator_t( _kernel, (*m_get)(obj) );
 
 			return py_value;
 		}

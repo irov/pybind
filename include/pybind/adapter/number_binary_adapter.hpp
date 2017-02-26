@@ -51,10 +51,10 @@ namespace pybind
 		{			
 			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 			
-			PyObject * py_result = (detail::return_operator_t)(self->*m_fn)(
-				detail::extract_operator_t( _value )
+            PyObject * py_result = detail::return_operator_t( _kernel, (self->*m_fn)(
+                detail::extract_operator_t( _kernel, _value )
 				, _rotate
-				);
+            ) );
 
 			return py_result;
 		}		
@@ -80,10 +80,10 @@ namespace pybind
 		{
 			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
-			PyObject * py_result = (detail::return_operator_t)(m_proxy->*m_fn)(self
-				, detail::extract_operator_t( _value )
+            PyObject * py_result = detail::return_operator_t( _kernel, (m_proxy->*m_fn)(self
+                , detail::extract_operator_t( _kernel, _value )
 				, _rotate
-				);
+            ) );
 
 			return py_result;
 		}
@@ -109,10 +109,10 @@ namespace pybind
 		{			
 			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
-			PyObject * py_result = (detail::return_operator_t)(*m_fn)(self
-				, detail::extract_operator_t( _value )
-				, _rotate
-				);
+            PyObject * py_result = detail::return_operator_t( _kernel, (*m_fn)(self
+                , detail::extract_operator_t( _kernel, _value )
+                , _rotate
+            ) );
 
 			return py_result;
 		}
