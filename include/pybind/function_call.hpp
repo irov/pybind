@@ -125,7 +125,7 @@ namespace pybind
 	template<class F, class Ret>
 	struct function_call_impl<F,Ret,8>
 	{
-		static Ret call( F f, PyObject * _arg )
+		static Ret call( kernel_interface * _kernel, F f, PyObject * _arg )
 		{
 			return (f)( 
 				tuple_getitem_t( _kernel, _arg, 0 ),
@@ -143,7 +143,7 @@ namespace pybind
 	template<class F, class Ret>
 	struct function_call_impl<F,Ret,9>
 	{
-		static Ret call( F f, PyObject * _arg )
+		static Ret call( kernel_interface * _kernel, F f, PyObject * _arg )
 		{
 			return (f)( 
 				tuple_getitem_t( _kernel, _arg, 0 ),
@@ -162,7 +162,7 @@ namespace pybind
 	template<class F, class Ret>
 	struct function_call_impl<F,Ret,10>
 	{
-		static Ret call( F f, PyObject * _arg )
+		static Ret call( kernel_interface * _kernel, F f, PyObject * _arg )
 		{
 			return (f)( 
 				tuple_getitem_t( _kernel, _arg, 0 ),
