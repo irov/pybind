@@ -11,7 +11,7 @@ namespace pybind
 	{
 		const pybind::class_type_scope_ptr & scope = _kernel->class_scope<T>();
 
-		tuple args = pybind::make_tuple_t();
+		tuple args = pybind::make_tuple_t( _kernel );
 
 		PyObject * py_result = _kernel->call_method( _self, scope, _name, args );
 
@@ -23,7 +23,7 @@ namespace pybind
 	{
 		const pybind::class_type_scope_ptr & scope = _kernel->class_scope<T>();
 
-		tuple args = pybind::make_tuple_t( _a0 );
+		tuple args = pybind::make_tuple_t( _kernel, _a0 );
 
 		PyObject * py_result = _kernel->call_method( _self, scope, _name, args );
 
@@ -35,7 +35,7 @@ namespace pybind
 	{
 		const pybind::class_type_scope_ptr & scope = _kernel->class_scope<T>();
 
-		tuple args = pybind::make_tuple_t( _a0, _a1 );
+		tuple args = pybind::make_tuple_t( _kernel, _a0, _a1 );
 
 		PyObject * py_result = _kernel->call_method( _self, scope, _name, args );
 
