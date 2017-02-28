@@ -123,15 +123,21 @@ namespace pybind
 			}
 
 		public:
-			operator PyObject * () const
+            PyObject * ptr() const
+            {
+                return m_obj;
+            }
+
+			kernel_interface * kernel() const
 			{
-				return m_obj;
+				return m_kernel;
 			}
 
-			PyObject * ptr() const
-			{
-				return m_obj;
-			}
+        public:
+            operator PyObject * () const
+            {
+                return m_obj;
+            }
 
 			template<class T>
 			operator T ()

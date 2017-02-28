@@ -15,6 +15,7 @@ namespace pybind
 	public:		
 		object( const base & _base );
 		object( const object & _obj );
+        object( const detail::extract_operator_t & _extract );
 
 	public:
 		explicit object();

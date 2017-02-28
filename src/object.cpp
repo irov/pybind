@@ -24,6 +24,12 @@ namespace pybind
 		: base( _obj.kernel(), _obj.ptr() )
 	{
 	}
+    //////////////////////////////////////////////////////////////////////////
+    object::object( const detail::extract_operator_t & _extract )
+        : base( _extract.kernel(), _extract.ptr())
+    {
+
+    }
 	//////////////////////////////////////////////////////////////////////////
 	object::object( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed _br )
         : base( _kernel, _obj, _br )
