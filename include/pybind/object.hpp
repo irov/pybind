@@ -285,13 +285,13 @@ namespace pybind
 	PYBIND_API pybind::object make_none_t( kernel_interface * _kernel );
 	PYBIND_API pybind::object make_true_t( kernel_interface * _kernel );
 	PYBIND_API pybind::object make_false_t( kernel_interface * _kernel );
-	//////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
+    PYBIND_API pybind::object make_object_i( kernel_interface * _kernel, const detail::import_operator_t & _t0 );
+    //////////////////////////////////////////////////////////////////////////
 	template<class T>
 	pybind::object make_object_t( kernel_interface * _kernel, const T & _t0 )
 	{
-		return make_object_t( _kernel, detail::import_operator_t( _kernel, _t0 ) );
+		return make_object_i( _kernel, detail::import_operator_t( _kernel, _t0 ) );
 	}
-	//////////////////////////////////////////////////////////////////////////
-	PYBIND_API pybind::object make_object_t( kernel_interface * _kernel, const detail::import_operator_t & _t0 );
 	PYBIND_API pybind::object make_invalid_object_t();
 }

@@ -172,7 +172,7 @@ namespace pybind
 		return pybind::object( _kernel, py_false, pybind::borrowed() );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	pybind::object make_object_t( kernel_interface * _kernel, const detail::import_operator_t & _t0 )
+	pybind::object make_object_i( kernel_interface * _kernel, const detail::import_operator_t & _t0 )
 	{
 		return pybind::object( _kernel, _t0 );
 	}
