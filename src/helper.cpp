@@ -108,7 +108,7 @@ namespace pybind
 		return dict_remove( _dict, _key );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	detail::extract_operator_t ask_tuple_i( kernel_interface * _kernel, PyObject * _obj, const pybind::tuple & _tuple )
+	detail::extract_operator_t ask_tuple_t( kernel_interface * _kernel, PyObject * _obj, const pybind::tuple & _tuple )
 	{
 		PyObject * py_result = pybind::ask_native( _obj, _tuple.ptr() );
 

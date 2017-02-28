@@ -189,7 +189,7 @@ namespace pybind
 		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
 	}
 	//////////////////////////////////////////////////////////////////////////	
-	pybind::tuple make_tuple_args_i( kernel_interface * _kernel, const detail::args_operator_t & _args )
+	pybind::tuple make_tuple_args_t( kernel_interface * _kernel, const detail::args_operator_t & _args )
 	{
 		size_t args_size = _args.size();
 
