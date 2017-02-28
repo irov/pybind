@@ -144,7 +144,7 @@ namespace pybind
 
 		for( typename C::size_type i = 0; i != size; ++i )
 		{
-            const C::value_type & v = _c[i];
+            const typename C::value_type & v = _c[i];
 
 			pybind::tuple_setitem_t( _kernel, py_tuple, i, v );
 		}
