@@ -60,7 +60,7 @@ namespace pybind
 		return detail::set_dict_operator_t( m_kernel, m_obj, _name );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void dict::remove( const detail::import_operator_t & _name ) const
+	void dict::remove_i( const detail::import_operator_t & _name ) const
 	{
 		pybind::dict_remove( m_obj, _name );
 	}

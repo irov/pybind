@@ -56,7 +56,7 @@ namespace pybind
 		template<class T>
 		void remove( const T & _name ) const
 		{
-			this->remove( detail::import_operator_t( m_kernel, _name ) );
+			this->remove_i( detail::import_operator_t( m_kernel, _name ) );
 		}
 
 	public:
@@ -65,7 +65,7 @@ namespace pybind
         detail::set_dict_operator_t set_i( const detail::import_operator_t & _name );		
 		
 	public:
-		void remove( const detail::import_operator_t & _name ) const;
+		void remove_i( const detail::import_operator_t & _name ) const;
 
 	public:
 		size_t size() const;

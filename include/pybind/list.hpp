@@ -27,10 +27,11 @@ namespace pybind
 		template<class T>
 		list & append( const T & _t )
 		{
-			return this->append( detail::import_operator_t( m_kernel, _t ) );
+			return this->append_i( detail::import_operator_t( m_kernel, _t ) );
 		}
 			
-		list & append( const detail::import_operator_t & _t );
+    public:
+		list & append_i( const detail::import_operator_t & _t );
 		
 	public:
 		template<class It>

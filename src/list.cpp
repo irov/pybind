@@ -45,7 +45,7 @@ namespace pybind
 		return detail::set_list_operator_t( m_kernel, m_obj, _index );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	list & list::append( const detail::import_operator_t & _t )
+	list & list::append_i( const detail::import_operator_t & _t )
 	{
 		pybind::list_appenditem_t( m_kernel, m_obj, _t );
 
