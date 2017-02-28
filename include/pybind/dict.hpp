@@ -30,26 +30,26 @@ namespace pybind
 		template<class T>
 		bool exist( const T & _name ) const
 		{
-			return this->exist( detail::import_operator_t( m_kernel, _name ) );
+			return this->exist_i( detail::import_operator_t( m_kernel, _name ) );
 		}
 
 		template<class T>
-		pybind::object get( const T & _name ) const
+        detail::extract_operator_t get( const T & _name ) const
 		{
-			return this->get( detail::import_operator_t( m_kernel, _name ) );
+			return this->get_i( detail::import_operator_t( m_kernel, _name ) );
 		}
 
 	public:
 		template<class T>
 		detail::set_dict_operator_t operator [] ( const T & _name )
 		{
-			return this->operator [] ( detail::import_operator_t( m_kernel, _name ) );
+			return this->set_i( detail::import_operator_t( m_kernel, _name ) );
 		}
 
 		template<class T>
 		detail::extract_operator_t operator [] ( const T & _name ) const
 		{
-			return this->operator [] ( detail::import_operator_t( m_kernel, _name ) );
+			return this->get_i( detail::import_operator_t( m_kernel, _name ) );
 		}
 
 	public:
@@ -60,12 +60,9 @@ namespace pybind
 		}
 
 	public:
-		bool exist( const detail::import_operator_t & _name ) const;
-		pybind::object get( const detail::import_operator_t & _name ) const;
-
-	public:
-		detail::set_dict_operator_t operator [] ( const detail::import_operator_t & _name );
-		detail::extract_operator_t operator [] ( const detail::import_operator_t & _name ) const;
+		bool exist_i( const detail::import_operator_t & _name ) const;
+        detail::extract_operator_t get_i( const detail::import_operator_t & _name ) const;
+        detail::set_dict_operator_t set_i( const detail::import_operator_t & _name );		
 		
 	public:
 		void remove( const detail::import_operator_t & _name ) const;

@@ -43,28 +43,21 @@ namespace pybind
 		return dict::iterator( m_kernel, m_obj, t_dict_iterator_end_tag() );
     }
 	//////////////////////////////////////////////////////////////////////////
-	bool dict::exist( const detail::import_operator_t & _name ) const
+	bool dict::exist_i( const detail::import_operator_t & _name ) const
 	{
 		return pybind::dict_exist( m_obj, _name );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	pybind::object dict::get( const detail::import_operator_t & _name ) const
+    detail::extract_operator_t dict::get_i( const detail::import_operator_t & _name ) const
 	{
 		PyObject * py_attr = pybind::dict_get( m_obj, _name );
 
-		return pybind::object( m_kernel, py_attr );
+		return detail::extract_operator_t( m_kernel, py_attr );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	detail::set_dict_operator_t dict::operator [] ( const detail::import_operator_t & _name )
+	detail::set_dict_operator_t dict::set_i( const detail::import_operator_t & _name )
 	{
 		return detail::set_dict_operator_t( m_kernel, m_obj, _name );
-	}
-	//////////////////////////////////////////////////////////////////////////
-	detail::extract_operator_t dict::operator [] ( const detail::import_operator_t & _name ) const
-	{
-		PyObject * py_object = pybind::dict_get( m_obj, _name );
-		
-		return detail::extract_operator_t( m_kernel, py_object );
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void dict::remove( const detail::import_operator_t & _name ) const
