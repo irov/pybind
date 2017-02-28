@@ -24,18 +24,18 @@ namespace pybind
 		template<class T>
 		bool has_attr( const T & _name ) const
 		{
-			return this->has_attr( detail::import_operator_t( m_kernel, _name ) );
+			return this->has_attr_i( detail::import_operator_t( m_kernel, _name ) );
 		}
 
 		template<class T>
 		detail::extract_operator_t get_attr( const T & _name ) const
 		{
-			return this->get_attr( detail::import_operator_t( m_kernel, _name ) );
+			return this->get_attr_i( detail::import_operator_t( m_kernel, _name ) );
 		}
 
 	public:
-		bool has_attr( const detail::import_operator_t & _name ) const;
-		detail::extract_operator_t get_attr( const detail::import_operator_t & _name ) const;
+		bool has_attr_i( const detail::import_operator_t & _name ) const;
+		detail::extract_operator_t get_attr_i( const detail::import_operator_t & _name ) const;
 
 	public:
 		pybind::dict get_dict() const;

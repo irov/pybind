@@ -30,17 +30,17 @@ namespace pybind
 			}
 
 		public:
-			template<class T>
+            set_dict_operator_t & operator = ( const import_operator_t & _value )
+            {
+                pybind::dict_set_t( m_kernel, m_dict, m_key, _value );
+
+                return *this;
+            }
+
+            template<class T>
 			set_dict_operator_t & operator = (const T & _value)
 			{
 				return this->operator = (import_operator_t( m_kernel, _value ));
-			}
-
-			set_dict_operator_t & operator = (const import_operator_t & _value)
-			{				
-				pybind::dict_set_t( m_kernel, m_dict, m_key, _value );
-
-				return *this;
 			}
 
 		public:

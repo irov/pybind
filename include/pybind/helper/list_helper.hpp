@@ -32,13 +32,13 @@ namespace pybind
 		public:
             void operator = ( const import_operator_t & _imp )
             {
-                pybind::list_setitem_t( m_kernel, m_list, m_index, _imp );
+                pybind::list_setitem_i( m_kernel, m_list, m_index, _imp );
             }
 
 			template<class T>
 			void operator = (const T & _value)
 			{
-				pybind::list_setitem_t( m_kernel, m_list, m_index, import_operator_t( m_kernel, _value ) );
+				pybind::list_setitem_i( m_kernel, m_list, m_index, import_operator_t( m_kernel, _value ) );
 			}
 
 		public:

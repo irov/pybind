@@ -32,7 +32,7 @@ namespace pybind
 	{
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool module::has_attr( const detail::import_operator_t & _name ) const
+	bool module::has_attr_i( const detail::import_operator_t & _name ) const
 	{
 		PyObject * module_dict = pybind::module_dict( m_obj );
 
@@ -41,7 +41,7 @@ namespace pybind
 		return result;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	detail::extract_operator_t module::get_attr( const detail::import_operator_t & _name ) const
+	detail::extract_operator_t module::get_attr_i( const detail::import_operator_t & _name ) const
 	{
 		PyObject * module_dict = pybind::module_dict( m_obj );
 
