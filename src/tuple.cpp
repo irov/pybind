@@ -202,7 +202,7 @@ namespace pybind
 
 		for( size_t i = 0; i != args_size; ++i )
 		{
-			pybind::tuple_setitem_t( _kernel, py_tuple, 0 + i, _args[i] );
+			pybind::tuple_setitem_i( _kernel, py_tuple, 0 + i, _args[i] );
 		}
 
 		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
@@ -223,7 +223,7 @@ namespace pybind
 
 		for( size_t i = 0; i != args_size; ++i )
 		{
-			pybind::tuple_setitem_t( _kernel, py_tuple, 1 + i, _args[i] );
+			pybind::tuple_setitem_i( _kernel, py_tuple, 1 + i, _args[i] );
 		}
 
 		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
@@ -245,7 +245,7 @@ namespace pybind
 
 		for( size_t i = 0; i != args_size; ++i )
 		{
-			pybind::tuple_setitem_t( _kernel, py_tuple, 2 + i, _args[i] );
+			pybind::tuple_setitem_i( _kernel, py_tuple, 2 + i, _args[i] );
 		}
 
 		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
@@ -268,7 +268,7 @@ namespace pybind
 
 		for( size_t i = 0; i != args_size; ++i )
 		{
-			pybind::tuple_setitem_t( _kernel, py_tuple, 3 + i, _args[i] );
+			pybind::tuple_setitem_i( _kernel, py_tuple, 3 + i, _args[i] );
 		}
 
 		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
@@ -292,7 +292,7 @@ namespace pybind
 
 		for( size_t i = 0; i != args_size; ++i )
 		{
-			pybind::tuple_setitem_t( _kernel, py_tuple, 4 + i, _args[i] );
+			pybind::tuple_setitem_i( _kernel, py_tuple, 4 + i, _args[i] );
 		}
 
 		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
@@ -317,7 +317,7 @@ namespace pybind
 
 		for( size_t i = 0; i != args_size; ++i )
 		{
-			pybind::tuple_setitem_t( _kernel, py_tuple, 5 + i, _args[i] );
+			pybind::tuple_setitem_i( _kernel, py_tuple, 5 + i, _args[i] );
 		}
 
 		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
@@ -343,7 +343,7 @@ namespace pybind
 
 		for( size_t i = 0; i != args_size; ++i )
 		{
-			pybind::tuple_setitem_t( _kernel, py_tuple, 6 + i, _args[i] );
+			pybind::tuple_setitem_i( _kernel, py_tuple, 6 + i, _args[i] );
 		}
 
 		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
@@ -370,7 +370,7 @@ namespace pybind
 
 		for( size_t i = 0; i != args_size; ++i )
 		{
-			pybind::tuple_setitem_t( _kernel, py_tuple, 7 + i, _args[i] );
+			pybind::tuple_setitem_i( _kernel, py_tuple, 7 + i, _args[i] );
 		}
 
 		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
@@ -398,7 +398,7 @@ namespace pybind
 
 		for( size_t i = 0; i != args_size; ++i )
 		{
-			pybind::tuple_setitem_t( _kernel, py_tuple, 8 + i, _args[i] );
+			pybind::tuple_setitem_i( _kernel, py_tuple, 8 + i, _args[i] );
 		}
 
 		return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
