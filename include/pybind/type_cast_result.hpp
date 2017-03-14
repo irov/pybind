@@ -129,7 +129,7 @@ namespace pybind
         typedef const T & TCastRef;
 
 	public:
-		virtual PyObject * wrap( kernel_interface * _kernel, TCastRef t ) = 0;
-		virtual bool apply( kernel_interface * _kernel, PyObject * _obj, TCastValue _value, bool _nothrow ) = 0;
+		virtual bool apply(kernel_interface * _kernel, PyObject * _obj, TCastValue _value, bool _nothrow) = 0;
+		virtual PyObject * wrap( kernel_interface * _kernel, TCastRef t ) = 0;		
 	};
 }
