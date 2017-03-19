@@ -33,6 +33,7 @@ namespace pybind
 
 	typedef stdex::intrusive_ptr<class number_binary_adapter_interface> number_binary_adapter_interface_ptr;
 	typedef stdex::intrusive_ptr<class smart_pointer_adapter_interface> smart_pointer_adapter_interface_ptr;
+    typedef stdex::intrusive_ptr<class bindable_adapter_interface> bindable_adapter_interface_ptr;    
 	//////////////////////////////////////////////////////////////////////////
 	class PYBIND_API class_type_scope
 		: public stdex::intrusive_ptr_base<class_type_scope>
@@ -63,9 +64,7 @@ namespace pybind
 
 		PyTypeObject * get_typemodule() const;
 
-		void * construct( kernel_interface * _kernel, PyObject * _obj, PyObject * _args );
-		
-		void add_method( const method_adapter_interface_ptr & _ifunc );
+        void add_method( const method_adapter_interface_ptr & _ifunc );
 		method_adapter_interface * get_method( const char * _name );
 		void add_member( const member_adapter_interface_ptr & _imember );
 		void add_base( uint32_t _info, const class_type_scope_ptr & _scope, pybind_metacast _cast );
@@ -110,12 +109,14 @@ namespace pybind
 		void add_number_mul( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter );
 		void add_number_div( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter );
 		void set_smart_pointer( const smart_pointer_adapter_interface_ptr & _iadapter );
+        void set_bindable( const bindable_adapter_interface_ptr & _iadapter );
         
 		PyObject * create_class( void * _impl );
-		PyObject * create_holder( kernel_interface * _kernel, void * _impl );
+		PyObject * create_holder( void * _impl );
 		PyObject * create_pod( void ** _impl );
 
-		void * metacast( uint32_t _info, void * _impl );
+		void * meta_cast( uint32_t _info, void * _impl );
+        pybind::bindable * bindable_cast( void * _impl );
 		void type_initialize( PyTypeObject * _type );
 
 		bool is_instance( PyTypeObject * _type ) const;
@@ -145,10 +146,16 @@ namespace pybind
 		inline const number_binary_adapter_interface_ptr & get_number_div_adapters( uint32_t _typeId ) const;
 
 		inline const smart_pointer_adapter_interface_ptr & get_smart_pointer() const;
+        inline const bindable_adapter_interface_ptr & get_bindable() const;
 
 	public:
-		void incref_smart_pointer( kernel_interface * _kernel, void * _impl );
-		void decref_smart_pointer( kernel_interface * _kernel, void * _impl );
+		void incref_smart_pointer( void * _impl );
+		void decref_smart_pointer( void * _impl );
+
+    public:
+        void * call_new( PyObject * _obj, PyObject * _args, PyObject * _kwds );
+        void call_destructor( PyObject * _obj, void * _impl );
+        void clear_bindable(void * _impl);
 		
     public:
         void addObject( PyObject * _obj );
@@ -207,13 +214,15 @@ namespace pybind
 		number_binary_adapter_interface_ptr m_number_divs[PYBIND_TYPE_COUNT];
 
 		smart_pointer_adapter_interface_ptr m_smart_pointer;
+        bindable_adapter_interface_ptr m_bindable;
 
 		uint32_t m_objectCount;
 
 		PyTypeObject * m_pytypeobject;
 
 		uint32_t m_pod_size;
-		bool m_pod_hash;        
+		bool m_pod_hash;
+        bool m_binable_base;
 	};
 	//////////////////////////////////////////////////////////////////////////
 	inline const new_adapter_interface_ptr & class_type_scope::get_new_adapter() const
@@ -320,6 +329,11 @@ namespace pybind
 	{
 		return m_smart_pointer;
 	}
+    //////////////////////////////////////////////////////////////////////////
+    inline const bindable_adapter_interface_ptr & class_type_scope::get_bindable() const
+    {
+        return m_bindable;
+    }
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<class_type_scope> class_type_scope_ptr;
 }

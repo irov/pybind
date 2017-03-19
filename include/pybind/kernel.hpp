@@ -3,6 +3,7 @@
 #	include "pybind/exports.hpp"
 #	include "pybind/types.hpp"
 
+#	include "pybind/bindable.hpp"
 #	include "pybind/function_interface.hpp"
 #	include "pybind/functor_interface.hpp"
 #	include "pybind/member_interface.hpp"
@@ -166,6 +167,8 @@ namespace pybind
 
 			return obj;
 		}
+
+        virtual pybind::bindable * bindable_cast( void * _self, const class_type_scope_ptr & _scope ) = 0;
 
 		virtual void * check_registred_class( PyObject * _obj, uint32_t _info ) = 0;
 

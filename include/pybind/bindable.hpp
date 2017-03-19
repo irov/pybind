@@ -13,10 +13,10 @@ namespace pybind
 	public:
 		void setEmbed( PyObject * _embed );
 		PyObject * getEmbed();
-		void removeEmbed();
 		bool isEmbed() const;
 
 	public:
+        void clear();
 		void unwrap();
 
 	protected:

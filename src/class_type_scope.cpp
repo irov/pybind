@@ -15,6 +15,7 @@
 #	include "pybind/adapter/sequence_set_adapter.hpp"
 #	include "pybind/adapter/number_binary_adapter.hpp"
 #	include "pybind/adapter/smart_pointer_adapter.hpp"
+#   include "pybind/adapter/bindable_adapter.hpp"
 
 #	include "pod_python.hpp"
 
@@ -436,19 +437,8 @@ namespace pybind
 		{
 			PyObject * py_self = detail::alloc_class( _type, _args, _kwds );
 
-			void * impl;
-
-			const new_adapter_interface_ptr & adapter = scope->get_new_adapter();
-
-			if( adapter != nullptr )
-			{
-				impl = adapter->call( scope, py_self, _args, _kwds );
-			}
-			else
-			{
-				impl = scope->construct( kernel, py_self, _args );
-			}
-
+			void * impl = scope->call_new( py_self, _args, _kwds );
+            
 			if( impl == nullptr )
 			{
 				Py_DECREF( py_self );
@@ -458,7 +448,7 @@ namespace pybind
 
 			pybind::detail::wrap_pod_ptr( py_self, impl, false );
 
-			scope->incref_smart_pointer( kernel, impl );
+			scope->incref_smart_pointer( impl );
 
 			scope->addObject( py_self );
 
@@ -490,19 +480,14 @@ namespace pybind
 
 			void * impl = kernel->get_class_impl( _obj );
 
-			scope->decref_smart_pointer( kernel, impl );
+            if( impl != nullptr )
+            {
+                scope->call_destructor( _obj, impl );
 
-			bool holder = pybind::detail::is_pod_holder( _obj );
+                scope->clear_bindable( impl );
 
-			if( holder == false )
-			{
-				const destroy_adapter_interface_ptr & adapter = scope->get_destroy_adapter();
-
-				if( adapter != nullptr )
-				{
-					adapter->call( scope, impl );
-				}
-			}
+                scope->decref_smart_pointer( impl );
+            }
 		}
 		catch( const pybind_exception & _ex )
 		{
@@ -530,20 +515,9 @@ namespace pybind
 
 			pybind::detail::wrap_pod( py_self, &buff, pod_size, pod_hash );
 
-			void * impl;
+            void * impl = scope->call_new( py_self, _args, _kwds );
 
-			const new_adapter_interface_ptr & adapter = scope->get_new_adapter();
-
-			if( adapter != nullptr )
-			{
-				impl = adapter->call( scope, py_self, _args, _kwds );
-			}
-			else
-			{
-				impl = scope->construct( kernel, py_self, _args );
-			}
-
-			scope->incref_smart_pointer( kernel, impl );
+			scope->incref_smart_pointer( impl );
 
 			scope->addObject( py_self );
 
@@ -575,14 +549,14 @@ namespace pybind
 
 			void * impl = kernel->get_class_impl( _obj );
 
-			scope->decref_smart_pointer( kernel, impl );
+            if( impl != nullptr )
+            {
+                scope->call_destructor( _obj, impl );
 
-			const destroy_adapter_interface_ptr & adapter = scope->get_destroy_adapter();
+                scope->clear_bindable( impl );
 
-			if( adapter != nullptr )
-			{
-				adapter->call( scope, impl );
-			}
+                scope->decref_smart_pointer( impl );
+            }
 		}
 		catch( const pybind_exception & _ex )
 		{
@@ -606,6 +580,7 @@ namespace pybind
 		, m_pytypeobject( nullptr )
 		, m_pod_size( _pod )
 		, m_pod_hash( _hash )
+        , m_binable_base( false )
 	{
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -660,6 +635,13 @@ namespace pybind
 				{
 					m_smart_pointer = base_smart_pointer;
 				}
+
+                const bindable_adapter_interface_ptr & base_bindable = mc.scope->get_bindable();
+
+                if( m_bindable == nullptr && base_bindable != nullptr )
+                {
+                    m_bindable = base_bindable;
+                }
 			}
 		}
 		else
@@ -1360,18 +1342,39 @@ namespace pybind
 	{
 		m_smart_pointer = _iadapter;
 	}
-	//////////////////////////////////////////////////////////////////////////
-	void * class_type_scope::construct( kernel_interface * _kernel, PyObject * _obj, PyObject * _args )
-	{
-		if( m_constructor == nullptr )
-		{
-			return nullptr;
-		}
+    //////////////////////////////////////////////////////////////////////////
+    void class_type_scope::set_bindable(const bindable_adapter_interface_ptr & _iadapter)
+    {
+        m_bindable = _iadapter;
 
-		void * obj = m_constructor->call( _kernel, _obj, _args );
+        if (m_bindable != nullptr)
+        {
+            m_binable_base = true;
+        }
+        else
+        {
+            m_binable_base = false;
+        }
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void * class_type_scope::call_new( PyObject * _obj, PyObject * _args, PyObject * _kwds )
+    {
+        if( m_new != nullptr )
+        {
+            void * impl = m_new->call( m_kernel, this, _obj, _args, _kwds );
 
-		return obj;
-	}
+            return impl;
+        }
+
+        if( m_constructor != nullptr )
+        {
+            void * obj = m_constructor->call( m_kernel, _obj, _args );
+
+            return obj;
+        }
+
+        return nullptr;
+    }
 	//////////////////////////////////////////////////////////////////////////
 	void class_type_scope::set_construct( const constructor_adapter_interface_ptr & _ctr )
 	{
@@ -1399,7 +1402,7 @@ namespace pybind
 		m_bases[newId] = mc;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void * class_type_scope::metacast( uint32_t _info, void * _impl )
+	void * class_type_scope::meta_cast( uint32_t _info, void * _impl )
 	{
 		for( uint32_t i = 0; i != m_basesCount; ++i )
 		{
@@ -1421,7 +1424,7 @@ namespace pybind
 
 			void * down_impl = mc.cast( _impl );
 
-			void * obj = mc.scope->metacast( _info, down_impl );
+			void * obj = mc.scope->meta_cast( _info, down_impl );
 
 			if( obj == nullptr )
 			{
@@ -1433,6 +1436,34 @@ namespace pybind
 
 		return nullptr;
 	}
+    //////////////////////////////////////////////////////////////////////////
+    pybind::bindable * class_type_scope::bindable_cast( void * _impl )
+    {
+        if( m_binable_base == true )
+        {
+            pybind::bindable * obj = static_cast<pybind::bindable *>(_impl);
+
+            return obj;
+        }
+
+        for( uint32_t i = 0; i != m_basesCount; ++i )
+        {
+            Metacast & mc = m_bases[i];
+
+            void * down_impl = mc.cast( _impl );
+
+            pybind::bindable * obj = mc.scope->bindable_cast( down_impl );
+
+            if( obj == nullptr )
+            {
+                continue;
+            }
+
+            return obj;
+        }
+
+        return nullptr;
+    }
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * class_type_scope::create_class( void * _impl )
 	{
@@ -1450,7 +1481,7 @@ namespace pybind
 		return py_self;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * class_type_scope::create_holder( kernel_interface * _kernel, void * _impl )
+	PyObject * class_type_scope::create_holder( void * _impl )
 	{
 		if( m_pod_size != 0 )
 		{
@@ -1461,7 +1492,7 @@ namespace pybind
 
 		pybind::detail::wrap_pod_ptr( py_self, _impl, true );
 
-		this->incref_smart_pointer( _kernel, _impl );
+		this->incref_smart_pointer( _impl );
 
 		this->addObject( py_self );
 
@@ -1515,21 +1546,44 @@ namespace pybind
 		PYBIND_FREE( _ptr, _size );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_type_scope::incref_smart_pointer( kernel_interface * _kernel, void * _impl )
+	void class_type_scope::incref_smart_pointer( void * _impl )
 	{
 		if( m_smart_pointer != nullptr )
 		{
-			m_smart_pointer->incref( _kernel, _impl, this );
+			m_smart_pointer->incref( m_kernel, _impl, this );
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void class_type_scope::decref_smart_pointer( kernel_interface * _kernel, void * _impl )
+	void class_type_scope::decref_smart_pointer( void * _impl )
 	{
 		if( m_smart_pointer != nullptr )
 		{
-			m_smart_pointer->decref( _kernel, _impl, this );
+			m_smart_pointer->decref( m_kernel, _impl, this );
 		}
 	}
+    //////////////////////////////////////////////////////////////////////////
+    void class_type_scope::call_destructor( PyObject * _obj, void * _impl )
+    {
+        bool holder = pybind::detail::is_pod_holder( _obj );
+
+        if( holder == true )
+        {
+            return;
+        }
+
+        if( m_destructor != nullptr )
+        {
+            m_destructor->call( m_kernel, this, _impl );
+        }        
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void class_type_scope::clear_bindable(void * _impl)
+    {
+        if( m_bindable != nullptr )
+        {
+            m_bindable->clear( m_kernel, _impl, this );
+        }
+    }
 	//////////////////////////////////////////////////////////////////////////
 #	ifdef PYBIND_VISIT_OBJECTS
 	void class_type_scope::visit_objects( pybind_visit_objects * _visitor )

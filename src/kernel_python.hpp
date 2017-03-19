@@ -71,6 +71,7 @@ namespace pybind
 		PyObject * scope_create_holder( const class_type_scope_ptr & _scope, void * _ptr ) override;
 
 		void * meta_cast_scope( void * _self, uint32_t _scope_name, uint32_t _class_name, const class_type_scope_ptr & _scope ) override;
+        pybind::bindable * bindable_cast( void * _self, const class_type_scope_ptr & _scope ) override;
 
 		void * check_registred_class( PyObject * _obj, uint32_t _info ) override;
 

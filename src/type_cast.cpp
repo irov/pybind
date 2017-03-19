@@ -56,7 +56,7 @@ namespace pybind
 
 		if( cur_scope != scope )
 		{
-			impl = scope->metacast( _tptrinfo, impl );
+			impl = scope->meta_cast( _tptrinfo, impl );
 		}
 
 		if( impl == nullptr )

@@ -18,6 +18,7 @@
 #	include "pybind/adapter/sequence_set_adapter.hpp"
 #	include "pybind/adapter/number_binary_adapter.hpp"
 #	include "pybind/adapter/smart_pointer_adapter.hpp"
+#   include "pybind/adapter/bindable_adapter.hpp"
 
 #	include "pybind/helper/bases_helper.hpp"
 
@@ -686,6 +687,16 @@ namespace pybind
 			return this->def_static_proxy_smart_pointer( &C::intrusive_ptr_add_ref, &C::intrusive_ptr_dec_ref );
 		}
 
+        base_ & def_bindable()
+        {
+            bindable_adapter_interface_ptr iadapter =
+                new bindable_adapter("unwrap_bindable");
+            
+            m_scope->set_bindable(iadapter);
+
+            return *this;
+        }
+
 		const pybind::class_type_scope_ptr & get_scope() const
 		{
 			return m_scope;
@@ -707,8 +718,9 @@ namespace pybind
 		: public new_adapter_interface
 	{
 	public:
-		void * call( const pybind::class_type_scope_ptr & _scope, PyObject * _obj, PyObject * _args, PyObject * _kwds ) override
+		void * call( pybind::kernel_interface * _kernel, const pybind::class_type_scope_ptr & _scope, PyObject * _obj, PyObject * _args, PyObject * _kwds ) override
 		{
+            (void)_kernel;
 			(void)_scope;
 			(void)_obj;
 			(void)_args;
@@ -727,8 +739,9 @@ namespace pybind
 		: public destroy_adapter_interface
 	{
 	public:
-		void call( const pybind::class_type_scope_ptr & _scope, void * _impl ) override
+		void call( pybind::kernel_interface * _kernel, const pybind::class_type_scope_ptr & _scope, void * _impl ) override
 		{
+            (void)_kernel;
 			(void)_scope;
 
 			C * obj = static_cast<C*>(_impl);
@@ -742,8 +755,9 @@ namespace pybind
 		: public destroy_adapter_interface
 	{
 	public:
-		void call( const pybind::class_type_scope_ptr & _scope, void * _impl ) override
+		void call( pybind::kernel_interface * _kernel, const pybind::class_type_scope_ptr & _scope, void * _impl ) override
 		{
+            (void)_kernel;
 			(void)_scope;
 
 			C * obj = static_cast<C*>(_impl);

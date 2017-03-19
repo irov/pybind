@@ -220,7 +220,7 @@ namespace pybind
 			return _self;
 		}
 
-		void * impl_cast = _scope->metacast( _name, _self );
+		void * impl_cast = _scope->meta_cast( _name, _self );
 
 		return impl_cast;
 	}
@@ -498,7 +498,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * kernel_python::scope_create_holder( const class_type_scope_ptr & _scope, void * _ptr )
 	{
-		PyObject * py_obj = _scope->create_holder( this, _ptr );
+		PyObject * py_obj = _scope->create_holder( _ptr );
 
 		return py_obj;
 	}
@@ -518,6 +518,13 @@ namespace pybind
 
 		return successful;
 	}
+    //////////////////////////////////////////////////////////////////////////
+    pybind::bindable * kernel_python::bindable_cast( void * _self, const class_type_scope_ptr & _scope )
+    {        
+        pybind::bindable * bindable_self = _scope->bindable_cast( _self );
+
+        return bindable_self;
+    }
 	//////////////////////////////////////////////////////////////////////////
 	void * kernel_python::check_registred_class( PyObject * _obj, uint32_t _info )
 	{

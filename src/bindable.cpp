@@ -17,9 +17,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	void bindable::setEmbed( PyObject * _embed )
 	{
-		pybind::decref( m_embed );
 		m_embed = _embed;
-		pybind::incref( m_embed );
 
 		this->_embedding( m_embed );
 	}
@@ -31,32 +29,28 @@ namespace pybind
 			PyObject * embed = this->_embedded();
 
 			this->setEmbed( embed );
-
-			pybind::decref( embed );
 		}
-
-		pybind::incref( m_embed );
+        else
+        {
+            pybind::incref(m_embed);
+        }
 
 		return m_embed;
-	}
-	//////////////////////////////////////////////////////////////////////////
-	void bindable::removeEmbed()
-	{
-		pybind::decref( m_embed );
-		m_embed = nullptr;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool bindable::isEmbed() const
 	{
 		return m_embed != nullptr;
 	}
+    //////////////////////////////////////////////////////////////////////////
+    void bindable::clear()
+    {
+        m_embed = nullptr;
+    }
 	//////////////////////////////////////////////////////////////////////////
 	void bindable::unwrap()
-	{
+	{        
 		pybind::unwrap( m_embed );
-
-		pybind::decref( m_embed );
-		m_embed = nullptr;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void bindable::_embedding( PyObject * _embed )
