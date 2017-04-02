@@ -14,7 +14,7 @@
 namespace pybind
 {
 	typedef stdex::intrusive_ptr<class type_cast> type_cast_ptr;
-	typedef stdex::intrusive_ptr<class class_type_scope> class_type_scope_ptr;
+	typedef stdex::intrusive_ptr<class class_type_scope_interface> class_type_scope_interface_ptr;
 
 	typedef stdex::intrusive_ptr<class new_adapter_interface> new_adapter_interface_ptr;
 	typedef stdex::intrusive_ptr<class destroy_adapter_interface> destroy_adapter_interface_ptr;
@@ -110,43 +110,43 @@ namespace pybind
 
 		virtual type_cast * find_type_info_extract( uint32_t _info ) = 0;
 
-		virtual class_type_scope_ptr create_new_type_scope( uint32_t _info, const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash ) = 0;
+		virtual class_type_scope_interface_ptr create_new_type_scope( uint32_t _info, const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash ) = 0;
 
 		virtual bool has_class_type_scope( uint32_t _info ) = 0;
-		virtual const class_type_scope_ptr & get_class_type_scope( uint32_t _info ) = 0;
+		virtual const class_type_scope_interface_ptr & get_class_type_scope( uint32_t _info ) = 0;
 
 		virtual void visit_types_scope( visitor_class_type_scope * _getter ) = 0;
 
 		virtual PyTypeObject * get_object_type( PyObject * _type ) = 0;
 		virtual uint32_t get_object_type_id( PyObject * _type ) = 0;
-		virtual const class_type_scope_ptr & get_class_scope( PyTypeObject * _type ) = 0;
+		virtual const class_type_scope_interface_ptr & get_class_scope( PyTypeObject * _type ) = 0;
 
 		template<class T>
-		const class_type_scope_ptr & class_scope()
+		const class_type_scope_interface_ptr & class_scope()
 		{
 			uint32_t ti = this->class_info<T>();
 
-			const class_type_scope_ptr & scope = this->get_class_type_scope( ti );
+			const class_type_scope_interface_ptr & scope = this->get_class_type_scope( ti );
 
 			return scope;
 		}
 
-		virtual PyObject * scope_create_holder( const class_type_scope_ptr & _scope, void * _ptr ) = 0;
+		virtual PyObject * scope_create_holder( const class_type_scope_interface_ptr & _scope, void * _ptr ) = 0;
 
 		template<class T>
 		PyObject * scope_create_holder_t( T * _ptr )
 		{
-			const pybind::class_type_scope_ptr & scope = this->class_scope<T>();
+			const pybind::class_type_scope_interface_ptr & scope = this->class_scope<T>();
 
 			PyObject * py_obj = this->scope_create_holder( scope, _ptr );
 
 			return py_obj;
 		}
 
-		virtual void * meta_cast_scope( void * _self, uint32_t _scope_name, uint32_t _class_name, const class_type_scope_ptr & _scope ) = 0;
+		virtual void * meta_cast_scope( void * _self, uint32_t _scope_name, uint32_t _class_name, const class_type_scope_interface_ptr & _scope ) = 0;
 
 		template<class T>
-		inline T meta_cast_scope_t( void * _self, uint32_t _scope_name, uint32_t _class_name, const class_type_scope_ptr & _scope )
+		inline T meta_cast_scope_t( void * _self, uint32_t _scope_name, uint32_t _class_name, const class_type_scope_interface_ptr & _scope )
 		{
 			void * impl = this->meta_cast_scope( _self, _scope_name, _class_name, _scope );
 
@@ -156,7 +156,7 @@ namespace pybind
 		}
 
 		template<class C>
-		inline C * meta_cast_class_t( void * _self, const class_type_scope_ptr & _scope )
+		inline C * meta_cast_class_t( void * _self, const class_type_scope_interface_ptr & _scope )
 		{
 			uint32_t scope_name = this->class_info<C>();
 			uint32_t class_name = this->class_info<C *>();
@@ -168,7 +168,7 @@ namespace pybind
 			return obj;
 		}
 
-        virtual pybind::bindable * bindable_cast( void * _self, const class_type_scope_ptr & _scope ) = 0;
+        virtual pybind::bindable * bindable_cast( void * _self, const class_type_scope_interface_ptr & _scope ) = 0;
 
 		virtual void * check_registred_class( PyObject * _obj, uint32_t _info ) = 0;
 
@@ -189,6 +189,6 @@ namespace pybind
 
 		virtual PyObject * get_str_class_type_scope() = 0;
 
-		virtual PyObject * call_method( void * _self, const class_type_scope_ptr & _scope, const char * _name, PyObject * _args ) = 0;
+		virtual PyObject * call_method( void * _self, const class_type_scope_interface_ptr & _scope, const char * _name, PyObject * _args ) = 0;
 	};
 }

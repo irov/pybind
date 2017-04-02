@@ -23,7 +23,7 @@ namespace pybind
         }
 
     public:
-        virtual void clear(kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope) = 0;
+        virtual void clear(kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope) = 0;
 
     protected:
         const char * m_name;
@@ -41,7 +41,7 @@ namespace pybind
         }
 
     protected:
-        void clear(kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope) override
+        void clear(kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope) override
         {
             pybind::bindable * self = _kernel->bindable_cast(_impl, _scope);
 

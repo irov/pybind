@@ -42,6 +42,8 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool list_setitem_i( kernel_interface * _kernel, PyObject * _list, size_t _it, const detail::import_operator_t & _item )
 	{
+		(void)_kernel;
+
 		bool result = pybind::list_setitem( _list, _it, _item );
 
 		return result;
@@ -49,6 +51,8 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool list_appenditem_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _item )
 	{
+		(void)_kernel;
+
 		bool result = pybind::list_appenditem( _obj, _item );
 
 		return result;
@@ -56,6 +60,8 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool dict_setstring_i( kernel_interface * _kernel, PyObject * _dict, const char * _name, const detail::import_operator_t & _value )
 	{
+		(void)_kernel;
+
 		bool result = pybind::dict_setstring( _dict, _name, _value );
 
 		return result;
@@ -77,6 +83,8 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool tuple_setitem_i( kernel_interface * _kernel, PyObject * _tuple, size_t _it, const detail::extract_operator_t & _item )
 	{ 
+		(void)_kernel;
+
 		bool result = pybind::tuple_setitem( _tuple, _it, _item );
 
 		return result;
@@ -84,6 +92,8 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool tuple_setitem_i( kernel_interface * _kernel, PyObject * _tuple, size_t _it, const detail::import_operator_t & _item )
 	{
+		(void)_kernel;
+
 		bool result = pybind::tuple_setitem( _tuple, _it, _item );
 
 		return result;
@@ -91,6 +101,8 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool dict_set_i( kernel_interface * _kernel, PyObject * _dict, const detail::import_operator_t & _name, const detail::import_operator_t & _value )
 	{
+		(void)_kernel;
+
 		bool result = pybind::dict_set( _dict, _name, _value );
 
 		return result;
@@ -105,7 +117,11 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	bool dict_remove_i( kernel_interface * _kernel, PyObject * _dict, const detail::import_operator_t & _key )
 	{
-		return dict_remove( _dict, _key );
+		(void)_kernel;
+
+		bool successful = dict_remove( _dict, _key );
+
+		return successful;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	detail::extract_operator_t ask_tuple_t( kernel_interface * _kernel, PyObject * _obj, const pybind::tuple & _tuple )

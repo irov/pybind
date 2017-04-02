@@ -3,7 +3,7 @@
 namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
-	typedef stdex::intrusive_ptr<class class_type_scope> class_type_scope_ptr;
+	typedef stdex::intrusive_ptr<class class_type_scope_interface> class_type_scope_interface_ptr;
 	//////////////////////////////////////////////////////////////////////////
     enum PybindOperatorCompare
     {
@@ -19,7 +19,7 @@ namespace pybind
         : public adapter_interface
     {
     public:
-		virtual bool compare( kernel_interface * _kernel, PyObject * _obj, void * _self, const class_type_scope_ptr & _scope, PyObject * _compare, PybindOperatorCompare _op, bool & _result ) = 0;
+		virtual bool compare( kernel_interface * _kernel, PyObject * _obj, void * _self, const class_type_scope_interface_ptr & _scope, PyObject * _compare, PybindOperatorCompare _op, bool & _result ) = 0;
     };
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<compare_adapter_interface> compare_adapter_interface_ptr;
@@ -35,7 +35,7 @@ namespace pybind
         }
 
     public:
-		bool compare( kernel_interface * _kernel, PyObject * _obj, void * _self, const class_type_scope_ptr & _scope, PyObject * _compare, PybindOperatorCompare _op, bool & _result ) override
+		bool compare( kernel_interface * _kernel, PyObject * _obj, void * _self, const class_type_scope_interface_ptr & _scope, PyObject * _compare, PybindOperatorCompare _op, bool & _result ) override
         {			
 			C * inst = _kernel->meta_cast_class_t<C>( _self, _scope );
 

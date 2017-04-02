@@ -5,13 +5,13 @@
 namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
-	typedef stdex::intrusive_ptr<class class_type_scope> class_type_scope_ptr;
+	typedef stdex::intrusive_ptr<class class_type_scope_interface> class_type_scope_interface_ptr;
 	//////////////////////////////////////////////////////////////////////////
 	class hash_adapter_interface
 		: public adapter_interface
     {
 	public:
-		virtual int64_t hash( kernel_interface * _kernel, void * _self, const class_type_scope_ptr & _scope ) = 0;
+		virtual int64_t hash( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope ) = 0;
 	};
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<hash_adapter_interface> hash_adapter_interface_ptr;
@@ -27,7 +27,7 @@ namespace pybind
 		}
 
 	public:
-		int64_t hash( kernel_interface * _kernel, void * _self, const class_type_scope_ptr & _scope ) override
+		int64_t hash( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope ) override
 		{			
 			uint32_t class_name = _kernel->class_info<C*>();
 			uint32_t scope_name = _kernel->class_info<C>();

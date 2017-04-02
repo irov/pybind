@@ -21,7 +21,7 @@ namespace pybind
 		}
 
 	public:
-		PyObject * get( kernel_interface * _kernel, void * _self, const class_type_scope_ptr & _scope ) override
+		PyObject * get( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope ) override
 		{
 			C * obj = _kernel->meta_cast_class_t<C>( _self, _scope );
 
@@ -30,7 +30,7 @@ namespace pybind
 			return py_value;
 		}
 
-		int set( kernel_interface * _kernel, void * _self, PyObject * _args, const class_type_scope_ptr & _scope ) override
+		int set( kernel_interface * _kernel, void * _self, PyObject * _args, const class_type_scope_interface_ptr & _scope ) override
 		{
 			C * obj = _kernel->meta_cast_class_t<C>( _self, _scope );
 
@@ -56,7 +56,7 @@ namespace pybind
 		}
 
 	public:
-		PyObject * get( kernel_interface * _kernel, void * _self, const class_type_scope_ptr & _scope ) override
+		PyObject * get( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope ) override
 		{
 			C * obj = _kernel->meta_cast_class_t<C>( _self, _scope );
 			
@@ -65,7 +65,7 @@ namespace pybind
 			return py_value;
 		}
 
-		int set( kernel_interface * _kernel, void * _self, PyObject * _args, const class_type_scope_ptr & _scope ) override
+		int set( kernel_interface * _kernel, void * _self, PyObject * _args, const class_type_scope_interface_ptr & _scope ) override
 		{
 			C * obj = _kernel->meta_cast_class_t<C>( _self, _scope );
 							
@@ -94,7 +94,7 @@ namespace pybind
 		}
 
 	public:
-		PyObject * get( kernel_interface * _kernel, void * _self, const class_type_scope_ptr & _scope ) override
+		PyObject * get( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope ) override
 		{
 			C * obj = _kernel->meta_cast_class_t<C>( _self, _scope );
 
@@ -103,7 +103,7 @@ namespace pybind
 			return py_value;
 		}
 
-		int set( kernel_interface * _kernel, void * _self, PyObject * _args, const class_type_scope_ptr & _scope ) override
+		int set( kernel_interface * _kernel, void * _self, PyObject * _args, const class_type_scope_interface_ptr & _scope ) override
 		{
 			C * obj = _kernel->meta_cast_class_t<C>( _self, _scope );
 						

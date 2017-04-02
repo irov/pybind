@@ -12,12 +12,12 @@
 
 namespace pybind
 {
-	class kernel_python
+	class python_kernel
 		: public kernel_interface
 	{
 	public:
-		kernel_python();
-		~kernel_python();
+		python_kernel();
+		~python_kernel();
 
 	public:
 		bool initialize() override;
@@ -57,21 +57,21 @@ namespace pybind
 		void unregister_type_info_extract( uint32_t _info ) override;
 		type_cast * find_type_info_extract( uint32_t _info ) override;
 
-		class_type_scope_ptr create_new_type_scope( uint32_t _info, const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash ) override;
+		class_type_scope_interface_ptr create_new_type_scope( uint32_t _info, const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash ) override;
 
 		bool has_class_type_scope( uint32_t _info ) override;
-		const class_type_scope_ptr & get_class_type_scope( uint32_t _info ) override;
+		const class_type_scope_interface_ptr & get_class_type_scope( uint32_t _info ) override;
 
 		void visit_types_scope( visitor_class_type_scope * _getter ) override;
 
 		PyTypeObject * get_object_type( PyObject * _type ) override;
 		uint32_t get_object_type_id( PyObject * _type ) override;
-		const class_type_scope_ptr & get_class_scope( PyTypeObject * _type ) override;
+		const class_type_scope_interface_ptr & get_class_scope( PyTypeObject * _type ) override;
 
-		PyObject * scope_create_holder( const class_type_scope_ptr & _scope, void * _ptr ) override;
+		PyObject * scope_create_holder( const class_type_scope_interface_ptr & _scope, void * _ptr ) override;
 
-		void * meta_cast_scope( void * _self, uint32_t _scope_name, uint32_t _class_name, const class_type_scope_ptr & _scope ) override;
-        pybind::bindable * bindable_cast( void * _self, const class_type_scope_ptr & _scope ) override;
+		void * meta_cast_scope( void * _self, uint32_t _scope_name, uint32_t _class_name, const class_type_scope_interface_ptr & _scope ) override;
+        pybind::bindable * bindable_cast( void * _self, const class_type_scope_interface_ptr & _scope ) override;
 
 		void * check_registred_class( PyObject * _obj, uint32_t _info ) override;
 
@@ -82,7 +82,7 @@ namespace pybind
 
 		PyObject * get_str_class_type_scope() override;
 
-		PyObject * call_method( void * _self, const class_type_scope_ptr & _scope, const char * _name, PyObject * _args ) override;
+		PyObject * call_method( void * _self, const class_type_scope_interface_ptr & _scope, const char * _name, PyObject * _args ) override;
 
 	protected:
 		function_python m_functions;
@@ -101,7 +101,7 @@ namespace pybind
 
 		class_info_desc_t m_class_info_desc[PYBIND_TYPE_COUNT];
 		type_cast_ptr m_type_cast[PYBIND_TYPE_COUNT];
-		class_type_scope_ptr m_class_type_scopes[PYBIND_TYPE_COUNT];
+		class_type_scope_interface_ptr m_class_type_scopes[PYBIND_TYPE_COUNT];
 
 		uint32_t m_enumerator;
 
@@ -109,7 +109,6 @@ namespace pybind
 
 	protected:
 		bool set_class_info_desc( uint32_t _typeId, const char * _info );
-		const char * get_class_info_desc_name( uint32_t _id );
 		uint32_t get_next_id();
 	};
 }

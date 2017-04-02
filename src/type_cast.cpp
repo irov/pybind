@@ -1,7 +1,7 @@
 #	include "pybind/type_cast.hpp"
 
 #	include "pybind/kernel.hpp"
-#	include "pybind/class_type_scope.hpp"
+#	include "pybind/class_type_scope_interface.hpp"
 
 #	include "pybind/system.hpp"
 
@@ -51,8 +51,8 @@ namespace pybind
 		}
 
 		PyTypeObject * py_type = _kernel->get_object_type( _obj );
-		const class_type_scope_ptr & scope = _kernel->get_class_scope( py_type );
-		const class_type_scope_ptr & cur_scope = _kernel->get_class_type_scope( _tinfo );
+		const class_type_scope_interface_ptr & scope = _kernel->get_class_scope( py_type );
+		const class_type_scope_interface_ptr & cur_scope = _kernel->get_class_type_scope( _tinfo );
 
 		if( cur_scope != scope )
 		{

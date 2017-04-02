@@ -57,6 +57,7 @@ namespace pybind
 		public:
 			bool apply( kernel_interface * _kernel, PyObject * _obj, std::wstring & _value, bool _nothrow ) override
 			{
+				(void)_kernel;
 				(void)_nothrow;
 
 				if( pybind::unicode_check( _obj ) == true )
@@ -82,6 +83,8 @@ namespace pybind
 		public:
 			PyObject * wrap( kernel_interface * _kernel, pybind::type_cast_result<std::wstring>::TCastRef _value ) override
 			{
+				(void)_kernel;
+
 				PyObject * py_value = pybind::unicode_from_wchar_size( _value.c_str(), _value.size() );
 
 				return py_value;
@@ -94,6 +97,7 @@ namespace pybind
 		public:
 			bool apply( kernel_interface * _kernel, PyObject * _obj, stdex::string & _value, bool _nothrow ) override
 			{
+				(void)_kernel;
 				(void)_nothrow;
 
 				if( pybind::string_check( _obj ) == true )
@@ -119,6 +123,7 @@ namespace pybind
 		public:
 			PyObject * wrap( kernel_interface * _kernel, pybind::type_cast_result<stdex::string>::TCastRef _value ) override
 			{
+				(void)_kernel;
 				PyObject * py_value = pybind::string_from_char_size( _value.c_str(), _value.size() );
 
 				return py_value;
@@ -131,6 +136,7 @@ namespace pybind
 		public:
 			bool apply( kernel_interface * _kernel, PyObject * _obj, stdex::wstring & _value, bool _nothrow ) override
 			{
+				(void)_kernel;
 				(void)_nothrow;
 
 				if( pybind::unicode_check( _obj ) == true )
@@ -156,6 +162,7 @@ namespace pybind
 		public:
 			PyObject * wrap( kernel_interface * _kernel, pybind::type_cast_result<stdex::wstring>::TCastRef _value ) override
 			{
+				(void)_kernel;
 				PyObject * py_value = pybind::unicode_from_wchar_size( _value.c_str(), _value.size() );
 
 				return py_value;

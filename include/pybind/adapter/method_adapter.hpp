@@ -27,7 +27,7 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
             (void)_kwds;
 
@@ -54,7 +54,7 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
 			(void)_kwds;
 
@@ -81,7 +81,7 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
 			(void)_kwds;
 			
@@ -108,7 +108,7 @@ namespace pybind
         }
 
     protected:
-		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
         {
 			const char * scopeName = _kernel->get_class_type_info_t<C>();
 
@@ -144,7 +144,7 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
             (void)_kwds;
 
@@ -173,7 +173,7 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
 			(void)_kwds;
 
@@ -202,7 +202,7 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
 			(void)_kwds;
 
@@ -231,7 +231,7 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
 			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
@@ -258,7 +258,7 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
 			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
@@ -284,7 +284,7 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
             (void)_kwds;
 
@@ -311,7 +311,7 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
 			(void)_kwds;
 
@@ -338,7 +338,7 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
 			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
@@ -363,7 +363,7 @@ namespace pybind
 		}
 
 	protected:
-		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+		PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
 		{
 			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
@@ -388,7 +388,7 @@ namespace pybind
         }
 
     protected:
-        PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+        PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
         {
             C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
@@ -413,7 +413,7 @@ namespace pybind
         }
 
     protected:
-        PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+        PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
         {
             C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 

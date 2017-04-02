@@ -2,7 +2,7 @@
 
 #	include "pybind/system.hpp"
 
-#	include "pybind/class_type_scope.hpp"
+#	include "pybind/class_type_scope_interface.hpp"
 
 namespace pybind
 {
@@ -42,7 +42,7 @@ namespace pybind
 				return nullptr;
 			}
 
-			const class_type_scope_ptr & scope = kernel->get_class_scope( py_self->ob_type );
+			const class_type_scope_interface_ptr & scope = kernel->get_class_scope( py_self->ob_type );
 
 			PyObject * py_method = mt->iadapter->get( kernel, impl, scope );
 
@@ -80,7 +80,7 @@ namespace pybind
 				return nullptr;
 			}
 
-			const class_type_scope_ptr & scope = kernel->get_class_scope( py_self->ob_type );
+			const class_type_scope_interface_ptr & scope = kernel->get_class_scope( py_self->ob_type );
 
 			mt->iadapter->set( kernel, impl, py_value, scope );
 

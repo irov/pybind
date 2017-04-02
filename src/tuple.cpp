@@ -406,6 +406,8 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	pybind::tuple make_invalid_tuple_t( kernel_interface * _kernel )
 	{
+		(void)_kernel;
+
 		return pybind::tuple( pybind::borrowed() );
 	}
 }

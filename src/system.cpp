@@ -1,6 +1,6 @@
 #	include "pybind/system.hpp"
 
-#	include "pybind/class_type_scope.hpp"
+#	include "pybind/class_type_scope_interface.hpp"
 
 #	ifdef PYBIND_STL_SUPPORT
 #	include "pybind/stl_type_cast.hpp"
@@ -8,7 +8,7 @@
 
 #	include "config/python.hpp"
 
-#	include "kernel_python.hpp"
+#	include "python_kernel.hpp"
 
 #	include <stdexcept>
 #	include <stdio.h>
@@ -69,7 +69,7 @@ namespace pybind
 #   endif
 		}
 
-		kernel_interface * kernel = new kernel_python;
+		kernel_interface * kernel = new python_kernel;
 
 		if( kernel->initialize() == false )
 		{
@@ -1371,7 +1371,7 @@ namespace pybind
         va_list valist;
         va_start(valist, _message);
 
-        char buffer[2048];
+        char buffer[4096];
         vsprintf( buffer, _message, valist );
         va_end( valist );
 
@@ -1503,7 +1503,7 @@ namespace pybind
 
 		PyTypeObject * type = (PyTypeObject *)_value;
 
-		const class_type_scope_ptr & scope = kernel->get_class_scope( type );
+		const class_type_scope_interface_ptr & scope = kernel->get_class_scope( type );
 
 		if( scope == nullptr )
 		{

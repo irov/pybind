@@ -19,7 +19,7 @@ extern "C"
 
 namespace pybind
 {
-	typedef stdex::intrusive_ptr<class class_type_scope> class_type_scope_ptr;
+	typedef stdex::intrusive_ptr<class class_type_scope_interface> class_type_scope_interface_ptr;
 
 	typedef void * (*pybind_metacast)( void * );
 
@@ -33,7 +33,7 @@ namespace pybind
     class visitor_class_type_scope
     {
     public:
-		virtual void visit_scope( class_type_scope * _scope ) = 0;
+		virtual void visit_scope( class_type_scope_interface * _scope ) = 0;
     };
 
 	class observer_bind_call

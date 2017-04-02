@@ -2,7 +2,7 @@
 
 #	include "pybind/type_cast_result.hpp"
 
-#	include "pybind/class_type_scope.hpp"
+#	include "pybind/class_type_scope_interface.hpp"
 
 #	include "pybind/adapter/new_adapter.hpp"
 #	include "pybind/adapter/destroy_adapter.hpp"
@@ -697,7 +697,7 @@ namespace pybind
             return *this;
         }
 
-		const pybind::class_type_scope_ptr & get_scope() const
+		const class_type_scope_interface_ptr & get_scope() const
 		{
 			return m_scope;
 		}
@@ -705,11 +705,11 @@ namespace pybind
 	protected:
 		void setup_extract( const type_cast_ptr & _type )
 		{
-			pybind::registration_type_cast<C>(m_kernel, _type);
+			registration_type_cast<C>(m_kernel, _type);
 		}
 
 	protected:
-		class_type_scope_ptr m_scope;
+		class_type_scope_interface_ptr m_scope;
 
 		kernel_interface * m_kernel;
 	};
@@ -718,7 +718,7 @@ namespace pybind
 		: public new_adapter_interface
 	{
 	public:
-		void * call( pybind::kernel_interface * _kernel, const pybind::class_type_scope_ptr & _scope, PyObject * _obj, PyObject * _args, PyObject * _kwds ) override
+		void * call( kernel_interface * _kernel, const class_type_scope_interface_ptr & _scope, PyObject * _obj, PyObject * _args, PyObject * _kwds ) override
 		{
             (void)_kernel;
 			(void)_scope;
@@ -739,7 +739,7 @@ namespace pybind
 		: public destroy_adapter_interface
 	{
 	public:
-		void call( pybind::kernel_interface * _kernel, const pybind::class_type_scope_ptr & _scope, void * _impl ) override
+		void call( kernel_interface * _kernel, const class_type_scope_interface_ptr & _scope, void * _impl ) override
 		{
             (void)_kernel;
 			(void)_scope;
@@ -755,7 +755,7 @@ namespace pybind
 		: public destroy_adapter_interface
 	{
 	public:
-		void call( pybind::kernel_interface * _kernel, const pybind::class_type_scope_ptr & _scope, void * _impl ) override
+		void call( kernel_interface * _kernel, const class_type_scope_interface_ptr & _scope, void * _impl ) override
 		{
             (void)_kernel;
 			(void)_scope;
@@ -809,7 +809,7 @@ namespace pybind
 				return pybind::ret_none();
 			}
 
-			const class_type_scope_ptr & scope = _kernel->class_scope<C>();
+			const class_type_scope_interface_ptr & scope = _kernel->class_scope<C>();
 
 			PyObject * py_obj = scope->create_class( (void *)_value );
 
@@ -876,7 +876,7 @@ namespace pybind
 			void * impl;
 			if( type_cast::type_info_cast( _kernel, _obj, tinfo, tptrinfo, &impl ) == false )
 			{
-				const class_type_scope_ptr & scope = _kernel->get_class_type_scope( tinfo );
+				const class_type_scope_interface_ptr & scope = _kernel->get_class_type_scope( tinfo );
 
 				const convert_adapter_interface_ptr & convert = scope->get_convert_adapter();
 
@@ -914,7 +914,7 @@ namespace pybind
 
 			void * obj_place = nullptr;
 
-			const class_type_scope_ptr & scope = _kernel->get_class_type_scope( tinfo );
+			const class_type_scope_interface_ptr & scope = _kernel->get_class_type_scope( tinfo );
 
 			PyObject * py_obj = scope->create_pod( &obj_place );
 
@@ -953,7 +953,7 @@ namespace pybind
 			constructor_adapter_interface_ptr ctr =
 				new constructor_new<C, init<C0, C1, C2, C3, C4, C5> >();
 
-			const pybind::class_type_scope_ptr & scope = base_<C, B>::get_scope();
+			const class_type_scope_interface_ptr & scope = base_<C, B>::get_scope();
 
 			scope->set_construct( ctr );
 
@@ -985,7 +985,7 @@ namespace pybind
 			constructor_adapter_interface_ptr ctr =
 				new constructor_new<C, init<C0, C1, C2, C3, C4, C5> >();
 
-			const class_type_scope_ptr & scope = base_<C, B>::get_scope();
+			const class_type_scope_interface_ptr & scope = base_<C, B>::get_scope();
 
 			scope->set_construct( ctr );
 
@@ -1019,7 +1019,7 @@ namespace pybind
 			constructor_adapter_interface_ptr ctr =
 				new constructor_new<C, init<C0, C1, C2, C3, C4, C5> >();
 
-			const class_type_scope_ptr & scope = base_<C, B>::get_scope();
+			const class_type_scope_interface_ptr & scope = base_<C, B>::get_scope();
 
 			scope->set_construct( ctr );
 
@@ -1053,7 +1053,7 @@ namespace pybind
 			constructor_adapter_interface_ptr ctr =
 				new constructor_placement<C, init<C0, C1, C2, C3, C4, C5> >();
 
-			const class_type_scope_ptr & scope = base_<C, B>::get_scope();
+			const class_type_scope_interface_ptr & scope = base_<C, B>::get_scope();
 
 			scope->set_construct( ctr );
 
@@ -1087,7 +1087,7 @@ namespace pybind
 			constructor_adapter_interface_ptr ctr =
 				new constructor_placement<C, init<C0, C1, C2, C3, C4, C5> >();
 
-			const class_type_scope_ptr & scope = base_<C, B>::get_scope();
+			const class_type_scope_interface_ptr & scope = base_<C, B>::get_scope();
 
 			scope->set_construct( ctr );
 
@@ -1116,7 +1116,7 @@ namespace pybind
 	template<class T>
 	PyTypeObject * get_typemodule( kernel_interface * _kernel )
 	{
-		const class_type_scope_ptr & scope = _kernel->class_scope<T>();
+		const class_type_scope_interface_ptr & scope = _kernel->class_scope<T>();
 
 		PyTypeObject * typemodule = scope->get_typemodule();
 

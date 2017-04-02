@@ -1,6 +1,6 @@
 #	include "method_python.hpp"
 
-#	include "pybind/class_type_scope.hpp"
+#	include "pybind/class_type_scope_interface.hpp"
 
 #	include "pybind/system.hpp"
 #	include "pybind/logger.hpp"
@@ -55,7 +55,7 @@ namespace pybind
 				return nullptr;
 			}
 
-			const class_type_scope_ptr & scope = kernel->get_class_scope( mct->self->ob_type );
+			const class_type_scope_interface_ptr & scope = kernel->get_class_scope( mct->self->ob_type );
 
 			method_adapter_interface * adapter = mct->iadapter;
 

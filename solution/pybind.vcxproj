@@ -14,7 +14,6 @@
     <ClCompile Include="..\src\adapter_interface.cpp" />
     <ClCompile Include="..\src\base.cpp" />
     <ClCompile Include="..\src\bindable.cpp" />
-    <ClCompile Include="..\src\class_type_scope.cpp" />
     <ClCompile Include="..\src\debug.cpp" />
     <ClCompile Include="..\src\dict.cpp" />
     <ClCompile Include="..\src\dict_iterator.cpp" />
@@ -26,7 +25,8 @@
     <ClCompile Include="..\src\functor_python.cpp" />
     <ClCompile Include="..\src\helper.cpp" />
     <ClCompile Include="..\src\kernel.cpp" />
-    <ClCompile Include="..\src\kernel_python.cpp" />
+    <ClCompile Include="..\src\python_class_type_scope.cpp" />
+    <ClCompile Include="..\src\python_kernel.cpp" />
     <ClCompile Include="..\src\list.cpp" />
     <ClCompile Include="..\src\logger.cpp" />
     <ClCompile Include="..\src\member_python.cpp" />
@@ -66,7 +66,7 @@
     <ClInclude Include="..\include\pybind\base.hpp" />
     <ClInclude Include="..\include\pybind\bindable.hpp" />
     <ClInclude Include="..\include\pybind\class.hpp" />
-    <ClInclude Include="..\include\pybind\class_type_scope.hpp" />
+    <ClInclude Include="..\include\pybind\class_type_scope_interface.hpp" />
     <ClInclude Include="..\include\pybind\constructor_new.hpp" />
     <ClInclude Include="..\include\pybind\constructor_placement.hpp" />
     <ClInclude Include="..\include\pybind\debug.hpp" />
@@ -109,7 +109,8 @@
     <ClInclude Include="..\include\pybind\types.hpp" />
     <ClInclude Include="..\src\function_python.hpp" />
     <ClInclude Include="..\src\functor_python.hpp" />
-    <ClInclude Include="..\src\kernel_python.hpp" />
+    <ClInclude Include="..\src\python_class_type_scope.hpp" />
+    <ClInclude Include="..\src\python_kernel.hpp" />
     <ClInclude Include="..\src\member_python.hpp" />
     <ClInclude Include="..\src\method_python.hpp" />
     <ClInclude Include="..\src\pod_python.hpp" />
@@ -118,6 +119,7 @@
     <ProjectGuid>{D1280EC3-AEB3-4516-A4D4-B3EB605C5735}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>pybind</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -148,7 +150,7 @@
     <ClCompile>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;PYBIND_CALL_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\include;..\..\stdex\include;..\..\Python;..\..\Python\PC;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>

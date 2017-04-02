@@ -25,8 +25,8 @@ namespace pybind
 		}
 
 	public:
-		virtual void incref( kernel_interface * _kernel, void * _self, const class_type_scope_ptr & scope ) = 0;
-		virtual void decref( kernel_interface * _kernel, void * _self, const class_type_scope_ptr & scope ) = 0;
+		virtual void incref( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & scope ) = 0;
+		virtual void decref( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & scope ) = 0;
 
 	protected:
 		const char * m_name;
@@ -47,14 +47,14 @@ namespace pybind
 		}
 
 	protected:
-		void incref( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope ) override
+		void incref( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope ) override
 		{            
 			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 			
 			(self->*m_incref)();
 		}		
 
-		void decref( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope ) override
+		void decref( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope ) override
 		{
 			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
@@ -80,14 +80,14 @@ namespace pybind
 		}
 
 	protected:
-		void incref( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope ) override
+		void incref( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope ) override
 		{
 			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
 			(m_proxy->*m_incref)(self);
 		}
 
-		void decref( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope ) override
+		void decref( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope ) override
 		{
 			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
@@ -113,14 +113,14 @@ namespace pybind
 		}
 
 	protected:
-		void incref( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope ) override
+		void incref( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope ) override
 		{			
 			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
 			(*m_incref)(self);
 		}
 
-		void decref( kernel_interface * _kernel, void * _impl, const class_type_scope_ptr & _scope ) override
+		void decref( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope ) override
 		{
 			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
