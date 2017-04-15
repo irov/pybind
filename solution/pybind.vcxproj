@@ -19,9 +19,7 @@
     <ClCompile Include="..\src\dict_iterator.cpp" />
     <ClCompile Include="..\src\exception.cpp" />
     <ClCompile Include="..\src\extract.cpp" />
-    <ClCompile Include="..\src\function.cpp" />
     <ClCompile Include="..\src\function_python.cpp" />
-    <ClCompile Include="..\src\functor.cpp" />
     <ClCompile Include="..\src\functor_python.cpp" />
     <ClCompile Include="..\src\helper.cpp" />
     <ClCompile Include="..\src\kernel.cpp" />
@@ -77,6 +75,7 @@
     <ClInclude Include="..\include\pybind\function.hpp" />
     <ClInclude Include="..\include\pybind\function_call.hpp" />
     <ClInclude Include="..\include\pybind\function_interface.hpp" />
+    <ClInclude Include="..\include\pybind\function_kernel_call.hpp" />
     <ClInclude Include="..\include\pybind\function_proxy_call.hpp" />
     <ClInclude Include="..\include\pybind\functor.hpp" />
     <ClInclude Include="..\include\pybind\functor_interface.hpp" />
@@ -119,7 +118,6 @@
     <ProjectGuid>{D1280EC3-AEB3-4516-A4D4-B3EB605C5735}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>pybind</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -152,10 +150,11 @@
       </PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;PYBIND_CALL_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;PYBIND_CALL_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\include;..\..\stdex\include;..\..\Python;..\..\Python\PC;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
