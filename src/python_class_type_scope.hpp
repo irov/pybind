@@ -68,7 +68,6 @@ namespace pybind
 		PyObject * create_pod( void ** _impl ) override;
 
 		void * meta_cast( uint32_t _info, void * _impl ) override;
-        pybind::bindable * bindable_cast( void * _impl ) override;
 		void type_initialize( PyTypeObject * _type ) override;
 
 		bool is_instance( PyTypeObject * _type ) const override;

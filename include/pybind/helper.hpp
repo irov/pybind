@@ -118,11 +118,6 @@ namespace pybind
 			}
 
 		public:
-			~extract_operator_t()
-			{
-			}
-
-		public:
             PyObject * ptr() const
             {
                 return m_obj;

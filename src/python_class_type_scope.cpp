@@ -1441,34 +1441,6 @@ namespace pybind
 
 		return nullptr;
 	}
-    //////////////////////////////////////////////////////////////////////////
-    pybind::bindable * python_class_type_scope::bindable_cast( void * _impl )
-    {
-        if( m_binable_base == true )
-        {
-            pybind::bindable * obj = static_cast<pybind::bindable *>(_impl);
-
-            return obj;
-        }
-
-        for( uint32_t i = 0; i != m_basesCount; ++i )
-        {
-            Metacast & mc = m_bases[i];
-
-            void * down_impl = mc.cast( _impl );
-
-            pybind::bindable * obj = mc.scope->bindable_cast( down_impl );
-
-            if( obj == nullptr )
-            {
-                continue;
-            }
-
-            return obj;
-        }
-
-        return nullptr;
-    }
 	//////////////////////////////////////////////////////////////////////////
 	PyObject * python_class_type_scope::create_class( void * _impl )
 	{

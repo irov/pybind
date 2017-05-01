@@ -31,6 +31,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<bindable_adapter_interface> bindable_adapter_interface_ptr;
     //////////////////////////////////////////////////////////////////////////
+	template<class C>
     class bindable_adapter
         : public bindable_adapter_interface
     {
@@ -43,9 +44,9 @@ namespace pybind
     protected:
         void clear(kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope) override
         {
-            pybind::bindable * self = _kernel->bindable_cast(_impl, _scope);
+			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
-            self->clear();
+			self->clear();
         }
     };
 }

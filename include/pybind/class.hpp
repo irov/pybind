@@ -690,7 +690,7 @@ namespace pybind
         base_ & def_bindable()
         {
             bindable_adapter_interface_ptr iadapter =
-                new bindable_adapter("unwrap_bindable");
+                new bindable_adapter<C>("unwrap_bindable");
             
             m_scope->set_bindable(iadapter);
 

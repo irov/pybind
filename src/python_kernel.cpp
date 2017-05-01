@@ -519,13 +519,6 @@ namespace pybind
 
 		return successful;
 	}
-    //////////////////////////////////////////////////////////////////////////
-    pybind::bindable * python_kernel::bindable_cast( void * _self, const class_type_scope_interface_ptr & _scope )
-    {        
-        pybind::bindable * bindable_self = _scope->bindable_cast( _self );
-
-        return bindable_self;
-    }
 	//////////////////////////////////////////////////////////////////////////
 	void * python_kernel::check_registred_class( PyObject * _obj, uint32_t _info )
 	{
