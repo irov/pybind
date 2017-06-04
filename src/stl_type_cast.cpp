@@ -63,7 +63,7 @@ namespace pybind
 				if( pybind::unicode_check( _obj ) == true )
 				{
 					size_t size = 0;
-					const pybind::pybind_unicode_t * value_char = pybind::unicode_to_wchar_and_size( _obj, size );
+					const wchar_t * value_char = pybind::unicode_to_wchar_and_size( _obj, size );
 
 					if( value_char == nullptr )
 					{
@@ -142,7 +142,7 @@ namespace pybind
 				if( pybind::unicode_check( _obj ) == true )
 				{
 					size_t size = 0;
-					const pybind::pybind_unicode_t * value_char = pybind::unicode_to_wchar_and_size( _obj, size );
+					const wchar_t * value_char = pybind::unicode_to_wchar_and_size( _obj, size );
 
 					if( value_char == nullptr )
 					{

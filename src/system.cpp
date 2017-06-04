@@ -1628,7 +1628,7 @@ namespace pybind
         return wstr;
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * unicode_from_wchar( const pybind_unicode_t * _value )
+    PyObject * unicode_from_wchar( const wchar_t * _value )
     {
         size_t size = wcslen( _value );
 
@@ -1638,7 +1638,7 @@ namespace pybind
         return py_unicode;
     }
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * unicode_from_wchar_size( const pybind_unicode_t * _value, size_t _size )
+	PyObject * unicode_from_wchar_size( const wchar_t * _value, size_t _size )
 	{
 		Py_ssize_t py_size = (Py_ssize_t)_size;
 		PyObject * py_unicode = PyUnicode_FromUnicode( _value, py_size );

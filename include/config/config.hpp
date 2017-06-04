@@ -44,11 +44,3 @@
 #	define PYBIND_MEMCPY(Dest, Src, Size) stdex::memorycopy(Dest, Src, Size)
 #	endif
 
-namespace pybind
-{
-#   ifndef PYBIND_UNICODE_T
-#	define PYBIND_UNICODE_T wchar_t
-#	endif
-
-	typedef PYBIND_UNICODE_T pybind_unicode_t;
-}
