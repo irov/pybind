@@ -28,7 +28,8 @@ namespace pybind
 
 			template<class T>
 			explicit return_operator_t( kernel_interface * _kernel, const T & _value )
-				: m_obj( ptr_throw_specialized<T>()(_kernel, _value) )
+                : m_kernel( _kernel )
+                , m_obj( ptr_throw_specialized<T>()(_kernel, _value) )
 			{
 			}
 
@@ -72,7 +73,8 @@ namespace pybind
 		public:
 			template<class T>
 			import_operator_t( kernel_interface * _kernel, const T & _value )
-				: m_obj( ptr_throw_specialized<T>()(_kernel, _value) )
+                : m_kernel( _kernel )
+				, m_obj( ptr_throw_specialized<T>()(_kernel, _value) )
 			{
 			}
 
