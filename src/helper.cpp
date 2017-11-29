@@ -58,14 +58,23 @@ namespace pybind
 		return result;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool dict_setstring_i( kernel_interface * _kernel, PyObject * _dict, const char * _name, const detail::import_operator_t & _value )
+	bool dict_setstring_i( kernel_interface * _kernel, PyObject * _dict, const char * _key, const detail::import_operator_t & _value )
 	{
 		(void)_kernel;
 
-		bool result = pybind::dict_setstring( _dict, _name, _value );
+		bool result = pybind::dict_setstring( _dict, _key, _value );
 
 		return result;
 	}
+    //////////////////////////////////////////////////////////////////////////
+    bool dict_setobject_i( kernel_interface * _kernel, PyObject * _dict, PyObject * _key, const detail::import_operator_t & _value )
+    {
+        (void)_kernel;
+
+        bool result = pybind::dict_set( _dict, _key, _value );
+
+        return result;
+    }
 	//////////////////////////////////////////////////////////////////////////
 	detail::args_operator_t make_args_t( kernel_interface * _kernel, PyObject * _tuple, size_t _size )
 	{
