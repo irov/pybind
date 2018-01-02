@@ -15,9 +15,9 @@ namespace pybind
 	public:
 		explicit dict( pybind::invalid );
 		explicit dict( kernel_interface * _kernel );
-		explicit dict( kernel_interface * _kernel, size_t _presized );
-		explicit dict( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed );
-		explicit dict( kernel_interface * _kernel, PyObject * _obj );
+		dict( kernel_interface * _kernel, size_t _presized );
+		dict( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed );
+		dict( kernel_interface * _kernel, PyObject * _obj );
 
     public:
         typedef dict_iterator iterator;

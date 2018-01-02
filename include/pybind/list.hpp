@@ -15,9 +15,9 @@ namespace pybind
 				
 	public:
 		explicit list( pybind::invalid );
-		explicit list( kernel_interface * _kernel, size_t _size );
-		explicit list( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed );
-		explicit list( kernel_interface * _kernel, PyObject * _obj );
+		list( kernel_interface * _kernel, size_t _size );
+		list( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed );
+		list( kernel_interface * _kernel, PyObject * _obj );
 
 	public:
 		detail::set_list_operator_t operator [] ( size_t _index );

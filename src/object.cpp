@@ -112,47 +112,47 @@ namespace pybind
 		return pybind::call_i( m_kernel, m_obj, _t0, _t1, _t2, _t3, _t4, _t5, _t6, _t7 );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	detail::extract_operator_t object::call_args( const detail::args_operator_t & _args ) const
+	detail::extract_operator_t object::call_args( const args & _args ) const
 	{
 		return pybind::call_args_t( m_kernel, m_obj, _args );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	detail::extract_operator_t object::call_args_i( const detail::import_operator_t & _t0, const detail::args_operator_t & _args ) const
+	detail::extract_operator_t object::call_args_i( const detail::import_operator_t & _t0, const args & _args ) const
 	{
 		return pybind::call_args_i( m_kernel, m_obj, _t0, _args );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	detail::extract_operator_t object::call_args_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::args_operator_t & _args ) const
+	detail::extract_operator_t object::call_args_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const args & _args ) const
 	{
 		return pybind::call_args_i( m_kernel, m_obj, _t0, _t1, _args );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	detail::extract_operator_t object::call_args_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::args_operator_t & _args ) const
+	detail::extract_operator_t object::call_args_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const args & _args ) const
 	{
 		return pybind::call_args_i( m_kernel, m_obj, _t0, _t1, _t2, _args );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	detail::extract_operator_t object::call_args_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::args_operator_t & _args ) const
+	detail::extract_operator_t object::call_args_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const args & _args ) const
 	{
 		return pybind::call_args_i( m_kernel, m_obj, _t0, _t1, _t2, _t3, _args );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	detail::extract_operator_t object::call_args_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::args_operator_t & _args ) const
+	detail::extract_operator_t object::call_args_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const args & _args ) const
 	{
 		return pybind::call_args_i( m_kernel, m_obj, _t0, _t1, _t2, _t3, _t4, _args );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	detail::extract_operator_t object::call_args_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::args_operator_t & _args ) const
+	detail::extract_operator_t object::call_args_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const args & _args ) const
 	{
 		return pybind::call_args_i( m_kernel, m_obj, _t0, _t1, _t2, _t3, _t4, _t5, _args );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	detail::extract_operator_t object::call_args_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::args_operator_t & _args ) const
+	detail::extract_operator_t object::call_args_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const args & _args ) const
 	{
 		return pybind::call_args_i( m_kernel, m_obj, _t0, _t1, _t2, _t3, _t4, _t5, _t6, _args );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	detail::extract_operator_t object::call_args_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::import_operator_t & _t7, const detail::args_operator_t & _args ) const
+	detail::extract_operator_t object::call_args_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::import_operator_t & _t7, const args & _args ) const
 	{
 		return pybind::call_args_i( m_kernel, m_obj, _t0, _t1, _t2, _t3, _t4, _t5, _t6, _t7, _args );
 	}

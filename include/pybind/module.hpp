@@ -17,10 +17,10 @@ namespace pybind
         module( const module & _module );
 
 	public:
-		explicit module( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed );
-		explicit module( kernel_interface * _kernel, PyObject * _obj );
+		module( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed );
+		module( kernel_interface * _kernel, PyObject * _obj );
 
-	public:
+    public:
 		template<class T>
 		bool has_attr( const T & _name ) const
 		{

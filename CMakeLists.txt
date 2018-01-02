@@ -1,0 +1,62 @@
+cmake_minimum_required(VERSION 3.0)
+
+OPTION(PYBIND_PROJECT_NAME  "PYBIND_PROJECT_NAME" ON)
+
+PROJECT(${PYBIND_PROJECT_NAME})
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall /WX")
+  set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} /wd4710") #function not inlined 
+  set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} /wd4738") #storing 32-bit float result in memory, possible loss of performance
+endif()
+
+OPTION(PYBIND_EXTERNAL_BUILD  "LIBMOVIE_EXTERNAL_BUILD"  OFF)
+OPTION(PYBIND_PYTHON_INCLUDE_PATH  "PYBIND_PYTHON_INCLUDE_PATH" OFF)
+OPTION(PYBIND_PYTHON_CONFIG_INCLUDE_PATH  "PYBIND_PYTHON_CONFIG_INCLUDE_PATH" OFF)
+OPTION(PYBIND_STDEX_INCLUDE_PATH  "PYBIND_STDEX_INCLUDE_PATH" OFF)
+OPTION(PYBIND_PYTHON_VERSION "PYBIND_PYTHON_VERSION" 278)
+
+IF( NOT PYBIND_EXTERNAL_BUILD )
+    SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build_temp/${ENGINE_LIB_DIR} )
+    SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/pybind_win32 )
+    SET( CMAKE_TEMP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/CMakeTemp/pybind_win32/${CMAKE_GENERATOR}/${CMAKE_BUILD_TYPE} )
+ENDIF()
+
+SET( CONFIG_DIR include/config )
+SET( PUBLIC_DIR include/pybind )
+SET( PRIVATE_DIR src )
+
+file(GLOB files_config_headers ${CONFIG_DIR}/*.hpp)
+file(GLOB files_public_headers ${PUBLIC_DIR}/*.hpp)
+file(GLOB files_private_headers ${PRIVATE_DIR}/*.hpp)
+file(GLOB files_private_sources ${PRIVATE_DIR}/*.cpp)
+
+INCLUDE_DIRECTORIES( ${PROJECT_NAME} include )
+
+if(PYBIND_PYTHON_INCLUDE_PATH)
+    include_directories(${PYBIND_PYTHON_INCLUDE_PATH})
+endif()
+if(PYBIND_PYTHON_CONFIG_INCLUDE_PATH)
+    include_directories(${PYBIND_PYTHON_CONFIG_INCLUDE_PATH})
+endif()
+if(PYBIND_STDEX_INCLUDE_PATH)
+    include_directories(${PYBIND_STDEX_INCLUDE_PATH})
+endif()
+
+if( CMAKE_BUILD_TYPE MATCHES Debug )
+    add_definitions(-DPYBIND_CALL_DEBUG)
+endif()
+
+add_definitions(-DMS_NO_COREDLL)
+add_definitions(-DPy_NO_ENABLE_SHARED)
+add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+
+add_definitions(-DPYBIND_PYTHON_VERSION=${PYBIND_PYTHON_VERSION})
+
+ADD_LIBRARY( ${PROJECT_NAME} STATIC ${files_config_headers} ${files_public_headers} ${files_private_headers} ${files_private_sources} )
