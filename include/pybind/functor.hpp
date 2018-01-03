@@ -15,7 +15,7 @@ namespace pybind
 		typedef typename stdex::function_traits<F>::result t_info;
 
 		functor_adapter_interface_ptr adapter =
-			new functor_proxy_adapter<typename t_info::class_type, F>(_name, t_info::arity, _self, _method );
+			new functor_proxy_adapter<C, F>(_name, t_info::arity, _self, _method );
 
 		_kernel->def_functor_adapter( adapter, false, _module );		
 	}
@@ -26,7 +26,7 @@ namespace pybind
 		typedef typename stdex::function_traits<F>::result t_info;
 
 		functor_adapter_interface_ptr adapter =
-			new functor_proxy_kernel_adapter<typename t_info::class_type, F>( _name, t_info::arity, _self, _method );
+			new functor_proxy_kernel_adapter<C, F>( _name, t_info::arity, _self, _method );
 
 		_kernel->def_functor_adapter( adapter, false, _module );
 	}
@@ -37,7 +37,7 @@ namespace pybind
 		typedef typename stdex::function_traits<F>::result t_info;
 
 		functor_adapter_interface_ptr adapter =
-			new functor_proxy_adapter_args<typename t_info::class_type, F>( _name, t_info::arity, _self, _method );
+			new functor_proxy_adapter_args<C, F>( _name, t_info::arity, _self, _method );
 
 		_kernel->def_functor_adapter( adapter, false, _module );
 	}
@@ -48,7 +48,20 @@ namespace pybind
         typedef typename stdex::function_traits<F>::result t_info;
 
         functor_adapter_interface_ptr adapter =
-            new functor_proxy_adapter<typename t_info::class_type, F>( _name, t_info::arity, _self, _method );
+            new functor_proxy_adapter<C, F>( _name, t_info::arity, _self, _method );
+
+        PyObject * obj = _kernel->create_functor_adapter( adapter, false );
+
+        return obj;
+    }
+
+    template<class C, class FI, class FD, class M>
+    PyObject * create_functor_ptr( kernel_interface * _kernel, const char * _name, C * _self, FI _incref, FD _decref, M _method )
+    {
+        typedef typename stdex::function_traits<M>::result t_info;
+
+        functor_adapter_interface_ptr adapter =
+            new functor_proxy_adapter_ptr<C, FI, FD, M>( _name, t_info::arity, _self, _incref, _decref, _method );
 
         PyObject * obj = _kernel->create_functor_adapter( adapter, false );
 
