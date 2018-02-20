@@ -65,7 +65,7 @@ namespace pybind
 		dict_iterator tmp = *this;
 		++*this;
 
-		return *this;
+		return tmp;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	detail::extract_operator_t dict_iterator::key() const
