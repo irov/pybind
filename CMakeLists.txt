@@ -4,13 +4,15 @@ OPTION(PYBIND_PROJECT_NAME  "PYBIND_PROJECT_NAME" ON)
 
 PROJECT(${PYBIND_PROJECT_NAME})
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror")
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL AppleClang)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror")
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror")
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL Intel)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror")
+elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall /WX")
   set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} /wd4710") #function not inlined 
   set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} /wd4738") #storing 32-bit float result in memory, possible loss of performance
