@@ -138,13 +138,11 @@ namespace pybind
 		uint32_t m_basesCount;
         
         void * m_user;
+
 		new_adapter_interface_ptr m_new;
 		destroy_adapter_interface_ptr m_destructor;
-
         constructor_adapter_interface_ptr m_constructor;
-
 		convert_adapter_interface_ptr m_convert;
-
         method_adapter_interface_ptr m_call;
 		repr_adapter_interface_ptr m_repr;
         hash_adapter_interface_ptr m_hash;
@@ -159,10 +157,16 @@ namespace pybind
 		number_binary_adapter_interface_ptr m_number_mul;
 		number_binary_adapter_interface_ptr m_number_div;
 				
-		number_binary_adapter_interface_ptr m_number_adds[PYBIND_TYPE_COUNT];
-		number_binary_adapter_interface_ptr m_number_subs[PYBIND_TYPE_COUNT];
-		number_binary_adapter_interface_ptr m_number_muls[PYBIND_TYPE_COUNT];
-		number_binary_adapter_interface_ptr m_number_divs[PYBIND_TYPE_COUNT];
+        struct number_multy_adapter_t
+        {
+            number_binary_adapter_interface_ptr adds[PYBIND_TYPE_COUNT];
+            number_binary_adapter_interface_ptr subs[PYBIND_TYPE_COUNT];
+            number_binary_adapter_interface_ptr muls[PYBIND_TYPE_COUNT];
+            number_binary_adapter_interface_ptr divs[PYBIND_TYPE_COUNT];
+        };
+
+        number_binary_adapter_interface_ptr m_number_none;
+        number_multy_adapter_t * m_number_multy;
 
 		smart_pointer_adapter_interface_ptr m_smart_pointer;
         bindable_adapter_interface_ptr m_bindable;
@@ -174,6 +178,9 @@ namespace pybind
 		uint32_t m_pod_size;
 		bool m_pod_hash;
         bool m_binable_base;
+
+    protected:
+        number_multy_adapter_t * get_number_multy();
 	};
 	//////////////////////////////////////////////////////////////////////////
 	inline const new_adapter_interface_ptr & python_class_type_scope::get_new_adapter() const
@@ -258,22 +265,42 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	inline const number_binary_adapter_interface_ptr & python_class_type_scope::get_number_add_adapters( uint32_t _typeId ) const
 	{
-		return m_number_adds[_typeId];
+        if( m_number_multy == nullptr )
+        {
+            return m_number_none;
+        }
+
+		return m_number_multy->adds[_typeId];
 	}
 	//////////////////////////////////////////////////////////////////////////
 	inline const number_binary_adapter_interface_ptr & python_class_type_scope::get_number_sub_adapters( uint32_t _typeId ) const
 	{
-		return m_number_subs[_typeId];
+        if( m_number_multy == nullptr )
+        {
+            return m_number_none;
+        }
+
+		return m_number_multy->subs[_typeId];
 	}
 	//////////////////////////////////////////////////////////////////////////
 	inline const number_binary_adapter_interface_ptr & python_class_type_scope::get_number_mul_adapters( uint32_t _typeId ) const
 	{
-		return m_number_muls[_typeId];
+        if( m_number_multy == nullptr )
+        {
+            return m_number_none;
+        }
+
+		return m_number_multy->muls[_typeId];
 	}
 	//////////////////////////////////////////////////////////////////////////
 	inline const number_binary_adapter_interface_ptr & python_class_type_scope::get_number_div_adapters( uint32_t _typeId ) const
 	{
-		return m_number_divs[_typeId];
+        if( m_number_multy == nullptr )
+        {
+            return m_number_none;
+        }
+
+		return m_number_multy->divs[_typeId];
 	}
 	//////////////////////////////////////////////////////////////////////////
 	inline const smart_pointer_adapter_interface_ptr & python_class_type_scope::get_smart_pointer() const

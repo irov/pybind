@@ -88,7 +88,6 @@ namespace pybind
 		functor_python m_functors;
 		member_python m_members;
 		method_python m_methods;
-
 		pod_python m_pods;
 
 		PyObject * m_current_module;
