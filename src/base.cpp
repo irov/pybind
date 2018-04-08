@@ -42,9 +42,9 @@ namespace pybind
     base::~base()
 	{
 		pybind::decref( m_obj );
-#	ifdef _DEBUG
+#ifndef NDEBUG
 		m_obj = nullptr;
-#	endif
+#endif
 	}
 	//////////////////////////////////////////////////////////////////////////
     base & base::operator = (const base & _obj)
