@@ -349,20 +349,6 @@ namespace pybind
 		return pybind::unicode_from_wchar( tmp );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw_i( kernel_interface * _kernel, long _value )
-	{
-		(void)_kernel;
-
-		return pybind::ptr_long( _value );
-	}
-	//////////////////////////////////////////////////////////////////////////
-	PyObject * ptr_throw_i( kernel_interface * _kernel, unsigned long _value )
-	{
-		(void)_kernel;
-
-		return pybind::ptr_ulong( _value );
-	}
-	//////////////////////////////////////////////////////////////////////////
 	PyObject * ptr_throw_i( kernel_interface * _kernel, float _value )
 	{
 		(void)_kernel;
