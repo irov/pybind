@@ -281,8 +281,6 @@ namespace pybind
 	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, uint32_t _value );	
 	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, uint64_t _value );	
 	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, wchar_t _value );
-	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, long _value );
-	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, unsigned long _value );
 	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, float _value );
 	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, double _value );
 	PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, char * _value );
