@@ -28,11 +28,52 @@ IF( NOT PYBIND_EXTERNAL_BUILD )
     SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build_temp/${ENGINE_LIB_DIR} )
     SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/pybind_win32 )
     SET( CMAKE_TEMP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/CMakeTemp/pybind_win32/${CMAKE_GENERATOR}/${CMAKE_BUILD_TYPE} )
+    
+    SET(PYBIND_PYTHON_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/Python CACHE STRING "PYBIND_PYTHON_INCLUDE_PATH" FORCE)
+    SET(PYBIND_PYTHON_CONFIG_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/Python/PC CACHE STRING "PYBIND_PYTHON_CONFIG_INCLUDE_PATH" FORCE)
+    
+    set(DEPENDENCIES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dependencies")
+
+    if(NOT EXISTS ${DEPENDENCIES_DIR}/Python)
+        message("Downloading python 2x, this may take some time!")
+        file(DOWNLOAD "https://www.python.org/ftp/python/2.7.14/Python-2.7.14.tgz" "${DEPENDENCIES_DIR}/Python-2.7.14.tgz" SHOW_PROGRESS)
+        
+        execute_process(
+            COMMAND ${CMAKE_COMMAND} -E tar x "${DEPENDENCIES_DIR}/Python-2.7.14.tgz"
+            WORKING_DIRECTORY "${DEPENDENCIES_DIR}"
+        )
+        
+        execute_process(
+            COMMAND ${CMAKE_COMMAND} -E rename
+            "${DEPENDENCIES_DIR}/Python-2.7.14" "${DEPENDENCIES_DIR}/Python"
+        )
+    endif()    
+    
+    include(ExternalProject)
+    
+    ExternalProject_Add(stdex_download PREFIX stdex
+    GIT_REPOSITORY https://github.com/irov/stdex.git
+        
+    UPDATE_COMMAND ""
+    INSTALL_COMMAND ""
+  
+    CMAKE_ARGS 
+        "-DSTDEX_EXTERNAL_BUILD=ON"
+    )
+    
+    ExternalProject_Get_Property(stdex_download SOURCE_DIR)
+    set(STDEX_INCLUDE_DIR ${SOURCE_DIR}/include)
+    set(STDEX_LIBRARY_DIR ${SOURCE_DIR}/lib)
+    
+    set(STDEX_INCLUDE_DIR ${STDEX_INCLUDE_DIR} CACHE STRING "")
+    set(STDEX_LIBRARY_DIR ${STDEX_LIBRARY_DIR} CACHE STRING "")
+    
+    SET(PYBIND_STDEX_INCLUDE_PATH ${STDEX_INCLUDE_DIR} CACHE STRING "PYBIND_STDEX_INCLUDE_PATH" FORCE)
 ENDIF()
 
-SET( CONFIG_DIR include/config )
-SET( PUBLIC_DIR include/pybind )
-SET( PRIVATE_DIR src )
+SET( CONFIG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/config )
+SET( PUBLIC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/pybind )
+SET( PRIVATE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src )
 
 file(GLOB files_config_headers ${CONFIG_DIR}/*.hpp)
 file(GLOB files_public_headers ${PUBLIC_DIR}/*.hpp)
@@ -44,9 +85,11 @@ INCLUDE_DIRECTORIES( ${PROJECT_NAME} include )
 if(PYBIND_PYTHON_INCLUDE_PATH)
     include_directories(${PYBIND_PYTHON_INCLUDE_PATH})
 endif()
+
 if(PYBIND_PYTHON_CONFIG_INCLUDE_PATH)
     include_directories(${PYBIND_PYTHON_CONFIG_INCLUDE_PATH})
 endif()
+
 if(PYBIND_STDEX_INCLUDE_PATH)
     include_directories(${PYBIND_STDEX_INCLUDE_PATH})
 endif()
@@ -62,3 +105,8 @@ add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 add_definitions(-DPYBIND_PYTHON_VERSION=${PYBIND_PYTHON_VERSION})
 
 ADD_LIBRARY( ${PROJECT_NAME} STATIC ${files_config_headers} ${files_public_headers} ${files_private_headers} ${files_private_sources} )
+
+IF( NOT PYBIND_EXTERNAL_BUILD )
+    TARGET_LINK_LIBRARIES( ${PROJECT_NAME} stdex )
+    add_dependencies(${PROJECT_NAME} stdex_download)
+ENDIF()
