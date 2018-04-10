@@ -67,6 +67,7 @@ IF( NOT PYBIND_EXTERNAL_BUILD )
     CMAKE_ARGS 
         "-DSTDEX_EXTERNAL_BUILD=ON"
         "-DCMAKE_CXX_STANDARD=11"
+        "-DLONG_BIT=64"
     )
     
     ExternalProject_Get_Property(stdex_download SOURCE_DIR)
