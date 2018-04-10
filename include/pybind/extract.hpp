@@ -123,8 +123,6 @@ namespace pybind
 	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, uint32_t & _value, bool _nothrow );
 	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, uint64_t & _value, bool _nothrow );
 	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, wchar_t & _value, bool _nothrow );
-	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, long & _value, bool _nothrow );
-	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, unsigned long & _value, bool _nothrow );
 	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, float & _value, bool _nothrow );
 	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, double & _value, bool _nothrow );
 	PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, const char * & _value, bool _nothrow );
