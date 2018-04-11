@@ -15,7 +15,7 @@ environment:
 build_script:
 - mkdir build_cmake
 - cd build_cmake
-- cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU
+- cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DPYBIND_PYTHON_VERSION:INTEGER=278 -DPYBIND_PROJECT_NAME:STRING="pybind"
 - cmake --build .
 - ctest --output-on-failure
 
