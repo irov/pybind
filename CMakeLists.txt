@@ -48,7 +48,7 @@ IF( NOT PYBIND_EXTERNAL_BUILD )
         )
         
         message("Downloading pyconfig.h, this may take some time!")
-        file(DOWNLOAD https://raw.githubusercontent.com/holzschu/python_ios/master/pyconfig.h ${DEPENDENCIES_DIR}/PythonConfig/pyconfig.h SHOW_PROGRESS)
+        file(DOWNLOAD https://raw.githubusercontent.com/irov/Mengine/master/CMake/Dependencies/Python/ModifiedMac/pyconfig.h ${DEPENDENCIES_DIR}/PythonConfig/pyconfig.h SHOW_PROGRESS)
     endif()    
     
     SET(PYBIND_PYTHON_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/Python CACHE STRING "PYBIND_PYTHON_INCLUDE_PATH" FORCE)
