@@ -33,7 +33,7 @@ IF( NOT PYBIND_EXTERNAL_BUILD )
     
     set(DEPENDENCIES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dependencies")
 
-    if(NOT EXISTS ${DEPENDENCIES_DIR}/Python)
+    IF(NOT EXISTS ${DEPENDENCIES_DIR}/Python)
         message("Downloading python, this may take some time!")
         file(DOWNLOAD https://www.python.org/ftp/python/2.7.14/Python-2.7.14.tgz ${DEPENDENCIES_DIR}/Python-2.7.14.tgz SHOW_PROGRESS)
         
@@ -49,7 +49,7 @@ IF( NOT PYBIND_EXTERNAL_BUILD )
         
         message("Downloading pyconfig.h, this may take some time!")
         file(DOWNLOAD https://raw.githubusercontent.com/irov/Mengine/master/CMake/Dependencies/Python/ModifiedMac/pyconfig.h ${DEPENDENCIES_DIR}/PythonConfig/pyconfig.h SHOW_PROGRESS)
-    endif()    
+    ENDIF()
     
     SET(PYBIND_PYTHON_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/Python CACHE STRING "PYBIND_PYTHON_INCLUDE_PATH" FORCE)
     
@@ -57,7 +57,11 @@ IF( NOT PYBIND_EXTERNAL_BUILD )
         SET(PYBIND_PYTHON_CONFIG_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/Python/PC CACHE STRING "PYBIND_PYTHON_CONFIG_INCLUDE_PATH" FORCE)
     ELSE()
         SET(PYBIND_PYTHON_CONFIG_INCLUDE_PATH ${DEPENDENCIES_DIR}/PythonConfig CACHE STRING "PYBIND_PYTHON_CONFIG_INCLUDE_PATH" FORCE)
-    endif()
+    ENDIF()
+    
+    IF(WIN32)
+        add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    ENDIF()
     
     include(ExternalProject)
     
@@ -111,7 +115,7 @@ endif()
 
 add_definitions(-DMS_NO_COREDLL)
 add_definitions(-DPy_NO_ENABLE_SHARED)
-add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+
 
 add_definitions(-DPYBIND_PYTHON_VERSION=${PYBIND_PYTHON_VERSION})
 
