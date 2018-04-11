@@ -34,28 +34,29 @@ IF( NOT PYBIND_EXTERNAL_BUILD )
     set(DEPENDENCIES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dependencies")
 
     if(NOT EXISTS ${DEPENDENCIES_DIR}/Python)
-        message("Downloading python 2x, this may take some time!")
-        file(DOWNLOAD "https://www.python.org/ftp/python/2.7.14/Python-2.7.14.tgz" "${DEPENDENCIES_DIR}/Python-2.7.14.tgz" SHOW_PROGRESS)
+        message("Downloading python, this may take some time!")
+        file(DOWNLOAD https://www.python.org/ftp/python/2.7.14/Python-2.7.14.tgz ${DEPENDENCIES_DIR}/Python-2.7.14.tgz SHOW_PROGRESS)
         
         execute_process(
-            COMMAND ${CMAKE_COMMAND} -E tar x "${DEPENDENCIES_DIR}/Python-2.7.14.tgz"
+            COMMAND ${CMAKE_COMMAND} -E tar x ${DEPENDENCIES_DIR}/Python-2.7.14.tgz
             WORKING_DIRECTORY "${DEPENDENCIES_DIR}"
         )
         
         execute_process(
             COMMAND ${CMAKE_COMMAND} -E rename
-            "${DEPENDENCIES_DIR}/Python-2.7.14" "${DEPENDENCIES_DIR}/Python"
+            ${DEPENDENCIES_DIR}/Python-2.7.14 ${DEPENDENCIES_DIR}/Python
         )
         
-        file(DOWNLOAD "https://raw.githubusercontent.com/python-cmake-buildsystem/python-cmake-buildsystem/master/cmake/config-unix/pyconfig.h.in" "${DEPENDENCIES_DIR}/pyconfig.h.in" SHOW_PROGRESS)
+        message("Downloading pyconfig.h, this may take some time!")
+        file(DOWNLOAD https://raw.githubusercontent.com/holzschu/python_ios/master/pyconfig.h ${DEPENDENCIES_DIR}/PythonConfig/pyconfig.h SHOW_PROGRESS)
     endif()    
     
     SET(PYBIND_PYTHON_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/Python CACHE STRING "PYBIND_PYTHON_INCLUDE_PATH" FORCE)
-
+    
     IF(WIN32)
         SET(PYBIND_PYTHON_CONFIG_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/Python/PC CACHE STRING "PYBIND_PYTHON_CONFIG_INCLUDE_PATH" FORCE)
     ELSE()
-        configure_file("${DEPENDENCIES_DIR}/pyconfig.h.in" ${PYBIND_PYTHON_INCLUDE_PATH}/pyconfig.h)
+        SET(PYBIND_PYTHON_CONFIG_INCLUDE_PATH ${DEPENDENCIES_DIR}/PythonConfig CACHE STRING "PYBIND_PYTHON_CONFIG_INCLUDE_PATH" FORCE)
     endif()
     
     include(ExternalProject)
