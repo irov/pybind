@@ -46,6 +46,8 @@ IF( NOT PYBIND_EXTERNAL_BUILD )
             COMMAND ${CMAKE_COMMAND} -E rename
             "${DEPENDENCIES_DIR}/Python-2.7.14" "${DEPENDENCIES_DIR}/Python"
         )
+        
+        file(DOWNLOAD "https://raw.githubusercontent.com/python-cmake-buildsystem/python-cmake-buildsystem/master/cmake/config-unix/pyconfig.h.in" "${DEPENDENCIES_DIR}/pyconfig.h.in" SHOW_PROGRESS)
     endif()    
     
     SET(PYBIND_PYTHON_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/Python CACHE STRING "PYBIND_PYTHON_INCLUDE_PATH" FORCE)
@@ -53,20 +55,20 @@ IF( NOT PYBIND_EXTERNAL_BUILD )
     IF(WIN32)
         SET(PYBIND_PYTHON_CONFIG_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/Python/PC CACHE STRING "PYBIND_PYTHON_CONFIG_INCLUDE_PATH" FORCE)
     ELSE()
-        configure_file(${PYBIND_PYTHON_INCLUDE_PATH}/pyconfig.h.in ${PYBIND_PYTHON_INCLUDE_PATH}/pyconfig.h)
+        configure_file("${DEPENDENCIES_DIR}/pyconfig.h.in" ${PYBIND_PYTHON_INCLUDE_PATH}/pyconfig.h)
     endif()
     
     include(ExternalProject)
     
     ExternalProject_Add(stdex_download PREFIX stdex
-    GIT_REPOSITORY https://github.com/irov/stdex.git
+        GIT_REPOSITORY https://github.com/irov/stdex.git
         
-    UPDATE_COMMAND ""
-    INSTALL_COMMAND ""
+        UPDATE_COMMAND ""
+        INSTALL_COMMAND ""
   
-    CMAKE_ARGS 
-        "-DSTDEX_EXTERNAL_BUILD=ON"
-        "-DCMAKE_CXX_STANDARD=11"        
+        CMAKE_ARGS
+            "-DSTDEX_EXTERNAL_BUILD=ON"
+            "-DCMAKE_CXX_STANDARD=11"
     )
     
     ExternalProject_Get_Property(stdex_download SOURCE_DIR)
@@ -77,10 +79,6 @@ IF( NOT PYBIND_EXTERNAL_BUILD )
     set(STDEX_LIBRARY_DIR ${STDEX_LIBRARY_DIR} CACHE STRING "")
     
     SET(PYBIND_STDEX_INCLUDE_PATH ${STDEX_INCLUDE_DIR} CACHE STRING "PYBIND_STDEX_INCLUDE_PATH" FORCE)
-    
-    IF(NOT WIN32)
-        add_definitions(-DLONG_BIT=32)
-    ENDIF()
 ENDIF()
 
 SET( CONFIG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/config )
