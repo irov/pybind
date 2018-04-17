@@ -1529,9 +1529,9 @@ namespace pybind
 		return m_objectCount;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void python_class_type_scope::intrusive_ptr_destroy( python_class_type_scope * _ptr )
+    void python_class_type_scope::destroy_intrusive_ptr()
 	{
-		delete _ptr;
+		delete this;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void * python_class_type_scope::operator new (size_t _size)

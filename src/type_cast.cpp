@@ -22,9 +22,9 @@ namespace pybind
 		PYBIND_FREE(_ptr, _size);
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void type_cast::intrusive_ptr_destroy( type_cast * _ptr )
+    void type_cast::destroy_intrusive_ptr()
 	{
-		delete _ptr;
+		delete this;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	bool type_cast::type_info_cast( kernel_interface * _kernel, PyObject * _obj, uint32_t _tinfo, uint32_t _tptrinfo, void ** _impl )
