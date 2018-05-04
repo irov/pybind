@@ -51,6 +51,7 @@ namespace pybind
 	void bindable::unwrap()
 	{        
 		pybind::unwrap( m_embed );
+        m_embed = nullptr;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void bindable::_embedding( PyObject * _embed )
