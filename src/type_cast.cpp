@@ -22,7 +22,7 @@ namespace pybind
 		PYBIND_FREE(_ptr, _size);
 	}
 	//////////////////////////////////////////////////////////////////////////
-    void type_cast::destroy_intrusive_ptr()
+    void type_cast::destroy()
 	{
 		delete this;
 	}

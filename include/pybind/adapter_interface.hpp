@@ -19,7 +19,7 @@ namespace pybind
 		};
 
     public:
-		void destroy_intrusive_ptr() override;
+		void destroy() override;
 
 	public:
 		void * operator new ( size_t _size );

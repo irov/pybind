@@ -5,7 +5,7 @@
 namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
-	void adapter_interface::destroy_intrusive_ptr()
+    void adapter_interface::destroy()
 	{
 		delete this;
 	}
