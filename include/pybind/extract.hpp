@@ -332,26 +332,6 @@ namespace pybind
 		}
 	};
 
-	//template<typename T>
-	//struct ptr_throw_specialized < T, typename stdex::mpl::enable_if<stdex::mpl::is_base_of<pybind::bindable, typename stdex::mpl::remove_ptr<T>::type>::value>::type >
-	//{
-	//	PyObject * operator () ( kernel_interface * _kernel, pybind::bindable * _t )
-	//	{
-	//		return ptr_throw_i( _kernel, _t );
-	//	}
-	//};
-
- //   template<typename T>
- //   struct ptr_throw_specialized < stdex::intrusive_ptr<T>, typename stdex::mpl::enable_if<stdex::mpl::is_base_of<pybind::bindable, typename stdex::mpl::remove_ptr<T>::type>::value>::type >
- //   {
- //       PyObject * operator () ( kernel_interface * _kernel, const stdex::intrusive_ptr<T> & _t )
- //       {
- //           pybind::bindable * t_ptr = _t.get();
-
- //           return ptr_throw_i( _kernel, t_ptr );
- //       }
- //   };
-
 	template<class T>
 	PyObject * ptr_throw( kernel_interface * _kernel, const T & _value )
 	{ 

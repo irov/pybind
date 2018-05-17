@@ -97,11 +97,11 @@ namespace pybind
 	};
 	//////////////////////////////////////////////////////////////////////////
     template<class C, class F>
-    class method_adapter_depricated
+    class method_adapter_deprecated
         : public method_adapter<C, F>
     {
     public:
-        method_adapter_depricated( const char * _name, F _fn, const char * _doc )
+        method_adapter_deprecated( const char * _name, F _fn, const char * _doc )
             : method_adapter<C, F>(_name, _fn)
             , m_doc(_doc)
         {
@@ -114,7 +114,7 @@ namespace pybind
 
             const char * name = this->getName();
 
-            pybind::error_traceback("method %s::%s depricated '%s'"
+            pybind::error_traceback("method %s::%s deprecated '%s'"
                 , scopeName
                 , name
                 , m_doc

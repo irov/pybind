@@ -1389,7 +1389,7 @@ namespace pybind
     {
         if( m_new != nullptr )
         {
-            void * impl = m_new->call( m_kernel, this, _obj, _args, _kwds );
+            void * impl = m_new->call( m_kernel, stdex::intrusive_from_this(this), _obj, _args, _kwds );
 
             return impl;
         }
@@ -1550,7 +1550,7 @@ namespace pybind
 	{
 		if( m_smart_pointer != nullptr )
 		{
-			m_smart_pointer->incref( m_kernel, _impl, this );
+            m_smart_pointer->incref( m_kernel, _impl, stdex::intrusive_from_this( this ) );
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -1558,7 +1558,7 @@ namespace pybind
 	{
 		if( m_smart_pointer != nullptr )
 		{
-			m_smart_pointer->decref( m_kernel, _impl, this );
+            m_smart_pointer->decref( m_kernel, _impl, stdex::intrusive_from_this( this ) );
 		}
 	}
     //////////////////////////////////////////////////////////////////////////
@@ -1573,7 +1573,7 @@ namespace pybind
 
         if( m_destructor != nullptr )
         {
-            m_destructor->call( m_kernel, this, _impl );
+            m_destructor->call( m_kernel, stdex::intrusive_from_this( this ), _impl );
         }        
     }
     //////////////////////////////////////////////////////////////////////////
@@ -1581,7 +1581,7 @@ namespace pybind
     {
         if( m_bindable != nullptr )
         {
-            m_bindable->clear( m_kernel, _impl, this );
+            m_bindable->clear( m_kernel, _impl, stdex::intrusive_from_this( this ) );
         }
     }
 	//////////////////////////////////////////////////////////////////////////
