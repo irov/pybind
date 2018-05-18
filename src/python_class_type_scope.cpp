@@ -571,11 +571,12 @@ namespace pybind
 	python_class_type_scope::python_class_type_scope( kernel_interface * _kernel, const char * _name, uint32_t _typeId, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash )
 		: m_kernel( _kernel )
 		, m_name( _name )
-		, m_typeId( _typeId )		
-        , m_basesCount( 0 )
-        , m_user( _user )
+		, m_typeId( _typeId )
+		, m_user( _user )		
 		, m_new( _pynew )
 		, m_destructor( _pydestructor )
+		, m_basesCount( 0 )
+        , m_number_multy( nullptr )
         , m_objectCount( 0 )
 		, m_pytypeobject( nullptr )
 		, m_pod_size( _pod )
@@ -713,26 +714,34 @@ namespace pybind
 
 		Py_DECREF( (PyObject*)m_pytypeobject );
 
-		m_constructor = nullptr;
+        for( uint32_t i = 0; i != m_basesCount; ++i )
+        {
+            Metacast & m = m_bases[i];
 
+            m.info = 0;
+            m.cast = nullptr;
+            m.scope = nullptr;
+        }
+
+        m_new = nullptr;
+        m_destructor = nullptr;
+		m_constructor = nullptr;
 		m_convert = nullptr;
 		m_call = nullptr;
 		m_repr = nullptr;
 		m_hash = nullptr;
+        m_compare = nullptr;
 		m_getattro = nullptr;
 		m_mapping = nullptr;
 		m_sequence_get = nullptr;
 		m_sequence_set = nullptr;
-		m_compare = nullptr;
+        m_number_add = nullptr;
+        m_number_sub = nullptr;
+        m_number_mul = nullptr;
+        m_number_div = nullptr;
 
-		for( uint32_t i = 0; i != m_basesCount; ++i )
-		{
-			Metacast & m = m_bases[i];
-
-			m.info = 0;
-			m.cast = nullptr;
-			m.scope = nullptr;
-		}
+        m_smart_pointer = nullptr;
+        m_bindable = nullptr;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	kernel_interface * python_class_type_scope::get_kernel() const
@@ -1314,31 +1323,45 @@ namespace pybind
 
 		m_pytypeobject->tp_as_number = &py_as_number;
 	}
+    //////////////////////////////////////////////////////////////////////////
+    python_class_type_scope::number_multy_adapter_t * python_class_type_scope::get_number_multy()
+    {
+        if( m_number_multy == nullptr )
+        {
+            m_number_multy = new number_multy_adapter_t;
+        }
+
+        return m_number_multy;
+    }
 	//////////////////////////////////////////////////////////////////////////
 	void python_class_type_scope::add_number_add( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
 	{
-		m_number_adds[_typeId] = _iadapter;
+        number_multy_adapter_t * number_multy = this->get_number_multy();
+        number_multy->adds[_typeId] = _iadapter;
 
 		m_pytypeobject->tp_as_number = &py_as_number;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void python_class_type_scope::add_number_sub( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
 	{
-		m_number_subs[_typeId] = _iadapter;
+        number_multy_adapter_t * number_multy = this->get_number_multy();
+		number_multy->subs[_typeId] = _iadapter;
 
 		m_pytypeobject->tp_as_number = &py_as_number;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void python_class_type_scope::add_number_mul( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
 	{
-		m_number_muls[_typeId] = _iadapter;
+        number_multy_adapter_t * number_multy = this->get_number_multy();
+		number_multy->muls[_typeId] = _iadapter;
 
 		m_pytypeobject->tp_as_number = &py_as_number;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void python_class_type_scope::add_number_div( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
 	{
-		m_number_divs[_typeId] = _iadapter;
+        number_multy_adapter_t * number_multy = this->get_number_multy();
+		number_multy->divs[_typeId] = _iadapter;
 
 		m_pytypeobject->tp_as_number = &py_as_number;
 	}
@@ -1366,7 +1389,7 @@ namespace pybind
     {
         if( m_new != nullptr )
         {
-            void * impl = m_new->call( m_kernel, this, _obj, _args, _kwds );
+            void * impl = m_new->call( m_kernel, stdex::intrusive_from_this(this), _obj, _args, _kwds );
 
             return impl;
         }
@@ -1506,9 +1529,9 @@ namespace pybind
 		return m_objectCount;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	void python_class_type_scope::intrusive_ptr_destroy( python_class_type_scope * _ptr )
+    void python_class_type_scope::destroy()
 	{
-		delete _ptr;
+		delete this;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void * python_class_type_scope::operator new (size_t _size)
@@ -1527,7 +1550,7 @@ namespace pybind
 	{
 		if( m_smart_pointer != nullptr )
 		{
-			m_smart_pointer->incref( m_kernel, _impl, this );
+            m_smart_pointer->incref( m_kernel, _impl, stdex::intrusive_from_this( this ) );
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -1535,7 +1558,7 @@ namespace pybind
 	{
 		if( m_smart_pointer != nullptr )
 		{
-			m_smart_pointer->decref( m_kernel, _impl, this );
+            m_smart_pointer->decref( m_kernel, _impl, stdex::intrusive_from_this( this ) );
 		}
 	}
     //////////////////////////////////////////////////////////////////////////
@@ -1550,7 +1573,7 @@ namespace pybind
 
         if( m_destructor != nullptr )
         {
-            m_destructor->call( m_kernel, this, _impl );
+            m_destructor->call( m_kernel, stdex::intrusive_from_this( this ), _impl );
         }        
     }
     //////////////////////////////////////////////////////////////////////////
@@ -1558,7 +1581,7 @@ namespace pybind
     {
         if( m_bindable != nullptr )
         {
-            m_bindable->clear( m_kernel, _impl, this );
+            m_bindable->clear( m_kernel, _impl, stdex::intrusive_from_this( this ) );
         }
     }
 	//////////////////////////////////////////////////////////////////////////

@@ -31,12 +31,12 @@
 
 #	ifndef PYBIND_MALLOC
 #	include "stdex/allocator.h"
-#	define PYBIND_MALLOC(S) stdex_malloc(S)
+#	define PYBIND_MALLOC(S) stdex_malloc(S, "pybind")
 #	endif
 
 #	ifndef PYBIND_FREE
 #	include "stdex/allocator.h"
-#	define PYBIND_FREE(B, S) stdex_free(B)
+#	define PYBIND_FREE(B, S) stdex_free(B, "pybind")
 #	endif 
 
 #	ifndef PYBIND_MEMCPY

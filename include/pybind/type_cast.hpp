@@ -11,7 +11,7 @@ namespace pybind
 	class kernel_interface;
 	//////////////////////////////////////////////////////////////////////////
     class type_cast
-		: public stdex::intrusive_ptr_base<type_cast>
+		: public stdex::intrusive_ptr_base
     {
     public:
         type_cast()
@@ -23,7 +23,7 @@ namespace pybind
         }
 
     public:
-		static void intrusive_ptr_destroy( type_cast * _ptr );
+		void destroy() override;
 
 	public:
 		void * operator new ( size_t _size );

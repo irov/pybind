@@ -122,10 +122,10 @@ namespace pybind
 		}
 
 		template<class F>
-		base_ & def_depricated( const char * _name, F f, const char * _doc )
+		base_ & def_deprecated( const char * _name, F f, const char * _doc )
 		{
 			method_adapter_interface_ptr iadapter =
-				new method_adapter_depricated<C, F>( _name, f, _doc );
+				new method_adapter_deprecated<C, F>( _name, f, _doc );
 
 			m_scope->add_method( iadapter );
 

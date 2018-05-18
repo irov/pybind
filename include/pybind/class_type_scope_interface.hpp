@@ -34,7 +34,7 @@ namespace pybind
     typedef stdex::intrusive_ptr<class bindable_adapter_interface> bindable_adapter_interface_ptr;    
 	//////////////////////////////////////////////////////////////////////////
 	class class_type_scope_interface
-		: public stdex::intrusive_ptr_base<class_type_scope_interface>
+		: public stdex::intrusive_ptr_base
 	{
 	public:
 		virtual void initialize( PyObject * _module ) = 0;

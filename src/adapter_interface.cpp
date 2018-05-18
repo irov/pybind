@@ -5,9 +5,9 @@
 namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
-	void adapter_interface::intrusive_ptr_destroy( adapter_interface * _ptr )
+    void adapter_interface::destroy()
 	{
-		delete _ptr;
+		delete this;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	void * adapter_interface::operator new ( size_t _size )
