@@ -7,6 +7,9 @@ namespace pybind
 	class PYBIND_API tuple
 		: public pybind::object
 	{
+    public:
+        typedef uint32_t size_type;
+
 	public:		
 		tuple( kernel_interface * _kernel );
 
@@ -16,10 +19,10 @@ namespace pybind
 		tuple( kernel_interface * _kernel, PyObject * _obj );
 
 	public:
-		detail::extract_operator_t operator [] ( size_t _index ) const;
+		detail::extract_operator_t operator [] ( size_type _index ) const;
 
 	public:
-		size_t size() const;
+        size_type size() const;
 		bool empty() const;
 	};
     //////////////////////////////////////////////////////////////////////////	

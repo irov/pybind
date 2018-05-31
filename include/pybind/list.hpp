@@ -1,27 +1,30 @@
-#	pragma once
+#pragma once
 
-#	include "pybind/object.hpp"
+#include "pybind/object.hpp"
 
-#	include "pybind/helper/list_helper.hpp"
+#include "pybind/helper/list_helper.hpp"
 
 namespace pybind
 { 
 	class PYBIND_API list
 		: public object
 	{
+    public:
+        typedef uint32_t size_type;
+
 	public:		
 		list( kernel_interface * _kernel );
 		list( const list & _list );
 				
 	public:
 		explicit list( pybind::invalid );
-		list( kernel_interface * _kernel, size_t _size );
+		list( kernel_interface * _kernel, size_type _size );
 		list( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed );
 		list( kernel_interface * _kernel, PyObject * _obj );
 
 	public:
-		detail::set_list_operator_t operator [] ( size_t _index );
-		detail::extract_operator_t operator [] ( size_t _index ) const;		
+		detail::set_list_operator_t operator [] ( size_type _index );
+		detail::extract_operator_t operator [] ( size_type _index ) const;
 
 	public:
 		template<class T>
@@ -46,9 +49,9 @@ namespace pybind
 		}
 
 		template<class It>
-		void fill( size_t _offset, It _begin, It _end )
+		void fill( size_type _offset, It _begin, It _end )
 		{
-			size_t index = 0;
+            size_type index = 0;
 
 			for( It it = _begin; it != _end; ++it )
 			{
@@ -57,7 +60,7 @@ namespace pybind
 		}
 
 	public:
-		size_t size() const;
+        size_type size() const;
 		bool empty() const;
 	};
 	//////////////////////////////////////////////////////////////////////////

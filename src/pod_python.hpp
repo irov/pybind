@@ -23,7 +23,7 @@ namespace pybind
 	{
 		bool is_pod_holder( PyObject * _obj );
 		void wrap_pod_ptr( PyObject * _obj, void * _impl, bool _holder );
-		void wrap_pod( PyObject * _obj, void ** _impl, size_t _size, bool _hash );
+		void wrap_pod( PyObject * _obj, void ** _impl, uint32_t _size, bool _hash );
 		int64_t get_pod_hash( PyObject * _obj );
 		void set_pod_hash( PyObject * _obj, int64_t _hash );
 		void * get_pod_impl( PyObject * _obj );

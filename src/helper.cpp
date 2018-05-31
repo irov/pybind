@@ -5,14 +5,14 @@
 namespace pybind
 {
 	//////////////////////////////////////////////////////////////////////////
-	detail::extract_operator_t list_getitem_t( kernel_interface * _kernel, PyObject * _list, size_t _it )
+	detail::extract_operator_t list_getitem_t( kernel_interface * _kernel, PyObject * _list, uint32_t _it )
 	{
 		PyObject * py_item = pybind::list_getitem( _list, _it );
 
 		return detail::extract_operator_t( _kernel, py_item );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool list_setitem_i( kernel_interface * _kernel, PyObject * _list, size_t _it, const detail::import_operator_t & _item )
+	bool list_setitem_i( kernel_interface * _kernel, PyObject * _list, uint32_t _it, const detail::import_operator_t & _item )
 	{
 		(void)_kernel;
 
@@ -48,21 +48,21 @@ namespace pybind
         return result;
     }
 	//////////////////////////////////////////////////////////////////////////
-	args make_args_t( kernel_interface * _kernel, PyObject * _tuple, size_t _size )
+	args make_args_t( kernel_interface * _kernel, PyObject * _tuple, uint32_t _size )
 	{
 		PyObject * py_args = pybind::tuple_slice_tail( _tuple, _size );
 
 		return args( _kernel, py_args );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	detail::extract_operator_t tuple_getitem_t( kernel_interface * _kernel, PyObject * _tuple, size_t _it )
+	detail::extract_operator_t tuple_getitem_t( kernel_interface * _kernel, PyObject * _tuple, uint32_t _it )
 	{
 		PyObject * py_item = pybind::tuple_getitem( _tuple, _it );
 		
 		return detail::extract_operator_t( _kernel, py_item );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool tuple_setitem_i( kernel_interface * _kernel, PyObject * _tuple, size_t _it, const detail::extract_operator_t & _item )
+	bool tuple_setitem_i( kernel_interface * _kernel, PyObject * _tuple, uint32_t _it, const detail::extract_operator_t & _item )
 	{ 
 		(void)_kernel;
 
@@ -71,7 +71,7 @@ namespace pybind
 		return result;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	bool tuple_setitem_i( kernel_interface * _kernel, PyObject * _tuple, size_t _it, const detail::import_operator_t & _item )
+	bool tuple_setitem_i( kernel_interface * _kernel, PyObject * _tuple, uint32_t _it, const detail::import_operator_t & _item )
 	{
 		(void)_kernel;
 

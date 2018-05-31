@@ -11,17 +11,17 @@ namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
     template<>
-    struct ptr_throw_specialized < detail::import_operator_t >;
+    struct ptr_throw_specialized <detail::import_operator_t>;
     //////////////////////////////////////////////////////////////////////////
-    PYBIND_API args make_args_t( kernel_interface * _kernel, PyObject * _tuple, size_t _size );
+    PYBIND_API args make_args_t( kernel_interface * _kernel, PyObject * _tuple, uint32_t _size );
     
-    PYBIND_API detail::extract_operator_t list_getitem_t( kernel_interface * _kernel, PyObject * _list, size_t _it );
-    PYBIND_API bool list_setitem_i( kernel_interface * _kernel, PyObject * _list, size_t _it, const detail::import_operator_t & _item );
+    PYBIND_API detail::extract_operator_t list_getitem_t( kernel_interface * _kernel, PyObject * _list, uint32_t _it );
+    PYBIND_API bool list_setitem_i( kernel_interface * _kernel, PyObject * _list, uint32_t _it, const detail::import_operator_t & _item );
     PYBIND_API bool list_appenditem_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _item );
     
     //////////////////////////////////////////////////////////////////////////
     template<class T>
-    bool list_setitem_t( kernel_interface * _kernel, PyObject * _list, size_t _it, const T & _item )
+    bool list_setitem_t( kernel_interface * _kernel, PyObject * _list, uint32_t _it, const T & _item )
     {
         return list_setitem_i( _kernel, _list, _it, detail::import_operator_t( _kernel, _item ) );
     }
@@ -46,11 +46,11 @@ namespace pybind
         return true;
     }
 
-    PYBIND_API detail::extract_operator_t tuple_getitem_t( kernel_interface * _kernel, PyObject * _tuple, size_t _it );
-    PYBIND_API bool tuple_setitem_i( kernel_interface * _kernel, PyObject * _tuple, size_t _it, const detail::import_operator_t & _item );
+    PYBIND_API detail::extract_operator_t tuple_getitem_t( kernel_interface * _kernel, PyObject * _tuple, uint32_t _it );
+    PYBIND_API bool tuple_setitem_i( kernel_interface * _kernel, PyObject * _tuple, uint32_t _it, const detail::import_operator_t & _item );
     //////////////////////////////////////////////////////////////////////////	
     template<class T>
-    bool tuple_setitem_t( kernel_interface * _kernel, PyObject * _tuple, size_t _it, const T & _item )
+    bool tuple_setitem_t( kernel_interface * _kernel, PyObject * _tuple, uint32_t _it, const T & _item )
     {
         return tuple_setitem_i( _kernel, _tuple, _it, detail::import_operator_t( _kernel, _item ) );
     }
@@ -86,7 +86,7 @@ namespace pybind
 	}
 	//////////////////////////////////////////////////////////////////////////
 	template<class K, class V>
-	inline bool dict_next_t( kernel_interface * _kernel, PyObject * _dict, size_t & _pos, K & _key, V & _value )
+	inline bool dict_next_t( kernel_interface * _kernel, PyObject * _dict, uint32_t & _pos, K & _key, V & _value )
 	{
 		PyObject * py_key;
 		PyObject * py_value;

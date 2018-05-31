@@ -11,7 +11,7 @@ namespace pybind
         : public adapter_interface
 	{
 	public:
-		constructor_adapter_interface( size_t _arity )
+		constructor_adapter_interface( uint32_t _arity )
 			: m_arity(_arity)
 		{
 		}
@@ -24,7 +24,7 @@ namespace pybind
 				return false;
 			}
 
-			size_t args_arity = pybind::tuple_size( _args );
+            uint32_t args_arity = pybind::tuple_size( _args );
 
 			if( m_arity != args_arity )
 			{
@@ -39,7 +39,7 @@ namespace pybind
 			return true;
 		}
 
-		size_t arity() const
+        uint32_t arity() const
 		{
 			return m_arity;
 		}
@@ -48,7 +48,7 @@ namespace pybind
 		virtual void * call( kernel_interface * _kernel, PyObject * _obj, PyObject * _args ) = 0;
 
 	protected:
-		size_t m_arity;
+        uint32_t m_arity;
 	};
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<constructor_adapter_interface> constructor_adapter_interface_ptr;

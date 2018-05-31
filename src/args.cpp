@@ -1,5 +1,5 @@
-#	include "pybind/args.hpp"
-#   include "pybind/helper.hpp"
+#include "pybind/args.hpp"
+#include "pybind/helper.hpp"
 
 namespace pybind
 {
@@ -48,19 +48,19 @@ namespace pybind
         m_args = nullptr;
     }
     //////////////////////////////////////////////////////////////////////////
-    size_t args::size() const
+    args::size_type args::size() const
     {
         if( m_args == nullptr )
         {
             return 0;
         }
 
-        size_t args_size = pybind::tuple_size( m_args );
+        size_type args_size = pybind::tuple_size( m_args );
 
         return args_size;
     }
     //////////////////////////////////////////////////////////////////////////
-    detail::extract_operator_t args::operator[]( size_t _index ) const
+    detail::extract_operator_t args::operator[]( args::size_type _index ) const
     {
         return pybind::tuple_getitem_t( m_kernel, m_args, _index );
     }

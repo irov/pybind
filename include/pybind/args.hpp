@@ -1,12 +1,15 @@
-#	pragma once
+#pragma once
 
-#   include "pybind/extract_operator.hpp"
+#include "pybind/extract_operator.hpp"
 
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
     class args
     {
+    public:
+        typedef uint32_t size_type;
+
     public:
         args();
         args( const args & _r );
@@ -22,10 +25,10 @@ namespace pybind
         void reset();
         
     public:
-        size_t size() const;
+        size_type size() const;
 
     public:
-        detail::extract_operator_t operator [] ( size_t _index ) const;
+        detail::extract_operator_t operator [] ( size_type _index ) const;
 
     public:
         operator PyObject * () const

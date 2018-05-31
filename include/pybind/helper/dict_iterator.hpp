@@ -11,6 +11,9 @@ namespace pybind
 
     class PYBIND_API dict_iterator
     {
+    public:
+        typedef uint32_t size_type;
+
     protected:
         dict_iterator( kernel_interface * _kernel, PyObject * _obj );
 		dict_iterator( kernel_interface * _kernel, PyObject * _obj, t_dict_iterator_end_tag );
@@ -34,7 +37,7 @@ namespace pybind
 		kernel_interface * m_kernel;
 
         PyObject * m_obj;
-        size_t m_pos;
+        size_type m_pos;
 
         PyObject * m_key;
         PyObject * m_value;

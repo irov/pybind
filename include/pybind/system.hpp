@@ -123,21 +123,21 @@ namespace pybind
 	PYBIND_API PyObject * ptr_long( long _value );
 	PYBIND_API PyObject * ptr_ulong( unsigned long _value );
 		
-	PYBIND_API PyObject * list_new( size_t _size );
+	PYBIND_API PyObject * list_new( uint32_t _size );
 	PYBIND_API bool list_check( PyObject * _list );
-	PYBIND_API size_t list_size( PyObject * _list );
-	PYBIND_API PyObject * list_getitem( PyObject * _list, size_t _it );
-    PYBIND_API bool list_insert( PyObject * _list, size_t _it, PyObject * _item );
-	PYBIND_API bool list_remove( PyObject * _list, size_t _it );
-	PYBIND_API bool list_setitem( PyObject * _list, size_t _it, PyObject * _item );
+	PYBIND_API uint32_t list_size( PyObject * _list );
+	PYBIND_API PyObject * list_getitem( PyObject * _list, uint32_t _it );
+    PYBIND_API bool list_insert( PyObject * _list, uint32_t _it, PyObject * _item );
+	PYBIND_API bool list_remove( PyObject * _list, uint32_t _it );
+	PYBIND_API bool list_setitem( PyObject * _list, uint32_t _it, PyObject * _item );
 	PYBIND_API bool list_appenditem( PyObject * _list, PyObject * _item );
 
 	PYBIND_API PyObject * dict_new();
-	PYBIND_API PyObject * dict_new_presized( size_t _count );
+	PYBIND_API PyObject * dict_new_presized( uint32_t _count );
 	PYBIND_API PyObject * dict_from( PyObject * _obj );
 
 	PYBIND_API bool dict_check( PyObject * _dict );
-	PYBIND_API size_t dict_size( PyObject * _obj );
+	PYBIND_API uint32_t dict_size( PyObject * _obj );
 	PYBIND_API bool dict_set( PyObject * _dict, PyObject * _name, PyObject * _value );
     PYBIND_API bool dict_setstring( PyObject * _dict, const char * _name, PyObject * _value );
     PYBIND_API bool dict_remove( PyObject * _dict, PyObject * _name );	
@@ -146,17 +146,17 @@ namespace pybind
 	PYBIND_API PyObject * dict_get( PyObject * _dict, PyObject * _name );
 	PYBIND_API bool dict_exist( PyObject * _dict, PyObject * _name );
 	PYBIND_API bool dict_existstring( PyObject * _dict, const char * _name );
-	PYBIND_API bool dict_next( PyObject * _dict, size_t & _pos, PyObject ** _key, PyObject ** _value );
+	PYBIND_API bool dict_next( PyObject * _dict, uint32_t & _pos, PyObject ** _key, PyObject ** _value );
 
 	PYBIND_API PyObject * dict_items( PyObject * _dict );
 
-	PYBIND_API PyObject * tuple_new( size_t _it );
+	PYBIND_API PyObject * tuple_new( uint32_t _it );
 	PYBIND_API bool tuple_check( PyObject * _tuple );
-	PYBIND_API size_t tuple_size( PyObject * _tuple );
-	PYBIND_API PyObject * tuple_getitem( PyObject * _tuple, size_t _it );
-	PYBIND_API PyObject * tuple_slice( PyObject * _tuple, size_t _low, size_t _high );
-	PYBIND_API PyObject * tuple_slice_tail( PyObject * _tuple, size_t _size );
-	PYBIND_API bool tuple_setitem( PyObject * _tuple, size_t _it, PyObject * _value );
+	PYBIND_API uint32_t tuple_size( PyObject * _tuple );
+	PYBIND_API PyObject * tuple_getitem( PyObject * _tuple, uint32_t _it );
+	PYBIND_API PyObject * tuple_slice( PyObject * _tuple, uint32_t _low, uint32_t _high );
+	PYBIND_API PyObject * tuple_slice_tail( PyObject * _tuple, uint32_t _size );
+	PYBIND_API bool tuple_setitem( PyObject * _tuple, uint32_t _it, PyObject * _value );
 
 	PYBIND_API PyObject * object_dir( PyObject * _obj );
     PYBIND_API PyTypeObject * object_type( PyObject * _obj );

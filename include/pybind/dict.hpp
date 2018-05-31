@@ -9,13 +9,16 @@ namespace pybind
 	class PYBIND_API dict
 		: public pybind::object
 	{
+    public:
+        typedef uint32_t size_type;
+
 	public:				
 		dict( const dict & _dict );
 
 	public:
 		explicit dict( pybind::invalid );
 		explicit dict( kernel_interface * _kernel );
-		dict( kernel_interface * _kernel, size_t _presized );
+		dict( kernel_interface * _kernel, size_type _presized );
 		dict( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed );
 		dict( kernel_interface * _kernel, PyObject * _obj );
 
@@ -68,7 +71,7 @@ namespace pybind
 		void remove_i( const detail::import_operator_t & _name ) const;
 
 	public:
-		size_t size() const;
+        size_type size() const;
 		bool empty() const;
 	};
 	//////////////////////////////////////////////////////////////////////////

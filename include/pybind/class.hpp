@@ -38,14 +38,14 @@ namespace pybind
 		typedef B bases_type;
 
 	public:
-		base_( kernel_interface * _kernel, const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, size_t _size, bool _hash, PyObject * _module )
+		base_( kernel_interface * _kernel, const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _size, bool _hash, PyObject * _module )
 			: m_kernel( _kernel )
 		{
 			uint32_t pod = 0;
 
 			if( _size <= PYBIND_OBJECT_POD_SIZE )
 			{
-				pod = (uint32_t)_size;
+				pod = _size;
 			}
 
 			uint32_t info = m_kernel->class_info<C>();

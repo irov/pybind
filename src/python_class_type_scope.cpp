@@ -371,7 +371,7 @@ namespace pybind
 		try
 		{
 			DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( scope->get_name(), adapter->getName(), nullptr, nullptr );
-			PyObject * res = adapter->call( kernel, impl, scope, (size_t)_index );
+			PyObject * res = adapter->call( kernel, impl, scope, (uint32_t)_index );
 			DEBUG_PYBIND_NOTIFY_END_BIND_CALL( scope->get_name(), adapter->getName(), nullptr, nullptr );
 
 			return res;

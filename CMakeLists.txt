@@ -91,6 +91,8 @@ SET( PUBLIC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/pybind )
 SET( PRIVATE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src )
 
 file(GLOB files_config_headers ${CONFIG_DIR}/*.hpp)
+file(GLOB files_public_adapter_headers ${PUBLIC_DIR}/adapter/*.hpp)
+file(GLOB files_public_helper_headers ${PUBLIC_DIR}/helper/*.hpp)
 file(GLOB files_public_headers ${PUBLIC_DIR}/*.hpp)
 file(GLOB files_private_headers ${PRIVATE_DIR}/*.hpp)
 file(GLOB files_private_sources ${PRIVATE_DIR}/*.cpp)
@@ -119,7 +121,7 @@ add_definitions(-DPy_NO_ENABLE_SHARED)
 
 add_definitions(-DPYBIND_PYTHON_VERSION=${PYBIND_PYTHON_VERSION})
 
-ADD_LIBRARY( ${PROJECT_NAME} STATIC ${files_config_headers} ${files_public_headers} ${files_private_headers} ${files_private_sources} )
+ADD_LIBRARY( ${PROJECT_NAME} STATIC ${files_config_headers} ${files_public_headers} ${files_public_adapter_headers} ${files_public_helper_headers} ${files_private_headers} ${files_private_sources} )
 
 IF( NOT PYBIND_EXTERNAL_BUILD )
     TARGET_LINK_LIBRARIES( ${PROJECT_NAME} stdex )

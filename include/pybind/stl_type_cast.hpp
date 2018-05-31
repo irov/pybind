@@ -22,11 +22,11 @@ namespace pybind
 
 			if( pybind::tuple_check( _obj ) == true )
 			{
-				size_t size = pybind::tuple_size( _obj );
+				uint32_t size = pybind::tuple_size( _obj );
 
 				_vector.reserve( size );
 
-				for( size_t it = 0; it != size; ++it )
+				for( uint32_t it = 0; it != size; ++it )
 				{
 					T value = pybind::tuple_getitem_t( _kernel, _obj, it );
 
@@ -35,11 +35,11 @@ namespace pybind
 			}
 			else if( pybind::list_check( _obj ) == true )
 			{
-				size_t size = pybind::list_size( _obj );
+                uint32_t size = pybind::list_size( _obj );
 
 				_vector.reserve( size );
 
-				for( size_t it = 0; it != size; ++it )
+				for( uint32_t it = 0; it != size; ++it )
 				{
 					T value = pybind::list_getitem_t( _kernel, _obj, it );
 
@@ -77,7 +77,7 @@ namespace pybind
 
 			if( pybind::dict_check( _obj ) == true )
 			{
-				size_t dict_pos = 0;
+                uint32_t dict_pos = 0;
 
 				K key;
 				V value;

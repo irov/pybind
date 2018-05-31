@@ -1,4 +1,4 @@
-#	include "pybind/list.hpp"
+#include "pybind/list.hpp"
 
 namespace pybind
 {
@@ -18,7 +18,7 @@ namespace pybind
 	{
 	}
 	//////////////////////////////////////////////////////////////////////////
-	list::list( kernel_interface * _kernel, size_t _size )
+	list::list( kernel_interface * _kernel, size_type _size )
 		: pybind::object( _kernel, pybind::list_new( _size ), pybind::borrowed() )
 	{
 	}
@@ -33,14 +33,14 @@ namespace pybind
 	{
 	}
 	//////////////////////////////////////////////////////////////////////////
-	detail::extract_operator_t list::operator [] ( size_t _index ) const
+	detail::extract_operator_t list::operator [] ( size_type _index ) const
 	{
 		PyObject * py_item = pybind::list_getitem( m_obj, _index );
 
 		return detail::extract_operator_t( m_kernel, py_item );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	detail::set_list_operator_t list::operator [] ( size_t _index )
+	detail::set_list_operator_t list::operator [] ( size_type _index )
 	{
 		return detail::set_list_operator_t( m_kernel, m_obj, _index );
 	}
@@ -52,7 +52,7 @@ namespace pybind
 		return *this;
 	}
 	//////////////////////////////////////////////////////////////////////////
-	size_t list::size() const
+    list::size_type list::size() const
 	{
 		return pybind::list_size( m_obj );
 	}

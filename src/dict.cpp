@@ -18,7 +18,7 @@ namespace pybind
 	{
 	}
 	//////////////////////////////////////////////////////////////////////////
-	dict::dict( kernel_interface * _kernel, size_t _presized )
+	dict::dict( kernel_interface * _kernel, dict::size_type _presized )
 		: pybind::object( _kernel, pybind::dict_new_presized( _presized ), pybind::borrowed() )
 	{
 	}
@@ -65,7 +65,7 @@ namespace pybind
 		pybind::dict_remove( m_obj, _name );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	size_t dict::size() const
+    dict::size_type dict::size() const
 	{
 		return pybind::dict_size( m_obj );
 	}
