@@ -184,24 +184,24 @@ namespace pybind
 	PYBIND_API bool test_equal( PyObject * _left, PyObject * _right );
 	
 	PYBIND_API bool string_check( PyObject * _string );	
-	PYBIND_API size_t string_size( PyObject * _string );
+	PYBIND_API uint32_t string_size( PyObject * _string );
 	PYBIND_API int64_t string_hash( PyObject * _string );
     PYBIND_API const char * string_to_char( PyObject * _string );
-    PYBIND_API const char * string_to_char_and_size( PyObject * _string, size_t & _size );
+    PYBIND_API const char * string_to_char_and_size( PyObject * _string, uint32_t & _size );
     PYBIND_API PyObject * string_from_char( const char * _str );
-	PYBIND_API PyObject * string_from_char_size( const char * _str, size_t _size );
+	PYBIND_API PyObject * string_from_char_size( const char * _str, uint32_t _size );
     
 
 	PYBIND_API bool unicode_check( PyObject * _unicode );	
     PYBIND_API const wchar_t * unicode_to_wchar( PyObject * _unicode );
-    PYBIND_API const wchar_t * unicode_to_wchar_and_size( PyObject * _unicode, size_t & _size );
+    PYBIND_API const wchar_t * unicode_to_wchar_and_size( PyObject * _unicode, uint32_t & _size );
     PYBIND_API PyObject * unicode_from_wchar( const wchar_t * _value );
-	PYBIND_API PyObject * unicode_from_wchar_size( const wchar_t * _value, size_t _size );
+	PYBIND_API PyObject * unicode_from_wchar_size( const wchar_t * _value, uint32_t _size );
 	
 	PYBIND_API const char * unicode_to_utf8( PyObject * _unicode );
-    PYBIND_API const char * unicode_to_utf8_and_size( PyObject * _unicode, size_t & _size );
+    PYBIND_API const char * unicode_to_utf8_and_size( PyObject * _unicode, uint32_t & _size );
     PYBIND_API PyObject * unicode_from_utf8( const char * _utf8 );
-	PYBIND_API PyObject * unicode_from_utf8_size( const char * _utf8, size_t _size );
+	PYBIND_API PyObject * unicode_from_utf8_size( const char * _utf8, uint32_t _size );
 
     PYBIND_API PyObject * _unicode_to_utf8_obj( PyObject * _unicode );
 
@@ -210,7 +210,7 @@ namespace pybind
     PYBIND_API void * void_ptr_get( PyObject * _obj );
 
     PYBIND_API long marshal_magic_number();
-    PYBIND_API PyObject * marshal_get_object( const char * _buf, size_t _len );
+    PYBIND_API PyObject * marshal_get_object( const char * _buf, uint32_t _len );
 
     PYBIND_API void _set_module_finder( PyObject * _finder );
 	PYBIND_API void _remove_module_finder();
