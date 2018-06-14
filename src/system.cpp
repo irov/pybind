@@ -1715,7 +1715,7 @@ namespace pybind
         return py_magic;
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * marshal_get_object( const char * _buf, uint32_t _len )
+    PyObject * marshal_get_object( const char * _buf, size_t _len )
     {
         Py_ssize_t py_len = (Py_ssize_t)_len;
 

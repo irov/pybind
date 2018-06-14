@@ -93,7 +93,8 @@ namespace pybind
 	template<class C>
 	inline pybind::list make_list_container_t( kernel_interface * _kernel, const C & _c )
 	{
-		pybind::list l( _kernel, _c.size() );
+        typename C::size_type c_size = _c.size();
+		pybind::list l( _kernel, (pybind::list::size_type)c_size );
 
 		l.fill( 0, _c.begin(), _c.end() );
 
