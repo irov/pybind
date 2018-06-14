@@ -1277,7 +1277,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * tuple_slice_tail( PyObject * _tuple, uint32_t _size )
     {
-        Py_ssize_t size = PyTuple_Size( _tuple );
+        uint32_t size = pybind::tuple_size( _tuple );
 
         PyObject * obj_slice = tuple_slice( _tuple, _size, size );
 
@@ -1623,7 +1623,7 @@ namespace pybind
         const wchar_t * wstr = PyUnicode_AS_UNICODE( _unicode );
         Py_ssize_t py_size = PyUnicode_GET_SIZE( _unicode );
 
-        _size = (size_t)py_size;
+        _size = (uint32_t)py_size;
 
         return wstr;
     }

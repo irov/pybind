@@ -410,7 +410,7 @@ namespace pybind
 		try
 		{
 			DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( scope->get_name(), adapter->getName(), nullptr, nullptr );
-			adapter->call( kernel, impl, scope, _index, _value );
+			adapter->call( kernel, impl, scope, (uint32_t)_index, _value );
 			DEBUG_PYBIND_NOTIFY_END_BIND_CALL( scope->get_name(), adapter->getName(), nullptr, nullptr );
 
 			return 0;
