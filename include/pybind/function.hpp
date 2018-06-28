@@ -52,6 +52,17 @@ namespace pybind
         _kernel->def_function_adapter( adapter, false, _module );
     }
 
+    template<class F, class P>
+    void def_function_proxy_args( kernel_interface * _kernel, const char * _name, F _function, P * _proxy, PyObject * _module = 0 )
+    {
+        typedef typename stdex::function_traits<F>::result t_info;
+
+        function_adapter_interface_ptr adapter =
+            new function_proxy_adapter_args<F, P>( _name, t_info::arity, _function, _proxy );
+
+        _kernel->def_function_adapter( adapter, false, _module );
+    }    
+
 	template<class F>
 	PyObject * create_function( kernel_interface * _kernel, const char * _name, F _function )
 	{

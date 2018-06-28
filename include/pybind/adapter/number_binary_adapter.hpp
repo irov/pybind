@@ -2,8 +2,8 @@
 
 #	include "pybind/adapter_interface.hpp"
 
-#	include "pybind/method_call.hpp"
-#	include "pybind/method_proxy_call.hpp"
+#	include "pybind/call/method_call.hpp"
+#	include "pybind/call/method_proxy_call.hpp"
 
 namespace pybind
 {

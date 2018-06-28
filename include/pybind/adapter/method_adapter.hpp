@@ -2,15 +2,15 @@
 
 #	include "pybind/method_interface.hpp"
 
-#	include "pybind/method_call.hpp"
-#	include "pybind/method_kernel_call.hpp"
-#	include "pybind/method_args_call.hpp"
-#	include "pybind/method_proxy_call.hpp"
-#	include "pybind/method_proxy_call_kernel.hpp"
-#	include "pybind/method_proxy_args_call.hpp"
+#	include "pybind/call/method_call.hpp"
+#	include "pybind/call/method_kernel_call.hpp"
+#	include "pybind/call/method_args_call.hpp"
+#	include "pybind/call/method_proxy_call.hpp"
+#	include "pybind/call/method_proxy_kernel_call.hpp"
+#	include "pybind/call/method_proxy_args_call.hpp"
 
-#	include "pybind/function_proxy_call.hpp"
-#	include "pybind/function_proxy_kernel_call.hpp"
+#	include "pybind/call/function_proxy_call.hpp"
+#	include "pybind/call/function_proxy_kernel_call.hpp"
 
 namespace pybind
 {
@@ -179,7 +179,7 @@ namespace pybind
 
 			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
-			PyObject * ret = method_proxy_call_kernel<P, C, F>::call( _kernel, m_proxy, self, m_fn, _args );
+			PyObject * ret = method_proxy_kernel_call<P, C, F>::call( _kernel, m_proxy, self, m_fn, _args );
 
 			return ret;
 		}
