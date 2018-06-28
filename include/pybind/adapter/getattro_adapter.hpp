@@ -4,7 +4,6 @@
 
 #	include "pybind/method_call.hpp"
 #	include "pybind/method_proxy_call.hpp"
-#	include "pybind/function_proxy_call.hpp"
 
 namespace pybind
 {

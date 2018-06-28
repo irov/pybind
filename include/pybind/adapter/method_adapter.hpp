@@ -290,7 +290,7 @@ namespace pybind
 
 			C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
-			PyObject * ret = function_proxy_call<C, F>::call( _kernel, self, m_fn, _args );
+			PyObject * ret = function_proxy_call<F, C>::call( _kernel, m_fn, _args, self );
 
 			return ret;
 		}

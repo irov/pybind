@@ -3,6 +3,7 @@
 #	include "pybind/function_interface.hpp"
 
 #	include "pybind/function_call.hpp"
+#	include "pybind/function_proxy_call.hpp"
 #	include "pybind/function_kernel_call.hpp"
 
 #	include "pybind/types.hpp"
@@ -54,6 +55,34 @@ namespace pybind
 			return ret;
 		}
 	};
+    //////////////////////////////////////////////////////////////////////////
+    template<class F, class P>
+    class function_proxy_adapter
+        : public function_adapter_base<F>
+    {
+    public:
+		function_proxy_adapter( const char * _name, uint32_t _arity, F _fn, P * _proxy )
+            : function_adapter_base<F>( _name, _arity, _fn )
+            , m_proxy( _proxy )
+        {
+        }
+
+    protected:
+        PyObject * call( kernel_interface * _kernel, PyObject * _args, PyObject * _kwds ) override
+        {
+            (void)_kernel;
+            (void)_kwds;
+
+            F fn = this->getFn();
+
+            PyObject *ret = function_proxy_call<F, P>::call( _kernel, fn, _args, m_proxy );
+
+            return ret;
+        }
+
+    protected:
+        P * m_proxy;
+    };
     //////////////////////////////////////////////////////////////////////////
     template<class F>
     class function_adapter_deprecate
