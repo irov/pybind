@@ -207,7 +207,7 @@ namespace pybind
 	template<typename T>
 	struct extract_specialized<stdex::intrusive_ptr<T> >
 	{
-		T * operator () ( kernel_interface * _kernel, PyObject * _obj )
+		T * operator () ( kernel_interface * _kernel, PyObject * _obj ) const
 		{
 			T * value = nullptr;
 

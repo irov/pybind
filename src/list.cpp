@@ -61,6 +61,18 @@ namespace pybind
 	{
 		return this->size() == 0;
 	}
+    //////////////////////////////////////////////////////////////////////////
+    list::const_iterator list::begin() const
+    {
+        return const_iterator( m_kernel, m_obj, 0 );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    list::const_iterator list::end() const
+    {
+        size_type size = this->size();
+
+        return const_iterator( m_kernel, m_obj, size );
+    }
 	//////////////////////////////////////////////////////////////////////////
 	bool list_check_t( const pybind::object & _obj )
 	{
@@ -71,4 +83,24 @@ namespace pybind
 	{
 		return pybind::list( invalid() );
 	}
+    //////////////////////////////////////////////////////////////////////////
+    pybind::list extract_specialized<pybind::list>::operator () ( kernel_interface * _kernel, PyObject * _obj ) const
+    {
+        pybind::list value( _kernel );
+
+        if( pybind::extract_value( _kernel, _obj, value, true ) == false )
+        {
+            const std::type_info & tinfo = typeid(pybind::list);
+
+            const char * type_name = tinfo.name();
+
+            pybind::log( "extract_value<T>: extract invalid %s:%s not cast to '%s'"
+                , pybind::object_repr( _obj )
+                , pybind::object_repr_type( _obj )
+                , type_name
+            );
+        }
+
+        return value;
+    }
 }

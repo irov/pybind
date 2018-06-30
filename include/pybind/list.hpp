@@ -3,6 +3,7 @@
 #include "pybind/object.hpp"
 
 #include "pybind/helper/list_helper.hpp"
+#include "pybind/helper/list_const_iterator.hpp"
 
 namespace pybind
 { 
@@ -17,7 +18,7 @@ namespace pybind
 		list( const list & _list );
 				
 	public:
-		explicit list( pybind::invalid );
+        explicit list( pybind::invalid );
 		list( kernel_interface * _kernel, size_type _size );
 		list( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed );
 		list( kernel_interface * _kernel, PyObject * _obj );
@@ -62,30 +63,19 @@ namespace pybind
 	public:
         size_type size() const;
 		bool empty() const;
+
+    public:
+        typedef list_const_iterator const_iterator;
+
+    public:
+        const_iterator begin() const;
+        const_iterator end() const;
 	};
 	//////////////////////////////////////////////////////////////////////////
 	template<>
 	struct extract_specialized<pybind::list>
 	{
-		pybind::list operator () ( kernel_interface * _kernel, PyObject * _obj )
-		{
-			pybind::list value( _kernel );
-
-			if( extract_value( _kernel, _obj, value, true ) == false )
-			{
-				const std::type_info & tinfo = typeid(pybind::list);
-
-				const char * type_name = tinfo.name();
-
-				pybind::log( "extract_value<T>: extract invalid %s:%s not cast to '%s'"
-					, pybind::object_repr( _obj )
-					, pybind::object_repr_type( _obj )
-					, type_name
-					);
-			}
-
-			return value;
-		}
+        pybind::list operator () ( kernel_interface * _kernel, PyObject * _obj ) const;
 	};
 	//////////////////////////////////////////////////////////////////////////
 	PYBIND_API bool list_check_t( const pybind::object & _obj );
