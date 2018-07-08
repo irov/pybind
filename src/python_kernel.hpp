@@ -1,14 +1,14 @@
-#	pragma once
+#pragma once
 
-#	include "pybind/kernel.hpp"
+#include "pybind/kernel.hpp"
 
-#	include "config/python.hpp"
+#include "config/python.hpp"
 
-#	include "function_python.hpp"
-#	include "functor_python.hpp"
-#	include "member_python.hpp"
-#	include "method_python.hpp"
-#	include "pod_python.hpp"
+#include "function_python.hpp"
+#include "functor_python.hpp"
+#include "member_python.hpp"
+#include "method_python.hpp"
+#include "pod_python.hpp"
 
 namespace pybind
 {
@@ -17,7 +17,7 @@ namespace pybind
 	{
 	public:
 		python_kernel();
-		~python_kernel();
+		~python_kernel() override;
 
 	public:
 		bool initialize() override;

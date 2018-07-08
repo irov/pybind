@@ -21,6 +21,14 @@ namespace pybind
 {
 	typedef stdex::intrusive_ptr<class class_type_scope_interface> class_type_scope_interface_ptr;
 
+    class borrowed
+    {
+    };
+
+    class invalid
+    {
+    };
+
 	typedef void * (*pybind_metacast)( void * );
 
 	typedef void (*pybind_callback)();

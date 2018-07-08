@@ -31,11 +31,6 @@ namespace pybind
 
     }
 	//////////////////////////////////////////////////////////////////////////
-	object::object( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed _br )
-        : base( _kernel, _obj, _br )
-	{
-	}
-	//////////////////////////////////////////////////////////////////////////
 	object::object( pybind::invalid _iv )
 		: base(_iv)
 	{
@@ -45,6 +40,11 @@ namespace pybind
 		: base( _kernel, _obj )
 	{
 	}
+    //////////////////////////////////////////////////////////////////////////
+    object::object( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed _br )
+        : base( _kernel, _obj, _br )
+    {
+    }
 	//////////////////////////////////////////////////////////////////////////
 	object::~object()
 	{

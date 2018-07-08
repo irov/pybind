@@ -19,8 +19,8 @@ namespace pybind
 
 	public:
 		explicit object();
-		object( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed );
 		object( kernel_interface * _kernel, PyObject * _obj );
+        object( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed );
 
     public:
 		explicit object( pybind::invalid );

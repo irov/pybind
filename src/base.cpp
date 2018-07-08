@@ -18,13 +18,6 @@ namespace pybind
 		pybind::incref( m_obj );
 	}
 	//////////////////////////////////////////////////////////////////////////
-	base::base( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed _br )
-		: m_kernel(_kernel)
-		, m_obj(_obj)
-	{
-		(void)_br;
-	}
-	//////////////////////////////////////////////////////////////////////////
 	base::base( pybind::invalid _iv )
 		: m_kernel(nullptr)
 		, m_obj(nullptr)
@@ -38,6 +31,12 @@ namespace pybind
 	{
 		pybind::incref( m_obj );
 	}
+    //////////////////////////////////////////////////////////////////////////
+    base::base( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed )
+        : m_kernel( _kernel )
+        , m_obj( _obj )
+    {
+    }
 	//////////////////////////////////////////////////////////////////////////
     base::~base()
 	{

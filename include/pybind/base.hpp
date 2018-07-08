@@ -6,23 +6,15 @@ namespace pybind
 {
 	class kernel_interface;
 
-    class borrowed
-    {
-    };
-
-    class invalid
-    {
-    };
-
 	class base
 	{
     public:
 		base();
         base( const base & _base );
 
-    public:		
-        base( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed );
+    public:		        
 		base( kernel_interface * _kernel, PyObject * _obj );
+        base( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed );
 
 		explicit base( pybind::invalid );
 

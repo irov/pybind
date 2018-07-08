@@ -302,7 +302,7 @@ namespace pybind
 	//////////////////////////////////////////////////////////////////////////
 	static void py_dealloc( PyObject * _obj )
 	{
-		PyTypeObject * objtype = Py_TYPE( _obj );
+        PyTypeObject * objtype = pybind::object_type( _obj );
 
 		objtype->tp_free( _obj );
 	}

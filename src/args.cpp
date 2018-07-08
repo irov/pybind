@@ -24,6 +24,12 @@ namespace pybind
         pybind::incref( m_args );
     }
     //////////////////////////////////////////////////////////////////////////
+    args::args( kernel_interface * _kernel, PyObject * _args, pybind::borrowed )
+        : m_kernel( _kernel )
+        , m_args( _args )
+    {
+    }
+    //////////////////////////////////////////////////////////////////////////
     args::~args()
     {
         pybind::decref( m_args );

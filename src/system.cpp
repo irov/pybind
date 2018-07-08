@@ -1230,6 +1230,11 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool tuple_setitem( PyObject * _tuple, uint32_t _index, PyObject * _value )
     {
+        if( _value == nullptr )
+        {
+            return false;
+        }
+
         Py_ssize_t py_index = (Py_ssize_t)_index;
 
         int res = PyTuple_SetItem( _tuple, py_index, _value );
@@ -1305,7 +1310,7 @@ namespace pybind
             return "NULL";
         }
 
-        PyTypeObject * type = Py_TYPE( _obj );
+        PyTypeObject * type = pybind::object_type( _obj );
 
         PyObject * repr = PyObject_Repr( (PyObject *)type );
 
