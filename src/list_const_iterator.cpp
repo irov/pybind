@@ -1,5 +1,3 @@
-#pragma once
-
 #include "pybind/helper/list_const_iterator.hpp"
 
 namespace pybind
