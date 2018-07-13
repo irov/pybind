@@ -11,6 +11,7 @@
 #	include "stdex/intrusive_ptr.h"
 
 #	include <typeinfo>
+#   include <type_traits>
 
 namespace pybind
 {
@@ -298,6 +299,15 @@ namespace pybind
     struct ptr_throw_specialized2
     {
         PyObject * operator () ( kernel_interface * _kernel, const T & _t )
+        {
+            return ptr_throw_i( _kernel, _t );
+        }
+    };
+
+    template<typename T>
+    struct ptr_throw_specialized2 < T, typename stdex::mpl::enable_if<std::is_enum<T>::value>::type >
+    {
+        PyObject * operator () ( kernel_interface * _kernel, uint32_t _t )
         {
             return ptr_throw_i( _kernel, _t );
         }
