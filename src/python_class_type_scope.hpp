@@ -1,14 +1,14 @@
-#	pragma once
+#pragma once
 
-#	include "pybind/class_type_scope_interface.hpp"
+#include "pybind/class_type_scope_interface.hpp"
 
-#	include "pybind/exports.hpp"
-#	include "pybind/types.hpp"
-#	include "pybind/exception.hpp"
-#	include "pybind/kernel.hpp"
-#	include "pybind/system.hpp"
+#include "pybind/exports.hpp"
+#include "pybind/types.hpp"
+#include "pybind/exception.hpp"
+#include "pybind/kernel.hpp"
+#include "pybind/system.hpp"
 
-#	include "config/stdex.hpp"
+#include "config/stdex.hpp"
 
 namespace pybind
 {

@@ -1,16 +1,16 @@
-#	pragma once
+#pragma once
 
-#	include "pybind/method_interface.hpp"
+#include "pybind/method_interface.hpp"
 
-#	include "pybind/call/method_call.hpp"
-#	include "pybind/call/method_kernel_call.hpp"
-#	include "pybind/call/method_args_call.hpp"
-#	include "pybind/call/method_proxy_call.hpp"
-#	include "pybind/call/method_proxy_kernel_call.hpp"
-#	include "pybind/call/method_proxy_args_call.hpp"
+#include "pybind/call/method_call.hpp"
+#include "pybind/call/method_kernel_call.hpp"
+#include "pybind/call/method_args_call.hpp"
+#include "pybind/call/method_proxy_call.hpp"
+#include "pybind/call/method_proxy_kernel_call.hpp"
+#include "pybind/call/method_proxy_args_call.hpp"
 
-#	include "pybind/call/function_proxy_call.hpp"
-#	include "pybind/call/function_proxy_kernel_call.hpp"
+#include "pybind/call/function_proxy_call.hpp"
+#include "pybind/call/function_proxy_kernel_call.hpp"
 
 namespace pybind
 {
@@ -188,6 +188,46 @@ namespace pybind
 		F m_fn;
 		P * m_proxy;
 	};
+    //////////////////////////////////////////////////////////////////////////
+    template<class C, class P, class F>
+    class method_adapter_proxy_deprecated
+        : public method_adapter_interface
+    {
+    public:
+        method_adapter_proxy_deprecated( const char * _name, F _fn, P * _proxy, const char * _doc )
+            : method_adapter_interface( _name )
+            , m_fn( _fn )
+            , m_proxy( _proxy )
+            , m_doc( _doc )
+        {
+        }
+
+    protected:
+        PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+        {
+            (void)_kwds;
+
+            const char * name = this->getName();
+
+            pybind::error_traceback( "function %s deprecated '%s'"
+                , name
+                , m_doc
+            );
+
+            pybind::check_error();
+
+            C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
+
+            PyObject * ret = method_proxy_call<P, C, F>::call( _kernel, m_proxy, self, m_fn, _args );
+
+            return ret;
+        }
+
+    protected:
+        F m_fn;
+        P * m_proxy;
+        const char * m_doc;
+    };
 	//////////////////////////////////////////////////////////////////////////
 	template<class C, class P, class F>
 	class method_adapter_proxy_args

@@ -1,9 +1,9 @@
-#	pragma once
+#pragma once
 
-#	include <stdint.h>
-#	include <memory.h>
+#include <stdint.h>
+#include <memory.h>
 
-#	include "config/stdex.hpp"
+#include "config/stdex.hpp"
 
 extern "C" 
 { 

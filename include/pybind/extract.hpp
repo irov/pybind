@@ -1,17 +1,17 @@
-#	pragma once
+#pragma once
 
-#	include "pybind/system.hpp"
-#	include "pybind/exception.hpp"
-#	include "pybind/logger.hpp"
-#	include "pybind/bindable.hpp"
+#include "pybind/system.hpp"
+#include "pybind/exception.hpp"
+#include "pybind/logger.hpp"
+#include "pybind/bindable.hpp"
 
-#	include "pybind/type_cast_result.hpp"
+#include "pybind/type_cast_result.hpp"
 
-#	include "stdex/mpl.h"
-#	include "stdex/intrusive_ptr.h"
+#include "stdex/mpl.h"
+#include "stdex/intrusive_ptr.h"
 
-#	include <typeinfo>
-#   include <type_traits>
+#include <typeinfo>
+#include <type_traits>
 
 namespace pybind
 {

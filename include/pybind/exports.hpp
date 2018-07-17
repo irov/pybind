@@ -1,6 +1,6 @@
-#	pragma once
+#pragma once
 
-#	include "config/config.hpp"
+#include "config/config.hpp"
 
 #	ifdef PYBIND_DLL
 	#	ifdef PYBIND_EXPORTS
@@ -11,7 +11,3 @@
 #	else
 	#	define PYBIND_API
 #	endif
-
-
-//#	pragma warning ( disable : 4251 ) // needs to have dll-interface to be used by clients of class
-

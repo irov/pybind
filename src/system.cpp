@@ -1,17 +1,17 @@
-#	include "pybind/system.hpp"
+#include "pybind/system.hpp"
 
-#	include "pybind/class_type_scope_interface.hpp"
+#include "pybind/class_type_scope_interface.hpp"
 
-#	ifdef PYBIND_STL_SUPPORT
-#	include "pybind/stl_type_cast.hpp"
-#	endif
+#ifdef PYBIND_STL_SUPPORT
+#include "pybind/stl_type_cast.hpp"
+#endif
 
-#	include "config/python.hpp"
+#include "config/python.hpp"
 
-#	include "python_kernel.hpp"
+#include "python_kernel.hpp"
 
-#	include <stdexcept>
-#	include <stdio.h>
+#include <stdexcept>
+#include <stdio.h>
 
 namespace pybind
 {
@@ -1413,6 +1413,39 @@ namespace pybind
         va_end( valist );
 
         PyErr_SetString( PyExc_RuntimeError, buffer );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void warning_traceback( const char * _message, ... )
+    {
+        pybind::check_error();
+
+        va_list valist;
+        va_start( valist, _message );
+
+        char buffer[4096];
+        vsprintf( buffer, _message, valist );
+        va_end( valist );
+
+        PyThreadState * tstate = PyThreadState_GET();
+
+        if( tstate->frame == nullptr )
+        {
+            return;
+        }
+
+        PyObject * py_filename = tstate->frame->f_code->co_filename;
+        int fileline = tstate->frame->f_lineno;
+
+        const char * str_filename = pybind::string_to_char( py_filename );
+
+        char trace_buffer[2048];
+        sprintf( trace_buffer, "%s[%d]: %s"
+            , str_filename
+            , fileline
+            , buffer
+        );
+
+        PyErr_SetString( PyExc_RuntimeWarning, trace_buffer );
     }
     //////////////////////////////////////////////////////////////////////////
     void error_clear()

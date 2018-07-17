@@ -1,31 +1,31 @@
-#	pragma once
+#pragma once
 
-#	include "pybind/type_cast_result.hpp"
+#include "pybind/type_cast_result.hpp"
 
-#	include "pybind/class_type_scope_interface.hpp"
+#include "pybind/class_type_scope_interface.hpp"
 
-#	include "pybind/adapter/new_adapter.hpp"
-#	include "pybind/adapter/destroy_adapter.hpp"
-#	include "pybind/adapter/method_adapter.hpp"
-#	include "pybind/adapter/member_adapter.hpp"
-#	include "pybind/adapter/convert_adapter.hpp"
-#   include "pybind/adapter/compare_adapter.hpp"
-#	include "pybind/adapter/repr_adapter.hpp"
-#	include "pybind/adapter/hash_adapter.hpp"
-#	include "pybind/adapter/mapping_adapter.hpp"
-#	include "pybind/adapter/getattro_adapter.hpp"
-#	include "pybind/adapter/sequence_get_adapter.hpp"
-#	include "pybind/adapter/sequence_set_adapter.hpp"
-#	include "pybind/adapter/number_binary_adapter.hpp"
-#	include "pybind/adapter/smart_pointer_adapter.hpp"
-#   include "pybind/adapter/bindable_adapter.hpp"
+#include "pybind/adapter/new_adapter.hpp"
+#include "pybind/adapter/destroy_adapter.hpp"
+#include "pybind/adapter/method_adapter.hpp"
+#include "pybind/adapter/member_adapter.hpp"
+#include "pybind/adapter/convert_adapter.hpp"
+#include "pybind/adapter/compare_adapter.hpp"
+#include "pybind/adapter/repr_adapter.hpp"
+#include "pybind/adapter/hash_adapter.hpp"
+#include "pybind/adapter/mapping_adapter.hpp"
+#include "pybind/adapter/getattro_adapter.hpp"
+#include "pybind/adapter/sequence_get_adapter.hpp"
+#include "pybind/adapter/sequence_set_adapter.hpp"
+#include "pybind/adapter/number_binary_adapter.hpp"
+#include "pybind/adapter/smart_pointer_adapter.hpp"
+#include "pybind/adapter/bindable_adapter.hpp"
 
-#	include "pybind/helper/bases_helper.hpp"
+#include "pybind/helper/bases_helper.hpp"
 
-#	include "pybind/exception.hpp"
+#include "pybind/exception.hpp"
 
-#   include "pybind/constructor_new.hpp"
-#   include "pybind/constructor_placement.hpp"
+#include "pybind/constructor_new.hpp"
+#include "pybind/constructor_placement.hpp"
 
 namespace pybind
 {
@@ -219,6 +219,17 @@ namespace pybind
 
 			return *this;
 		}
+
+        template<class P, class F>
+        base_ & def_proxy_static_deprecated( const char * _name, P * _proxy, F f, const char * _doc )
+        {
+            method_adapter_interface_ptr iadapter =
+                new method_adapter_proxy_deprecated<C, P, F>( _name, f, _proxy, _doc );
+
+            m_scope->add_method( iadapter );
+
+            return *this;
+        }        
 
 		template<class P, class F>
 		base_ & def_proxy_static_kernel( const char * _name, P * _proxy, F f )

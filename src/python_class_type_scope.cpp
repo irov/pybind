@@ -1,30 +1,30 @@
-#	include "python_class_type_scope.hpp"
+#include "python_class_type_scope.hpp"
 
-#	include "pybind/adapter/new_adapter.hpp"
-#	include "pybind/adapter/destroy_adapter.hpp"
+#include "pybind/adapter/new_adapter.hpp"
+#include "pybind/adapter/destroy_adapter.hpp"
 
-#	include "pybind/adapter/repr_adapter.hpp"
-#	include "pybind/adapter/hash_adapter.hpp"
-#	include "pybind/adapter/convert_adapter.hpp"
-#	include "pybind/adapter/compare_adapter.hpp"
-#	include "pybind/adapter/constructor_adapter.hpp"
+#include "pybind/adapter/repr_adapter.hpp"
+#include "pybind/adapter/hash_adapter.hpp"
+#include "pybind/adapter/convert_adapter.hpp"
+#include "pybind/adapter/compare_adapter.hpp"
+#include "pybind/adapter/constructor_adapter.hpp"
 
-#	include "pybind/adapter/getattro_adapter.hpp"
-#	include "pybind/adapter/mapping_adapter.hpp"
-#	include "pybind/adapter/sequence_get_adapter.hpp"
-#	include "pybind/adapter/sequence_set_adapter.hpp"
-#	include "pybind/adapter/number_binary_adapter.hpp"
-#	include "pybind/adapter/smart_pointer_adapter.hpp"
-#   include "pybind/adapter/bindable_adapter.hpp"
+#include "pybind/adapter/getattro_adapter.hpp"
+#include "pybind/adapter/mapping_adapter.hpp"
+#include "pybind/adapter/sequence_get_adapter.hpp"
+#include "pybind/adapter/sequence_set_adapter.hpp"
+#include "pybind/adapter/number_binary_adapter.hpp"
+#include "pybind/adapter/smart_pointer_adapter.hpp"
+#include "pybind/adapter/bindable_adapter.hpp"
 
-#	include "pod_python.hpp"
+#include "pod_python.hpp"
 
-#	include "pybind/exception.hpp"
+#include "pybind/exception.hpp"
 
-#	include "pybind/system.hpp"
-#	include "config/python.hpp"
+#include "pybind/system.hpp"
+#include "config/python.hpp"
 
-#	include "pybind/debug.hpp"
+#include "pybind/debug.hpp"
 
 namespace pybind
 {

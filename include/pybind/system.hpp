@@ -1,11 +1,11 @@
-#	pragma once
+#pragma once
 
-#	include "pybind/exports.hpp"
-#	include "pybind/types.hpp"
+#include "pybind/exports.hpp"
+#include "pybind/types.hpp"
 
-#	include "pybind/kernel.hpp"
+#include "pybind/kernel.hpp"
 
-#	include <stdarg.h>
+#include <stdarg.h>
 
 namespace pybind
 {
@@ -167,7 +167,8 @@ namespace pybind
 
     PYBIND_API void error_traceback( const char * _message, ... );
 	PYBIND_API void error_message( const char * _message, ... );
-	PYBIND_API void error_clear();
+    PYBIND_API void warning_traceback( const char * _message, ... );
+	PYBIND_API void error_clear();    
 	PYBIND_API PyObject * build_value( const char * _format, ... );
 	PYBIND_API PyObject * build_value_va( const char * _format, va_list _va );
 

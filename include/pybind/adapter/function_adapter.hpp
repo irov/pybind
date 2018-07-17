@@ -1,13 +1,13 @@
-#	pragma once
+#pragma once
 
-#	include "pybind/function_interface.hpp"
+#include "pybind/function_interface.hpp"
 
-#	include "pybind/call/function_call.hpp"
-#	include "pybind/call/function_proxy_call.hpp"
-#	include "pybind/call/function_proxy_args_call.hpp"
-#	include "pybind/call/function_kernel_call.hpp"
+#include "pybind/call/function_call.hpp"
+#include "pybind/call/function_proxy_call.hpp"
+#include "pybind/call/function_proxy_args_call.hpp"
+#include "pybind/call/function_kernel_call.hpp"
 
-#	include "pybind/types.hpp"
+#include "pybind/types.hpp"
 
 namespace pybind
 {
@@ -136,6 +136,8 @@ namespace pybind
                 , name
                 , m_doc
             );
+
+            pybind::check_error();
 
             F fn = this->getFn();
 
