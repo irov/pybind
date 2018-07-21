@@ -205,29 +205,29 @@ namespace pybind
 		}
 	};
 
-	template<typename T>
-	struct extract_specialized<stdex::intrusive_ptr<T> >
-	{
-		T * operator () ( kernel_interface * _kernel, PyObject * _obj ) const
-		{
-			T * value = nullptr;
+    template<typename T, typename D>
+    struct extract_specialized<stdex::intrusive_ptr<T, D> >
+    {
+        T * operator () ( kernel_interface * _kernel, PyObject * _obj ) const
+        {
+            T * value = nullptr;
 
-			if( extract_value( _kernel, _obj, value, true ) == false )
-			{
-				const std::type_info & tinfo = typeid(T *);
+            if( extract_value( _kernel, _obj, value, true ) == false )
+            {
+                const std::type_info & tinfo = typeid(T *);
 
-				const char * type_name = tinfo.name();
+                const char * type_name = tinfo.name();
 
-				pybind::log( "extract_value<intrusive>: extract invalid %s:%s not cast to '%s'"
-					, pybind::object_repr( _obj )
-					, pybind::object_repr_type( _obj )
-					, type_name
-					);
-			}
+                pybind::log( "extract_value<intrusive>: extract invalid %s:%s not cast to '%s'"
+                    , pybind::object_repr( _obj )
+                    , pybind::object_repr_type( _obj )
+                    , type_name
+                );
+            }
 
-			return value;
-		}
-	};
+            return value;
+        }
+    };
 
 	template<class T>
 	typename stdex::mpl::remove_cref<T>::type extract( kernel_interface * _kernel, PyObject * _obj )
@@ -331,10 +331,10 @@ namespace pybind
 		}
 	};
 
-	template<typename T>
-	struct ptr_throw_specialized < stdex::intrusive_ptr<T> >
+	template<typename T, typename D>
+	struct ptr_throw_specialized < stdex::intrusive_ptr<T, D> >
 	{
-		PyObject * operator () ( kernel_interface * _kernel, const stdex::intrusive_ptr<T> & _t )
+		PyObject * operator () ( kernel_interface * _kernel, const stdex::intrusive_ptr<T, D> & _t )
 		{
 			T * t_ptr = _t.get();
 
