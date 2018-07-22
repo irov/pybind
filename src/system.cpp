@@ -1400,6 +1400,8 @@ namespace pybind
         );
 
         PyErr_SetString( PyExc_RuntimeError, trace_buffer );
+
+        pybind::check_error();
     }
     //////////////////////////////////////////////////////////////////////////
     void error_message( const char * _message, ... )

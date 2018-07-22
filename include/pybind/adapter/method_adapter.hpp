@@ -114,13 +114,11 @@ namespace pybind
 
             const char * name = this->getName();
 
-            pybind::error_traceback("method %s::%s deprecated '%s'"
+            pybind::error_traceback("method '%s::%s' deprecated '%s'"
                 , scopeName
                 , name
                 , m_doc
                 );
-
-            pybind::check_error();
 
 			PyObject * ret = method_adapter<C, F>::call( _kernel, _impl, _scope, _args, _kwds );
 
@@ -209,12 +207,10 @@ namespace pybind
 
             const char * name = this->getName();
 
-            pybind::error_traceback( "function %s deprecated '%s'"
+            pybind::error_traceback( "function '%s' deprecated '%s'"
                 , name
                 , m_doc
             );
-
-            pybind::check_error();
 
             C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 

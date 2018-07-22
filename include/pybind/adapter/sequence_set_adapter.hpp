@@ -77,13 +77,11 @@ namespace pybind
 
             const char * name = this->getName();
 
-            pybind::error_traceback("method %s::%s depricated '%s'"
+            pybind::error_traceback("method '%s::%s' depricated '%s'"
                 , scopeName
                 , name
                 , m_doc
-                );
-
-            pybind::check_error();
+                );            
 
 			sequence_get_adapter<C, F>::call( _kernel, _impl, _scope
 				, _index

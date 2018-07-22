@@ -131,13 +131,11 @@ namespace pybind
             (void)_kwds;
 
             const char * name = this->getName();
-
-            pybind::error_traceback( "function %s deprecated '%s'"
+            
+            pybind::error_traceback( "function '%s' deprecated '%s'"
                 , name
                 , m_doc
             );
-
-            pybind::check_error();
 
             F fn = this->getFn();
 
