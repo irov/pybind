@@ -352,6 +352,20 @@ namespace pybind
         return scope;
     }
     //////////////////////////////////////////////////////////////////////////
+    void python_kernel::remove_type_scope( uint32_t _info )
+    {
+        const class_type_scope_interface_ptr & scope = m_class_type_scopes[_info];
+
+        if( scope == nullptr )
+        {
+            return;
+        }
+
+        scope->finalize();
+
+        m_class_type_scopes[_info] = nullptr;
+    }
+    //////////////////////////////////////////////////////////////////////////
     bool python_kernel::has_class_type_scope( uint32_t _info )
     {
         const class_type_scope_interface_ptr & scope = m_class_type_scopes[_info];

@@ -58,6 +58,7 @@ namespace pybind
 		type_cast * find_type_info_extract( uint32_t _info ) override;
 
 		class_type_scope_interface_ptr create_new_type_scope( uint32_t _info, const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash ) override;
+        void remove_type_scope( uint32_t _info ) override;
 
 		bool has_class_type_scope( uint32_t _info ) override;
 		const class_type_scope_interface_ptr & get_class_type_scope( uint32_t _info ) override;

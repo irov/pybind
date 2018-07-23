@@ -110,6 +110,7 @@ namespace pybind
 		virtual type_cast * find_type_info_extract( uint32_t _info ) = 0;
 
 		virtual class_type_scope_interface_ptr create_new_type_scope( uint32_t _info, const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash ) = 0;
+        virtual void remove_type_scope( uint32_t _info ) = 0;
 
 		virtual bool has_class_type_scope( uint32_t _info ) = 0;
 		virtual const class_type_scope_interface_ptr & get_class_type_scope( uint32_t _info ) = 0;
@@ -129,6 +130,14 @@ namespace pybind
 
 			return scope;
 		}
+
+        template<class T>
+        void remove_scope()
+        {
+            uint32_t ti = this->class_info<T>();
+
+            this->remove_type_scope( ti );
+        }
 
 		virtual PyObject * scope_create_holder( const class_type_scope_interface_ptr & _scope, void * _ptr ) = 0;
 

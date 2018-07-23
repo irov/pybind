@@ -89,11 +89,8 @@ namespace pybind
 	PYBIND_API bool set_attr( PyObject * _obj, const char * _attr , PyObject * _value);
 
 	PYBIND_API bool check_type( PyObject * _obj );
-
-	PYBIND_API bool int_check( PyObject * _obj );
-	
-	PYBIND_API bool long_check( PyObject * _obj );
-	
+	PYBIND_API bool int_check( PyObject * _obj );	
+	PYBIND_API bool long_check( PyObject * _obj );	
 	PYBIND_API bool float_check( PyObject * _obj );
 
 	PYBIND_API bool extract_bool( PyObject * _obj, bool & _value );
@@ -190,8 +187,7 @@ namespace pybind
     PYBIND_API const char * string_to_char( PyObject * _string );
     PYBIND_API const char * string_to_char_and_size( PyObject * _string, uint32_t & _size );
     PYBIND_API PyObject * string_from_char( const char * _str );
-	PYBIND_API PyObject * string_from_char_size( const char * _str, uint32_t _size );
-    
+	PYBIND_API PyObject * string_from_char_size( const char * _str, uint32_t _size );    
 
 	PYBIND_API bool unicode_check( PyObject * _unicode );	
     PYBIND_API const wchar_t * unicode_to_wchar( PyObject * _unicode );
@@ -209,7 +205,7 @@ namespace pybind
     PYBIND_API bool void_ptr_check( PyObject * _obj );
     PYBIND_API PyObject * void_ptr_new( void * _impl );
     PYBIND_API void * void_ptr_get( PyObject * _obj );
-
+    
     PYBIND_API long marshal_magic_number();
     PYBIND_API PyObject * marshal_get_object( const char * _buf, size_t _len );
 
