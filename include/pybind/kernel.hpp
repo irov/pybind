@@ -121,6 +121,16 @@ namespace pybind
 		virtual uint32_t get_object_type_id( PyObject * _type ) = 0;
 		virtual const class_type_scope_interface_ptr & get_class_scope( PyTypeObject * _type ) = 0;
 
+        template<class T>
+        class_type_scope_interface_ptr create_new_scope( const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash )
+        {
+            uint32_t ti = this->class_info<T>();
+
+            class_type_scope_interface_ptr scope = this->create_new_type_scope( ti, _name, _user, _pynew, _pydestructor, _pod, _hash );
+
+            return scope;
+        }
+
 		template<class T>
 		const class_type_scope_interface_ptr & class_scope()
 		{

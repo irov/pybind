@@ -47,10 +47,8 @@ namespace pybind
 			{
 				pod = _size;
 			}
-
-			uint32_t info = m_kernel->class_info<C>();
-
-			m_scope = m_kernel->create_new_type_scope( info, _name, _user, _pynew, _pydestructor, pod, _hash );
+            
+			m_scope = m_kernel->create_new_scope<C>( _name, _user, _pynew, _pydestructor, pod, _hash );
 
 			this->setup_bases();
 
