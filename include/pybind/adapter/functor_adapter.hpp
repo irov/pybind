@@ -37,6 +37,43 @@ namespace pybind
 		M m_method;		
 	};
     //////////////////////////////////////////////////////////////////////////
+    template<class C, class M>
+    class functor_proxy_deprecated_adapter
+        : public functor_adapter_interface
+    {
+    public:
+        functor_proxy_deprecated_adapter( const char * _name, uint32_t _arity, C * _self, M _method, const char * _doc )
+            : functor_adapter_interface( _name, _arity )
+            , m_self( _self )
+            , m_method( _method )
+            , m_doc( _doc )
+        {
+        }
+
+    public:
+        PyObject * call( kernel_interface * _kernel, PyObject * _args, PyObject * _kwds ) override
+        {
+            (void)_kernel;
+            (void)_kwds;
+
+            const char * name = this->getName();
+
+            pybind::error_traceback( "functor '%s' deprecated '%s'"
+                , name
+                , m_doc
+            );
+
+            PyObject * ret = method_call<C, M>::call( _kernel, m_self, m_method, _args );
+
+            return ret;
+        }
+
+    protected:
+        C * m_self;
+        M m_method;
+        const char * m_doc;
+    };
+    //////////////////////////////////////////////////////////////////////////
     template<class C, class FI, class FD, class M>
     class functor_proxy_adapter_ptr
         : public functor_adapter_interface
