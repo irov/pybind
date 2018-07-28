@@ -6,63 +6,63 @@
 #include "pybind/helper/list_const_iterator.hpp"
 
 namespace pybind
-{ 
-	class PYBIND_API list
-		: public object
-	{
+{
+    class PYBIND_API list
+        : public object
+    {
     public:
         typedef uint32_t size_type;
 
-	public:		
-		list( kernel_interface * _kernel );
-		list( const list & _list );
-				
-	public:
-        explicit list( pybind::invalid );
-		list( kernel_interface * _kernel, size_type _size );
-		list( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed );
-		list( kernel_interface * _kernel, PyObject * _obj );
-
-	public:
-		detail::set_list_operator_t operator [] ( size_type _index );
-		detail::extract_operator_t operator [] ( size_type _index ) const;
-
-	public:
-		template<class T>
-		list & append( const T & _t )
-		{
-			return this->append_i( detail::import_operator_t( m_kernel, _t ) );
-		}
-			
     public:
-		list & append_i( const detail::import_operator_t & _t );
-		
-	public:
-		template<class It>
-		list & append( It _begin, It _end )
-		{
-			for( It it = _begin; it != _end; ++it )
-			{
-				this->append( *it );
-			}
+        list( kernel_interface * _kernel );
+        list( const list & _list );
 
-			return *this;
-		}
+    public:
+        explicit list( pybind::invalid );
+        list( kernel_interface * _kernel, size_type _size );
+        list( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed );
+        list( kernel_interface * _kernel, PyObject * _obj );
 
-		template<class It>
-		void fill( size_type _offset, It _begin, It _end )
-		{
+    public:
+        detail::set_list_operator_t operator [] ( size_type _index );
+        detail::extract_operator_t operator [] ( size_type _index ) const;
+
+    public:
+        template<class T>
+        list & append( const T & _t )
+        {
+            return this->append_i( detail::import_operator_t( m_kernel, _t ) );
+        }
+
+    public:
+        list & append_i( const detail::import_operator_t & _t );
+
+    public:
+        template<class It>
+        list & append( It _begin, It _end )
+        {
+            for( It it = _begin; it != _end; ++it )
+            {
+                this->append( *it );
+            }
+
+            return *this;
+        }
+
+        template<class It>
+        void fill( size_type _offset, It _begin, It _end )
+        {
             size_type index = 0;
 
-			for( It it = _begin; it != _end; ++it )
-			{
-				this->operator [] ( _offset + index++ ) = *it;
-			}
-		}
+            for( It it = _begin; it != _end; ++it )
+            {
+                this->operator [] ( _offset + index++ ) = *it;
+            }
+        }
 
-	public:
+    public:
         size_type size() const;
-		bool empty() const;
+        bool empty() const;
 
     public:
         typedef list_const_iterator const_iterator;
@@ -70,26 +70,26 @@ namespace pybind
     public:
         const_iterator begin() const;
         const_iterator end() const;
-	};
-	//////////////////////////////////////////////////////////////////////////
-	template<>
-	struct extract_specialized<pybind::list>
-	{
+    };
+    //////////////////////////////////////////////////////////////////////////
+    template<>
+    struct extract_specialized<pybind::list>
+    {
         pybind::list operator () ( kernel_interface * _kernel, PyObject * _obj ) const;
-	};
-	//////////////////////////////////////////////////////////////////////////
-	PYBIND_API bool list_check_t( const pybind::object & _obj );
-	//////////////////////////////////////////////////////////////////////////
-	template<class C>
-	inline pybind::list make_list_container_t( kernel_interface * _kernel, const C & _c )
-	{
+    };
+    //////////////////////////////////////////////////////////////////////////
+    PYBIND_API bool list_check_t( const pybind::object & _obj );
+    //////////////////////////////////////////////////////////////////////////
+    template<class C>
+    inline pybind::list make_list_container_t( kernel_interface * _kernel, const C & _c )
+    {
         typename C::size_type c_size = _c.size();
-		pybind::list l( _kernel, (pybind::list::size_type)c_size );
+        pybind::list l( _kernel, (pybind::list::size_type)c_size );
 
-		l.fill( 0, _c.begin(), _c.end() );
+        l.fill( 0, _c.begin(), _c.end() );
 
-		return l;
-	}
-	//////////////////////////////////////////////////////////////////////////
-	PYBIND_API pybind::list make_invalid_list_t();
+        return l;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PYBIND_API pybind::list make_invalid_list_t();
 }

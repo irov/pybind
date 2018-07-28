@@ -1528,7 +1528,7 @@ namespace pybind
         return result;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool is_type_class( PyObject * _value )
+    bool is_type_class( PyTypeObject * _value )
     {
         kernel_interface * kernel = pybind::get_kernel();
 

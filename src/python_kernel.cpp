@@ -7,6 +7,9 @@
 
 #include "python_class_type_scope.hpp"
 
+#include "pybind/adapter/new_adapter.hpp"
+#include "pybind/adapter/destroy_adapter.hpp"
+
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
@@ -47,7 +50,6 @@ namespace pybind
         }
 
         m_enumerator = 4;
-        m_str_pybind_class_type_scope = nullptr;
 
         for( uint32_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
         {
@@ -56,11 +58,7 @@ namespace pybind
             desc.name = nullptr;
         }
 
-#   if PYBIND_PYTHON_VERSION > 300
-        m_str_pybind_class_type_scope = pybind::unicode_from_utf8( "__pybind_class_type_scope" );
-#   else
-        m_str_pybind_class_type_scope = pybind::string_from_char( "__pybind_class_type_scope" );
-#   endif
+        m_class_type_dummy = new python_class_type_scope( this, "__dummy__", 0, nullptr, nullptr, nullptr, 0, false );
 
         return true;
     }
@@ -84,11 +82,14 @@ namespace pybind
             m_class_info_desc[index].name = nullptr;
         }
 
-        if( m_str_pybind_class_type_scope != nullptr )
+        for( uint32_t index = 0; index != PYBIND_TYPE_COUNT_HASH; ++index )
         {
-            Py_DECREF( m_str_pybind_class_type_scope );
-            m_str_pybind_class_type_scope = nullptr;
+            class_type_scope_interface_ptr & scope = m_class_type_hashes[index];
+
+            scope = nullptr;
         }
+
+        m_class_type_dummy = nullptr;
 
         m_functions.finalize();
         m_functors.finalize();
@@ -347,6 +348,11 @@ namespace pybind
     {
         class_type_scope_interface_ptr scope = new python_class_type_scope( this, _name, _info, _user, _pynew, _pydestructor, _pod, _hash );
 
+        if( scope == nullptr )
+        {
+            return nullptr;
+        }
+
         m_class_type_scopes[_info] = scope;
 
         return scope;
@@ -360,6 +366,8 @@ namespace pybind
         {
             return;
         }
+
+        this->remove_class_scope_type( scope );
 
         scope->finalize();
 
@@ -408,9 +416,9 @@ namespace pybind
     {
         PyTypeObject * objtype = pybind::object_type( _obj );
 
-        PyObject * py_scope = pybind::get_attr( (PyObject*)objtype, m_str_pybind_class_type_scope );
+        const class_type_scope_interface_ptr & scope = this->get_class_scope( objtype );
 
-        if( py_scope == nullptr )
+        if( scope == nullptr )
         {
             pybind::error_clear();
 
@@ -450,65 +458,90 @@ namespace pybind
             return 0;
         }
 
-        uint32_t id;
-        if( pybind::extract_value( this, py_scope, id, false ) == false )
+        uint32_t type_id = scope->get_type_id();
+
+        return type_id;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void python_kernel::cache_class_scope_type( const class_type_scope_interface_ptr & _scope )
+    {
+        PyTypeObject * py_type = _scope->get_typeobject();
+
+        uint64_t py_hash = pybind::object_hash( (PyObject*)py_type );
+
+        uint32_t slot = py_hash % PYBIND_TYPE_COUNT_HASH;
+
+        for( uint32_t probe = slot; probe != PYBIND_TYPE_COUNT_HASH; probe = (probe + 17) % PYBIND_TYPE_COUNT_HASH )
         {
-            pybind::decref( py_scope );
+            class_type_scope_interface_ptr & scope = m_class_type_hashes[probe];
 
-            pybind::throw_exception( "obj %s incorrect wrap pybind (scope)"
-                , pybind::object_str( (PyObject *)objtype )
-            );
+            if( scope != nullptr )
+            {
+                continue;
+            }
 
-            return 0;
+            scope = _scope;
+
+            break;
         }
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void python_kernel::remove_class_scope_type( const class_type_scope_interface_ptr & _scope )
+    {
+        PyTypeObject * py_type = _scope->get_typeobject();
 
-        pybind::decref( py_scope );
+        uint64_t py_hash = pybind::object_hash( (PyObject*)py_type );
 
-        return id;
+        uint32_t slot = py_hash % PYBIND_TYPE_COUNT_HASH;
+
+        for( uint32_t probe = slot; probe != PYBIND_TYPE_COUNT_HASH; probe = (probe + 17) % PYBIND_TYPE_COUNT_HASH )
+        {
+            class_type_scope_interface_ptr & scope = m_class_type_hashes[probe];
+
+            if( scope == nullptr )
+            {
+                break;
+            }
+
+            PyTypeObject * py_typeobject = scope->get_typeobject();
+
+            if( py_typeobject != py_type )
+            {
+                continue;
+            }
+
+            scope = m_class_type_dummy;
+
+            break;
+        }
     }
     //////////////////////////////////////////////////////////////////////////
     const class_type_scope_interface_ptr & python_kernel::get_class_scope( PyTypeObject * _type )
     {
-        PyObject * py_scope = pybind::get_attr( (PyObject*)_type, m_str_pybind_class_type_scope );
+        uint64_t py_hash = pybind::object_hash( (PyObject*)_type );
 
-        if( py_scope == nullptr )
+        uint32_t slot = py_hash % PYBIND_TYPE_COUNT_HASH;
+
+        for( uint32_t probe = slot; probe != PYBIND_TYPE_COUNT_HASH; probe = (probe + 17) % PYBIND_TYPE_COUNT_HASH )
         {
-            pybind::error_clear();
+            const class_type_scope_interface_ptr & scope = m_class_type_hashes[probe];
 
-            pybind::throw_exception( "obj %s not wrap pybind (scope)"
-                , pybind::object_str( (PyObject *)_type )
-            );
+            if( scope == nullptr )
+            {
+                break;
+            }
 
-            return class_type_scope_interface_ptr::none();
+            PyTypeObject * py_typeobject = scope->get_typeobject();
+
+            if( py_typeobject != _type )
+            {
+                continue;
+            }
+
+            return scope;
         }
 
-        uint32_t id;
-        if( pybind::extract_value( this, py_scope, id, false ) == false )
-        {
-            pybind::decref( py_scope );
-
-            pybind::throw_exception( "obj %s incorrect wrap pybind (scope)"
-                , pybind::object_str( (PyObject *)_type )
-            );
-
-            return class_type_scope_interface_ptr::none();
-        }
-
-        pybind::decref( py_scope );
-
-        const class_type_scope_interface_ptr & scope = this->get_class_type_scope( id );
-
-        if( scope == nullptr )
-        {
-            pybind::throw_exception( "obj %s incorrect wrap pybind (id %d)"
-                , pybind::object_str( (PyObject *)_type )
-                , id
-            );
-
-            return class_type_scope_interface_ptr::none();
-        }
-
-        return scope;
+        return class_type_scope_interface_ptr::none();
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::scope_create_holder( const class_type_scope_interface_ptr & _scope, void * _ptr )
@@ -522,16 +555,37 @@ namespace pybind
     {
         PyTypeObject * objtype = pybind::object_type( _obj );
 
-        bool successful = pybind::is_type_class( (PyObject *)objtype );
+        bool successful = this->is_type_class( objtype );
 
         return successful;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::is_type_class( PyObject * _type )
+    bool python_kernel::is_type_class( PyTypeObject * _type )
     {
-        bool successful = pybind::has_attr( _type, m_str_pybind_class_type_scope );
+        uint64_t py_hash = pybind::object_hash( (PyObject *)_type );
 
-        return successful;
+        uint32_t slot = py_hash % PYBIND_TYPE_COUNT_HASH;
+
+        for( uint32_t probe = slot; probe != PYBIND_TYPE_COUNT_HASH; probe = (probe + 17) % PYBIND_TYPE_COUNT_HASH )
+        {
+            const class_type_scope_interface_ptr & scope = m_class_type_hashes[probe];
+
+            if( scope == nullptr )
+            {
+                return false;
+            }
+
+            PyTypeObject * py_typeobject = scope->get_typeobject();
+
+            if( py_typeobject != _type )
+            {
+                continue;
+            }
+
+            return true;
+        }
+
+        return false;
     }
     //////////////////////////////////////////////////////////////////////////
     void * python_kernel::check_registred_class( PyObject * _obj, uint32_t _info )
@@ -606,11 +660,6 @@ namespace pybind
         void * impl = pybind::detail::get_pod_impl( _obj );
 
         return impl;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    PyObject * python_kernel::get_str_class_type_scope()
-    {
-        return m_str_pybind_class_type_scope;
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::call_method( void * _self, const class_type_scope_interface_ptr & _scope, const char * _name, PyObject * _args )

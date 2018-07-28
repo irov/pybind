@@ -93,7 +93,7 @@ namespace pybind
 
                 return py_value;
             }
-        };        
+        };
     }
     //////////////////////////////////////////////////////////////////////////
     bool initialize_stl_type_cast( kernel_interface * _kernel )

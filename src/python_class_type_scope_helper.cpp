@@ -17,7 +17,7 @@ namespace pybind
             kernel_interface * kernel = pybind::get_kernel();
 
             PyTypeObject * objtype = pybind::object_type( _obj );
-            
+
             const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
 
             if( scope == nullptr )

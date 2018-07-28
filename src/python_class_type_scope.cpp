@@ -194,9 +194,7 @@ namespace pybind
             return Py_NotImplemented;
         }
 
-        PyTypeObject * objtype = pybind::object_type( _obj );
-
-        const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
+        
 
         PybindOperatorCompare pybind_op = POC_Less;
 
@@ -236,10 +234,13 @@ namespace pybind
 
         try
         {
-            bool test_result;
+            PyTypeObject * objtype = pybind::object_type( _obj );
+
+            const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
 
             const compare_adapter_interface_ptr & adapter = scope->get_compare_adapter();
 
+            bool test_result;
             if( adapter->compare( kernel, _obj, impl, scope, _compare, pybind_op, test_result ) == false )
             {
                 Py_INCREF( Py_NotImplemented );
@@ -589,7 +590,7 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
-    void python_class_type_scope::initialize( PyObject * _module )
+    bool python_class_type_scope::initialize( PyObject * _module )
     {
         PyObject * py_module = _module;
 
@@ -603,7 +604,7 @@ namespace pybind
                     , m_name
                 );
 
-                return;
+                return false;
             }
         }
 
@@ -625,7 +626,7 @@ namespace pybind
             {
                 Metacast & mc = m_bases[i];
 
-                PyTypeObject * py_base = mc.scope->get_typemodule();
+                PyTypeObject * py_base = mc.scope->get_typeobject();
 
                 Py_INCREF( (PyObject *)py_base );
                 PyTuple_SetItem( py_bases, index++, (PyObject*)py_base );
@@ -665,13 +666,6 @@ namespace pybind
 
         PyObject * py_dict = PyDict_New();
 
-        PyObject * py_pybind_scope_id = pybind::ptr_throw( m_kernel, m_typeId );
-
-        PyObject * py_str_class_type_scope = m_kernel->get_str_class_type_scope();
-
-        PyDict_SetItem( py_dict, py_str_class_type_scope, py_pybind_scope_id );
-        Py_DECREF( py_pybind_scope_id );
-
         PyObject * py_args = PyTuple_Pack( 3, py_name, py_bases, py_dict );
         Py_DECREF( py_name );
         Py_DECREF( py_bases );
@@ -688,7 +682,7 @@ namespace pybind
                 , m_name
             );
 
-            return;
+            return false;
         }
 
         if( m_pod_size == 0 )
@@ -706,11 +700,17 @@ namespace pybind
 
         Py_INCREF( (PyObject*)m_pytypeobject );
         PyModule_AddObject( py_module, m_pytypeobject->tp_name, (PyObject*)m_pytypeobject );
+
+        m_kernel->cache_class_scope_type( this );
+
+        return true;
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::finalize()
     {
         PyDict_Clear( m_pytypeobject->tp_dict );
+
+        m_kernel->remove_class_scope_type( this );
 
         Py_DECREF( (PyObject*)m_pytypeobject );
 
@@ -789,7 +789,7 @@ namespace pybind
         return m_user;
     }
     //////////////////////////////////////////////////////////////////////////
-    PyTypeObject * python_class_type_scope::get_typemodule() const
+    PyTypeObject * python_class_type_scope::get_typeobject() const
     {
         return m_pytypeobject;
     }
@@ -1585,19 +1585,4 @@ namespace pybind
         }
     }
     //////////////////////////////////////////////////////////////////////////
-#	ifdef PYBIND_VISIT_OBJECTS
-    void python_class_type_scope::visit_objects( pybind_visit_objects * _visitor )
-    {
-        for( TVectorObjects::iterator
-            it = m_objects.begin(),
-            it_end = m_objects.end();
-            it != it_end;
-            ++it )
-        {
-            PyObject * obj = *it;
-
-            _visitor->visit_object( obj );
-        }
-    }
-#	endif
 }

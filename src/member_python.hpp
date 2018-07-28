@@ -8,20 +8,20 @@
 
 namespace pybind
 {
-	class member_python
-	{
-	public:
-		bool initialize();
-		void finalize();
+    class member_python
+    {
+    public:
+        bool initialize();
+        void finalize();
 
-	public:
-		PyObject * create_member_adapter( const member_adapter_interface_ptr & _iadapter );
+    public:
+        PyObject * create_member_adapter( const member_adapter_interface_ptr & _iadapter );
 
-	protected:
-		PyTypeObject m_member_type;
+    protected:
+        PyTypeObject m_member_type;
 
-		PyMethodDef m_setmethod;
-		PyMethodDef m_getmethod;
-	};
+        PyMethodDef m_setmethod;
+        PyMethodDef m_getmethod;
+    };
 }
 

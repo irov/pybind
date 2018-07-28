@@ -6,25 +6,25 @@
 
 namespace pybind
 {
-	class adapter_interface
+    class adapter_interface
         : public stdex::intrusive_ptr_base
-	{
-	public:
+    {
+    public:
         adapter_interface()
         {
         }
-        
+
         virtual ~adapter_interface()
-		{
-		};
+        {
+        };
 
     public:
-		void destroy() override;
+        void destroy() override;
 
-	public:
-		void * operator new ( size_t _size );
-		void operator delete ( void * _ptr, size_t _size );
-	};
+    public:
+        void * operator new (size_t _size);
+        void operator delete (void * _ptr, size_t _size);
+    };
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<adapter_interface> adapter_interface_ptr;
 }

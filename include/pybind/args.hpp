@@ -24,7 +24,7 @@ namespace pybind
 
     public:
         void reset();
-        
+
     public:
         size_type size() const;
 

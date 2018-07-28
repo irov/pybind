@@ -12,102 +12,104 @@
 
 namespace pybind
 {
-	class python_kernel
-		: public kernel_interface
-	{
-	public:
-		python_kernel();
-		~python_kernel() override;
+    class python_kernel
+        : public kernel_interface
+    {
+    public:
+        python_kernel();
+        ~python_kernel() override;
 
-	public:
-		bool initialize() override;
-		void finalize() override;
+    public:
+        bool initialize() override;
+        void finalize() override;
 
-	public:
-		void def_function_adapter( const function_adapter_interface_ptr & _adapter, bool _native, PyObject * _module ) override;
-		void def_functor_adapter( const functor_adapter_interface_ptr & _adapter, bool _native, PyObject * _module ) override;
+    public:
+        void def_function_adapter( const function_adapter_interface_ptr & _adapter, bool _native, PyObject * _module ) override;
+        void def_functor_adapter( const functor_adapter_interface_ptr & _adapter, bool _native, PyObject * _module ) override;
 
-		PyObject * create_function_adapter( const function_adapter_interface_ptr & _adapter, bool _native ) override;
+        PyObject * create_function_adapter( const function_adapter_interface_ptr & _adapter, bool _native ) override;
         PyObject * create_functor_adapter( const functor_adapter_interface_ptr & _adapter, bool _native ) override;
 
-		PyObject * create_member( const member_adapter_interface_ptr & _iadapter ) override;
-		PyObject * create_method( const method_adapter_interface_ptr & _iadapter, PyTypeObject * _type ) override;
-		method_adapter_interface * get_method_adapter( PyObject * _obj ) override;
-		
-	public:
-		PyTypeObject * get_pod_type( uint32_t _pod, bool _hash ) override;
+        PyObject * create_member( const member_adapter_interface_ptr & _iadapter ) override;
+        PyObject * create_method( const method_adapter_interface_ptr & _iadapter, PyTypeObject * _type ) override;
+        method_adapter_interface * get_method_adapter( PyObject * _obj ) override;
 
-	public:
-		void set_current_module( PyObject * _module ) override;
-		PyObject * get_current_module() const override;
+    public:
+        PyTypeObject * get_pod_type( uint32_t _pod, bool _hash ) override;
 
-	public:
-		void * unwrap( PyObject * _obj ) override;
-		bool is_wrap( PyObject * _obj ) override;
+    public:
+        void set_current_module( PyObject * _module ) override;
+        PyObject * get_current_module() const override;
 
-		bool is_class( PyObject * _obj ) override;
-		bool is_type_class( PyObject * _type ) override;
+    public:
+        void * unwrap( PyObject * _obj ) override;
+        bool is_wrap( PyObject * _obj ) override;
 
-		uint32_t get_class_type_id( const std::type_info & _info ) override;
-		const char * get_class_type_info( uint32_t _id ) override;
+        bool is_class( PyObject * _obj ) override;
+        bool is_type_class( PyTypeObject * _type ) override;
 
-		uint32_t find_class_info_desc_name( const char * _name ) override;
+        uint32_t get_class_type_id( const std::type_info & _info ) override;
+        const char * get_class_type_info( uint32_t _id ) override;
 
-		void register_type_info_extract( uint32_t _info, const type_cast_ptr & _cast ) override;
-		void unregister_type_info_extract( uint32_t _info ) override;
-		type_cast * find_type_info_extract( uint32_t _info ) override;
+        uint32_t find_class_info_desc_name( const char * _name ) override;
 
-		class_type_scope_interface_ptr create_new_type_scope( uint32_t _info, const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash ) override;
+        void register_type_info_extract( uint32_t _info, const type_cast_ptr & _cast ) override;
+        void unregister_type_info_extract( uint32_t _info ) override;
+        type_cast * find_type_info_extract( uint32_t _info ) override;
+
+        class_type_scope_interface_ptr create_new_type_scope( uint32_t _info, const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash ) override;
         void remove_type_scope( uint32_t _info ) override;
 
-		bool has_class_type_scope( uint32_t _info ) override;
-		const class_type_scope_interface_ptr & get_class_type_scope( uint32_t _info ) override;
+        bool has_class_type_scope( uint32_t _info ) override;
+        const class_type_scope_interface_ptr & get_class_type_scope( uint32_t _info ) override;
 
-		void visit_types_scope( visitor_class_type_scope * _getter ) override;
+        void visit_types_scope( visitor_class_type_scope * _getter ) override;
 
-		PyTypeObject * get_object_type( PyObject * _type ) override;
-		uint32_t get_object_type_id( PyObject * _type ) override;
-		const class_type_scope_interface_ptr & get_class_scope( PyTypeObject * _type ) override;
+        PyTypeObject * get_object_type( PyObject * _type ) override;
+        uint32_t get_object_type_id( PyObject * _type ) override;
 
-		PyObject * scope_create_holder( const class_type_scope_interface_ptr & _scope, void * _ptr ) override;
+        const class_type_scope_interface_ptr & get_class_scope( PyTypeObject * _type ) override;
+        void cache_class_scope_type( const class_type_scope_interface_ptr & _scope ) override;
+        void remove_class_scope_type( const class_type_scope_interface_ptr & _scope ) override;
 
-		void * meta_cast_scope( void * _self, uint32_t _scope_name, uint32_t _class_name, const class_type_scope_interface_ptr & _scope ) override;
+        PyObject * scope_create_holder( const class_type_scope_interface_ptr & _scope, void * _ptr ) override;
 
-		void * check_registred_class( PyObject * _obj, uint32_t _info ) override;
+        void * meta_cast_scope( void * _self, uint32_t _scope_name, uint32_t _class_name, const class_type_scope_interface_ptr & _scope ) override;
 
-		void error_invalid_extract( PyObject * _obj, uint32_t _tinfo ) override;
-		bool instance_of_type( PyObject * _obj, uint32_t _tinfo ) override;
+        void * check_registred_class( PyObject * _obj, uint32_t _info ) override;
 
-		void * get_class_impl( PyObject * _obj ) override;
+        void error_invalid_extract( PyObject * _obj, uint32_t _tinfo ) override;
+        bool instance_of_type( PyObject * _obj, uint32_t _tinfo ) override;
 
-		PyObject * get_str_class_type_scope() override;
+        void * get_class_impl( PyObject * _obj ) override;
 
-		PyObject * call_method( void * _self, const class_type_scope_interface_ptr & _scope, const char * _name, PyObject * _args ) override;
+        PyObject * call_method( void * _self, const class_type_scope_interface_ptr & _scope, const char * _name, PyObject * _args ) override;
 
-	protected:
-		function_python m_functions;
-		functor_python m_functors;
-		member_python m_members;
-		method_python m_methods;
-		pod_python m_pods;
+    protected:
+        function_python m_functions;
+        functor_python m_functors;
+        member_python m_members;
+        method_python m_methods;
+        pod_python m_pods;
 
-		PyObject * m_current_module;
+        PyObject * m_current_module;
 
-		struct class_info_desc_t
-		{
-			const char * name;
-		};
+        struct class_info_desc_t
+        {
+            const char * name;
+        };
 
-		class_info_desc_t m_class_info_desc[PYBIND_TYPE_COUNT];
-		type_cast_ptr m_type_cast[PYBIND_TYPE_COUNT];
-		class_type_scope_interface_ptr m_class_type_scopes[PYBIND_TYPE_COUNT];
+        class_info_desc_t m_class_info_desc[PYBIND_TYPE_COUNT];
+        type_cast_ptr m_type_cast[PYBIND_TYPE_COUNT];
+        class_type_scope_interface_ptr m_class_type_scopes[PYBIND_TYPE_COUNT];
 
-		uint32_t m_enumerator;
+        class_type_scope_interface_ptr m_class_type_dummy;
+        class_type_scope_interface_ptr m_class_type_hashes[PYBIND_TYPE_COUNT_HASH];
 
-		PyObject * m_str_pybind_class_type_scope;
+        uint32_t m_enumerator;
 
-	protected:
-		bool set_class_info_desc( uint32_t _typeId, const char * _info );
-		uint32_t get_next_id();
-	};
+    protected:
+        bool set_class_info_desc( uint32_t _typeId, const char * _info );
+        uint32_t get_next_id();
+    };
 }

@@ -6,20 +6,20 @@
 
 namespace pybind
 {
-	class functor_python
-	{
-	public:
-		bool initialize();
-		void finalize();
+    class functor_python
+    {
+    public:
+        bool initialize();
+        void finalize();
 
-	public:
-		PyObject * create_functor_adapter( const functor_adapter_interface_ptr & _adapter, bool _native );
+    public:
+        PyObject * create_functor_adapter( const functor_adapter_interface_ptr & _adapter, bool _native );
 
-	protected:
-		PyTypeObject m_functor_type;
+    protected:
+        PyTypeObject m_functor_type;
 
-		PyMethodDef m_method_native;
-		PyMethodDef m_method_args;
-		PyMethodDef m_method_noargs;
-	};
+        PyMethodDef m_method_native;
+        PyMethodDef m_method_args;
+        PyMethodDef m_method_noargs;
+    };
 }

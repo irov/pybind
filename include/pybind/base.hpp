@@ -4,26 +4,26 @@
 
 namespace pybind
 {
-	class kernel_interface;
+    class kernel_interface;
 
-	class base
-	{
+    class base
+    {
     public:
-		base();
+        base();
         base( const base & _base );
 
-    public:		        
-		base( kernel_interface * _kernel, PyObject * _obj );
+    public:
+        base( kernel_interface * _kernel, PyObject * _obj );
         base( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed );
 
-		explicit base( pybind::invalid );
+        explicit base( pybind::invalid );
 
         base & operator = ( const base & _obj );
 
         ~base();
 
-	public:
-		kernel_interface * kernel() const;
+    public:
+        kernel_interface * kernel() const;
 
     public:
         PyObject * ptr() const;
@@ -49,7 +49,7 @@ namespace pybind
         const char * repr() const;
 
     protected:
-		kernel_interface * m_kernel;
+        kernel_interface * m_kernel;
         PyObject * m_obj;
-	};
+    };
 }

@@ -7,7 +7,6 @@
 #include "pybind/kernel.hpp"
 #include "pybind/function.hpp"
 #include "pybind/functor.hpp"
-#include "pybind/class.hpp"
 #include "pybind/system.hpp"
 #include "pybind/helper.hpp"
 #include "pybind/object.hpp"
@@ -16,4 +15,9 @@
 #include "pybind/dict.hpp"
 #include "pybind/module.hpp"
 
-
+#include "pybind/generator/class_.hpp"
+#include "pybind/generator/interface_.hpp"
+#include "pybind/generator/proxy_.hpp"
+#include "pybind/generator/struct_.hpp"
+#include "pybind/generator/structhash_.hpp"
+#include "pybind/generator/superclass_.hpp"

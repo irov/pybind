@@ -6,38 +6,38 @@
 
 namespace pybind
 {
-	//////////////////////////////////////////////////////////////////////////
-	class kernel_interface;
-	//////////////////////////////////////////////////////////////////////////
-	class functor_adapter_interface
+    //////////////////////////////////////////////////////////////////////////
+    class kernel_interface;
+    //////////////////////////////////////////////////////////////////////////
+    class functor_adapter_interface
         : public adapter_interface
-	{
-	public:
-		functor_adapter_interface( const char * _name, uint32_t _arity )
-			: m_name(_name)
-			, m_arity(_arity)
-		{
-		}
-
-	public:
-		inline const char * getName() const
-		{
-			return m_name;
-		}
+    {
+    public:
+        functor_adapter_interface( const char * _name, uint32_t _arity )
+            : m_name( _name )
+            , m_arity( _arity )
+        {
+        }
 
     public:
-		uint32_t getArity() const
-		{
-			return m_arity;
-		}        
+        inline const char * getName() const
+        {
+            return m_name;
+        }
 
-	public:
-		virtual PyObject * call( kernel_interface * _kernel, PyObject * _args, PyObject * _kwds ) = 0;
+    public:
+        uint32_t getArity() const
+        {
+            return m_arity;
+        }
 
-	protected:
-		const char * m_name;
-		uint32_t m_arity;
-	};
+    public:
+        virtual PyObject * call( kernel_interface * _kernel, PyObject * _args, PyObject * _kwds ) = 0;
+
+    protected:
+        const char * m_name;
+        uint32_t m_arity;
+    };
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<class functor_adapter_interface> functor_adapter_interface_ptr;
 }
