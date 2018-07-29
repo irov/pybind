@@ -15,7 +15,7 @@ namespace pybind
         {
         }
 
-        ~pybind_exception() throw()
+        ~pybind_exception() throw() override
         {
         }
 

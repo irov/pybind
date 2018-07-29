@@ -10,7 +10,7 @@ namespace pybind
         : public stdex::intrusive_ptr_base
     {
     public:
-        adapter_interface()
+        adapter_interface() noexcept
         {
         }
 

@@ -475,7 +475,7 @@ namespace pybind
         {
             class_type_scope_interface_ptr & scope = m_class_type_hashes[probe];
 
-            if( scope != nullptr )
+            if( scope != nullptr && scope != m_class_type_dummy )
             {
                 continue;
             }
@@ -502,7 +502,7 @@ namespace pybind
             {
                 break;
             }
-
+            
             PyTypeObject * py_typeobject = scope->get_typeobject();
 
             if( py_typeobject != py_type )
