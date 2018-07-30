@@ -136,9 +136,9 @@ namespace pybind
             uint32_t arg_size = pybind::tuple_size( _arg );
             uint32_t fn_arity = f_info::arity;
 
-            if( arg_size + 2 != fn_arity )
+            if( arg_size + 2 < fn_arity )
             {
-                pybind::throw_exception( "invalid proxy args function call args is not equal %d != %d\n"
+                pybind::throw_exception( "invalid proxy args function call args is not equal %d < %d\n"
                     , arg_size + 2
                     , fn_arity
                 );
