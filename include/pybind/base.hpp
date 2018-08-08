@@ -40,12 +40,15 @@ namespace pybind
         bool is_type_class() const;
         bool is_none() const;
         bool is_bool() const;
+        bool is_string() const;
+        bool is_unicode() const;
         bool is_callable() const;
 
     public:
         void unwrap() const;
 
     public:
+        const char * str() const;
         const char * repr() const;
 
     protected:

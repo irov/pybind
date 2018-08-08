@@ -124,6 +124,16 @@ namespace pybind
         return pybind::bool_check( m_obj );
     }
     //////////////////////////////////////////////////////////////////////////
+    bool base::is_string() const
+    {
+        return pybind::string_check( m_obj );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool base::is_unicode() const
+    {
+        return pybind::unicode_check( m_obj );
+    }
+    //////////////////////////////////////////////////////////////////////////
     bool base::is_callable() const
     {
         return pybind::is_callable( m_obj );
@@ -132,6 +142,11 @@ namespace pybind
     void base::unwrap() const
     {
         pybind::unwrap( m_obj );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const char * base::str() const
+    {
+        return pybind::object_str( m_obj );
     }
     //////////////////////////////////////////////////////////////////////////
     const char * base::repr() const

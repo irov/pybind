@@ -1,6 +1,6 @@
 #pragma once
 
-#include "pybind/object.hpp"
+#include "pybind/extract_operator.hpp"
 
 namespace pybind
 {

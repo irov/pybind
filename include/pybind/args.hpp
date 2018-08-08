@@ -2,6 +2,8 @@
 
 #include "pybind/extract_operator.hpp"
 
+#include "pybind/helper/tuple_const_iterator.hpp"
+
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
@@ -43,6 +45,13 @@ namespace pybind
             return m_args;
         }
 
+    public:
+        typedef tuple_const_iterator const_iterator;
+
+    public:
+        const_iterator begin() const;
+        const_iterator end() const;
+        
     protected:
         kernel_interface * m_kernel;
         PyObject * m_args;

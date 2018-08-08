@@ -70,4 +70,16 @@ namespace pybind
     {
         return pybind::tuple_getitem_t( m_kernel, m_args, _index );
     }
+    //////////////////////////////////////////////////////////////////////////
+    args::const_iterator args::begin() const
+    {
+        return const_iterator( m_kernel, m_args, 0 );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    args::const_iterator args::end() const
+    {
+        size_type size = this->size();
+
+        return const_iterator( m_kernel, m_args, size );
+    }
 }
