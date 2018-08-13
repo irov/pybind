@@ -17,13 +17,17 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
+    tuple_const_iterator::~tuple_const_iterator()
+    {
+    }
+    //////////////////////////////////////////////////////////////////////////
     detail::extract_operator_t tuple_const_iterator::operator -> () const
     {
         PyObject * py_item = pybind::tuple_getitem( m_obj, m_index );
 
         return detail::extract_operator_t( m_kernel, py_item );
     }
-
+    //////////////////////////////////////////////////////////////////////////
     detail::extract_operator_t tuple_const_iterator::operator * () const
     {
         PyObject * py_item = pybind::tuple_getitem( m_obj, m_index );

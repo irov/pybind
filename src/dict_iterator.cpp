@@ -22,12 +22,17 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
-    dict_iterator & dict_iterator::operator = ( const dict_iterator & _it )
+    dict_iterator::dict_iterator( const dict_iterator & _r )
+        : m_kernel( _r.m_kernel )
+        , m_obj( _r.m_obj )
+        , m_pos( _r.m_pos )
+        , m_key( _r.m_key )
+        , m_value( _r.m_value )
     {
-        m_obj = _it.m_obj;
-        m_pos = _it.m_pos;
-
-        return *this;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    dict_iterator::~dict_iterator()
+    {
     }
     //////////////////////////////////////////////////////////////////////////
     bool dict_iterator::operator == ( const dict_iterator & _it ) const

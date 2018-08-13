@@ -11,7 +11,10 @@ namespace pybind
 
     public:
         list_const_iterator( kernel_interface * _kernel, PyObject * _obj, size_type _index );
-        list_const_iterator( const list_const_iterator & _iterator );
+
+    public:
+        list_const_iterator( const list_const_iterator & _r );
+        ~list_const_iterator();
 
     public:
         detail::extract_operator_t operator -> () const;

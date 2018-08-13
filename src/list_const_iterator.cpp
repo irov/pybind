@@ -10,10 +10,14 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
-    list_const_iterator::list_const_iterator( const list_const_iterator & _iterator )
-        : m_kernel( _iterator.m_kernel )
-        , m_obj( _iterator.m_obj )
-        , m_index( _iterator.m_index )
+    list_const_iterator::list_const_iterator( const list_const_iterator & _r )
+        : m_kernel( _r.m_kernel )
+        , m_obj( _r.m_obj )
+        , m_index( _r.m_index )
+    {
+    }
+    //////////////////////////////////////////////////////////////////////////
+    list_const_iterator::~list_const_iterator()
     {
     }
     //////////////////////////////////////////////////////////////////////////

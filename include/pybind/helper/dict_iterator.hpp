@@ -14,12 +14,13 @@ namespace pybind
     public:
         typedef uint32_t size_type;
 
-    protected:
+    public:
         dict_iterator( kernel_interface * _kernel, PyObject * _obj );
-		dict_iterator( kernel_interface * _kernel, PyObject * _obj, t_dict_iterator_end_tag );
+        dict_iterator( kernel_interface * _kernel, PyObject * _obj, t_dict_iterator_end_tag );
 
     public:
-        dict_iterator & operator = ( const dict_iterator & _it );
+        dict_iterator( const dict_iterator & _r );
+        ~dict_iterator();
 
     public:
         bool operator == ( const dict_iterator & _it ) const;
@@ -34,15 +35,12 @@ namespace pybind
         detail::extract_operator_t value() const;
 
     protected:
-		kernel_interface * m_kernel;
+        kernel_interface * m_kernel;
 
         PyObject * m_obj;
         size_type m_pos;
 
         PyObject * m_key;
         PyObject * m_value;
-
-    protected:
-        friend class pybind::dict;
     };
 }

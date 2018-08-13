@@ -1275,7 +1275,9 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * tuple_slice( PyObject * _tuple, uint32_t _low, uint32_t _high )
     {
-        PyObject * obj_slice = PyTuple_GetSlice( _tuple, _low, _high );
+        Py_ssize_t py_low = (Py_ssize_t)_low;
+        Py_ssize_t py_high = (Py_ssize_t)_high;
+        PyObject * obj_slice = PyTuple_GetSlice( _tuple, py_low, py_high );
 
         return obj_slice;
     }
@@ -1284,7 +1286,7 @@ namespace pybind
     {
         uint32_t size = pybind::tuple_size( _tuple );
 
-        PyObject * obj_slice = tuple_slice( _tuple, _size, size );
+        PyObject * obj_slice = pybind::tuple_slice( _tuple, _size, size );
 
         return obj_slice;
     }
