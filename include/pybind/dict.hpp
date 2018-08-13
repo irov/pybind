@@ -14,6 +14,7 @@ namespace pybind
 
     public:
         dict( const dict & _dict );
+        dict( dict && _dict );
 
     public:
         explicit dict( pybind::invalid );
@@ -21,6 +22,13 @@ namespace pybind
         dict( kernel_interface * _kernel, size_type _presized );
         dict( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed );
         dict( kernel_interface * _kernel, PyObject * _obj );
+
+    public:
+        ~dict();
+
+    public:
+        dict & operator = ( const dict & _obj );
+        dict & operator = ( dict && _obj );
 
     public:
         typedef dict_iterator iterator;

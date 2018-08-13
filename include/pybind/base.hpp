@@ -11,6 +11,7 @@ namespace pybind
     public:
         base();
         base( const base & _base );
+        base( base && _base );
 
     public:
         base( kernel_interface * _kernel, PyObject * _obj );
@@ -18,9 +19,11 @@ namespace pybind
 
         explicit base( pybind::invalid );
 
-        base & operator = ( const base & _obj );
-
         ~base();
+
+    public:
+        base & operator = ( const base & _obj );
+        base & operator = ( base && _obj );
 
     public:
         kernel_interface * kernel() const;

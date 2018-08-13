@@ -29,6 +29,8 @@ namespace pybind
     {
     };
 
+    class kernel_interface;
+
     typedef void * (*pybind_metacast)(void *);
 
     typedef void( *pybind_callback )();

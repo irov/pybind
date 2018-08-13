@@ -25,6 +25,11 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
+    object::object( object && _obj )
+        : base( std::move( _obj ) )
+    {
+    }
+    //////////////////////////////////////////////////////////////////////////
     object::object( const detail::extract_operator_t & _extract )
         : base( _extract.kernel(), _extract.ptr() )
     {
@@ -48,6 +53,20 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     object::~object()
     {
+    }
+    //////////////////////////////////////////////////////////////////////////
+    object & object::operator = ( const object & _obj )
+    {
+        this->base::operator = ( _obj );
+
+        return *this;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    object & object::operator = ( object && _obj )
+    {
+        this->base::operator = ( std::move( _obj ) );
+
+        return *this;
     }
     //////////////////////////////////////////////////////////////////////////
     bool object::has_attr_i( const detail::import_operator_t & _name ) const

@@ -18,6 +18,13 @@ namespace pybind
         pybind::incref( m_obj );
     }
     //////////////////////////////////////////////////////////////////////////
+    base::base( base && _base )
+        : m_kernel( _base.m_kernel )
+        , m_obj( _base.m_obj )
+    {
+        _base.m_obj = nullptr;
+    }
+    //////////////////////////////////////////////////////////////////////////
     base::base( pybind::invalid _iv )
         : m_kernel( nullptr )
         , m_obj( nullptr )
@@ -53,6 +60,16 @@ namespace pybind
         pybind::decref( m_obj );
         m_obj = _obj.ptr();
         pybind::incref( m_obj );
+
+        return *this;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    base & base::operator = ( base && _obj )
+    {
+        m_kernel = _obj.m_kernel;
+
+        m_obj = _obj.ptr();
+        _obj.m_obj = nullptr;
 
         return *this;
     }

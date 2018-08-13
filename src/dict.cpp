@@ -13,6 +13,11 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
+    dict::dict( dict && _dict )
+        : pybind::object( std::move( _dict ) )
+    {
+    }
+    //////////////////////////////////////////////////////////////////////////
     dict::dict( pybind::invalid _iv )
         : object( _iv )
     {
@@ -31,6 +36,24 @@ namespace pybind
     dict::dict( kernel_interface * _kernel, PyObject * _obj )
         : pybind::object( _kernel, _obj )
     {
+    }
+    //////////////////////////////////////////////////////////////////////////
+    dict::~dict()
+    {
+    }
+    //////////////////////////////////////////////////////////////////////////    
+    dict & dict::operator = ( const dict & _obj )
+    {
+        this->base::operator = ( _obj );
+
+        return *this;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    dict & dict::operator = ( dict && _obj )
+    {
+        this->base::operator = ( std::move( _obj ) );
+
+        return *this;
     }
     //////////////////////////////////////////////////////////////////////////
     dict::iterator dict::begin() const

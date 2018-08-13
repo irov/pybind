@@ -12,6 +12,17 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
+    tuple::tuple( const tuple & _tuple )
+        : pybind::object( _tuple.kernel(), _tuple.ptr() )
+    {
+    }
+    //////////////////////////////////////////////////////////////////////////
+    tuple::tuple( tuple && _tuple )
+        : pybind::object( std::move( _tuple ) )
+    {
+
+    }
+    //////////////////////////////////////////////////////////////////////////
     tuple::tuple( kernel_interface * _kernel, PyObject * _obj, borrowed _br )
         : pybind::object( _kernel, _obj, _br )
     {
@@ -20,6 +31,24 @@ namespace pybind
     tuple::tuple( kernel_interface * _kernel, PyObject * _obj )
         : pybind::object( _kernel, _obj )
     {
+    }
+    //////////////////////////////////////////////////////////////////////////
+    tuple::~tuple()
+    {
+    }
+    //////////////////////////////////////////////////////////////////////////    
+    tuple & tuple::operator = ( const tuple & _obj )
+    {
+        this->base::operator = ( _obj );
+
+        return *this;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    tuple & tuple::operator = ( tuple && _obj )
+    {
+        this->base::operator = ( std::move( _obj ) );
+
+        return *this;
     }
     //////////////////////////////////////////////////////////////////////////
     detail::extract_operator_t tuple::operator[]( tuple::size_type _index ) const

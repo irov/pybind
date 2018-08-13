@@ -12,11 +12,20 @@ namespace pybind
 
     public:
         tuple( kernel_interface * _kernel );
+        tuple( const tuple & _tuple );
+        tuple( tuple && _tuple );
 
     public:
         explicit tuple( borrowed );
         tuple( kernel_interface * _kernel, PyObject * _obj, borrowed );
         tuple( kernel_interface * _kernel, PyObject * _obj );
+
+    public:
+        ~tuple();
+
+    public:
+        tuple & operator = ( const tuple & _obj );
+        tuple & operator = ( tuple && _obj );
 
     public:
         detail::extract_operator_t operator [] ( size_type _index ) const;

@@ -194,8 +194,6 @@ namespace pybind
             return Py_NotImplemented;
         }
 
-        
-
         PybindOperatorCompare pybind_op = POC_Less;
 
         switch( _op )
@@ -699,7 +697,7 @@ namespace pybind
         PyType_Modified( m_pytypeobject );
 
         Py_INCREF( (PyObject*)m_pytypeobject );
-        PyModule_AddObject( py_module, m_pytypeobject->tp_name, (PyObject*)m_pytypeobject );
+        pybind::module_addobject( py_module, m_pytypeobject->tp_name, (PyObject*)m_pytypeobject );
 
         m_kernel->cache_class_scope_type( this );
 

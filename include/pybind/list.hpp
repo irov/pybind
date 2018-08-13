@@ -16,12 +16,20 @@ namespace pybind
     public:
         list( kernel_interface * _kernel );
         list( const list & _list );
+        list( list && _list );
 
     public:
         explicit list( pybind::invalid );
         list( kernel_interface * _kernel, size_type _size );
         list( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed );
         list( kernel_interface * _kernel, PyObject * _obj );
+
+    public:
+        ~list();
+
+    public:
+        list & operator = ( const list & _obj );
+        list & operator = ( list && _obj );
 
     public:
         detail::set_list_operator_t operator [] ( size_type _index );

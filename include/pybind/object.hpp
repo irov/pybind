@@ -13,12 +13,13 @@ namespace pybind
         static const pybind::object & get_invalid();
 
     public:
+        object();
         object( const base & _base );
         object( const object & _obj );
+        object( object && _obj );
         object( const detail::extract_operator_t & _extract );
 
-    public:
-        explicit object();
+    public:        
         object( kernel_interface * _kernel, PyObject * _obj );
         object( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed );
 
@@ -27,6 +28,10 @@ namespace pybind
 
     public:
         ~object();
+
+    public:
+        object & operator = ( const object & _obj );
+        object & operator = ( object && _obj );
 
     public:
         template<class T>

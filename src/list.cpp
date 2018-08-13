@@ -13,6 +13,11 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
+    list::list( list && _list )
+        : pybind::object( std::move( _list ) )
+    {
+    }
+    //////////////////////////////////////////////////////////////////////////
     list::list( pybind::invalid _iv )
         : object( _iv )
     {
@@ -31,6 +36,24 @@ namespace pybind
     list::list( kernel_interface * _kernel, PyObject * _obj )
         : pybind::object( _kernel, _obj )
     {
+    }
+    //////////////////////////////////////////////////////////////////////////
+    list::~list()
+    {
+    }
+    //////////////////////////////////////////////////////////////////////////    
+    list & list::operator = ( const list & _obj )
+    {
+        this->base::operator = ( _obj );
+
+        return *this;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    list & list::operator = ( list && _obj )
+    {
+        this->base::operator = ( std::move( _obj ) );
+
+        return *this;
     }
     //////////////////////////////////////////////////////////////////////////
     detail::extract_operator_t list::operator [] ( size_type _index ) const
