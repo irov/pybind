@@ -177,6 +177,17 @@ namespace pybind
             return *this;
         }
 
+        template<class F>
+        base_ & def_static_args( const char * _name, F f )
+        {
+            method_adapter_interface_ptr iadapter =
+                new method_adapter_proxy_function_args<C, F>( _name, f );
+
+            m_scope->add_method( iadapter );
+
+            return *this;
+        }
+
         template<class P, class F>
         base_ & def_proxy_static( const char * _name, P * _proxy, F f )
         {
@@ -211,7 +222,7 @@ namespace pybind
         }
 
         template<class P, class F>
-        base_ & def_proxy_args_static( const char * _name, P * _proxy, F f )
+        base_ & def_proxy_static_args( const char * _name, P * _proxy, F f )
         {
             method_adapter_interface_ptr iadapter =
                 new method_adapter_proxy_args<C, P, F>( _name, f, _proxy );

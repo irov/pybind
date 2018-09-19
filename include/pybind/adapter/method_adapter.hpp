@@ -336,6 +336,33 @@ namespace pybind
     };
     //////////////////////////////////////////////////////////////////////////
     template<class C, class F>
+    class method_adapter_proxy_function_args
+        : public method_adapter_interface
+    {
+    public:
+        method_adapter_proxy_function_args( const char * _name, F _fn )
+            : method_adapter_interface( _name )
+            , m_fn( _fn )
+        {
+        }
+
+    protected:
+        PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+        {
+            (void)_kwds;
+
+            C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
+
+            PyObject * ret = function_proxy_args_call<F, C>::call( _kernel, m_fn, _args, self );
+
+            return ret;
+        }
+
+    protected:
+        F m_fn;
+    };
+    //////////////////////////////////////////////////////////////////////////
+    template<class C, class F>
     class method_adapter_proxy_function_kernel
         : public method_adapter_interface
     {
