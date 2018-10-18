@@ -32,6 +32,9 @@ namespace pybind
         virtual void finalize() = 0;
 
     public:
+        virtual void remove_from_module( const char * _name, PyObject * _module ) = 0;
+
+    public:
         virtual void def_function_adapter( const function_adapter_interface_ptr & _adapter, bool _native, PyObject * _module ) = 0;
         virtual void def_functor_adapter( const functor_adapter_interface_ptr & _adapter, bool _native, PyObject * _module ) = 0;
 

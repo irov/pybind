@@ -98,6 +98,25 @@ namespace pybind
         m_pods.finalize();
     }
     //////////////////////////////////////////////////////////////////////////
+    void python_kernel::remove_from_module( const char * _name, PyObject * _module )
+    {
+        if( _module == nullptr )
+        {
+            _module = this->get_current_module();
+
+            if( _module == nullptr )
+            {
+                pybind::throw_exception( "remove_from_module not setup module!"
+                );
+
+                return;
+            }
+        }
+
+        PyObject * py_none = pybind::ret_none();
+        pybind::module_addobject( _module, _name, py_none );
+    }
+    //////////////////////////////////////////////////////////////////////////
     void python_kernel::def_function_adapter( const function_adapter_interface_ptr & _adapter, bool _native, PyObject * _module )
     {
         PyObject * py_func = m_functions.create_function_adapter( _adapter, _native );

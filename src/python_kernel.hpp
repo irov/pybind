@@ -24,6 +24,9 @@ namespace pybind
         void finalize() override;
 
     public:
+        void remove_from_module( const char * _name, PyObject * _module ) override;
+
+    public:
         void def_function_adapter( const function_adapter_interface_ptr & _adapter, bool _native, PyObject * _module ) override;
         void def_functor_adapter( const functor_adapter_interface_ptr & _adapter, bool _native, PyObject * _module ) override;
 
