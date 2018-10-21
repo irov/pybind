@@ -2,6 +2,7 @@
 
 namespace pybind
 {
+    //////////////////////////////////////////////////////////////////////////
     struct kernel_scope
     {
         kernel_interface * current_kernel;

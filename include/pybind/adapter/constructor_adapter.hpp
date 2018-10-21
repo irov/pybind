@@ -11,38 +11,12 @@ namespace pybind
         : public adapter_interface
     {
     public:
-        constructor_adapter_interface( uint32_t _arity )
-            : m_arity( _arity )
-        {
-        }
+        constructor_adapter_interface( uint32_t _arity );
+        ~constructor_adapter_interface();
 
     public:
-        bool valid( PyObject * _args ) const
-        {
-            if( pybind::tuple_check( _args ) == false )
-            {
-                return false;
-            }
-
-            uint32_t args_arity = pybind::tuple_size( _args );
-
-            if( m_arity != args_arity )
-            {
-                pybind::throw_exception( "construct have %d args, but you call %d params"
-                    , m_arity
-                    , args_arity
-                );
-
-                return false;
-            }
-
-            return true;
-        }
-
-        uint32_t arity() const
-        {
-            return m_arity;
-        }
+        bool valid( kernel_interface * _kernel, PyObject * _args ) const;
+        uint32_t arity() const;
 
     public:
         virtual void * call( kernel_interface * _kernel, PyObject * _obj, PyObject * _args ) = 0;

@@ -152,7 +152,7 @@ namespace pybind
     {
         typename C::size_type size = _c.size();
 
-        PyObject * py_tuple = pybind::tuple_new( size );
+        PyObject * py_tuple = _kernel->tuple_new( size );
 
         for( typename C::size_type i = 0; i != size; ++i )
         {
@@ -165,4 +165,5 @@ namespace pybind
     }
     //////////////////////////////////////////////////////////////////////////
     PYBIND_API pybind::tuple make_invalid_tuple_t( kernel_interface * _kernel );
+    //////////////////////////////////////////////////////////////////////////
 }

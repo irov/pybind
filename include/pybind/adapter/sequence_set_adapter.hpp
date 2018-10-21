@@ -77,7 +77,7 @@ namespace pybind
 
             const char * name = this->getName();
 
-            pybind::error_traceback( "method '%s::%s' depricated '%s'"
+            _kernel->error_traceback( "method '%s::%s' depricated '%s'"
                 , scopeName
                 , name
                 , m_doc

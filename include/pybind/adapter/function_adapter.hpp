@@ -132,7 +132,7 @@ namespace pybind
 
             const char * name = this->getName();
 
-            pybind::error_traceback( "function '%s' deprecated '%s'"
+            _kernel->error_traceback( "function '%s' deprecated '%s'"
                 , name
                 , m_doc
             );

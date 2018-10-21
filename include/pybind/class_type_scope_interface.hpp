@@ -4,7 +4,6 @@
 #include "pybind/types.hpp"
 #include "pybind/exception.hpp"
 #include "pybind/kernel.hpp"
-#include "pybind/system.hpp"
 
 #include "config/stdex.hpp"
 

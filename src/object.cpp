@@ -1,7 +1,5 @@
 #include "pybind/object.hpp"
 
-#include "pybind/system.hpp"
-
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
@@ -55,6 +53,13 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
+    object & object::operator = ( nullptr_t )
+    {
+        this->base::operator = ( nullptr );
+
+        return *this;
+    }
+    //////////////////////////////////////////////////////////////////////////
     object & object::operator = ( const object & _obj )
     {
         this->base::operator = ( _obj );
@@ -71,12 +76,12 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool object::has_attr_i( const detail::import_operator_t & _name ) const
     {
-        return pybind::has_attr( m_obj, _name );
+        return m_kernel->has_attr( m_obj, _name );
     }
     //////////////////////////////////////////////////////////////////////////
     pybind::object object::get_attr_i( const detail::import_operator_t & _name ) const
     {
-        PyObject * py_attr = pybind::get_attr( m_obj, _name );
+        PyObject * py_attr = m_kernel->get_attr( m_obj, _name );
 
         return pybind::object( m_kernel, py_attr, pybind::borrowed() );
     }
@@ -178,21 +183,21 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     pybind::object make_none_t( kernel_interface * _kernel )
     {
-        PyObject * py_none = pybind::ret_none();
+        PyObject * py_none = _kernel->ret_none();
 
         return pybind::object( _kernel, py_none, pybind::borrowed() );
     }
     //////////////////////////////////////////////////////////////////////////
     pybind::object make_true_t( kernel_interface * _kernel )
     {
-        PyObject * py_true = pybind::ret_true();
+        PyObject * py_true = _kernel->ret_true();
 
         return pybind::object( _kernel, py_true, pybind::borrowed() );
     }
     //////////////////////////////////////////////////////////////////////////
     pybind::object make_false_t( kernel_interface * _kernel )
     {
-        PyObject * py_false = pybind::ret_false();
+        PyObject * py_false = _kernel->ret_false();
 
         return pybind::object( _kernel, py_false, pybind::borrowed() );
     }

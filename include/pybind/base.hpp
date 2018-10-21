@@ -19,9 +19,11 @@ namespace pybind
 
         explicit base( pybind::invalid );
 
+    public:
         ~base();
 
     public:
+        base & operator = ( nullptr_t );
         base & operator = ( const base & _obj );
         base & operator = ( base && _obj );
 
@@ -45,6 +47,7 @@ namespace pybind
         bool is_bool() const;
         bool is_string() const;
         bool is_unicode() const;
+        bool is_list() const;
         bool is_callable() const;
 
     public:

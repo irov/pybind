@@ -1,9 +1,9 @@
 #include "pybind/bindable.hpp"
 
-#include "pybind/system.hpp"
+#include "pybind/kernel.hpp"
 
 #ifndef NDEBUG
-#include "python_class_type_scope_helper.hpp"
+#include "python/python_class_type_scope_helper.hpp"
 #include "pybind/exception.hpp"
 #endif
 
@@ -11,7 +11,8 @@ namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////		
     bindable::bindable()
-        : m_embed( nullptr )
+        : m_kernel( nullptr )
+        , m_embed( nullptr )
     {
     }
     //////////////////////////////////////////////////////////////////////////
@@ -20,13 +21,31 @@ namespace pybind
         this->unwrap();
     }
     //////////////////////////////////////////////////////////////////////////
+    void bindable::setKernel( kernel_interface * _kernel )
+    {
+        m_kernel = _kernel;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    kernel_interface * bindable::getKernel() const
+    {
+        return m_kernel;
+    }
+    //////////////////////////////////////////////////////////////////////////
     void bindable::setEmbed( PyObject * _embed )
     {
 #ifndef NDEBUG
-        if( pybind::helper::is_object_bindable( _embed ) == false )
+        if( m_kernel == nullptr )
+        {
+            pybind::throw_exception( "bindable::setEmbed but kernel is not settup"
+            );
+
+            return;
+        }
+
+        if( m_kernel != nullptr && pybind::helper::is_object_bindable( _embed ) == false )
         {
             pybind::throw_exception( "bindable::setEmbed '%s' but scope not settup bindable"
-                , pybind::object_repr_type( _embed )
+                , m_kernel->object_repr_type( _embed )
             );
 
             return;
@@ -48,7 +67,7 @@ namespace pybind
         }
         else
         {
-            pybind::incref( m_embed );
+            m_kernel->incref( m_embed );
         }
 
         return m_embed;
@@ -70,7 +89,8 @@ namespace pybind
         {
             PyObject * embed = m_embed;
             m_embed = nullptr;
-            pybind::unwrap( embed );
+            m_kernel->unwrap( embed );
+            m_kernel = nullptr;
         }
     }
     //////////////////////////////////////////////////////////////////////////

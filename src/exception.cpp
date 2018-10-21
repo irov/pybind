@@ -8,14 +8,19 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void throw_exception( const char * _format, ... )
     {
-        va_list argList;
+        va_list valist;
 
-        va_start( argList, _format );
+        va_start( valist, _format );
 
+        throw_exception_va( _format, valist );
+
+        va_end( valist );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void throw_exception_va( const char * _format, va_list _va )
+    {
         char message[4096] = { 0 };
-        vsprintf( message, _format, argList );
-
-        va_end( argList );
+        vsprintf( message, _format, _va );
 
         throw pybind_exception( message );
     }

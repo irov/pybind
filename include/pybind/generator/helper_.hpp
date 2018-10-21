@@ -73,7 +73,7 @@ namespace pybind
     {
         bool apply( kernel_interface * _kernel, PyObject * _obj, typename type_cast_result<C *>::TCastValue _value, bool _nothrow ) override
         {
-            if( pybind::is_none( _obj ) == true )
+            if( _kernel->is_none( _obj ) == true )
             {
                 _value = nullptr;
 
@@ -105,7 +105,7 @@ namespace pybind
         {
             if( _value == nullptr )
             {
-                return pybind::ret_none();
+                return _kernel->ret_none();
             }
 
             const class_type_scope_interface_ptr & scope = _kernel->class_scope<C>();
@@ -122,7 +122,7 @@ namespace pybind
     {
         bool apply( kernel_interface * _kernel, PyObject * _obj, typename type_cast_result<C *>::TCastValue _value, bool _nothrow ) override
         {
-            if( pybind::is_none( _obj ) == true )
+            if( _kernel->is_none( _obj ) == true )
             {
                 _value = nullptr;
 
@@ -154,7 +154,7 @@ namespace pybind
         {
             if( _value == nullptr )
             {
-                return pybind::ret_none();
+                return _kernel->ret_none();
             }
 
             PyObject * py_obj = _kernel->scope_create_holder_t( _value );

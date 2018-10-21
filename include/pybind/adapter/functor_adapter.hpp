@@ -58,7 +58,7 @@ namespace pybind
 
             const char * name = this->getName();
 
-            pybind::error_traceback( "functor '%s' deprecated '%s'"
+            _kernel->error_traceback( "functor '%s' deprecated '%s'"
                 , name
                 , m_doc
             );

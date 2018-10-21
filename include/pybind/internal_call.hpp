@@ -16,7 +16,7 @@ namespace pybind
 
         tuple args = pybind::make_tuple_t( _kernel );
 
-        PyObject * py_result = _kernel->call_method( _self, scope, _name, args );
+        PyObject * py_result = _kernel->ask_adapter( _self, scope, _name, args );
 
         return detail::extract_operator_t( _kernel, py_result );
     }
@@ -28,7 +28,7 @@ namespace pybind
 
         tuple args = pybind::make_tuple_t( _kernel, _a0 );
 
-        PyObject * py_result = _kernel->call_method( _self, scope, _name, args );
+        PyObject * py_result = _kernel->ask_adapter( _self, scope, _name, args );
 
         return detail::extract_operator_t( _kernel, py_result );
     }
@@ -40,7 +40,7 @@ namespace pybind
 
         tuple args = pybind::make_tuple_t( _kernel, _a0, _a1 );
 
-        PyObject * py_result = _kernel->call_method( _self, scope, _name, args );
+        PyObject * py_result = _kernel->ask_adapter( _self, scope, _name, args );
 
         return detail::extract_operator_t( _kernel, py_result );
     }

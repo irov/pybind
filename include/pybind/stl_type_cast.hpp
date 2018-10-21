@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef PYBIND_STL_SUPPORT
+
 #include "pybind/type_cast_result.hpp"
 #include "pybind/extract.hpp"
 
@@ -20,9 +22,9 @@ namespace pybind
             (void)_kernel;
             (void)_nothrow;
 
-            if( pybind::tuple_check( _obj ) == true )
+            if( _kernel->tuple_check( _obj ) == true )
             {
-                uint32_t size = pybind::tuple_size( _obj );
+                uint32_t size = _kernel->tuple_size( _obj );
 
                 _vector.reserve( size );
 
@@ -33,9 +35,9 @@ namespace pybind
                     _vector.push_back( value );
                 }
             }
-            else if( pybind::list_check( _obj ) == true )
+            else if( _kernel->list_check( _obj ) == true )
             {
-                uint32_t size = pybind::list_size( _obj );
+                uint32_t size = _kernel->list_size( _obj );
 
                 _vector.reserve( size );
 
@@ -75,7 +77,7 @@ namespace pybind
             (void)_kernel;
             (void)_nothrow;
 
-            if( pybind::dict_check( _obj ) == true )
+            if( _kernel->dict_check( _obj ) == true )
             {
                 uint32_t dict_pos = 0;
 
@@ -98,7 +100,7 @@ namespace pybind
         {
             (void)_kernel;
 
-            PyObject * py_dict = pybind::dict_new();
+            PyObject * py_dict = _kernel->dict_new();
 
             for( typename M::const_iterator
                 it = _value.begin(),
@@ -119,7 +121,7 @@ namespace pybind
     template<class T, class V>
     inline void registration_stl_vector_type_cast( kernel_interface * _kernel )
     {
-        _kernel->register_type_info_extract_t<V>( new pybind::extract_stl_vector_type<T, V> );
+        _kernel->register_type_info_extract_t<V>( new extract_stl_vector_type<T, V> );
     }
 
     template<class T, class V>
@@ -131,7 +133,7 @@ namespace pybind
     template<class K, class V, class M>
     inline void registration_stl_map_type_cast( kernel_interface * _kernel )
     {
-        _kernel->register_type_info_extract_t<M>( new pybind::extract_stl_map_type<K, V, M> );
+        _kernel->register_type_info_extract_t<M>( new extract_stl_map_type<K, V, M> );
     }
 
     template<class K, class V, class M>
@@ -143,3 +145,5 @@ namespace pybind
     PYBIND_API bool initialize_stl_type_cast( kernel_interface * _kernel );
     PYBIND_API void finalize_stl_type_cast( kernel_interface * _kernel );
 }
+
+#endif

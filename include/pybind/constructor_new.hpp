@@ -88,7 +88,7 @@ namespace pybind
             (void)_kernel;
             (void)_obj;
 
-            if( this->valid( _args ) == false )
+            if( this->valid( _kernel, _args ) == false )
             {
                 return nullptr;
             }

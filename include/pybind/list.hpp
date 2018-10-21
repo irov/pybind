@@ -86,8 +86,6 @@ namespace pybind
         pybind::list operator () ( kernel_interface * _kernel, PyObject * _obj ) const;
     };
     //////////////////////////////////////////////////////////////////////////
-    PYBIND_API bool list_check_t( const pybind::object & _obj );
-    //////////////////////////////////////////////////////////////////////////
     template<class C>
     inline pybind::list make_list_container_t( kernel_interface * _kernel, const C & _c )
     {

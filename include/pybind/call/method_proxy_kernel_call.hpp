@@ -2,7 +2,6 @@
 
 #include "pybind/exports.hpp"
 #include "pybind/types.hpp"
-#include "pybind/system.hpp"
 #include "pybind/extract.hpp"
 #include "pybind/helper.hpp"
 
@@ -248,7 +247,7 @@ namespace pybind
 		{
 			method_proxy_kernel_call_impl<P, C, F, void, f_info::arity>::call( _kernel, _proxy, _obj, f, _arg );
 
-			return ret_none();
+			return _kernel->ret_none();
 		}
 	};
 
@@ -259,12 +258,12 @@ namespace pybind
 
 		static PyObject * call( kernel_interface * _kernel, P * _proxy, C * _obj, F f, PyObject * _arg )
 		{
-            uint32_t arg_size = pybind::tuple_size( _arg );
+            uint32_t arg_size = _kernel->tuple_size( _arg );
             uint32_t fn_arity = f_info::arity;
 
             if( arg_size + 2 != fn_arity )
             {
-				pybind::throw_exception("invalid proxy method call kernel args is not equal %d + addition %d != %d\n"
+                pybind::throw_exception("invalid proxy method call kernel args is not equal %d + addition %d != %d\n"
                     , (uint32_t)arg_size
 					, (uint32_t)2
                     , (uint32_t)fn_arity

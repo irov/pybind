@@ -33,7 +33,7 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         set_dict_operator_t::operator PyObject * ()
         {
-            PyObject * py_object = pybind::dict_get( m_dict, m_key );
+            PyObject * py_object = m_kernel->dict_get( m_dict, m_key );
 
             return py_object;
         }

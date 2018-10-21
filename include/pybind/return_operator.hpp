@@ -1,6 +1,5 @@
 #pragma once
 
-#include "pybind/system.hpp"
 #include "pybind/extract.hpp"
 
 #include <stddef.h>

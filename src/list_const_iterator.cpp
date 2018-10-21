@@ -23,14 +23,14 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     detail::extract_operator_t list_const_iterator::operator -> () const
     {
-        PyObject * py_item = pybind::list_getitem( m_obj, m_index );
+        PyObject * py_item = m_kernel->list_getitem( m_obj, m_index );
 
         return detail::extract_operator_t( m_kernel, py_item );
     }
 
     detail::extract_operator_t list_const_iterator::operator * () const
     {
-        PyObject * py_item = pybind::list_getitem( m_obj, m_index );
+        PyObject * py_item = m_kernel->list_getitem( m_obj, m_index );
 
         return detail::extract_operator_t( m_kernel, py_item );
     }

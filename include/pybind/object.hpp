@@ -30,6 +30,7 @@ namespace pybind
         ~object();
 
     public:
+        object & operator = ( nullptr_t );
         object & operator = ( const object & _obj );
         object & operator = ( object && _obj );
 
@@ -301,5 +302,7 @@ namespace pybind
     {
         return make_object_i( _kernel, detail::import_operator_t( _kernel, _t0 ) );
     }
+    //////////////////////////////////////////////////////////////////////////
     PYBIND_API pybind::object make_invalid_object_t();
+    //////////////////////////////////////////////////////////////////////////
 }

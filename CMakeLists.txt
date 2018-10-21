@@ -7,6 +7,7 @@ PROJECT(${PYBIND_PROJECT_NAME})
 OPTION(PYBIND_EXTERNAL_BUILD  "PYBIND_EXTERNAL_BUILD"  OFF)
 OPTION(PYBIND_PYTHON_INCLUDE_PATH  "PYBIND_PYTHON_INCLUDE_PATH" OFF)
 OPTION(PYBIND_PYTHON_CONFIG_INCLUDE_PATH  "PYBIND_PYTHON_CONFIG_INCLUDE_PATH" OFF)
+OPTION(PYBIND_STL_NOT_SUPPORT "PYBIND_STL_NOT_SUPPORT" OFF)
 OPTION(PYBIND_STDEX_INCLUDE_PATH  "PYBIND_STDEX_INCLUDE_PATH" OFF)
 OPTION(PYBIND_PYTHON_VERSION "PYBIND_PYTHON_VERSION" 278)
 
@@ -94,11 +95,14 @@ file(GLOB files_public_generator_headers ${PUBLIC_DIR}/generator/*.hpp)
 file(GLOB files_public_headers ${PUBLIC_DIR}/*.hpp)
 file(GLOB files_private_headers ${PRIVATE_DIR}/*.hpp)
 file(GLOB files_private_sources ${PRIVATE_DIR}/*.cpp)
+file(GLOB files_private_python_headers ${PRIVATE_DIR}/python/*.hpp)
+file(GLOB files_private_python_sources ${PRIVATE_DIR}/python/*.cpp)
 
 SOURCE_GROUP( adapter FILES ${files_public_adapter_headers} )
 SOURCE_GROUP( helper FILES ${files_public_helper_headers} )
 SOURCE_GROUP( call FILES ${files_public_call_headers} )
 SOURCE_GROUP( generator FILES ${files_public_generator_headers} )
+SOURCE_GROUP( generator FILES ${files_private_python_headers} )
 
 INCLUDE_DIRECTORIES( ${PROJECT_NAME} include )
 
@@ -114,13 +118,16 @@ if(PYBIND_STDEX_INCLUDE_PATH)
     include_directories(${PYBIND_STDEX_INCLUDE_PATH})
 endif()
 
-if( CMAKE_BUILD_TYPE MATCHES Debug )
+if(CMAKE_BUILD_TYPE MATCHES Debug)
     add_definitions(-DPYBIND_CALL_DEBUG)
+endif()
+
+if(PYBIND_STL_NOT_SUPPORT)
+    add_definitions(-DPYBIND_STL_NOT_SUPPORT)
 endif()
 
 add_definitions(-DMS_NO_COREDLL)
 add_definitions(-DPy_NO_ENABLE_SHARED)
-
 
 add_definitions(-DPYBIND_PYTHON_VERSION=${PYBIND_PYTHON_VERSION})
 
@@ -132,7 +139,8 @@ ADD_LIBRARY( ${PROJECT_NAME} STATIC
 	${files_public_call_headers}
     ${files_public_generator_headers}
 	${files_private_headers} 
-	${files_private_sources} 
+	${files_private_sources}
+    ${files_private_python_sources}
 	)
 
 IF( NOT PYBIND_EXTERNAL_BUILD )

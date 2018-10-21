@@ -4,7 +4,7 @@ namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
     tuple::tuple( kernel_interface * _kernel )
-        : pybind::object( _kernel, pybind::tuple_new( 0 ) )
+        : pybind::object( _kernel, _kernel->tuple_new( 0 ) )
     {
     }
     //////////////////////////////////////////////////////////////////////////
@@ -58,7 +58,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     tuple::size_type tuple::size() const
     {
-        return pybind::tuple_size( m_obj );
+        return m_kernel->tuple_size( m_obj );
     }
     //////////////////////////////////////////////////////////////////////////
     bool tuple::empty() const
@@ -68,7 +68,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////	
     pybind::tuple make_tuple_t( kernel_interface * _kernel )
     {
-        PyObject * py_tuple = pybind::tuple_new( 0 );
+        PyObject * py_tuple = _kernel->tuple_new( 0 );
 
         if( py_tuple == nullptr )
         {
@@ -80,7 +80,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     pybind::tuple make_tuple_i( kernel_interface * _kernel, const detail::import_operator_t & _t0 )
     {
-        PyObject * py_tuple = pybind::tuple_new( 1 );
+        PyObject * py_tuple = _kernel->tuple_new( 1 );
 
         if( py_tuple == nullptr )
         {
@@ -94,7 +94,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     pybind::tuple make_tuple_i( kernel_interface * _kernel, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1 )
     {
-        PyObject * py_tuple = pybind::tuple_new( 2 );
+        PyObject * py_tuple = _kernel->tuple_new( 2 );
 
         if( py_tuple == nullptr )
         {
@@ -109,7 +109,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     pybind::tuple make_tuple_i( kernel_interface * _kernel, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2 )
     {
-        PyObject * py_tuple = pybind::tuple_new( 3 );
+        PyObject * py_tuple = _kernel->tuple_new( 3 );
 
         if( py_tuple == nullptr )
         {
@@ -125,7 +125,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     pybind::tuple make_tuple_i( kernel_interface * _kernel, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3 )
     {
-        PyObject * py_tuple = pybind::tuple_new( 4 );
+        PyObject * py_tuple = _kernel->tuple_new( 4 );
 
         if( py_tuple == nullptr )
         {
@@ -142,7 +142,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     pybind::tuple make_tuple_i( kernel_interface * _kernel, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4 )
     {
-        PyObject * py_tuple = pybind::tuple_new( 5 );
+        PyObject * py_tuple = _kernel->tuple_new( 5 );
 
         if( py_tuple == nullptr )
         {
@@ -160,7 +160,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     pybind::tuple make_tuple_i( kernel_interface * _kernel, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5 )
     {
-        PyObject * py_tuple = pybind::tuple_new( 6 );
+        PyObject * py_tuple = _kernel->tuple_new( 6 );
 
         if( py_tuple == nullptr )
         {
@@ -179,7 +179,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     pybind::tuple make_tuple_i( kernel_interface * _kernel, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6 )
     {
-        PyObject * py_tuple = pybind::tuple_new( 7 );
+        PyObject * py_tuple = _kernel->tuple_new( 7 );
 
         if( py_tuple == nullptr )
         {
@@ -199,7 +199,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     pybind::tuple make_tuple_i( kernel_interface * _kernel, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::import_operator_t & _t7 )
     {
-        PyObject * py_tuple = pybind::tuple_new( 8 );
+        PyObject * py_tuple = _kernel->tuple_new( 8 );
 
         if( py_tuple == nullptr )
         {
@@ -222,7 +222,7 @@ namespace pybind
     {
         args::size_type args_size = _args.size();
 
-        PyObject * py_tuple = pybind::tuple_new( 0 + args_size );
+        PyObject * py_tuple = _kernel->tuple_new( 0 + args_size );
 
         if( py_tuple == nullptr )
         {
@@ -241,7 +241,7 @@ namespace pybind
     {
         args::size_type args_size = _args.size();
 
-        PyObject * py_tuple = pybind::tuple_new( 1 + args_size );
+        PyObject * py_tuple = _kernel->tuple_new( 1 + args_size );
 
         if( py_tuple == nullptr )
         {
@@ -262,7 +262,7 @@ namespace pybind
     {
         args::size_type args_size = _args.size();
 
-        PyObject * py_tuple = pybind::tuple_new( 2 + args_size );
+        PyObject * py_tuple = _kernel->tuple_new( 2 + args_size );
 
         if( py_tuple == nullptr )
         {
@@ -284,7 +284,7 @@ namespace pybind
     {
         args::size_type args_size = _args.size();
 
-        PyObject * py_tuple = pybind::tuple_new( 3 + args_size );
+        PyObject * py_tuple = _kernel->tuple_new( 3 + args_size );
 
         if( py_tuple == nullptr )
         {
@@ -307,7 +307,7 @@ namespace pybind
     {
         args::size_type args_size = _args.size();
 
-        PyObject * py_tuple = pybind::tuple_new( 4 + args_size );
+        PyObject * py_tuple = _kernel->tuple_new( 4 + args_size );
 
         if( py_tuple == nullptr )
         {
@@ -331,7 +331,7 @@ namespace pybind
     {
         args::size_type args_size = _args.size();
 
-        PyObject * py_tuple = pybind::tuple_new( 5 + args_size );
+        PyObject * py_tuple = _kernel->tuple_new( 5 + args_size );
 
         if( py_tuple == nullptr )
         {
@@ -356,7 +356,7 @@ namespace pybind
     {
         args::size_type args_size = _args.size();
 
-        PyObject * py_tuple = pybind::tuple_new( 6 + args_size );
+        PyObject * py_tuple = _kernel->tuple_new( 6 + args_size );
 
         if( py_tuple == nullptr )
         {
@@ -382,7 +382,7 @@ namespace pybind
     {
         args::size_type args_size = _args.size();
 
-        PyObject * py_tuple = pybind::tuple_new( 7 + args_size );
+        PyObject * py_tuple = _kernel->tuple_new( 7 + args_size );
 
         if( py_tuple == nullptr )
         {
@@ -409,7 +409,7 @@ namespace pybind
     {
         args::size_type args_size = _args.size();
 
-        PyObject * py_tuple = pybind::tuple_new( 8 );
+        PyObject * py_tuple = _kernel->tuple_new( 8 );
 
         if( py_tuple == nullptr )
         {

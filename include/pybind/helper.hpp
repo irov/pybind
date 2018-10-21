@@ -1,7 +1,5 @@
 #pragma once
 
-#include "pybind/system.hpp"
-
 #include "pybind/return_operator.hpp"
 #include "pybind/import_operator.hpp"
 #include "pybind/extract_operator.hpp"
@@ -37,7 +35,7 @@ namespace pybind
     {
         for( It it = _begin; it != _end; ++it )
         {
-            if( pybind::list_appenditem_t( _obj, *it ) == false )
+            if( pybind::list_appenditem_t( _kernel, _obj, *it ) == false )
             {
                 return false;
             }
@@ -91,7 +89,7 @@ namespace pybind
         PyObject * py_key;
         PyObject * py_value;
 
-        if( pybind::dict_next( _dict, _pos, &py_key, &py_value ) == false )
+        if( _kernel->dict_next( _dict, _pos, &py_key, &py_value ) == false )
         {
             return false;
         }

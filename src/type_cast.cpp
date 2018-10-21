@@ -3,8 +3,6 @@
 #include "pybind/kernel.hpp"
 #include "pybind/class_type_scope_interface.hpp"
 
-#include "pybind/system.hpp"
-
 #include "config/config.hpp"
 
 namespace pybind
@@ -36,7 +34,7 @@ namespace pybind
 
         if( _kernel->is_wrap( _obj ) == false )
         {
-            pybind::error_message( "type_info_cast: unwrap object" );
+            _kernel->error_message( "type_info_cast: unwrap object" );
 
             return false;
         }
@@ -45,7 +43,7 @@ namespace pybind
 
         if( impl == nullptr )
         {
-            pybind::error_message( "type_info_cast: unbind object" );
+            _kernel->error_message( "type_info_cast: unbind object" );
 
             return false;
         }

@@ -11,6 +11,10 @@ namespace pybind
         ~bindable();
 
     public:
+        void setKernel( kernel_interface * _kernel );
+        kernel_interface * getKernel() const;
+
+    public:
         void setEmbed( PyObject * _embed );
         PyObject * getEmbed();
         bool isEmbed() const;
@@ -26,6 +30,7 @@ namespace pybind
         virtual void _embedding( PyObject * _embed );
 
     protected:
+        kernel_interface * m_kernel;
         PyObject * m_embed;
     };
 }

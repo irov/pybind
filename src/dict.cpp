@@ -4,7 +4,7 @@ namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
     dict::dict( kernel_interface * _kernel )
-        : pybind::object( _kernel, pybind::dict_new(), borrowed() )
+        : pybind::object( _kernel, _kernel->dict_new(), borrowed() )
     {
     }
     //////////////////////////////////////////////////////////////////////////
@@ -24,7 +24,7 @@ namespace pybind
     }
     //////////////////////////////////////////////////////////////////////////
     dict::dict( kernel_interface * _kernel, dict::size_type _presized )
-        : pybind::object( _kernel, pybind::dict_new_presized( _presized ), pybind::borrowed() )
+        : pybind::object( _kernel, _kernel->dict_new_presized( _presized ), pybind::borrowed() )
     {
     }
     //////////////////////////////////////////////////////////////////////////
@@ -68,12 +68,12 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool dict::exist_i( const detail::import_operator_t & _name ) const
     {
-        return pybind::dict_exist( m_obj, _name );
+        return m_kernel->dict_exist( m_obj, _name );
     }
     //////////////////////////////////////////////////////////////////////////
     detail::extract_operator_t dict::get_i( const detail::import_operator_t & _name ) const
     {
-        PyObject * py_attr = pybind::dict_get( m_obj, _name );
+        PyObject * py_attr = m_kernel->dict_get( m_obj, _name );
 
         return detail::extract_operator_t( m_kernel, py_attr );
     }
@@ -85,12 +85,12 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void dict::remove_i( const detail::import_operator_t & _name ) const
     {
-        pybind::dict_remove( m_obj, _name );
+        m_kernel->dict_remove( m_obj, _name );
     }
     //////////////////////////////////////////////////////////////////////////
     dict::size_type dict::size() const
     {
-        return pybind::dict_size( m_obj );
+        return m_kernel->dict_size( m_obj );
     }
     //////////////////////////////////////////////////////////////////////////
     bool dict::empty() const

@@ -2,7 +2,6 @@
 
 #include "pybind/exports.hpp"
 #include "pybind/types.hpp"
-#include "pybind/system.hpp"
 #include "pybind/extract.hpp"
 #include "pybind/helper.hpp"
 
@@ -247,7 +246,7 @@ namespace pybind
 		{
 			method_kernel_call_impl<C, F, void, f_info::arity>::call( _kernel, _obj, f, _arg );
 
-			return ret_none();
+			return _kernel->ret_none();
 		}
 	};
 
@@ -258,12 +257,12 @@ namespace pybind
 
 		static PyObject * call( kernel_interface * _kernel, C * _self, F f, PyObject * _arg )
 		{
-			uint32_t arg_size = (_arg) ? pybind::tuple_size( _arg ) : 0;
+			uint32_t arg_size = (_arg) ? _kernel->tuple_size( _arg ) : 0;
             uint32_t fn_arity = f_info::arity;
 
 			if( arg_size + 1 != fn_arity )
 			{
-				pybind::throw_exception("invalid method call args is not equal %d != %d\n"
+                pybind::throw_exception("invalid method call args is not equal %d != %d\n"
 					, (uint32_t)arg_size
 					, (uint32_t)fn_arity
 					);

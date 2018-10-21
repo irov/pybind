@@ -30,5 +30,6 @@ namespace pybind
     };
 
     PYBIND_API void throw_exception( const char * _format, ... );
+    PYBIND_API void throw_exception_va( const char * _format, va_list _va );
 }
 

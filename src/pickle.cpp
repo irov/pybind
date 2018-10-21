@@ -1,6 +1,5 @@
 #include "pybind/pickle.hpp"
 
-#include "pybind/system.hpp"
 #include "pybind/extract.hpp"
 #include "pybind/helper.hpp"
 
@@ -89,19 +88,19 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     static void s_obj_pickle( kernel_interface * _kernel, PyObject * _obj, PyObject * _types, void * _buffer, size_t _capacity, size_t & _offset )
     {
-        if( pybind::is_none( _obj ) == true )
+        if( _kernel->is_none( _obj ) == true )
         {
             uint8_t type = PICKLE_NONE;
 
             s_write_buffer_t( _buffer, _capacity, type, _offset );
         }
-        else if( pybind::bool_check( _obj ) == true )
+        else if( _kernel->bool_check( _obj ) == true )
         {
-            uint8_t type = pybind::is_true( _obj ) == true ? PICKLE_TRUE : PICKLE_FALSE;
+            uint8_t type = _kernel->is_true( _obj ) == true ? PICKLE_TRUE : PICKLE_FALSE;
 
             s_write_buffer_t( _buffer, _capacity, type, _offset );
         }
-        else if( pybind::int_check( _obj ) == true )
+        else if( _kernel->int_check( _obj ) == true )
         {
             uint8_t type = PICKLE_INT;
 
@@ -111,7 +110,7 @@ namespace pybind
 
             s_write_buffer_t( _buffer, _capacity, value, _offset );
         }
-        else if( pybind::long_check( _obj ) == true )
+        else if( _kernel->long_check( _obj ) == true )
         {
             uint8_t type = PICKLE_LONG;
 
@@ -121,7 +120,7 @@ namespace pybind
 
             s_write_buffer_t( _buffer, _capacity, value, _offset );
         }
-        else if( pybind::float_check( _obj ) == true )
+        else if( _kernel->float_check( _obj ) == true )
         {
             uint8_t type = PICKLE_FLOAT;
 
@@ -131,71 +130,71 @@ namespace pybind
 
             s_write_buffer_t( _buffer, _capacity, value, _offset );
         }
-        else if( pybind::string_check( _obj ) == true )
+        else if( _kernel->string_check( _obj ) == true )
         {
             uint8_t type = PICKLE_STRING;
 
             s_write_buffer_t( _buffer, _capacity, type, _offset );
 
             uint32_t str_size;
-            const char * str = pybind::string_to_char_and_size( _obj, str_size );
+            const char * str = _kernel->string_to_char_and_size( _obj, str_size );
 
             s_write_size_t( _buffer, _capacity, str_size, _offset );
             s_write_buffer_tn( _buffer, _capacity, str, str_size, _offset );
         }
-        else if( pybind::unicode_check( _obj ) == true )
+        else if( _kernel->unicode_check( _obj ) == true )
         {
             uint8_t type = PICKLE_UNICODE;
 
             s_write_buffer_t( _buffer, _capacity, type, _offset );
 
             uint32_t str_size;
-            const char * str = pybind::unicode_to_utf8_and_size( _obj, str_size );
+            const char * str = _kernel->unicode_to_utf8_and_size( _obj, str_size );
 
             s_write_size_t( _buffer, _capacity, str_size, _offset );
             s_write_buffer_tn( _buffer, _capacity, str, str_size, _offset );
         }
-        else if( pybind::tuple_check( _obj ) == true )
+        else if( _kernel->tuple_check( _obj ) == true )
         {
             uint8_t type = PICKLE_TUPLE;
 
             s_write_buffer_t( _buffer, _capacity, type, _offset );
 
-            uint32_t count = pybind::tuple_size( _obj );
+            uint32_t count = _kernel->tuple_size( _obj );
 
             s_write_size_t( _buffer, _capacity, count, _offset );
 
             for( uint32_t i = 0; i != count; ++i )
             {
-                PyObject * element = pybind::tuple_getitem( _obj, i );
+                PyObject * element = _kernel->tuple_getitem( _obj, i );
 
                 s_obj_pickle( _kernel, element, _types, _buffer, _capacity, _offset );
             }
         }
-        else if( pybind::list_check( _obj ) == true )
+        else if( _kernel->list_check( _obj ) == true )
         {
             uint8_t type = PICKLE_LIST;
 
             s_write_buffer_t( _buffer, _capacity, type, _offset );
 
-            uint32_t count = pybind::list_size( _obj );
+            uint32_t count = _kernel->list_size( _obj );
 
             s_write_size_t( _buffer, _capacity, count, _offset );
 
             for( uint32_t i = 0; i != count; ++i )
             {
-                PyObject * element = pybind::list_getitem( _obj, i );
+                PyObject * element = _kernel->list_getitem( _obj, i );
 
                 s_obj_pickle( _kernel, element, _types, _buffer, _capacity, _offset );
             }
         }
-        else if( pybind::dict_check( _obj ) == true )
+        else if( _kernel->dict_check( _obj ) == true )
         {
             uint8_t type = PICKLE_DICT;
 
             s_write_buffer_t( _buffer, _capacity, type, _offset );
 
-            uint32_t count = pybind::dict_size( _obj );
+            uint32_t count = _kernel->dict_size( _obj );
 
             s_write_size_t( _buffer, _capacity, count, _offset );
 
@@ -203,59 +202,59 @@ namespace pybind
 
             PyObject * key;
             PyObject * value;
-            while( pybind::dict_next( _obj, pos, &key, &value ) == true )
+            while( _kernel->dict_next( _obj, pos, &key, &value ) == true )
             {
                 s_obj_pickle( _kernel, key, _types, _buffer, _capacity, _offset );
                 s_obj_pickle( _kernel, value, _types, _buffer, _capacity, _offset );
             }
         }
-        else if( pybind::has_attrstring( _obj, "value" ) == true )
+        else if( _kernel->has_attrstring( _obj, "value" ) == true )
         {
             uint8_t type = PICKLE_OBJECT;
 
             s_write_buffer_t( _buffer, _capacity, type, _offset );
 
-            uint32_t type_count = pybind::list_size( _types );
+            uint32_t type_count = _kernel->list_size( _types );
 
             for( uint32_t index = 0; index != type_count; ++index )
             {
-                PyObject * element = pybind::list_getitem( _types, index );
+                PyObject * element = _kernel->list_getitem( _types, index );
 
                 PyTypeObject * element_type = (PyTypeObject *)(element);
 
-                if( pybind::is_instanceof( _obj, element_type ) == false )
+                if( _kernel->is_instanceof( _obj, element_type ) == false )
                 {
                     continue;
                 }
 
                 s_write_size_t( _buffer, _capacity, index, _offset );
 
-                PyObject * obj_value = pybind::get_attrstring( _obj, "value" );
+                PyObject * obj_value = _kernel->get_attrstring( _obj, "value" );
 
                 s_obj_pickle( _kernel, obj_value, _types, _buffer, _capacity, _offset );
 
-                pybind::decref( obj_value );
+                _kernel->decref( obj_value );
 
                 return;
             }
 
             pybind::throw_exception( "pickle obj %s type %s has 'value' but not type in types!"
-                , pybind::object_repr( _obj )
-                , pybind::object_repr_type( _obj )
+                , _kernel->object_repr( _obj )
+                , _kernel->object_repr_type( _obj )
             );
         }
         else
         {
             pybind::throw_exception( "pickle obj %s type %s invalid pickle"
-                , pybind::object_repr( _obj )
-                , pybind::object_repr_type( _obj )
+                , _kernel->object_repr( _obj )
+                , _kernel->object_repr_type( _obj )
             );
         }
     }
     //////////////////////////////////////////////////////////////////////////
     bool pickle( kernel_interface * _kernel, PyObject * _obj, PyObject * _types, void * _buffer, size_t _capacity, size_t & _size )
     {
-        if( pybind::list_check( _types ) == false )
+        if( _kernel->list_check( _types ) == false )
         {
             return false;
         }
@@ -267,12 +266,10 @@ namespace pybind
         }
         catch( const pybind::pybind_exception & _ex )
         {
-            pybind::error_message( "ptr value %s"
+            _kernel->error_message( "ptr value %s"
                 , _ex.what()
             );
-
-            pybind::check_error();
-
+                        
             return false;
         }
 
@@ -340,19 +337,19 @@ namespace pybind
         {
         case PICKLE_NONE:
             {
-                PyObject * obj = pybind::ret_none();
+                PyObject * obj = _kernel->ret_none();
 
                 return obj;
             }break;
         case PICKLE_FALSE:
             {
-                PyObject * obj = pybind::ret_bool( false );
+                PyObject * obj = _kernel->ret_bool( false );
 
                 return obj;
             }break;
         case PICKLE_TRUE:
             {
-                PyObject * obj = pybind::ret_bool( true );
+                PyObject * obj = _kernel->ret_bool( true );
 
                 return obj;
             }break;
@@ -401,7 +398,7 @@ namespace pybind
 
                 _carriage += str_size;
 
-                PyObject * obj = pybind::string_from_char_size( str_buffer, str_size );
+                PyObject * obj = _kernel->string_from_char_size( str_buffer, str_size );
 
                 return obj;
             }break;
@@ -423,7 +420,7 @@ namespace pybind
 
                 _carriage += utf8_size;
 
-                PyObject * obj = pybind::unicode_from_utf8_size( utf8_buffer, utf8_size );
+                PyObject * obj = _kernel->unicode_from_utf8_size( utf8_buffer, utf8_size );
 
                 return obj;
             }break;
@@ -432,7 +429,7 @@ namespace pybind
                 uint32_t count;
                 s_read_size_t( _buffer, _capacity, _carriage, count );
 
-                PyObject * obj = pybind::tuple_new( count );
+                PyObject * obj = _kernel->tuple_new( count );
 
                 for( uint32_t i = 0; i != count; ++i )
                 {
@@ -448,7 +445,7 @@ namespace pybind
                 uint32_t count;
                 s_read_size_t( _buffer, _capacity, _carriage, count );
 
-                PyObject * obj = pybind::list_new( count );
+                PyObject * obj = _kernel->list_new( count );
 
                 for( uint32_t i = 0; i != count; ++i )
                 {
@@ -464,14 +461,14 @@ namespace pybind
                 uint32_t count;
                 s_read_size_t( _buffer, _capacity, _carriage, count );
 
-                PyObject * obj = pybind::dict_new_presized( count );
+                PyObject * obj = _kernel->dict_new_presized( count );
 
                 for( uint32_t i = 0; i != count; ++i )
                 {
                     PyObject * key = s_obj_unpickle( _kernel, _buffer, _capacity, _carriage, _types );
                     PyObject * value = s_obj_unpickle( _kernel, _buffer, _capacity, _carriage, _types );
 
-                    pybind::dict_set( obj, key, value );
+                    _kernel->dict_set( obj, key, value );
                 }
 
                 return obj;
@@ -481,7 +478,7 @@ namespace pybind
                 uint32_t index;
                 s_read_size_t( _buffer, _capacity, _carriage, index );
 
-                uint32_t types_size = pybind::list_size( _types );
+                uint32_t types_size = _kernel->list_size( _types );
 
                 if( index >= types_size )
                 {
@@ -493,14 +490,14 @@ namespace pybind
 
                 PyObject * value = s_obj_unpickle( _kernel, _buffer, _capacity, _carriage, _types );
 
-                PyObject * object_type = pybind::list_getitem( _types, index );
+                PyObject * object_type = _kernel->list_getitem( _types, index );
 
                 PyObject * obj = pybind::call_t( _kernel, object_type, value );
 
                 if( obj == nullptr )
                 {
                     pybind::throw_exception( "unpickle invalid create object %s type index %d"
-                        , pybind::object_repr_type( object_type )
+                        , _kernel->object_repr_type( object_type )
                         , index
                     );
                 }
@@ -530,7 +527,7 @@ namespace pybind
         }
         catch( const pybind::pybind_exception & _ex )
         {
-            pybind::error_message( "ptr value %s"
+            _kernel->error_message( "ptr value %s"
                 , _ex.what()
             );
         }

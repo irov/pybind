@@ -31,7 +31,7 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         set_list_operator_t::operator PyObject * ()
         {
-            PyObject * obj = pybind::list_getitem( m_list, m_index );
+            PyObject * obj = m_kernel->list_getitem( m_list, m_index );
 
             return obj;
         }

@@ -34,25 +34,25 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool module::has_attr_i( const detail::import_operator_t & _name ) const
     {
-        PyObject * module_dict = pybind::module_dict( m_obj );
+        PyObject * module_dict = m_kernel->module_dict( m_obj );
 
-        bool result = pybind::dict_exist( module_dict, _name );
+        bool result = m_kernel->dict_exist( module_dict, _name );
 
         return result;
     }
     //////////////////////////////////////////////////////////////////////////
     detail::extract_operator_t module::get_attr_i( const detail::import_operator_t & _name ) const
     {
-        PyObject * module_dict = pybind::module_dict( m_obj );
+        PyObject * module_dict = m_kernel->module_dict( m_obj );
 
-        PyObject * py_attr = pybind::dict_get( module_dict, _name );
+        PyObject * py_attr = m_kernel->dict_get( module_dict, _name );
 
         return detail::extract_operator_t( m_kernel, py_attr );
     }
     //////////////////////////////////////////////////////////////////////////
     pybind::dict module::get_dict() const
     {
-        PyObject * module_dict = pybind::module_dict( m_obj );
+        PyObject * module_dict = m_kernel->module_dict( m_obj );
 
         return pybind::dict( m_kernel, module_dict );
     }

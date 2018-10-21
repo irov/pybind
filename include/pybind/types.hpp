@@ -49,8 +49,8 @@ namespace pybind
     class observer_bind_call
     {
     public:
-        virtual void begin_bind_call( const char * _className, const char * _functionName, PyObject * _args, PyObject * _kwds ) = 0;
-        virtual void end_bind_call( const char * _className, const char * _functionName, PyObject * _args, PyObject * _kwds ) = 0;
+        virtual void begin_bind_call( kernel_interface * _kernel, const char * _className, const char * _functionName, PyObject * _args, PyObject * _kwds ) = 0;
+        virtual void end_bind_call( kernel_interface * _kernel, const char * _className, const char * _functionName, PyObject * _args, PyObject * _kwds ) = 0;
     };
 }
 

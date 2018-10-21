@@ -26,7 +26,7 @@ namespace pybind
             }
 
             PyObject * py_value = pybind::ptr( _kernel, _value );
-            pybind::module_addobject( py_module, _id, py_value );
+            _kernel->module_addobject( py_module, _id, py_value );
         }
     }
 }

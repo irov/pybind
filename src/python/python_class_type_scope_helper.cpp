@@ -1,7 +1,8 @@
 #include "python_class_type_scope_helper.hpp"
 
 #include "pybind/class_type_scope_interface.hpp"
-#include "pybind/system.hpp"
+
+#include "python_system.hpp"
 
 namespace pybind
 {

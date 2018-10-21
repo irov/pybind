@@ -14,14 +14,20 @@ namespace pybind
         : m_kernel( _r.m_kernel )
         , m_args( _r.m_args )
     {
-        pybind::incref( m_args );
+        if( m_kernel != nullptr )
+        {
+            m_kernel->incref( m_args );
+        }
     }
     //////////////////////////////////////////////////////////////////////////
     args::args( kernel_interface * _kernel, PyObject * _args )
         : m_kernel( _kernel )
         , m_args( _args )
     {
-        pybind::incref( m_args );
+        if( m_kernel != nullptr )
+        {
+            m_kernel->incref( m_args );
+        }
     }
     //////////////////////////////////////////////////////////////////////////
     args::args( kernel_interface * _kernel, PyObject * _args, pybind::borrowed )
@@ -32,26 +38,39 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     args::~args()
     {
-        pybind::decref( m_args );
+        if( m_kernel != nullptr )
+        {
+            m_kernel->decref( m_args );
+        }
     }
     //////////////////////////////////////////////////////////////////////////
     args & args::operator = ( const args & _args )
     {
-        m_kernel = _args.m_kernel;
+        if( m_kernel != nullptr )
+        {
+            m_kernel->decref( m_args );
+        }
 
-        pybind::decref( m_args );
+        m_kernel = _args.m_kernel;
         m_args = _args.ptr();
-        pybind::incref( m_args );
+
+        if( m_kernel != nullptr )
+        {
+            m_kernel->incref( m_args );
+        }
 
         return *this;
     }
     //////////////////////////////////////////////////////////////////////////
     void args::reset()
     {
-        m_kernel = nullptr;
+        if( m_kernel != nullptr )
+        {
+            m_kernel->decref( m_args );
+            m_args = nullptr;
+        }
 
-        pybind::decref( m_args );
-        m_args = nullptr;
+        m_kernel = nullptr;
     }
     //////////////////////////////////////////////////////////////////////////
     args::size_type args::size() const
@@ -61,7 +80,7 @@ namespace pybind
             return 0;
         }
 
-        size_type args_size = pybind::tuple_size( m_args );
+        size_type args_size = m_kernel->tuple_size( m_args );
 
         return args_size;
     }

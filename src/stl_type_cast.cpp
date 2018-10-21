@@ -1,5 +1,6 @@
 #include "pybind/stl_type_cast.hpp"
-#include "pybind/system.hpp"
+
+#ifdef PYBIND_STL_SUPPORT
 
 #include <string>
 #include <vector>
@@ -18,10 +19,10 @@ namespace pybind
                 (void)_kernel;
                 (void)_nothrow;
 
-                if( pybind::string_check( _obj ) == true )
+                if( _kernel->string_check( _obj ) == true )
                 {
                     uint32_t size;
-                    const std::string::value_type * string_char = pybind::string_to_char_and_size( _obj, size );
+                    const std::string::value_type * string_char = _kernel->string_to_char_and_size( _obj, size );
 
                     if( string_char == 0 )
                     {
@@ -46,7 +47,7 @@ namespace pybind
                 const std::string::value_type * value_str = _value.c_str();
                 std::string::size_type value_size = _value.size();
 
-                PyObject * py_value = pybind::string_from_char_size( value_str, (uint32_t)value_size );
+                PyObject * py_value = _kernel->string_from_char_size( value_str, (uint32_t)value_size );
 
                 return py_value;
             }
@@ -61,10 +62,10 @@ namespace pybind
                 (void)_kernel;
                 (void)_nothrow;
 
-                if( pybind::unicode_check( _obj ) == true )
+                if( _kernel->unicode_check( _obj ) == true )
                 {
                     uint32_t size = 0;
-                    const wchar_t * value_char = pybind::unicode_to_wchar_and_size( _obj, size );
+                    const wchar_t * value_char = _kernel->unicode_to_wchar_and_size( _obj, size );
 
                     if( value_char == nullptr )
                     {
@@ -89,7 +90,7 @@ namespace pybind
                 const std::wstring::value_type * value_str = _value.c_str();
                 std::wstring::size_type value_size = _value.size();
 
-                PyObject * py_value = pybind::unicode_from_wchar_size( value_str, (uint32_t)value_size );
+                PyObject * py_value = _kernel->unicode_from_wchar_size( value_str, (uint32_t)value_size );
 
                 return py_value;
             }
@@ -113,3 +114,5 @@ namespace pybind
         pybind::unregistration_stl_vector_type_cast<std::wstring, std::vector<std::wstring>>(_kernel);
     }
 }
+
+#endif

@@ -32,14 +32,23 @@ namespace pybind
             return;
         }
 
-        va_list argList;
+        va_list va;
+        va_start( va, _format );
 
-        va_start( argList, _format );
+        log_va( _format, va );
+
+        va_end( va );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void log_va( const char * _format, va_list _va )
+    {
+        if( s_logger == nullptr )
+        {
+            return;
+        }
 
         char str[4096] = { 0 };
-        vsprintf( str, _format, argList );
-
-        va_end( argList );
+        vsprintf( str, _format, _va );
 
         s_logger( s_user, str );
     }

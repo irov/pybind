@@ -201,7 +201,7 @@ namespace pybind
 		{
 			function_kernel_call_impl<F, void, f_info::arity>::call( _kernel, f, _arg );
 
-			return ret_none();
+			return _kernel->ret_none();
 		}
 	};
 
@@ -212,12 +212,12 @@ namespace pybind
 
 		static PyObject * call( kernel_interface * _kernel, F f, PyObject * _arg )
         {
-            uint32_t arg_size = (_arg) ? pybind::tuple_size( _arg ) : 0;
+            uint32_t arg_size = (_arg) ? _kernel->tuple_size( _arg ) : 0;
             uint32_t fn_arity = f_info::arity;
 
 			if( arg_size + 1 != fn_arity )
 			{
-				pybind::throw_exception("invalid function call args is not equal %d != %d\n"					
+                pybind::throw_exception("invalid function call args is not equal %d != %d\n"
 					, (uint32_t)arg_size + 1
 					, (uint32_t)fn_arity
 					);

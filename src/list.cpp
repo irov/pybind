@@ -4,7 +4,7 @@ namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
     list::list( kernel_interface * _kernel )
-        : pybind::object( _kernel, pybind::list_new( 0 ), pybind::borrowed() )
+        : pybind::object( _kernel, _kernel->list_new( 0 ), pybind::borrowed() )
     {
     }
     //////////////////////////////////////////////////////////////////////////
@@ -24,7 +24,7 @@ namespace pybind
     }
     //////////////////////////////////////////////////////////////////////////
     list::list( kernel_interface * _kernel, size_type _size )
-        : pybind::object( _kernel, pybind::list_new( _size ), pybind::borrowed() )
+        : pybind::object( _kernel, _kernel->list_new( _size ), pybind::borrowed() )
     {
     }
     //////////////////////////////////////////////////////////////////////////
@@ -58,7 +58,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     detail::extract_operator_t list::operator [] ( size_type _index ) const
     {
-        PyObject * py_item = pybind::list_getitem( m_obj, _index );
+        PyObject * py_item = m_kernel->list_getitem( m_obj, _index );
 
         return detail::extract_operator_t( m_kernel, py_item );
     }
@@ -77,7 +77,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     list::size_type list::size() const
     {
-        return pybind::list_size( m_obj );
+        return m_kernel->list_size( m_obj );
     }
     //////////////////////////////////////////////////////////////////////////
     bool list::empty() const
@@ -97,11 +97,6 @@ namespace pybind
         return const_iterator( m_kernel, m_obj, size );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool list_check_t( const pybind::object & _obj )
-    {
-        return pybind::list_check( _obj.ptr() );
-    }
-    //////////////////////////////////////////////////////////////////////////
     pybind::list make_invalid_list_t()
     {
         return pybind::list( invalid() );
@@ -117,9 +112,9 @@ namespace pybind
 
             const char * type_name = tinfo.name();
 
-            pybind::log( "extract_value<T>: extract invalid %s:%s not cast to '%s'"
-                , pybind::object_repr( _obj )
-                , pybind::object_repr_type( _obj )
+            _kernel->log( "extract_value<T>: extract invalid %s:%s not cast to '%s'"
+                , _kernel->object_repr( _obj )
+                , _kernel->object_repr_type( _obj )
                 , type_name
             );
         }
