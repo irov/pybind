@@ -49,7 +49,7 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
-    object & object::operator = ( nullptr_t )
+    object & object::operator = ( std::nullptr_t )
     {
         this->base::operator = ( nullptr );
 

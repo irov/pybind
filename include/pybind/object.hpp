@@ -30,7 +30,7 @@ namespace pybind
         ~object();
 
     public:
-        object & operator = ( nullptr_t );
+        object & operator = ( std::nullptr_t );
         object & operator = ( const object & _obj );
         object & operator = ( object && _obj );
 

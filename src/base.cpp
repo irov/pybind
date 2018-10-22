@@ -63,7 +63,7 @@ namespace pybind
         }
     }
     //////////////////////////////////////////////////////////////////////////
-    base & base::operator = ( nullptr_t )
+    base & base::operator = ( std::nullptr_t )
     {
         if( m_kernel != nullptr )
         {

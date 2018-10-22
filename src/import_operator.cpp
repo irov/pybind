@@ -22,7 +22,7 @@ namespace pybind
             }
         }
         //////////////////////////////////////////////////////////////////////////
-        import_operator_t::import_operator_t( kernel_interface * _kernel, nullptr_t )
+        import_operator_t::import_operator_t( kernel_interface * _kernel, std::nullptr_t )
             : m_kernel( _kernel )
             , m_obj( _kernel->ret_none() )
         {

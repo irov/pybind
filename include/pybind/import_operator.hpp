@@ -15,7 +15,7 @@ namespace pybind
         public:
             import_operator_t();
             import_operator_t( const import_operator_t & _op );
-            import_operator_t( kernel_interface * _kernel, nullptr_t );
+            import_operator_t( kernel_interface * _kernel, std::nullptr_t );
             import_operator_t( kernel_interface * _kernel, PyObject * _value );
 
         public:
