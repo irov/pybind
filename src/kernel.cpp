@@ -1,5 +1,7 @@
 #include "pybind/kernel.hpp"
 
+#include "python/python_system.hpp"
+
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////

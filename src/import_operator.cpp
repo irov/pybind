@@ -22,6 +22,14 @@ namespace pybind
             }
         }
         //////////////////////////////////////////////////////////////////////////
+        import_operator_t::import_operator_t( import_operator_t && _op )
+            : m_kernel( _op.m_kernel )
+            , m_obj( _op.m_obj )
+        {
+            _op.m_kernel = nullptr;
+            _op.m_obj = nullptr;
+        }
+        //////////////////////////////////////////////////////////////////////////
         import_operator_t::import_operator_t( kernel_interface * _kernel, std::nullptr_t )
             : m_kernel( _kernel )
             , m_obj( _kernel->ret_none() )

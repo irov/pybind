@@ -18,13 +18,38 @@ namespace pybind
 	}
     //////////////////////////////////////////////////////////////////////////
     module::module( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed _br )
-        : pybind::object( _kernel, _obj, _br )
+        : object( _kernel, _obj, _br )
     {
     }
     //////////////////////////////////////////////////////////////////////////
     module::module( kernel_interface * _kernel, PyObject * _obj )
-        : pybind::object( _kernel, _obj )
+        : object( _kernel, _obj )
     {
+    }
+    //////////////////////////////////////////////////////////////////////////
+    module::~module()
+    {
+    }
+    //////////////////////////////////////////////////////////////////////////
+    module & module::operator = ( std::nullptr_t )
+    {
+        this->object::operator = ( nullptr );
+
+        return *this;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    module & module::operator = ( const module & _obj )
+    {
+        this->object::operator = ( _obj );
+
+        return *this;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    module & module::operator = ( module && _obj )
+    {
+        this->object::operator = ( std::move( _obj ) );
+
+        return *this;
     }
     //////////////////////////////////////////////////////////////////////////
     bool module::has_attr_i( const detail::import_operator_t & _name ) const

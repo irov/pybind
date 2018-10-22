@@ -19,6 +19,14 @@ namespace pybind
         module( kernel_interface * _kernel, PyObject * _obj );
 
     public:
+        ~module();
+
+    public:
+        module & operator = ( std::nullptr_t );
+        module & operator = ( const module & _obj );
+        module & operator = ( module && _obj );
+
+    public:
         template<class T>
         bool has_attr( const T & _name ) const
         {

@@ -87,7 +87,19 @@ namespace pybind
         void * get_class_impl( PyObject * _obj ) override;
         bool type_initialize( PyObject * _obj ) override;
 
+    public:
+        uint32_t get_python_version() override;
+
+        PyObject * get_builtins() override;
         PyObject * set_currentmodule( PyObject * _obj ) override;
+
+        PyObject * code_compile_file( const char * _buf, const char * _module ) override;
+        bool code_check( PyObject * _code ) override;
+        long marshal_magic_number() override;
+        PyObject * marshal_get_object( const char * _buf, size_t _len ) override;
+
+        void set_module_finder( PyObject * _finder ) override;
+        void remove_module_finder() override;
 
         void call_method( PyObject * _obj, const char * _method, const char * _format, ... ) override;
         PyObject * ask_adapter( void * _self, const class_type_scope_interface_ptr & _scope, const char * _name, PyObject * _args ) override;

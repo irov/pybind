@@ -1508,36 +1508,7 @@ namespace pybind
         PyObject * value = Py_VaBuildValue( _format, _va );
 
         return value;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    void exception_filter()
-    {
-        try
-        {
-            throw;
-        }
-        catch( const std::bad_alloc& )
-        {
-            PyErr_NoMemory();
-        }
-        catch( const std::out_of_range& x )
-        {
-            PyErr_SetString( PyExc_IndexError, x.what() );
-        }
-        catch( const std::exception& x )
-        {
-            PyErr_SetString( PyExc_RuntimeError, x.what() );
-        }
-        catch( ... )
-        {
-            PyErr_SetString( PyExc_RuntimeError, "unidentifiable C++ exception" );
-        }
-
-        if( PyErr_Occurred() )
-        {
-            PyErr_Print();
-        }
-    }
+    }    
     //////////////////////////////////////////////////////////////////////////
     void unwrap( PyObject * _value )
     {

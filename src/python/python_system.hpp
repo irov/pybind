@@ -9,7 +9,6 @@
 
 namespace pybind
 {
-    PYBIND_API kernel_interface * initialize( bool _debug, bool install_sigs, bool _nosite );
     PYBIND_API void finalize();
 
     PYBIND_API bool is_initialized();

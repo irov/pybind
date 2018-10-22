@@ -96,7 +96,7 @@ namespace pybind
         m_members.finalize();
         m_methods.finalize();
         m_pods.finalize();
-    }
+    }    
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::remove_from_module( const char * _name, PyObject * _module )
     {
@@ -686,9 +686,49 @@ namespace pybind
         return pybind::type_initialize( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
+    uint32_t python_kernel::get_python_version()
+    {
+        return pybind::get_python_version();
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::get_builtins()
+    {
+        return pybind::get_builtins();
+    }
+    //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::set_currentmodule( PyObject * _obj )
     {
         return pybind::set_currentmodule( _obj );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::code_compile_file( const char * _buf, const char * _module )
+    {
+        return pybind::code_compile_file( _buf, _module );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool python_kernel::code_check( PyObject * _code )
+    {
+        return pybind::code_check( _code );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    long python_kernel::marshal_magic_number()
+    {
+        return pybind::marshal_magic_number();
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::marshal_get_object( const char * _buf, size_t _len )
+    {
+        return pybind::marshal_get_object( _buf, _len );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void python_kernel::set_module_finder( PyObject * _finder )
+    {
+        pybind::set_module_finder( _finder );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void python_kernel::remove_module_finder()
+    {
+        pybind::remove_module_finder();
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::call_method( PyObject * _obj, const char * _method, const char * _format, ... )
@@ -1172,12 +1212,12 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool python_kernel::tuple_check( PyObject * _obj )
     {
-        return tuple_check( _obj );
+        return pybind::tuple_check( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
     uint32_t python_kernel::tuple_size( PyObject * _obj )
     {
-        return tuple_size( _obj );
+        return pybind::tuple_size( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
     bool python_kernel::tuple_setitem( PyObject * _obj, uint32_t _it, PyObject * _value )
@@ -1192,12 +1232,12 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::tuple_slice( PyObject * _obj, uint32_t _low, uint32_t _high )
     {
-        return tuple_slice( _obj, _low, _high );
+        return pybind::tuple_slice( _obj, _low, _high );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::tuple_slice_tail( PyObject * _obj, uint32_t _size )
     {
-        return tuple_slice_tail( _obj, _size );
+        return pybind::tuple_slice_tail( _obj, _size );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::log( const char * _format, ... )
@@ -1284,36 +1324,36 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::module_import( const char * _name, bool & _exsist )
     {
-        return module_import( _name, _exsist );
+        return pybind::module_import( _name, _exsist );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::module_init( const char * _name )
     {
-        return module_init( _name );
+        return pybind::module_init( _name );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::module_fini( PyObject * _module )
     {
-        return module_fini( _module );
+        return pybind::module_fini( _module );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::module_dict( PyObject * _module )
     {
-        return module_dict( _module );
+        return pybind::module_dict( _module );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::module_addobject( PyObject * _module, const char * _name, PyObject * _obj )
     {
-        return module_addobject( _module, _name, _obj );
+        return pybind::module_addobject( _module, _name, _obj );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::module_execcode( const char * _name, PyObject * _code )
     {
-        return module_execcode( _name, _code );
+        return pybind::module_execcode( _name, _code );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::module_reload( PyObject * _module )
     {
-        return module_reload( _module );
+        return pybind::module_reload( _module );
     }
 }
