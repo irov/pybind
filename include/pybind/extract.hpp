@@ -365,24 +365,5 @@ namespace pybind
 
         return nullptr;
     }
-
-    template<class T>
-    pybind::object ptr_obj( kernel_interface * _kernel, const T & _value )
-    {
-        try
-        {
-            PyObject * value = ptr_throw( _kernel, _value );
-
-            return pybind::object( _kernel, value );
-        }
-        catch( const pybind::pybind_exception & _ex )
-        {
-            _kernel->error_message( "ptr value: %s"
-                , _ex.what()
-            );
-        }
-
-        return pybind::object();
-    }
 }
 

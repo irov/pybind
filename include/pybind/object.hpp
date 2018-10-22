@@ -302,6 +302,25 @@ namespace pybind
     {
         return make_object_i( _kernel, detail::import_operator_t( _kernel, _t0 ) );
     }
+	//////////////////////////////////////////////////////////////////////////
+	template<class T>
+	pybind::object ptr_obj(kernel_interface * _kernel, const T & _value)
+	{
+		try
+		{
+			PyObject * value = ptr_throw(_kernel, _value);
+
+			return pybind::object(_kernel, value);
+		}
+		catch (const pybind::pybind_exception & _ex)
+		{
+			_kernel->error_message("ptr value: %s"
+				, _ex.what()
+			);
+		}
+
+		return pybind::object();
+	}
     //////////////////////////////////////////////////////////////////////////
     PYBIND_API pybind::object make_invalid_object_t();
     //////////////////////////////////////////////////////////////////////////
