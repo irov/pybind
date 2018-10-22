@@ -1,8 +1,9 @@
 #pragma once
 
 #include "pybind/base.hpp"
-
 #include "pybind/helper.hpp"
+
+#include <cstddef>
 
 namespace pybind
 {
@@ -14,7 +15,6 @@ namespace pybind
 
     public:
         object();
-        object( const base & _base );
         object( const object & _obj );
         object( object && _obj );
         object( const detail::extract_operator_t & _extract );

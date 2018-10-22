@@ -2,6 +2,8 @@
 
 #include "pybind/types.hpp"
 
+#include <cstddef>
+
 namespace pybind
 {
     class kernel_interface;

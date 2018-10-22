@@ -7,20 +7,15 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
-    module::module( const base & _base )
-        : object( _base )
-    {
-    }
-    //////////////////////////////////////////////////////////////////////////
-    module::module( const object & _obj )
-        : object( _obj )
-    {
-    }
-    //////////////////////////////////////////////////////////////////////////
     module::module( const module & _module )
         : object( _module.kernel(), _module.ptr() )
     {
     }
+	//////////////////////////////////////////////////////////////////////////
+	module::module( module && _module )
+		: object( std::move( _module ) )
+	{
+	}
     //////////////////////////////////////////////////////////////////////////
     module::module( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed _br )
         : pybind::object( _kernel, _obj, _br )

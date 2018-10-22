@@ -13,10 +13,6 @@ namespace pybind
     object::object()
     {
     }
-    object::object( const base & _base )
-        : base( _base )
-    {
-    }
     //////////////////////////////////////////////////////////////////////////
     object::object( const object & _obj )
         : base( _obj.kernel(), _obj.ptr() )

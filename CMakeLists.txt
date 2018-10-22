@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.0)
 
+if (POLICY CMP0025)
+  cmake_policy(SET CMP0025 NEW)
+endif ()
+
 OPTION(PYBIND_PROJECT_NAME  "PYBIND_PROJECT_NAME" ON)
 
 PROJECT(${PYBIND_PROJECT_NAME})
@@ -70,7 +74,7 @@ IF( NOT PYBIND_EXTERNAL_BUILD )
   
         CMAKE_ARGS
             "-DSTDEX_EXTERNAL_BUILD=ON"
-            "-DCMAKE_CXX_STANDARD=11"
+            "-DCMAKE_CXX_STANDARD=14"
     )
     
     ExternalProject_Get_Property(stdex_download SOURCE_DIR)
