@@ -15,12 +15,12 @@ namespace pybind
 
     public:
         list( kernel_interface * _kernel );
+        list( kernel_interface * _kernel, size_type _size );
         list( const list & _list );
         list( list && _list );
 
     public:
         explicit list( pybind::invalid );
-        list( kernel_interface * _kernel, size_type _size );
         list( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed );
         list( kernel_interface * _kernel, PyObject * _obj );
 

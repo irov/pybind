@@ -16,8 +16,21 @@
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
-    kernel_interface * initialize( bool _debug, bool install_sigs, bool _nosite )
+    kernel_interface * initialize( const wchar_t * _path, bool _debug, bool install_sigs, bool _nosite )
     {
+        (void)_path;
+
+#   if PYBIND_PYTHON_VERSION >= 300
+        if( _path != nullptr )
+        {
+            Py_SetPath( _path );
+
+            check_error();
+        }
+#   endif
+
+        
+
         if( Py_IsInitialized() == 0 )
         {
             if( _debug == false )
@@ -41,7 +54,7 @@ namespace pybind
 #	endif
 
 #   if PYBIND_PYTHON_VERSION >= 330
-            wchar_t pyProgramName[] = L"pybind";
+            wchar_t pyProgramName[] = L"pybind330";
             Py_SetProgramName( pyProgramName );
 
             wchar_t pySearchPath[] = L".";
@@ -51,7 +64,7 @@ namespace pybind
 
             Py_InitializeEx( install_sigs ? 1 : 0 );
 #   elif PYBIND_PYTHON_VERSION >= 320
-            wchar_t pyProgramName[] = L"pybind";
+            wchar_t pyProgramName[] = L"pybind320";
             Py_SetProgramName( pyProgramName );
 
             wchar_t pySearchPath[] = L".";
@@ -225,6 +238,7 @@ namespace pybind
 
         pybind::decref( _module );
     }
+    //////////////////////////////////////////////////////////////////////////
 #	else
     //   //////////////////////////////////////////////////////////////////////////
     //static PyObject* initfunc(void)
@@ -256,6 +270,13 @@ namespace pybind
         PyObject * module = PyImport_AddModule( _name );
 
         return module;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void module_fini( PyObject * _module )
+    {
+        _PyModule_Clear( _module );
+
+        pybind::decref( _module );
     }
 #	endif
     //////////////////////////////////////////////////////////////////////////
@@ -354,6 +375,14 @@ namespace pybind
     PyObject * ask_va( PyObject * _obj, const char * _format, va_list _va )
     {
         PyObject * value = Py_VaBuildValue( _format, _va );
+
+        if( value == nullptr )
+        {
+            check_error();
+
+            return nullptr;
+        }
+
         PyObject * result = ask_native( _obj, value );
 
         Py_DECREF( value );
@@ -1506,6 +1535,13 @@ namespace pybind
     PyObject * build_value_va( const char * _format, va_list _va )
     {
         PyObject * value = Py_VaBuildValue( _format, _va );
+
+        if( value == nullptr )
+        {
+            check_error();
+
+            return nullptr;
+        }
 
         return value;
     }    

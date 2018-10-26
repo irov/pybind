@@ -93,6 +93,8 @@ namespace pybind
         PyObject * get_builtins() override;
         PyObject * set_currentmodule( PyObject * _obj ) override;
 
+        void set_syspath( PyObject * _path ) override;
+
         PyObject * code_compile_file( const char * _buf, const char * _module ) override;
         bool code_check( PyObject * _code ) override;
         long marshal_magic_number() override;

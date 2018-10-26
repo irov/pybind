@@ -125,8 +125,10 @@ namespace pybind
         : public type_cast
     {
     public:
-        typedef T & TCastValue;
-        typedef const T & TCastRef;
+        typedef T value_type;
+
+        typedef value_type & TCastValue;
+        typedef const value_type & TCastRef;
 
     public:
         virtual bool apply( kernel_interface * _kernel, PyObject * _obj, TCastValue _value, bool _nothrow ) = 0;

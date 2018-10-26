@@ -701,6 +701,11 @@ namespace pybind
         return pybind::set_currentmodule( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
+    void python_kernel::set_syspath( PyObject * _path )
+    {
+        pybind::set_syspath( _path );
+    }
+    //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::code_compile_file( const char * _buf, const char * _module )
     {
         return pybind::code_compile_file( _buf, _module );
@@ -733,7 +738,10 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::call_method( PyObject * _obj, const char * _method, const char * _format, ... )
     {
-        return pybind::call_method( _obj, _method, _format );
+        va_list valist;
+        va_start( valist, _format );
+        return pybind::call_method_va( _obj, _method, _format, valist );
+        va_end( valist );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::ask_adapter( void * _self, const class_type_scope_interface_ptr & _scope, const char * _name, PyObject * _args )

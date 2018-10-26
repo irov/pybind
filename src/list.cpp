@@ -8,6 +8,11 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
+    list::list( kernel_interface * _kernel, size_type _size )
+        : pybind::object( _kernel, _kernel->list_new( _size ), pybind::borrowed() )
+    {
+    }
+    //////////////////////////////////////////////////////////////////////////
     list::list( const list & _list )
         : pybind::object( _list.kernel(), _list.ptr() )
     {
@@ -20,11 +25,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     list::list( pybind::invalid _iv )
         : object( _iv )
-    {
-    }
-    //////////////////////////////////////////////////////////////////////////
-    list::list( kernel_interface * _kernel, size_type _size )
-        : pybind::object( _kernel, _kernel->list_new( _size ), pybind::borrowed() )
     {
     }
     //////////////////////////////////////////////////////////////////////////

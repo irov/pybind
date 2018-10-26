@@ -18,7 +18,7 @@ namespace pybind
     typedef stdex::intrusive_ptr<class new_adapter_interface> new_adapter_interface_ptr;
     typedef stdex::intrusive_ptr<class destroy_adapter_interface> destroy_adapter_interface_ptr;
 
-    PYBIND_API kernel_interface * initialize( bool _debug, bool install_sigs, bool _nosite );    
+    PYBIND_API kernel_interface * initialize( const wchar_t * _path, bool _debug, bool install_sigs, bool _nosite );
     PYBIND_API class kernel_interface * get_kernel();
     PYBIND_API void set_kernel( class kernel_interface * _kernel );
 
@@ -216,6 +216,8 @@ namespace pybind
 
         virtual PyObject * get_builtins() = 0;
         virtual PyObject * set_currentmodule( PyObject * _obj ) = 0;
+
+        virtual void set_syspath( PyObject * _path ) = 0;
 
         virtual PyObject * code_compile_file( const char * _buf, const char * _module ) = 0;
         virtual bool code_check( PyObject * _code ) = 0;
