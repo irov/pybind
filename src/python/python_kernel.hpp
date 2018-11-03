@@ -104,6 +104,7 @@ namespace pybind
         void remove_module_finder() override;
 
         void call_method( PyObject * _obj, const char * _method, const char * _format, ... ) override;
+        void call_method_native( PyObject * _obj, const char * _method, PyObject * _args ) override;
         PyObject * ask_adapter( void * _self, const class_type_scope_interface_ptr & _scope, const char * _name, PyObject * _args ) override;
 
         void setStdOutHandle( PyObject * _obj ) override;
