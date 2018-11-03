@@ -25,7 +25,7 @@ namespace pybind
         ~base();
 
     public:
-        base & operator = (std::nullptr_t);
+        base & operator = ( std::nullptr_t );
         base & operator = ( const base & _obj );
         base & operator = ( base && _obj );
 
