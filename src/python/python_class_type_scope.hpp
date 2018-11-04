@@ -9,6 +9,10 @@
 
 #include "config/stdex.hpp"
 
+#ifndef PYBIND_CLASS_TYPE_MAX_NAME
+#define PYBIND_CLASS_TYPE_MAX_NAME 128
+#endif
+
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
@@ -123,7 +127,7 @@ namespace pybind
     protected:
         kernel_interface * m_kernel;
 
-        const char * m_name;
+        char m_name[PYBIND_CLASS_TYPE_MAX_NAME];
         uint32_t m_typeId;
 
         struct Metacast

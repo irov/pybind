@@ -569,7 +569,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     python_class_type_scope::python_class_type_scope( kernel_interface * _kernel, const char * _name, uint32_t _typeId, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash )
         : m_kernel( _kernel )
-        , m_name( _name )
         , m_typeId( _typeId )
         , m_user( _user )
         , m_new( _pynew )
@@ -582,6 +581,8 @@ namespace pybind
         , m_pod_hash( _hash )
         , m_binable_base( false )
     {
+
+        strcpy( m_name, _name );
     }
     //////////////////////////////////////////////////////////////////////////
     python_class_type_scope::~python_class_type_scope()

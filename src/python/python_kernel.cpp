@@ -740,7 +740,7 @@ namespace pybind
     {
         va_list valist;
         va_start( valist, _format );
-        return pybind::call_method_va( _obj, _method, _format, valist );
+        pybind::call_method_va( _obj, _method, _format, valist );
         va_end( valist );
     }
     //////////////////////////////////////////////////////////////////////////
