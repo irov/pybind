@@ -17,9 +17,9 @@ namespace pybind
 
     public:
         base( kernel_interface * _kernel, PyObject * _obj );
-        base( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed );
+        base( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed_t );
 
-        explicit base( pybind::invalid );
+        explicit base( pybind::invalid_t );
 
     public:
         ~base();

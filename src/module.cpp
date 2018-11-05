@@ -17,7 +17,7 @@ namespace pybind
 	{
 	}
     //////////////////////////////////////////////////////////////////////////
-    module::module( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed _br )
+    module::module( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed_t _br )
         : object( _kernel, _obj, _br )
     {
     }

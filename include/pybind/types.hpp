@@ -21,13 +21,17 @@ namespace pybind
 {
     typedef stdex::intrusive_ptr<class class_type_scope_interface> class_type_scope_interface_ptr;
 
-    class borrowed
+    class borrowed_t
     {
     };
 
-    class invalid
+    const borrowed_t borrowed;
+
+    class invalid_t
     {
     };
+
+    const invalid_t invalid;
 
     class kernel_interface;
 

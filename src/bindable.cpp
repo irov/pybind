@@ -21,53 +21,35 @@ namespace pybind
         this->unwrap();
     }
     //////////////////////////////////////////////////////////////////////////
-    void bindable::setKernel( kernel_interface * _kernel )
-    {
-        m_kernel = _kernel;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    kernel_interface * bindable::getKernel() const
-    {
-        return m_kernel;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    void bindable::setEmbed( PyObject * _embed )
+    void bindable::setEmbed( pybind::kernel_interface * _kernel, PyObject * _embed )
     {
 #ifndef NDEBUG
-        if( m_kernel == nullptr )
-        {
-            pybind::throw_exception( "bindable::setEmbed but kernel is not settup"
-            );
-
-            return;
-        }
-
-        if( m_kernel != nullptr && pybind::helper::is_object_bindable( _embed ) == false )
+        if( pybind::helper::is_object_bindable( _kernel, _embed ) == false )
         {
             pybind::throw_exception( "bindable::setEmbed '%s' but scope not settup bindable"
-                , m_kernel->object_repr_type( _embed )
+                , _kernel->object_repr_type( _embed )
             );
 
             return;
         }
 #endif
-
+        m_kernel = _kernel;
         m_embed = _embed;
 
-        this->_embedding( m_embed );
+        this->_embedding( _kernel, m_embed );
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * bindable::getEmbed()
+    PyObject * bindable::getEmbed( pybind::kernel_interface * _kernel )
     {
         if( m_embed == nullptr )
         {
-            PyObject * embed = this->_embedded();
+            PyObject * embed = this->_embedded( _kernel );
 
-            this->setEmbed( embed );
+            this->setEmbed( _kernel, embed );
         }
         else
         {
-            m_kernel->incref( m_embed );
+            _kernel->incref( m_embed );
         }
 
         return m_embed;
@@ -85,7 +67,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void bindable::unwrap()
     {
-        if( m_embed != nullptr )
+        if( m_kernel != nullptr )
         {
             PyObject * embed = m_embed;
             m_embed = nullptr;
@@ -94,7 +76,7 @@ namespace pybind
         }
     }
     //////////////////////////////////////////////////////////////////////////
-    void bindable::_embedding( PyObject * _embed )
+    void bindable::_embedding( pybind::kernel_interface * _kernel, PyObject * _embed )
     {
         (void)_embed;
         //Empty

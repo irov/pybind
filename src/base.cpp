@@ -29,7 +29,7 @@ namespace pybind
         _base.m_obj = nullptr;
     }
     //////////////////////////////////////////////////////////////////////////
-    base::base( pybind::invalid _iv )
+    base::base( pybind::invalid_t _iv )
         : m_kernel( nullptr )
         , m_obj( nullptr )
     {
@@ -46,7 +46,7 @@ namespace pybind
         }
     }
     //////////////////////////////////////////////////////////////////////////
-    base::base( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed )
+    base::base( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed_t )
         : m_kernel( _kernel )
         , m_obj( _obj )
     {
@@ -96,6 +96,11 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     base & base::operator = ( base && _obj )
     {
+        if( m_kernel != nullptr )
+        {
+            m_kernel->decref( m_obj );
+        }
+
         m_kernel = _obj.m_kernel;
         m_obj = _obj.ptr();
 

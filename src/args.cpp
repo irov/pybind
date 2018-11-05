@@ -30,7 +30,7 @@ namespace pybind
         }
     }
     //////////////////////////////////////////////////////////////////////////
-    args::args( kernel_interface * _kernel, PyObject * _args, pybind::borrowed )
+    args::args( kernel_interface * _kernel, PyObject * _args, pybind::borrowed_t )
         : m_kernel( _kernel )
         , m_args( _args )
     {

@@ -16,7 +16,7 @@ namespace pybind
         args();
         args( const args & _r );
         args( kernel_interface * _kernel, PyObject * _args );
-        args( kernel_interface * _kernel, PyObject * _args, pybind::borrowed );
+        args( kernel_interface * _kernel, PyObject * _args, pybind::borrowed_t );
 
     public:
         ~args();

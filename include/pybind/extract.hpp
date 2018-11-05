@@ -11,6 +11,7 @@
 
 #include <typeinfo>
 #include <type_traits>
+#include <utility>
 
 namespace pybind
 {
@@ -149,13 +150,13 @@ namespace pybind
             );
         }
 
-        return value;
+        return std::forward<typename stdex::mpl::remove_cref<T>::type>( value );
     }
 
     template<typename T>
     struct extract_specialized
     {
-        typename stdex::mpl::remove_cref<T>::type operator () ( kernel_interface * _kernel, PyObject * _obj )
+        typename stdex::mpl::remove_cref<T>::type operator () ( kernel_interface * _kernel, PyObject * _obj ) const
         {
             typedef typename stdex::mpl::remove_cref<T>::type type_value;
             type_value value;
@@ -173,14 +174,14 @@ namespace pybind
                 );
             }
 
-            return value;
+            return std::forward<typename stdex::mpl::remove_cref<T>::type>( value );
         }
     };
 
     template<typename T>
     struct extract_specialized<T *>
     {
-        T * operator () ( kernel_interface * _kernel, PyObject * _obj )
+        T * operator () ( kernel_interface * _kernel, PyObject * _obj ) const
         {
             T * value = nullptr;
 
@@ -295,7 +296,7 @@ namespace pybind
     template<typename T, typename = void>
     struct ptr_throw_specialized2
     {
-        PyObject * operator () ( kernel_interface * _kernel, const T & _t )
+        PyObject * operator () ( kernel_interface * _kernel, const T & _t ) const
         {
             return ptr_throw_i( _kernel, _t );
         }
@@ -304,7 +305,7 @@ namespace pybind
     template<typename T>
     struct ptr_throw_specialized2 < T, typename stdex::mpl::enable_if<std::is_enum<T>::value>::type >
     {
-        PyObject * operator () ( kernel_interface * _kernel, uint32_t _t )
+        PyObject * operator () ( kernel_interface * _kernel, uint32_t _t ) const
         {
             return ptr_throw_i( _kernel, _t );
         }
@@ -313,7 +314,7 @@ namespace pybind
     template<typename T>
     struct ptr_throw_specialized2 < T, typename stdex::mpl::enable_if<stdex::mpl::is_base_of<pybind::bindable, typename stdex::mpl::remove_ptr<T>::type>::value>::type >
     {
-        PyObject * operator () ( kernel_interface * _kernel, pybind::bindable * _t )
+        PyObject * operator () ( kernel_interface * _kernel, pybind::bindable * _t ) const
         {
             return ptr_throw_i( _kernel, _t );
         }
@@ -322,7 +323,7 @@ namespace pybind
     template<typename T, typename = void>
     struct ptr_throw_specialized
     {
-        PyObject * operator () ( kernel_interface * _kernel, const T & _t )
+        PyObject * operator () ( kernel_interface * _kernel, const T & _t ) const
         {
             return ptr_throw_specialized2<T>()(_kernel, _t);
         }
@@ -331,7 +332,7 @@ namespace pybind
     template<typename T, typename D>
     struct ptr_throw_specialized < stdex::intrusive_ptr<T, D> >
     {
-        PyObject * operator () ( kernel_interface * _kernel, const stdex::intrusive_ptr<T, D> & _t )
+        PyObject * operator () ( kernel_interface * _kernel, const stdex::intrusive_ptr<T, D> & _t ) const
         {
             T * t_ptr = _t.get();
 

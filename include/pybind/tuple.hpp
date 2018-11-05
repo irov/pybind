@@ -16,8 +16,8 @@ namespace pybind
         tuple( tuple && _tuple );
 
     public:
-        explicit tuple( borrowed );
-        tuple( kernel_interface * _kernel, PyObject * _obj, borrowed );
+        explicit tuple( pybind::invalid_t );
+        tuple( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed_t );
         tuple( kernel_interface * _kernel, PyObject * _obj );
 
     public:
@@ -161,9 +161,15 @@ namespace pybind
             pybind::tuple_setitem_t( _kernel, py_tuple, i, v );
         }
 
-        return pybind::tuple( _kernel, py_tuple, pybind::borrowed() );
+        return pybind::tuple( _kernel, py_tuple, pybind::borrowed );
     }
     //////////////////////////////////////////////////////////////////////////
     PYBIND_API pybind::tuple make_invalid_tuple_t( kernel_interface * _kernel );
+    //////////////////////////////////////////////////////////////////////////
+    template<>
+    struct extract_specialized<pybind::tuple>
+    {
+        pybind::tuple operator () ( kernel_interface * _kernel, PyObject * _obj ) const;
+    };
     //////////////////////////////////////////////////////////////////////////
 }

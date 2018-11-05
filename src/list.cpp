@@ -4,12 +4,12 @@ namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
     list::list( kernel_interface * _kernel )
-        : pybind::object( _kernel, _kernel->list_new( 0 ), pybind::borrowed() )
+        : pybind::object( _kernel, _kernel->list_new( 0 ), pybind::borrowed )
     {
     }
     //////////////////////////////////////////////////////////////////////////
     list::list( kernel_interface * _kernel, size_type _size )
-        : pybind::object( _kernel, _kernel->list_new( _size ), pybind::borrowed() )
+        : pybind::object( _kernel, _kernel->list_new( _size ), pybind::borrowed )
     {
     }
     //////////////////////////////////////////////////////////////////////////
@@ -23,12 +23,12 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
-    list::list( pybind::invalid _iv )
+    list::list( pybind::invalid_t _iv )
         : object( _iv )
     {
     }
     //////////////////////////////////////////////////////////////////////////
-    list::list( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed _br )
+    list::list( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed_t _br )
         : pybind::object( _kernel, _obj, _br )
     {
     }
@@ -99,12 +99,12 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     pybind::list make_invalid_list_t()
     {
-        return pybind::list( invalid() );
+        return pybind::list( pybind::invalid );
     }
     //////////////////////////////////////////////////////////////////////////
     pybind::list extract_specialized<pybind::list>::operator () ( kernel_interface * _kernel, PyObject * _obj ) const
     {
-        pybind::list value( _kernel );
+        pybind::list value( pybind::invalid );
 
         if( pybind::extract_value( _kernel, _obj, value, true ) == false )
         {

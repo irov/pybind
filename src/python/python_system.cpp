@@ -2,9 +2,7 @@
 
 #include "pybind/class_type_scope_interface.hpp"
 
-#ifdef PYBIND_STL_SUPPORT
-#include "pybind/stl_type_cast.hpp"
-#endif
+#include "pybind/stl/stl_type_cast.hpp"
 
 #include "config/python.hpp"
 
@@ -16,9 +14,52 @@
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
-    kernel_interface * initialize( const wchar_t * _path, bool _debug, bool install_sigs, bool _nosite )
+    kernel_interface * initialize( const kernel_domain_allocator_t * _allocator, const wchar_t * _path, bool _debug, bool install_sigs, bool _nosite )
     {
+        (void)_allocator;
         (void)_path;
+
+#   if PYBIND_PYTHON_VERSION >= 300
+        if( _allocator != nullptr )
+        {
+            if( _allocator->raw != nullptr )
+            {
+                PyMemAllocatorEx pyalloc;
+                pyalloc.ctx = _allocator->raw->ctx;
+                pyalloc.malloc = _allocator->raw->malloc;
+                pyalloc.calloc = _allocator->raw->calloc;
+                pyalloc.realloc = _allocator->raw->realloc;
+                pyalloc.free = _allocator->raw->free;
+
+                PyMem_SetAllocator( PYMEM_DOMAIN_RAW, &pyalloc );
+            }
+
+            if( _allocator->mem != nullptr )
+            {
+                PyMemAllocatorEx pyalloc;
+                pyalloc.ctx = _allocator->mem->ctx;
+                pyalloc.malloc = _allocator->mem->malloc;
+                pyalloc.calloc = _allocator->mem->calloc;
+                pyalloc.realloc = _allocator->mem->realloc;
+                pyalloc.free = _allocator->mem->free;
+
+                PyMem_SetAllocator( PYMEM_DOMAIN_MEM, &pyalloc );
+            }
+
+            if( _allocator->obj != nullptr )
+            {
+                PyMemAllocatorEx pyalloc;
+                pyalloc.ctx = _allocator->obj->ctx;
+                pyalloc.malloc = _allocator->obj->malloc;
+                pyalloc.calloc = _allocator->obj->calloc;
+                pyalloc.realloc = _allocator->obj->realloc;
+                pyalloc.free = _allocator->obj->free;
+
+                PyMem_SetAllocator( PYMEM_DOMAIN_OBJ, &pyalloc );
+            }
+        }
+#endif
+
 
 #   if PYBIND_PYTHON_VERSION >= 300
         if( _path != nullptr )
@@ -28,9 +69,7 @@ namespace pybind
             check_error();
         }
 #   endif
-
         
-
         if( Py_IsInitialized() == 0 )
         {
             if( _debug == false )
@@ -91,34 +130,12 @@ namespace pybind
 
         pybind::set_kernel( kernel );
 
-#	ifdef PYBIND_STL_SUPPORT
+#ifdef PYBIND_STL_SUPPORT
         if( initialize_stl_type_cast( kernel ) == false )
         {
             return nullptr;
         }
-#	endif
-
-        //if( initialize_methods() == false )
-  //      {
-  //          return false;
-  //      }
-
-        //if( initialize_members() == false )
-        //{
-        //    return false;
-        //}
-
-        //if( initialize_function() == false )
-  //      {
-  //          return false;
-  //      }
-
-        //if( initialize_functor() == false )
-  //      {
-  //          return false;
-  //      }
-
-        //initialize_default_type_cast();
+#endif
 
         return kernel;
     }
@@ -129,18 +146,14 @@ namespace pybind
 
         kernel_interface * kernel = pybind::get_kernel();
 
-#	ifdef PYBIND_STL_SUPPORT
+#ifdef PYBIND_STL_SUPPORT
         finalize_stl_type_cast( kernel );
-#	endif			
+#endif
 
         kernel->finalize();
         delete kernel;
 
         pybind::set_kernel( nullptr );
-
-        //finalize_methods();
-        //finalize_function();
-        //finalize_functor();
     }
     //////////////////////////////////////////////////////////////////////////
     bool is_initialized()

@@ -17,10 +17,10 @@ namespace pybind
         dict( dict && _dict );
 
     public:
-        explicit dict( pybind::invalid );
+        explicit dict( pybind::invalid_t );
         explicit dict( kernel_interface * _kernel );
         dict( kernel_interface * _kernel, size_type _presized );
-        dict( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed );
+        dict( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed_t );
         dict( kernel_interface * _kernel, PyObject * _obj );
 
     public:
@@ -84,4 +84,11 @@ namespace pybind
     };
     //////////////////////////////////////////////////////////////////////////
     PYBIND_API pybind::dict make_invalid_dict_t();
+    //////////////////////////////////////////////////////////////////////////
+    template<>
+    struct extract_specialized<pybind::dict>
+    {
+        pybind::dict operator () ( kernel_interface * _kernel, PyObject * _obj ) const;
+    };
+    //////////////////////////////////////////////////////////////////////////
 }

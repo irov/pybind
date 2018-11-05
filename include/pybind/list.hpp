@@ -20,8 +20,8 @@ namespace pybind
         list( list && _list );
 
     public:
-        explicit list( pybind::invalid );
-        list( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed );
+        explicit list( pybind::invalid_t );
+        list( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed_t );
         list( kernel_interface * _kernel, PyObject * _obj );
 
     public:

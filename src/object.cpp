@@ -30,7 +30,7 @@ namespace pybind
 
     }
     //////////////////////////////////////////////////////////////////////////
-    object::object( pybind::invalid _iv )
+    object::object( pybind::invalid_t _iv )
         : base( _iv )
     {
     }
@@ -40,7 +40,7 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
-    object::object( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed _br )
+    object::object( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed_t _br )
         : base( _kernel, _obj, _br )
     {
     }
@@ -79,7 +79,7 @@ namespace pybind
     {
         PyObject * py_attr = m_kernel->get_attr( m_obj, _name );
 
-        return pybind::object( m_kernel, py_attr, pybind::borrowed() );
+        return pybind::object( m_kernel, py_attr, pybind::borrowed );
     }
     //////////////////////////////////////////////////////////////////////////
     detail::extract_operator_t object::extract() const
@@ -181,21 +181,21 @@ namespace pybind
     {
         PyObject * py_none = _kernel->ret_none();
 
-        return pybind::object( _kernel, py_none, pybind::borrowed() );
+        return pybind::object( _kernel, py_none, pybind::borrowed );
     }
     //////////////////////////////////////////////////////////////////////////
     pybind::object make_true_t( kernel_interface * _kernel )
     {
         PyObject * py_true = _kernel->ret_true();
 
-        return pybind::object( _kernel, py_true, pybind::borrowed() );
+        return pybind::object( _kernel, py_true, pybind::borrowed );
     }
     //////////////////////////////////////////////////////////////////////////
     pybind::object make_false_t( kernel_interface * _kernel )
     {
         PyObject * py_false = _kernel->ret_false();
 
-        return pybind::object( _kernel, py_false, pybind::borrowed() );
+        return pybind::object( _kernel, py_false, pybind::borrowed );
     }
     //////////////////////////////////////////////////////////////////////////
     pybind::object make_object_i( kernel_interface * _kernel, const detail::import_operator_t & _t0 )
@@ -205,6 +205,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     pybind::object make_invalid_object_t()
     {
-        return pybind::object( pybind::invalid() );
+        return pybind::object( pybind::invalid );
     }
 }

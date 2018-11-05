@@ -402,7 +402,7 @@ namespace pybind
             return _kernel->ret_none();
         }
 
-        PyObject * py_obj = _value->getEmbed();
+        PyObject * py_obj = _value->getEmbed( _kernel );
 
         return py_obj;
     }

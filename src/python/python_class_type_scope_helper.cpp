@@ -8,18 +8,16 @@ namespace pybind
 {
     namespace helper
     {
-        bool is_object_bindable( PyObject * _obj )
+        bool is_object_bindable( kernel_interface * _kernel, PyObject * _obj )
         {
             if( _obj == nullptr )
             {
                 return false;
             }
 
-            kernel_interface * kernel = pybind::get_kernel();
-
             PyTypeObject * objtype = pybind::object_type( _obj );
 
-            const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
+            const class_type_scope_interface_ptr & scope = _kernel->get_class_scope( objtype );
 
             if( scope == nullptr )
             {

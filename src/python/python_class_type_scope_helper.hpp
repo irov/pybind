@@ -6,6 +6,6 @@ namespace pybind
 {
     namespace helper
     {
-        bool is_object_bindable( PyObject * _obj );
+        bool is_object_bindable( kernel_interface * _kernel, PyObject * _obj );
     }
 }

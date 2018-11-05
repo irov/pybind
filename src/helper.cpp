@@ -44,7 +44,7 @@ namespace pybind
     {
         PyObject * py_args = _kernel->tuple_slice_tail( _tuple, _size );
 
-        return args( _kernel, py_args, pybind::borrowed() );
+        return args( _kernel, py_args, pybind::borrowed );
     }
     //////////////////////////////////////////////////////////////////////////
     detail::extract_operator_t tuple_getitem_t( kernel_interface * _kernel, PyObject * _tuple, uint32_t _it )

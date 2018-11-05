@@ -4,7 +4,7 @@ namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
     dict::dict( kernel_interface * _kernel )
-        : pybind::object( _kernel, _kernel->dict_new(), borrowed() )
+        : pybind::object( _kernel, _kernel->dict_new(), pybind::borrowed )
     {
     }
     //////////////////////////////////////////////////////////////////////////
@@ -18,17 +18,17 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
-    dict::dict( pybind::invalid _iv )
+    dict::dict( pybind::invalid_t _iv )
         : object( _iv )
     {
     }
     //////////////////////////////////////////////////////////////////////////
     dict::dict( kernel_interface * _kernel, dict::size_type _presized )
-        : pybind::object( _kernel, _kernel->dict_new_presized( _presized ), pybind::borrowed() )
+        : pybind::object( _kernel, _kernel->dict_new_presized( _presized ), pybind::borrowed )
     {
     }
     //////////////////////////////////////////////////////////////////////////
-    dict::dict( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed _br )
+    dict::dict( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed_t _br )
         : pybind::object( _kernel, _obj, _br )
     {
     }
@@ -100,6 +100,27 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     pybind::dict make_invalid_dict_t()
     {
-        return pybind::dict( pybind::invalid() );
+        return pybind::dict( pybind::invalid );
     }
+    //////////////////////////////////////////////////////////////////////////
+    pybind::dict extract_specialized<pybind::dict>::operator () ( kernel_interface * _kernel, PyObject * _obj ) const
+    {
+        pybind::dict value( pybind::invalid );
+
+        if( pybind::extract_value( _kernel, _obj, value, true ) == false )
+        {
+            const std::type_info & tinfo = typeid(pybind::dict);
+
+            const char * type_name = tinfo.name();
+
+            _kernel->log( "extract_value<T>: extract invalid %s:%s not cast to '%s'"
+                , _kernel->object_repr( _obj )
+                , _kernel->object_repr_type( _obj )
+                , type_name
+            );
+        }
+
+        return value;
+    }
+    //////////////////////////////////////////////////////////////////////////
 }
