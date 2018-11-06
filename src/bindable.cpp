@@ -78,7 +78,9 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void bindable::_embedding( pybind::kernel_interface * _kernel, PyObject * _embed )
     {
+        (void)_kernel;
         (void)_embed;
+
         //Empty
     }
 }

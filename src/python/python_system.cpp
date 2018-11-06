@@ -11,6 +11,18 @@
 #include <stdexcept>
 #include <stdio.h>
 
+#if PYBIND_PYTHON_ERROR_FORMAT_FLAG
+#if PYBIND_PYTHON_VERSION < 300
+#ifdef __cplusplus
+extern "C" {
+#endif
+    extern int Py_ErrFormatFlag;
+#ifdef __cplusplus
+}
+#endif
+#endif
+#endif
+
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
@@ -18,6 +30,20 @@ namespace pybind
     {
         (void)_allocator;
         (void)_path;
+        (void)_debug;
+
+#if PYBIND_PYTHON_ERROR_FORMAT_FLAG
+#if PYBIND_PYTHON_VERSION < 300
+        if( _debug == true )
+        {
+            Py_ErrFormatFlag = 1;
+        }
+        else
+        {
+            Py_ErrFormatFlag = 0;
+        }
+#endif
+#endif
 
 #   if PYBIND_PYTHON_VERSION >= 300
         if( _allocator != nullptr )
