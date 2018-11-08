@@ -1263,7 +1263,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::log_va( const char * _format, va_list _va )
     {
-        pybind::log( _format, _va );
+        pybind::log_va( _format, _va );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::error_traceback( const char * _format, ... )
