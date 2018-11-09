@@ -14,7 +14,7 @@ namespace pybind
     template<class P, class C, class F, class Ret>
     struct method_proxy_kernel_call_impl
     {
-        template<std::size_t ... I>
+        template<size_t ... I>
         static Ret call( kernel_interface * _kernel, P * _proxy, C * _obj, F f, PyObject * _arg, std::index_sequence<I...> )
         {
             return (_proxy->*f)(_kernel, _obj
@@ -23,27 +23,23 @@ namespace pybind
         }
     };
 
-    template<class P, class C, class F, class Ret>
+    template<class P, class C, class F, size_t Arity, class Ret>
     struct method_proxy_kernel_call_ret_impl
     {
-        typedef typename stdex::function_traits<F>::result f_info;
-
         static PyObject * call( kernel_interface * _kernel, P * _proxy, C * _obj, F f, PyObject * _arg )
         {
-            PyObject * py_result = detail::return_operator_t( _kernel, method_proxy_kernel_call_impl<P, C, F, Ret>::call( _kernel, _proxy, _obj, f, _arg, std::make_index_sequence<f_info::arity - 2>() ) );
+            PyObject * py_result = detail::return_operator_t( _kernel, method_proxy_kernel_call_impl<P, C, F, Ret>::call( _kernel, _proxy, _obj, f, _arg, std::make_index_sequence<Arity>() ) );
 
             return py_result;
         }
     };
 
-    template<class P, class C, class F>
-    struct method_proxy_kernel_call_ret_impl<P, C, F, void>
+    template<class P, class C, class F, size_t Arity>
+    struct method_proxy_kernel_call_ret_impl<P, C, F, Arity, void>
     {
-        typedef typename stdex::function_traits<F>::result f_info;
-
         static PyObject * call( kernel_interface * _kernel, P * _proxy, C * _obj, F f, PyObject * _arg )
         {
-            method_proxy_kernel_call_impl<P, C, F, void>::call( _kernel, _proxy, _obj, f, _arg, std::make_index_sequence<f_info::arity - 2>() );
+            method_proxy_kernel_call_impl<P, C, F, void>::call( _kernel, _proxy, _obj, f, _arg, std::make_index_sequence<Arity>() );
 
             return _kernel->ret_none();
         }
@@ -73,7 +69,7 @@ namespace pybind
                 return nullptr;
             }
 
-            PyObject * ret = method_proxy_kernel_call_ret_impl<P, C, F, typename f_info::ret_type>::call( _kernel, _proxy, _obj, f, _arg );
+            PyObject * ret = method_proxy_kernel_call_ret_impl<P, C, F, f_info::arity - 2, typename f_info::ret_type>::call( _kernel, _proxy, _obj, f, _arg );
 
             return ret;
         }
