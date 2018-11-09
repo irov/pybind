@@ -7,6 +7,8 @@
 
 #include "stdex/function_traits.h"
 
+#include <type_traits>
+
 namespace pybind
 {
     template<class P, class C, class F, class Ret>
