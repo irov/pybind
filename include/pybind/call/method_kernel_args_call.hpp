@@ -14,33 +14,33 @@ namespace pybind
     template<class C, class F, class Ret>
     struct method_kernel_args_call_impl
     {
-        template<size_t ... I>
-        static Ret call( kernel_interface * _kernel, C * _obj, F f, PyObject * _arg, std::index_sequence<I...> )
+        template<uint32_t ... I>
+        static Ret call( kernel_interface * _kernel, C * _obj, F f, PyObject * _arg, std::integer_sequence<uint32_t, I...> )
         {
             return (_obj->*f)(_kernel
                 , tuple_getitem_t( _kernel, _arg, I ) ...
-                , make_args_t( _kernel, _arg, std::index_sequence<I...>::size() )
+                , make_args_t( _kernel, _arg, sizeof ... (I) )
                 );
         }
     };
 
-    template<class C, class F, size_t Arity, class Ret>
+    template<class C, class F, uint32_t Arity, class Ret>
     struct method_kernel_args_call_ret_impl
     {
         static PyObject * call( kernel_interface * _kernel, C * _obj, F f, PyObject * _arg )
         {
-            PyObject * result = detail::return_operator_t( _kernel, method_kernel_args_call_impl<C, F, Ret>::call( _kernel, _obj, f, _arg, std::make_index_sequence<Arity>() ) );
+            PyObject * result = detail::return_operator_t( _kernel, method_kernel_args_call_impl<C, F, Ret>::call( _kernel, _obj, f, _arg, std::make_integer_sequence<uint32_t, Arity>() ) );
 
             return result;
         }
     };
 
-    template<class C, class F, size_t Arity>
+    template<class C, class F, uint32_t Arity>
     struct method_kernel_args_call_ret_impl<C, F, Arity, void>
     {
         static PyObject * call( kernel_interface * _kernel, C * _obj, F f, PyObject * _arg )
         {
-            method_kernel_args_call_impl<C, F, void>::call( _kernel, _obj, f, _arg, std::make_index_sequence<Arity>() );
+            method_kernel_args_call_impl<C, F, void>::call( _kernel, _obj, f, _arg, std::make_integer_sequence<uint32_t, Arity>() );
 
             return _kernel->ret_none();
         }
