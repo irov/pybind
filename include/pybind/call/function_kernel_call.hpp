@@ -12,8 +12,8 @@ namespace pybind
     template<class F, class Ret>
     struct function_kernel_call_impl
     {
-        template<size_t ... I>
-        static Ret call( kernel_interface * _kernel, F f, PyObject * _arg, std::index_sequence<I...> )
+        template<uint32_t ... I>
+        static Ret call( kernel_interface * _kernel, F f, PyObject * _arg, std::integer_sequence<uint32_t, I...> )
         {
             return (*f)(_kernel
                 , tuple_getitem_t( _kernel, _arg, I ) ...
@@ -21,23 +21,23 @@ namespace pybind
         }
     };
 
-    template<class F, size_t Arity, class Ret>
+    template<class F, uint32_t Arity, class Ret>
     struct function_kernel_call_ret_impl
     {
         static PyObject * call( kernel_interface * _kernel, F f, PyObject * _arg )
         {
-            PyObject * py_result = detail::return_operator_t( _kernel, function_kernel_call_impl<F, Ret>::call( _kernel, f, _arg, std::make_index_sequence<Arity>() ) );
+            PyObject * py_result = detail::return_operator_t( _kernel, function_kernel_call_impl<F, Ret>::call( _kernel, f, _arg, std::make_integer_sequence<uint32_t, Arity>() ) );
 
             return py_result;
         }
     };
 
-    template<class F, size_t Arity>
+    template<class F, uint32_t Arity>
     struct function_kernel_call_ret_impl<F, Arity, void>
     {
         static PyObject * call( kernel_interface * _kernel, F f, PyObject * _arg )
         {
-            function_kernel_call_impl<F, void>::call( _kernel, f, _arg, std::make_index_sequence<Arity>() );
+            function_kernel_call_impl<F, void>::call( _kernel, f, _arg, std::make_integer_sequence<uint32_t, Arity>() );
 
             return _kernel->ret_none();
         }
