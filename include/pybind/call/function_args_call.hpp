@@ -40,7 +40,7 @@ namespace pybind
     {
         static PyObject * call( kernel_interface * _kernel, F f, PyObject * _arg )
         {
-            function_args_call_impl<F, P, void>::call( _kernel, f, _arg, std::make_integer_sequence<uint32_t, Arity>() );
+            function_args_call_impl<F, void>::call( _kernel, f, _arg, std::make_integer_sequence<uint32_t, Arity>() );
 
             return _kernel->ret_none();
         }
