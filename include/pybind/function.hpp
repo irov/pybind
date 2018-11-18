@@ -20,6 +20,17 @@ namespace pybind
     }
 
     template<class F>
+    void def_function_args( kernel_interface * _kernel, const char * _name, F _function, PyObject * _module = 0 )
+    {
+        typedef typename stdex::function_traits<F>::result t_info;
+
+        function_adapter_interface_ptr adapter =
+            new function_adapter_args<F>( _name, t_info::arity, _function );
+
+        _kernel->def_function_adapter( adapter, false, _module );
+    }
+
+    template<class F>
     void def_function_deprecate( kernel_interface * _kernel, const char * _name, F _function, const char * _doc, PyObject * _module = 0 )
     {
         typedef typename stdex::function_traits<F>::result t_info;

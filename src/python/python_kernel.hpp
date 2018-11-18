@@ -33,9 +33,12 @@ namespace pybind
         PyObject * create_function_adapter( const function_adapter_interface_ptr & _adapter, bool _native ) override;
         PyObject * create_functor_adapter( const functor_adapter_interface_ptr & _adapter, bool _native ) override;
 
-        PyObject * create_member( const member_adapter_interface_ptr & _iadapter ) override;
-        PyObject * create_method( const method_adapter_interface_ptr & _iadapter, PyTypeObject * _type ) override;
+        PyObject * create_member_adapter( const member_adapter_interface_ptr & _iadapter ) override;
+        PyObject * create_method_adapter( const method_adapter_interface_ptr & _iadapter, PyTypeObject * _type ) override;
         method_adapter_interface * get_method_adapter( PyObject * _obj ) override;
+
+    public:
+        void undef_adapter( const char * _name, PyObject * _module ) override;
 
     public:
         PyTypeObject * get_pod_type( uint32_t _pod, bool _hash ) override;

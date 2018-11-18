@@ -329,6 +329,11 @@ namespace pybind
         PyModule_AddObject( _module, _name, _obj );
     }
     //////////////////////////////////////////////////////////////////////////
+    void module_removeobject( PyObject * _module, const char * _name )
+    {
+        PyModule_AddObject( _module, _name, Py_None );
+    }
+    //////////////////////////////////////////////////////////////////////////
     PyObject * module_execcode( const char * _name, PyObject * _code )
     {
         char * unconst_name = const_cast<char *>(_name);

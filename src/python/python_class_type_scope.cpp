@@ -816,7 +816,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::add_method( const method_adapter_interface_ptr & _ifunc )
     {
-        PyObject * py_type_method = m_kernel->create_method( _ifunc, m_pytypeobject );
+        PyObject * py_type_method = m_kernel->create_method_adapter( _ifunc, m_pytypeobject );
 
         const char * name = _ifunc->getName();
 
@@ -854,7 +854,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::add_member( const member_adapter_interface_ptr & _imember )
     {
-        PyObject * py_member = m_kernel->create_member( _imember );
+        PyObject * py_member = m_kernel->create_member_adapter( _imember );
 
         const char * name = _imember->getName();
 

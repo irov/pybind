@@ -139,6 +139,24 @@ namespace pybind
         pybind::module_addobject( _module, name, py_func );
     }
     //////////////////////////////////////////////////////////////////////////
+    void python_kernel::undef_adapter( const char * _name, PyObject * _module )
+    {
+        if( _module == nullptr )
+        {
+            _module = this->get_current_module();
+
+            if( _module == nullptr )
+            {
+                pybind::throw_exception( "def_function_adapter not setup module!"
+                );
+
+                return;
+            }
+        }
+
+        pybind::module_removeobject( _module, _name );
+    }
+    //////////////////////////////////////////////////////////////////////////
     void python_kernel::def_functor_adapter( const functor_adapter_interface_ptr & _adapter, bool _native, PyObject * _module )
     {
         PyObject * py_func = m_functors.create_functor_adapter( _adapter, _native );
@@ -175,14 +193,14 @@ namespace pybind
         return py_func;
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * python_kernel::create_member( const member_adapter_interface_ptr & _iadapter )
+    PyObject * python_kernel::create_member_adapter( const member_adapter_interface_ptr & _iadapter )
     {
         PyObject * py_member = m_members.create_member_adapter( _iadapter );
 
         return py_member;
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * python_kernel::create_method( const method_adapter_interface_ptr & _iadapter, PyTypeObject * _type )
+    PyObject * python_kernel::create_method_adapter( const method_adapter_interface_ptr & _iadapter, PyTypeObject * _type )
     {
         PyObject * py_member = m_methods.create_method_adapter( _iadapter, _type );
 
