@@ -269,7 +269,7 @@ namespace pybind
             _kernel->error_message( "ptr value %s"
                 , _ex.what()
             );
-                        
+
             return false;
         }
 

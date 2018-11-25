@@ -51,7 +51,7 @@ namespace pybind
     public:
         const_iterator begin() const;
         const_iterator end() const;
-        
+
     protected:
         kernel_interface * m_kernel;
         PyObject * m_args;

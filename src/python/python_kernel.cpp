@@ -96,7 +96,7 @@ namespace pybind
         m_members.finalize();
         m_methods.finalize();
         m_pods.finalize();
-    }    
+    }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::remove_from_module( const char * _name, PyObject * _module )
     {
@@ -539,7 +539,7 @@ namespace pybind
             {
                 break;
             }
-            
+
             PyTypeObject * py_typeobject = scope->get_typeobject();
 
             if( py_typeobject != py_type )
@@ -949,7 +949,7 @@ namespace pybind
     bool python_kernel::extract_wchar( PyObject * _obj, wchar_t & _value )
     {
         return pybind::extract_wchar( _obj, _value );
-    }    
+    }
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::ptr_bool( bool _value )
     {
@@ -1124,7 +1124,7 @@ namespace pybind
     PyObject * python_kernel::unicode_from_utf8_size( const char * _utf8, uint32_t _size )
     {
         return pybind::unicode_from_utf8_size( _utf8, _size );
-    }    
+    }
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::list_new( uint32_t _size )
     {
@@ -1218,7 +1218,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::dict_get( PyObject * _obj, PyObject * _name )
     {
-        return pybind::dict_get( _obj, _name);
+        return pybind::dict_get( _obj, _name );
     }
     //////////////////////////////////////////////////////////////////////////
     bool python_kernel::dict_exist( PyObject * _obj, PyObject * _name )

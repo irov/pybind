@@ -19,7 +19,7 @@ namespace pybind
     class list;
     class tuple;
     class dict;
-
+    //////////////////////////////////////////////////////////////////////////
     namespace detail
     {
         template<class T>
@@ -101,7 +101,7 @@ namespace pybind
             }
         };
     }
-
+    //////////////////////////////////////////////////////////////////////////
     template<class T>
     bool extract_value( kernel_interface * _kernel, PyObject * _obj, T & _value, bool _nothrow )
     {
@@ -109,7 +109,7 @@ namespace pybind
 
         return result;
     }
-
+    //////////////////////////////////////////////////////////////////////////
     PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, bool & _value, bool _nothrow );
     PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, int8_t & _value, bool _nothrow );
     PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, int16_t & _value, bool _nothrow );
@@ -130,7 +130,7 @@ namespace pybind
     PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, pybind::list & _value, bool _nothrow );
     PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, pybind::tuple & _value, bool _nothrow );
     PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, pybind::dict & _value, bool _nothrow );
-
+    //////////////////////////////////////////////////////////////////////////
     template<class T>
     typename stdex::mpl::remove_cref<T>::type extract_throw( kernel_interface * _kernel, PyObject * _obj )
     {
@@ -150,9 +150,9 @@ namespace pybind
             );
         }
 
-        return std::forward<typename stdex::mpl::remove_cref<T>::type>( value );
+        return std::move( value );
     }
-
+    //////////////////////////////////////////////////////////////////////////
     template<typename T>
     struct extract_specialized
     {
@@ -174,10 +174,10 @@ namespace pybind
                 );
             }
 
-            return std::forward<typename stdex::mpl::remove_cref<T>::type>( value );
+            return std::move( value );
         }
     };
-
+    //////////////////////////////////////////////////////////////////////////
     template<typename T>
     struct extract_specialized<T *>
     {
@@ -201,7 +201,7 @@ namespace pybind
             return value;
         }
     };
-
+    //////////////////////////////////////////////////////////////////////////
     template<typename T, typename D>
     struct extract_specialized<stdex::intrusive_ptr<T, D> >
     {
@@ -225,13 +225,13 @@ namespace pybind
             return value;
         }
     };
-
+    //////////////////////////////////////////////////////////////////////////
     template<class T>
     typename stdex::mpl::remove_cref<T>::type extract( kernel_interface * _kernel, PyObject * _obj )
     {
         return extract_specialized<T>()(_kernel, _obj);
     }
-
+    //////////////////////////////////////////////////////////////////////////
     template<class T>
     PyObject * ptr_throw_i( kernel_interface * _kernel, const T & _value )
     {
@@ -268,7 +268,7 @@ namespace pybind
 
         return result;
     }
-
+    //////////////////////////////////////////////////////////////////////////
     PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, bool _value );
     PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, int8_t _value );
     PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, int16_t _value );
@@ -292,8 +292,8 @@ namespace pybind
     PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::tuple & _value );
     PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::list & _value );
     PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::dict & _value );
-
-    template<typename T, typename = void>
+    //////////////////////////////////////////////////////////////////////////
+    template<class T, class = void>
     struct ptr_throw_specialized2
     {
         PyObject * operator () ( kernel_interface * _kernel, const T & _t ) const
@@ -301,26 +301,26 @@ namespace pybind
             return ptr_throw_i( _kernel, _t );
         }
     };
-
-    template<typename T>
-    struct ptr_throw_specialized2 < T, typename stdex::mpl::enable_if<std::is_enum<T>::value>::type >
+    //////////////////////////////////////////////////////////////////////////
+    template<class T>
+    struct ptr_throw_specialized2<T, std::enable_if_t<std::is_enum<T>::value>>
     {
         PyObject * operator () ( kernel_interface * _kernel, uint32_t _t ) const
         {
             return ptr_throw_i( _kernel, _t );
         }
     };
-
-    template<typename T>
-    struct ptr_throw_specialized2 < T, typename stdex::mpl::enable_if<stdex::mpl::is_base_of<pybind::bindable, typename stdex::mpl::remove_ptr<T>::type>::value>::type >
+    //////////////////////////////////////////////////////////////////////////
+    template<class T>
+    struct ptr_throw_specialized2<T, std::enable_if_t<std::is_base_of<pybind::bindable, std::remove_pointer_t<T>>::value>>
     {
         PyObject * operator () ( kernel_interface * _kernel, pybind::bindable * _t ) const
         {
             return ptr_throw_i( _kernel, _t );
         }
     };
-
-    template<typename T, typename = void>
+    //////////////////////////////////////////////////////////////////////////
+    template<class T, class = void>
     struct ptr_throw_specialized
     {
         PyObject * operator () ( kernel_interface * _kernel, const T & _t ) const
@@ -328,9 +328,9 @@ namespace pybind
             return ptr_throw_specialized2<T>()(_kernel, _t);
         }
     };
-
-    template<typename T, typename D>
-    struct ptr_throw_specialized < stdex::intrusive_ptr<T, D> >
+    //////////////////////////////////////////////////////////////////////////
+    template<class T, class D>
+    struct ptr_throw_specialized<stdex::intrusive_ptr<T, D>>
     {
         PyObject * operator () ( kernel_interface * _kernel, const stdex::intrusive_ptr<T, D> & _t ) const
         {
@@ -339,7 +339,7 @@ namespace pybind
             return ptr_throw_specialized2<T *>()(_kernel, t_ptr);
         }
     };
-
+    //////////////////////////////////////////////////////////////////////////
     template<class T>
     PyObject * ptr_throw( kernel_interface * _kernel, const T & _value )
     {
@@ -347,7 +347,7 @@ namespace pybind
 
         return py_ptr;
     }
-
+    //////////////////////////////////////////////////////////////////////////
     template<class T>
     PyObject * ptr( kernel_interface * _kernel, const T & _value )
     {

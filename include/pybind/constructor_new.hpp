@@ -78,7 +78,7 @@ namespace pybind
     {
     public:
         constructor_new()
-            : constructor_adapter_interface( P::base_arity )
+            : constructor_adapter_interface( P::args_arity )
         {
         }
 
@@ -93,7 +93,7 @@ namespace pybind
                 return nullptr;
             }
 
-            void * impl = call_constructor_new_impl<C, P, P::base_arity>::call( _kernel, _args );
+            void * impl = call_constructor_new_impl<C, P, P::args_arity>::call( _kernel, _args );
 
             return impl;
         }

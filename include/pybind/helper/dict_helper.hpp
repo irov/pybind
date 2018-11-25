@@ -13,6 +13,7 @@ namespace pybind
         public:
             set_dict_operator_t( kernel_interface * _kernel, PyObject * _dict, PyObject * _key );
             set_dict_operator_t( const set_dict_operator_t & _r );
+            set_dict_operator_t( set_dict_operator_t && _r );
             ~set_dict_operator_t();
 
         public:

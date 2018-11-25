@@ -24,7 +24,7 @@
 
 namespace pybind
 {
-    typedef bases<void, void, void, void, void, void, void, void, void, void, void, void, void, void, void> no_bases;
+    typedef bases<> no_bases;
 
     template<class C, class B = no_bases>
     class base_
@@ -707,26 +707,40 @@ namespace pybind
             registration_type_cast<C>(m_kernel, _type);
         }
 
+        template<class T>
+        void add_base( const class_type_scope_interface_ptr & _scope )
+        {
+            _scope->add_base_t<T>( &base_::meta_cast<T> );
+        }
+
+        template<class Bases, size_t ... I>
+        void add_bases( const class_type_scope_interface_ptr & _scope, std::integer_sequence<uint32_t, I...> )
+        {
+            (_scope->add_base_t<typename std::tuple_element<I, Bases>::type>( &base_::meta_cast<typename std::tuple_element<I, Bases>::type> ), ...);
+        }
+
         void setup_bases( const class_type_scope_interface_ptr & _scope )
         {
-            int arity = B::base_arity;
+            typedef typename bases_type::bases_tuple bases_tuple;
 
-            if( arity-- > 0 )_scope->add_base_t<typename B::base0>( &meta_cast<typename B::base0> );
-            if( arity-- > 0 )_scope->add_base_t<typename B::base1>( &meta_cast<typename B::base1> );
-            if( arity-- > 0 )_scope->add_base_t<typename B::base2>( &meta_cast<typename B::base2> );
-            if( arity-- > 0 )_scope->add_base_t<typename B::base3>( &meta_cast<typename B::base3> );
-            if( arity-- > 0 )_scope->add_base_t<typename B::base4>( &meta_cast<typename B::base4> );
-            if( arity-- > 0 )_scope->add_base_t<typename B::base5>( &meta_cast<typename B::base5> );
-            if( arity-- > 0 )_scope->add_base_t<typename B::base6>( &meta_cast<typename B::base6> );
-            if( arity-- > 0 )_scope->add_base_t<typename B::base7>( &meta_cast<typename B::base7> );
-            if( arity-- > 0 )_scope->add_base_t<typename B::base8>( &meta_cast<typename B::base8> );
-            if( arity-- > 0 )_scope->add_base_t<typename B::base9>( &meta_cast<typename B::base9> );
-            if( arity-- > 0 )_scope->add_base_t<typename B::base10>( &meta_cast<typename B::base10> );
-            if( arity-- > 0 )_scope->add_base_t<typename B::base11>( &meta_cast<typename B::base11> );
-            if( arity-- > 0 )_scope->add_base_t<typename B::base12>( &meta_cast<typename B::base12> );
-            if( arity-- > 0 )_scope->add_base_t<typename B::base13>( &meta_cast<typename B::base13> );
-            if( arity-- > 0 )_scope->add_base_t<typename B::base14>( &meta_cast<typename B::base14> );
-            if( arity-- > 0 )_scope->add_base_t<typename B::base15>( &meta_cast<typename B::base15> );
+            this->add_bases<bases_tuple>( _scope, std::make_integer_sequence<uint32_t, std::tuple_size<bases_tuple>::value>() );
+            //this->add_bases<std::get<typename bases_type::bases_tuple>() ...>( _scope );
+            //if( arity-- > 0 )_scope->add_base_t<typename B::base0>( &meta_cast<typename B::base0> );
+            //if( arity-- > 0 )_scope->add_base_t<typename B::base1>( &meta_cast<typename B::base1> );
+            //if( arity-- > 0 )_scope->add_base_t<typename B::base2>( &meta_cast<typename B::base2> );
+            //if( arity-- > 0 )_scope->add_base_t<typename B::base3>( &meta_cast<typename B::base3> );
+            //if( arity-- > 0 )_scope->add_base_t<typename B::base4>( &meta_cast<typename B::base4> );
+            //if( arity-- > 0 )_scope->add_base_t<typename B::base5>( &meta_cast<typename B::base5> );
+            //if( arity-- > 0 )_scope->add_base_t<typename B::base6>( &meta_cast<typename B::base6> );
+            //if( arity-- > 0 )_scope->add_base_t<typename B::base7>( &meta_cast<typename B::base7> );
+            //if( arity-- > 0 )_scope->add_base_t<typename B::base8>( &meta_cast<typename B::base8> );
+            //if( arity-- > 0 )_scope->add_base_t<typename B::base9>( &meta_cast<typename B::base9> );
+            //if( arity-- > 0 )_scope->add_base_t<typename B::base10>( &meta_cast<typename B::base10> );
+            //if( arity-- > 0 )_scope->add_base_t<typename B::base11>( &meta_cast<typename B::base11> );
+            //if( arity-- > 0 )_scope->add_base_t<typename B::base12>( &meta_cast<typename B::base12> );
+            //if( arity-- > 0 )_scope->add_base_t<typename B::base13>( &meta_cast<typename B::base13> );
+            //if( arity-- > 0 )_scope->add_base_t<typename B::base14>( &meta_cast<typename B::base14> );
+            //if( arity-- > 0 )_scope->add_base_t<typename B::base15>( &meta_cast<typename B::base15> );
         }
 
     protected:

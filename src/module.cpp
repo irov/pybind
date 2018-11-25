@@ -11,11 +11,11 @@ namespace pybind
         : object( _module.kernel(), _module.ptr() )
     {
     }
-	//////////////////////////////////////////////////////////////////////////
-	module::module( module && _module )
-		: object( std::move( _module ) )
-	{
-	}
+    //////////////////////////////////////////////////////////////////////////
+    module::module( module && _module )
+        : object( std::move( _module ) )
+    {
+    }
     //////////////////////////////////////////////////////////////////////////
     module::module( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed_t _br )
         : object( _kernel, _obj, _br )

@@ -205,17 +205,17 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         PyMemberDef descr_members[] =
         {
-            { const_cast<char*>("__objclass__"), T_OBJECT, offsetof( py_method_generator_type, classtype ), READONLY },
+            {const_cast<char*>("__objclass__"), T_OBJECT, offsetof( py_method_generator_type, classtype ), READONLY},
             //{const_cast<char*>("__name__"), T_OBJECT, offsetof(py_method_generator_type, methodname), READONLY},
-        { 0 }
+        {0}
         };
 #	else
         //////////////////////////////////////////////////////////////////////////
         PyMemberDef descr_members[] =
         {
-            { "__objclass__", T_OBJECT, offsetof( py_method_generator_type, classtype ), READONLY, "__objclass__" },
+            {"__objclass__", T_OBJECT, offsetof( py_method_generator_type, classtype ), READONLY, "__objclass__"},
             //{"__name__", T_OBJECT, offsetof(py_method_generator_type, methodname), READONLY, "__name__"},
-        { 0 }
+        {0}
         };
 #	endif
 

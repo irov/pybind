@@ -95,7 +95,7 @@ namespace pybind
             check_error();
         }
 #   endif
-        
+
         if( Py_IsInitialized() == 0 )
         {
             if( _debug == false )
@@ -1588,7 +1588,7 @@ namespace pybind
         }
 
         return value;
-    }    
+    }
     //////////////////////////////////////////////////////////////////////////
     void unwrap( PyObject * _value )
     {

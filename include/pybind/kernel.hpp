@@ -324,7 +324,7 @@ namespace pybind
         virtual PyObject * ptr_unicode( const wchar_t * _value ) = 0;
 
         virtual PyObject * ask_native( PyObject * _obj, PyObject * _args ) = 0;
-        
+
         virtual bool bool_check( PyObject * _obj ) = 0;
         virtual bool is_true( PyObject * _obj ) = 0;
         virtual PyObject * ret_bool( bool _value ) = 0;

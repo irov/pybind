@@ -12,7 +12,7 @@ namespace pybind
     public:
         module();
         module( const module & _module );
-		module( module && _module );
+        module( module && _module );
 
     public:
         module( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed_t );

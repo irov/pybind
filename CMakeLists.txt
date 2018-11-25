@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-if (POLICY CMP0025)
+if(POLICY CMP0025)
   cmake_policy(SET CMP0025 NEW)
 endif ()
 
@@ -12,13 +12,35 @@ OPTION(PYBIND_STL_NOT_SUPPORT "PYBIND_STL_NOT_SUPPORT" OFF)
 OPTION(PYBIND_STDEX_INCLUDE_PATH  "PYBIND_STDEX_INCLUDE_PATH" OFF)
 OPTION(PYBIND_PYTHON_VERSION "PYBIND_PYTHON_VERSION" 278)
 OPTION(PYBIND_PYTHON_ERROR_FORMAT_FLAG "PYBIND_PYTHON_ERROR_FORMAT" OFF)
+OPTION(PYBIND_SANDBOX "PYBIND_SANDBOX" ON)
+OPTION(PYBIND_INSTALL "PYBIND_INSTALL" ON)
 
 PROJECT(${PYBIND_PROJECT_NAME})
 
-IF( NOT PYBIND_EXTERNAL_BUILD )
-    set( CMAKE_CXX_STANDARD 17 )
+IF(NOT PYBIND_EXTERNAL_BUILD)
+    set(CMAKE_CXX_STANDARD 17)
 
     add_definitions(-D_CRT_SECURE_NO_DEPRECATE -D_SCL_SECURE_NO_WARNINGS)
+    
+    if(WIN32)
+        if(MINGW)
+            set(CMAKE_STATIC_LIBRARY_PREFIX lib)
+            set(CMAKE_STATIC_LIBRARY_SUFFIX .a)
+        else()
+            set(CMAKE_STATIC_LIBRARY_PREFIX)
+            set(CMAKE_STATIC_LIBRARY_SUFFIX .lib)
+        endif()
+    endif()
+
+    if(UNIX AND NOT APPLE)
+        set(CMAKE_STATIC_LIBRARY_PREFIX lib)
+        set(CMAKE_STATIC_LIBRARY_SUFFIX .a)
+    endif()
+
+    if(APPLE)
+        set(CMAKE_STATIC_LIBRARY_PREFIX lib)
+        set(CMAKE_STATIC_LIBRARY_SUFFIX .a)
+    endif()    
     
     if(${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror")
@@ -35,65 +57,29 @@ IF( NOT PYBIND_EXTERNAL_BUILD )
     endif()
 ENDIF()
 
-IF( NOT PYBIND_EXTERNAL_BUILD )
+IF(NOT PYBIND_EXTERNAL_BUILD)
     set(DEPENDENCIES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dependencies")
-
-    IF(NOT EXISTS ${DEPENDENCIES_DIR}/Python)
-        message("Downloading python, this may take some time!")
-        file(DOWNLOAD https://www.python.org/ftp/python/2.7.14/Python-2.7.14.tgz ${DEPENDENCIES_DIR}/Python-2.7.14.tgz SHOW_PROGRESS)
-        
-        execute_process(
-            COMMAND ${CMAKE_COMMAND} -E tar x ${DEPENDENCIES_DIR}/Python-2.7.14.tgz
-            WORKING_DIRECTORY "${DEPENDENCIES_DIR}"
-        )
-        
-        execute_process(
-            COMMAND ${CMAKE_COMMAND} -E rename
-            ${DEPENDENCIES_DIR}/Python-2.7.14 ${DEPENDENCIES_DIR}/Python
-        )
-        
-        message("Downloading pyconfig.h, this may take some time!")
-        file(DOWNLOAD https://raw.githubusercontent.com/irov/Mengine/master/CMake/Dependencies/Python/ModifiedMac/pyconfig.h ${DEPENDENCIES_DIR}/PythonConfig/pyconfig.h SHOW_PROGRESS)
-    ENDIF()
+   
+    include(cmake/python_download.cmake)
     
-    SET(PYBIND_PYTHON_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/Python CACHE STRING "PYBIND_PYTHON_INCLUDE_PATH" FORCE)
+    set(PYBIND_PYTHON_INCLUDE_PATH ${PYTHON_INCLUDE_DIR} CACHE STRING "PYBIND_PYTHON_INCLUDE_PATH" FORCE)
+    message(${PYBIND_PYTHON_INCLUDE_PATH})
     
     IF(WIN32)
-        SET(PYBIND_PYTHON_CONFIG_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/Python/PC CACHE STRING "PYBIND_PYTHON_CONFIG_INCLUDE_PATH" FORCE)
-    ELSE()
-        SET(PYBIND_PYTHON_CONFIG_INCLUDE_PATH ${DEPENDENCIES_DIR}/PythonConfig CACHE STRING "PYBIND_PYTHON_CONFIG_INCLUDE_PATH" FORCE)
+        set(PYBIND_PYTHON_CONFIG_INCLUDE_PATH ${PYTHON_INCLUDE_DIR}/PC CACHE STRING "PYBIND_PYTHON_CONFIG_INCLUDE_PATH" FORCE)
     ENDIF()
     
     IF(WIN32)
         add_definitions(-D_CRT_SECURE_NO_WARNINGS)
     ENDIF()
     
-    include(ExternalProject)
-    
-    ExternalProject_Add(stdex_download PREFIX stdex
-        GIT_REPOSITORY https://github.com/irov/stdex.git
-        
-        UPDATE_COMMAND ""
-        INSTALL_COMMAND ""
-  
-        CMAKE_ARGS
-            "-DSTDEX_EXTERNAL_BUILD=ON"
-            "-DCMAKE_CXX_STANDARD=14"
-    )
-    
-    ExternalProject_Get_Property(stdex_download SOURCE_DIR)
-    set(STDEX_INCLUDE_DIR ${SOURCE_DIR}/include)
-    set(STDEX_LIBRARY_DIR ${SOURCE_DIR}/lib)
-    
-    set(STDEX_INCLUDE_DIR ${STDEX_INCLUDE_DIR} CACHE STRING "")
-    set(STDEX_LIBRARY_DIR ${STDEX_LIBRARY_DIR} CACHE STRING "")
-    
-    SET(PYBIND_STDEX_INCLUDE_PATH ${STDEX_INCLUDE_DIR} CACHE STRING "PYBIND_STDEX_INCLUDE_PATH" FORCE)
+    include(cmake/stdex_download.cmake)
+    set(PYBIND_STDEX_INCLUDE_PATH ${STDEX_INCLUDE_DIR} CACHE STRING "PYBIND_STDEX_INCLUDE_PATH" FORCE)
 ENDIF()
 
-SET( CONFIG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/config )
-SET( PUBLIC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/pybind )
-SET( PRIVATE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src )
+set(CONFIG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/config)
+set(PUBLIC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/pybind)
+set(PRIVATE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 file(GLOB files_config_headers ${CONFIG_DIR}/*.hpp)
 file(GLOB files_public_adapter_headers ${PUBLIC_DIR}/adapter/*.hpp)
@@ -112,8 +98,8 @@ SOURCE_GROUP( adapter FILES ${files_public_adapter_headers} )
 SOURCE_GROUP( helper FILES ${files_public_helper_headers} )
 SOURCE_GROUP( call FILES ${files_public_call_headers} )
 SOURCE_GROUP( generator FILES ${files_public_generator_headers} )
-SOURCE_GROUP( python FILES ${files_private_python_headers} )
-SOURCE_GROUP( stl FILES ${files_private_stl_headers} )
+SOURCE_GROUP( python FILES ${files_private_python_headers} ${files_private_python_sources} )
+SOURCE_GROUP( stl FILES ${files_private_stl_headers} ${files_private_stl_sources} )
 
 INCLUDE_DIRECTORIES( ${PROJECT_NAME} include )
 
@@ -158,8 +144,45 @@ ADD_LIBRARY( ${PROJECT_NAME} STATIC
     ${files_private_python_sources}
     ${files_private_stl_sources}
 	)
-
+    
 IF( NOT PYBIND_EXTERNAL_BUILD )
-    TARGET_LINK_LIBRARIES( ${PROJECT_NAME} stdex )
     add_dependencies(${PROJECT_NAME} stdex_download)
+    add_dependencies(${PROJECT_NAME} python_download)
 ENDIF()
+    
+if(PYBIND_SANDBOX)
+    file(GLOB files_private_sandbox_sources ${CMAKE_CURRENT_SOURCE_DIR}/sandbox/*.cpp)
+
+    SOURCE_GROUP( sandbox FILES ${files_private_sandbox_sources} )    
+
+    if(PYBIND_PYTHON_INCLUDE_PATH)
+        include_directories(${PYBIND_PYTHON_INCLUDE_PATH})
+    endif()
+
+    if(PYBIND_STDEX_INCLUDE_PATH)
+        include_directories(${PYBIND_STDEX_INCLUDE_PATH})
+    endif()
+
+    ADD_EXECUTABLE( sandbox 
+        ${files_private_sandbox_sources}
+        )
+        
+    TARGET_LINK_LIBRARIES(sandbox ${PROJECT_NAME})
+    add_dependencies(sandbox ${PROJECT_NAME})
+
+    TARGET_LINK_LIBRARIES(sandbox python)
+    add_dependencies(sandbox python_download)
+
+    TARGET_LINK_LIBRARIES(sandbox stdex)
+    add_dependencies(sandbox stdex_download)
+endif()
+
+if(PYBIND_INSTALL)
+    install(DIRECTORY include
+        DESTINATION .
+        FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h")
+
+    install(TARGETS ${PROJECT_NAME}
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)
+endif()

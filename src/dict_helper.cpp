@@ -11,6 +11,10 @@ namespace pybind
             , m_dict( _dict )
             , m_key( _key )
         {
+            if( m_kernel != nullptr )
+            {
+                m_kernel->incref( m_key );
+            }
         }
         //////////////////////////////////////////////////////////////////////////
         set_dict_operator_t::set_dict_operator_t( const set_dict_operator_t & _r )
@@ -18,15 +22,33 @@ namespace pybind
             , m_dict( _r.m_dict )
             , m_key( _r.m_key )
         {
+            if( m_kernel != nullptr )
+            {
+                m_kernel->incref( m_key );
+            }
+        }
+        //////////////////////////////////////////////////////////////////////////
+        set_dict_operator_t::set_dict_operator_t( set_dict_operator_t && _r )
+            : m_kernel( _r.m_kernel )
+            , m_dict( _r.m_dict )
+            , m_key( _r.m_key )
+        {
+            _r.m_kernel = nullptr;
+            _r.m_dict = nullptr;
+            _r.m_key = nullptr;
         }
         //////////////////////////////////////////////////////////////////////////
         set_dict_operator_t::~set_dict_operator_t()
         {
+            if( m_kernel != nullptr )
+            {
+                m_kernel->decref( m_key );
+            }
         }
         //////////////////////////////////////////////////////////////////////////
         set_dict_operator_t & set_dict_operator_t::operator = ( const import_operator_t & _value )
         {
-            pybind::dict_setobject_i( m_kernel, m_dict, import_operator_t( m_kernel, m_key ), _value );
+            pybind::dict_setobject_i( m_kernel, m_dict, m_key, _value );
 
             return *this;
         }

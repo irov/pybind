@@ -19,7 +19,7 @@ namespace pybind
         object( object && _obj );
         object( const detail::extract_operator_t & _extract );
 
-    public:        
+    public:
         object( kernel_interface * _kernel, PyObject * _obj );
         object( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed_t );
 
@@ -302,25 +302,25 @@ namespace pybind
     {
         return make_object_i( _kernel, detail::import_operator_t( _kernel, _t0 ) );
     }
-	//////////////////////////////////////////////////////////////////////////
-	template<class T>
-	pybind::object ptr_obj(kernel_interface * _kernel, const T & _value)
-	{
-		try
-		{
-			PyObject * value = ptr_throw(_kernel, _value);
+    //////////////////////////////////////////////////////////////////////////
+    template<class T>
+    pybind::object ptr_obj( kernel_interface * _kernel, const T & _value )
+    {
+        try
+        {
+            PyObject * value = ptr_throw( _kernel, _value );
 
-			return pybind::object(_kernel, value);
-		}
-		catch (const pybind::pybind_exception & _ex)
-		{
-			_kernel->error_message("ptr value: %s"
-				, _ex.what()
-			);
-		}
+            return pybind::object( _kernel, value, pybind::borrowed_t() );
+        }
+        catch( const pybind::pybind_exception & _ex )
+        {
+            _kernel->error_message( "ptr value: %s"
+                , _ex.what()
+            );
+        }
 
-		return pybind::object();
-	}
+        return pybind::object();
+    }
     //////////////////////////////////////////////////////////////////////////
     PYBIND_API pybind::object make_invalid_object_t();
     //////////////////////////////////////////////////////////////////////////
