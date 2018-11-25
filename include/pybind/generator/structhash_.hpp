@@ -23,13 +23,13 @@ namespace pybind
         }
 
     public:
-        template<class C0, class C1, class C2, class C3, class C4, class C5>
-        structhash_ & def_constructor( const init<C0, C1, C2, C3, C4, C5> & _init )
+        template<class ... Args>
+        structhash_ & def_constructor( const init<Args...> & _init )
         {
             (void)_init;
 
             constructor_adapter_interface_ptr ctr =
-                new constructor_placement<C, init<C0, C1, C2, C3, C4, C5> >();
+                new constructor_placement<C, init<Args...> >();
 
             const class_type_scope_interface_ptr & scope = base_<C, B>::get_scope();
 

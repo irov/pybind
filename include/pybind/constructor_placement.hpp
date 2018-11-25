@@ -77,7 +77,7 @@ namespace pybind
     {
     public:
         constructor_placement()
-            : constructor_adapter_interface( P::base_arity )
+            : constructor_adapter_interface( P::args_arity )
         {
         }
 
@@ -96,7 +96,7 @@ namespace pybind
                 return nullptr;
             }
 
-            C * obj = call_constructor_placement_impl<C, P, P::base_arity>::call( _kernel, self, _args );
+            C * obj = call_constructor_placement_impl<C, P, P::args_arity>::call( _kernel, self, _args );
 
             return obj;
         }
