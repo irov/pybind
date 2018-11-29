@@ -8,6 +8,7 @@
 
 namespace pybind
 {
+    //////////////////////////////////////////////////////////////////////////
     template<class F>
     void def_function( kernel_interface * _kernel, const char * _name, F _function, PyObject * _module = 0 )
     {
@@ -18,7 +19,7 @@ namespace pybind
 
         _kernel->def_function_adapter( adapter, false, _module );
     }
-
+    //////////////////////////////////////////////////////////////////////////
     template<class F>
     void def_function_args( kernel_interface * _kernel, const char * _name, F _function, PyObject * _module = 0 )
     {
@@ -29,7 +30,7 @@ namespace pybind
 
         _kernel->def_function_adapter( adapter, false, _module );
     }
-
+    //////////////////////////////////////////////////////////////////////////
     template<class F>
     void def_function_deprecate( kernel_interface * _kernel, const char * _name, F _function, const char * _doc, PyObject * _module = 0 )
     {
@@ -40,7 +41,7 @@ namespace pybind
 
         _kernel->def_function_adapter( adapter, false, _module );
     }
-
+    //////////////////////////////////////////////////////////////////////////
     template<class F>
     void def_function_kernel( kernel_interface * _kernel, const char * _name, F _function, PyObject * _module = 0 )
     {
@@ -51,7 +52,7 @@ namespace pybind
 
         _kernel->def_function_adapter( adapter, false, _module );
     }
-
+    //////////////////////////////////////////////////////////////////////////
     template<class F, class P>
     void def_function_proxy( kernel_interface * _kernel, const char * _name, F _function, P * _proxy, PyObject * _module = 0 )
     {
@@ -62,7 +63,7 @@ namespace pybind
 
         _kernel->def_function_adapter( adapter, false, _module );
     }
-
+    //////////////////////////////////////////////////////////////////////////
     template<class F, class P>
     void def_function_proxy_args( kernel_interface * _kernel, const char * _name, F _function, P * _proxy, PyObject * _module = 0 )
     {
@@ -73,7 +74,7 @@ namespace pybind
 
         _kernel->def_function_adapter( adapter, false, _module );
     }
-
+    //////////////////////////////////////////////////////////////////////////
     template<class F>
     PyObject * create_function( kernel_interface * _kernel, const char * _name, F _function )
     {
@@ -86,7 +87,7 @@ namespace pybind
 
         return py_function;
     }
-
+    //////////////////////////////////////////////////////////////////////////
     template<class F>
     void def_function_native( kernel_interface * _kernel, const char * _name, F _function, PyObject * _module = 0 )
     {
@@ -97,7 +98,7 @@ namespace pybind
 
         _kernel->def_function_adapter( adapter, true, _module );
     }
-
+    //////////////////////////////////////////////////////////////////////////
     template<class F>
     PyObject * create_function_native( kernel_interface * _kernel, const char * _name, F _function )
     {

@@ -87,7 +87,7 @@ namespace pybind
         return detail::extract_operator_t( m_kernel, m_obj );
     }
     //////////////////////////////////////////////////////////////////////////
-    detail::extract_operator_t object::call() const
+    detail::extract_operator_t object::call_i() const
     {
         return pybind::call_t( m_kernel, m_obj );
     }
@@ -132,7 +132,7 @@ namespace pybind
         return pybind::call_i( m_kernel, m_obj, _t0, _t1, _t2, _t3, _t4, _t5, _t6, _t7 );
     }
     //////////////////////////////////////////////////////////////////////////
-    detail::extract_operator_t object::call_args( const args & _args ) const
+    detail::extract_operator_t object::call_args_i( const args & _args ) const
     {
         return pybind::call_args_t( m_kernel, m_obj, _args );
     }
@@ -198,9 +198,9 @@ namespace pybind
         return pybind::object( _kernel, py_false, pybind::borrowed );
     }
     //////////////////////////////////////////////////////////////////////////
-    pybind::object make_object_i( kernel_interface * _kernel, const detail::import_operator_t & _t0 )
+    pybind::object make_object_i( kernel_interface * _kernel, const detail::import_operator_t & _t )
     {
-        return pybind::object( _kernel, _t0 );
+        return pybind::object( _kernel, _t );
     }
     //////////////////////////////////////////////////////////////////////////
     pybind::object make_invalid_object_t()

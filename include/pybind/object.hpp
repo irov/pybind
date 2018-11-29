@@ -55,100 +55,16 @@ namespace pybind
         detail::extract_operator_t extract() const;
 
     public:
-        template<class T0>
-        detail::extract_operator_t call( const T0 & _t0 ) const
+        template<class ... T>
+        detail::extract_operator_t call( const T & ... _t ) const
         {
             return this->call_i(
-                detail::import_operator_t( m_kernel, _t0 )
-            );
-        }
-
-        template<class T0, class T1>
-        detail::extract_operator_t call( const T0 & _t0, const T1 & _t1 ) const
-        {
-            return this->call_i(
-                detail::import_operator_t( m_kernel, _t0 ),
-                detail::import_operator_t( m_kernel, _t1 )
-            );
-        }
-
-        template<class T0, class T1, class T2>
-        detail::extract_operator_t call( const T0 & _t0, const T1 & _t1, const T2 & _t2 ) const
-        {
-            return this->call_i(
-                detail::import_operator_t( m_kernel, _t0 ),
-                detail::import_operator_t( m_kernel, _t1 ),
-                detail::import_operator_t( m_kernel, _t2 )
-            );
-        }
-
-        template<class T0, class T1, class T2, class T3>
-        detail::extract_operator_t call( const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3 ) const
-        {
-            return this->call_i(
-                detail::import_operator_t( m_kernel, _t0 ),
-                detail::import_operator_t( m_kernel, _t1 ),
-                detail::import_operator_t( m_kernel, _t2 ),
-                detail::import_operator_t( m_kernel, _t3 )
-            );
-        }
-
-        template<class T0, class T1, class T2, class T3, class T4>
-        detail::extract_operator_t call( const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4 ) const
-        {
-            return this->call_i(
-                detail::import_operator_t( m_kernel, _t0 ),
-                detail::import_operator_t( m_kernel, _t1 ),
-                detail::import_operator_t( m_kernel, _t2 ),
-                detail::import_operator_t( m_kernel, _t3 ),
-                detail::import_operator_t( m_kernel, _t4 )
-            );
-        }
-
-        template<class T0, class T1, class T2, class T3, class T4, class T5>
-        detail::extract_operator_t call( const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4, const T5 & _t5 ) const
-        {
-            return this->call_i(
-                detail::import_operator_t( m_kernel, _t0 ),
-                detail::import_operator_t( m_kernel, _t1 ),
-                detail::import_operator_t( m_kernel, _t2 ),
-                detail::import_operator_t( m_kernel, _t3 ),
-                detail::import_operator_t( m_kernel, _t4 ),
-                detail::import_operator_t( m_kernel, _t5 )
-            );
-        }
-
-        template<class T0, class T1, class T2, class T3, class T4, class T5, class T6>
-        detail::extract_operator_t call( const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4, const T5 & _t5, const T6 & _t6 ) const
-        {
-            return this->call_i(
-                detail::import_operator_t( m_kernel, _t0 ),
-                detail::import_operator_t( m_kernel, _t1 ),
-                detail::import_operator_t( m_kernel, _t2 ),
-                detail::import_operator_t( m_kernel, _t3 ),
-                detail::import_operator_t( m_kernel, _t4 ),
-                detail::import_operator_t( m_kernel, _t5 ),
-                detail::import_operator_t( m_kernel, _t6 )
-            );
-        }
-
-        template<class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7>
-        detail::extract_operator_t call( const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4, const T5 & _t5, const T6 & _t6, const T7 & _t7 ) const
-        {
-            return this->call_i(
-                detail::import_operator_t( m_kernel, _t0 ),
-                detail::import_operator_t( m_kernel, _t1 ),
-                detail::import_operator_t( m_kernel, _t2 ),
-                detail::import_operator_t( m_kernel, _t3 ),
-                detail::import_operator_t( m_kernel, _t4 ),
-                detail::import_operator_t( m_kernel, _t5 ),
-                detail::import_operator_t( m_kernel, _t6 ),
-                detail::import_operator_t( m_kernel, _t7 )
+                detail::import_operator_t( m_kernel, _t ) ...
             );
         }
 
     public:
-        detail::extract_operator_t call() const;
+        detail::extract_operator_t call_i() const;
         detail::extract_operator_t call_i( const detail::import_operator_t & _t0 ) const;
         detail::extract_operator_t call_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1 ) const;
         detail::extract_operator_t call_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2 ) const;
@@ -159,6 +75,13 @@ namespace pybind
         detail::extract_operator_t call_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::import_operator_t & _t7 ) const;
 
     public:
+        inline detail::extract_operator_t call_args( const args & _args ) const
+        {
+            return this->call_args_i(
+                _args
+            );
+        }
+
         template<class T0>
         detail::extract_operator_t call_args( const T0 & _t0, const args & _args ) const
         {
@@ -267,7 +190,7 @@ namespace pybind
         }
 
     public:
-        detail::extract_operator_t call_args( const args & _args ) const;
+        detail::extract_operator_t call_args_i( const args & _args ) const;
         detail::extract_operator_t call_args_i( const detail::import_operator_t & _t0, const args & _args ) const;
         detail::extract_operator_t call_args_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const args & _args ) const;
         detail::extract_operator_t call_args_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const args & _args ) const;
@@ -301,25 +224,6 @@ namespace pybind
     pybind::object make_object_t( kernel_interface * _kernel, const T & _t0 )
     {
         return make_object_i( _kernel, detail::import_operator_t( _kernel, _t0 ) );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    template<class T>
-    pybind::object ptr_obj( kernel_interface * _kernel, const T & _value )
-    {
-        try
-        {
-            PyObject * value = ptr_throw( _kernel, _value );
-
-            return pybind::object( _kernel, value, pybind::borrowed_t() );
-        }
-        catch( const pybind::pybind_exception & _ex )
-        {
-            _kernel->error_message( "ptr value: %s"
-                , _ex.what()
-            );
-        }
-
-        return pybind::object();
     }
     //////////////////////////////////////////////////////////////////////////
     PYBIND_API pybind::object make_invalid_object_t();

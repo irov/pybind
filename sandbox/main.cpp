@@ -85,7 +85,7 @@ void test_dict( pybind::kernel_interface * _kernel, uint32_t i )
     pybind::dict p( _kernel );
     p["aaa"] = 10040 + i;
 
-    pybind::object g = pybind::ptr_obj( _kernel, 23200 + i );
+    pybind::object g = pybind::make_object_t( _kernel, 23200 + i );
     p["aaa2"] = g;
 
     pybind::object o = p["aaa2"];
@@ -130,9 +130,11 @@ int test_function_1( pybind::kernel_interface * _kernel, PyObject * _obj, float 
     return (int)(pybind::extract<float>( _kernel, _obj ) + j);
 }
 
-PyObject * test_function_2( pybind::kernel_interface * _kernel, const pybind::object & _obj, float j )
+PyObject * test_function_2( pybind::kernel_interface * _kernel, const pybind::object & _obj, const pybind::args & _args, float j )
 {
     float j1 = _obj.extract();
+
+    _obj.call_args( 1, 2, 3, _args );
 
     return pybind::ptr( _kernel, (int)(j1 + j) );
 }

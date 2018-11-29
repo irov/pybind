@@ -449,7 +449,9 @@ namespace pybind
 
             scope->incref_smart_pointer( impl );
 
+#ifndef NDEBUG
             scope->addObject( py_self );
+#endif
 
             return py_self;
         }
@@ -475,7 +477,9 @@ namespace pybind
 
         try
         {
+#ifndef NDEBUG
             scope->removeObject( _obj );
+#endif
 
             void * impl = kernel->get_class_impl( _obj );
 
@@ -518,7 +522,9 @@ namespace pybind
 
             scope->incref_smart_pointer( impl );
 
+#ifndef NDEBUG
             scope->addObject( py_self );
+#endif
 
             return py_self;
         }
@@ -544,7 +550,9 @@ namespace pybind
 
         try
         {
+#ifndef NDEBUG
             scope->removeObject( _obj );
+#endif
 
             void * impl = kernel->get_class_impl( _obj );
 
@@ -1475,7 +1483,9 @@ namespace pybind
 
         pybind::detail::wrap_pod_ptr( py_self, _impl, false );
 
+#ifndef NDEBUG
         this->addObject( py_self );
+#endif
 
         return py_self;
     }
@@ -1493,7 +1503,9 @@ namespace pybind
 
         this->incref_smart_pointer( _impl );
 
+#ifndef NDEBUG
         this->addObject( py_self );
+#endif
 
         return py_self;
     }
@@ -1504,10 +1516,14 @@ namespace pybind
 
         pybind::detail::wrap_pod( py_self, _impl, m_pod_size, m_pod_hash );
 
+#ifndef NDEBUG
         this->addObject( py_self );
+#endif
 
         return py_self;
     }
+    //////////////////////////////////////////////////////////////////////////
+#ifndef NDEBUG
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::addObject( PyObject * _obj )
     {
@@ -1527,6 +1543,8 @@ namespace pybind
     {
         return m_objectCount;
     }
+    //////////////////////////////////////////////////////////////////////////
+#endif
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::destroy()
     {

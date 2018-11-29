@@ -12,7 +12,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<class method_type_scope> method_type_scope_ptr;
     typedef stdex::intrusive_ptr<class member_type_scope> member_type_scope_ptr;
-
     typedef stdex::intrusive_ptr<class new_adapter_interface> new_adapter_interface_ptr;
     typedef stdex::intrusive_ptr<class destroy_adapter_interface> destroy_adapter_interface_ptr;
     typedef stdex::intrusive_ptr<class repr_adapter_interface> repr_adapter_interface_ptr;
@@ -22,12 +21,10 @@ namespace pybind
     typedef stdex::intrusive_ptr<class hash_adapter_interface> hash_adapter_interface_ptr;
     typedef stdex::intrusive_ptr<class compare_adapter_interface> compare_adapter_interface_ptr;
     typedef stdex::intrusive_ptr<class constructor_adapter_interface> constructor_adapter_interface_ptr;
-
     typedef stdex::intrusive_ptr<class getattro_adapter_interface> getattro_adapter_interface_ptr;
     typedef stdex::intrusive_ptr<class mapping_adapter_interface> mapping_adapter_interface_ptr;
     typedef stdex::intrusive_ptr<class sequence_get_adapter_interface> sequence_get_adapter_interface_ptr;
     typedef stdex::intrusive_ptr<class sequence_set_adapter_interface> sequence_set_adapter_interface_ptr;
-
     typedef stdex::intrusive_ptr<class number_binary_adapter_interface> number_binary_adapter_interface_ptr;
     typedef stdex::intrusive_ptr<class smart_pointer_adapter_interface> smart_pointer_adapter_interface_ptr;
     typedef stdex::intrusive_ptr<class bindable_adapter_interface> bindable_adapter_interface_ptr;
@@ -154,11 +151,12 @@ namespace pybind
         virtual void call_destructor( PyObject * _obj, void * _impl ) = 0;
         virtual void clear_bindable( void * _impl ) = 0;
 
+#ifndef NDEBUG 
     public:
         virtual void addObject( PyObject * _obj ) = 0;
         virtual void removeObject( PyObject * _obj ) = 0;
-
         virtual uint32_t getObjectCount() const = 0;
+#endif
     };
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<class_type_scope_interface> class_type_scope_interface_ptr;

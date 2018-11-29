@@ -55,97 +55,13 @@ namespace pybind
     PYBIND_API pybind::tuple make_tuple_args_i( kernel_interface * _kernel, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const args & _args );
     PYBIND_API pybind::tuple make_tuple_args_i( kernel_interface * _kernel, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::import_operator_t & _t7, const args & _args );
     //////////////////////////////////////////////////////////////////////////	
-    template<class T0>
-    pybind::tuple make_tuple_t( kernel_interface * _kernel, const T0 & _t0 )
+    template<class ... T>
+    pybind::tuple make_tuple_t( kernel_interface * _kernel, const T & ... _t )
     {
         return make_tuple_i( _kernel
-            , detail::import_operator_t( _kernel, _t0 )
+            , detail::import_operator_t( _kernel, _t ) ...
         );
-    }
-    //////////////////////////////////////////////////////////////////////////	
-    template<class T0, class T1>
-    pybind::tuple make_tuple_t( kernel_interface * _kernel, const T0 & _t0, const T1 & _t1 )
-    {
-        return make_tuple_i( _kernel
-            , detail::import_operator_t( _kernel, _t0 )
-            , detail::import_operator_t( _kernel, _t1 )
-        );
-    }
-    //////////////////////////////////////////////////////////////////////////	
-    template<class T0, class T1, class T2>
-    pybind::tuple make_tuple_t( kernel_interface * _kernel, const T0 & _t0, const T1 & _t1, const T2 & _t2 )
-    {
-        return make_tuple_i( _kernel
-            , detail::import_operator_t( _kernel, _t0 )
-            , detail::import_operator_t( _kernel, _t1 )
-            , detail::import_operator_t( _kernel, _t2 )
-        );
-    }
-    //////////////////////////////////////////////////////////////////////////	
-    template<class T0, class T1, class T2, class T3>
-    pybind::tuple make_tuple_t( kernel_interface * _kernel, const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3 )
-    {
-        return make_tuple_i( _kernel
-            , detail::import_operator_t( _kernel, _t0 )
-            , detail::import_operator_t( _kernel, _t1 )
-            , detail::import_operator_t( _kernel, _t2 )
-            , detail::import_operator_t( _kernel, _t3 )
-        );
-    }
-    //////////////////////////////////////////////////////////////////////////	
-    template<class T0, class T1, class T2, class T3, class T4>
-    pybind::tuple make_tuple_t( kernel_interface * _kernel, const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4 )
-    {
-        return make_tuple_i( _kernel
-            , detail::import_operator_t( _kernel, _t0 )
-            , detail::import_operator_t( _kernel, _t1 )
-            , detail::import_operator_t( _kernel, _t2 )
-            , detail::import_operator_t( _kernel, _t3 )
-            , detail::import_operator_t( _kernel, _t4 )
-        );
-    }
-    //////////////////////////////////////////////////////////////////////////	
-    template<class T0, class T1, class T2, class T3, class T4, class T5>
-    pybind::tuple make_tuple_t( kernel_interface * _kernel, const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4, const T5 & _t5 )
-    {
-        return make_tuple_i( _kernel
-            , detail::import_operator_t( _kernel, _t0 )
-            , detail::import_operator_t( _kernel, _t1 )
-            , detail::import_operator_t( _kernel, _t2 )
-            , detail::import_operator_t( _kernel, _t3 )
-            , detail::import_operator_t( _kernel, _t4 )
-            , detail::import_operator_t( _kernel, _t5 )
-        );
-    }
-    //////////////////////////////////////////////////////////////////////////	
-    template<class T0, class T1, class T2, class T3, class T4, class T5, class T6>
-    pybind::tuple make_tuple_t( kernel_interface * _kernel, const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4, const T5 & _t5, const T6 & _t6 )
-    {
-        return make_tuple_i( _kernel
-            , detail::import_operator_t( _kernel, _t0 )
-            , detail::import_operator_t( _kernel, _t1 )
-            , detail::import_operator_t( _kernel, _t2 )
-            , detail::import_operator_t( _kernel, _t3 )
-            , detail::import_operator_t( _kernel, _t4 )
-            , detail::import_operator_t( _kernel, _t5 )
-            , detail::import_operator_t( _kernel, _t6 )
-        );
-    }
-    //////////////////////////////////////////////////////////////////////////	
-    template<class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7>
-    pybind::tuple make_tuple_t( kernel_interface * _kernel, const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4, const T5 & _t5, const T6 & _t6, const T7 & _t7 )
-    {
-        return make_tuple_i( _kernel
-            , detail::import_operator_t( _kernel, _t0 )
-            , detail::import_operator_t( _kernel, _t1 )
-            , detail::import_operator_t( _kernel, _t2 )
-            , detail::import_operator_t( _kernel, _t3 )
-            , detail::import_operator_t( _kernel, _t4 )
-            , detail::import_operator_t( _kernel, _t5 )
-            , detail::import_operator_t( _kernel, _t6 )
-            , detail::import_operator_t( _kernel, _t7 )
-        );
-    }
+    }    
     //////////////////////////////////////////////////////////////////////////
     template<class C>
     inline pybind::tuple make_tuple_container_t( kernel_interface * _kernel, const C & _c )

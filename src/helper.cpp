@@ -159,7 +159,7 @@ namespace pybind
         return pybind::ask_tuple_t( _kernel, _obj, args );
     }
     //////////////////////////////////////////////////////////////////////////
-    detail::extract_operator_t call_args_t( kernel_interface * _kernel, PyObject * _obj, const args & _args )
+    detail::extract_operator_t call_args_i( kernel_interface * _kernel, PyObject * _obj, const args & _args )
     {
         pybind::tuple args = pybind::make_tuple_args_t( _kernel, _args );
 

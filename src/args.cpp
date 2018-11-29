@@ -20,6 +20,14 @@ namespace pybind
         }
     }
     //////////////////////////////////////////////////////////////////////////
+    args::args( args && _r )
+        : m_kernel( _r.m_kernel )
+        , m_args( _r.m_args )
+    {
+        _r.m_kernel = nullptr;
+        _r.m_args = nullptr;
+    }
+    //////////////////////////////////////////////////////////////////////////
     args::args( kernel_interface * _kernel, PyObject * _args )
         : m_kernel( _kernel )
         , m_args( _args )

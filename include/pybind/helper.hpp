@@ -12,11 +12,10 @@ namespace pybind
     struct ptr_throw_specialized <detail::import_operator_t>;
     //////////////////////////////////////////////////////////////////////////
     PYBIND_API args make_args_t( kernel_interface * _kernel, PyObject * _tuple, uint32_t _size );
-
+    //////////////////////////////////////////////////////////////////////////
     PYBIND_API detail::extract_operator_t list_getitem_t( kernel_interface * _kernel, PyObject * _list, uint32_t _it );
     PYBIND_API bool list_setitem_i( kernel_interface * _kernel, PyObject * _list, uint32_t _it, const detail::import_operator_t & _item );
     PYBIND_API bool list_appenditem_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _item );
-
     //////////////////////////////////////////////////////////////////////////
     template<class T>
     bool list_setitem_t( kernel_interface * _kernel, PyObject * _list, uint32_t _it, const T & _item )
@@ -43,7 +42,7 @@ namespace pybind
 
         return true;
     }
-
+    //////////////////////////////////////////////////////////////////////////
     PYBIND_API detail::extract_operator_t tuple_getitem_t( kernel_interface * _kernel, PyObject * _tuple, uint32_t _it );
     PYBIND_API bool tuple_setitem_i( kernel_interface * _kernel, PyObject * _tuple, uint32_t _it, const detail::import_operator_t & _item );
     //////////////////////////////////////////////////////////////////////////	
@@ -52,7 +51,7 @@ namespace pybind
     {
         return tuple_setitem_i( _kernel, _tuple, _it, detail::import_operator_t( _kernel, _item ) );
     }
-
+    //////////////////////////////////////////////////////////////////////////
     PYBIND_API bool dict_setstring_i( kernel_interface * _kernel, PyObject * _dict, const char * _key, const detail::import_operator_t & _value );
     PYBIND_API bool dict_setobject_i( kernel_interface * _kernel, PyObject * _dict, PyObject * _key, const detail::import_operator_t & _value );
     PYBIND_API detail::extract_operator_t dict_get_i( kernel_interface * _kernel, PyObject * _dict, const detail::import_operator_t & _key );
@@ -112,99 +111,15 @@ namespace pybind
     PYBIND_API detail::extract_operator_t call_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6 );
     PYBIND_API detail::extract_operator_t call_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::import_operator_t & _t7 );
     //////////////////////////////////////////////////////////////////////////
-    template<class T0>
-    detail::extract_operator_t call_t( kernel_interface * _kernel, PyObject * _obj, const T0 & _t0 )
+    template<class ... T>
+    detail::extract_operator_t call_t( kernel_interface * _kernel, PyObject * _obj, const T & ... _t )
     {
         return call_i( _kernel, _obj
-            , detail::import_operator_t( _kernel, _t0 )
+            , detail::import_operator_t( _kernel, _t ) ...
         );
     }
     //////////////////////////////////////////////////////////////////////////
-    template<class T0, class T1>
-    detail::extract_operator_t call_t( kernel_interface * _kernel, PyObject * _obj, const T0 & _t0, const T1 & _t1 )
-    {
-        return call_i( _kernel, _obj
-            , detail::import_operator_t( _kernel, _t1 )
-            , detail::import_operator_t( _kernel, _t0 )
-        );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    template<class T0, class T1, class T2>
-    detail::extract_operator_t call_t( kernel_interface * _kernel, PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2 )
-    {
-        return call_i( _kernel, _obj
-            , detail::import_operator_t( _kernel, _t0 )
-            , detail::import_operator_t( _kernel, _t1 )
-            , detail::import_operator_t( _kernel, _t2 )
-        );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    template<class T0, class T1, class T2, class T3>
-    detail::extract_operator_t call_t( kernel_interface * _kernel, PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3 )
-    {
-        return call_i( _kernel, _obj
-            , detail::import_operator_t( _kernel, _t0 )
-            , detail::import_operator_t( _kernel, _t1 )
-            , detail::import_operator_t( _kernel, _t2 )
-            , detail::import_operator_t( _kernel, _t3 )
-        );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    template<class T0, class T1, class T2, class T3, class T4>
-    detail::extract_operator_t call_t( kernel_interface * _kernel, PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4 )
-    {
-        return call_i( _kernel, _obj
-            , detail::import_operator_t( _kernel, _t0 )
-            , detail::import_operator_t( _kernel, _t1 )
-            , detail::import_operator_t( _kernel, _t2 )
-            , detail::import_operator_t( _kernel, _t3 )
-            , detail::import_operator_t( _kernel, _t4 )
-        );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    template<class T0, class T1, class T2, class T3, class T4, class T5>
-    detail::extract_operator_t call_t( kernel_interface * _kernel, PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4, const T5 & _t5 )
-    {
-        return call_i( _kernel, _obj
-            , detail::import_operator_t( _kernel, _t0 )
-            , detail::import_operator_t( _kernel, _t1 )
-            , detail::import_operator_t( _kernel, _t2 )
-            , detail::import_operator_t( _kernel, _t3 )
-            , detail::import_operator_t( _kernel, _t4 )
-            , detail::import_operator_t( _kernel, _t5 )
-        );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    template<class T0, class T1, class T2, class T3, class T4, class T5, class T6>
-    detail::extract_operator_t call_t( kernel_interface * _kernel, PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4, const T5 & _t5, const T6 & _t6 )
-    {
-        return call_i( _kernel, _obj
-            , detail::import_operator_t( _kernel, _t0 )
-            , detail::import_operator_t( _kernel, _t1 )
-            , detail::import_operator_t( _kernel, _t2 )
-            , detail::import_operator_t( _kernel, _t3 )
-            , detail::import_operator_t( _kernel, _t4 )
-            , detail::import_operator_t( _kernel, _t5 )
-            , detail::import_operator_t( _kernel, _t6 )
-        );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    template<class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7>
-    detail::extract_operator_t call_t( kernel_interface * _kernel, PyObject * _obj, const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4, const T5 & _t5, const T6 & _t6, const T7 & _t7 )
-    {
-        return call_i( _kernel, _obj
-            , detail::import_operator_t( _kernel, _t0 )
-            , detail::import_operator_t( _kernel, _t1 )
-            , detail::import_operator_t( _kernel, _t2 )
-            , detail::import_operator_t( _kernel, _t3 )
-            , detail::import_operator_t( _kernel, _t4 )
-            , detail::import_operator_t( _kernel, _t5 )
-            , detail::import_operator_t( _kernel, _t6 )
-            , detail::import_operator_t( _kernel, _t7 )
-        );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    PYBIND_API detail::extract_operator_t call_args_t( kernel_interface * _kernel, PyObject * _obj, const args & _args );
+    PYBIND_API detail::extract_operator_t call_args_i( kernel_interface * _kernel, PyObject * _obj, const args & _args );
     PYBIND_API detail::extract_operator_t call_args_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _t0, const args & _args );
     PYBIND_API detail::extract_operator_t call_args_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const args & _args );
     PYBIND_API detail::extract_operator_t call_args_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const args & _args );
@@ -213,6 +128,13 @@ namespace pybind
     PYBIND_API detail::extract_operator_t call_args_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const args & _args );
     PYBIND_API detail::extract_operator_t call_args_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const args & _args );
     PYBIND_API detail::extract_operator_t call_args_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::import_operator_t & _t7, const args & _args );
+    //////////////////////////////////////////////////////////////////////////
+    inline detail::extract_operator_t call_args_t( kernel_interface * _kernel, PyObject * _obj, const args & _args )
+    {
+        return call_args_i( _kernel, _obj
+            , _args
+        );
+    }
     //////////////////////////////////////////////////////////////////////////
     template<class T0>
     detail::extract_operator_t call_args_t( kernel_interface * _kernel, PyObject * _obj, const T0 & _t0, const args & _args )

@@ -15,15 +15,20 @@ namespace pybind
         ~constructor_adapter_interface();
 
     public:
-        bool valid( kernel_interface * _kernel, PyObject * _args ) const;
         uint32_t arity() const;
 
     public:
         virtual void * call( kernel_interface * _kernel, PyObject * _obj, PyObject * _args ) = 0;
+
+#ifndef NDEBUG
+    protected:
+        bool valid( kernel_interface * _kernel, PyObject * _args ) const;
+#endif
 
     protected:
         uint32_t m_arity;
     };
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<constructor_adapter_interface> constructor_adapter_interface_ptr;
+    //////////////////////////////////////////////////////////////////////////
 }

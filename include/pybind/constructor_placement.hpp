@@ -2,75 +2,23 @@
 
 #include "pybind/adapter/constructor_adapter.hpp"
 
+#include <type_traits>
+
 namespace pybind
 {
-    template<class C, class P, int i>
+    //////////////////////////////////////////////////////////////////////////
+    template<class C, class P>
     struct call_constructor_placement_impl
     {
-        static C * call( kernel_interface * _kernel, void * _impl, PyObject * _args );
-    };
-
-    template<class C, class P>
-    struct call_constructor_placement_impl<C, P, 0>
-    {
-        static C * call( kernel_interface * _kernel, void * _impl, PyObject * _args )
-        {
-            (void)_kernel;
-
-            return new (_impl) C();
-        }
-    };
-
-    template<class C, class P>
-    struct call_constructor_placement_impl<C, P, 1>
-    {
-        static C * call( kernel_interface * _kernel, void * _impl, PyObject * _args )
+        template<uint32_t ... I>
+        static C * call( kernel_interface * _kernel, void * _impl, PyObject * _args, std::integer_sequence<uint32_t, I...> )
         {
             return new (_impl)C(
-                tuple_getitem_t( _kernel, _args, 0 )
+                tuple_getitem_t( _kernel, _args, I ) ...
             );
         }
     };
-
-    template<class C, class P>
-    struct call_constructor_placement_impl<C, P, 2>
-    {
-        static C * call( kernel_interface * _kernel, void * _impl, PyObject * _args )
-        {
-            return new (_impl)C(
-                tuple_getitem_t( _kernel, _args, 0 ),
-                tuple_getitem_t( _kernel, _args, 1 )
-            );
-        }
-    };
-
-    template<class C, class P>
-    struct call_constructor_placement_impl<C, P, 3>
-    {
-        static C * call( kernel_interface * _kernel, void * _impl, PyObject * _args )
-        {
-            return new (_impl)C(
-                tuple_getitem_t( _kernel, _args, 0 ),
-                tuple_getitem_t( _kernel, _args, 1 ),
-                tuple_getitem_t( _kernel, _args, 2 )
-            );
-        }
-    };
-
-    template<class C, class P>
-    struct call_constructor_placement_impl<C, P, 4>
-    {
-        static C * call( kernel_interface * _kernel, void * _impl, PyObject * _args )
-        {
-            return new (_impl)C(
-                tuple_getitem_t( _kernel, _args, 0 ),
-                tuple_getitem_t( _kernel, _args, 1 ),
-                tuple_getitem_t( _kernel, _args, 2 ),
-                tuple_getitem_t( _kernel, _args, 3 )
-            );
-        }
-    };
-
+    //////////////////////////////////////////////////////////////////////////
     template<class C, class P>
     class constructor_placement
         : public constructor_adapter_interface
@@ -84,10 +32,12 @@ namespace pybind
     public:
         void * call( kernel_interface * _kernel, PyObject * _obj, PyObject * _args ) override
         {
+#ifndef NDEBUG
             if( this->valid( _kernel, _args ) == false )
             {
                 return nullptr;
             }
+#endif
 
             C * self = _kernel->get_class_impl_t<C>( _obj );
 
@@ -96,7 +46,7 @@ namespace pybind
                 return nullptr;
             }
 
-            C * obj = call_constructor_placement_impl<C, P, P::args_arity>::call( _kernel, self, _args );
+            C * obj = call_constructor_placement_impl<C, P>::call( _kernel, self, _args, std::make_integer_sequence<uint32_t, P::args_arity>() );
 
             return obj;
         }
