@@ -118,7 +118,7 @@ namespace pybind
     detail::extract_operator_t call_args_t_i( kernel_interface * _kernel, PyObject * _obj, args && _args, std::tuple<T ...> && _t, std::integer_sequence<uint32_t, I...> )
     {
         return call_args_i( _kernel, _obj
-            { detail::import_operator_t( m_kernel, std::get<I>( _t ) ) ... }
+            , { detail::import_operator_t( _kernel, std::get<I>( _t ) ) ... }
             , _args
         );
     }
@@ -127,9 +127,9 @@ namespace pybind
     detail::extract_operator_t call_args_t( kernel_interface * _kernel, PyObject * _obj, T && ... _t, const args & _args )
     {
         return call_args_t_i( _kernel, _obj
-            , std::get<sizeof ... (Args) - 1u>( std::make_tuple( _t... ) )
+            , std::get<sizeof ... (T) - 1u>( std::make_tuple( _t ... ) )
             , std::make_tuple( _t... )
-            , std::make_integer_sequence<uint32_t, sizeof ... (Args) - 1u>()
+            , std::make_integer_sequence<uint32_t, sizeof ... (T) - 1u>()
         );
     }    
     //////////////////////////////////////////////////////////////////////////
