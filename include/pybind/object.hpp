@@ -3,6 +3,8 @@
 #include "pybind/base.hpp"
 #include "pybind/helper.hpp"
 
+#include <tuple>
+#include <type_traits>
 #include <cstddef>
 
 namespace pybind
@@ -55,150 +57,35 @@ namespace pybind
         detail::extract_operator_t extract() const;
 
     public:
+        detail::extract_operator_t call_i( std::initializer_list<detail::import_operator_t> && _t ) const;
+        detail::extract_operator_t call_args_i( std::initializer_list<detail::import_operator_t> && _t, const args & _args ) const;
+
+    public:
         template<class ... T>
         detail::extract_operator_t call( const T & ... _t ) const
         {
             return this->call_i(
-                detail::import_operator_t( m_kernel, _t ) ...
+                { detail::import_operator_t( m_kernel, _t ) ... }
             );
         }
 
     public:
-        detail::extract_operator_t call_i() const;
-        detail::extract_operator_t call_i( const detail::import_operator_t & _t0 ) const;
-        detail::extract_operator_t call_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1 ) const;
-        detail::extract_operator_t call_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2 ) const;
-        detail::extract_operator_t call_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3 ) const;
-        detail::extract_operator_t call_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4 ) const;
-        detail::extract_operator_t call_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5 ) const;
-        detail::extract_operator_t call_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6 ) const;
-        detail::extract_operator_t call_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::import_operator_t & _t7 ) const;
-
-    public:
-        inline detail::extract_operator_t call_args( const args & _args ) const
+        template<class ... T, uint32_t ... I>
+        inline detail::extract_operator_t call_args_ii( args && _args, std::tuple<T ...> && _t, std::integer_sequence<uint32_t, I...> ) const
         {
-            return this->call_args_i(
-                _args
+            return this->call_args_i( { detail::import_operator_t( m_kernel, std::get<I>( _t ) ) ... }
+                , _args
             );
         }
 
-        template<class T0>
-        detail::extract_operator_t call_args( const T0 & _t0, const args & _args ) const
+        template<class ... T>
+        inline detail::extract_operator_t call_args( T && ... _t ) const
         {
-            return this->call_args_i(
-                detail::import_operator_t( m_kernel, _t0 ),
-                _args
+            return this->call_args_ii( std::get<sizeof ... (T) - 1u>( std::make_tuple( _t... ) )
+                , std::make_tuple( _t... )
+                , std::make_integer_sequence<uint32_t, sizeof ... (T) - 1u>()
             );
         }
-
-        template<class T0, class T1>
-        detail::extract_operator_t call_args( const T0 & _t0, const T1 & _t1
-            , const args & _args ) const
-        {
-            return this->call_args_i(
-                detail::import_operator_t( m_kernel, _t0 ),
-                detail::import_operator_t( m_kernel, _t1 ),
-                _args
-            );
-        }
-
-        template<class T0, class T1, class T2>
-        detail::extract_operator_t call_args( const T0 & _t0, const T1 & _t1, const T2 & _t2
-            , const args & _args ) const
-        {
-            return this->call_args_i(
-                detail::import_operator_t( m_kernel, _t0 ),
-                detail::import_operator_t( m_kernel, _t1 ),
-                detail::import_operator_t( m_kernel, _t2 ),
-                _args
-            );
-        }
-
-        template<class T0, class T1, class T2, class T3>
-        detail::extract_operator_t call_args( const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3
-            , const args & _args ) const
-        {
-            return this->call_args_i(
-                detail::import_operator_t( m_kernel, _t0 ),
-                detail::import_operator_t( m_kernel, _t1 ),
-                detail::import_operator_t( m_kernel, _t2 ),
-                detail::import_operator_t( m_kernel, _t3 ),
-                _args
-            );
-        }
-
-        template<class T0, class T1, class T2, class T3, class T4>
-        detail::extract_operator_t call_args( const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4
-            , const args & _args ) const
-        {
-            return this->call_args_i(
-                detail::import_operator_t( m_kernel, _t0 ),
-                detail::import_operator_t( m_kernel, _t1 ),
-                detail::import_operator_t( m_kernel, _t2 ),
-                detail::import_operator_t( m_kernel, _t3 ),
-                detail::import_operator_t( m_kernel, _t4 ),
-                _args
-            );
-        }
-
-        template<class T0, class T1, class T2, class T3, class T4, class T5>
-        detail::extract_operator_t call_args( const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4, const T5 & _t5
-            , const args & _args ) const
-        {
-            return this->call_args_i(
-                detail::import_operator_t( m_kernel, _t0 ),
-                detail::import_operator_t( m_kernel, _t1 ),
-                detail::import_operator_t( m_kernel, _t2 ),
-                detail::import_operator_t( m_kernel, _t3 ),
-                detail::import_operator_t( m_kernel, _t4 ),
-                detail::import_operator_t( m_kernel, _t5 ),
-                _args
-            );
-        }
-
-        template<class T0, class T1, class T2, class T3, class T4, class T5, class T6>
-        detail::extract_operator_t call_args( const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4, const T5 & _t5, const T6 & _t6
-            , const args & _args ) const
-        {
-            return this->call_args_i(
-                detail::import_operator_t( m_kernel, _t0 ),
-                detail::import_operator_t( m_kernel, _t1 ),
-                detail::import_operator_t( m_kernel, _t2 ),
-                detail::import_operator_t( m_kernel, _t3 ),
-                detail::import_operator_t( m_kernel, _t4 ),
-                detail::import_operator_t( m_kernel, _t5 ),
-                detail::import_operator_t( m_kernel, _t6 ),
-                _args
-            );
-        }
-
-        template<class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7>
-        detail::extract_operator_t call_args( const T0 & _t0, const T1 & _t1, const T2 & _t2, const T3 & _t3, const T4 & _t4, const T5 & _t5, const T6 & _t6, const T7 & _t7
-            , const args & _args ) const
-        {
-            return this->call_args_i(
-                detail::import_operator_t( m_kernel, _t0 ),
-                detail::import_operator_t( m_kernel, _t1 ),
-                detail::import_operator_t( m_kernel, _t2 ),
-                detail::import_operator_t( m_kernel, _t3 ),
-                detail::import_operator_t( m_kernel, _t4 ),
-                detail::import_operator_t( m_kernel, _t5 ),
-                detail::import_operator_t( m_kernel, _t6 ),
-                detail::import_operator_t( m_kernel, _t7 ),
-                _args
-            );
-        }
-
-    public:
-        detail::extract_operator_t call_args_i( const args & _args ) const;
-        detail::extract_operator_t call_args_i( const detail::import_operator_t & _t0, const args & _args ) const;
-        detail::extract_operator_t call_args_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const args & _args ) const;
-        detail::extract_operator_t call_args_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const args & _args ) const;
-        detail::extract_operator_t call_args_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const args & _args ) const;
-        detail::extract_operator_t call_args_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const args & _args ) const;
-        detail::extract_operator_t call_args_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const args & _args ) const;
-        detail::extract_operator_t call_args_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const args & _args ) const;
-        detail::extract_operator_t call_args_i( const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::import_operator_t & _t7, const args & _args ) const;
     };
     //////////////////////////////////////////////////////////////////////////
     template<class It>

@@ -103,124 +103,19 @@ namespace pybind
         return pybind::ask_tuple_t( _kernel, _obj, args );
     }
     //////////////////////////////////////////////////////////////////////////	
-    detail::extract_operator_t call_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _t0 )
+    detail::extract_operator_t call_i( kernel_interface * _kernel, PyObject * _obj, std::initializer_list<detail::import_operator_t> && _t )
     {
-        pybind::tuple args = pybind::make_tuple_i( _kernel, _t0 );
+        pybind::tuple args = pybind::make_tuple_i( _kernel, std::forward<std::initializer_list<detail::import_operator_t>>( _t ) );
 
         return pybind::ask_tuple_t( _kernel, _obj, args );
     }
     //////////////////////////////////////////////////////////////////////////
-    detail::extract_operator_t call_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1 )
+    detail::extract_operator_t call_args_i( kernel_interface * _kernel, PyObject * _obj, std::initializer_list<detail::import_operator_t> && _t, const args & _args )
     {
-        pybind::tuple args = pybind::make_tuple_i( _kernel, _t0, _t1 );
+        pybind::tuple args = pybind::make_tuple_args_i( _kernel, std::forward<std::initializer_list<detail::import_operator_t>>( _t ), _args );
 
         return pybind::ask_tuple_t( _kernel, _obj, args );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    detail::extract_operator_t call_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2 )
-    {
-        pybind::tuple args = pybind::make_tuple_i( _kernel, _t0, _t1, _t2 );
-
-        return pybind::ask_tuple_t( _kernel, _obj, args );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    detail::extract_operator_t call_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3 )
-    {
-        pybind::tuple args = pybind::make_tuple_i( _kernel, _t0, _t1, _t2, _t3 );
-
-        return pybind::ask_tuple_t( _kernel, _obj, args );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    detail::extract_operator_t call_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4 )
-    {
-        pybind::tuple args = pybind::make_tuple_i( _kernel, _t0, _t1, _t2, _t3, _t4 );
-
-        return pybind::ask_tuple_t( _kernel, _obj, args );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    detail::extract_operator_t call_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5 )
-    {
-        pybind::tuple args = pybind::make_tuple_i( _kernel, _t0, _t1, _t2, _t3, _t4, _t5 );
-
-        return pybind::ask_tuple_t( _kernel, _obj, args );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    detail::extract_operator_t call_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6 )
-    {
-        pybind::tuple args = pybind::make_tuple_i( _kernel, _t0, _t1, _t2, _t3, _t4, _t5, _t6 );
-
-        return pybind::ask_tuple_t( _kernel, _obj, args );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    detail::extract_operator_t call_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::import_operator_t & _t7 )
-    {
-        pybind::tuple args = pybind::make_tuple_i( _kernel, _t0, _t1, _t2, _t3, _t4, _t5, _t6, _t7 );
-
-        return pybind::ask_tuple_t( _kernel, _obj, args );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    detail::extract_operator_t call_args_i( kernel_interface * _kernel, PyObject * _obj, const args & _args )
-    {
-        pybind::tuple args = pybind::make_tuple_args_t( _kernel, _args );
-
-        return pybind::ask_tuple_t( _kernel, _obj, args );
-    }
-    //////////////////////////////////////////////////////////////////////////	
-    detail::extract_operator_t call_args_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _t0, const args & _args )
-    {
-        pybind::tuple args = pybind::make_tuple_args_i( _kernel, _t0, _args );
-
-        return pybind::ask_tuple_t( _kernel, _obj, args );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    detail::extract_operator_t call_args_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const args & _args )
-    {
-        pybind::tuple args = pybind::make_tuple_args_i( _kernel, _t0, _t1, _args );
-
-        return pybind::ask_tuple_t( _kernel, _obj, args );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    detail::extract_operator_t call_args_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const args & _args )
-    {
-        pybind::tuple args = pybind::make_tuple_args_i( _kernel, _t0, _t1, _t2, _args );
-
-        return pybind::ask_tuple_t( _kernel, _obj, args );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    detail::extract_operator_t call_args_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const args & _args )
-    {
-        pybind::tuple args = pybind::make_tuple_args_i( _kernel, _t0, _t1, _t2, _t3, _args );
-
-        return pybind::ask_tuple_t( _kernel, _obj, args );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    detail::extract_operator_t call_args_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const args & _args )
-    {
-        pybind::tuple args = pybind::make_tuple_args_i( _kernel, _t0, _t1, _t2, _t3, _t4, _args );
-
-        return pybind::ask_tuple_t( _kernel, _obj, args );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    detail::extract_operator_t call_args_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const args & _args )
-    {
-        pybind::tuple args = pybind::make_tuple_args_i( _kernel, _t0, _t1, _t2, _t3, _t4, _t5, _args );
-
-        return pybind::ask_tuple_t( _kernel, _obj, args );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    detail::extract_operator_t call_args_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const args & _args )
-    {
-        pybind::tuple args = pybind::make_tuple_args_i( _kernel, _t0, _t1, _t2, _t3, _t4, _t5, _t6, _args );
-
-        return pybind::ask_tuple_t( _kernel, _obj, args );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    detail::extract_operator_t call_args_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _t0, const detail::import_operator_t & _t1, const detail::import_operator_t & _t2, const detail::import_operator_t & _t3, const detail::import_operator_t & _t4, const detail::import_operator_t & _t5, const detail::import_operator_t & _t6, const detail::import_operator_t & _t7, const args & _args )
-    {
-        pybind::tuple args = pybind::make_tuple_args_i( _kernel, _t0, _t1, _t2, _t3, _t4, _t5, _t6, _t7, _args );
-
-        return pybind::ask_tuple_t( _kernel, _obj, args );
-    }
+    }    
     //////////////////////////////////////////////////////////////////////////
     detail::extract_operator_t extract_t( kernel_interface * _kernel, PyObject * _obj )
     {
