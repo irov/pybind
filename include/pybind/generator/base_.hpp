@@ -22,6 +22,8 @@
 
 #include "pybind/exception.hpp"
 
+#include "config/stdex.hpp"
+
 namespace pybind
 {
     typedef bases<> no_bases;
@@ -200,10 +202,32 @@ namespace pybind
         }
 
         template<class P, class F>
+        base_ & def_proxy_static( const char * _name, const stdex::intrusive_ptr<P> & _proxy, F f )
+        {
+            method_adapter_interface_ptr iadapter =
+                new method_adapter_proxy<C, P, F>( _name, f, _proxy.get() );
+
+            m_scope->add_method( iadapter );
+
+            return *this;
+        }
+
+        template<class P, class F>
         base_ & def_proxy_static_deprecated( const char * _name, P * _proxy, F f, const char * _doc )
         {
             method_adapter_interface_ptr iadapter =
                 new method_adapter_proxy_deprecated<C, P, F>( _name, f, _proxy, _doc );
+
+            m_scope->add_method( iadapter );
+
+            return *this;
+        }
+
+        template<class P, class F>
+        base_ & def_proxy_static_deprecated( const char * _name, const stdex::intrusive_ptr<P> & _proxy, F f, const char * _doc )
+        {
+            method_adapter_interface_ptr iadapter =
+                new method_adapter_proxy_deprecated<C, P, F>( _name, f, _proxy.get(), _doc );
 
             m_scope->add_method( iadapter );
 
@@ -222,10 +246,32 @@ namespace pybind
         }
 
         template<class P, class F>
+        base_ & def_proxy_static_kernel( const char * _name, const stdex::intrusive_ptr<P> & _proxy, F f )
+        {
+            method_adapter_interface_ptr iadapter =
+                new method_adapter_proxy_kernel<C, P, F>( _name, f, _proxy.get() );
+
+            m_scope->add_method( iadapter );
+
+            return *this;
+        }
+
+        template<class P, class F>
         base_ & def_proxy_static_args( const char * _name, P * _proxy, F f )
         {
             method_adapter_interface_ptr iadapter =
                 new method_adapter_proxy_args<C, P, F>( _name, f, _proxy );
+
+            m_scope->add_method( iadapter );
+
+            return *this;
+        }
+
+        template<class P, class F>
+        base_ & def_proxy_static_args( const char * _name, const stdex::intrusive_ptr<P> & _proxy, F f )
+        {
+            method_adapter_interface_ptr iadapter =
+                new method_adapter_proxy_args<C, P, F>( _name, f, _proxy.get() );
 
             m_scope->add_method( iadapter );
 
@@ -244,6 +290,17 @@ namespace pybind
         }
 
         template<class P, class F>
+        base_ & def_proxy_native( const char * _name, stdex::intrusive_ptr<P> & _proxy, F f )
+        {
+            method_adapter_interface_ptr iadapter =
+                new method_adapter_proxy_native<C, P, F>( _name, f, _proxy.get() );
+
+            m_scope->add_method( iadapter );
+
+            return *this;
+        }
+
+        template<class P, class F>
         base_ & def_proxy_native_kernel( const char * _name, P * _proxy, F f )
         {
             method_adapter_interface_ptr iadapter =
@@ -254,6 +311,16 @@ namespace pybind
             return *this;
         }
 
+        template<class P, class F>
+        base_ & def_proxy_native_kernel( const char * _name, const stdex::intrusive_ptr<P> & _proxy, F f )
+        {
+            method_adapter_interface_ptr iadapter =
+                new method_adapter_proxy_native_kernel<C, P, F>( _name, f, _proxy.get() );
+
+            m_scope->add_method( iadapter );
+
+            return *this;
+        }
 
         template<class A>
         base_ & def_member( const char * _name, A C:: * a )

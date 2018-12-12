@@ -17,7 +17,8 @@ namespace pybind
             ~set_dict_operator_t();
 
         public:
-            set_dict_operator_t & operator = ( const import_operator_t & _value );
+            set_dict_operator_t & operator = ( const set_dict_operator_t & _op );
+            set_dict_operator_t & operator = ( const import_operator_t & _op );
 
             template<class T>
             set_dict_operator_t & operator = ( const T & _value )

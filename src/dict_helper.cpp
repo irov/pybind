@@ -46,9 +46,23 @@ namespace pybind
             }
         }
         //////////////////////////////////////////////////////////////////////////
-        set_dict_operator_t & set_dict_operator_t::operator = ( const import_operator_t & _value )
+        set_dict_operator_t & set_dict_operator_t::operator = ( const set_dict_operator_t & _op )
         {
-            pybind::dict_setobject_i( m_kernel, m_dict, m_key, _value );
+            this->m_kernel = _op.m_kernel;
+            this->m_dict = _op.m_dict;
+            this->m_key = _op.m_key;
+
+            if( m_kernel != nullptr )
+            {
+                m_kernel->incref( m_key );
+            }
+
+            return *this;
+        }
+        //////////////////////////////////////////////////////////////////////////
+        set_dict_operator_t & set_dict_operator_t::operator = ( const import_operator_t & _op )
+        {
+            pybind::dict_setobject_i( m_kernel, m_dict, m_key, _op );
 
             return *this;
         }

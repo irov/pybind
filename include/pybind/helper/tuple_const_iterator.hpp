@@ -17,6 +17,9 @@ namespace pybind
         ~tuple_const_iterator();
 
     public:
+        tuple_const_iterator & operator = ( const tuple_const_iterator & _iterator );
+
+    public:
         detail::extract_operator_t operator -> () const;
         detail::extract_operator_t operator * () const;
 

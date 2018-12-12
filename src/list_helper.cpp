@@ -24,9 +24,20 @@ namespace pybind
         {
         }
         //////////////////////////////////////////////////////////////////////////
-        void set_list_operator_t::operator = ( const import_operator_t & _imp )
+        set_list_operator_t & set_list_operator_t::operator = ( const set_list_operator_t & _op )
+        {
+            this->m_kernel = _op.m_kernel;
+            this->m_list = _op.m_list;
+            this->m_index = _op.m_index;
+
+            return *this;
+        }
+        //////////////////////////////////////////////////////////////////////////
+        set_list_operator_t & set_list_operator_t::operator = ( const import_operator_t & _imp )
         {
             pybind::list_setitem_i( m_kernel, m_list, m_index, _imp );
+
+            return *this;
         }
         //////////////////////////////////////////////////////////////////////////
         set_list_operator_t::operator PyObject * ()

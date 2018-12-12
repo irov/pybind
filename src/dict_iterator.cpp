@@ -35,6 +35,17 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
+    dict_iterator & dict_iterator::operator = ( const dict_iterator & _r )
+    {
+        this->m_kernel = _r.m_kernel;
+        this->m_obj = _r.m_obj;
+        this->m_pos = _r.m_pos;
+        this->m_key = _r.m_key;
+        this->m_value = _r.m_value;
+
+        return *this;
+    }
+    //////////////////////////////////////////////////////////////////////////
     bool dict_iterator::operator == ( const dict_iterator & _it ) const
     {
         if( m_obj != _it.m_obj )

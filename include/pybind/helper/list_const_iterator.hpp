@@ -17,6 +17,9 @@ namespace pybind
         ~list_const_iterator();
 
     public:
+        list_const_iterator & operator = ( const list_const_iterator & _r );
+
+    public:
         detail::extract_operator_t operator -> () const;
         detail::extract_operator_t operator * () const;
 

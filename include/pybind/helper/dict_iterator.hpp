@@ -23,6 +23,9 @@ namespace pybind
         ~dict_iterator();
 
     public:
+        dict_iterator & operator = ( const dict_iterator & _r );
+
+    public:
         bool operator == ( const dict_iterator & _it ) const;
         bool operator != ( const dict_iterator & _it ) const;
 

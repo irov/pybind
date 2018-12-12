@@ -21,6 +21,15 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
+    tuple_const_iterator & tuple_const_iterator::operator = ( const tuple_const_iterator & _iterator )
+    {
+        this->m_kernel = _iterator.m_kernel;
+        this->m_obj = _iterator.m_obj;
+        this->m_index = _iterator.m_index;
+
+        return *this;
+    }
+    //////////////////////////////////////////////////////////////////////////
     detail::extract_operator_t tuple_const_iterator::operator -> () const
     {
         PyObject * py_item = m_kernel->tuple_getitem( m_obj, m_index );
