@@ -24,15 +24,15 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
+    object::object( std::nullptr_t )
+        : base( nullptr )
+    {
+    }
+    //////////////////////////////////////////////////////////////////////////
     object::object( const detail::extract_operator_t & _extract )
         : base( _extract.kernel(), _extract.ptr() )
     {
 
-    }
-    //////////////////////////////////////////////////////////////////////////
-    object::object( pybind::invalid_t _iv )
-        : base( _iv )
-    {
     }
     //////////////////////////////////////////////////////////////////////////
     object::object( kernel_interface * _kernel, PyObject * _obj )
@@ -42,6 +42,11 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     object::object( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed_t _br )
         : base( _kernel, _obj, _br )
+    {
+    }
+    //////////////////////////////////////////////////////////////////////////
+    object::object( pybind::invalid_t _iv )
+        : base( _iv )
     {
     }
     //////////////////////////////////////////////////////////////////////////
@@ -116,6 +121,11 @@ namespace pybind
         PyObject * py_false = _kernel->ret_false();
 
         return pybind::object( _kernel, py_false, pybind::borrowed );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    pybind::object make_borrowed_t( kernel_interface * _kernel, PyObject * _obj )
+    {
+        return pybind::object( _kernel, _obj, pybind::borrowed );
     }
     //////////////////////////////////////////////////////////////////////////
     pybind::object make_object_i( kernel_interface * _kernel, const detail::import_operator_t & _t )

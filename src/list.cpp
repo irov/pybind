@@ -68,6 +68,15 @@ namespace pybind
         return detail::set_list_operator_t( m_kernel, m_obj, _index );
     }
     //////////////////////////////////////////////////////////////////////////
+    list & list::append( const pybind::object & _item )
+    {
+        PyObject * py_item = _item.ptr();
+
+        m_kernel->list_appenditem( m_obj, py_item );
+
+        return *this;
+    }
+    //////////////////////////////////////////////////////////////////////////
     list & list::append_i( const detail::import_operator_t & _t )
     {
         pybind::list_appenditem_i( m_kernel, m_obj, _t );
@@ -82,7 +91,9 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool list::empty() const
     {
-        return this->size() == 0;
+        size_type size = this->size();
+
+        return size == 0;
     }
     //////////////////////////////////////////////////////////////////////////
     list::const_iterator list::begin() const

@@ -16,6 +16,7 @@ namespace pybind
         base( base && _base );
 
     public:
+        base( std::nullptr_t );
         base( kernel_interface * _kernel, PyObject * _obj );
         base( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed_t );
 

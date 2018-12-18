@@ -1,5 +1,7 @@
 #include "pybind/import_operator.hpp"
 
+#include "pybind/object.hpp"
+
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
@@ -44,6 +46,12 @@ namespace pybind
             {
                 m_kernel->incref( m_obj );
             }
+        }
+        //////////////////////////////////////////////////////////////////////////
+        import_operator_t::import_operator_t( const object & _obj )
+            : m_kernel( _obj.kernel() )
+            , m_obj( _obj.ret() )
+        {
         }
         //////////////////////////////////////////////////////////////////////////
         import_operator_t::~import_operator_t()

@@ -19,6 +19,7 @@ namespace pybind
         object();
         object( const object & _obj );
         object( object && _obj );
+        object( std::nullptr_t );
         object( const detail::extract_operator_t & _extract );
 
     public:
@@ -35,6 +36,12 @@ namespace pybind
         object & operator = ( std::nullptr_t );
         object & operator = ( const object & _obj );
         object & operator = ( object && _obj );
+
+    public:
+        bool operator == ( std::nullptr_t ) const
+        {
+            return m_kernel == nullptr;
+        }
 
     public:
         template<class T>
@@ -104,6 +111,8 @@ namespace pybind
     PYBIND_API pybind::object make_none_t( kernel_interface * _kernel );
     PYBIND_API pybind::object make_true_t( kernel_interface * _kernel );
     PYBIND_API pybind::object make_false_t( kernel_interface * _kernel );
+    //////////////////////////////////////////////////////////////////////////
+    PYBIND_API pybind::object make_borrowed_t( kernel_interface * _kernel, PyObject * _obj );
     //////////////////////////////////////////////////////////////////////////
     PYBIND_API pybind::object make_object_i( kernel_interface * _kernel, const detail::import_operator_t & _t0 );
     //////////////////////////////////////////////////////////////////////////
