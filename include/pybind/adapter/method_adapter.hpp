@@ -26,6 +26,10 @@ namespace pybind
         {
         }
 
+        ~method_adapter() override
+        {
+        }
+
     protected:
         PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
         {
@@ -50,6 +54,10 @@ namespace pybind
         method_adapter_kernel( const char * _name, F _fn )
             : method_adapter_interface( _name )
             , m_fn( _fn )
+        {
+        }
+
+        ~method_adapter_kernel() override
         {
         }
 
@@ -80,6 +88,10 @@ namespace pybind
         {
         }
 
+        ~method_adapter_args() override
+        {
+        }
+
     protected:
         PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
         {
@@ -104,6 +116,10 @@ namespace pybind
         method_adapter_deprecated( const char * _name, F _fn, const char * _doc )
             : method_adapter<C, F>( _name, _fn )
             , m_doc( _doc )
+        {
+        }
+
+        ~method_adapter_deprecated() override
         {
         }
 
@@ -141,6 +157,10 @@ namespace pybind
         {
         }
 
+        ~method_adapter_proxy() override
+        {
+        }
+
     protected:
         PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
         {
@@ -167,6 +187,10 @@ namespace pybind
             : method_adapter_interface( _name )
             , m_fn( _fn )
             , m_proxy( _proxy )
+        {
+        }
+
+        ~method_adapter_proxy_kernel() override
         {
         }
 
@@ -197,6 +221,10 @@ namespace pybind
             , m_fn( _fn )
             , m_proxy( _proxy )
             , m_doc( _doc )
+        {
+        }
+
+        ~method_adapter_proxy_deprecated() override
         {
         }
 
@@ -237,6 +265,10 @@ namespace pybind
         {
         }
 
+        ~method_adapter_proxy_args() override
+        {
+        }
+
     protected:
         PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
         {
@@ -263,6 +295,10 @@ namespace pybind
             : method_adapter_interface( _name )
             , m_fn( _fn )
             , m_proxy( _proxy )
+        {
+        }
+
+        ~method_adapter_proxy_native() override
         {
         }
 
@@ -293,6 +329,10 @@ namespace pybind
         {
         }
 
+        ~method_adapter_proxy_native_kernel() override
+        {
+        }
+
     protected:
         PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
         {
@@ -316,6 +356,10 @@ namespace pybind
         method_adapter_proxy_function( const char * _name, F _fn )
             : method_adapter_interface( _name )
             , m_fn( _fn )
+        {
+        }
+
+        ~method_adapter_proxy_function() override
         {
         }
 
@@ -346,6 +390,10 @@ namespace pybind
         {
         }
 
+        ~method_adapter_proxy_function_args() override
+        {
+        }
+
     protected:
         PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
         {
@@ -370,6 +418,10 @@ namespace pybind
         method_adapter_proxy_function_kernel( const char * _name, F _fn )
             : method_adapter_interface( _name )
             , m_fn( _fn )
+        {
+        }
+
+        ~method_adapter_proxy_function_kernel() override
         {
         }
 
@@ -400,6 +452,10 @@ namespace pybind
         {
         }
 
+        ~method_adapter_native() override
+        {
+        }
+
     protected:
         PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
         {
@@ -422,6 +478,10 @@ namespace pybind
         method_adapter_native_kernel( const char * _name, F _fn )
             : method_adapter_interface( _name )
             , m_fn( _fn )
+        {
+        }
+
+        ~method_adapter_native_kernel() override
         {
         }
 
@@ -450,6 +510,10 @@ namespace pybind
         {
         }
 
+        ~method_adapter_static_native() override
+        {
+        }
+
     protected:
         PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
         {
@@ -472,6 +536,10 @@ namespace pybind
         method_adapter_static_native_kernel( const char * _name, F _fn )
             : method_adapter_interface( _name )
             , m_fn( _fn )
+        {
+        }
+
+        ~method_adapter_static_native_kernel() override
         {
         }
 

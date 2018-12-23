@@ -12,7 +12,7 @@ namespace pybind
     {
     public:
         constructor_adapter_interface( uint32_t _arity );
-        ~constructor_adapter_interface();
+        ~constructor_adapter_interface() override;
 
     public:
         uint32_t arity() const;

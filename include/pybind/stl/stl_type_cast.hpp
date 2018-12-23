@@ -1,9 +1,12 @@
 #pragma once
 
+#include "pybind/exports.hpp"
 #include "pybind/type_cast_result.hpp"
 #include "pybind/extract.hpp"
 
 #include "pybind/list.hpp"
+
+#ifdef PYBIND_STL_SUPPORT
 
 namespace pybind
 {
@@ -138,9 +141,8 @@ namespace pybind
         _kernel->unregister_type_info_extract_t<M>();
     }
 
-#ifdef PYBIND_STL_SUPPORT
     PYBIND_API bool initialize_stl_type_cast( kernel_interface * _kernel );
     PYBIND_API void finalize_stl_type_cast( kernel_interface * _kernel );
-#endif
 }
 
+#endif

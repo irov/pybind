@@ -19,6 +19,10 @@ namespace pybind
         {
         }
 
+        ~sequence_set_adapter_interface() override
+        {
+        }
+
     public:
         inline const char * getName() const
         {
@@ -45,6 +49,10 @@ namespace pybind
         {
         }
 
+        ~sequence_set_adapter() override
+        {
+        }
+
     protected:
         void call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, uint32_t _index, PyObject * _value ) override
         {
@@ -67,6 +75,10 @@ namespace pybind
         sequence_set_adapter_depricated( const char * _name, F _fn, const char * _doc )
             : sequence_set_adapter<C, F>( _name, _fn )
             , m_doc( _doc )
+        {
+        }
+
+        ~sequence_set_adapter_depricated() override
         {
         }
 
@@ -105,6 +117,10 @@ namespace pybind
         {
         }
 
+        ~sequence_set_adapter_proxy() override
+        {
+        }
+
     protected:
         void call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, uint32_t _index, PyObject * _value ) override
         {
@@ -132,6 +148,10 @@ namespace pybind
         {
         }
 
+        ~sequence_set_adapter_proxy_function() override
+        {
+        }
+
     protected:
         void call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, uint32_t _index, PyObject * _value ) override
         {
@@ -154,6 +174,10 @@ namespace pybind
     public:
         sequence_set_adapter_operator( const char * _name )
             : sequence_set_adapter_interface( _name )
+        {
+        }
+
+        ~sequence_set_adapter_operator() override
         {
         }
 

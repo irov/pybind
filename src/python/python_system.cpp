@@ -26,9 +26,14 @@ extern "C" {
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
-    kernel_interface * initialize( const kernel_domain_allocator_t * _allocator, const wchar_t * _path, bool _debug, bool install_sigs, bool _nosite )
+#if PYBIND_PYTHON_VERSION < 300 && defined(WITH_THREAD)
+    static PyThreadState * gtstate;
+#endif
+    //////////////////////////////////////////////////////////////////////////
+    kernel_interface * initialize( const kernel_domain_allocator_t * _allocator, const kernel_mutex_t * _mutex, const wchar_t * _path, bool _debug, bool install_sigs, bool _nosite )
     {
         (void)_allocator;
+        (void)_mutex;
         (void)_path;
         (void)_debug;
 
@@ -45,7 +50,7 @@ namespace pybind
 #endif
 #endif
 
-#   if PYBIND_PYTHON_VERSION >= 300
+#if PYBIND_PYTHON_VERSION >= 300
         if( _allocator != nullptr )
         {
             if( _allocator->raw != nullptr )
@@ -87,14 +92,14 @@ namespace pybind
 #endif
 
 
-#   if PYBIND_PYTHON_VERSION >= 300
+#if PYBIND_PYTHON_VERSION >= 300
         if( _path != nullptr )
         {
             Py_SetPath( _path );
 
             check_error();
         }
-#   endif
+#endif
 
         if( Py_IsInitialized() == 0 )
         {
@@ -110,15 +115,15 @@ namespace pybind
 
             Py_IgnoreEnvironmentFlag = 1;
 
-#   if PYBIND_PYTHON_VERSION < 300
+#if PYBIND_PYTHON_VERSION < 300
             Py_HashRandomizationFlag = 0;
-#	endif
+#endif
 
-#   if PYBIND_PYTHON_VERSION >= 330
+#if PYBIND_PYTHON_VERSION >= 330
             Py_DontWriteBytecodeFlag = 1;
-#	endif
+#endif
 
-#   if PYBIND_PYTHON_VERSION >= 330
+#if PYBIND_PYTHON_VERSION >= 330
             wchar_t pyProgramName[] = L"pybind330";
             Py_SetProgramName( pyProgramName );
 
@@ -128,7 +133,7 @@ namespace pybind
             Py_SetStandardStreamEncoding( "utf-8", "utf-8" );
 
             Py_InitializeEx( install_sigs ? 1 : 0 );
-#   elif PYBIND_PYTHON_VERSION >= 320
+#elif PYBIND_PYTHON_VERSION >= 320
             wchar_t pyProgramName[] = L"pybind320";
             Py_SetProgramName( pyProgramName );
 
@@ -136,7 +141,7 @@ namespace pybind
             Py_SetPythonHome( pySearchPath );
 
             Py_InitializeEx( install_sigs ? 1 : 0 );
-#   else
+#else
             char pyProgramName[] = "pybind";
             Py_SetProgramName( pyProgramName );
 
@@ -144,52 +149,24 @@ namespace pybind
             Py_SetPythonHome( pySearchPath );
 
             Py_InitializeEx( install_sigs ? 1 : 0 );
-#   endif
+#endif
+
+#if PYBIND_PYTHON_VERSION < 300 && defined(WITH_THREAD)
+            PyEval_InitThreads();
+            gtstate = PyEval_SaveThread();
+#endif
         }
 
-        kernel_interface * kernel = new python_kernel;
+        python_kernel * kernel = new python_kernel();
 
-        if( kernel->initialize() == false )
+        if( kernel->initialize( _mutex ) == false )
         {
             return nullptr;
         }
 
         pybind::set_kernel( kernel );
 
-#ifdef PYBIND_STL_SUPPORT
-        if( initialize_stl_type_cast( kernel ) == false )
-        {
-            return nullptr;
-        }
-#endif
-
         return kernel;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    void finalize()
-    {
-        Py_Finalize();
-
-        kernel_interface * kernel = pybind::get_kernel();
-
-#ifdef PYBIND_STL_SUPPORT
-        finalize_stl_type_cast( kernel );
-#endif
-
-        kernel->finalize();
-        delete kernel;
-
-        pybind::set_kernel( nullptr );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    bool is_initialized()
-    {
-        if( Py_IsInitialized() == 0 )
-        {
-            return false;
-        }
-
-        return true;
     }
     //////////////////////////////////////////////////////////////////////////
     void check_error()

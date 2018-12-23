@@ -20,6 +20,10 @@ namespace pybind
         {
         }
 
+        ~member_adapter() override
+        {
+        }
+
     public:
         PyObject * get( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope ) override
         {
@@ -52,6 +56,10 @@ namespace pybind
             : member_adapter_interface( _name )
             , m_get( _get )
             , m_set( _set )
+        {
+        }
+
+        ~member_adapter_property() override
         {
         }
 
@@ -90,6 +98,10 @@ namespace pybind
             : member_adapter_interface( _name )
             , m_get( _get )
             , m_set( _set )
+        {
+        }
+
+        ~member_adapter_property_static() override
         {
         }
 

@@ -16,6 +16,10 @@ namespace pybind
         {
         }
 
+        ~bindable_adapter_interface() override
+        {
+        }
+
     public:
         inline const char * getName() const
         {

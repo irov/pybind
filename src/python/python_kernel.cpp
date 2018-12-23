@@ -10,11 +10,16 @@
 #include "pybind/adapter/new_adapter.hpp"
 #include "pybind/adapter/destroy_adapter.hpp"
 
+#ifdef PYBIND_STL_SUPPORT
+#   include "pybind/stl/stl_type_cast.hpp"
+#endif
+
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
     python_kernel::python_kernel()
         : m_current_module( nullptr )
+        , m_acquire_mutex( nullptr )
     {
     }
     //////////////////////////////////////////////////////////////////////////
@@ -22,8 +27,19 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::initialize()
+    bool python_kernel::initialize( const kernel_mutex_t * _mutex )
     {
+        if( _mutex != nullptr )
+        {
+            m_mutex = *_mutex;
+        }
+        else
+        {
+            m_mutex.ctx = nullptr;
+            m_mutex.lock = nullptr;
+            m_mutex.unlock = nullptr;
+        }
+
         if( m_functions.initialize() == false )
         {
             return false;
@@ -60,11 +76,29 @@ namespace pybind
 
         m_class_type_dummy = new python_class_type_scope( this, "__dummy__", 0, nullptr, nullptr, nullptr, 0, false );
 
+#ifdef PYBIND_STL_SUPPORT
+        pybind::initialize_stl_type_cast( this );
+#endif
+
         return true;
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::finalize()
     {
+#if PYBIND_PYTHON_VERSION < 300 && defined(WITH_THREAD)
+        if( gtstate != nullptr )
+        {
+            PyEval_AcquireThread( gtstate );
+            gtstate = nullptr;
+        }
+#endif
+
+        Py_Finalize();
+
+#ifdef PYBIND_STL_SUPPORT
+        pybind::finalize_stl_type_cast( this );
+#endif
+
         for( uint32_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
         {
             class_type_scope_interface_ptr & scope = m_class_type_scopes[index];
@@ -96,6 +130,39 @@ namespace pybind
         m_members.finalize();
         m_methods.finalize();
         m_pods.finalize();
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void python_kernel::destroy()
+    {
+        this->finalize();
+
+        delete this;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void python_kernel::acquire_mutex()
+    {
+        m_acquire_mutex = &m_mutex;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void python_kernel::release_mutex()
+    {
+        m_acquire_mutex = nullptr;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void python_kernel::lock_mutex()
+    {
+        if( m_acquire_mutex != nullptr )
+        {
+            m_acquire_mutex->lock( m_mutex.ctx );
+        }
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void python_kernel::unlock_mutex()
+    {
+        if( m_acquire_mutex != nullptr )
+        {
+            m_acquire_mutex->unlock( m_mutex.ctx );
+        }
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::remove_from_module( const char * _name, PyObject * _module )

@@ -19,6 +19,10 @@ namespace pybind
         {
         }
 
+        ~number_binary_adapter_interface() override
+        {
+        }
+
     public:
         inline const char * getName() const
         {

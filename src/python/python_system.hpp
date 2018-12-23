@@ -9,10 +9,6 @@
 
 namespace pybind
 {
-    PYBIND_API void finalize();
-
-    PYBIND_API bool is_initialized();
-
     PYBIND_API uint32_t get_python_version();
 
     PYBIND_API void check_error();

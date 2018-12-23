@@ -19,6 +19,10 @@ namespace pybind
         {
         }
 
+        ~mapping_adapter_interface() override
+        {
+        }
+
     public:
         inline const char * getName() const
         {
@@ -42,6 +46,10 @@ namespace pybind
         mapping_adapter( const char * _name, F _fn )
             : mapping_adapter_interface( _name )
             , m_fn( _fn )
+        {
+        }
+
+        ~mapping_adapter() override
         {
         }
 
@@ -69,6 +77,10 @@ namespace pybind
         mapping_adapter_depricated( const char * _name, F _fn, const char * _doc )
             : mapping_adapter<C, F>( _name, _fn )
             , m_doc( _doc )
+        {
+        }
+
+        ~mapping_adapter_depricated() override
         {
         }
 
@@ -106,6 +118,10 @@ namespace pybind
         {
         }
 
+        ~mapping_adapter_proxy_member() override
+        {
+        }
+
     protected:
         PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _key ) override
         {
@@ -131,6 +147,10 @@ namespace pybind
         mapping_adapter_proxy_function( const char * _name, F _fn )
             : mapping_adapter_interface( _name )
             , m_fn( _fn )
+        {
+        }
+
+        ~mapping_adapter_proxy_function() override
         {
         }
 

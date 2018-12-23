@@ -19,6 +19,10 @@ namespace pybind
         {
         }
 
+        ~getattro_adapter_interface() override
+        {
+        }
+
     public:
         inline const char * getName() const
         {

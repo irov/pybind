@@ -29,6 +29,10 @@ namespace pybind
         {
         }
 
+        ~repr_adapter() override
+        {
+        }
+
     public:
         PyObject * repr( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope ) override
         {

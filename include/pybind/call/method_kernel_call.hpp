@@ -52,7 +52,7 @@ namespace pybind
 
         static PyObject * call( kernel_interface * _kernel, C * _self, F f, PyObject * _arg )
         {
-            uint32_t arg_size = (_arg) ? _kernel->tuple_size( _arg ) : 0;
+            uint32_t arg_size = (_arg != nullptr) ? _kernel->tuple_size( _arg ) : 0;
             uint32_t fn_arity = f_info::arity;
 
             static_assert(std::is_same<typename f_info::first_param, pybind::kernel_interface *>::value == true, "[pybind] use kernel bind");

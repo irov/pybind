@@ -17,6 +17,10 @@ namespace pybind
         {
         }
 
+        ~smart_pointer_adapter_interface() override
+        {
+        }
+
     public:
         inline const char * getName() const
         {
@@ -24,8 +28,8 @@ namespace pybind
         }
 
     public:
-        virtual void incref( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & scope ) = 0;
-        virtual void decref( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & scope ) = 0;
+        virtual void incref( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope ) = 0;
+        virtual void decref( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope ) = 0;
 
     protected:
         const char * m_name;
@@ -42,6 +46,10 @@ namespace pybind
             : smart_pointer_adapter_interface( _name )
             , m_incref( _incref )
             , m_decref( _decref )
+        {
+        }
+
+        ~smart_pointer_adapter() override
         {
         }
 
@@ -78,6 +86,10 @@ namespace pybind
         {
         }
 
+        ~smart_pointer_adapter_proxy() override
+        {
+        }
+
     protected:
         void incref( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope ) override
         {
@@ -108,6 +120,10 @@ namespace pybind
             : smart_pointer_adapter_interface( _name )
             , m_incref( _incref )
             , m_decref( _decref )
+        {
+        }
+
+        ~smart_pointer_adapter_proxy_function() override
         {
         }
 

@@ -7,6 +7,7 @@
 #include "pybind/call/function_proxy_call.hpp"
 #include "pybind/call/function_proxy_args_call.hpp"
 #include "pybind/call/function_kernel_call.hpp"
+#include "pybind/call/function_kernel_args_call.hpp"
 
 #include "pybind/types.hpp"
 
@@ -192,6 +193,29 @@ namespace pybind
             F fn = this->getFn();
 
             PyObject *ret = function_kernel_call<F>::call( _kernel, fn, _args );
+
+            return ret;
+        }
+    };
+    //////////////////////////////////////////////////////////////////////////
+    template<class F>
+    class function_kernel_adapter_args
+        : public function_adapter_base<F>
+    {
+    public:
+        function_kernel_adapter_args( const char * _name, uint32_t _arity, F _fn )
+            : function_adapter_base<F>( _name, _arity, _fn )
+        {
+        }
+
+    protected:
+        PyObject * call( kernel_interface * _kernel, PyObject * _args, PyObject * _kwds ) override
+        {
+            (void)_kwds;
+
+            F fn = this->getFn();
+
+            PyObject *ret = function_kernel_args_call<F>::call( _kernel, fn, _args );
 
             return ret;
         }

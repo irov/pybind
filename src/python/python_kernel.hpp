@@ -20,8 +20,19 @@ namespace pybind
         ~python_kernel() override;
 
     public:
-        bool initialize() override;
-        void finalize() override;
+        bool initialize( const kernel_mutex_t * _mutex );
+        void finalize();
+
+    public:
+        void destroy() override;
+
+    public:
+        void acquire_mutex() override;
+        void release_mutex() override;
+
+    protected:
+        void lock_mutex() override;
+        void unlock_mutex() override;
 
     public:
         void remove_from_module( const char * _name, PyObject * _module ) override;
@@ -247,6 +258,9 @@ namespace pybind
         bool tuple_setitem( PyObject * _obj, uint32_t _it, PyObject * _value ) override;
 
     protected:
+        kernel_mutex_t m_mutex;
+        const kernel_mutex_t * m_acquire_mutex;
+
         function_python m_functions;
         functor_python m_functors;
         member_python m_members;
