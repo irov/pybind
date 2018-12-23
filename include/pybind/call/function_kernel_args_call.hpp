@@ -27,7 +27,7 @@ namespace pybind
     {
         static PyObject * call( kernel_interface * _kernel, F f, PyObject * _arg )
         {
-            PyObject * py_result = detail::return_operator_t( _kernel, function_kernel_call_impl<F, Ret>::call( _kernel, f, _arg, std::make_integer_sequence<uint32_t, Arity>() ) );
+            PyObject * py_result = detail::return_operator_t( _kernel, function_kernel_args_call_impl<F, Ret>::call( _kernel, f, _arg, std::make_integer_sequence<uint32_t, Arity>() ) );
 
             return py_result;
         }
@@ -67,7 +67,7 @@ namespace pybind
                 return nullptr;
             }
 
-            PyObject * ret = function_kernel_args_call_ret_impl<F, f_info::arity - 1, typename f_info::ret_type>::call( _kernel, f, _arg );
+            PyObject * ret = function_kernel_args_call_ret_impl<F, f_info::arity - 2, typename f_info::ret_type>::call( _kernel, f, _arg );
 
             return ret;
         }
