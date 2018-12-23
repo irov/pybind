@@ -244,10 +244,10 @@ namespace pybind
 
         virtual void set_syspath( PyObject * _path ) = 0;
 
-        virtual PyObject * code_compile_file( const char * _buf, const char * _module ) = 0;
+        virtual PyObject * code_compile_file( const void * _buf, const char * _module ) = 0;
         virtual bool code_check( PyObject * _code ) = 0;
         virtual long marshal_magic_number() = 0;
-        virtual PyObject * marshal_get_object( const char * _buf, size_t _len ) = 0;
+        virtual PyObject * marshal_get_object( const void * _buf, size_t _len ) = 0;
 
         virtual void set_module_finder( PyObject * _finder ) = 0;
         virtual void remove_module_finder() = 0;

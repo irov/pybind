@@ -27,7 +27,7 @@ namespace pybind
     PYBIND_API PyObject * module_reload( PyObject * _module );
 
     PYBIND_API bool code_check( PyObject * _code );
-    PYBIND_API PyObject * code_compile_file( const char * _buf, const char * _module );
+    PYBIND_API PyObject * code_compile_file( const void * _buf, const char * _module );
 
     PYBIND_API PyObject * set_currentmodule( PyObject * _obj );
     PYBIND_API PyObject * get_currentmodule();
@@ -207,7 +207,7 @@ namespace pybind
     PYBIND_API void * void_ptr_get( PyObject * _obj );
 
     PYBIND_API long marshal_magic_number();
-    PYBIND_API PyObject * marshal_get_object( const char * _buf, size_t _len );
+    PYBIND_API PyObject * marshal_get_object( const void * _buf, size_t _len );
 
     PYBIND_API void set_module_finder( PyObject * _finder );
     PYBIND_API void remove_module_finder();

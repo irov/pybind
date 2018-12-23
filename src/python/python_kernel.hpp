@@ -109,10 +109,10 @@ namespace pybind
 
         void set_syspath( PyObject * _path ) override;
 
-        PyObject * code_compile_file( const char * _buf, const char * _module ) override;
+        PyObject * code_compile_file( const void * _buf, const char * _module ) override;
         bool code_check( PyObject * _code ) override;
         long marshal_magic_number() override;
-        PyObject * marshal_get_object( const char * _buf, size_t _len ) override;
+        PyObject * marshal_get_object( const void * _buf, size_t _len ) override;
 
         void set_module_finder( PyObject * _finder ) override;
         void remove_module_finder() override;

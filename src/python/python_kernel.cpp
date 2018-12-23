@@ -791,7 +791,7 @@ namespace pybind
         pybind::set_syspath( _path );
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * python_kernel::code_compile_file( const char * _buf, const char * _module )
+    PyObject * python_kernel::code_compile_file( const void * _buf, const char * _module )
     {
         return pybind::code_compile_file( _buf, _module );
     }
@@ -806,7 +806,7 @@ namespace pybind
         return pybind::marshal_magic_number();
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * python_kernel::marshal_get_object( const char * _buf, size_t _len )
+    PyObject * python_kernel::marshal_get_object( const void * _buf, size_t _len )
     {
         return pybind::marshal_get_object( _buf, _len );
     }

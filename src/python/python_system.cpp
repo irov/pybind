@@ -333,9 +333,9 @@ namespace pybind
         return PyCode_Check( _code );
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * code_compile_file( const char * _buf, const char * _module )
+    PyObject * code_compile_file( const void * _buf, const char * _module )
     {
-        PyObject * code = Py_CompileString( _buf, _module, Py_file_input );
+        PyObject * code = Py_CompileString( (const char *)_buf, _module, Py_file_input );
 
         return code;
     }
@@ -1819,11 +1819,11 @@ namespace pybind
         return py_magic;
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * marshal_get_object( const char * _buf, size_t _len )
+    PyObject * marshal_get_object( const void * _buf, size_t _len )
     {
         Py_ssize_t py_len = (Py_ssize_t)_len;
 
-        char * buf_unconst = const_cast<char *>(_buf);
+        char * buf_unconst = const_cast<char *>(static_cast<const char *>(_buf));
         PyObject * obj = PyMarshal_ReadObjectFromString( buf_unconst, py_len );
 
         return obj;
