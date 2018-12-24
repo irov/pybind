@@ -1559,7 +1559,7 @@ namespace pybind
 
         if( value == nullptr )
         {
-            check_error();
+            pybind::check_error();
 
             return nullptr;
         }

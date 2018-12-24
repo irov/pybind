@@ -793,7 +793,11 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::code_compile_file( const void * _buf, const char * _module )
     {
-        return pybind::code_compile_file( _buf, _module );
+        PyObject * py_code = pybind::code_compile_file( _buf, _module );
+
+        pybind::check_error();
+
+        return py_code;
     }
     //////////////////////////////////////////////////////////////////////////
     bool python_kernel::code_check( PyObject * _code )
@@ -808,7 +812,11 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::marshal_get_object( const void * _buf, size_t _len )
     {
-        return pybind::marshal_get_object( _buf, _len );
+        PyObject * py_code = pybind::marshal_get_object( _buf, _len );
+
+        pybind::check_error();
+
+        return py_code;
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::set_module_finder( PyObject * _finder )
