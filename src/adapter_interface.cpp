@@ -19,6 +19,6 @@ namespace pybind
     {
         (void)_size;
 
-        PYBIND_FREE( _ptr, _size );
+        PYBIND_FREE( _ptr );
     }
 }

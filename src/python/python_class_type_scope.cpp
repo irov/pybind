@@ -1560,7 +1560,7 @@ namespace pybind
     {
         (void)_size;
 
-        PYBIND_FREE( _ptr, _size );
+        PYBIND_FREE( _ptr );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::incref_smart_pointer( void * _impl )
