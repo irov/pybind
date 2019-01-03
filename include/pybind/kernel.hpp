@@ -179,6 +179,7 @@ namespace pybind
             uint32_t ti = this->class_info<T>();
 
             this->remove_type_scope( ti );
+            this->unregister_type_info_extract( ti );
         }
 
         virtual PyObject * scope_create_holder( const class_type_scope_interface_ptr & _scope, void * _ptr ) = 0;

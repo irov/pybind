@@ -85,14 +85,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::finalize()
     {
-#if PYBIND_PYTHON_VERSION < 300 && defined(WITH_THREAD)
-        if( gtstate != nullptr )
-        {
-            PyEval_AcquireThread( gtstate );
-            gtstate = nullptr;
-        }
-#endif
-
         Py_Finalize();
 
 #ifdef PYBIND_STL_SUPPORT
@@ -101,6 +93,8 @@ namespace pybind
 
         for( uint32_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
         {
+            char * name = m_class_info_desc[index].name;
+
             class_type_scope_interface_ptr & scope = m_class_type_scopes[index];
 
             if( scope != nullptr )
@@ -113,7 +107,7 @@ namespace pybind
 
             m_type_cast[index] = nullptr;
 
-            m_class_info_desc[index].name = nullptr;
+            PYBIND_FREE( name );
         }
 
         for( uint32_t index = 0; index != PYBIND_TYPE_COUNT_HASH; ++index )
@@ -376,7 +370,13 @@ namespace pybind
             return false;
         }
 
-        desc.name = _info;
+        size_t len = strlen( _info );
+
+        void * name_memory = PYBIND_MALLOC( len + 1 );
+
+        desc.name = (char *)name_memory;
+
+        strcpy( desc.name, _info );
 
         return true;
     }
@@ -443,6 +443,13 @@ namespace pybind
     {
         const type_cast_ptr & cast = m_type_cast[_info];
 
+#ifndef NDEBUG
+        if( cast == nullptr )
+        {
+            return nullptr;
+        }
+#endif
+
         type_cast * t = cast.get();
 
         return t;
@@ -452,10 +459,12 @@ namespace pybind
     {
         class_type_scope_interface_ptr scope = new python_class_type_scope( this, _name, _info, _user, _pynew, _pydestructor, _pod, _hash );
 
+#ifndef NDEBUG
         if( scope == nullptr )
         {
             return nullptr;
         }
+#endif
 
         m_class_type_scopes[_info] = scope;
 
@@ -466,12 +475,12 @@ namespace pybind
     {
         const class_type_scope_interface_ptr & scope = m_class_type_scopes[_info];
 
+#ifndef NDEBUG
         if( scope == nullptr )
         {
             return;
         }
-
-        this->remove_class_scope_type( scope );
+#endif
 
         scope->finalize();
 
