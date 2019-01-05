@@ -22,7 +22,7 @@ namespace pybind
         }
 
     public:
-        enum_ & add( const char * _id, T _value )
+        enum_ & def( const char * _id, T _value )
         {
             detail::add_module_enum( m_kernel, m_module, _id, (uint32_t)_value );
 
