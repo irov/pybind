@@ -143,20 +143,26 @@ namespace pybind
         m_acquire_mutex = nullptr;
     }
     //////////////////////////////////////////////////////////////////////////
-    void python_kernel::lock_mutex()
+    bool python_kernel::lock_mutex()
     {
-        if( m_acquire_mutex != nullptr )
+        if( m_acquire_mutex == nullptr )
         {
-            m_acquire_mutex->lock( m_mutex.ctx );
+            return false;
         }
+         
+        m_acquire_mutex->lock( m_mutex.ctx );
+
+        return true;        
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::unlock_mutex()
     {
-        if( m_acquire_mutex != nullptr )
+        if( m_acquire_mutex == nullptr )
         {
-            m_acquire_mutex->unlock( m_mutex.ctx );
+            return;
         }
+
+        m_acquire_mutex->unlock( m_mutex.ctx );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::remove_from_module( const char * _name, PyObject * _module )

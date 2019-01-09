@@ -51,7 +51,7 @@ namespace pybind
         virtual void acquire_mutex() = 0;
         virtual void release_mutex() = 0;
 
-        virtual void lock_mutex() = 0;
+        virtual bool lock_mutex() = 0;
         virtual void unlock_mutex() = 0;
 
     public:
