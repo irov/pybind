@@ -779,18 +779,18 @@ namespace pybind
         {
             _scope->add_base_t<T>( &base_::meta_cast<T> );
         }
-
-        template<class Bases, size_t ... I>
-        void add_bases( const class_type_scope_interface_ptr & _scope, std::integer_sequence<uint32_t, I...> )
-        {
-            (_scope->add_base_t<typename std::tuple_element<I, Bases>::type>( &base_::meta_cast<typename std::tuple_element<I, Bases>::type> ), ...);
+        
+        template<class bases_tuple, uint32_t ... I>
+        void setup_bases_i( const class_type_scope_interface_ptr & _scope, std::integer_sequence<uint32_t, I...> )
+        {            
+            (_scope->add_base_t<typename std::tuple_element<I, bases_tuple>::type>( &base_::meta_cast<typename std::tuple_element<I, bases_tuple>::type> ), ...);
         }
 
         void setup_bases( const class_type_scope_interface_ptr & _scope )
         {
             typedef typename bases_type::bases_tuple bases_tuple;
 
-            this->add_bases<bases_tuple>( _scope, std::make_integer_sequence<uint32_t, std::tuple_size<bases_tuple>::value>() );
+            this->setup_bases_i<bases_tuple>( _scope, std::make_integer_sequence<uint32_t, std::tuple_size<bases_tuple>::value>() );
             //this->add_bases<std::get<typename bases_type::bases_tuple>() ...>( _scope );
             //if( arity-- > 0 )_scope->add_base_t<typename B::base0>( &meta_cast<typename B::base0> );
             //if( arity-- > 0 )_scope->add_base_t<typename B::base1>( &meta_cast<typename B::base1> );
@@ -809,7 +809,7 @@ namespace pybind
             //if( arity-- > 0 )_scope->add_base_t<typename B::base14>( &meta_cast<typename B::base14> );
             //if( arity-- > 0 )_scope->add_base_t<typename B::base15>( &meta_cast<typename B::base15> );
         }
-
+        
     protected:
         class_type_scope_interface_ptr m_scope;
 

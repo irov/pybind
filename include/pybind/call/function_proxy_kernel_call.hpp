@@ -14,7 +14,7 @@ namespace pybind
     template<class P, class F, class Ret>
     struct function_proxy_kernel_call_impl
     {
-        template<size_t ... I>
+        template<uint32_t ... I>
         static Ret call( kernel_interface * _kernel, P * _proxy, F f, PyObject * _arg, std::integer_sequence<uint32_t, I...> )
         {
             return (*f)(_kernel, _proxy
@@ -61,8 +61,8 @@ namespace pybind
             if( arg_size + 2 != fn_arity )
             {
                 pybind::throw_exception( "invalid proxy function call args is not equal %d != %d\n"
-                    , (uint32_t)arg_size
-                    , (uint32_t)fn_arity
+                    , arg_size
+                    , fn_arity
                 );
 
                 return nullptr;
