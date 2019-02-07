@@ -46,10 +46,10 @@ namespace pybind
     template<class F>
     struct function_call
     {
-        typedef typename stdex::function_traits<F>::result f_info;
-
         static PyObject * call( kernel_interface * _kernel, F f, PyObject * _arg )
         {
+			typedef typename stdex::function_traits<F>::result f_info;
+
             uint32_t arg_size = (_arg != nullptr) ? _kernel->tuple_size( _arg ) : 0;
             uint32_t fn_arity = f_info::arity;
 
