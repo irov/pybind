@@ -876,6 +876,16 @@ namespace pybind
         pybind::setStdErrorHandle( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::getStdOutHandle()
+    {
+        return pybind::getStdOutHandle();
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::getStdErrorHandle()
+    {
+        return pybind::getStdErrorHandle();
+    }
+    //////////////////////////////////////////////////////////////////////////
     void python_kernel::incref( PyObject * _obj )
     {
         pybind::incref( _obj );
@@ -1372,6 +1382,11 @@ namespace pybind
     void python_kernel::log_va( const char * _format, va_list _va )
     {
         pybind::log_va( _format, _va );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void python_kernel::get_traceback( char * _buffer )
+    {
+        pybind::get_traceback( _buffer );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::error_traceback( const char * _format, ... )

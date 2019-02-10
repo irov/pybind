@@ -123,11 +123,14 @@ namespace pybind
 
         void setStdOutHandle( PyObject * _obj ) override;
         void setStdErrorHandle( PyObject * _obj ) override;
+        PyObject * getStdOutHandle() override;
+        PyObject * getStdErrorHandle() override;
 
     public:
         void log( const char * _format, ... ) override;
         void log_va( const char * _format, va_list _va ) override;
 
+        void get_traceback( char * _buffer ) override;
         void error_traceback( const char * _format, ... ) override;
         void error_traceback_va( const char * _format, va_list _va ) override;
         void error_message( const char * _format, ... ) override;

@@ -257,12 +257,15 @@ namespace pybind
         virtual void call_method_native( PyObject * _obj, const char * _method, PyObject * _args ) = 0;
         virtual PyObject * ask_adapter( void * _self, const class_type_scope_interface_ptr & _scope, const char * _name, PyObject * _args ) = 0;
 
-        virtual void setStdOutHandle( PyObject * _obj ) = 0;
+        virtual void setStdOutHandle( PyObject * _obj ) = 0;        
         virtual void setStdErrorHandle( PyObject * _obj ) = 0;
+        virtual PyObject * getStdOutHandle() = 0;
+        virtual PyObject * getStdErrorHandle() = 0;
 
         virtual void log( const char * _format, ... ) = 0;
         virtual void log_va( const char * _format, va_list _va ) = 0;
 
+        virtual void get_traceback( char * _buffer ) = 0;
         virtual void error_traceback( const char * _format, ... ) = 0;
         virtual void error_traceback_va( const char * _format, va_list _va ) = 0;
         virtual void error_message( const char * _format, ... ) = 0;

@@ -13,8 +13,11 @@ namespace pybind
 
     PYBIND_API void check_error();
 
-    PYBIND_API void setStdErrorHandle( PyObject * _handle );
+    PYBIND_API void setStdErrorHandle( PyObject * _handle );    
     PYBIND_API void setStdOutHandle( PyObject * _handle );
+    PYBIND_API PyObject * getStdErrorHandle();
+    PYBIND_API PyObject * getStdOutHandle();
+
     PYBIND_API PyObject * get_builtins();
 
     PYBIND_API PyObject * module_import( const char * _name, bool & _exsist );
@@ -157,6 +160,7 @@ namespace pybind
     PYBIND_API const char * object_str( PyObject * _obj );
     PYBIND_API int64_t object_hash( PyObject * _obj );
 
+    PYBIND_API void get_traceback( char * _buffer );
     PYBIND_API void error_traceback( const char * _format, ... );
     PYBIND_API void error_traceback_va( const char * _format, va_list _va );
     PYBIND_API void error_message( const char * _format, ... );
