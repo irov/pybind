@@ -1384,9 +1384,9 @@ namespace pybind
         pybind::log_va( _format, _va );
     }
     //////////////////////////////////////////////////////////////////////////
-    void python_kernel::get_traceback( char * _buffer )
+    void python_kernel::get_traceback( char * _buffer, size_t _maxlen )
     {
-        pybind::get_traceback( _buffer );
+        pybind::get_traceback( _buffer, _maxlen );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::error_traceback( const char * _format, ... )

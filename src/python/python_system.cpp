@@ -1443,13 +1443,19 @@ namespace pybind
         return py_hash;
     }
     //////////////////////////////////////////////////////////////////////////
-    void get_traceback( char * _buffer )
+    void get_traceback( char * _buffer, size_t _maxlen )
     {
+        if( _maxlen == 0 )
+        {
+            return;
+        }
+
         PyObject * modtraceback = PyImport_ImportModule( "traceback" );
         PyObject * string_stackFunc = PyObject_GetAttrString( modtraceback, "string_stack" );
         PyObject * string_stackResult = PyObject_CallObject( string_stackFunc, NULL );
         char * sresult = PyBytes_AsString( string_stackResult );
-        strcpy( _buffer, sresult );
+        strncpy( _buffer, sresult, _maxlen );
+        _buffer[_maxlen - 1] = '\0';
         Py_XDECREF( string_stackResult );
         Py_XDECREF( string_stackFunc );
         Py_XDECREF( modtraceback );
