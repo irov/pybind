@@ -766,6 +766,13 @@ namespace pybind
             return this->def_static_proxy_smart_pointer( &C::intrusive_ptr_add_ref, &C::intrusive_ptr_dec_ref );
         }
 
+        base_ & remove_smart_pointer()
+        {
+            m_scope->set_smart_pointer( nullptr );
+
+            return *this;
+        }
+
         base_ & def_bindable()
         {
             bindable_adapter_interface_ptr iadapter =

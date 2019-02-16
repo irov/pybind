@@ -92,7 +92,7 @@ namespace pybind
     {
         PyObject * py_result = _kernel->ask_native( _obj, _tuple.ptr() );
 
-        return detail::extract_operator_t( _kernel, py_result );
+        return detail::extract_operator_t( _kernel, py_result, pybind::borrowed );
     }
     //////////////////////////////////////////////////////////////////////////
     detail::extract_operator_t call_t( kernel_interface * _kernel, PyObject * _obj )

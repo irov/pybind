@@ -670,6 +670,13 @@ namespace pybind
         return py_obj;
     }
     //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::scope_create_weak( const class_type_scope_interface_ptr & _scope, void * _ptr )
+    {
+        PyObject * py_obj = _scope->create_weak( _ptr );
+
+        return py_obj;
+    }
+    //////////////////////////////////////////////////////////////////////////
     bool python_kernel::is_class( PyObject * _obj )
     {
         PyTypeObject * objtype = pybind::object_type( _obj );
@@ -779,6 +786,13 @@ namespace pybind
         void * impl = pybind::detail::get_pod_impl( _obj );
 
         return impl;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool python_kernel::is_class_weak( PyObject * _obj )
+    {
+        bool result = pybind::detail::is_pod_weak( _obj );
+
+        return result;
     }
     //////////////////////////////////////////////////////////////////////////
     bool python_kernel::type_initialize( PyObject * _obj )

@@ -57,6 +57,18 @@ namespace pybind
             return false;
         }
         //////////////////////////////////////////////////////////////////////////
+        bool is_pod_weak( PyObject * _obj )
+        {
+            py_base_object * py_base = (py_base_object *)_obj;
+
+            if( py_base->flag & PY_OBJECT_WEAK )
+            {
+                return true;
+            }
+
+            return false;
+        }
+        //////////////////////////////////////////////////////////////////////////
         void wrap_pod_ptr( PyObject * _obj, void * _impl, bool _holder )
         {
             py_ptr_object * py_ptr = (py_ptr_object *)_obj;
@@ -64,6 +76,21 @@ namespace pybind
             py_ptr->impl = _impl;
 
             py_ptr->flag |= PY_OBJECT_PTR;
+
+            if( _holder == true )
+            {
+                py_ptr->flag |= PY_OBJECT_HOLDER;
+            }
+        }
+        //////////////////////////////////////////////////////////////////////////
+        void wrap_pod_weak( PyObject * _obj, void * _impl, bool _holder )
+        {
+            py_ptr_object * py_ptr = (py_ptr_object *)_obj;
+
+            py_ptr->impl = _impl;
+
+            py_ptr->flag |= PY_OBJECT_PTR;
+            py_ptr->flag |= PY_OBJECT_WEAK;
 
             if( _holder == true )
             {

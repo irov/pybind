@@ -483,7 +483,7 @@ namespace pybind
 
             void * impl = kernel->get_class_impl( _obj );
 
-            if( impl != nullptr )
+            if( impl != nullptr && kernel->is_class_weak( _obj ) == false )
             {
                 scope->call_destructor( _obj, impl );
 
@@ -556,7 +556,7 @@ namespace pybind
 
             void * impl = kernel->get_class_impl( _obj );
 
-            if( impl != nullptr )
+            if( impl != nullptr && kernel->is_class_weak( _obj ) == false )
             {
                 scope->call_destructor( _obj, impl );
 
@@ -1502,6 +1502,24 @@ namespace pybind
         pybind::detail::wrap_pod_ptr( py_self, _impl, true );
 
         this->incref_smart_pointer( _impl );
+
+#ifndef NDEBUG
+        this->addObject( py_self );
+#endif
+
+        return py_self;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * python_class_type_scope::create_weak( void * _impl )
+    {
+        if( m_pod_size != 0 )
+        {
+            return nullptr;
+        }
+
+        PyObject * py_self = pybind::detail::alloc_class( m_pytypeobject, nullptr, nullptr );
+
+        pybind::detail::wrap_pod_weak( py_self, _impl, true );
 
 #ifndef NDEBUG
         this->addObject( py_self );

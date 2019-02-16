@@ -108,6 +108,7 @@ namespace pybind
 
         virtual PyObject * create_class( void * _impl ) = 0;
         virtual PyObject * create_holder( void * _impl ) = 0;
+        virtual PyObject * create_weak( void * _impl ) = 0;
         virtual PyObject * create_pod( void ** _impl ) = 0;
 
         virtual void * meta_cast( uint32_t _info, void * _impl ) = 0;

@@ -183,6 +183,7 @@ namespace pybind
         }
 
         virtual PyObject * scope_create_holder( const class_type_scope_interface_ptr & _scope, void * _ptr ) = 0;
+        virtual PyObject * scope_create_weak( const class_type_scope_interface_ptr & _scope, void * _ptr ) = 0;
 
         template<class T>
         PyObject * scope_create_holder_t( T * _ptr )
@@ -190,6 +191,16 @@ namespace pybind
             const class_type_scope_interface_ptr & scope = this->class_scope<T>();
 
             PyObject * py_obj = this->scope_create_holder( scope, _ptr );
+
+            return py_obj;
+        }
+
+        template<class T>
+        PyObject * scope_create_weak_t( T * _ptr )
+        {
+            const class_type_scope_interface_ptr & scope = this->class_scope<T>();
+
+            PyObject * py_obj = this->scope_create_weak( scope, _ptr);
 
             return py_obj;
         }
@@ -235,6 +246,7 @@ namespace pybind
         }
 
         virtual void * get_class_impl( PyObject * _obj ) = 0;
+        virtual bool is_class_weak( PyObject * _obj ) = 0;
         virtual bool type_initialize( PyObject * _obj ) = 0;
 
     public:

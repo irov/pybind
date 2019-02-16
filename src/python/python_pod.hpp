@@ -11,6 +11,7 @@ namespace pybind
     static const uint32_t PY_OBJECT_HOLDER = 0x00000001;
     static const uint32_t PY_OBJECT_PTR = 0x00000002;
     static const uint32_t PY_OBJECT_HASH = 0x00000004;
+    static const uint32_t PY_OBJECT_WEAK = 0x00000008;
 
     static const uint32_t PY_OBJECT_POD = 0x00000010;
     static const uint32_t PY_OBJECT_POD4 = PY_OBJECT_POD << 0;
@@ -22,7 +23,9 @@ namespace pybind
     namespace detail
     {
         bool is_pod_holder( PyObject * _obj );
+        bool is_pod_weak( PyObject * _obj );
         void wrap_pod_ptr( PyObject * _obj, void * _impl, bool _holder );
+        void wrap_pod_weak( PyObject * _obj, void * _impl, bool _holder );
         void wrap_pod( PyObject * _obj, void ** _impl, uint32_t _size, bool _hash );
         int64_t get_pod_hash( PyObject * _obj );
         void set_pod_hash( PyObject * _obj, int64_t _hash );
