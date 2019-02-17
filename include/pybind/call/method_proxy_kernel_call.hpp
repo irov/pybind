@@ -14,7 +14,7 @@ namespace pybind
     template<class P, class C, class F, class Ret>
     struct method_proxy_kernel_call_impl
     {
-        template<size_t ... I>
+        template<uint32_t ... I>
         static Ret call( kernel_interface * _kernel, P * _proxy, C * _obj, F f, PyObject * _arg, std::integer_sequence<uint32_t, I...> )
         {
             return (_proxy->*f)(_kernel, _obj
