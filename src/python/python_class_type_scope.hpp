@@ -68,6 +68,7 @@ namespace pybind
 
         PyObject * create_class( void * _impl ) override;
         PyObject * create_holder( void * _impl ) override;
+        PyObject * create_weak( void * _impl ) override;
         PyObject * create_pod( void ** _impl ) override;
 
         void * meta_cast( uint32_t _info, void * _impl ) override;

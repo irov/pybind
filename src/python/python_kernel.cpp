@@ -670,6 +670,13 @@ namespace pybind
         return py_obj;
     }
     //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::scope_create_weak( const class_type_scope_interface_ptr & _scope, void * _ptr )
+    {
+        PyObject * py_obj = _scope->create_weak( _ptr );
+
+        return py_obj;
+    }
+    //////////////////////////////////////////////////////////////////////////
     bool python_kernel::is_class( PyObject * _obj )
     {
         PyTypeObject * objtype = pybind::object_type( _obj );
@@ -781,6 +788,13 @@ namespace pybind
         return impl;
     }
     //////////////////////////////////////////////////////////////////////////
+    bool python_kernel::is_class_weak( PyObject * _obj )
+    {
+        bool result = pybind::detail::is_pod_weak( _obj );
+
+        return result;
+    }
+    //////////////////////////////////////////////////////////////////////////
     bool python_kernel::type_initialize( PyObject * _obj )
     {
         return pybind::type_initialize( _obj );
@@ -874,6 +888,16 @@ namespace pybind
     void python_kernel::setStdErrorHandle( PyObject * _obj )
     {
         pybind::setStdErrorHandle( _obj );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::getStdOutHandle()
+    {
+        return pybind::getStdOutHandle();
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::getStdErrorHandle()
+    {
+        return pybind::getStdErrorHandle();
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::incref( PyObject * _obj )
@@ -1372,6 +1396,11 @@ namespace pybind
     void python_kernel::log_va( const char * _format, va_list _va )
     {
         pybind::log_va( _format, _va );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void python_kernel::get_traceback( char * _buffer, size_t _maxlen )
+    {
+        pybind::get_traceback( _buffer, _maxlen );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::error_traceback( const char * _format, ... )

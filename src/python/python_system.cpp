@@ -198,6 +198,24 @@ namespace pybind
         PyObject_SetAttrString( sysModule, "stdout", _handle );
     }
     //////////////////////////////////////////////////////////////////////////
+    PyObject * getStdErrorHandle()
+    {
+        PyObject * sysModule = PyImport_AddModule( "sys" );
+
+        PyObject * stderr_handle = PyObject_GetAttrString( sysModule, "stderr" );
+
+        return stderr_handle;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * getStdOutHandle()
+    {
+        PyObject * sysModule = PyImport_AddModule( "sys" );
+
+        PyObject * stdout_handle = PyObject_GetAttrString( sysModule, "stdout" );
+
+        return stdout_handle;
+    }
+    //////////////////////////////////////////////////////////////////////////
     PyObject * get_builtins()
     {
 #   if PYBIND_PYTHON_VERSION < 300
@@ -1423,6 +1441,24 @@ namespace pybind
         int64_t py_hash = (int64_t)PyObject_Hash( _obj );
 
         return py_hash;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void get_traceback( char * _buffer, size_t _maxlen )
+    {
+        if( _maxlen == 0 )
+        {
+            return;
+        }
+
+        PyObject * modtraceback = PyImport_ImportModule( "traceback" );
+        PyObject * string_stackFunc = PyObject_GetAttrString( modtraceback, "string_stack" );
+        PyObject * string_stackResult = PyObject_CallObject( string_stackFunc, NULL );
+        char * sresult = PyBytes_AsString( string_stackResult );
+        strncpy( _buffer, sresult, _maxlen );
+        _buffer[_maxlen - 1] = '\0';
+        Py_XDECREF( string_stackResult );
+        Py_XDECREF( string_stackFunc );
+        Py_XDECREF( modtraceback );
     }
     //////////////////////////////////////////////////////////////////////////
     void error_traceback( const char * _format, ... )

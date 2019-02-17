@@ -48,10 +48,10 @@ namespace pybind
     template<class P, class C, class F>
     struct method_proxy_kernel_call
     {
-        typedef typename stdex::function_traits<F>::result f_info;
-
         static PyObject * call( kernel_interface * _kernel, P * _proxy, C * _obj, F f, PyObject * _arg )
         {
+			typedef typename stdex::function_traits<F>::result f_info;
+
             uint32_t arg_size = _kernel->tuple_size( _arg );
             uint32_t fn_arity = f_info::arity;
 

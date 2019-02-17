@@ -90,6 +90,7 @@ namespace pybind
         void remove_class_scope_type( const class_type_scope_interface_ptr & _scope ) override;
 
         PyObject * scope_create_holder( const class_type_scope_interface_ptr & _scope, void * _ptr ) override;
+        PyObject * scope_create_weak( const class_type_scope_interface_ptr & _scope, void * _ptr ) override;
 
         void * meta_cast_scope( void * _self, uint32_t _scope_name, uint32_t _class_name, const class_type_scope_interface_ptr & _scope ) override;
 
@@ -99,6 +100,8 @@ namespace pybind
         bool instance_of_type( PyObject * _obj, uint32_t _tinfo ) override;
 
         void * get_class_impl( PyObject * _obj ) override;
+        bool is_class_weak( PyObject * _obj ) override;
+
         bool type_initialize( PyObject * _obj ) override;
 
     public:
@@ -123,11 +126,14 @@ namespace pybind
 
         void setStdOutHandle( PyObject * _obj ) override;
         void setStdErrorHandle( PyObject * _obj ) override;
+        PyObject * getStdOutHandle() override;
+        PyObject * getStdErrorHandle() override;
 
     public:
         void log( const char * _format, ... ) override;
         void log_va( const char * _format, va_list _va ) override;
 
+        void get_traceback( char * _buffer, size_t _maxlen ) override;
         void error_traceback( const char * _format, ... ) override;
         void error_traceback_va( const char * _format, va_list _va ) override;
         void error_message( const char * _format, ... ) override;

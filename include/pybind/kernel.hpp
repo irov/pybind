@@ -183,6 +183,7 @@ namespace pybind
         }
 
         virtual PyObject * scope_create_holder( const class_type_scope_interface_ptr & _scope, void * _ptr ) = 0;
+        virtual PyObject * scope_create_weak( const class_type_scope_interface_ptr & _scope, void * _ptr ) = 0;
 
         template<class T>
         PyObject * scope_create_holder_t( T * _ptr )
@@ -190,6 +191,16 @@ namespace pybind
             const class_type_scope_interface_ptr & scope = this->class_scope<T>();
 
             PyObject * py_obj = this->scope_create_holder( scope, _ptr );
+
+            return py_obj;
+        }
+
+        template<class T>
+        PyObject * scope_create_weak_t( T * _ptr )
+        {
+            const class_type_scope_interface_ptr & scope = this->class_scope<T>();
+
+            PyObject * py_obj = this->scope_create_weak( scope, _ptr);
 
             return py_obj;
         }
@@ -235,6 +246,7 @@ namespace pybind
         }
 
         virtual void * get_class_impl( PyObject * _obj ) = 0;
+        virtual bool is_class_weak( PyObject * _obj ) = 0;
         virtual bool type_initialize( PyObject * _obj ) = 0;
 
     public:
@@ -257,12 +269,15 @@ namespace pybind
         virtual void call_method_native( PyObject * _obj, const char * _method, PyObject * _args ) = 0;
         virtual PyObject * ask_adapter( void * _self, const class_type_scope_interface_ptr & _scope, const char * _name, PyObject * _args ) = 0;
 
-        virtual void setStdOutHandle( PyObject * _obj ) = 0;
+        virtual void setStdOutHandle( PyObject * _obj ) = 0;        
         virtual void setStdErrorHandle( PyObject * _obj ) = 0;
+        virtual PyObject * getStdOutHandle() = 0;
+        virtual PyObject * getStdErrorHandle() = 0;
 
         virtual void log( const char * _format, ... ) = 0;
         virtual void log_va( const char * _format, va_list _va ) = 0;
 
+        virtual void get_traceback( char * _buffer, size_t _maxlen ) = 0;
         virtual void error_traceback( const char * _format, ... ) = 0;
         virtual void error_traceback_va( const char * _format, va_list _va ) = 0;
         virtual void error_message( const char * _format, ... ) = 0;

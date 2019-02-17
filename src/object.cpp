@@ -32,7 +32,6 @@ namespace pybind
     object::object( const detail::extract_operator_t & _extract )
         : base( _extract.kernel(), _extract.ptr() )
     {
-
     }
     //////////////////////////////////////////////////////////////////////////
     object::object( kernel_interface * _kernel, PyObject * _obj )
@@ -84,7 +83,7 @@ namespace pybind
     {
         PyObject * py_attr = m_kernel->get_attr( m_obj, _name );
 
-        return pybind::object( m_kernel, py_attr, pybind::borrowed );
+        return pybind::object( m_kernel, py_attr );
     }
     //////////////////////////////////////////////////////////////////////////
     detail::extract_operator_t object::extract() const

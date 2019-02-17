@@ -257,6 +257,28 @@ namespace pybind
         }
 
         template<class P, class F>
+        base_ & def_proxy_static_kernel_args( const char * _name, P * _proxy, F f )
+        {
+            method_adapter_interface_ptr iadapter =
+                new method_adapter_proxy_kernel_args<C, P, F>( _name, f, _proxy );
+
+            m_scope->add_method( iadapter );
+
+            return *this;
+        }
+
+        template<class P, class F>
+        base_ & def_proxy_static_kernel_args( const char * _name, const stdex::intrusive_ptr<P> & _proxy, F f )
+        {
+            method_adapter_interface_ptr iadapter =
+                new method_adapter_proxy_kernel_args<C, P, F>( _name, f, _proxy.get() );
+
+            m_scope->add_method( iadapter );
+
+            return *this;
+        }
+
+        template<class P, class F>
         base_ & def_proxy_static_args( const char * _name, P * _proxy, F f )
         {
             method_adapter_interface_ptr iadapter =
@@ -742,6 +764,13 @@ namespace pybind
         base_ & def_smart_pointer()
         {
             return this->def_static_proxy_smart_pointer( &C::intrusive_ptr_add_ref, &C::intrusive_ptr_dec_ref );
+        }
+
+        base_ & remove_smart_pointer()
+        {
+            m_scope->set_smart_pointer( nullptr );
+
+            return *this;
         }
 
         base_ & def_bindable()
