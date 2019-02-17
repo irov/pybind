@@ -1,5 +1,6 @@
 #pragma once
 
+extern "C" {
 #include "Include/Python.h"
 #include "Include/structmember.h"
 #include "Include/osdefs.h"
@@ -11,3 +12,4 @@
 #if PYBIND_PYTHON_VERSION >= 350
 #   include "Include/pylifecycle.h"
 #endif
+}
