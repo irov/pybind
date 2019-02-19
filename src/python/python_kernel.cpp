@@ -463,7 +463,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     class_type_scope_interface_ptr python_kernel::create_new_type_scope( uint32_t _info, const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash )
     {
-        class_type_scope_interface_ptr scope = new python_class_type_scope( this, _name, _info, _user, _pynew, _pydestructor, _pod, _hash );
+        class_type_scope_interface_ptr scope( new python_class_type_scope( this, _name, _info, _user, _pynew, _pydestructor, _pod, _hash ) );
 
 #ifndef NDEBUG
         if( scope == nullptr )

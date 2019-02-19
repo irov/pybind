@@ -708,7 +708,7 @@ namespace pybind
         Py_INCREF( (PyObject*)m_pytypeobject );
         pybind::module_addobject( py_module, m_pytypeobject->tp_name, (PyObject*)m_pytypeobject );
 
-        m_kernel->cache_class_scope_type( this );
+        m_kernel->cache_class_scope_type( python_class_type_scope_ptr( this ) );
 
         return true;
     }
@@ -717,7 +717,7 @@ namespace pybind
     {
         PyDict_Clear( m_pytypeobject->tp_dict );
 
-        m_kernel->remove_class_scope_type( this );
+        m_kernel->remove_class_scope_type( python_class_type_scope_ptr( this ) );
 
         Py_DECREF( (PyObject*)m_pytypeobject );
 
