@@ -34,4 +34,10 @@ namespace pybind
     };
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<type_cast> type_cast_ptr;
+    //////////////////////////////////////////////////////////////////////////
+    template<class T>
+    type_cast_ptr make_type_cast()
+    {
+        return type_cast_ptr( new T() );
+    }
 }

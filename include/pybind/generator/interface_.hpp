@@ -14,11 +14,11 @@ namespace pybind
 
     public:
         interface_( kernel_interface * _kernel, const char * _name, bool external_extract = true, PyObject * _module = 0 )
-            : base_<C, B>( _kernel, _name, 0, new class_new_invalid, nullptr, 0, false, _module )
+            : base_<C, B>( _kernel, _name, 0, new_adapter_interface_ptr( new class_new_invalid ), nullptr, 0, false, _module )
         {
             if( external_extract == true )
             {
-                this->setup_extract( new extract_type_ptr );
+                this->setup_extract( type_cast_ptr( new extract_type_ptr ) );
             }
         }
     };

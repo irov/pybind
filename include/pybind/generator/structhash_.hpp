@@ -18,7 +18,8 @@ namespace pybind
         {
             if( external_extract == true )
             {
-                this->setup_extract( new extract_type_ref );
+                type_cast_ptr extract( new extract_type_ref );
+                this->setup_extract( extract );
             }
         }
 

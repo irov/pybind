@@ -18,7 +18,9 @@ namespace pybind
         {
             if( external_extract == true )
             {
-                this->setup_extract( new extract_type_ref );
+                type_cast_ptr cast( new extract_type_ref );
+
+                this->setup_extract( cast );
             }
         }
 
@@ -28,11 +30,9 @@ namespace pybind
         {
             (void)_init;
 
-            constructor_adapter_interface_ptr ctr =
-                new constructor_placement<C, init<Args...> >();
-
             const class_type_scope_interface_ptr & scope = base_<C, B>::get_scope();
 
+            constructor_adapter_interface_ptr ctr( new constructor_placement<C, init<Args...> > );
             scope->set_construct( ctr );
 
             return *this;
