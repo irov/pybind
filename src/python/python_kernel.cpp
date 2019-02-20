@@ -871,6 +871,11 @@ namespace pybind
         pybind::call_method_native( _obj, _method, _args );
     }
     //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::ask_method_native( PyObject * _obj, const char * _method, PyObject * _args )
+    {
+        return pybind::ask_method_native( _obj, _method, _args );
+    }
+    //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::ask_adapter( void * _self, const class_type_scope_interface_ptr & _scope, const char * _name, PyObject * _args )
     {
         method_adapter_interface * iadapter = _scope->get_method( _name );
