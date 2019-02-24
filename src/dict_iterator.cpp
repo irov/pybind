@@ -16,7 +16,7 @@ namespace pybind
     dict_iterator::dict_iterator( kernel_interface * _kernel, PyObject * _obj, t_dict_iterator_end_tag )
         : m_kernel( _kernel )
         , m_obj( _obj )
-        , m_pos( (size_type)(-1) )
+        , m_pos( ~0 )
         , m_key( nullptr )
         , m_value( nullptr )
     {
@@ -46,6 +46,16 @@ namespace pybind
         return *this;
     }
     //////////////////////////////////////////////////////////////////////////
+    dict_pair_value dict_iterator::operator -> () const
+    {
+        return dict_pair_value( m_kernel, m_key, m_value );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    dict_pair_value dict_iterator::operator * () const
+    {
+        return dict_pair_value( m_kernel, m_key, m_value );
+    }
+    //////////////////////////////////////////////////////////////////////////
     bool dict_iterator::operator == ( const dict_iterator & _it ) const
     {
         if( m_obj != _it.m_obj )
@@ -70,7 +80,7 @@ namespace pybind
     {
         if( m_kernel->dict_next( m_obj, m_pos, &m_key, &m_value ) == false )
         {
-            m_pos = (size_type)(-1);
+            m_pos = ~0;
         }
 
         return *this;

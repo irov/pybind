@@ -3,6 +3,8 @@
 #include "pybind/types.hpp"
 #include "pybind/helper.hpp"
 
+#include "pybind/helper/dict_pair_value.hpp"
+
 namespace pybind
 {
     class t_dict_iterator_end_tag
@@ -24,6 +26,10 @@ namespace pybind
 
     public:
         dict_iterator & operator = ( const dict_iterator & _r );
+
+    public:
+        dict_pair_value operator -> () const;
+        dict_pair_value operator * () const;
 
     public:
         bool operator == ( const dict_iterator & _it ) const;

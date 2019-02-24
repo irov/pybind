@@ -32,7 +32,7 @@ namespace pybind
     struct py_hash_object
         : public py_base_object
     {
-        uint64_t hash;
+        int64_t hash;
     };
     //////////////////////////////////////////////////////////////////////////
     template<uint32_t I>
@@ -115,7 +115,7 @@ namespace pybind
 
             py_pod_hash->flag |= PY_OBJECT_POD << I;
             py_pod_hash->flag |= PY_OBJECT_HASH;
-            py_pod_hash->hash = (uint64_t)-1;
+            py_pod_hash->hash = -1;
 
             *_impl = (void *)py_pod_hash->buff;
         }

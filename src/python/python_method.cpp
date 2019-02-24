@@ -58,7 +58,7 @@ namespace pybind
 
             method_adapter_interface * adapter = mct->iadapter;
 
-            DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( kernel, scope->get_name(), adapter->getName(), _args, _kwds );
+            DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( kernel, scope->get_name(), adapter->getName(), _args, _kwds );            
             PyObject * py_value = adapter->call( kernel, impl, scope, _args, _kwds );
             DEBUG_PYBIND_NOTIFY_END_BIND_CALL( kernel, scope->get_name(), adapter->getName(), _args, _kwds );
 
@@ -66,10 +66,25 @@ namespace pybind
         }
         catch( const pybind_exception & _ex )
         {
-            pybind::error_message( "descr_call2: obj %s method %s invalid call exception '%s'"
+            pybind::error_message( "descr_call2: obj %s method %s invalid call pybind exception '%s'"
                 , pybind::object_str( mct->self )
                 , mct->iadapter->getName()
                 , _ex.what()
+            );
+        }
+        catch( const std::exception & _ex )
+        {
+            pybind::error_message( "descr_call2: obj %s method %s invalid call std exception '%s'"
+                , pybind::object_str( mct->self )
+                , mct->iadapter->getName()
+                , _ex.what()
+            );
+        }
+        catch( ... )
+        {
+            pybind::error_message( "descr_call2: obj %s method %s invalid call ... exception"
+                , pybind::object_str( mct->self )
+                , mct->iadapter->getName()
             );
         }
 

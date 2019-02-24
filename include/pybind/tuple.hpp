@@ -2,6 +2,8 @@
 
 #include "pybind/object.hpp"
 
+#include "pybind/helper/tuple_const_iterator.hpp"
+
 namespace pybind
 {
     class PYBIND_API tuple
@@ -33,6 +35,13 @@ namespace pybind
     public:
         size_type size() const;
         bool empty() const;
+
+    public:
+        typedef tuple_const_iterator const_iterator;
+
+    public:
+        const_iterator begin() const;
+        const_iterator end() const;
     };
     //////////////////////////////////////////////////////////////////////////	
     PYBIND_API pybind::tuple make_tuple_i( kernel_interface * _kernel, std::initializer_list<detail::import_operator_t> && _t );

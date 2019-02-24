@@ -65,6 +65,18 @@ namespace pybind
     {
         return this->size() == 0;
     }
+    //////////////////////////////////////////////////////////////////////////
+    tuple::const_iterator tuple::begin() const
+    {
+        return const_iterator( m_kernel, m_obj, 0 );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    tuple::const_iterator tuple::end() const
+    {
+        size_type size = this->size();
+
+        return const_iterator( m_kernel, m_obj, size );
+    }
     //////////////////////////////////////////////////////////////////////////	
     pybind::tuple make_tuple_t( kernel_interface * _kernel )
     {

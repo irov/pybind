@@ -58,7 +58,14 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     dict::iterator dict::begin() const
     {
-        return dict_iterator( m_kernel, m_obj );
+        if( m_obj != nullptr )
+        {
+            return dict_iterator( m_kernel, m_obj );
+        }
+        else
+        {
+            return dict::iterator( m_kernel, m_obj, t_dict_iterator_end_tag() );
+        }
     }
     //////////////////////////////////////////////////////////////////////////
     dict::iterator dict::end() const
