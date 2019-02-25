@@ -77,6 +77,9 @@ namespace pybind
         virtual void set_current_module( PyObject * _module ) = 0;
         virtual PyObject * get_current_module() const = 0;
 
+        virtual observer_bind_call * set_observer_bind_call( observer_bind_call * _observer ) = 0;
+        virtual observer_bind_call * get_observer_bind_call() = 0;
+
     public:
         virtual void * unwrap( PyObject * _obj ) = 0;
         virtual bool is_wrap( PyObject * _obj ) = 0;

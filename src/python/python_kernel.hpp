@@ -58,6 +58,9 @@ namespace pybind
         void set_current_module( PyObject * _module ) override;
         PyObject * get_current_module() const override;
 
+        observer_bind_call * set_observer_bind_call( observer_bind_call * _observer ) override;
+        observer_bind_call * get_observer_bind_call() override;
+
     public:
         void * unwrap( PyObject * _obj ) override;
         bool is_wrap( PyObject * _obj ) override;

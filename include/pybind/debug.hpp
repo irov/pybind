@@ -5,7 +5,8 @@
 
 namespace pybind
 {
-    PYBIND_API void set_observer_bind_call( observer_bind_call * _observer );
+    PYBIND_API observer_bind_call * set_observer_bind_call( observer_bind_call * _observer );
+    PYBIND_API observer_bind_call * get_observer_bind_call();
     PYBIND_API void notify_begin_bind_call( kernel_interface * _kernel, const char * _className, const char * _functionName, PyObject * _args, PyObject * _kwds );
     PYBIND_API void notify_end_bind_call( kernel_interface * _kernel, const char * _className, const char * _functionName, PyObject * _args, PyObject * _kwds );
 

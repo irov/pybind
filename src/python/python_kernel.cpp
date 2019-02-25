@@ -2,6 +2,7 @@
 #include "python_system.hpp"
 
 #include "pybind/exception.hpp"
+#include "pybind/debug.hpp"
 
 #include "pybind/method_interface.hpp"
 
@@ -296,6 +297,16 @@ namespace pybind
     PyObject * python_kernel::get_current_module() const
     {
         return m_current_module;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    observer_bind_call * python_kernel::set_observer_bind_call( observer_bind_call * _observer )
+    {
+        return pybind::set_observer_bind_call( _observer );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    observer_bind_call * python_kernel::get_observer_bind_call()
+    {
+        return pybind::get_observer_bind_call();
     }
     //////////////////////////////////////////////////////////////////////////
     void * python_kernel::unwrap( PyObject * _obj )
