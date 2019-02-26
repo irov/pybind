@@ -16,7 +16,7 @@ namespace pybind
     dict_iterator::dict_iterator( kernel_interface * _kernel, PyObject * _obj, t_dict_iterator_end_tag )
         : m_kernel( _kernel )
         , m_obj( _obj )
-        , m_pos( ~0 )
+        , m_pos( ~0u )
         , m_key( nullptr )
         , m_value( nullptr )
     {
@@ -80,7 +80,7 @@ namespace pybind
     {
         if( m_kernel->dict_next( m_obj, m_pos, &m_key, &m_value ) == false )
         {
-            m_pos = ~0;
+            m_pos = ~0u;
         }
 
         return *this;
