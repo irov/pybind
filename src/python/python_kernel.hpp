@@ -24,6 +24,7 @@ namespace pybind
         void finalize();
 
     public:
+        void collect() override;
         void destroy() override;
 
     public:

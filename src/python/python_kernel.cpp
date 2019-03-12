@@ -127,6 +127,12 @@ namespace pybind
         m_pods.finalize();
     }
     //////////////////////////////////////////////////////////////////////////
+    void python_kernel::collect()
+    {
+        PyType_ClearCache();
+        PyGC_Collect();
+    }
+    //////////////////////////////////////////////////////////////////////////
     void python_kernel::destroy()
     {
         this->finalize();

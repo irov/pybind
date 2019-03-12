@@ -45,6 +45,7 @@ namespace pybind
         virtual ~kernel_interface() {};
 
     public:
+        virtual void collect() = 0;
         virtual void destroy() = 0;
 
     public:
