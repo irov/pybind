@@ -84,8 +84,6 @@ namespace pybind
         template<class ... T, uint32_t ... I>
         inline detail::extract_operator_t call_args_ii( args && _args, std::tuple<T ...> && _t, std::integer_sequence<uint32_t, I...> ) const
         {
-            pybind::mutex_scope scope( m_kernel );
-
             return this->call_args_i( { detail::import_operator_t( m_kernel, std::get<I>( _t ) ) ... }
                 , _args
             );
@@ -94,6 +92,8 @@ namespace pybind
         template<class ... T>
         inline detail::extract_operator_t call_args( T && ... _t ) const
         {
+            pybind::mutex_scope scope( m_kernel );
+
             return this->call_args_ii( std::get<sizeof ... (T) - 1u>( std::make_tuple( _t... ) )
                 , std::make_tuple( _t... )
                 , std::make_integer_sequence<uint32_t, sizeof ... (T) - 1u>()
