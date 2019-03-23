@@ -1443,14 +1443,24 @@ namespace pybind
         return py_hash;
     }
     //////////////////////////////////////////////////////////////////////////
-    void get_traceback( char * _buffer, size_t _maxlen )
+    bool get_traceback( char * _buffer, size_t _maxlen )
     {
         if( _maxlen == 0 )
         {
-            return;
+            return true;
         }
 
-        PyObject * modtraceback = PyImport_ImportModule( "traceback" );
+        PyObject * modtraceback = PyImport_ImportModule( "traceback" );        
+
+        if( modtraceback == nullptr )
+        {
+            PyErr_Clear();
+
+            _buffer[0] = '\0';
+
+            return false;
+        }
+
         PyObject * string_stackFunc = PyObject_GetAttrString( modtraceback, "string_stack" );
         PyObject * string_stackResult = PyObject_CallObject( string_stackFunc, NULL );
         char * sresult = PyBytes_AsString( string_stackResult );
@@ -1459,6 +1469,8 @@ namespace pybind
         Py_XDECREF( string_stackResult );
         Py_XDECREF( string_stackFunc );
         Py_XDECREF( modtraceback );
+
+        return true;
     }
     //////////////////////////////////////////////////////////////////////////
     void error_traceback( const char * _format, ... )
