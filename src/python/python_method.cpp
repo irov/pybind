@@ -47,7 +47,7 @@ namespace pybind
 
             if( impl == nullptr )
             {
-                pybind::error_message( "descr_call2: method %s invalid call unbind object"
+                pybind::error_message( "descr_call2: method '%s' invalid call unbind object"
                     , mct->iadapter->getName()
                 );
 
@@ -66,7 +66,7 @@ namespace pybind
         }
         catch( const pybind_exception & _ex )
         {
-            pybind::error_message( "descr_call2: obj %s method %s invalid call pybind exception '%s'"
+            pybind::error_message( "descr_call2: obj '%s' method '%s' invalid call pybind exception '%s'"
                 , pybind::object_str( mct->self )
                 , mct->iadapter->getName()
                 , _ex.what()
@@ -74,7 +74,7 @@ namespace pybind
         }
         catch( const std::exception & _ex )
         {
-            pybind::error_message( "descr_call2: obj %s method %s invalid call std exception '%s'"
+            pybind::error_message( "descr_call2: obj '%s' method '%s' invalid call std exception '%s'"
                 , pybind::object_str( mct->self )
                 , mct->iadapter->getName()
                 , _ex.what()
@@ -82,7 +82,7 @@ namespace pybind
         }
         catch( ... )
         {
-            pybind::error_message( "descr_call2: obj %s method %s invalid call ... exception"
+            pybind::error_message( "descr_call2: obj '%s' method '%s' invalid call ... exception"
                 , pybind::object_str( mct->self )
                 , mct->iadapter->getName()
             );
