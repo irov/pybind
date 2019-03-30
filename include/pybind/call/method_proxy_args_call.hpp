@@ -59,6 +59,7 @@ namespace pybind
             static_assert(std::is_same<typename f_info::first_param, pybind::kernel_interface *>::value == false, "[pybind] use kernel bind");
             static_assert(std::is_same<typename f_info::last_param, const pybind::args &>::value == true, "[pybind] add args");
 
+#ifndef NDEBUG
             if( arg_size + 2 < fn_arity )
             {
                 pybind::throw_exception( "invalid proxy method call args is not equal %d != %d\n"
@@ -68,6 +69,7 @@ namespace pybind
 
                 return nullptr;
             }
+#endif
 
             PyObject * ret = method_proxy_args_call_ret_impl<P, C, F, f_info::arity - 2, typename f_info::ret_type>::call( _kernel, _proxy, _obj, f, _arg );
 
