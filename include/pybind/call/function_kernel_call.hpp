@@ -56,6 +56,7 @@ namespace pybind
             static_assert(std::is_same<typename f_info::first_param, pybind::kernel_interface *>::value == true, "[pybind] add kernel");
             static_assert(std::is_same<typename f_info::last_param, const pybind::args &>::value == false, "[pybind] use args bind");
 
+#ifndef NDEBUG
             if( arg_size + 1 != fn_arity )
             {
                 pybind::throw_exception( "invalid function call args is not equal %d != %d\n"
@@ -65,6 +66,7 @@ namespace pybind
 
                 return nullptr;
             }
+#endif
 
             PyObject * ret = function_kernel_call_ret_impl<F, f_info::arity - 1, typename f_info::ret_type>::call( _kernel, f, _arg );
 
