@@ -72,9 +72,6 @@ namespace pybind
         virtual PyTypeObject * get_pod_type( uint32_t _pod, bool _hash ) = 0;
 
     public:
-        virtual void undef_adapter( const char * _name, PyObject * _module ) = 0;
-
-    public:
         virtual void set_current_module( PyObject * _module ) = 0;
         virtual PyObject * get_current_module() const = 0;
 
@@ -178,9 +175,14 @@ namespace pybind
         }
 
         template<class T>
-        void remove_scope()
+        void remove_scope( PyObject * _module )
         {
             uint32_t ti = this->class_info<T>();
+
+            const class_type_scope_interface_ptr & scope = this->get_class_type_scope( ti );
+
+            const char * name = scope->get_name();
+            this->remove_from_module( name, _module );
 
             this->remove_type_scope( ti );
             this->unregister_type_info_extract( ti );

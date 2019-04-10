@@ -50,9 +50,6 @@ namespace pybind
         method_adapter_interface * get_method_adapter( PyObject * _obj ) override;
 
     public:
-        void undef_adapter( const char * _name, PyObject * _module ) override;
-
-    public:
         PyTypeObject * get_pod_type( uint32_t _pod, bool _hash ) override;
 
     public:

@@ -188,8 +188,7 @@ namespace pybind
             }
         }
 
-        PyObject * py_none = pybind::ret_none();
-        pybind::module_addobject( _module, _name, py_none );
+        pybind::module_removeobject( _module, _name );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::def_function_adapter( const function_adapter_interface_ptr & _adapter, bool _native, PyObject * _module )
@@ -212,24 +211,6 @@ namespace pybind
         const char * name = _adapter->getName();
 
         pybind::module_addobject( _module, name, py_func );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    void python_kernel::undef_adapter( const char * _name, PyObject * _module )
-    {
-        if( _module == nullptr )
-        {
-            _module = this->get_current_module();
-
-            if( _module == nullptr )
-            {
-                pybind::throw_exception( "def_function_adapter not setup module!"
-                );
-
-                return;
-            }
-        }
-
-        pybind::module_removeobject( _module, _name );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::def_functor_adapter( const functor_adapter_interface_ptr & _adapter, bool _native, PyObject * _module )
