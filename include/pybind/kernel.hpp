@@ -178,12 +178,6 @@ namespace pybind
         void remove_scope( PyObject * _module )
         {
             uint32_t ti = this->class_info<T>();
-
-            const class_type_scope_interface_ptr & scope = this->get_class_type_scope( ti );
-
-            const char * name = scope->get_name();
-            this->remove_from_module( name, _module );
-
             this->remove_type_scope( ti );
             this->unregister_type_info_extract( ti );
         }
