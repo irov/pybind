@@ -32,6 +32,7 @@ namespace pybind
         void release_mutex() override;
 
     protected:
+        bool try_lock_mutex() override;
         bool lock_mutex() override;
         void unlock_mutex() override;
 

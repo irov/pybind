@@ -37,6 +37,7 @@ namespace pybind
         else
         {
             m_mutex.ctx = nullptr;
+            m_mutex.try_lock = nullptr;
             m_mutex.lock = nullptr;
             m_mutex.unlock = nullptr;
         }
@@ -151,6 +152,21 @@ namespace pybind
         m_acquire_mutex = nullptr;
     }
     //////////////////////////////////////////////////////////////////////////
+    bool python_kernel::try_lock_mutex()
+    {
+        if( m_acquire_mutex == nullptr )
+        {
+            return false;
+        }
+
+        if( m_acquire_mutex->try_lock( m_mutex.ctx ) == false )
+        {
+            return false;
+        }
+
+        return true;
+    }
+    //////////////////////////////////////////////////////////////////////////
     bool python_kernel::lock_mutex()
     {
         if( m_acquire_mutex == nullptr )
@@ -160,7 +176,7 @@ namespace pybind
          
         m_acquire_mutex->lock( m_mutex.ctx );
 
-        return true;        
+        return true;
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::unlock_mutex()
