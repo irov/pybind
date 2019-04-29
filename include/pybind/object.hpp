@@ -3,8 +3,6 @@
 #include "pybind/base.hpp"
 #include "pybind/helper.hpp"
 
-#include "pybind/mutex/mutex_scope.hpp"
-
 #include <tuple>
 #include <type_traits>
 #include <cstddef>
@@ -73,8 +71,6 @@ namespace pybind
         template<class ... T>
         detail::extract_operator_t call( const T & ... _t ) const
         {
-            pybind::mutex_scope scope( m_kernel );
-
             return this->call_i(
                 { detail::import_operator_t( m_kernel, _t ) ... }
             );
@@ -92,8 +88,6 @@ namespace pybind
         template<class ... T>
         inline detail::extract_operator_t call_args( T && ... _t ) const
         {
-            pybind::mutex_scope scope( m_kernel );
-
             return this->call_args_ii( std::get<sizeof ... (T) - 1u>( std::make_tuple( _t... ) )
                 , std::make_tuple( _t... )
                 , std::make_integer_sequence<uint32_t, sizeof ... (T) - 1u>()

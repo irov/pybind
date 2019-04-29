@@ -34,7 +34,7 @@ namespace pybind
         kernel_allocator_t * obj;
     } kernel_domain_allocator_t;
 
-    PYBIND_API kernel_interface * initialize( const kernel_domain_allocator_t * _allocator, const kernel_mutex_t * _mutex, const wchar_t * _path, bool _debug, bool install_sigs, bool _nosite );
+    PYBIND_API kernel_interface * initialize( const kernel_domain_allocator_t * _allocator, const wchar_t * _path, bool _debug, bool install_sigs, bool _nosite );
     PYBIND_API class kernel_interface * get_kernel();
     PYBIND_API void set_kernel( class kernel_interface * _kernel );
 
@@ -47,14 +47,6 @@ namespace pybind
     public:
         virtual void collect() = 0;
         virtual void destroy() = 0;
-
-    public:
-        virtual void acquire_mutex() = 0;
-        virtual void release_mutex() = 0;
-
-        virtual bool try_lock_mutex() = 0;
-        virtual bool lock_mutex() = 0;
-        virtual void unlock_mutex() = 0;
 
     public:
         virtual void remove_from_module( const char * _name, PyObject * _module ) = 0;

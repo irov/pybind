@@ -20,7 +20,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     python_kernel::python_kernel()
         : m_current_module( nullptr )
-        , m_acquire_mutex( nullptr )
     {
     }
     //////////////////////////////////////////////////////////////////////////
@@ -28,20 +27,8 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::initialize( const kernel_mutex_t * _mutex )
+    bool python_kernel::initialize()
     {
-        if( _mutex != nullptr )
-        {
-            m_mutex = *_mutex;
-        }
-        else
-        {
-            m_mutex.ctx = nullptr;
-            m_mutex.try_lock = nullptr;
-            m_mutex.lock = nullptr;
-            m_mutex.unlock = nullptr;
-        }
-
         if( m_functions.initialize() == false )
         {
             return false;
@@ -140,53 +127,6 @@ namespace pybind
         this->finalize();
 
         delete this;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    void python_kernel::acquire_mutex()
-    {
-        m_acquire_mutex = &m_mutex;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    void python_kernel::release_mutex()
-    {
-        m_acquire_mutex = nullptr;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::try_lock_mutex()
-    {
-        if( m_acquire_mutex == nullptr )
-        {
-            return false;
-        }
-
-        if( m_acquire_mutex->try_lock( m_mutex.ctx ) == false )
-        {
-            return false;
-        }
-
-        return true;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::lock_mutex()
-    {
-        if( m_acquire_mutex == nullptr )
-        {
-            return false;
-        }
-         
-        m_acquire_mutex->lock( m_mutex.ctx );
-
-        return true;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    void python_kernel::unlock_mutex()
-    {
-        if( m_acquire_mutex == nullptr )
-        {
-            return;
-        }
-
-        m_acquire_mutex->unlock( m_mutex.ctx );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::remove_from_module( const char * _name, PyObject * _module )

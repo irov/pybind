@@ -21,5 +21,3 @@
 #include "pybind/generator/struct_.hpp"
 #include "pybind/generator/structhash_.hpp"
 #include "pybind/generator/superclass_.hpp"
-
-#include "pybind/mutex/mutex_scope.hpp"

@@ -176,7 +176,7 @@ void main()
 {
     stdex_allocator_initialize();
 
-    pybind::kernel_interface * kernel = pybind::initialize( nullptr, nullptr, L"", false, false, true );
+    pybind::kernel_interface * kernel = pybind::initialize( nullptr, L"", false, false, true );
 
     pybind::list syspath( kernel );
     syspath.append( "d:/Projects/Mengine/dependencies/pybind/sandbox/" );

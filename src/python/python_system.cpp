@@ -30,10 +30,9 @@ namespace pybind
     static PyThreadState * gtstate;
 #endif
     //////////////////////////////////////////////////////////////////////////
-    kernel_interface * initialize( const kernel_domain_allocator_t * _allocator, const kernel_mutex_t * _mutex, const wchar_t * _path, bool _debug, bool install_sigs, bool _nosite )
+    kernel_interface * initialize( const kernel_domain_allocator_t * _allocator, const wchar_t * _path, bool _debug, bool install_sigs, bool _nosite )
     {
         (void)_allocator;
-        (void)_mutex;
         (void)_path;
         (void)_debug;
 
@@ -159,7 +158,7 @@ namespace pybind
 
         python_kernel * kernel = new python_kernel();
 
-        if( kernel->initialize( _mutex ) == false )
+        if( kernel->initialize() == false )
         {
             return nullptr;
         }
