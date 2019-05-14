@@ -496,7 +496,7 @@ namespace pybind
                 _kernel->tuple_setitem( py_tuple, 0, value );
 
                 PyObject * obj = _kernel->ask_native( object_type, py_tuple );
-                
+
                 _kernel->decref( py_tuple );
 
                 if( obj == nullptr )

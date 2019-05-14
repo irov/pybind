@@ -131,7 +131,7 @@ namespace pybind
 
     template<class K, class V, class M>
     inline void registration_stl_map_type_cast( kernel_interface * _kernel )
-    {        
+    {
         _kernel->register_type_info_extract_t<M>( pybind::make_type_cast<extract_stl_map_type<K, V, M>>() );
     }
 

@@ -244,5 +244,5 @@ void main()
 
     stdex_allocator_finalize();
 
-    printf( "done" );    
+    printf( "done" );
 }

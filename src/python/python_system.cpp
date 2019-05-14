@@ -160,6 +160,8 @@ namespace pybind
 
         if( kernel->initialize() == false )
         {
+            kernel->destroy();
+
             return nullptr;
         }
 
@@ -1449,7 +1451,7 @@ namespace pybind
             return true;
         }
 
-        PyObject * modtraceback = PyImport_ImportModule( "traceback" );        
+        PyObject * modtraceback = PyImport_ImportModule( "traceback" );
 
         if( modtraceback == nullptr )
         {

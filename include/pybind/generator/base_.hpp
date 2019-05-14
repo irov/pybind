@@ -70,7 +70,7 @@ namespace pybind
         template<class F>
         base_ & def_kernel( const char * _name, F f )
         {
-            method_adapter_interface_ptr iadapter( new method_adapter_kernel<C, F>( _name, f ));
+            method_adapter_interface_ptr iadapter( new method_adapter_kernel<C, F>( _name, f ) );
             m_scope->add_method( iadapter );
 
             return *this;
@@ -556,7 +556,7 @@ namespace pybind
         base_ & def_operator_mul_t()
         {
             number_binary_adapter_interface_ptr iadapter( new number_binary_adapter_operator_mul<C, V>( "operator_mul" ) );
-            
+
             uint32_t typeId = m_kernel->class_info<VC>();
 
             m_scope->add_number_mul( typeId, iadapter );
@@ -684,10 +684,10 @@ namespace pybind
         {
             _scope->add_base_t<T>( &base_::meta_cast<T> );
         }
-        
+
         template<class bases_tuple, uint32_t ... I>
         void setup_bases_i( const class_type_scope_interface_ptr & _scope, std::integer_sequence<uint32_t, I...> )
-        {            
+        {
             (_scope->add_base_t<typename std::tuple_element<I, bases_tuple>::type>( &base_::meta_cast<typename std::tuple_element<I, bases_tuple>::type> ), ...);
         }
 
@@ -697,7 +697,7 @@ namespace pybind
 
             this->setup_bases_i<bases_tuple>( _scope, std::make_integer_sequence<uint32_t, std::tuple_size<bases_tuple>::value>() );
         }
-        
+
     protected:
         class_type_scope_interface_ptr m_scope;
 

@@ -131,7 +131,7 @@ namespace pybind
             , std::make_tuple( _t... )
             , std::make_integer_sequence<uint32_t, sizeof ... (T) - 1u>()
         );
-    }    
+    }
     //////////////////////////////////////////////////////////////////////////
     PYBIND_API detail::extract_operator_t extract_t( kernel_interface * _kernel, PyObject * _obj );
     //////////////////////////////////////////////////////////////////////////

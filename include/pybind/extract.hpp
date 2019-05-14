@@ -222,7 +222,7 @@ namespace pybind
                 );
             }
 
-            return stdex::intrusive_ptr<T, D>(value);
+            return stdex::intrusive_ptr<T, D>( value );
         }
     };
     //////////////////////////////////////////////////////////////////////////

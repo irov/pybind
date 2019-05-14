@@ -99,7 +99,7 @@ namespace pybind
     detail::extract_operator_t object::call_args_i( std::initializer_list<detail::import_operator_t> && _t, const args & _args ) const
     {
         return pybind::call_args_i( m_kernel, m_obj, std::forward<std::initializer_list<detail::import_operator_t>>( _t ), _args );
-    }    
+    }
     //////////////////////////////////////////////////////////////////////////
     pybind::object make_none_t( kernel_interface * _kernel )
     {

@@ -114,7 +114,7 @@ namespace pybind
         pybind::tuple args = pybind::make_tuple_args_i( _kernel, std::forward<std::initializer_list<detail::import_operator_t>>( _t ), _args );
 
         return pybind::ask_tuple_t( _kernel, _obj, args );
-    }    
+    }
     //////////////////////////////////////////////////////////////////////////
     detail::extract_operator_t extract_t( kernel_interface * _kernel, PyObject * _obj )
     {

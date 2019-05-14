@@ -50,15 +50,15 @@ namespace pybind
     {
         static PyObject * call( kernel_interface * _kernel, P * _proxy, C * _obj, F f, PyObject * _arg )
         {
-			typedef typename stdex::function_traits<F>::result f_info;
-
-            uint32_t arg_size = _kernel->tuple_size( _arg );
-            uint32_t fn_arity = f_info::arity;
+            typedef typename stdex::function_traits<F>::result f_info;
 
             static_assert(std::is_same<typename f_info::first_param, pybind::kernel_interface *>::value == true, "[pybind] use kernel bind");
             static_assert(std::is_same<typename f_info::last_param, const pybind::args &>::value == false, "[pybind] use args bind");
 
 #ifndef NDEBUG
+            uint32_t arg_size = _kernel->tuple_size( _arg );
+            uint32_t fn_arity = f_info::arity;
+
             if( arg_size + 2 != fn_arity )
             {
                 pybind::throw_exception( "invalid proxy method call kernel args is not equal %d + addition %d != %d\n"

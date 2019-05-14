@@ -589,12 +589,15 @@ namespace pybind
         , m_pod_hash( _hash )
         , m_binable_base( false )
     {
-
         strcpy( m_name, _name );
     }
     //////////////////////////////////////////////////////////////////////////
     python_class_type_scope::~python_class_type_scope()
     {
+        if( m_number_multy != nullptr )
+        {
+            m_number_multy = new number_multy_adapter_t;
+        }
     }
     //////////////////////////////////////////////////////////////////////////
     bool python_class_type_scope::initialize( PyObject * _module )

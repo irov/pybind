@@ -103,7 +103,7 @@ namespace pybind
         }
 
         return pybind::tuple( _kernel, py_tuple, pybind::borrowed );
-    }    
+    }
     //////////////////////////////////////////////////////////////////////////
     pybind::tuple make_tuple_args_i( kernel_interface * _kernel, std::initializer_list<detail::import_operator_t> && _t, const args & _args )
     {
@@ -125,7 +125,7 @@ namespace pybind
         }
 
         return pybind::tuple( _kernel, py_tuple, pybind::borrowed );
-    }    
+    }
     //////////////////////////////////////////////////////////////////////////
     pybind::tuple make_invalid_tuple_t( kernel_interface * _kernel )
     {

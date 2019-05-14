@@ -19,7 +19,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void throw_exception_va( const char * _format, va_list _va )
     {
-        char message[4096] = {0};
+        char message[4096] = { 0 };
         vsprintf( message, _format, _va );
 
         throw pybind_exception( message );

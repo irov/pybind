@@ -47,7 +47,7 @@ namespace pybind
             return;
         }
 
-        char str[4096] = {0};
+        char str[4096] = { 0 };
         vsprintf( str, _format, _va );
 
         s_logger( s_user, str );

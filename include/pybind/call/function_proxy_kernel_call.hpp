@@ -50,7 +50,7 @@ namespace pybind
     {
         static PyObject * call( kernel_interface * _kernel, P * _proxy, F f, PyObject * _arg )
         {
-			typedef typename stdex::function_traits<F>::result f_info;
+            typedef typename stdex::function_traits<F>::result f_info;
 
             static_assert(std::is_same<typename f_info::first_param, pybind::kernel_interface *>::value == true, "[pybind] add kernel");
             static_assert(std::is_same<typename f_info::last_param, const pybind::args &>::value == false, "[pybind] use args bind");

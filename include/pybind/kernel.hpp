@@ -193,7 +193,7 @@ namespace pybind
         {
             const class_type_scope_interface_ptr & scope = this->class_scope<T>();
 
-            PyObject * py_obj = this->scope_create_weak( scope, _ptr);
+            PyObject * py_obj = this->scope_create_weak( scope, _ptr );
 
             return py_obj;
         }
@@ -263,7 +263,7 @@ namespace pybind
         virtual PyObject * ask_method_native( PyObject * _obj, const char * _method, PyObject * _args ) = 0;
         virtual PyObject * ask_adapter( void * _self, const class_type_scope_interface_ptr & _scope, const char * _name, PyObject * _args ) = 0;
 
-        virtual void setStdOutHandle( PyObject * _obj ) = 0;        
+        virtual void setStdOutHandle( PyObject * _obj ) = 0;
         virtual void setStdErrorHandle( PyObject * _obj ) = 0;
         virtual PyObject * getStdOutHandle() = 0;
         virtual PyObject * getStdErrorHandle() = 0;
