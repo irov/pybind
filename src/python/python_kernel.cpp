@@ -234,6 +234,30 @@ namespace pybind
         return py_pod_type;
     }
     //////////////////////////////////////////////////////////////////////////
+    bool python_kernel::is_object_bindable( PyObject * _obj )
+    {
+        if( _obj == nullptr )
+        {
+            return false;
+        }
+
+        PyTypeObject * objtype = pybind::object_type( _obj );
+
+        const class_type_scope_interface_ptr & scope = this->get_class_scope( objtype );
+
+        if( scope == nullptr )
+        {
+            return false;
+        }
+
+        if( scope->get_bindable() == nullptr )
+        {
+            return false;
+        }
+
+        return true;
+    }
+    //////////////////////////////////////////////////////////////////////////
     void python_kernel::set_current_module( PyObject * _module )
     {
         m_current_module = _module;

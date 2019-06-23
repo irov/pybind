@@ -43,6 +43,7 @@ namespace pybind
 
     public:
         PyTypeObject * get_pod_type( uint32_t _pod, bool _hash ) override;
+        bool is_object_bindable( PyObject * _obj ) override;
 
     public:
         void set_current_module( PyObject * _module ) override;

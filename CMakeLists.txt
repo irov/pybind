@@ -103,7 +103,6 @@ SOURCE_GROUP(python FILES ${files_private_python_headers} ${files_private_python
 SOURCE_GROUP(stl FILES ${files_public_stl_headers} ${files_private_stl_sources})
 SOURCE_GROUP(mutex FILES ${files_public_mutex_headers})
 
-
 INCLUDE_DIRECTORIES(${PROJECT_NAME} include)
 
 if(PYBIND_PYTHON_INCLUDE_PATH)
@@ -126,9 +125,6 @@ if(PYBIND_STL_NOT_SUPPORT)
     add_definitions(-DPYBIND_STL_NOT_SUPPORT)
 endif()
 
-add_definitions(-DMS_NO_COREDLL)
-add_definitions(-DPy_NO_ENABLE_SHARED)
-
 add_definitions(-DPYBIND_PYTHON_VERSION=${PYBIND_PYTHON_VERSION})
 
 if(PYBIND_PYTHON_ERROR_FORMAT_FLAG)
@@ -144,11 +140,17 @@ ADD_LIBRARY(${PROJECT_NAME} STATIC
     ${files_public_generator_headers}
 	${files_private_headers} 
 	${files_private_sources}
-    ${files_private_python_sources}
     ${files_public_stl_headers}
     ${files_private_stl_sources}
     ${files_public_mutex_headers}
 	)
+    
+add_definitions(-DMS_NO_COREDLL)
+add_definitions(-DPy_NO_ENABLE_SHARED)    
+    
+ADD_LIBRARY(${PROJECT_NAME}_python STATIC 
+    ${files_private_python_sources}
+	)    
     
 IF( NOT PYBIND_EXTERNAL_BUILD )
     add_dependencies(${PROJECT_NAME} stdex_download)
@@ -172,8 +174,8 @@ if(PYBIND_SANDBOX)
         ${files_private_sandbox_sources}
         )
         
-    TARGET_LINK_LIBRARIES(sandbox ${PROJECT_NAME})
-    add_dependencies(sandbox ${PROJECT_NAME})
+    TARGET_LINK_LIBRARIES(sandbox ${PROJECT_NAME} ${PROJECT_NAME}_python)
+    add_dependencies(sandbox ${PROJECT_NAME} ${PROJECT_NAME}_python)
 
     TARGET_LINK_LIBRARIES(sandbox python)
     add_dependencies(sandbox python_download)

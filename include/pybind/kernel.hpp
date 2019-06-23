@@ -63,6 +63,7 @@ namespace pybind
         virtual method_adapter_interface * get_method_adapter( PyObject * _obj ) = 0;
 
         virtual PyTypeObject * get_pod_type( uint32_t _pod, bool _hash ) = 0;
+        virtual bool is_object_bindable( PyObject * _obj ) = 0;
 
     public:
         virtual void set_current_module( PyObject * _module ) = 0;
@@ -168,7 +169,7 @@ namespace pybind
         }
 
         template<class T>
-        void remove_scope( PyObject * _module )
+        void remove_scope()
         {
             uint32_t ti = this->class_info<T>();
             this->remove_type_scope( ti );

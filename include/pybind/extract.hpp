@@ -2,7 +2,6 @@
 
 #include "pybind/exception.hpp"
 #include "pybind/logger.hpp"
-#include "pybind/bindable.hpp"
 
 #include "pybind/type_cast_result.hpp"
 
@@ -287,7 +286,6 @@ namespace pybind
     PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, const wchar_t * _value );
     PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, PyObject * _value );
     PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, PyTypeObject * _value );
-    PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, pybind::bindable * _value );
     PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::object & _value );
     PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::tuple & _value );
     PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::list & _value );
@@ -303,7 +301,9 @@ namespace pybind
     };
     //////////////////////////////////////////////////////////////////////////
     template<class T>
-    struct ptr_throw_specialized2<T, std::enable_if_t<std::is_enum<T>::value>>
+    struct ptr_throw_specialized2<T
+        , std::enable_if_t<std::is_enum<T>::value>
+    >
     {
         PyObject * operator () ( kernel_interface * _kernel, uint32_t _t ) const
         {
@@ -311,12 +311,35 @@ namespace pybind
         }
     };
     //////////////////////////////////////////////////////////////////////////
-    template<class T>
-    struct ptr_throw_specialized2<T, std::enable_if_t<std::is_base_of<pybind::bindable, std::remove_pointer_t<T>>::value>>
+    namespace detail
     {
-        PyObject * operator () ( kernel_interface * _kernel, pybind::bindable * _t ) const
+        template<typename T>
+        class has_getEmbed
         {
-            return ptr_throw_i( _kernel, _t );
+        private:
+            template <typename C> static std::true_type test( decltype(&C::getEmbed) );
+            template <typename C> static std::false_type test( ... );
+
+        public:
+            static constexpr bool value = std::is_same<std::true_type, decltype(test<T>( 0 ))>::value;
+        };
+    }
+    //////////////////////////////////////////////////////////////////////////
+    template<class T>
+    struct ptr_throw_specialized2<T *
+        , std::enable_if_t<detail::has_getEmbed<T>::value>
+    >
+    {
+        PyObject * operator () ( kernel_interface * _kernel, T * _t ) const
+        {
+            if( _t == nullptr )
+            {
+                return _kernel->ret_none();
+            }
+
+            PyObject * py_obj = _t->getEmbed( _kernel );
+
+            return ptr_throw_i( _kernel, py_obj );
         }
     };
     //////////////////////////////////////////////////////////////////////////

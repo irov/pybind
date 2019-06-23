@@ -2,8 +2,6 @@
 
 #include "pybind/adapter_interface.hpp"
 
-#include "pybind/bindable.hpp"
-
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
@@ -50,7 +48,7 @@ namespace pybind
         {
             C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
-            self->clear();
+            self->clearEmbed();
         }
     };
 }

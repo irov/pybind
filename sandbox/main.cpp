@@ -4,7 +4,6 @@
 #include <stdio.h>
 
 class Bar
-    : public pybind::bindable
 {
 public:
     Bar()
@@ -37,7 +36,12 @@ public:
         data = _data;
     }
 
-    PyObject * _embedded( pybind::kernel_interface * _kernel ) override
+    void clearEmbed()
+    {
+        //Empty
+    }
+
+    PyObject * getEmbed( pybind::kernel_interface * _kernel )
     {
         const pybind::class_type_scope_interface_ptr & scope = _kernel->class_scope<Bar>();
 
@@ -130,11 +134,9 @@ int test_function_1( pybind::kernel_interface * _kernel, PyObject * _obj, float 
     return (int)(pybind::extract<float>( _kernel, _obj ) + j);
 }
 
-PyObject * test_function_2( pybind::kernel_interface * _kernel, const pybind::object & _obj, const pybind::args & _args, float j )
+PyObject * test_function_2( pybind::kernel_interface * _kernel, const pybind::object & _obj, float j )
 {
     float j1 = _obj.extract();
-
-    _obj.call_args( 1, 2, 3, _args );
 
     return pybind::ptr( _kernel, (int)(j1 + j) );
 }

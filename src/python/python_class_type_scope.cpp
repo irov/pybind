@@ -618,6 +618,9 @@ namespace pybind
             }
         }
 
+        m_module = py_module;
+        Py_INCREF( m_module );
+
 #   if PYBIND_PYTHON_VERSION < 300
         PyObject * py_name = PyString_InternFromString( m_name );
 #	else
@@ -709,7 +712,7 @@ namespace pybind
         PyType_Modified( m_pytypeobject );
 
         Py_INCREF( (PyObject*)m_pytypeobject );
-        pybind::module_addobject( py_module, m_pytypeobject->tp_name, (PyObject*)m_pytypeobject );
+        pybind::module_addobject( m_module, m_pytypeobject->tp_name, (PyObject*)m_pytypeobject );
 
         m_kernel->cache_class_scope_type( python_class_type_scope_ptr( this ) );
 
@@ -718,6 +721,9 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::finalize()
     {
+        pybind::module_removeobject( m_module, m_name );
+        Py_DECREF( m_module );
+
         PyDict_Clear( m_pytypeobject->tp_dict );
 
         m_kernel->remove_class_scope_type( python_class_type_scope_ptr( this ) );

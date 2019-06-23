@@ -130,6 +130,8 @@ namespace pybind
     protected:
         kernel_interface * m_kernel;
 
+        PyObject * m_module;
+
         char m_name[PYBIND_CLASS_TYPE_MAX_NAME];
         uint32_t m_typeId;
 

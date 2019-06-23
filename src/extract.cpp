@@ -1,7 +1,5 @@
 #include "pybind/extract.hpp"
 
-#include "pybind/bindable.hpp"
-
 #include "pybind/object.hpp"
 #include "pybind/list.hpp"
 #include "pybind/tuple.hpp"
@@ -393,18 +391,6 @@ namespace pybind
         _kernel->incref( (PyObject *)_value );
 
         return (PyObject *)_value;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    PyObject * ptr_throw_i( kernel_interface * _kernel, pybind::bindable * _value )
-    {
-        if( _value == nullptr )
-        {
-            return _kernel->ret_none();
-        }
-
-        PyObject * py_obj = _value->getEmbed( _kernel );
-
-        return py_obj;
     }
     ////////////////////////////////////////////////////////////////////////////
     PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::object & _value )
