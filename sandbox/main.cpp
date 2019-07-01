@@ -21,9 +21,9 @@ public:
         data++;
     }
 
-    void min( float _a, float _b )
+    float min( float _a, float _b )
     {
-        float m = _a < _b ? _a : _b;
+        return _a < _b ? _a : _b;
     }
 
     int getData()
@@ -109,8 +109,8 @@ void test_list( pybind::kernel_interface * _kernel, uint32_t i )
     pybind::object p0 = p[0];
     pybind::object p1 = p[1];
 
-    PyObject * p2 = p[2];
-    PyObject * p3 = p[3];
+    (void)p0;
+    (void)p1;
 }
 
 void test_tuple( pybind::kernel_interface * _kernel, uint32_t i )
@@ -127,6 +127,13 @@ void test_tuple( pybind::kernel_interface * _kernel, uint32_t i )
     PyObject * p4 = pp3[0];
     PyObject * p5 = pp3[1];
     PyObject * p6 = pp3[2];
+
+    (void)p1;
+    (void)p2;
+    (void)p3;
+    (void)p4;
+    (void)p5;
+    (void)p6;
 }
 
 int test_function_1( pybind::kernel_interface * _kernel, PyObject * _obj, float j )
@@ -223,8 +230,7 @@ void main()
     Bar * b = new Bar;
 
     PyObject * py_b = pybind::ptr( kernel, b );
-
-    PyObject * g = nullptr;
+    (void)py_b;
 
     bool exist;
     PyObject * m = kernel->module_import( "Test1", exist );

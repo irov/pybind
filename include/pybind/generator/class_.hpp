@@ -24,7 +24,7 @@ namespace pybind
 
     public:
         template<class ... Args>
-        class_ & def_constructor( const init<Args...> & _init )
+        class_ & def_constructor( const init<Args...> & )
         {
             constructor_adapter_interface_ptr ctr =
                 constructor_adapter_interface_ptr::from( new constructor_new<C, init<Args...> >() );
