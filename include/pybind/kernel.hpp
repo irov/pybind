@@ -302,10 +302,12 @@ namespace pybind
         virtual bool test_equal( PyObject * _lhs, PyObject * _rhs ) = 0;
         virtual bool has_attr( PyObject * _obj, PyObject * _attr ) = 0;
         virtual PyObject * get_attr( PyObject * _obj, PyObject * _attr ) = 0;
-        virtual bool set_attr( PyObject * _obj, const char * _attr, PyObject * _value ) = 0;
+        virtual bool set_attr( PyObject * _obj, PyObject * _attr, PyObject * _value ) = 0;
+        virtual bool set_attrstring( PyObject * _obj, const char * _attr, PyObject * _value ) = 0;
         virtual bool has_attrstring( PyObject * _obj, const char * _attr ) = 0;
         virtual PyObject * get_attrstring( PyObject * _obj, const char * _attr ) = 0;
 
+        virtual PyObject * dictobject_new(  PyObject * _dict ) = 0;
         virtual const char * object_str( PyObject * _obj ) = 0;
         virtual const char * object_repr( PyObject * _obj ) = 0;
         virtual const char * object_repr_type( PyObject * _obj ) = 0;

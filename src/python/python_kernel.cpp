@@ -935,9 +935,14 @@ namespace pybind
         return pybind::get_attr( _obj, _attr );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::set_attr( PyObject * _obj, const char * _attr, PyObject * _value )
+    bool python_kernel::set_attr( PyObject * _obj, PyObject * _attr, PyObject * _value )
     {
         return pybind::set_attr( _obj, _attr, _value );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool python_kernel::set_attrstring( PyObject* _obj, const char* _attr, PyObject* _value )
+    {
+        return pybind::set_attrstring( _obj, _attr, _value );
     }
     //////////////////////////////////////////////////////////////////////////
     bool python_kernel::has_attrstring( PyObject * _obj, const char * _attr )
@@ -948,6 +953,30 @@ namespace pybind
     PyObject * python_kernel::get_attrstring( PyObject * _obj, const char * _attr )
     {
         return pybind::get_attrstring( _obj, _attr );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::dictobject_new( PyObject * _dict )
+    {
+        PyObject * py_name = PyString_FromString( "" );
+
+        PyObject * py_bases = PyTuple_New( 1 );
+        PyTuple_SetItem( py_bases, 0, (PyObject *)& PyDict_Type );
+        
+        PyObject * py_args = PyTuple_Pack( 3, py_name, py_bases, _dict );
+        Py_DECREF( py_name );
+        Py_DECREF( py_bases );
+
+        PyObject * py_typeobject = PyType_Type.tp_call( (PyObject *)&PyType_Type, py_args, 0 );
+
+        Py_DECREF( py_args );
+                
+        PyObject * py_self = PyObject_CallObject( py_typeobject, nullptr );
+
+        Py_DECREF( py_typeobject );
+
+        PyDict_Merge( py_self, _dict, 1 );
+        
+        return py_self;
     }
     //////////////////////////////////////////////////////////////////////////
     const char * python_kernel::object_str( PyObject * _obj )

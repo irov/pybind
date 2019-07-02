@@ -746,13 +746,13 @@ Py_NO_ENABLE_SHARED to find out.  Also support MS_NO_COREDLL for b/w compat */
 /* #undef HAVE_LIBMPC */
 
 /* Define if you have the nsl library (-lnsl).  */
-#undef HAVE_LIBNSL 1
+#undef HAVE_LIBNSL
 
 /* Define if you have the seq library (-lseq).  */
 /* #undef HAVE_LIBSEQ */
 
 /* Define if you have the socket library (-lsocket).  */
-#undef HAVE_LIBSOCKET 1
+#undef HAVE_LIBSOCKET
 
 /* Define if you have the sun library (-lsun).  */
 /* #undef HAVE_LIBSUN */

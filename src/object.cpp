@@ -86,6 +86,11 @@ namespace pybind
         return pybind::object( m_kernel, py_attr );
     }
     //////////////////////////////////////////////////////////////////////////
+    void object::set_attr_i( const detail::import_operator_t& _name, const detail::import_operator_t& _value )
+    {
+        m_kernel->set_attr( m_obj, _name, _value );
+    }
+    //////////////////////////////////////////////////////////////////////////
     detail::extract_operator_t object::extract() const
     {
         return detail::extract_operator_t( m_kernel, m_obj );

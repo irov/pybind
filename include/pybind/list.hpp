@@ -14,7 +14,7 @@ namespace pybind
         typedef uint32_t size_type;
 
     public:
-        list( kernel_interface * _kernel );
+        explicit list( kernel_interface * _kernel );
         list( kernel_interface * _kernel, size_type _size );
         list( const list & _list );
         list( list && _list );
@@ -34,6 +34,15 @@ namespace pybind
     public:
         detail::set_list_operator_t operator [] ( size_type _index );
         detail::extract_operator_t operator [] ( size_type _index ) const;
+
+    public:
+        template<class T>
+        list & operator += ( const T & _t )
+        {
+            this->append( _t );
+
+            return *this;
+        }
 
     public:
         list & append( const pybind::object & _t );

@@ -50,6 +50,12 @@ namespace pybind
             return this->get_i( detail::import_operator_t( m_kernel, _name ) );
         }
 
+        template<class K, class V>
+        void set( const K & _name, const V & _value )
+        {
+            this->set_i( detail::import_operator_t( m_kernel, _name ) ) = _value;
+        }
+
     public:
         template<class T>
         detail::set_dict_operator_t operator [] ( const T & _name )
@@ -83,6 +89,7 @@ namespace pybind
         bool empty() const;
     };
     //////////////////////////////////////////////////////////////////////////
+    PYBIND_API pybind::dict make_dict_t( pybind::kernel_interface * _kernel );
     PYBIND_API pybind::dict make_invalid_dict_t();
     //////////////////////////////////////////////////////////////////////////
     template<>

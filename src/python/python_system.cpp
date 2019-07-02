@@ -669,7 +669,23 @@ namespace pybind
         return obj;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool set_attr( PyObject * _obj, const char * _attr, PyObject * _value )
+    bool set_attr( PyObject* _obj, PyObject* _attr, PyObject* _value )
+    {
+        int res = PyObject_SetAttr( _obj, _attr, _value );
+
+        if( res != 0 )
+        {
+            check_error();
+
+            return false;
+        }
+
+        //Py_XDECREF( _value );
+
+        return true;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool set_attrstring( PyObject * _obj, const char * _attr, PyObject * _value )
     {
         int res = PyObject_SetAttrString( _obj, _attr, _value );
 

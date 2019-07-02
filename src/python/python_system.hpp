@@ -85,7 +85,8 @@ namespace pybind
 
     PYBIND_API bool has_attrstring( PyObject * _obj, const char * _attr );
     PYBIND_API PyObject * get_attrstring( PyObject * _obj, const char * _attr );
-    PYBIND_API bool set_attr( PyObject * _obj, const char * _attr, PyObject * _value );
+    PYBIND_API bool set_attr( PyObject* _obj, PyObject* _attr, PyObject* _value );
+    PYBIND_API bool set_attrstring( PyObject * _obj, const char * _attr, PyObject * _value );
 
     PYBIND_API bool check_type( PyObject * _obj );
     PYBIND_API bool int_check( PyObject * _obj );

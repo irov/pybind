@@ -98,6 +98,11 @@ namespace pybind
         return this->size() == 0;
     }
     //////////////////////////////////////////////////////////////////////////
+    pybind::dict make_dict_t( pybind::kernel_interface * _kernel )
+    {
+        return pybind::dict( _kernel );
+    }
+    //////////////////////////////////////////////////////////////////////////
     pybind::dict make_invalid_dict_t()
     {
         return pybind::dict( pybind::invalid );

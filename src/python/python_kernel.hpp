@@ -158,9 +158,12 @@ namespace pybind
         bool test_equal( PyObject * _lhs, PyObject * _rhs ) override;
         bool has_attr( PyObject * _obj, PyObject * _attr ) override;
         PyObject * get_attr( PyObject * _obj, PyObject * _attr ) override;
-        bool set_attr( PyObject * _obj, const char * _attr, PyObject * _value ) override;
+        bool set_attr( PyObject* _obj, PyObject* _attr, PyObject* _value ) override;
+        bool set_attrstring( PyObject * _obj, const char * _attr, PyObject * _value ) override;
         bool has_attrstring( PyObject * _obj, const char * _attr ) override;
         PyObject * get_attrstring( PyObject * _obj, const char * _attr ) override;
+
+        PyObject * dictobject_new( PyObject * _dict ) override;
         const char * object_str( PyObject * _obj ) override;
         const char * object_repr( PyObject * _obj ) override;
         const char * object_repr_type( PyObject * _obj ) override;
