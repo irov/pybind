@@ -957,7 +957,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::dictobject_new( PyObject * _dict )
     {
-        PyObject * py_name = PyString_FromString( "" );
+        PyObject * py_name = PyBytes_FromString( "" );
 
         PyObject * py_bases = PyTuple_New( 1 );
         PyTuple_SetItem( py_bases, 0, (PyObject *)& PyDict_Type );
