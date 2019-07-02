@@ -29,28 +29,24 @@
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
-    namespace detail
+    static PyObject* py_alloc_class( PyTypeObject* _type, PyObject* _args, PyObject* _kwds )
     {
-        //////////////////////////////////////////////////////////////////////////
-        static PyObject * alloc_class( PyTypeObject * _type, PyObject * _args, PyObject * _kwds )
+        (void)_args;
+        (void)_kwds;
+
+        PyObject* py_self = PyType_GenericAlloc( _type, 0 );
+
+        if( py_self == nullptr )
         {
-            (void)_args;
-            (void)_kwds;
-
-            PyObject * py_self = PyType_GenericAlloc( _type, 0 );
-
-            if( py_self == nullptr )
+            if( PyErr_Occurred() )
             {
-                if( PyErr_Occurred() )
-                {
-                    PyErr_Print();
-                }
-
-                return nullptr;
+                PyErr_Print();
             }
 
-            return py_self;
+            return nullptr;
         }
+
+        return py_self;
     }
     //////////////////////////////////////////////////////////////////////////
     static PyObject * py_callfunc( PyObject * _obj, PyObject * _args, PyObject * _kwds )
@@ -434,7 +430,7 @@ namespace pybind
 
         try
         {
-            PyObject * py_self = detail::alloc_class( _type, _args, _kwds );
+            PyObject * py_self = py_alloc_class( _type, _args, _kwds );
 
             void * impl = scope->call_new( py_self, _args, _kwds );
 
@@ -510,7 +506,7 @@ namespace pybind
 
         try
         {
-            PyObject * py_self = detail::alloc_class( _type, _args, _kwds );
+            PyObject * py_self = py_alloc_class( _type, _args, _kwds );
 
             void * buff = nullptr;
             uint32_t pod_size = scope->get_pod_size();
@@ -839,7 +835,7 @@ namespace pybind
 
         if( PyDict_SetItemString( m_pytypeobject->tp_dict, name, py_type_method ) == -1 )
         {
-            pybind::throw_exception( "scope %s add_method %s python error"
+            pybind::throw_exception( "scope '%s' add_method '%s' python error"
                 , this->m_name
                 , name
             );
@@ -856,7 +852,7 @@ namespace pybind
 
         if( py_method == nullptr )
         {
-            pybind::throw_exception( "scope %s get_method %s python error"
+            pybind::throw_exception( "scope '%s' get_method '%s' python error"
                 , this->m_name
                 , _name
             );
@@ -877,7 +873,7 @@ namespace pybind
 
         if( PyDict_SetItemString( m_pytypeobject->tp_dict, name, py_member ) == -1 )
         {
-            pybind::throw_exception( "scope %s add_member %s python error"
+            pybind::throw_exception( "scope '%s' add_member '%s' python error"
                 , this->m_name
                 , name
             );
@@ -1488,7 +1484,7 @@ namespace pybind
             return nullptr;
         }
 
-        PyObject * py_self = pybind::detail::alloc_class( m_pytypeobject, nullptr, nullptr );
+        PyObject * py_self = py_alloc_class( m_pytypeobject, nullptr, nullptr );
 
         pybind::detail::wrap_pod_ptr( py_self, _impl, false );
 
@@ -1506,7 +1502,7 @@ namespace pybind
             return nullptr;
         }
 
-        PyObject * py_self = pybind::detail::alloc_class( m_pytypeobject, nullptr, nullptr );
+        PyObject * py_self = py_alloc_class( m_pytypeobject, nullptr, nullptr );
 
         pybind::detail::wrap_pod_ptr( py_self, _impl, true );
 
@@ -1526,7 +1522,7 @@ namespace pybind
             return nullptr;
         }
 
-        PyObject * py_self = pybind::detail::alloc_class( m_pytypeobject, nullptr, nullptr );
+        PyObject * py_self = py_alloc_class( m_pytypeobject, nullptr, nullptr );
 
         pybind::detail::wrap_pod_weak( py_self, _impl, true );
 
@@ -1539,7 +1535,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_class_type_scope::create_pod( void ** _impl )
     {
-        PyObject * py_self = pybind::detail::alloc_class( m_pytypeobject, nullptr, nullptr );
+        PyObject * py_self = py_alloc_class( m_pytypeobject, nullptr, nullptr );
 
         pybind::detail::wrap_pod( py_self, _impl, m_pod_size, m_pod_hash );
 
