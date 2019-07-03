@@ -47,6 +47,9 @@ namespace pybind
         }
 
     public:
+        const char * repr();
+
+    public:
         typedef tuple_const_iterator const_iterator;
 
     public:
