@@ -67,6 +67,17 @@ namespace pybind
             return *this;
         }
 
+        template<class R, class M, class ... Args>
+        base_ & def_const( const char * _name, R( M:: * f )(Args ...) const )
+        {
+            typedef R( M:: * F )(Args ...) const;
+
+            method_adapter_interface_ptr iadapter( new method_adapter<C, F>( _name, f ) );
+            m_scope->add_method( iadapter );
+
+            return *this;
+        }
+
         template<class F>
         base_ & def_kernel( const char * _name, F f )
         {
