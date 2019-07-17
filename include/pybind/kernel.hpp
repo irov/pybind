@@ -10,6 +10,7 @@
 #include "pybind/method_interface.hpp"
 
 #include <typeinfo>
+#include <stdarg.h>
 
 namespace pybind
 {

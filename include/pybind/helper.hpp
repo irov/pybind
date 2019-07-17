@@ -5,6 +5,8 @@
 #include "pybind/extract_operator.hpp"
 #include "pybind/args.hpp"
 
+#include <tuple>
+
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
