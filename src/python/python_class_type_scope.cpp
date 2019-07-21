@@ -544,6 +544,15 @@ namespace pybind
 
         const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
 
+        if( scope == nullptr )
+        {
+            pybind::error_message( "obj '%s' py_del_pod scope is null\n"
+                , pybind::object_str( _obj )
+            );
+
+            return;
+        }
+
         try
         {
 #ifndef NDEBUG
@@ -563,7 +572,7 @@ namespace pybind
         }
         catch( const pybind_exception & _ex )
         {
-            pybind::error_message( "obj %s py_del_pod scope '%s' error '%s'\n"
+            pybind::error_message( "obj '%s' py_del_pod scope '%s' error '%s'\n"
                 , pybind::object_str( _obj )
                 , scope->get_name()
                 , _ex.what()
@@ -606,7 +615,7 @@ namespace pybind
 
             if( py_module == nullptr )
             {
-                pybind::throw_exception( "scope %s initialize not setup python module"
+                pybind::throw_exception( "scope '%s' initialize not setup python module"
                     , m_name
                 );
 
@@ -663,7 +672,7 @@ namespace pybind
 
             if( py_pybind_type == nullptr )
             {
-                pybind::throw_exception( "scope %s initialize not pod %d (hash %d)"
+                pybind::throw_exception( "scope '%s' initialize not pod %d (hash %d)"
                     , m_name
                     , m_pod_size
                     , m_pod_hash
@@ -687,7 +696,7 @@ namespace pybind
         {
             pybind::check_error();
 
-            pybind::throw_exception( "scope %s initialize invalide not create type"
+            pybind::throw_exception( "scope '%s' initialize invalide not create type"
                 , m_name
             );
 
