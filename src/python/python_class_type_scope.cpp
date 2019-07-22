@@ -105,6 +105,13 @@ namespace pybind
 
         const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
 
+        if( scope == nullptr )
+        {
+            PyObject * ret = pybind::string_from_char( "[pybind scope is nullptr]" );
+
+            return ret;
+        }
+
         const repr_adapter_interface_ptr & adapter = scope->get_repr_adapter();
 
         try
