@@ -152,7 +152,7 @@ namespace pybind
         return std::move( value );
     }
     //////////////////////////////////////////////////////////////////////////
-    template<typename T>
+    template<typename T, class = void>
     struct extract_specialized
     {
         typename stdex::mpl::remove_cref<T>::type operator () ( kernel_interface * _kernel, PyObject * _obj ) const
@@ -174,6 +174,27 @@ namespace pybind
             }
 
             return std::move( value );
+        }
+    };
+    //////////////////////////////////////////////////////////////////////////
+    template<class T>
+    struct extract_specialized<T
+        , std::enable_if_t<std::is_enum_v<T>>
+    >
+    {
+        typename T operator () ( kernel_interface * _kernel, PyObject * _obj ) const
+        {
+            uint32_t value;
+
+            if( extract_value( _kernel, _obj, value, true ) == false )
+            {
+                _kernel->log( "extract_value<T>: extract invalid '%s:%s' not cast to 'uint32_t'"
+                    , _kernel->object_repr( _obj )
+                    , _kernel->object_repr_type( _obj )
+                );
+            }
+
+            return static_cast<T>(value);
         }
     };
     //////////////////////////////////////////////////////////////////////////
@@ -302,12 +323,12 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     template<class T>
     struct ptr_throw_specialized2<T
-        , std::enable_if_t<std::is_enum<T>::value>
+        , std::enable_if_t<std::is_enum_v<T>>
     >
     {
-        PyObject * operator () ( kernel_interface * _kernel, uint32_t _t ) const
+        PyObject * operator () ( kernel_interface * _kernel, T _t ) const
         {
-            return ptr_throw_i( _kernel, _t );
+            return ptr_throw_i( _kernel, static_cast<uint32_t>(_t) );
         }
     };
     //////////////////////////////////////////////////////////////////////////
