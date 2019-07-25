@@ -182,7 +182,7 @@ namespace pybind
         , std::enable_if_t<std::is_enum_v<T>>
     >
     {
-        typename T operator () ( kernel_interface * _kernel, PyObject * _obj ) const
+        T operator () ( kernel_interface * _kernel, PyObject * _obj ) const
         {
             uint32_t value;
 
