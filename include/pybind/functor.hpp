@@ -19,12 +19,30 @@ namespace pybind
         _kernel->def_functor_adapter( adapter, false, _module );
     }
     //////////////////////////////////////////////////////////////////////////
+    template<class C, class D, template <typename, typename> typename P, class F>
+    void def_functor( kernel_interface * _kernel, const char * _name, const P<C, D> & _self, F _method, PyObject * _module = 0 )
+    {
+        typedef typename stdex::function_traits<F>::result t_info;
+
+        functor_adapter_interface_ptr adapter( new functor_proxy_adapter<C, F>( _name, t_info::arity, _self.get(), _method ) );
+        _kernel->def_functor_adapter( adapter, false, _module );
+    }
+    //////////////////////////////////////////////////////////////////////////
     template<class C, class F>
     void def_functor_deprecated( kernel_interface * _kernel, const char * _name, C * _self, F _method, const char * _doc, PyObject * _module = 0 )
     {
         typedef typename stdex::function_traits<F>::result t_info;
 
         functor_adapter_interface_ptr adapter( new functor_proxy_deprecated_adapter<C, F>( _name, t_info::arity, _self, _method, _doc ) );
+        _kernel->def_functor_adapter( adapter, false, _module );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    template<class C, class D, template <typename, typename> typename P, class F>
+    void def_functor_deprecated( kernel_interface * _kernel, const char * _name, const P<C, D> & _self, F _method, const char * _doc, PyObject * _module = 0 )
+    {
+        typedef typename stdex::function_traits<F>::result t_info;
+
+        functor_adapter_interface_ptr adapter( new functor_proxy_deprecated_adapter<C, F>( _name, t_info::arity, _self.get(), _method, _doc ) );
         _kernel->def_functor_adapter( adapter, false, _module );
     }
     //////////////////////////////////////////////////////////////////////////
@@ -37,6 +55,15 @@ namespace pybind
         _kernel->def_functor_adapter( adapter, false, _module );
     }
     //////////////////////////////////////////////////////////////////////////
+    template<class C, class D, template <typename, typename> typename P,  class F>
+    void def_functor_kernel( kernel_interface * _kernel, const char * _name, const P<C, D> & _self, F _method, PyObject * _module = 0 )
+    {
+        typedef typename stdex::function_traits<F>::result t_info;
+
+        functor_adapter_interface_ptr adapter( new functor_proxy_kernel_adapter<C, F>( _name, t_info::arity, _self.get(), _method ) );
+        _kernel->def_functor_adapter( adapter, false, _module );
+    }
+    //////////////////////////////////////////////////////////////////////////
     template<class C, class F>
     void def_functor_kernel_args( kernel_interface * _kernel, const char * _name, C * _self, F _method, PyObject * _module = 0 )
     {
@@ -46,12 +73,30 @@ namespace pybind
         _kernel->def_functor_adapter( adapter, false, _module );
     }
     //////////////////////////////////////////////////////////////////////////
+    template<class C, class D, template <typename, typename> typename P, class F>
+    void def_functor_kernel_args( kernel_interface * _kernel, const char * _name, const P<C, D> & _self, F _method, PyObject * _module = 0 )
+    {
+        typedef typename stdex::function_traits<F>::result t_info;
+
+        functor_adapter_interface_ptr adapter( new functor_proxy_kernel_adapter_args<C, F>( _name, t_info::arity, _self.get(), _method ) );
+        _kernel->def_functor_adapter( adapter, false, _module );
+    }
+    //////////////////////////////////////////////////////////////////////////
     template<class C, class F>
     void def_functor_args( kernel_interface * _kernel, const char * _name, C * _self, F _method, PyObject * _module = 0 )
     {
         typedef typename stdex::function_traits<F>::result t_info;
 
         functor_adapter_interface_ptr adapter( new functor_proxy_adapter_args<C, F>( _name, t_info::arity, _self, _method ) );
+        _kernel->def_functor_adapter( adapter, false, _module );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    template<class C, class D, template <typename, typename> typename P, class F>
+    void def_functor_args( kernel_interface * _kernel, const char * _name, const P<C, D> & _self, F _method, PyObject * _module = 0 )
+    {
+        typedef typename stdex::function_traits<F>::result t_info;
+
+        functor_adapter_interface_ptr adapter( new functor_proxy_adapter_args<C, F>( _name, t_info::arity, _self.get(), _method ) );
         _kernel->def_functor_adapter( adapter, false, _module );
     }
     //////////////////////////////////////////////////////////////////////////
