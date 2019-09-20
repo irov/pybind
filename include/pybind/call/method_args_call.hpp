@@ -69,6 +69,21 @@ namespace pybind
 
                 return nullptr;
             }
+
+            if constexpr( std::is_same<typename f_info::last2_param, const pybind::object &>::value == true )
+            {
+                PyObject * py_cb = _kernel->tuple_getitem( _arg, fn_arity - 2 );
+
+                if( _kernel->is_callable( py_cb ) == false && _kernel->is_none( py_cb ) == false )
+                {
+                    pybind::throw_exception( "invalid args function call cb is not callable '%s' type '%s'"
+                        , _kernel->object_repr( py_cb )
+                        , _kernel->object_repr_type( py_cb )
+                    );
+
+                    return nullptr;
+                }
+            }
 #endif
 
             PyObject * ret = method_args_call_ret_impl<C, F, f_info::arity - 1, typename f_info::ret_type>::call( _kernel, _self, f, _arg );

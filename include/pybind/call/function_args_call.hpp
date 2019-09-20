@@ -62,9 +62,21 @@ namespace pybind
 
             if( arg_size + 1 < fn_arity )
             {
-                pybind::throw_exception( "invalid args function call args is not equal %d < %d\n"
+                pybind::throw_exception( "invalid args function call args is not equal %d < %d"
                     , arg_size + 1
                     , fn_arity
+                );
+
+                return nullptr;
+            }
+
+            PyObject * py_cb = _kernel->tuple_getitem( _arg, fn_arity - 2 );
+
+            if( _kernel->is_callable( py_cb ) == false && _kernel->is_none( py_cb ) == false )
+            {
+                pybind::throw_exception( "invalid args function call cb is not callable '%s' type '%s'"
+                    , _kernel->object_repr( py_cb )
+                    , _kernel->object_repr_type( py_cb )
                 );
 
                 return nullptr;
