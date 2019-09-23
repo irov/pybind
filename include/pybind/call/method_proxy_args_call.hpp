@@ -53,8 +53,8 @@ namespace pybind
         {
             typedef typename stdex::function_traits<F>::result f_info;
 
-            static_assert(std::is_same<typename f_info::first_param, pybind::kernel_interface *>::value == false, "[pybind] use kernel bind");
-            static_assert(std::is_same<typename f_info::last_param, const pybind::args &>::value == true, "[pybind] add args");
+            static_assert(std::is_same<typename f_info::template iterator_param<0>, pybind::kernel_interface *>::value == false, "[pybind] use kernel bind");
+            static_assert(std::is_same<typename f_info::template reverse_iterator_param<0>, const pybind::args &>::value == true, "[pybind] add args");
 
 #ifndef NDEBUG
             uint32_t arg_size = _kernel->tuple_size( _arg );
@@ -70,16 +70,19 @@ namespace pybind
                 return nullptr;
             }
 
-            PyObject * py_cb = _kernel->tuple_getitem( _arg, fn_arity - 3 );
-
-            if( _kernel->is_callable( py_cb ) == false && _kernel->is_none( py_cb ) == false )
+            if constexpr( std::is_same<typename f_info::template reverse_iterator_param<2>, const pybind::object &>::value == true )
             {
-                pybind::throw_exception( "invalid args function call cb is not callable '%s' type '%s'"
-                    , _kernel->object_repr( py_cb )
-                    , _kernel->object_repr_type( py_cb )
-                );
+                PyObject * py_cb = _kernel->tuple_getitem( _arg, fn_arity - 3 );
 
-                return nullptr;
+                if( _kernel->is_callable( py_cb ) == false && _kernel->is_none( py_cb ) == false )
+                {
+                    pybind::throw_exception( "invalid args function call cb is not callable '%s' type '%s'"
+                        , _kernel->object_repr( py_cb )
+                        , _kernel->object_repr_type( py_cb )
+                    );
+
+                    return nullptr;
+                }
             }
 #endif
 
