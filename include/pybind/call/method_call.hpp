@@ -52,8 +52,11 @@ namespace pybind
         {
             typedef typename stdex::function_traits<F>::result f_info;
 
-            static_assert(std::is_same<typename f_info::template iterator_param<0>, pybind::kernel_interface *>::value == false, "[pybind] use kernel bind");
-            static_assert(std::is_same<typename f_info::template reverse_iterator_param<0>, const pybind::args & > ::value == false, "[pybind] use args bind");
+            typedef typename f_info::template iterator_param<0> param0;
+            typedef typename f_info::template reverse_iterator_param<0> reverse_param0;
+
+            static_assert(std::is_same<param0, pybind::kernel_interface *>::value == false, "[pybind] use kernel bind");
+            static_assert(std::is_same<reverse_param0, const pybind::args & > ::value == false, "[pybind] use args bind");
 
 #ifndef NDEBUG
             uint32_t arg_size = (_arg != nullptr) ? _kernel->tuple_size( _arg ) : 0;
