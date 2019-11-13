@@ -403,7 +403,7 @@ namespace pybind
     {
         PyTypeObject pod_type =
         {
-            PyVarObject_HEAD_INIT( &PyType_Type, 0 )
+            PyVarObject_HEAD_INIT( nullptr, 0 )
             _name,
             (Py_ssize_t)_size,
             0,

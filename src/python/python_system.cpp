@@ -1902,7 +1902,7 @@ namespace pybind
         pybind::list_insert( py_meta_path, 0, _finder );
 #   endif
 
-#   if PYBIND_PYTHON_VERSION >= 330
+#   if PYBIND_PYTHON_VERSION >= 330 && PYBIND_PYTHON_VERSION < 380
         PyThreadState * thread_state = PyThreadState_Get();
         PyInterpreterState * interp = thread_state->interp;
         interp->importlib = _finder;
@@ -1917,7 +1917,7 @@ namespace pybind
         pybind::list_remove( py_meta_path, 0 );
 #   endif
 
-#   if PYBIND_PYTHON_VERSION >= 330
+#   if PYBIND_PYTHON_VERSION >= 330 && PYBIND_PYTHON_VERSION < 380
         PyThreadState * thread_state = PyThreadState_Get();
         PyInterpreterState * interp = thread_state->interp;
         interp->importlib = nullptr;

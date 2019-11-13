@@ -78,7 +78,7 @@ namespace pybind
     {
         PyTypeObject function_type =
         {
-            PyVarObject_HEAD_INIT( &PyType_Type, 0 )
+            PyVarObject_HEAD_INIT( nullptr, 0 )
             "function_type_scope",
             sizeof( py_function_type ),
             0,

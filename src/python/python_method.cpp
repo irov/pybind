@@ -179,7 +179,7 @@ namespace pybind
     {
         PyTypeObject method_caller_type =
         {
-            PyVarObject_HEAD_INIT( &PyType_Type, 0 )
+            PyVarObject_HEAD_INIT( nullptr, 0 )
             "pybind_method_caller_type",
             sizeof( py_method_caller_type ),
             0,
@@ -239,7 +239,7 @@ namespace pybind
 
         PyTypeObject method_generator_type =
         {
-            PyVarObject_HEAD_INIT( &PyType_Type, 0 )
+            PyVarObject_HEAD_INIT( nullptr, 0 )
             "pybind_method_generator_type",
             sizeof( py_method_generator_type ),
             0,
