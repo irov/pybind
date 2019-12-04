@@ -40,7 +40,7 @@ namespace pybind
     template<class T>
     PyTypeObject * get_typemodule( kernel_interface * _kernel )
     {
-        const class_type_scope_interface_ptr & scope = _kernel->class_scope<T>();
+        const class_type_scope_interface_ptr & scope = _kernel->get_class_type_scope_t<T>();
 
         PyTypeObject * typemodule = scope->get_typeobject();
 

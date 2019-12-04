@@ -108,7 +108,7 @@ namespace pybind
                 return _kernel->ret_none();
             }
 
-            const class_type_scope_interface_ptr & scope = _kernel->class_scope<C>();
+            const class_type_scope_interface_ptr & scope = _kernel->get_class_type_scope_t<C>();
 
             PyObject * py_obj = scope->create_class( (void *)_value );
 

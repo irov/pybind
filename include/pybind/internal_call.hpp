@@ -12,7 +12,7 @@ namespace pybind
     template<class T, class ... A>
     detail::extract_operator_t internal_call_method( kernel_interface * _kernel, T * _self, const char * _name, const A & ... _a )
     {
-        const class_type_scope_interface_ptr & scope = _kernel->class_scope<T>();
+        const class_type_scope_interface_ptr & scope = _kernel->get_class_type_scope_t<T>();
 
         tuple args = pybind::make_tuple_t( _kernel, _a ... );
 

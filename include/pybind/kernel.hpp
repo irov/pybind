@@ -160,7 +160,7 @@ namespace pybind
         }
 
         template<class T>
-        const class_type_scope_interface_ptr & class_scope()
+        const class_type_scope_interface_ptr & get_class_type_scope_t()
         {
             uint32_t ti = this->class_info<T>();
 
@@ -183,7 +183,7 @@ namespace pybind
         template<class T>
         PyObject * scope_create_holder_t( T * _ptr )
         {
-            const class_type_scope_interface_ptr & scope = this->class_scope<T>();
+            const class_type_scope_interface_ptr & scope = this->get_class_type_scope_t<T>();
 
             PyObject * py_obj = this->scope_create_holder( scope, _ptr );
 
@@ -193,7 +193,7 @@ namespace pybind
         template<class T>
         PyObject * scope_create_weak_t( T * _ptr )
         {
-            const class_type_scope_interface_ptr & scope = this->class_scope<T>();
+            const class_type_scope_interface_ptr & scope = this->get_class_type_scope_t<T>();
 
             PyObject * py_obj = this->scope_create_weak( scope, _ptr );
 

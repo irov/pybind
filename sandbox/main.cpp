@@ -43,7 +43,7 @@ public:
 
     PyObject * getEmbed( pybind::kernel_interface * _kernel )
     {
-        const pybind::class_type_scope_interface_ptr & scope = _kernel->class_scope<Bar>();
+        const pybind::class_type_scope_interface_ptr & scope = _kernel->get_class_type_scope_t<Bar>();
 
         PyObject * py_obj = scope->create_holder( this );
 
