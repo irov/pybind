@@ -360,7 +360,7 @@ namespace pybind
 
             PyObject * py_obj = _t->getEmbed( _kernel );
 
-            return ptr_throw_i( _kernel, py_obj );
+            return py_obj;
         }
     };
     //////////////////////////////////////////////////////////////////////////

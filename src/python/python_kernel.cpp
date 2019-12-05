@@ -118,7 +118,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::collect()
     {
-        PyImport_Cleanup();
         PyType_ClearCache();
         PyGC_Collect();
     }
