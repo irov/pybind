@@ -55,6 +55,7 @@ IF(NOT PYBIND_EXTERNAL_BUILD)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4710") #function not inlined 
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4738") #storing 32-bit float result in memory, possible loss of performance
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd5033")
     endif()
 ENDIF()
 
