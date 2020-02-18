@@ -2,6 +2,8 @@
 
 #include "pybind/adapter_interface.hpp"
 
+#include "pybind/kernel.hpp"
+
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////

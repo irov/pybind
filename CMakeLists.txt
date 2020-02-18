@@ -88,6 +88,7 @@ file(GLOB files_public_adapter_headers ${PUBLIC_DIR}/adapter/*.hpp)
 file(GLOB files_public_helper_headers ${PUBLIC_DIR}/helper/*.hpp)
 file(GLOB files_public_call_headers ${PUBLIC_DIR}/call/*.hpp)
 file(GLOB files_public_generator_headers ${PUBLIC_DIR}/generator/*.hpp)
+file(GLOB files_private_generator_sources ${PRIVATE_DIR}/generator/*.cpp)
 file(GLOB files_public_headers ${PUBLIC_DIR}/*.hpp)
 file(GLOB files_private_headers ${PRIVATE_DIR}/*.hpp)
 file(GLOB files_private_sources ${PRIVATE_DIR}/*.cpp)
@@ -100,9 +101,10 @@ file(GLOB files_public_mutex_headers ${PUBLIC_DIR}/mutex/*.hpp)
 SOURCE_GROUP(adapter FILES ${files_public_adapter_headers})
 SOURCE_GROUP(helper FILES ${files_public_helper_headers})
 SOURCE_GROUP(call FILES ${files_public_call_headers})
-SOURCE_GROUP(generator FILES ${files_public_generator_headers})
+SOURCE_GROUP(generator FILES ${files_public_generator_headers} ${files_private_generator_sources})
 SOURCE_GROUP(python FILES ${files_private_python_headers} ${files_private_python_sources})
 SOURCE_GROUP(stl FILES ${files_public_stl_headers} ${files_private_stl_sources})
+
 SOURCE_GROUP(mutex FILES ${files_public_mutex_headers})
 
 INCLUDE_DIRECTORIES(${PROJECT_NAME} include)
@@ -140,6 +142,7 @@ ADD_LIBRARY(${PROJECT_NAME} STATIC
 	${files_public_helper_headers} 
 	${files_public_call_headers}
     ${files_public_generator_headers}
+    ${files_private_generator_sources}
 	${files_private_headers} 
 	${files_private_sources}
     ${files_public_stl_headers}
@@ -157,6 +160,9 @@ ADD_LIBRARY(${PROJECT_NAME}_python STATIC
 IF( NOT PYBIND_EXTERNAL_BUILD )
     add_dependencies(${PROJECT_NAME} stdex_download)
     add_dependencies(${PROJECT_NAME} python_download)
+    
+    add_dependencies(${PROJECT_NAME}_python stdex_download)
+    add_dependencies(${PROJECT_NAME}_python python_download)
 ENDIF()
     
 if(PYBIND_SANDBOX)

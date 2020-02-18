@@ -12,9 +12,12 @@ namespace pybind
 
         va_start( valist, _format );
 
-        throw_exception_va( _format, valist );
+        char message[4096] = { 0 };
+        vsprintf( message, _format, valist );
 
         va_end( valist );
+
+        throw pybind_exception( message );
     }
     //////////////////////////////////////////////////////////////////////////
     void throw_exception_va( const char * _format, va_list _va )

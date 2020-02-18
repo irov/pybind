@@ -1,5 +1,8 @@
 #pragma once
 
+#include "pybind/adapter/new_adapter.hpp"
+#include "pybind/adapter/destroy_adapter.hpp"
+
 #include "pybind/type_cast_result.hpp"
 
 #include "pybind/class_type_scope_interface.hpp"
@@ -17,20 +20,7 @@ namespace pybind
         : public new_adapter_interface
     {
     public:
-        void * call( kernel_interface * _kernel, const class_type_scope_interface_ptr & _scope, PyObject * _obj, PyObject * _args, PyObject * _kwds ) override
-        {
-            (void)_kernel;
-            (void)_scope;
-            (void)_obj;
-            (void)_args;
-            (void)_kwds;
-
-            pybind::throw_exception( "scope %s not support 'new_interface'"
-                , _scope->get_name()
-            );
-
-            return nullptr;
-        }
+        void * call( kernel_interface * _kernel, const class_type_scope_interface_ptr & _scope, PyObject * _obj, PyObject * _args, PyObject * _kwds ) override;
     };
 
     template<class C>
