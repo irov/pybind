@@ -2,6 +2,7 @@
 
 #include "pybind/adapter/new_adapter.hpp"
 #include "pybind/adapter/destroy_adapter.hpp"
+#include "pybind/adapter/convert_adapter.hpp"
 
 #include "pybind/type_cast_result.hpp"
 

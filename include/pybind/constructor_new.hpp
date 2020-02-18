@@ -1,5 +1,7 @@
 #pragma once
 
+#include "pybind/helper.hpp"
+
 #include "pybind/adapter/constructor_adapter.hpp"
 
 #include <type_traits>
