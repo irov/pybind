@@ -8,21 +8,12 @@
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
-    void * type_cast::operator new (size_t _size)
+    type_cast::type_cast()
     {
-        return PYBIND_MALLOC( _size );
     }
     //////////////////////////////////////////////////////////////////////////
-    void type_cast::operator delete (void * _ptr, size_t _size)
+    type_cast::~type_cast()
     {
-        (void)_size;
-
-        PYBIND_FREE( _ptr );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    void type_cast::destroy()
-    {
-        delete this;
     }
     //////////////////////////////////////////////////////////////////////////
     bool type_cast::type_info_cast( kernel_interface * _kernel, PyObject * _obj, uint32_t _tinfo, uint32_t _tptrinfo, void ** _impl )

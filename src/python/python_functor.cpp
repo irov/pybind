@@ -20,7 +20,7 @@ namespace pybind
     {
         py_functor_type * py_self = (py_functor_type *)_obj;
 
-        stdex::intrusive_ptr_release( py_self->iadapter );
+        intrusive_ptr_base::intrusive_ptr_release( py_self->iadapter );
 
         PyObject_Free( _obj );
     }
@@ -176,7 +176,7 @@ namespace pybind
 
         py_functor_type * py_self = (py_functor_type *)PyType_GenericAlloc( &m_functor_type, 0 );
 
-        stdex::intrusive_ptr_setup( py_self->iadapter, _adapter );
+        intrusive_ptr_base::intrusive_ptr_setup( py_self->iadapter, _adapter.get() );
 
         PyObject * py_func = PyCFunction_New( method, (PyObject*)py_self );
         Py_DECREF( (PyObject *)py_self );

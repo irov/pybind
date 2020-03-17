@@ -1,7 +1,6 @@
 #include "python_system.hpp"
 
 #include "pybind/class_type_scope_interface.hpp"
-
 #include "pybind/stl/stl_type_cast.hpp"
 
 #include "config/python.hpp"
@@ -49,7 +48,21 @@ namespace pybind
 #endif
 #endif
 
-#if PYBIND_PYTHON_VERSION >= 300
+#if PYBIND_PYTHON_VERSION < 300
+#ifdef PYBIND_PYTHON_HAS_EXTERNAL_ALLOCATOR_EX
+        if( _allocator != nullptr )
+        {
+            PyMemAllocatorEx pyalloc;
+            pyalloc.ctx = _allocator->raw->ctx;
+            pyalloc.malloc = _allocator->raw->malloc;
+            pyalloc.calloc = _allocator->raw->calloc;
+            pyalloc.realloc = _allocator->raw->realloc;
+            pyalloc.free = _allocator->raw->free;
+
+            PyMem_SetAllocator( &pyalloc );
+        }
+#endif
+#elif PYBIND_PYTHON_VERSION >= 300
         if( _allocator != nullptr )
         {
             if( _allocator->raw != nullptr )

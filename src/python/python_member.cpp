@@ -17,7 +17,7 @@ namespace pybind
     {
         py_member_type * mt = (py_member_type *)(_obj);
 
-        stdex::intrusive_ptr_release( mt->iadapter );
+        intrusive_ptr_base::intrusive_ptr_release( mt->iadapter );
 
         PyObject_Free( _obj );
     }
@@ -175,7 +175,7 @@ namespace pybind
     {
         py_member_type * py_member = (py_member_type *)PyType_GenericAlloc( &m_member_type, 0 );
 
-        stdex::intrusive_ptr_setup( py_member->iadapter, _iadapter );
+        intrusive_ptr_base::intrusive_ptr_setup( py_member->iadapter, _iadapter.get() );
 
         PyObject * py_get = PyCFunction_New( &m_getmethod, (PyObject*)py_member );
         PyObject * py_set = PyCFunction_New( &m_setmethod, (PyObject*)py_member );

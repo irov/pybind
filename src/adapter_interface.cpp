@@ -5,20 +5,12 @@
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
-    void adapter_interface::destroy()
+    adapter_interface::adapter_interface() noexcept
     {
-        delete this;
     }
     //////////////////////////////////////////////////////////////////////////
-    void * adapter_interface::operator new (size_t _size)
+    adapter_interface::~adapter_interface()
     {
-        return PYBIND_MALLOC( _size );
     }
     //////////////////////////////////////////////////////////////////////////
-    void adapter_interface::operator delete (void * _ptr, size_t _size)
-    {
-        (void)_size;
-
-        PYBIND_FREE( _ptr );
-    }
 }

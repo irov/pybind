@@ -6,6 +6,8 @@
 #include "pybind/exception.hpp"
 #include "pybind/logger.hpp"
 
+#include "config/stdex.hpp"
+
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
@@ -20,7 +22,7 @@ namespace pybind
     {
         py_function_type * py_self = (py_function_type *)_obj;
 
-        stdex::intrusive_ptr_release( py_self->iadapter );
+        intrusive_ptr_base::intrusive_ptr_release( py_self->iadapter );
 
         PyObject_Free( _obj );
     }
@@ -176,7 +178,7 @@ namespace pybind
 
         py_function_type * py_self = (py_function_type *)PyType_GenericAlloc( &m_function_type, 0 );
 
-        stdex::intrusive_ptr_setup( py_self->iadapter, _adapter );
+        intrusive_ptr_base::intrusive_ptr_setup( py_self->iadapter, _adapter.get() );
 
         PyObject * py_func = PyCFunction_New( method, (PyObject*)py_self );
         Py_DECREF( (PyObject *)py_self );

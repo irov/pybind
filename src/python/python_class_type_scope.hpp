@@ -120,13 +120,6 @@ namespace pybind
         uint32_t getObjectCount() const override;
 #endif
 
-    public:
-        void destroy() override;
-
-    public:
-        void * operator new (size_t _size);
-        void operator delete (void * _ptr, size_t _size);
-
     protected:
         kernel_interface * m_kernel;
 

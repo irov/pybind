@@ -4,8 +4,7 @@
 #include "pybind/types.hpp"
 #include "pybind/exception.hpp"
 #include "pybind/kernel.hpp"
-
-#include "config/stdex.hpp"
+#include "pybind/intrusive_ptr_base.hpp"
 
 namespace pybind
 {
@@ -30,7 +29,7 @@ namespace pybind
     typedef stdex::intrusive_ptr<class bindable_adapter_interface> bindable_adapter_interface_ptr;
     //////////////////////////////////////////////////////////////////////////
     class class_type_scope_interface
-        : public stdex::intrusive_ptr_base
+        : public intrusive_ptr_base
     {
     public:
         virtual bool initialize( PyObject * _module ) = 0;
