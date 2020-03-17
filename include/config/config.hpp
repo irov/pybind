@@ -32,16 +32,6 @@
 #define PYBIND_OBJECT_POD_SIZE 64
 #endif
 
-#ifndef PYBIND_MALLOC
-#   include "stdex/allocator.h"
-#	define PYBIND_MALLOC(S) stdex_malloc(S, "pybind")
-#endif
-
-#ifndef PYBIND_FREE
-#   include "stdex/allocator.h"
-#	define PYBIND_FREE(B) stdex_free(B, "pybind")
-#endif 
-
 #ifndef PYBIND_MEMCPY
 #   include "stdex/memorycopy.h"
 #	define PYBIND_MEMCPY(Dest, Src, Size) stdex::memorycopy(Dest, Src, Size)

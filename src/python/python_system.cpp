@@ -25,11 +25,45 @@ extern "C" {
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
+    void * s_pybind_malloc( void * ctx, size_t size )
+    {
+        allocator_interface * allocator = static_cast<allocator_interface *>(ctx);
+
+        void * p = allocator->malloc( size );
+
+        return p;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void * s_pybind_calloc( void * ctx, size_t nelem, size_t elsize )
+    {
+        allocator_interface * allocator = static_cast<allocator_interface *>(ctx);
+
+        void * p = allocator->calloc( nelem, elsize );
+
+        return p;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void * s_pybind_realloc( void * ctx, void * ptr, size_t new_size )
+    {
+        allocator_interface * allocator = static_cast<allocator_interface *>(ctx);
+
+        void * p = allocator->realloc( ptr, new_size );
+
+        return p;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void  s_pybind_free( void * ctx, void * ptr )
+    {
+        allocator_interface * allocator = static_cast<allocator_interface *>(ctx);
+
+        allocator->free( ptr );
+    }
+    //////////////////////////////////////////////////////////////////////////
 #if PYBIND_PYTHON_VERSION < 300 && defined(WITH_THREAD)
     static PyThreadState * gtstate;
 #endif
     //////////////////////////////////////////////////////////////////////////
-    kernel_interface * initialize( const kernel_domain_allocator_t * _allocator, const wchar_t * _path, bool _debug, bool install_sigs, bool _nosite )
+    kernel_interface * initialize( allocator_interface * _allocator, const wchar_t * _path, bool _debug, bool install_sigs, bool _nosite )
     {
         (void)_allocator;
         (void)_path;
@@ -53,11 +87,11 @@ namespace pybind
         if( _allocator != nullptr )
         {
             PyMemAllocatorEx pyalloc;
-            pyalloc.ctx = _allocator->raw->ctx;
-            pyalloc.malloc = _allocator->raw->malloc;
-            pyalloc.calloc = _allocator->raw->calloc;
-            pyalloc.realloc = _allocator->raw->realloc;
-            pyalloc.free = _allocator->raw->free;
+            pyalloc.ctx = _allocator;
+            pyalloc.malloc = &s_pybind_malloc;
+            pyalloc.calloc = &s_pybind_calloc;
+            pyalloc.realloc = &s_pybind_realloc;
+            pyalloc.free = &s_pybind_free;
 
             PyMem_SetAllocator( &pyalloc );
         }
@@ -68,11 +102,11 @@ namespace pybind
             if( _allocator->raw != nullptr )
             {
                 PyMemAllocatorEx pyalloc;
-                pyalloc.ctx = _allocator->raw->ctx;
-                pyalloc.malloc = _allocator->raw->malloc;
-                pyalloc.calloc = _allocator->raw->calloc;
-                pyalloc.realloc = _allocator->raw->realloc;
-                pyalloc.free = _allocator->raw->free;
+                pyalloc.ctx = _allocator;
+                pyalloc.malloc = &s_pybind_malloc;
+                pyalloc.calloc = &s_pybind_calloc;
+                pyalloc.realloc = &s_pybind_realloc;
+                pyalloc.free = &s_pybind_free;
 
                 PyMem_SetAllocator( PYMEM_DOMAIN_RAW, &pyalloc );
             }
@@ -80,11 +114,11 @@ namespace pybind
             if( _allocator->mem != nullptr )
             {
                 PyMemAllocatorEx pyalloc;
-                pyalloc.ctx = _allocator->mem->ctx;
-                pyalloc.malloc = _allocator->mem->malloc;
-                pyalloc.calloc = _allocator->mem->calloc;
-                pyalloc.realloc = _allocator->mem->realloc;
-                pyalloc.free = _allocator->mem->free;
+                pyalloc.ctx = _allocator;
+                pyalloc.malloc = &s_pybind_malloc;
+                pyalloc.calloc = &s_pybind_calloc;
+                pyalloc.realloc = &s_pybind_realloc;
+                pyalloc.free = &s_pybind_free;
 
                 PyMem_SetAllocator( PYMEM_DOMAIN_MEM, &pyalloc );
             }
@@ -92,11 +126,11 @@ namespace pybind
             if( _allocator->obj != nullptr )
             {
                 PyMemAllocatorEx pyalloc;
-                pyalloc.ctx = _allocator->obj->ctx;
-                pyalloc.malloc = _allocator->obj->malloc;
-                pyalloc.calloc = _allocator->obj->calloc;
-                pyalloc.realloc = _allocator->obj->realloc;
-                pyalloc.free = _allocator->obj->free;
+                pyalloc.ctx = _allocator;
+                pyalloc.malloc = &s_pybind_malloc;
+                pyalloc.calloc = &s_pybind_calloc;
+                pyalloc.realloc = &s_pybind_realloc;
+                pyalloc.free = &s_pybind_free;
 
                 PyMem_SetAllocator( PYMEM_DOMAIN_OBJ, &pyalloc );
             }
@@ -169,9 +203,13 @@ namespace pybind
 #endif
         }
 
-        python_kernel * kernel = new python_kernel();
+        void * mem_kernel = _allocator->malloc( sizeof( python_kernel ) );
 
-        if( kernel->initialize() == false )
+        new (mem_kernel)python_kernel();
+
+        python_kernel * kernel = static_cast<python_kernel *>(mem_kernel);
+
+        if( kernel->initialize( _allocator ) == false )
         {
             kernel->destroy();
 

@@ -6,7 +6,8 @@ namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
     intrusive_ptr_base::intrusive_ptr_base()
-        : m_refcount( 0 )
+        : m_allocator( nullptr )
+        , m_refcount( 0 )
     {
     }
     //////////////////////////////////////////////////////////////////////////
@@ -14,16 +15,14 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
-    void * intrusive_ptr_base::operator new (size_t _size)
+    void intrusive_ptr_base::set_allocator( allocator_interface * _allocator )
     {
-        return PYBIND_MALLOC( _size );
+        m_allocator = _allocator;
     }
     //////////////////////////////////////////////////////////////////////////
-    void intrusive_ptr_base::operator delete (void * _ptr, size_t _size)
+    allocator_interface * intrusive_ptr_base::get_allocator() const
     {
-        (void)_size;
-
-        PYBIND_FREE( _ptr );
+        return m_allocator;
     }
     //////////////////////////////////////////////////////////////////////////
     uint32_t intrusive_ptr_base::incref()
@@ -37,7 +36,9 @@ namespace pybind
     {
         if( --m_refcount == 0 )
         {
-            delete this;
+            this->~intrusive_ptr_base();
+
+            m_allocator->free( this );
         }
     }
     //////////////////////////////////////////////////////////////////////////

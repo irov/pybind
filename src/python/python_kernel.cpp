@@ -19,7 +19,8 @@ namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
     python_kernel::python_kernel()
-        : m_current_module( nullptr )
+        : m_allocator( nullptr )
+        , m_current_module( nullptr )
         , m_enumerator( 0 )
     {
     }
@@ -28,8 +29,10 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::initialize()
+    bool python_kernel::initialize( allocator_interface * _allocator )
     {
+        m_allocator = _allocator;
+
         if( m_functions.initialize() == false )
         {
             return false;
@@ -97,7 +100,7 @@ namespace pybind
 
             m_type_cast[index] = nullptr;
 
-            PYBIND_FREE( name );
+            m_allocator->free( name );
         }
 
         for( uint32_t index = 0; index != PYBIND_TYPE_COUNT_HASH; ++index )
@@ -114,6 +117,11 @@ namespace pybind
         m_members.finalize();
         m_methods.finalize();
         m_pods.finalize();
+    }
+    //////////////////////////////////////////////////////////////////////////
+    allocator_interface * python_kernel::get_allocator() const
+    {
+        return m_allocator;
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::collect()
@@ -357,7 +365,7 @@ namespace pybind
 
         size_t len = strlen( _info );
 
-        void * name_memory = PYBIND_MALLOC( len + 1 );
+        void * name_memory = m_allocator->malloc( len + 1 );
 
         desc.name = (char *)name_memory;
 

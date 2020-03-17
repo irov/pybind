@@ -3,6 +3,7 @@
 #include "pybind/exports.hpp"
 #include "pybind/types.hpp"
 #include "pybind/mutex.hpp"
+#include "pybind/allocator_interface.hpp"
 
 #include "pybind/function_interface.hpp"
 #include "pybind/functor_interface.hpp"
@@ -20,22 +21,7 @@ namespace pybind
     typedef stdex::intrusive_ptr<class new_adapter_interface> new_adapter_interface_ptr;
     typedef stdex::intrusive_ptr<class destroy_adapter_interface> destroy_adapter_interface_ptr;
 
-    typedef struct {
-        void *ctx;
-
-        void* (*malloc) (void *ctx, size_t size);
-        void* (*calloc) (void *ctx, size_t nelem, size_t elsize);
-        void* (*realloc) (void *ctx, void *ptr, size_t new_size);
-        void( *free ) (void *ctx, void *ptr);
-    } kernel_allocator_t;
-
-    typedef struct {
-        kernel_allocator_t * raw;
-        kernel_allocator_t * mem;
-        kernel_allocator_t * obj;
-    } kernel_domain_allocator_t;
-
-    PYBIND_API kernel_interface * initialize( const kernel_domain_allocator_t * _allocator, const wchar_t * _path, bool _debug, bool install_sigs, bool _nosite );
+    PYBIND_API kernel_interface * initialize( allocator_interface * _allocator, const wchar_t * _path, bool _debug, bool install_sigs, bool _nosite );
     PYBIND_API class kernel_interface * get_kernel();
     PYBIND_API void set_kernel( class kernel_interface * _kernel );
 
@@ -44,6 +30,9 @@ namespace pybind
     public:
         kernel_interface() {};
         virtual ~kernel_interface() {};
+
+    public:
+        virtual allocator_interface * get_allocator() const = 0;
 
     public:
         virtual void collect() = 0;

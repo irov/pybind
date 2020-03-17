@@ -20,8 +20,11 @@ namespace pybind
         ~python_kernel() override;
 
     public:
-        bool initialize();
+        bool initialize( allocator_interface * _allocator );
         void finalize();
+
+    public:
+        allocator_interface * get_allocator() const override;
 
     public:
         void collect() override;
@@ -262,6 +265,8 @@ namespace pybind
         bool tuple_setitem( PyObject * _obj, uint32_t _it, PyObject * _value ) override;
 
     protected:
+        allocator_interface * m_allocator;
+
         function_python m_functions;
         functor_python m_functors;
         member_python m_members;
