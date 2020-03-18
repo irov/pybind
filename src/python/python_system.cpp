@@ -97,19 +97,19 @@ namespace pybind
         }
 #endif
 #elif PYBIND_PYTHON_VERSION >= 300
-        if( _allocator != nullptr )
-        {
-            PyMemAllocatorEx pyalloc;
-            pyalloc.ctx = _allocator;
-            pyalloc.malloc = &s_pybind_malloc;
-            pyalloc.calloc = &s_pybind_calloc;
-            pyalloc.realloc = &s_pybind_realloc;
-            pyalloc.free = &s_pybind_free;
+        //if( _allocator != nullptr )
+        //{
+        //    PyMemAllocatorEx pyalloc;
+        //    pyalloc.ctx = _allocator;
+        //    pyalloc.malloc = &s_pybind_malloc;
+        //    pyalloc.calloc = &s_pybind_calloc;
+        //    pyalloc.realloc = &s_pybind_realloc;
+        //    pyalloc.free = &s_pybind_free;
 
-            PyMem_SetAllocator( PYMEM_DOMAIN_RAW, &pyalloc );
-            PyMem_SetAllocator( PYMEM_DOMAIN_MEM, &pyalloc );
-            PyMem_SetAllocator( PYMEM_DOMAIN_OBJ, &pyalloc );
-        }
+        //    PyMem_SetAllocator( PYMEM_DOMAIN_RAW, &pyalloc );
+        //    PyMem_SetAllocator( PYMEM_DOMAIN_MEM, &pyalloc );
+        //    PyMem_SetAllocator( PYMEM_DOMAIN_OBJ, &pyalloc );
+        //}
 #endif
 
 
