@@ -8,7 +8,7 @@
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
-    typedef stdex::intrusive_ptr<class class_type_scope_interface> class_type_scope_interface_ptr;
+    typedef intrusive_ptr<class class_type_scope_interface> class_type_scope_interface_ptr;
     //////////////////////////////////////////////////////////////////////////
     class repr_adapter_interface
         : public adapter_interface
@@ -17,7 +17,7 @@ namespace pybind
         virtual PyObject * repr( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope ) = 0;
     };
     //////////////////////////////////////////////////////////////////////////
-    typedef stdex::intrusive_ptr<repr_adapter_interface> repr_adapter_interface_ptr;
+    typedef intrusive_ptr<repr_adapter_interface> repr_adapter_interface_ptr;
     //////////////////////////////////////////////////////////////////////////
     template<class C, class F>
     class repr_adapter

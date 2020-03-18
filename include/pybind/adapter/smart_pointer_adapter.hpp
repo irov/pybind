@@ -35,7 +35,7 @@ namespace pybind
         const char * m_name;
     };
     //////////////////////////////////////////////////////////////////////////
-    typedef stdex::intrusive_ptr<smart_pointer_adapter_interface> smart_pointer_adapter_interface_ptr;
+    typedef intrusive_ptr<smart_pointer_adapter_interface> smart_pointer_adapter_interface_ptr;
     //////////////////////////////////////////////////////////////////////////
     template<class C, class FI, class FD>
     class smart_pointer_adapter

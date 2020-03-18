@@ -43,7 +43,7 @@ namespace pybind
         uint32_t m_arity;
     };
     //////////////////////////////////////////////////////////////////////////
-    typedef stdex::intrusive_ptr<class functor_adapter_interface> functor_adapter_interface_ptr;
+    typedef intrusive_ptr<class functor_adapter_interface> functor_adapter_interface_ptr;
     //////////////////////////////////////////////////////////////////////////
 }
 

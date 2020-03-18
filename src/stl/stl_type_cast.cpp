@@ -99,8 +99,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool initialize_stl_type_cast( kernel_interface * _kernel )
     {
-        pybind::registration_type_cast<std::string>(_kernel, type_cast_ptr::from( new helper::extract_stl_string_type ));
-        pybind::registration_type_cast<std::wstring>(_kernel, type_cast_ptr::from( new helper::extract_stl_wstring_type ));
+        pybind::registration_type_cast<std::string>(_kernel, _kernel->get_allocator()->newT<helper::extract_stl_string_type>());
+        pybind::registration_type_cast<std::wstring>(_kernel, _kernel->get_allocator()->newT<helper::extract_stl_wstring_type>());
 
         pybind::registration_stl_vector_type_cast<std::string, std::vector<std::string>>(_kernel);
         pybind::registration_stl_vector_type_cast<std::wstring, std::vector<std::wstring>>(_kernel);

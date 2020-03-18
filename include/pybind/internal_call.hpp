@@ -7,7 +7,7 @@
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
-    typedef stdex::intrusive_ptr<class class_type_scope_interface> class_type_scope_interface_ptr;
+    typedef intrusive_ptr<class class_type_scope_interface> class_type_scope_interface_ptr;
     //////////////////////////////////////////////////////////////////////////
     template<class T, class ... A>
     detail::extract_operator_t internal_call_method( kernel_interface * _kernel, T * _self, const char * _name, const A & ... _a )

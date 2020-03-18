@@ -18,9 +18,7 @@ namespace pybind
         {
             if( external_extract == true )
             {
-                type_cast_ptr cast( new extract_type_ref );
-
-                this->setup_extract( cast );
+                this->setup_extract( _kernel->get_allocator()->newT<extract_type_ref>() );
             }
         }
 
@@ -32,7 +30,10 @@ namespace pybind
 
             const class_type_scope_interface_ptr & scope = base_<C, B>::get_scope();
 
-            constructor_adapter_interface_ptr ctr( new constructor_placement<C, init<Args...> > );
+            allocator_interface * allocator = m_kernel->get_allocator();
+
+            constructor_adapter_interface_ptr ctr = allocator->newT<constructor_placement<C, init<Args...> >>();
+
             scope->set_construct( ctr );
 
             return *this;

@@ -12,7 +12,7 @@ namespace pybind
         virtual bool convert( pybind::kernel_interface * _kernel, PyObject * _obj, void * _place ) = 0;
     };
     //////////////////////////////////////////////////////////////////////////
-    typedef stdex::intrusive_ptr<convert_adapter_interface> convert_adapter_interface_ptr;
+    typedef intrusive_ptr<convert_adapter_interface> convert_adapter_interface_ptr;
     //////////////////////////////////////////////////////////////////////////
     template<class C, class F>
     class convert_adapter

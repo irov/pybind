@@ -608,7 +608,9 @@ namespace pybind
     {
         if( m_number_multy != nullptr )
         {
-            m_number_multy = new number_multy_adapter_t;
+            allocator_interface * allocator = m_kernel->get_allocator();
+
+            allocator->deleteT( m_number_multy );
         }
     }
     //////////////////////////////////////////////////////////////////////////
@@ -712,13 +714,13 @@ namespace pybind
 
         if( m_pod_size == 0 )
         {
-            m_pytypeobject->tp_new = py_new_class;
-            m_pytypeobject->tp_del = py_del_class;
+            m_pytypeobject->tp_new = &py_new_class;
+            m_pytypeobject->tp_del = &py_del_class;
         }
         else
         {
-            m_pytypeobject->tp_new = py_new_pod;
-            m_pytypeobject->tp_del = py_del_pod;
+            m_pytypeobject->tp_new = &py_new_pod;
+            m_pytypeobject->tp_del = &py_del_pod;
         }
 
         PyType_Modified( m_pytypeobject );
@@ -1356,7 +1358,9 @@ namespace pybind
     {
         if( m_number_multy == nullptr )
         {
-            m_number_multy = new number_multy_adapter_t;
+            allocator_interface * allocator = m_kernel->get_allocator();
+
+            m_number_multy = allocator->newP<number_multy_adapter_t>();
         }
 
         return m_number_multy;

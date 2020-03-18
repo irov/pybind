@@ -14,11 +14,11 @@ namespace pybind
 
     public:
         class_( kernel_interface * _kernel, const char * _name, bool external_extract = true, PyObject * _module = 0 )
-            : base_<C, B>( _kernel, _name, nullptr, nullptr, destroy_adapter_interface_ptr::from( new class_destroy_delete<C> ), 0, false, _module )
+            : base_<C, B>( _kernel, _name, nullptr, nullptr, _kernel->get_allocator()->newT<class_destroy_delete<C>>(), 0, false, _module )
         {
             if( external_extract == true )
             {
-                this->setup_extract( type_cast_ptr::from( new extract_type_ptr ) );
+                this->setup_extract( _kernel->get_allocator()->newT<extract_type_ptr>() );
             }
         }
 
@@ -26,8 +26,9 @@ namespace pybind
         template<class ... Args>
         class_ & def_constructor( const init<Args...> & )
         {
-            constructor_adapter_interface_ptr ctr =
-                constructor_adapter_interface_ptr::from( new constructor_new<C, init<Args...> >() );
+            allocator_interface * allocator = m_kernel->get_allocator();
+
+            constructor_adapter_interface_ptr ctr = allocator->newT<constructor_new<C, init<Args...>>>();
 
             const class_type_scope_interface_ptr & scope = base_<C, B>::get_scope();
 

@@ -28,7 +28,7 @@ namespace pybind
     {
         py_method_caller_type * mct = (py_method_caller_type *)_obj;
 
-        intrusive_ptr_base::intrusive_ptr_release( mct->iadapter );
+        factorable::intrusive_ptr_release( mct->iadapter );
 
         Py_DECREF( mct->self );
 
@@ -129,7 +129,7 @@ namespace pybind
 
         py_method_caller_type * mct = (py_method_caller_type *)PyType_GenericAlloc( _descr->method_caller_type, 0 );
 
-        intrusive_ptr_base::intrusive_ptr_setup( mct->iadapter, _descr->iadapter );
+        factorable::intrusive_ptr_setup( mct->iadapter, _descr->iadapter );
 
         Py_INCREF( _obj );
         mct->self = _obj;
@@ -151,7 +151,7 @@ namespace pybind
         }
 
         py_method_caller_type * mct = (py_method_caller_type *)PyType_GenericAlloc( _descr->method_caller_type, 0 );
-        intrusive_ptr_base::intrusive_ptr_setup( mct->iadapter, _descr->iadapter );
+        factorable::intrusive_ptr_setup( mct->iadapter, _descr->iadapter );
 
         mct->self = PyTuple_GetItem( _args, 0 );
 
@@ -168,7 +168,7 @@ namespace pybind
 
         Py_DECREF( (PyObject *)mgt->method_caller_type );
 
-        intrusive_ptr_base::intrusive_ptr_release( mgt->iadapter );
+        factorable::intrusive_ptr_release( mgt->iadapter );
 
         Py_XDECREF( (PyObject *)mgt->classtype );
 
@@ -311,7 +311,7 @@ namespace pybind
         generator->method_caller_type = &m_method_caller_type;
         Py_INCREF( (PyObject *)generator->method_caller_type );
 
-        intrusive_ptr_base::intrusive_ptr_setup( generator->iadapter, _ifunc.get() );
+        factorable::intrusive_ptr_setup( generator->iadapter, _ifunc.get() );
 
         if( _type != nullptr )
         {

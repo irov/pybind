@@ -14,7 +14,10 @@ namespace pybind
     {
         typedef typename stdex::function_traits<F>::result t_info;
 
-        function_adapter_interface_ptr adapter( new function_adapter<F>( _name, t_info::arity, _function ) );
+        allocator_interface * allocator = _kernel->get_allocator();
+
+        function_adapter_interface_ptr adapter = allocator->newT<function_adapter<F>>( _name, t_info::arity, _function );
+
         _kernel->def_function_adapter( adapter, false, _module );
     }
     //////////////////////////////////////////////////////////////////////////
@@ -23,7 +26,10 @@ namespace pybind
     {
         typedef typename stdex::function_traits<F>::result t_info;
 
-        function_adapter_interface_ptr adapter( new function_adapter_args<F>( _name, t_info::arity, _function ) );
+        allocator_interface * allocator = _kernel->get_allocator();
+
+        function_adapter_interface_ptr adapter = allocator->newT<function_adapter_args<F>>( _name, t_info::arity, _function );
+
         _kernel->def_function_adapter( adapter, false, _module );
     }
     //////////////////////////////////////////////////////////////////////////
@@ -32,7 +38,10 @@ namespace pybind
     {
         typedef typename stdex::function_traits<F>::result t_info;
 
-        function_adapter_interface_ptr adapter( new function_adapter_deprecate<F>( _name, t_info::arity, _function, _doc ) );
+        allocator_interface * allocator = _kernel->get_allocator();
+
+        function_adapter_interface_ptr adapter = allocator->newT<function_adapter_deprecate<F>>( _name, t_info::arity, _function, _doc );
+
         _kernel->def_function_adapter( adapter, false, _module );
     }
     //////////////////////////////////////////////////////////////////////////
@@ -41,7 +50,10 @@ namespace pybind
     {
         typedef typename stdex::function_traits<F>::result t_info;
 
-        function_adapter_interface_ptr adapter( new function_kernel_adapter<F>( _name, t_info::arity, _function ) );
+        allocator_interface * allocator = _kernel->get_allocator();
+
+        function_adapter_interface_ptr adapter = allocator->newT<function_kernel_adapter<F>>( _name, t_info::arity, _function );
+
         _kernel->def_function_adapter( adapter, false, _module );
     }
     //////////////////////////////////////////////////////////////////////////
@@ -50,7 +62,10 @@ namespace pybind
     {
         typedef typename stdex::function_traits<F>::result t_info;
 
-        function_adapter_interface_ptr adapter( new function_kernel_adapter_args<F>( _name, t_info::arity, _function ) );
+        allocator_interface * allocator = _kernel->get_allocator();
+
+        function_adapter_interface_ptr adapter = allocator->newT<function_kernel_adapter_args<F>>( _name, t_info::arity, _function );
+
         _kernel->def_function_adapter( adapter, false, _module );
     }
     //////////////////////////////////////////////////////////////////////////
@@ -59,7 +74,10 @@ namespace pybind
     {
         typedef typename stdex::function_traits<F>::result t_info;
 
-        function_adapter_interface_ptr adapter( new function_proxy_adapter<F, P>( _name, t_info::arity, _function, _proxy ) );
+        allocator_interface * allocator = _kernel->get_allocator();
+
+        function_adapter_interface_ptr adapter = allocator->newT<function_proxy_adapter<F, P>>( _name, t_info::arity, _function, _proxy );
+
         _kernel->def_function_adapter( adapter, false, _module );
     }
     //////////////////////////////////////////////////////////////////////////
@@ -68,7 +86,10 @@ namespace pybind
     {
         typedef typename stdex::function_traits<F>::result t_info;
 
-        function_adapter_interface_ptr adapter( new function_proxy_adapter_args<F, P>( _name, t_info::arity, _function, _proxy ) );
+        allocator_interface * allocator = _kernel->get_allocator();
+
+        function_adapter_interface_ptr adapter = allocator->newT<function_proxy_adapter_args<F, P>>( _name, t_info::arity, _function, _proxy );
+
         _kernel->def_function_adapter( adapter, false, _module );
     }
     //////////////////////////////////////////////////////////////////////////
@@ -77,7 +98,10 @@ namespace pybind
     {
         typedef typename stdex::function_traits<F>::result t_info;
 
-        function_adapter_interface_ptr adapter( new function_adapter<F>( _name, t_info::arity, _function ) );
+        allocator_interface * allocator = _kernel->get_allocator();
+
+        function_adapter_interface_ptr adapter = allocator->newT<function_adapter<F>>( _name, t_info::arity, _function );
+
         PyObject * py_function = _kernel->create_function_adapter( adapter, false );
 
         return py_function;
@@ -88,7 +112,10 @@ namespace pybind
     {
         typedef typename stdex::function_traits<F>::result t_info;
 
-        function_adapter_interface_ptr adapter( new function_adapter_native<F>( _name, t_info::arity, _function ) );
+        allocator_interface * allocator = _kernel->get_allocator();
+
+        function_adapter_interface_ptr adapter = allocator->newT<function_adapter_native<F>>( _name, t_info::arity, _function );
+
         _kernel->def_function_adapter( adapter, true, _module );
     }
     //////////////////////////////////////////////////////////////////////////
@@ -97,7 +124,10 @@ namespace pybind
     {
         typedef typename stdex::function_traits<F>::result t_info;
 
-        function_adapter_interface_ptr adapter( new function_adapter_native<F>( _name, t_info::arity, _function ) );
+        allocator_interface * allocator = _kernel->get_allocator();
+
+        function_adapter_interface_ptr adapter = allocator->newT<function_adapter_native<F>>( _name, t_info::arity, _function );
+
         PyObject * py_function = _kernel->create_function_adapter( adapter, true );
 
         return py_function;

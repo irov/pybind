@@ -1,48 +1,48 @@
-#include "pybind/intrusive_ptr_base.hpp"
+#include "pybind/factorable.hpp"
+
+#include "pybind/allocator_interface.hpp"
 
 #include "config/config.hpp"
 
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
-    intrusive_ptr_base::intrusive_ptr_base()
+    factorable::factorable()
         : m_allocator( nullptr )
         , m_refcount( 0 )
     {
     }
     //////////////////////////////////////////////////////////////////////////
-    intrusive_ptr_base::~intrusive_ptr_base()
+    factorable::~factorable()
     {
     }
     //////////////////////////////////////////////////////////////////////////
-    void intrusive_ptr_base::set_allocator( allocator_interface * _allocator )
+    void factorable::set_allocator( allocator_interface * _allocator )
     {
         m_allocator = _allocator;
     }
     //////////////////////////////////////////////////////////////////////////
-    allocator_interface * intrusive_ptr_base::get_allocator() const
+    allocator_interface * factorable::get_allocator() const
     {
         return m_allocator;
     }
     //////////////////////////////////////////////////////////////////////////
-    uint32_t intrusive_ptr_base::incref()
+    uint32_t factorable::incref()
     {
         ++m_refcount;
 
         return m_refcount;
     }
     //////////////////////////////////////////////////////////////////////////
-    void intrusive_ptr_base::decref()
+    void factorable::decref()
     {
         if( --m_refcount == 0 )
         {
-            this->~intrusive_ptr_base();
-
-            m_allocator->free( this );
+            m_allocator->deleteT( this );
         }
     }
     //////////////////////////////////////////////////////////////////////////
-    uint32_t intrusive_ptr_base::getrefcount() const
+    uint32_t factorable::getrefcount() const
     {
         return m_refcount;
     }

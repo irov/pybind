@@ -3,20 +3,20 @@
 #include "pybind/exports.hpp"
 #include "pybind/types.hpp"
 
-#include "pybind/allocator_interface.hpp"
-
 #include "config/stdex.hpp"
 
 #include <new>
 
 namespace pybind
-{    
-    class intrusive_ptr_base
+{
+    class allocator_interface;
+
+    class factorable
         : public stdex::intrusive_ptr_base
     {
     public:
-        intrusive_ptr_base();
-        virtual ~intrusive_ptr_base();
+        factorable();
+        virtual ~factorable();
 
     public:
         void set_allocator( allocator_interface * _allocator );
@@ -32,4 +32,7 @@ namespace pybind
 
         uint32_t m_refcount;
     };
+    //////////////////////////////////////////////////////////////////////////
+    typedef intrusive_ptr<factorable> factorable_ptr;
+    //////////////////////////////////////////////////////////////////////////
 }

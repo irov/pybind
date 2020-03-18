@@ -67,7 +67,7 @@ namespace pybind
             desc.name = nullptr;
         }
 
-        m_class_type_dummy = new python_class_type_scope( this, "__dummy__", 0, nullptr, nullptr, nullptr, 0, false );
+        m_class_type_dummy = m_allocator->newT<python_class_type_scope>( this, "__dummy__", 0, nullptr, nullptr, nullptr, 0, false );
 
 #ifdef PYBIND_STL_SUPPORT
         pybind::initialize_stl_type_cast( this );
@@ -134,7 +134,7 @@ namespace pybind
     {
         this->finalize();
 
-        delete this;
+        m_allocator->deleteT( this );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::remove_from_module( const char * _name, PyObject * _module )
@@ -450,7 +450,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     class_type_scope_interface_ptr python_kernel::create_new_type_scope( uint32_t _info, const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash )
     {
-        class_type_scope_interface_ptr scope( new python_class_type_scope( this, _name, _info, _user, _pynew, _pydestructor, _pod, _hash ) );
+        class_type_scope_interface_ptr scope = m_allocator->newT<python_class_type_scope>( this, _name, _info, _user, _pynew, _pydestructor, _pod, _hash );
 
 #ifndef NDEBUG
         if( scope == nullptr )

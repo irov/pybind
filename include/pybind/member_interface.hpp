@@ -9,7 +9,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     class kernel_interface;
     //////////////////////////////////////////////////////////////////////////
-    typedef stdex::intrusive_ptr<class class_type_scope_interface> class_type_scope_interface_ptr;
+    typedef intrusive_ptr<class class_type_scope_interface> class_type_scope_interface_ptr;
     //////////////////////////////////////////////////////////////////////////
     class member_adapter_interface
         : public adapter_interface
@@ -38,7 +38,7 @@ namespace pybind
         const char * m_name;
     };
     //////////////////////////////////////////////////////////////////////////
-    typedef stdex::intrusive_ptr<member_adapter_interface> member_adapter_interface_ptr;
+    typedef intrusive_ptr<member_adapter_interface> member_adapter_interface_ptr;
     //////////////////////////////////////////////////////////////////////////
 }
 

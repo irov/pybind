@@ -120,7 +120,7 @@ namespace pybind
     template<class T, class V>
     inline void registration_stl_vector_type_cast( kernel_interface * _kernel )
     {
-        _kernel->register_type_info_extract_t<V>( pybind::make_type_cast<extract_stl_vector_type<T, V>>() );
+        _kernel->register_type_info_extract_t<V>( pybind::make_type_cast<extract_stl_vector_type<T, V>>(_kernel) );
     }
 
     template<class T, class V>
@@ -132,7 +132,7 @@ namespace pybind
     template<class K, class V, class M>
     inline void registration_stl_map_type_cast( kernel_interface * _kernel )
     {
-        _kernel->register_type_info_extract_t<M>( pybind::make_type_cast<extract_stl_map_type<K, V, M>>() );
+        _kernel->register_type_info_extract_t<M>( pybind::make_type_cast<extract_stl_map_type<K, V, M>>(_kernel) );
     }
 
     template<class K, class V, class M>

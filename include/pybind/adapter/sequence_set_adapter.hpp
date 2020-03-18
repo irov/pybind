@@ -8,7 +8,7 @@
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
-    typedef stdex::intrusive_ptr<class class_type_scope_interface> class_type_scope_interface_ptr;
+    typedef intrusive_ptr<class class_type_scope_interface> class_type_scope_interface_ptr;
     //////////////////////////////////////////////////////////////////////////
     class sequence_set_adapter_interface
         : public adapter_interface
@@ -36,7 +36,7 @@ namespace pybind
         const char * m_name;
     };
     //////////////////////////////////////////////////////////////////////////
-    typedef stdex::intrusive_ptr<sequence_set_adapter_interface> sequence_set_adapter_interface_ptr;
+    typedef intrusive_ptr<sequence_set_adapter_interface> sequence_set_adapter_interface_ptr;
     //////////////////////////////////////////////////////////////////////////
     template<class C, class F>
     class sequence_set_adapter

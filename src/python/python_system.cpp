@@ -99,41 +99,16 @@ namespace pybind
 #elif PYBIND_PYTHON_VERSION >= 300
         if( _allocator != nullptr )
         {
-            if( _allocator->raw != nullptr )
-            {
-                PyMemAllocatorEx pyalloc;
-                pyalloc.ctx = _allocator;
-                pyalloc.malloc = &s_pybind_malloc;
-                pyalloc.calloc = &s_pybind_calloc;
-                pyalloc.realloc = &s_pybind_realloc;
-                pyalloc.free = &s_pybind_free;
+            PyMemAllocatorEx pyalloc;
+            pyalloc.ctx = _allocator;
+            pyalloc.malloc = &s_pybind_malloc;
+            pyalloc.calloc = &s_pybind_calloc;
+            pyalloc.realloc = &s_pybind_realloc;
+            pyalloc.free = &s_pybind_free;
 
-                PyMem_SetAllocator( PYMEM_DOMAIN_RAW, &pyalloc );
-            }
-
-            if( _allocator->mem != nullptr )
-            {
-                PyMemAllocatorEx pyalloc;
-                pyalloc.ctx = _allocator;
-                pyalloc.malloc = &s_pybind_malloc;
-                pyalloc.calloc = &s_pybind_calloc;
-                pyalloc.realloc = &s_pybind_realloc;
-                pyalloc.free = &s_pybind_free;
-
-                PyMem_SetAllocator( PYMEM_DOMAIN_MEM, &pyalloc );
-            }
-
-            if( _allocator->obj != nullptr )
-            {
-                PyMemAllocatorEx pyalloc;
-                pyalloc.ctx = _allocator;
-                pyalloc.malloc = &s_pybind_malloc;
-                pyalloc.calloc = &s_pybind_calloc;
-                pyalloc.realloc = &s_pybind_realloc;
-                pyalloc.free = &s_pybind_free;
-
-                PyMem_SetAllocator( PYMEM_DOMAIN_OBJ, &pyalloc );
-            }
+            PyMem_SetAllocator( PYMEM_DOMAIN_RAW, &pyalloc );
+            PyMem_SetAllocator( PYMEM_DOMAIN_MEM, &pyalloc );
+            PyMem_SetAllocator( PYMEM_DOMAIN_OBJ, &pyalloc );
         }
 #endif
 
@@ -203,11 +178,7 @@ namespace pybind
 #endif
         }
 
-        void * mem_kernel = _allocator->malloc( sizeof( python_kernel ) );
-
-        new (mem_kernel)python_kernel();
-
-        python_kernel * kernel = static_cast<python_kernel *>(mem_kernel);
+        python_kernel * kernel = _allocator->newP<python_kernel>();
 
         if( kernel->initialize( _allocator ) == false )
         {

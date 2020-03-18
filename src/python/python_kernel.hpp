@@ -293,4 +293,7 @@ namespace pybind
         bool set_class_info_desc( uint32_t _typeId, const char * _info );
         uint32_t get_next_id();
     };
+    //////////////////////////////////////////////////////////////////////////
+    typedef stdex::intrusive_ptr<python_kernel> python_kernel_ptr;
+    //////////////////////////////////////////////////////////////////////////
 }
