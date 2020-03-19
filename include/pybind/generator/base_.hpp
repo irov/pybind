@@ -729,7 +729,7 @@ namespace pybind
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter_proxy<C, P, F>( "proxy_static_mul", f, _proxy );
+            number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter_proxy<C, P, F>>( "proxy_static_mul", f, _proxy );
 
             m_scope->set_number_mul( iadapter );
 
@@ -906,6 +906,12 @@ namespace pybind
             typedef typename bases_type::bases_tuple bases_tuple;
 
             this->setup_bases_i<bases_tuple>( _scope, std::make_integer_sequence<uint32_t, std::tuple_size<bases_tuple>::value>() );
+        }
+
+    protected:
+        kernel_interface * get_kernel() const
+        {
+            return m_kernel;
         }
 
     protected:

@@ -30,7 +30,9 @@ namespace pybind
 
             const class_type_scope_interface_ptr & scope = base_<C, B>::get_scope();
 
-            allocator_interface * allocator = m_kernel->get_allocator();
+            kernel_interface * kernel = this->get_kernel();
+
+            allocator_interface * allocator = kernel->get_allocator();
 
             constructor_adapter_interface_ptr ctr = allocator->newT<constructor_placement<C, init<Args...> >>();
 

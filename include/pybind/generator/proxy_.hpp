@@ -26,7 +26,9 @@ namespace pybind
         template<class ... Args>
         proxy_ & def_constructor( const init<Args...> & _init )
         {
-            allocator_interface * allocator = m_kernel->get_allocator();
+            kernel_interface * kernel = this->get_kernel();
+
+            allocator_interface * allocator = kernel->get_allocator();
 
             constructor_adapter_interface_ptr ctr = allocator->newT<constructor_new<C, init<Args...> >>();
 
