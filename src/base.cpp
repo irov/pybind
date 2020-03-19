@@ -1,6 +1,6 @@
 #include "pybind/base.hpp"
 
-#include "pybind/kernel.hpp"
+#include "pybind/kernel_interface.hpp"
 
 namespace pybind
 {

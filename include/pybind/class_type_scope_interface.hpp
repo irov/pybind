@@ -3,8 +3,8 @@
 #include "pybind/exports.hpp"
 #include "pybind/types.hpp"
 #include "pybind/exception.hpp"
-#include "pybind/kernel.hpp"
-#include "pybind/factorable.hpp"
+
+#include "pybind/kernel_interface.hpp"
 
 namespace pybind
 {

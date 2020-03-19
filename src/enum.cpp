@@ -1,5 +1,5 @@
 #include "pybind/enum.hpp"
-#include "pybind/kernel.hpp"
+#include "pybind/kernel_interface.hpp"
 #include "pybind/exception.hpp"
 #include "pybind/extract.hpp"
 

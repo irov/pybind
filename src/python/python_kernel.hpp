@@ -1,6 +1,6 @@
 #pragma once
 
-#include "pybind/kernel.hpp"
+#include "pybind/kernel_interface.hpp"
 
 #include "config/python.hpp"
 

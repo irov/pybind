@@ -3,8 +3,6 @@
 #include "pybind/exports.hpp"
 #include "pybind/types.hpp"
 
-#include "pybind/kernel.hpp"
-
 #include <stdarg.h>
 
 namespace pybind

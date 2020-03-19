@@ -1,6 +1,7 @@
 #pragma once
 
-#include "pybind/kernel.hpp"
+#include "pybind/kernel_interface.hpp"
+
 #include "pybind/helper.hpp"
 #include "pybind/tuple.hpp"
 

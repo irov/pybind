@@ -2,6 +2,8 @@
 
 #include "python_system.hpp"
 
+#include "pybind/kernel_interface.hpp"
+
 #include "pybind/debug.hpp"
 #include "pybind/exception.hpp"
 #include "pybind/logger.hpp"

@@ -1,7 +1,8 @@
 #pragma once
 
 #include "pybind/type_cast.hpp"
-#include "pybind/kernel.hpp"
+
+#include "pybind/kernel_interface.hpp"
 
 namespace pybind
 {

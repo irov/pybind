@@ -1,6 +1,7 @@
 #include "python_functor.hpp"
-
 #include "python_system.hpp"
+
+#include "pybind/kernel_interface.hpp"
 
 #include "pybind/debug.hpp"
 #include "pybind/exception.hpp"

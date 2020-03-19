@@ -5,7 +5,6 @@
 #include "pybind/exports.hpp"
 #include "pybind/types.hpp"
 #include "pybind/exception.hpp"
-#include "pybind/kernel.hpp"
 
 #include "config/stdex.hpp"
 
@@ -15,6 +14,8 @@
 
 namespace pybind
 {
+    //////////////////////////////////////////////////////////////////////////
+    class kernel_interface;
     //////////////////////////////////////////////////////////////////////////
     class python_class_type_scope
         : public class_type_scope_interface

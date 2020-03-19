@@ -4,7 +4,8 @@
 #include "pybind/extract.hpp"
 #include "pybind/internal_call.hpp"
 
-#include "pybind/kernel.hpp"
+#include "pybind/kernel_interface.hpp"
+
 #include "pybind/function.hpp"
 #include "pybind/functor.hpp"
 #include "pybind/helper.hpp"

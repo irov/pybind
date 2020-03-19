@@ -2,8 +2,8 @@
 
 #include "pybind/exports.hpp"
 #include "pybind/type_cast_result.hpp"
+#include "pybind/make_type_cast.hpp"
 #include "pybind/extract.hpp"
-
 #include "pybind/list.hpp"
 
 #ifdef PYBIND_STL_SUPPORT

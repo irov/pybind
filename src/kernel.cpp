@@ -1,4 +1,4 @@
-#include "pybind/kernel.hpp"
+#include "pybind/kernel_interface.hpp"
 
 #include "python/python_system.hpp"
 

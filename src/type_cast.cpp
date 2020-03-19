@@ -1,6 +1,6 @@
 #include "pybind/type_cast.hpp"
 
-#include "pybind/kernel.hpp"
+#include "pybind/kernel_interface.hpp"
 #include "pybind/class_type_scope_interface.hpp"
 
 #include "config/config.hpp"

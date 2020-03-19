@@ -2,7 +2,6 @@
 
 #include "pybind/exports.hpp"
 #include "pybind/types.hpp"
-
 #include "pybind/factorable.hpp"
 
 namespace pybind
@@ -22,13 +21,5 @@ namespace pybind
     };
     //////////////////////////////////////////////////////////////////////////
     typedef intrusive_ptr<type_cast> type_cast_ptr;
-    //////////////////////////////////////////////////////////////////////////
-    template<class T>
-    type_cast_ptr make_type_cast( kernel_interface * _kernel )
-    {
-        allocator_interface * allocator = _kernel->get_allocator();
-
-        return allocator->newT<T>();
-    }
     //////////////////////////////////////////////////////////////////////////
 }
