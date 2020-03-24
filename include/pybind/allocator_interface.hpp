@@ -7,6 +7,10 @@ namespace pybind
     class allocator_interface
     {
     public:
+        allocator_interface() = default;
+        virtual ~allocator_interface() = default;
+
+    public:
         virtual void * malloc( size_t _size ) = 0;
         virtual void * calloc( size_t _num, size_t _size ) = 0;
         virtual void * realloc( void * _ptr, size_t _size ) = 0;

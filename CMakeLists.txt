@@ -99,6 +99,7 @@ file(GLOB files_public_stl_headers ${PUBLIC_DIR}/stl/*.hpp)
 file(GLOB files_private_stl_sources ${PRIVATE_DIR}/stl/*.cpp)
 file(GLOB files_public_mutex_headers ${PUBLIC_DIR}/mutex/*.hpp)
 
+SOURCE_GROUP(config FILES ${files_config_headers})
 SOURCE_GROUP(adapter FILES ${files_public_adapter_headers})
 SOURCE_GROUP(helper FILES ${files_public_helper_headers})
 SOURCE_GROUP(call FILES ${files_public_call_headers})
@@ -162,7 +163,7 @@ ADD_LIBRARY(${PROJECT_NAME}_python STATIC
     ${files_private_python_sources}
 	)    
     
-IF( NOT PYBIND_EXTERNAL_BUILD )
+IF(NOT PYBIND_EXTERNAL_BUILD)
     add_dependencies(${PROJECT_NAME} stdex_download)
     add_dependencies(${PROJECT_NAME} python_download)
     
@@ -173,7 +174,7 @@ ENDIF()
 if(PYBIND_SANDBOX)
     file(GLOB files_private_sandbox_sources ${CMAKE_CURRENT_SOURCE_DIR}/sandbox/*.cpp)
 
-    SOURCE_GROUP( sandbox FILES ${files_private_sandbox_sources} )    
+    SOURCE_GROUP(sandbox FILES ${files_private_sandbox_sources})
 
     if(PYBIND_PYTHON_INCLUDE_PATH)
         include_directories(${PYBIND_PYTHON_INCLUDE_PATH})
@@ -183,7 +184,7 @@ if(PYBIND_SANDBOX)
         include_directories(${PYBIND_STDEX_INCLUDE_PATH})
     endif()
 
-    ADD_EXECUTABLE( sandbox 
+    ADD_EXECUTABLE(sandbox 
         ${files_private_sandbox_sources}
         )
         
