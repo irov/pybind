@@ -8,18 +8,18 @@
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
-    static const uint8_t PICKLE_NONE = 0;
-    static const uint8_t PICKLE_FALSE = 1;
-    static const uint8_t PICKLE_TRUE = 2;
-    static const uint8_t PICKLE_INT = 3;
-    static const uint8_t PICKLE_FLOAT = 4;
-    static const uint8_t PICKLE_STRING = 5;
-    static const uint8_t PICKLE_UNICODE = 6;
-    static const uint8_t PICKLE_TUPLE = 7;
-    static const uint8_t PICKLE_LIST = 8;
-    static const uint8_t PICKLE_DICT = 9;
-    static const uint8_t PICKLE_OBJECT = 10;
-    static const uint8_t PICKLE_LONG = 11;
+    static constexpr uint8_t PICKLE_NONE = 0;
+    static constexpr uint8_t PICKLE_FALSE = 1;
+    static constexpr uint8_t PICKLE_TRUE = 2;
+    static constexpr uint8_t PICKLE_INT = 3;
+    static constexpr uint8_t PICKLE_FLOAT = 4;
+    static constexpr uint8_t PICKLE_STRING = 5;
+    static constexpr uint8_t PICKLE_UNICODE = 6;
+    static constexpr uint8_t PICKLE_TUPLE = 7;
+    static constexpr uint8_t PICKLE_LIST = 8;
+    static constexpr uint8_t PICKLE_DICT = 9;
+    static constexpr uint8_t PICKLE_OBJECT = 10;
+    static constexpr uint8_t PICKLE_LONG = 11;
     //////////////////////////////////////////////////////////////////////////
     template<class T>
     static void s_write_buffer_t( void * _buffer, size_t _capacity, const T & _t, size_t & _offset )

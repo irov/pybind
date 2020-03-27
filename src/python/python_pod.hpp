@@ -7,18 +7,18 @@
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
-    static const uint32_t PY_OBJECT_UNWRAP = 0xFF000000;
-    static const uint32_t PY_OBJECT_HOLDER = 0x00000001;
-    static const uint32_t PY_OBJECT_PTR = 0x00000002;
-    static const uint32_t PY_OBJECT_HASH = 0x00000004;
-    static const uint32_t PY_OBJECT_WEAK = 0x00000008;
-
-    static const uint32_t PY_OBJECT_POD = 0x00000010;
-    static const uint32_t PY_OBJECT_POD4 = PY_OBJECT_POD << 0;
-    static const uint32_t PY_OBJECT_POD8 = PY_OBJECT_POD << 1;
-    static const uint32_t PY_OBJECT_POD16 = PY_OBJECT_POD << 2;
-    static const uint32_t PY_OBJECT_POD32 = PY_OBJECT_POD << 3;
-    static const uint32_t PY_OBJECT_POD64 = PY_OBJECT_POD << 4;
+    static constexpr uint32_t PY_OBJECT_UNWRAP = 0xFF000000;
+    static constexpr uint32_t PY_OBJECT_HOLDER = 0x00000001;
+    static constexpr uint32_t PY_OBJECT_PTR = 0x00000002;
+    static constexpr uint32_t PY_OBJECT_HASH = 0x00000004;
+    static constexpr uint32_t PY_OBJECT_WEAK = 0x00000008;
+    //////////////////////////////////////////////////////////////////////////
+    static constexpr uint32_t PY_OBJECT_POD = 0x00000010;
+    static constexpr uint32_t PY_OBJECT_POD4 = PY_OBJECT_POD << 0;
+    static constexpr uint32_t PY_OBJECT_POD8 = PY_OBJECT_POD << 1;
+    static constexpr uint32_t PY_OBJECT_POD16 = PY_OBJECT_POD << 2;
+    static constexpr uint32_t PY_OBJECT_POD32 = PY_OBJECT_POD << 3;
+    static constexpr uint32_t PY_OBJECT_POD64 = PY_OBJECT_POD << 4;
     //////////////////////////////////////////////////////////////////////////
     namespace detail
     {
