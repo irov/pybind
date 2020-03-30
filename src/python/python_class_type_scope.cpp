@@ -1593,7 +1593,7 @@ namespace pybind
     {
         if( m_smart_pointer != nullptr )
         {
-            m_smart_pointer->incref( m_kernel, _impl, stdex::intrusive_from_this( this ) );
+            m_smart_pointer->incref_smart_pointer( m_kernel, _impl, stdex::intrusive_from_this( this ) );
         }
     }
     //////////////////////////////////////////////////////////////////////////
@@ -1601,7 +1601,7 @@ namespace pybind
     {
         if( m_smart_pointer != nullptr )
         {
-            m_smart_pointer->decref( m_kernel, _impl, stdex::intrusive_from_this( this ) );
+            m_smart_pointer->decref_smart_pointer( m_kernel, _impl, stdex::intrusive_from_this( this ) );
         }
     }
     //////////////////////////////////////////////////////////////////////////

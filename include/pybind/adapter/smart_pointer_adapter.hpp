@@ -28,8 +28,8 @@ namespace pybind
         }
 
     public:
-        virtual void incref( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope ) = 0;
-        virtual void decref( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope ) = 0;
+        virtual void incref_smart_pointer( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope ) = 0;
+        virtual void decref_smart_pointer( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope ) = 0;
 
     protected:
         const char * m_name;
@@ -128,14 +128,14 @@ namespace pybind
         }
 
     protected:
-        void incref( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope ) override
+        void incref_smart_pointer( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope ) override
         {
             C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
             (*m_incref)(self);
         }
 
-        void decref( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope ) override
+        void decref_smart_pointer( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope ) override
         {
             C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
