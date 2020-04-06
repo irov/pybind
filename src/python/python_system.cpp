@@ -24,52 +24,52 @@ extern "C" {
 
 namespace pybind
 {
-    namespace detail
-    {
-        //////////////////////////////////////////////////////////////////////////
-        static void * s_pybind_malloc( void * ctx, size_t size )
-        {
-            allocator_interface * allocator = static_cast<allocator_interface *>(ctx);
+    //namespace detail
+    //{
+    //    //////////////////////////////////////////////////////////////////////////
+    //    static void * s_pybind_malloc( void * ctx, size_t size )
+    //    {
+    //        allocator_interface * allocator = static_cast<allocator_interface *>(ctx);
 
-            void * p = allocator->malloc( size );
+    //        void * p = allocator->malloc( size );
 
-            return p;
-        }
-        //////////////////////////////////////////////////////////////////////////
-        static void * s_pybind_calloc( void * ctx, size_t nelem, size_t elsize )
-        {
-            allocator_interface * allocator = static_cast<allocator_interface *>(ctx);
+    //        return p;
+    //    }
+    //    //////////////////////////////////////////////////////////////////////////
+    //    static void * s_pybind_calloc( void * ctx, size_t nelem, size_t elsize )
+    //    {
+    //        allocator_interface * allocator = static_cast<allocator_interface *>(ctx);
 
-            void * p = allocator->calloc( nelem, elsize );
+    //        void * p = allocator->calloc( nelem, elsize );
 
-            return p;
-        }
-        //////////////////////////////////////////////////////////////////////////
-        static void * s_pybind_realloc( void * ctx, void * ptr, size_t new_size )
-        {
-            allocator_interface * allocator = static_cast<allocator_interface *>(ctx);
+    //        return p;
+    //    }
+    //    //////////////////////////////////////////////////////////////////////////
+    //    static void * s_pybind_realloc( void * ctx, void * ptr, size_t new_size )
+    //    {
+    //        allocator_interface * allocator = static_cast<allocator_interface *>(ctx);
 
-            void * p = allocator->realloc( ptr, new_size );
+    //        void * p = allocator->realloc( ptr, new_size );
 
-            return p;
-        }
-        //////////////////////////////////////////////////////////////////////////
-        static void s_pybind_free( void * ctx, void * ptr )
-        {
-            allocator_interface * allocator = static_cast<allocator_interface *>(ctx);
+    //        return p;
+    //    }
+    //    //////////////////////////////////////////////////////////////////////////
+    //    static void s_pybind_free( void * ctx, void * ptr )
+    //    {
+    //        allocator_interface * allocator = static_cast<allocator_interface *>(ctx);
 
-            allocator->free( ptr );
-        }
-        //////////////////////////////////////////////////////////////////////////
-        static void s_pybind_free_n( void * ctx, void * ptr, size_t _size )
-        {
-            (void)_size;
+    //        allocator->free( ptr );
+    //    }
+    //    //////////////////////////////////////////////////////////////////////////
+    //    static void s_pybind_free_n( void * ctx, void * ptr, size_t _size )
+    //    {
+    //        (void)_size;
 
-            allocator_interface * allocator = static_cast<allocator_interface *>(ctx);
+    //        allocator_interface * allocator = static_cast<allocator_interface *>(ctx);
 
-            allocator->free( ptr );
-        }
-    }
+    //        allocator->free( ptr );
+    //    }
+    //}
     //////////////////////////////////////////////////////////////////////////
 #if PYBIND_PYTHON_VERSION < 300 && defined(WITH_THREAD)
     static PyThreadState * gtstate;
@@ -116,32 +116,32 @@ namespace pybind
             //PyMem_SetAllocator( PYMEM_DOMAIN_OBJ, &pyalloc );
         }
 #elif PYBIND_PYTHON_VERSION >= 300
-        if( _allocator != nullptr )
-        {
-            PyMemAllocatorEx pyalloc;
-            pyalloc.ctx = static_cast<void *>(_allocator);
-            pyalloc.malloc = &detail::s_pybind_malloc;
-            pyalloc.calloc = &detail::s_pybind_calloc;
-            pyalloc.realloc = &detail::s_pybind_realloc;
-            pyalloc.free = &detail::s_pybind_free;
+        //if( _allocator != nullptr )
+        //{
+        //    PyMemAllocatorEx pyalloc;
+        //    pyalloc.ctx = static_cast<void *>(_allocator);
+        //    pyalloc.malloc = &detail::s_pybind_malloc;
+        //    pyalloc.calloc = &detail::s_pybind_calloc;
+        //    pyalloc.realloc = &detail::s_pybind_realloc;
+        //    pyalloc.free = &detail::s_pybind_free;
 
-            PyMem_SetAllocator( PYMEM_DOMAIN_RAW, &pyalloc );
-            PyMem_SetAllocator( PYMEM_DOMAIN_MEM, &pyalloc );
-            PyMem_SetAllocator( PYMEM_DOMAIN_OBJ, &pyalloc );
-        }
+        //    PyMem_SetAllocator( PYMEM_DOMAIN_RAW, &pyalloc );
+        //    PyMem_SetAllocator( PYMEM_DOMAIN_MEM, &pyalloc );
+        //    PyMem_SetAllocator( PYMEM_DOMAIN_OBJ, &pyalloc );
+        //}
 #else
 #ifdef PYBIND_PYTHON_HAS_EXTERNAL_ALLOCATOR_EX
-        if( _allocator != nullptr )
-        {
-            PyMemAllocatorEx pyalloc;
-            pyalloc.ctx = static_cast<void *>(_allocator);
-            pyalloc.malloc = &detail::s_pybind_malloc;
-            pyalloc.calloc = &detail::s_pybind_calloc;
-            pyalloc.realloc = &detail::s_pybind_realloc;
-            pyalloc.free = &detail::s_pybind_free;
+        //if( _allocator != nullptr )
+        //{
+        //    PyMemAllocatorEx pyalloc;
+        //    pyalloc.ctx = static_cast<void *>(_allocator);
+        //    pyalloc.malloc = &detail::s_pybind_malloc;
+        //    pyalloc.calloc = &detail::s_pybind_calloc;
+        //    pyalloc.realloc = &detail::s_pybind_realloc;
+        //    pyalloc.free = &detail::s_pybind_free;
 
-            PyMem_SetAllocator( &pyalloc );
-        }
+        //    PyMem_SetAllocator( &pyalloc );
+        //}
 #endif
 #endif
 
