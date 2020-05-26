@@ -8,7 +8,7 @@
 #include "python_kernel.hpp"
 
 #include <stdexcept>
-#include <stdio.h>
+#include <cstdio>
 
 #if PYBIND_PYTHON_ERROR_FORMAT_FLAG
 #if PYBIND_PYTHON_VERSION < 300
@@ -26,6 +26,7 @@ namespace pybind
 {
     namespace detail
     {
+#ifdef PYBIND_PYTHON_HAS_EXTERNAL_ALLOCATOR_EX
         //////////////////////////////////////////////////////////////////////////
         static void * s_pybind_malloc( void * ctx, size_t size )
         {
@@ -60,15 +61,7 @@ namespace pybind
 
             allocator->free( ptr );
         }
-        ////////////////////////////////////////////////////////////////////////////
-        //static void s_pybind_free_n( void * ctx, void * ptr, size_t _size )
-        //{
-        //    (void)_size;
-
-        //    allocator_interface * allocator = static_cast<allocator_interface *>(ctx);
-
-        //    allocator->free( ptr );
-        //}
+#endif
     }
     //////////////////////////////////////////////////////////////////////////
 #if PYBIND_PYTHON_VERSION < 300 && defined(WITH_THREAD)

@@ -1,7 +1,7 @@
 #include "pybind/pybind.hpp"
 #include "stdex/allocator.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 class Bar
 {

@@ -2,7 +2,7 @@
 
 #include "pybind/extract.hpp"
 
-#include <stddef.h>
+#include <cstddef>
 
 namespace pybind
 {

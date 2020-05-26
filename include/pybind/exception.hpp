@@ -3,7 +3,7 @@
 #include "exports.hpp"
 
 #include <exception>
-#include <stdarg.h>
+#include <cstdarg>
 
 namespace pybind
 {

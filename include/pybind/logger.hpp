@@ -1,7 +1,8 @@
 #pragma once
 
 #include "exports.hpp"
-#include <stdarg.h>
+
+#include <cstdarg>
 
 namespace pybind
 {

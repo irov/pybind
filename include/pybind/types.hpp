@@ -1,7 +1,6 @@
 #pragma once
 
-#include <stdint.h>
-#include <memory.h>
+#include <cstdint>
 
 #include "pybind/intrusive_ptr.hpp"
 

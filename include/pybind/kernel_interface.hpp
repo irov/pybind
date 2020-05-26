@@ -11,7 +11,7 @@
 #include "pybind/method_interface.hpp"
 
 #include <typeinfo>
-#include <stdarg.h>
+#include <cstdarg>
 
 namespace pybind
 {
