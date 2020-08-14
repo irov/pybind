@@ -1577,7 +1577,7 @@ namespace pybind
 
         const char * str_filename = pybind::string_to_char( py_filename );
 
-        char trace_buffer[2048];
+        char trace_buffer[4096 + 256];
         sprintf( trace_buffer, "%s[%d]: %s"
             , str_filename
             , fileline
@@ -1649,7 +1649,7 @@ namespace pybind
 
         const char * str_filename = pybind::string_to_char( py_filename );
 
-        char trace_buffer[2048];
+        char trace_buffer[4096 + 256];
         sprintf( trace_buffer, "%s[%d]: %s"
             , str_filename
             , fileline
