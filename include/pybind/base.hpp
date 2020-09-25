@@ -1,8 +1,7 @@
 #pragma once
 
 #include "pybind/types.hpp"
-
-#include <cstddef>
+#include "pybind/string_view.hpp"
 
 namespace pybind
 {
@@ -57,8 +56,8 @@ namespace pybind
         void unwrap() const;
 
     public:
-        PyObject * str() const;
-        PyObject * repr() const;
+        string_view str() const;
+        string_view repr() const;
 
     protected:
         kernel_interface * m_kernel;

@@ -13,7 +13,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     base::base( const base & _base )
         : m_kernel( _base.m_kernel )
-        , m_obj( _base.ptr() )
+        , m_obj( _base.m_obj )
     {
         if( m_kernel != nullptr )
         {
@@ -255,26 +255,26 @@ namespace pybind
         m_kernel->unwrap( m_obj );
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * base::str() const
+    string_view base::str() const
     {
         if( m_kernel == nullptr )
         {
-            return nullptr;
+            return string_view( nullptr, nullptr );
         }
 
-        PyObject * py_str = m_kernel->object_str( m_obj );
+        string_view py_str = m_kernel->object_str( m_obj );
 
         return py_str;
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * base::repr() const
+    string_view base::repr() const
     {
         if( m_kernel == nullptr )
         {
-            return nullptr;
+            return string_view( nullptr, nullptr );
         }
 
-        PyObject * py_repr = m_kernel->object_repr( m_obj );
+        string_view py_repr = m_kernel->object_repr( m_obj );
 
         return py_repr;
     }

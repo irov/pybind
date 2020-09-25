@@ -145,8 +145,8 @@ namespace pybind
             const char * type_name = tinfo.name();
 
             _kernel->log( "extract_value<T>: extract invalid %s:%s not cast to '%s'"
-                , _kernel->object_repr( _obj )
-                , _kernel->object_repr_type( _obj )
+                , _kernel->object_repr( _obj ).c_str()
+                , _kernel->object_repr_type( _obj ).c_str()
                 , type_name
             );
         }

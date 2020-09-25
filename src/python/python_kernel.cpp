@@ -558,7 +558,7 @@ namespace pybind
             }
 
             pybind::throw_exception( "obj %s not wrap pybind (scope)"
-                , pybind::object_str( (PyObject *)objtype )
+                , this->object_str( (PyObject *)objtype ).c_str()
             );
 
             return 0;
@@ -990,19 +990,25 @@ namespace pybind
         return py_self;
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * python_kernel::object_str( PyObject * _obj )
+    string_view python_kernel::object_str( PyObject * _obj )
     {
-        return pybind::object_str( _obj );
+        PyObject * py_str = pybind::object_str( _obj );
+
+        return string_view( this, py_str );
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * python_kernel::object_repr( PyObject * _obj )
+    string_view python_kernel::object_repr( PyObject * _obj )
     {
-        return pybind::object_repr( _obj );
+        PyObject * py_repr = pybind::object_repr( _obj );
+
+        return string_view( this, py_repr );
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * python_kernel::object_repr_type( PyObject * _obj )
+    string_view python_kernel::object_repr_type( PyObject * _obj )
     {
-        return pybind::object_repr_type( _obj );
+        PyObject * py_repr = pybind::object_repr_type( _obj );
+
+        return string_view( this, py_repr );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::ret_none()

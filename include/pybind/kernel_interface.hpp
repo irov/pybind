@@ -3,6 +3,7 @@
 #include "pybind/exports.hpp"
 #include "pybind/types.hpp"
 #include "pybind/mutex.hpp"
+#include "pybind/string_view.hpp"
 
 #include "pybind/allocator_interface.hpp"
 #include "pybind/function_interface.hpp"
@@ -298,9 +299,9 @@ namespace pybind
         virtual PyObject * get_attrstring( PyObject * _obj, const char * _attr ) = 0;
 
         virtual PyObject * dictobject_new(  PyObject * _dict ) = 0;
-        virtual PyObject * object_str( PyObject * _obj ) = 0;
-        virtual PyObject * object_repr( PyObject * _obj ) = 0;
-        virtual PyObject * object_repr_type( PyObject * _obj ) = 0;
+        virtual string_view object_str( PyObject * _obj ) = 0;
+        virtual string_view object_repr( PyObject * _obj ) = 0;
+        virtual string_view object_repr_type( PyObject * _obj ) = 0;
 
         virtual PyObject * ret_none() = 0;
 

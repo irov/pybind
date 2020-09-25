@@ -1,6 +1,7 @@
 #pragma once
 
 #include "pybind/extract_operator.hpp"
+#include "pybind/string_view.hpp"
 
 #include "pybind/helper/tuple_const_iterator.hpp"
 
@@ -47,7 +48,7 @@ namespace pybind
         }
 
     public:
-        PyObject * repr() const;
+        string_view repr() const;
 
     public:
         typedef tuple_const_iterator const_iterator;

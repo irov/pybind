@@ -77,8 +77,8 @@ namespace pybind
                 if( _kernel->is_callable( py_cb ) == false && _kernel->is_none( py_cb ) == false )
                 {
                     pybind::throw_exception( "invalid args function call cb is not callable '%s' type '%s'"
-                        , _kernel->object_repr( py_cb )
-                        , _kernel->object_repr_type( py_cb )
+                        , _kernel->object_repr( py_cb ).c_str()
+                        , _kernel->object_repr_type( py_cb ).c_str()
                     );
 
                     return nullptr;

@@ -74,20 +74,15 @@ namespace pybind
 
                         const char * type_name = tinfo.name();
 
-                        PyObject * repr_obj = _kernel->object_repr( _obj );
+                        string_view repr_obj = _kernel->object_repr( _obj );
                         
-                        if( repr_obj != nullptr )
+                        if( repr_obj.is_valid() == true )
                         {
-                            PyObject * repr_obj_type = _kernel->object_repr_type( _obj );
-
                             _kernel->throw_message( "extract from '%.256s' type '%.256s' to '%.256s'"
-                                , _kernel->string_to_char( repr_obj )
-                                , _kernel->string_to_char( repr_obj_type )
+                                , repr_obj.c_str()
+                                , _kernel->object_repr_type( _obj ).c_str()
                                 , type_name
                             );
-
-                            _kernel->decref( repr_obj );
-                            _kernel->decref( repr_obj_type );
                         }
                         else
                         {
@@ -147,8 +142,8 @@ namespace pybind
             const char * type_name = tinfo.name();
 
             pybind::throw_exception( "extract_throw: extract invalid %s:%s not cast to '%s'"
-                , _kernel->object_repr( _obj )
-                , _kernel->object_repr_type( _obj )
+                , _kernel->object_repr( _obj ).c_str()
+                , _kernel->object_repr_type( _obj ).c_str()
                 , type_name
             );
         }
@@ -171,8 +166,8 @@ namespace pybind
                 const char * type_name = tinfo.name();
 
                 _kernel->log( "extract_value<T>: extract invalid '%s:%s' not cast to '%s'"
-                    , _kernel->object_repr( _obj )
-                    , _kernel->object_repr_type( _obj )
+                    , _kernel->object_repr( _obj ).c_str()
+                    , _kernel->object_repr_type( _obj ).c_str()
                     , type_name
                 );
             }
@@ -193,8 +188,8 @@ namespace pybind
             if( extract_value( _kernel, _obj, value, true ) == false )
             {
                 _kernel->log( "extract_value<T>: extract invalid '%s:%s' not cast to 'uint32_t'"
-                    , _kernel->object_repr( _obj )
-                    , _kernel->object_repr_type( _obj )
+                    , _kernel->object_repr( _obj ).c_str()
+                    , _kernel->object_repr_type( _obj ).c_str()
                 );
             }
 
@@ -216,8 +211,8 @@ namespace pybind
                 const char * type_name = tinfo.name();
 
                 _kernel->log( "extract_value<T*>: extract invalid %s:%s not cast to '%s'"
-                    , _kernel->object_repr( _obj )
-                    , _kernel->object_repr_type( _obj )
+                    , _kernel->object_repr( _obj ).c_str()
+                    , _kernel->object_repr_type( _obj ).c_str()
                     , type_name
                 );
             }
@@ -240,8 +235,8 @@ namespace pybind
                 const char * type_name = tinfo.name();
 
                 _kernel->log( "extract_value<intrusive>: extract invalid %s:%s not cast to '%s'"
-                    , _kernel->object_repr( _obj )
-                    , _kernel->object_repr_type( _obj )
+                    , _kernel->object_repr( _obj ).c_str()
+                    , _kernel->object_repr_type( _obj ).c_str()
                     , type_name
                 );
             }
