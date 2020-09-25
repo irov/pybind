@@ -57,8 +57,8 @@ namespace pybind
         void unwrap() const;
 
     public:
-        const char * str() const;
-        const char * repr() const;
+        PyObject * str() const;
+        PyObject * repr() const;
 
     protected:
         kernel_interface * m_kernel;

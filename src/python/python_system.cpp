@@ -1452,63 +1452,66 @@ namespace pybind
         return type;
     }
     //////////////////////////////////////////////////////////////////////////
-    const char * object_repr_type( PyObject * _obj )
+    const char * object_type_name( PyObject * _obj )
     {
-        if( _obj == nullptr )
-        {
-            return "NULL";
-        }
+        PyTypeObject * type = Py_TYPE( _obj );
 
-        PyTypeObject * type = pybind::object_type( _obj );
+        const char * name = type->tp_name;
 
-        PyObject * repr = PyObject_Repr( (PyObject *)type );
-
-        if( repr == nullptr )
-        {
-            return "INVALID";
-        }
-
-        const char * str = pybind::string_to_char( repr );
-
-        return str;
+        return name;
     }
     //////////////////////////////////////////////////////////////////////////
-    const char * object_repr( PyObject * _obj )
+    PyObject * object_repr_type( PyObject * _obj )
     {
         if( _obj == nullptr )
         {
-            return "NULL";
+            return nullptr;
+        }
+
+        PyTypeObject * py_type = pybind::object_type( _obj );
+
+        PyObject * py_repr = PyObject_Repr( (PyObject *)py_type );
+
+        if( py_repr == nullptr )
+        {
+            return nullptr;
+        }
+
+        return py_repr;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * object_repr( PyObject * _obj )
+    {
+        if( _obj == nullptr )
+        {
+            return nullptr;
         }
 
         PyObject * py_repr = PyObject_Repr( _obj );
 
         if( py_repr == nullptr )
         {
-            return "INVALID";
+            return nullptr;
         }
 
-        const char * str = pybind::string_to_char( py_repr );
-
-        return str;
+        return py_repr;
     }
     //////////////////////////////////////////////////////////////////////////
-    const char * object_str( PyObject * _obj )
+    PyObject * object_str( PyObject * _obj )
     {
         if( _obj == nullptr )
         {
-            return "NULL";
+            return nullptr;
         }
 
         PyObject * py_str = PyObject_Str( _obj );
 
         if( py_str == nullptr )
         {
-            return "INVALID";
+            return nullptr;
         }
-
-        const char * str = pybind::string_to_char( py_str );
-
-        return str;
+                
+        return py_str;
     }
     //////////////////////////////////////////////////////////////////////////
     int64_t object_hash( PyObject * _obj )
@@ -1803,13 +1806,13 @@ namespace pybind
         return ch_buff;
     }
     //////////////////////////////////////////////////////////////////////////
-    const char * string_to_char_and_size( PyObject * _string, uint32_t & _size )
+    const char * string_to_char_and_size( PyObject * _string, size_t * _size )
     {
         char * ch_buff_unconst;
         Py_ssize_t len;
         PyBytes_AsStringAndSize( _string, &ch_buff_unconst, &len );
 
-        _size = (uint32_t)len;
+        *_size = (size_t)len;
 
         const char * ch_buff = const_cast<const char *>(ch_buff_unconst);
 
@@ -1823,7 +1826,7 @@ namespace pybind
         return py_str;
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * string_from_char_size( const char * _str, uint32_t _size )
+    PyObject * string_from_char_size( const char * _str, size_t _size )
     {
         Py_ssize_t py_size = (Py_ssize_t)_size;
         PyObject * py_str = PyBytes_FromStringAndSize( _str, py_size );
@@ -1845,12 +1848,12 @@ namespace pybind
         return wstr;
     }
     //////////////////////////////////////////////////////////////////////////
-    const wchar_t * unicode_to_wchar_and_size( PyObject * _unicode, uint32_t & _size )
+    const wchar_t * unicode_to_wchar_and_size( PyObject * _unicode, size_t * _size )
     {
         const wchar_t * wstr = PyUnicode_AS_UNICODE( _unicode );
         Py_ssize_t py_size = PyUnicode_GET_SIZE( _unicode );
 
-        _size = (uint32_t)py_size;
+        *_size = (size_t)py_size;
 
         return wstr;
     }
@@ -1865,7 +1868,7 @@ namespace pybind
         return py_unicode;
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * unicode_from_wchar_size( const wchar_t * _value, uint32_t _size )
+    PyObject * unicode_from_wchar_size( const wchar_t * _value, size_t _size )
     {
         Py_ssize_t py_size = (Py_ssize_t)_size;
         PyObject * py_unicode = PyUnicode_FromUnicode( _value, py_size );
@@ -1882,14 +1885,11 @@ namespace pybind
         return ch_buff;
     }
     //////////////////////////////////////////////////////////////////////////
-    const char * unicode_to_utf8_and_size( PyObject * _unicode, uint32_t & _size )
+    const char * unicode_to_utf8_and_size( PyObject * _unicode, size_t * _size )
     {
         PyObject* py_utf8 = PyUnicode_AsUTF8String( _unicode );
 
-        uint32_t size;
-        const char * ch_buff = pybind::string_to_char_and_size( py_utf8, size );
-
-        _size = size;
+        const char * ch_buff = pybind::string_to_char_and_size( py_utf8, _size );
 
         return ch_buff;
     }
@@ -1901,7 +1901,7 @@ namespace pybind
         return unicode;
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * unicode_from_utf8_size( const char * _utf8, uint32_t _size )
+    PyObject * unicode_from_utf8_size( const char * _utf8, size_t _size )
     {
         Py_ssize_t py_size = (Py_ssize_t)_size;
         PyObject * unicode = PyUnicode_FromStringAndSize( _utf8, py_size );

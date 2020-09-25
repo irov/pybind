@@ -21,8 +21,8 @@ namespace pybind
 
                 if( _kernel->string_check( _obj ) == true )
                 {
-                    uint32_t size;
-                    const std::string::value_type * string_char = _kernel->string_to_char_and_size( _obj, size );
+                    size_t size;
+                    const std::string::value_type * string_char = _kernel->string_to_char_and_size( _obj, &size );
 
                     if( string_char == 0 )
                     {
@@ -64,8 +64,8 @@ namespace pybind
 
                 if( _kernel->unicode_check( _obj ) == true )
                 {
-                    uint32_t size = 0;
-                    const wchar_t * value_char = _kernel->unicode_to_wchar_and_size( _obj, size );
+                    size_t size = 0;
+                    const wchar_t * value_char = _kernel->unicode_to_wchar_and_size( _obj, &size );
 
                     if( value_char == nullptr )
                     {

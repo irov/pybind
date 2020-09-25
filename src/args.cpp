@@ -98,9 +98,11 @@ namespace pybind
         return pybind::tuple_getitem_t( m_kernel, m_args, _index );
     }
     //////////////////////////////////////////////////////////////////////////
-    const char * args::repr() const
+    PyObject * args::repr() const
     {
-        return m_kernel->object_repr( m_args );
+        PyObject * py_repr = m_kernel->object_repr( m_args );
+
+        return py_repr;
     }
     //////////////////////////////////////////////////////////////////////////
     args::const_iterator args::begin() const

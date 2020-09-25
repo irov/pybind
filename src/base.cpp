@@ -255,23 +255,27 @@ namespace pybind
         m_kernel->unwrap( m_obj );
     }
     //////////////////////////////////////////////////////////////////////////
-    const char * base::str() const
+    PyObject * base::str() const
     {
         if( m_kernel == nullptr )
         {
-            return "NULL";
+            return nullptr;
         }
 
-        return m_kernel->object_str( m_obj );
+        PyObject * py_str = m_kernel->object_str( m_obj );
+
+        return py_str;
     }
     //////////////////////////////////////////////////////////////////////////
-    const char * base::repr() const
+    PyObject * base::repr() const
     {
         if( m_kernel == nullptr )
         {
-            return "NULL";
+            return nullptr;
         }
 
-        return m_kernel->object_repr( m_obj );
+        PyObject * py_repr = m_kernel->object_repr( m_obj );
+
+        return py_repr;
     }
 }

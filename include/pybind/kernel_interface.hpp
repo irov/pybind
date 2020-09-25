@@ -298,9 +298,9 @@ namespace pybind
         virtual PyObject * get_attrstring( PyObject * _obj, const char * _attr ) = 0;
 
         virtual PyObject * dictobject_new(  PyObject * _dict ) = 0;
-        virtual const char * object_str( PyObject * _obj ) = 0;
-        virtual const char * object_repr( PyObject * _obj ) = 0;
-        virtual const char * object_repr_type( PyObject * _obj ) = 0;
+        virtual PyObject * object_str( PyObject * _obj ) = 0;
+        virtual PyObject * object_repr( PyObject * _obj ) = 0;
+        virtual PyObject * object_repr_type( PyObject * _obj ) = 0;
 
         virtual PyObject * ret_none() = 0;
 
@@ -349,19 +349,19 @@ namespace pybind
         virtual uint32_t string_size( PyObject * _string ) = 0;
         virtual int64_t string_hash( PyObject * _string ) = 0;
         virtual const char * string_to_char( PyObject * _string ) = 0;
-        virtual const char * string_to_char_and_size( PyObject * _string, uint32_t & _size ) = 0;
+        virtual const char * string_to_char_and_size( PyObject * _string, size_t * _size ) = 0;
         virtual PyObject * string_from_char( const char * _str ) = 0;
-        virtual PyObject * string_from_char_size( const char * _str, uint32_t _size ) = 0;
+        virtual PyObject * string_from_char_size( const char * _str, size_t _size ) = 0;
 
         virtual bool unicode_check( PyObject * _unicode ) = 0;
         virtual const wchar_t * unicode_to_wchar( PyObject * _unicode ) = 0;
-        virtual const wchar_t * unicode_to_wchar_and_size( PyObject * _unicode, uint32_t & _size ) = 0;
+        virtual const wchar_t * unicode_to_wchar_and_size( PyObject * _unicode, size_t * _size ) = 0;
         virtual PyObject * unicode_from_wchar( const wchar_t * _value ) = 0;
-        virtual PyObject * unicode_from_wchar_size( const wchar_t * _value, uint32_t _size ) = 0;
+        virtual PyObject * unicode_from_wchar_size( const wchar_t * _value, size_t _size ) = 0;
         virtual const char * unicode_to_utf8( PyObject * _unicode ) = 0;
-        virtual const char * unicode_to_utf8_and_size( PyObject * _unicode, uint32_t & _size ) = 0;
+        virtual const char * unicode_to_utf8_and_size( PyObject * _unicode, size_t * _size ) = 0;
         virtual PyObject * unicode_from_utf8( const char * _utf8 ) = 0;
-        virtual PyObject * unicode_from_utf8_size( const char * _utf8, uint32_t _size ) = 0;
+        virtual PyObject * unicode_from_utf8_size( const char * _utf8, size_t _size ) = 0;
 
         virtual PyObject * list_new( uint32_t _size ) = 0;
         virtual bool list_check( PyObject * _list ) = 0;

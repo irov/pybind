@@ -154,9 +154,10 @@ namespace pybind
 
     PYBIND_API PyObject * object_dir( PyObject * _obj );
     PYBIND_API PyTypeObject * object_type( PyObject * _obj );
-    PYBIND_API const char * object_repr_type( PyObject * _obj );
-    PYBIND_API const char * object_repr( PyObject * _obj );
-    PYBIND_API const char * object_str( PyObject * _obj );
+    PYBIND_API const char * object_type_name( PyObject * _obj );
+    PYBIND_API PyObject * object_repr_type( PyObject * _obj );
+    PYBIND_API PyObject * object_repr( PyObject * _obj );
+    PYBIND_API PyObject * object_str( PyObject * _obj );
     PYBIND_API int64_t object_hash( PyObject * _obj );
 
     PYBIND_API bool get_traceback( char * _buffer, size_t _maxlen );
@@ -188,20 +189,20 @@ namespace pybind
     PYBIND_API uint32_t string_size( PyObject * _string );
     PYBIND_API int64_t string_hash( PyObject * _string );
     PYBIND_API const char * string_to_char( PyObject * _string );
-    PYBIND_API const char * string_to_char_and_size( PyObject * _string, uint32_t & _size );
+    PYBIND_API const char * string_to_char_and_size( PyObject * _string, size_t * _size );
     PYBIND_API PyObject * string_from_char( const char * _str );
-    PYBIND_API PyObject * string_from_char_size( const char * _str, uint32_t _size );
+    PYBIND_API PyObject * string_from_char_size( const char * _str, size_t _size );
 
     PYBIND_API bool unicode_check( PyObject * _unicode );
     PYBIND_API const wchar_t * unicode_to_wchar( PyObject * _unicode );
-    PYBIND_API const wchar_t * unicode_to_wchar_and_size( PyObject * _unicode, uint32_t & _size );
+    PYBIND_API const wchar_t * unicode_to_wchar_and_size( PyObject * _unicode, size_t * _size );
     PYBIND_API PyObject * unicode_from_wchar( const wchar_t * _value );
-    PYBIND_API PyObject * unicode_from_wchar_size( const wchar_t * _value, uint32_t _size );
+    PYBIND_API PyObject * unicode_from_wchar_size( const wchar_t * _value, size_t _size );
 
     PYBIND_API const char * unicode_to_utf8( PyObject * _unicode );
-    PYBIND_API const char * unicode_to_utf8_and_size( PyObject * _unicode, uint32_t & _size );
+    PYBIND_API const char * unicode_to_utf8_and_size( PyObject * _unicode, size_t * _size );
     PYBIND_API PyObject * unicode_from_utf8( const char * _utf8 );
-    PYBIND_API PyObject * unicode_from_utf8_size( const char * _utf8, uint32_t _size );
+    PYBIND_API PyObject * unicode_from_utf8_size( const char * _utf8, size_t _size );
 
     PYBIND_API PyObject * _unicode_to_utf8_obj( PyObject * _unicode );
 

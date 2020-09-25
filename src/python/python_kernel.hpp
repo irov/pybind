@@ -167,9 +167,9 @@ namespace pybind
         PyObject * get_attrstring( PyObject * _obj, const char * _attr ) override;
 
         PyObject * dictobject_new( PyObject * _dict ) override;
-        const char * object_str( PyObject * _obj ) override;
-        const char * object_repr( PyObject * _obj ) override;
-        const char * object_repr_type( PyObject * _obj ) override;
+        PyObject * object_str( PyObject * _obj ) override;
+        PyObject * object_repr( PyObject * _obj ) override;
+        PyObject * object_repr_type( PyObject * _obj ) override;
 
         PyObject * ret_none() override;
 
@@ -218,19 +218,19 @@ namespace pybind
         uint32_t string_size( PyObject * _obj ) override;
         int64_t string_hash( PyObject * _obj ) override;
         const char * string_to_char( PyObject * _obj ) override;
-        const char * string_to_char_and_size( PyObject * _obj, uint32_t & _size ) override;
+        const char * string_to_char_and_size( PyObject * _obj, size_t * _size ) override;
         PyObject * string_from_char( const char * _str ) override;
-        PyObject * string_from_char_size( const char * _str, uint32_t _size ) override;
+        PyObject * string_from_char_size( const char * _str, size_t _size ) override;
 
         bool unicode_check( PyObject * _obj ) override;
         const wchar_t * unicode_to_wchar( PyObject * _obj ) override;
-        const wchar_t * unicode_to_wchar_and_size( PyObject * _obj, uint32_t & _size ) override;
+        const wchar_t * unicode_to_wchar_and_size( PyObject * _obj, size_t * _size ) override;
         PyObject * unicode_from_wchar( const wchar_t * _value ) override;
-        PyObject * unicode_from_wchar_size( const wchar_t * _value, uint32_t _size ) override;
+        PyObject * unicode_from_wchar_size( const wchar_t * _value, size_t _size ) override;
         const char * unicode_to_utf8( PyObject * _obj ) override;
-        const char * unicode_to_utf8_and_size( PyObject * _obj, uint32_t & _size ) override;
+        const char * unicode_to_utf8_and_size( PyObject * _obj, size_t * _size ) override;
         PyObject * unicode_from_utf8( const char * _utf8 ) override;
-        PyObject * unicode_from_utf8_size( const char * _utf8, uint32_t _size ) override;
+        PyObject * unicode_from_utf8_size( const char * _utf8, size_t _size ) override;
 
         PyObject * list_new( uint32_t _size ) override;
         bool list_check( PyObject * _obj ) override;

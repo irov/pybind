@@ -723,21 +723,25 @@ namespace pybind
 
         const char * typeinfo_name = this->get_class_type_info( _tinfo );
 
-        const char * obj_repr = pybind::object_repr( _obj );
-        const char * obj_repr_type = pybind::object_repr_type( _obj );
-
+        PyObject * obj_repr = pybind::object_repr( _obj );
+        
         if( obj_repr != nullptr )
         {
+            PyObject * obj_repr_type = pybind::object_repr_type( _obj );
+
             pybind::error_message( "invalid extract from %.256s type %.256s to %.256s"
-                , obj_repr
-                , obj_repr_type
+                , pybind::string_to_char( obj_repr )
+                , pybind::string_to_char( obj_repr_type )
                 , typeinfo_name
             );
+
+            pybind::decref( obj_repr );
+            pybind::decref( obj_repr_type );
         }
         else
         {
             pybind::error_message( "invalid extract from unknown object type %s to %s"
-                , _obj->ob_type->tp_name
+                , pybind::object_type_name( _obj )
                 , typeinfo_name
             );
         }
@@ -986,17 +990,17 @@ namespace pybind
         return py_self;
     }
     //////////////////////////////////////////////////////////////////////////
-    const char * python_kernel::object_str( PyObject * _obj )
+    PyObject * python_kernel::object_str( PyObject * _obj )
     {
         return pybind::object_str( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
-    const char * python_kernel::object_repr( PyObject * _obj )
+    PyObject * python_kernel::object_repr( PyObject * _obj )
     {
         return pybind::object_repr( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
-    const char * python_kernel::object_repr_type( PyObject * _obj )
+    PyObject * python_kernel::object_repr_type( PyObject * _obj )
     {
         return pybind::object_repr_type( _obj );
     }
@@ -1201,7 +1205,7 @@ namespace pybind
         return pybind::string_to_char( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
-    const char * python_kernel::string_to_char_and_size( PyObject * _obj, uint32_t & _size )
+    const char * python_kernel::string_to_char_and_size( PyObject * _obj, size_t * _size )
     {
         return pybind::string_to_char_and_size( _obj, _size );
     }
@@ -1211,7 +1215,7 @@ namespace pybind
         return pybind::string_from_char( _str );
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * python_kernel::string_from_char_size( const char * _str, uint32_t _size )
+    PyObject * python_kernel::string_from_char_size( const char * _str, size_t _size )
     {
         return pybind::string_from_char_size( _str, _size );
     }
@@ -1226,7 +1230,7 @@ namespace pybind
         return pybind::unicode_to_wchar( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
-    const wchar_t * python_kernel::unicode_to_wchar_and_size( PyObject * _obj, uint32_t & _size )
+    const wchar_t * python_kernel::unicode_to_wchar_and_size( PyObject * _obj, size_t * _size )
     {
         return pybind::unicode_to_wchar_and_size( _obj, _size );
     }
@@ -1236,7 +1240,7 @@ namespace pybind
         return pybind::unicode_from_wchar( _value );
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * python_kernel::unicode_from_wchar_size( const wchar_t * _value, uint32_t _size )
+    PyObject * python_kernel::unicode_from_wchar_size( const wchar_t * _value, size_t _size )
     {
         return pybind::unicode_from_wchar_size( _value, _size );
     }
@@ -1246,7 +1250,7 @@ namespace pybind
         return pybind::unicode_to_utf8( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
-    const char * python_kernel::unicode_to_utf8_and_size( PyObject * _obj, uint32_t & _size )
+    const char * python_kernel::unicode_to_utf8_and_size( PyObject * _obj, size_t * _size )
     {
         return pybind::unicode_to_utf8_and_size( _obj, _size );
     }
@@ -1256,7 +1260,7 @@ namespace pybind
         return pybind::unicode_from_utf8( _utf8 );
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * python_kernel::unicode_from_utf8_size( const char * _utf8, uint32_t _size )
+    PyObject * python_kernel::unicode_from_utf8_size( const char * _utf8, size_t _size )
     {
         return pybind::unicode_from_utf8_size( _utf8, _size );
     }

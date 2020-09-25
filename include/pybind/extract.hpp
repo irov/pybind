@@ -74,16 +74,20 @@ namespace pybind
 
                         const char * type_name = tinfo.name();
 
-                        const char * repr_obj = _kernel->object_repr( _obj );
-                        const char * repr_obj_type = _kernel->object_repr_type( _obj );
-
+                        PyObject * repr_obj = _kernel->object_repr( _obj );
+                        
                         if( repr_obj != nullptr )
                         {
+                            PyObject * repr_obj_type = _kernel->object_repr_type( _obj );
+
                             _kernel->throw_message( "extract from '%.256s' type '%.256s' to '%.256s'"
-                                , repr_obj
-                                , repr_obj_type
+                                , _kernel->string_to_char( repr_obj )
+                                , _kernel->string_to_char( repr_obj_type )
                                 , type_name
                             );
+
+                            _kernel->decref( repr_obj );
+                            _kernel->decref( repr_obj_type );
                         }
                         else
                         {

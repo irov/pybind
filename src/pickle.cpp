@@ -46,7 +46,7 @@ namespace pybind
     }
     //////////////////////////////////////////////////////////////////////////
     template<class T>
-    static void s_write_buffer_tn( void * _buffer, size_t _capacity, const T * _t, uint32_t _count, size_t & _offset )
+    static void s_write_buffer_tn( void * _buffer, size_t _capacity, const T * _t, size_t _count, size_t & _offset )
     {
         size_t size = sizeof( T ) * _count;
 
@@ -136,10 +136,10 @@ namespace pybind
 
             s_write_buffer_t( _buffer, _capacity, type, _offset );
 
-            uint32_t str_size;
-            const char * str = _kernel->string_to_char_and_size( _obj, str_size );
+            size_t str_size;
+            const char * str = _kernel->string_to_char_and_size( _obj, &str_size );
 
-            s_write_size_t( _buffer, _capacity, str_size, _offset );
+            s_write_size_t( _buffer, _capacity, (uint32_t)str_size, _offset );
             s_write_buffer_tn( _buffer, _capacity, str, str_size, _offset );
         }
         else if( _kernel->unicode_check( _obj ) == true )
@@ -148,10 +148,10 @@ namespace pybind
 
             s_write_buffer_t( _buffer, _capacity, type, _offset );
 
-            uint32_t str_size;
-            const char * str = _kernel->unicode_to_utf8_and_size( _obj, str_size );
+            size_t str_size;
+            const char * str = _kernel->unicode_to_utf8_and_size( _obj, &str_size );
 
-            s_write_size_t( _buffer, _capacity, str_size, _offset );
+            s_write_size_t( _buffer, _capacity, (uint32_t)str_size, _offset );
             s_write_buffer_tn( _buffer, _capacity, str, str_size, _offset );
         }
         else if( _kernel->tuple_check( _obj ) == true )
