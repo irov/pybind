@@ -53,7 +53,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////    
     const char * string_view::c_str() const
     {
-        if( m_kernel == nullptr )
+        if( m_obj == nullptr )
         {
             return "";
         }
