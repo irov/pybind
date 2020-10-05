@@ -1001,6 +1001,11 @@ namespace pybind
     {
         PyObject * py_repr = pybind::object_repr( _obj );
 
+        if( py_repr == nullptr )
+        {
+            return string_view( this, nullptr );
+        }
+
         if( pybind::string_check( py_repr ) == false )
         {
             return string_view( this, nullptr );
@@ -1012,6 +1017,11 @@ namespace pybind
     string_view python_kernel::object_repr_type( PyObject * _obj )
     {
         PyObject * py_repr = pybind::object_repr_type( _obj );
+
+        if( py_repr == nullptr )
+        {
+            return string_view( this, nullptr );
+        }
 
         if( pybind::string_check( py_repr ) == false )
         {
