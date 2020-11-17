@@ -263,6 +263,7 @@ namespace pybind
         virtual void log( const char * _format, ... ) = 0;
         virtual void log_va( const char * _format, va_list _va ) = 0;
 
+        virtual bool get_traceback_function( char * _buffer, size_t _maxlen, uint32_t * _lineno ) = 0;
         virtual bool get_traceback( char * _buffer, size_t _maxlen ) = 0;
         virtual void error_traceback( const char * _format, ... ) = 0;
         virtual void error_traceback_va( const char * _format, va_list _va ) = 0;

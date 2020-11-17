@@ -1521,6 +1521,70 @@ namespace pybind
         return py_hash;
     }
     //////////////////////////////////////////////////////////////////////////
+    bool get_traceback_function( char * _buffer, size_t _maxlen, uint32_t * _lineno )
+    {
+        if( _maxlen == 0 )
+        {
+            return true;
+        }
+
+        PyObject * modtraceback = PyImport_ImportModule( "traceback" );
+
+        if( modtraceback == nullptr )
+        {
+            PyErr_Clear();
+
+            _buffer[0] = '\0';
+            *_lineno = 0;
+
+            return false;
+        }
+
+        PyObject * function = PyObject_GetAttrString( modtraceback, "top_stack_function" );
+
+        if( function == nullptr )
+        {
+            check_error();
+
+            Py_XDECREF( modtraceback );
+
+            _buffer[0] = '\0';
+            *_lineno = 0;
+
+            return false;
+        }
+
+        PyObject * result = PyObject_CallObject( function, nullptr );
+
+        if( result == nullptr )
+        {
+            check_error();
+
+            Py_XDECREF( function );
+            Py_XDECREF( modtraceback );
+
+            _buffer[0] = '\0';
+            *_lineno = 0;
+
+            return false;
+        }
+
+        PyObject * string_stackFunc = PyTuple_GetItem( result, 0 );
+        PyObject * int_stackLineno = PyTuple_GetItem( result, 1 );
+
+        char * sresult = PyBytes_AsString( string_stackFunc );
+        strncpy( _buffer, sresult, _maxlen );
+        _buffer[_maxlen - 1] = '\0';
+
+        *_lineno = (uint32_t)PyNumber_AsSsize_t( int_stackLineno, nullptr );
+
+        Py_XDECREF( result );
+        Py_XDECREF( function );
+        Py_XDECREF( modtraceback );
+
+        return true;        
+    }
+    //////////////////////////////////////////////////////////////////////////
     bool get_traceback( char * _buffer, size_t _maxlen )
     {
         if( _maxlen == 0 )
@@ -1539,13 +1603,38 @@ namespace pybind
             return false;
         }
 
-        PyObject * string_stackFunc = PyObject_GetAttrString( modtraceback, "string_stack" );
-        PyObject * string_stackResult = PyObject_CallObject( string_stackFunc, NULL );
-        char * sresult = PyBytes_AsString( string_stackResult );
+        PyObject * function = PyObject_GetAttrString( modtraceback, "string_stack" );
+
+        if( function == nullptr )
+        {
+            check_error();
+
+            Py_XDECREF( modtraceback );
+
+            _buffer[0] = '\0';
+
+            return false;
+        }
+
+        PyObject * result = PyObject_CallObject( function, nullptr );
+
+        if( result == nullptr )
+        {
+            check_error();
+
+            Py_XDECREF( function );
+            Py_XDECREF( modtraceback );
+
+            _buffer[0] = '\0';
+
+            return false;
+        }
+
+        char * sresult = PyBytes_AsString( result );
         strncpy( _buffer, sresult, _maxlen );
         _buffer[_maxlen - 1] = '\0';
-        Py_XDECREF( string_stackResult );
-        Py_XDECREF( string_stackFunc );
+        Py_XDECREF( result );
+        Py_XDECREF( function );
         Py_XDECREF( modtraceback );
 
         return true;

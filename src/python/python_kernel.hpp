@@ -131,6 +131,7 @@ namespace pybind
         void log( const char * _format, ... ) override;
         void log_va( const char * _format, va_list _va ) override;
 
+        bool get_traceback_function( char * _buffer, size_t _maxlen, uint32_t * _lineno ) override;
         bool get_traceback( char * _buffer, size_t _maxlen ) override;
         void error_traceback( const char * _format, ... ) override;
         void error_traceback_va( const char * _format, va_list _va ) override;
