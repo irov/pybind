@@ -573,7 +573,7 @@ namespace pybind
     {
         PyTypeObject * py_type = _scope->get_typeobject();
 
-        uint64_t py_hash = pybind::object_hash( (PyObject*)py_type );
+        uint64_t py_hash = pybind::object_hash( (PyObject *)py_type );
 
         uint32_t slot = py_hash % PYBIND_TYPE_COUNT_HASH;
 
@@ -596,7 +596,7 @@ namespace pybind
     {
         PyTypeObject * py_type = _scope->get_typeobject();
 
-        uint64_t py_hash = pybind::object_hash( (PyObject*)py_type );
+        uint64_t py_hash = pybind::object_hash( (PyObject *)py_type );
 
         uint32_t slot = py_hash % PYBIND_TYPE_COUNT_HASH;
 
@@ -624,7 +624,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     const class_type_scope_interface_ptr & python_kernel::get_class_scope( PyTypeObject * _type )
     {
-        uint64_t py_hash = pybind::object_hash( (PyObject*)_type );
+        uint64_t py_hash = pybind::object_hash( (PyObject *)_type );
 
         uint32_t slot = py_hash % PYBIND_TYPE_COUNT_HASH;
 
@@ -724,7 +724,7 @@ namespace pybind
         const char * typeinfo_name = this->get_class_type_info( _tinfo );
 
         PyObject * obj_repr = pybind::object_repr( _obj );
-        
+
         if( obj_repr != nullptr )
         {
             PyObject * obj_repr_type = pybind::object_repr_type( _obj );
@@ -951,7 +951,7 @@ namespace pybind
         return pybind::set_attr( _obj, _attr, _value );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::set_attrstring( PyObject* _obj, const char* _attr, PyObject* _value )
+    bool python_kernel::set_attrstring( PyObject * _obj, const char * _attr, PyObject * _value )
     {
         return pybind::set_attrstring( _obj, _attr, _value );
     }
@@ -971,8 +971,8 @@ namespace pybind
         PyObject * py_name = PyBytes_FromString( "" );
 
         PyObject * py_bases = PyTuple_New( 1 );
-        PyTuple_SetItem( py_bases, 0, (PyObject *)& PyDict_Type );
-        
+        PyTuple_SetItem( py_bases, 0, (PyObject *)&PyDict_Type );
+
         PyObject * py_args = PyTuple_Pack( 3, py_name, py_bases, _dict );
         Py_DECREF( py_name );
         Py_DECREF( py_bases );
@@ -980,13 +980,13 @@ namespace pybind
         PyObject * py_typeobject = PyType_Type.tp_call( (PyObject *)&PyType_Type, py_args, 0 );
 
         Py_DECREF( py_args );
-                
+
         PyObject * py_self = PyObject_CallObject( py_typeobject, nullptr );
 
         Py_DECREF( py_typeobject );
 
         PyDict_Merge( py_self, _dict, 1 );
-        
+
         return py_self;
     }
     //////////////////////////////////////////////////////////////////////////
