@@ -207,6 +207,18 @@ namespace pybind
         }
 
         template<class F>
+        base_ & def_static_deprecated( const char * _name, F f, const char * _doc )
+        {
+            allocator_interface * allocator = m_kernel->get_allocator();
+
+            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_function_deprecated<C, F>>( _name, f, _doc );
+
+            m_scope->add_method( iadapter );
+
+            return *this;
+        }
+
+        template<class F>
         base_ & def_static_kernel( const char * _name, F f )
         {
             allocator_interface * allocator = m_kernel->get_allocator();

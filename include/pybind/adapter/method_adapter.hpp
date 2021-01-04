@@ -414,6 +414,50 @@ namespace pybind
     };
     //////////////////////////////////////////////////////////////////////////
     template<class C, class F>
+    class method_adapter_proxy_function_deprecated
+        : public method_adapter_interface
+    {
+    public:
+        method_adapter_proxy_function_deprecated( const char * _name, F _fn, const char * _doc )
+            : method_adapter_interface( _name )
+            , m_fn( _fn )
+            , m_doc( _doc )
+        {
+        }
+
+        ~method_adapter_proxy_function_deprecated() override
+        {
+        }
+
+    protected:
+        PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+        {
+            (void)_kwds;
+
+            const char * scopeName = _kernel->get_class_type_info_t<C>();
+
+            const char * name = this->getName();
+
+            _kernel->error_traceback( "method '%s::%s' deprecated '%s'"
+                , scopeName
+                , name
+                , m_doc
+            );
+
+            C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
+
+            PyObject * ret = function_proxy_call<F, C>::call( _kernel, m_fn, _args, self );
+
+            return ret;
+        }
+
+    protected:
+        F m_fn;
+
+        const char * m_doc;
+    };
+    //////////////////////////////////////////////////////////////////////////
+    template<class C, class F>
     class method_adapter_proxy_function_args
         : public method_adapter_interface
     {
@@ -503,7 +547,7 @@ namespace pybind
     protected:
         F m_fn;
     };
-
+    //////////////////////////////////////////////////////////////////////////
     template<class C, class F>
     class method_adapter_native_kernel
         : public method_adapter_interface
@@ -532,7 +576,7 @@ namespace pybind
     protected:
         F m_fn;
     };
-
+    //////////////////////////////////////////////////////////////////////////
     template<class C, class F>
     class method_adapter_static_native
         : public method_adapter_interface
@@ -561,7 +605,7 @@ namespace pybind
     protected:
         F m_fn;
     };
-
+    //////////////////////////////////////////////////////////////////////////
     template<class C, class F>
     class method_adapter_static_native_kernel
         : public method_adapter_interface
@@ -590,5 +634,6 @@ namespace pybind
     protected:
         F m_fn;
     };
+    //////////////////////////////////////////////////////////////////////////
 }
 
