@@ -27,6 +27,7 @@ namespace pybind
     typedef intrusive_ptr<class number_binary_adapter_interface> number_binary_adapter_interface_ptr;
     typedef intrusive_ptr<class smart_pointer_adapter_interface> smart_pointer_adapter_interface_ptr;
     typedef intrusive_ptr<class bindable_adapter_interface> bindable_adapter_interface_ptr;
+    typedef intrusive_ptr<class proxy_adapter_interface> proxy_adapter_interface_ptr;
     //////////////////////////////////////////////////////////////////////////
     class class_type_scope_interface
         : public factorable
@@ -56,8 +57,11 @@ namespace pybind
 
         virtual PyTypeObject * get_typeobject() const = 0;
 
-        virtual void add_method( const method_adapter_interface_ptr & _ifunc ) = 0;
-        virtual method_adapter_interface * get_method( const char * _name ) = 0;
+        virtual void add_method( const method_adapter_interface_ptr & _imethod ) = 0;
+        virtual const method_adapter_interface_ptr & find_method( const char * _name ) const = 0;
+        virtual uint32_t get_methods_count() const = 0;
+        virtual const method_adapter_interface_ptr & get_method( uint32_t _index ) const = 0;
+
         virtual void add_member( const member_adapter_interface_ptr & _imember ) = 0;
         virtual void add_base( uint32_t _info, const class_type_scope_interface_ptr & _scope, pybind_metacast _cast ) = 0;
 
@@ -104,6 +108,7 @@ namespace pybind
         virtual void add_number_div( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter ) = 0;
         virtual void set_smart_pointer( const smart_pointer_adapter_interface_ptr & _iadapter ) = 0;
         virtual void set_bindable( const bindable_adapter_interface_ptr & _iadapter ) = 0;
+        virtual void add_proxy_interface( const class_type_scope_interface_ptr & _scope, const proxy_adapter_interface_ptr & _iproxy ) = 0;
 
         virtual PyObject * create_class( void * _impl ) = 0;
         virtual PyObject * create_holder( void * _impl ) = 0;

@@ -41,8 +41,11 @@ namespace pybind
 
         PyTypeObject * get_typeobject() const override;
 
-        void add_method( const method_adapter_interface_ptr & _ifunc ) override;
-        method_adapter_interface * get_method( const char * _name ) override;
+        void add_method( const method_adapter_interface_ptr & _imethod ) override;
+        const method_adapter_interface_ptr & find_method( const char * _name ) const override;
+        uint32_t get_methods_count() const override;
+        const method_adapter_interface_ptr & get_method( uint32_t _index ) const override;
+
         void add_member( const member_adapter_interface_ptr & _imember ) override;
         void add_base( uint32_t _info, const class_type_scope_interface_ptr & _scope, pybind_metacast _cast ) override;
 
@@ -66,6 +69,7 @@ namespace pybind
         void add_number_div( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter ) override;
         void set_smart_pointer( const smart_pointer_adapter_interface_ptr & _iadapter ) override;
         void set_bindable( const bindable_adapter_interface_ptr & _iadapter ) override;
+        void add_proxy_interface( const class_type_scope_interface_ptr & _scope, const proxy_adapter_interface_ptr & _iproxy ) override;
 
         PyObject * create_class( void * _impl ) override;
         PyObject * create_holder( void * _impl ) override;
@@ -140,6 +144,9 @@ namespace pybind
         uint32_t m_basesCount;
 
         void * m_user;
+
+        method_adapter_interface_ptr m_methods[256];
+        uint32_t m_methodCount;
 
         new_adapter_interface_ptr m_new;
         destroy_adapter_interface_ptr m_destructor;

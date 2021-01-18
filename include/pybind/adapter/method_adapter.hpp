@@ -12,6 +12,7 @@
 
 #include "pybind/call/function_proxy_call.hpp"
 #include "pybind/call/function_proxy_kernel_call.hpp"
+#include "pybind/call/function_proxy_args_call.hpp"
 
 namespace pybind
 {

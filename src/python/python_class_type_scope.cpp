@@ -16,6 +16,7 @@
 #include "pybind/adapter/number_binary_adapter.hpp"
 #include "pybind/adapter/smart_pointer_adapter.hpp"
 #include "pybind/adapter/bindable_adapter.hpp"
+#include "pybind/adapter/proxy_adapter.hpp"
 
 #include "python_pod.hpp"
 #include "python_system.hpp"
@@ -593,6 +594,7 @@ namespace pybind
         , m_typeId( _typeId )
         , m_basesCount( 0 )
         , m_user( _user )
+        , m_methodCount( 0 )
         , m_new( _pynew )
         , m_destructor( _pydestructor )
         , m_number_multy( nullptr )
@@ -754,6 +756,11 @@ namespace pybind
             m.scope = nullptr;
         }
 
+        for( uint32_t i = 0; i != m_methodCount; ++i )
+        {
+            m_methods[i] = nullptr;
+        }
+
         m_new = nullptr;
         m_destructor = nullptr;
         m_constructor = nullptr;
@@ -846,11 +853,21 @@ namespace pybind
         };
     }
     //////////////////////////////////////////////////////////////////////////
-    void python_class_type_scope::add_method( const method_adapter_interface_ptr & _ifunc )
+    void python_class_type_scope::add_method( const method_adapter_interface_ptr & _imethod )
     {
-        PyObject * py_type_method = m_kernel->create_method_adapter( _ifunc, m_pytypeobject );
+        if( m_methodCount == 256 )
+        {
+            pybind::throw_exception( "scope '%s' add_method '%s' max count"
+                , this->m_name
+                , _imethod->getName()
+            );
 
-        const char * name = _ifunc->getName();
+            return;
+        }
+
+        PyObject * py_type_method = m_kernel->create_method_adapter( _imethod, m_pytypeobject );
+
+        const char * name = _imethod->getName();
 
         if( PyDict_SetItemString( m_pytypeobject->tp_dict, name, py_type_method ) == -1 )
         {
@@ -863,25 +880,42 @@ namespace pybind
         }
 
         pybind::decref( py_type_method );
+
+        m_methods[m_methodCount++] = _imethod;
     }
     //////////////////////////////////////////////////////////////////////////
-    method_adapter_interface * python_class_type_scope::get_method( const char * _name )
+    const method_adapter_interface_ptr & python_class_type_scope::find_method( const char * _name ) const
     {
-        PyObject * py_method = PyDict_GetItemString( m_pytypeobject->tp_dict, _name );
-
-        if( py_method == nullptr )
+        for( uint32_t index = 0; index != m_methodCount; ++index )
         {
-            pybind::throw_exception( "scope '%s' get_method '%s' python error"
-                , this->m_name
-                , _name
-            );
+            const method_adapter_interface_ptr & method = m_methods[index];
 
-            return nullptr;
+            const char * methodName = method->getName();
+
+            if( strcmp( methodName, _name ) != 0 )
+            {
+                continue;
+            }
+
+            return method;
         }
 
-        method_adapter_interface * iadapter = m_kernel->get_method_adapter( py_method );
+        pybind::throw_exception( "scope '%s' get_method '%s' python error"
+            , this->m_name
+            , _name
+        );
 
-        return iadapter;
+        return method_adapter_interface_ptr::none();
+    }
+    //////////////////////////////////////////////////////////////////////////
+    uint32_t python_class_type_scope::get_methods_count() const
+    {
+        return m_methodCount;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const method_adapter_interface_ptr & python_class_type_scope::get_method( uint32_t _index ) const
+    {
+        return m_methods[_index];
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::add_member( const member_adapter_interface_ptr & _imember )
@@ -1415,6 +1449,24 @@ namespace pybind
         else
         {
             m_binable_base = false;
+        }
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void python_class_type_scope::add_proxy_interface( const class_type_scope_interface_ptr & _scope, const proxy_adapter_interface_ptr & _iproxy )
+    {
+        uint32_t methodCount = _scope->get_methods_count();
+
+        for( uint32_t index = 0; index != methodCount; ++index )
+        {
+            const method_adapter_interface_ptr & imethod = _scope->get_method( index );
+
+            allocator_interface * allocator = m_kernel->get_allocator();
+
+            const char * methodName = imethod->getName();
+
+            method_adapter_interface_ptr iproxy_method = allocator->newT<proxy_method_adapter>( methodName, _iproxy, imethod, _scope );
+
+            this->add_method( iproxy_method );
         }
     }
     //////////////////////////////////////////////////////////////////////////

@@ -869,7 +869,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::ask_adapter( void * _self, const class_type_scope_interface_ptr & _scope, const char * _name, PyObject * _args )
     {
-        method_adapter_interface * iadapter = _scope->get_method( _name );
+        const method_adapter_interface_ptr & iadapter = _scope->find_method( _name );
 
         PyObject * py_result = iadapter->call( this, _self, _scope, _args, nullptr );
 

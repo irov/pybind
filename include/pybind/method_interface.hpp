@@ -31,7 +31,7 @@ namespace pybind
         }
 
     public:
-        virtual PyObject * call( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) = 0;
+        virtual PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) = 0;
 
     protected:
         const char * m_name;

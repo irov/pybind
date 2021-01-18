@@ -17,6 +17,7 @@
 #include "pybind/adapter/number_binary_adapter.hpp"
 #include "pybind/adapter/smart_pointer_adapter.hpp"
 #include "pybind/adapter/bindable_adapter.hpp"
+#include "pybind/adapter/proxy_adapter.hpp"
 
 #include "pybind/helper/bases_helper.hpp"
 
@@ -877,6 +878,20 @@ namespace pybind
             bindable_adapter_interface_ptr iadapter = allocator->newT<bindable_adapter<C>>( "unwrap_bindable" );
 
             m_scope->set_bindable( iadapter );
+
+            return *this;
+        }
+
+        template<class P, class M>
+        base_ & def_proxy_interface( P * (M:: * _getter)() )
+        {
+            const class_type_scope_interface_ptr & proxy_scope = m_kernel->get_class_type_scope_t<P>();
+
+            allocator_interface * allocator = m_kernel->get_allocator();
+
+            proxy_adapter_interface_ptr iproxy = allocator->newT<proxy_adapter<C, P, P * (M:: *)()>>( _getter );
+
+            m_scope->add_proxy_interface( proxy_scope, iproxy );
 
             return *this;
         }
