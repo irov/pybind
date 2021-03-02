@@ -931,16 +931,20 @@ namespace pybind
             return false;
         }
 
-        if( PyUnicode_CheckExact( _obj ) == true )
+        if( PyUnicode_CheckExact( _obj ) == 1 )
         {
-            const wchar_t * ch_buff = PyUnicode_AS_UNICODE( _obj );
+            const wchar_t * ch_buff = PyUnicode_AsUnicode( _obj );
 
             if( ch_buff == nullptr )
             {
                 return false;
             }
 
+#ifdef PYBIND_PYTHON_VERSION < 300
             Py_ssize_t sz = PyUnicode_GET_SIZE( _obj );
+#else
+            Py_ssize_t sz = PyUnicode_GET_LENGTH( _obj );
+#endif
 
             if( sz != 1 )
             {
@@ -1884,15 +1888,20 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     const wchar_t * unicode_to_wchar( PyObject * _unicode )
     {
-        const wchar_t * wstr = PyUnicode_AS_UNICODE( _unicode );
+        const wchar_t * wstr = PyUnicode_AsUnicode( _unicode );
 
         return wstr;
     }
     //////////////////////////////////////////////////////////////////////////
     const wchar_t * unicode_to_wchar_and_size( PyObject * _unicode, size_t * _size )
     {
-        const wchar_t * wstr = PyUnicode_AS_UNICODE( _unicode );
+        const wchar_t * wstr = PyUnicode_AsUnicode( _unicode );
+
+#ifdef PYBIND_PYTHON_VERSION < 300
         Py_ssize_t py_size = PyUnicode_GET_SIZE( _unicode );
+#else
+        Py_ssize_t py_size = PyUnicode_GET_LENGTH( _unicode );
+#endif
 
         *_size = (size_t)py_size;
 
@@ -1904,7 +1913,7 @@ namespace pybind
         size_t size = wcslen( _value );
 
         Py_ssize_t py_size = (Py_ssize_t)size;
-        PyObject * py_unicode = PyUnicode_FromUnicode( _value, py_size );
+        PyObject * py_unicode = PyUnicode_FromWideChar( _value, py_size );
 
         return py_unicode;
     }
@@ -1912,7 +1921,7 @@ namespace pybind
     PyObject * unicode_from_wchar_size( const wchar_t * _value, size_t _size )
     {
         Py_ssize_t py_size = (Py_ssize_t)_size;
-        PyObject * py_unicode = PyUnicode_FromUnicode( _value, py_size );
+        PyObject * py_unicode = PyUnicode_FromWideChar( _value, py_size );
 
         return py_unicode;
     }
@@ -1995,6 +2004,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void set_module_finder( PyObject * _finder )
     {
+        (void)_finder;
+
 #   if PYBIND_PYTHON_VERSION < 300
         PyObject * py_meta_path = PySys_GetObject( const_cast<char *>("meta_path") );
 
