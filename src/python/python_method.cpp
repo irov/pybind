@@ -41,6 +41,16 @@ namespace pybind
 
         py_method_caller_type * mct = (py_method_caller_type *)_obj;
 
+        if( mct->iadapter == nullptr )
+        {
+            pybind::error_message( "descr_call2: method '%s' invalid call not set iadapter for object '%s'"
+                , mct->iadapter->getName()
+                , kernel->object_repr( mct->self )
+            );
+
+            return nullptr;
+        }
+
         try
         {
             void * impl = kernel->get_class_impl( mct->self );
@@ -55,6 +65,16 @@ namespace pybind
             }
 
             const class_type_scope_interface_ptr & scope = kernel->get_class_scope( mct->self->ob_type );
+
+            if( scope == nullptr )
+            {
+                pybind::error_message( "descr_call2: method '%s' invalid call not found scope for object '%s'"
+                    , mct->iadapter->getName()
+                    , kernel->object_repr( mct->self )
+                );
+
+                return nullptr;
+            }
 
             method_adapter_interface * adapter = mct->iadapter;
 
