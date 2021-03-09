@@ -44,7 +44,7 @@ namespace pybind
         if( mct->iadapter == nullptr )
         {
             pybind::error_message( "descr_call2: invalid call unknown method [not set iadapter] for object '%s'"
-                , kernel->object_repr( mct->self )
+                , kernel->object_repr( mct->self ).c_str()
             );
 
             return nullptr;
@@ -69,7 +69,7 @@ namespace pybind
             {
                 pybind::error_message( "descr_call2: method '%s' invalid call not found scope for object '%s'"
                     , mct->iadapter->getName()
-                    , kernel->object_repr( mct->self )
+                    , kernel->object_repr( mct->self ).c_str()
                 );
 
                 return nullptr;
