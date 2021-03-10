@@ -224,16 +224,16 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * get_builtins()
     {
-#   if PYBIND_PYTHON_VERSION < 300
+#if PYBIND_PYTHON_VERSION < 300
         PyObject * builtins = PyImport_ImportModuleLevel( const_cast<char *>("__builtin__"),
             nullptr, nullptr, nullptr, 0 );
-#   endif
+#endif
 
 
-#   if PYBIND_PYTHON_VERSION >= 300
+#if PYBIND_PYTHON_VERSION >= 300
         PyObject * builtins = PyImport_ImportModuleLevel( "builtins",
             nullptr, nullptr, nullptr, 0 );
-#   endif
+#endif
 
         return builtins;
     }
@@ -263,7 +263,7 @@ namespace pybind
         return module;
     }
     //////////////////////////////////////////////////////////////////////////
-#   if PYBIND_PYTHON_VERSION < 300
+#if PYBIND_PYTHON_VERSION < 300
     //////////////////////////////////////////////////////////////////////////
     PyObject * module_init( const char * _name )
     {
@@ -279,7 +279,7 @@ namespace pybind
         pybind::decref( _module );
     }
     //////////////////////////////////////////////////////////////////////////
-#	else
+#else
     //   //////////////////////////////////////////////////////////////////////////
     //static PyObject* initfunc(void)
     //{
@@ -318,7 +318,8 @@ namespace pybind
 
         pybind::decref( _module );
     }
-#	endif
+    //////////////////////////////////////////////////////////////////////////
+#endif
     //////////////////////////////////////////////////////////////////////////
     PyObject * module_dict( PyObject * _module )
     {
@@ -715,11 +716,11 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool int_check( PyObject * _obj )
     {
-#   if PYBIND_PYTHON_VERSION < 300
+#if PYBIND_PYTHON_VERSION < 300
         int result = PyInt_Check( _obj );
-#	else
+#else
         int result = PyLong_Check( _obj );
-#	endif
+#endif
 
         return result == 1;
     }
@@ -940,7 +941,7 @@ namespace pybind
                 return false;
             }
 
-#ifdef PYBIND_PYTHON_VERSION < 300
+#if PYBIND_PYTHON_VERSION < 300
             Py_ssize_t sz = PyUnicode_GET_SIZE( _obj );
 #else
             Py_ssize_t sz = PyUnicode_GET_LENGTH( _obj );
@@ -1897,7 +1898,7 @@ namespace pybind
     {
         const wchar_t * wstr = PyUnicode_AsUnicode( _unicode );
 
-#ifdef PYBIND_PYTHON_VERSION < 300
+#if PYBIND_PYTHON_VERSION < 300
         Py_ssize_t py_size = PyUnicode_GET_SIZE( _unicode );
 #else
         Py_ssize_t py_size = PyUnicode_GET_LENGTH( _unicode );
@@ -2006,32 +2007,32 @@ namespace pybind
     {
         (void)_finder;
 
-#   if PYBIND_PYTHON_VERSION < 300
+#if PYBIND_PYTHON_VERSION < 300
         PyObject * py_meta_path = PySys_GetObject( const_cast<char *>("meta_path") );
 
         pybind::list_insert( py_meta_path, 0, _finder );
-#   endif
+#endif
 
-#   if PYBIND_PYTHON_VERSION >= 330 && PYBIND_PYTHON_VERSION < 380
+#if PYBIND_PYTHON_VERSION >= 330 && PYBIND_PYTHON_VERSION < 380
         PyThreadState * thread_state = PyThreadState_Get();
         PyInterpreterState * interp = thread_state->interp;
         interp->importlib = _finder;
-#   endif
+#endif
     }
     //////////////////////////////////////////////////////////////////////////
     void remove_module_finder()
     {
-#   if PYBIND_PYTHON_VERSION < 300
+#if PYBIND_PYTHON_VERSION < 300
         PyObject * py_meta_path = PySys_GetObject( const_cast<char *>("meta_path") );
 
         pybind::list_remove( py_meta_path, 0 );
-#   endif
+#endif
 
-#   if PYBIND_PYTHON_VERSION >= 330 && PYBIND_PYTHON_VERSION < 380
+#if PYBIND_PYTHON_VERSION >= 330 && PYBIND_PYTHON_VERSION < 380
         PyThreadState * thread_state = PyThreadState_Get();
         PyInterpreterState * interp = thread_state->interp;
         interp->importlib = nullptr;
-#   endif
+#endif
     }
 }
 

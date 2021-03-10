@@ -532,12 +532,12 @@ namespace pybind
             {
                 return 0;
             }
-#   if PYBIND_PYTHON_VERSION < 300
+#if PYBIND_PYTHON_VERSION < 300
             else if( pybind::int_check( _obj ) == true )
             {
                 return this->class_info<int>();
             }
-#	endif
+#endif
             else if( pybind::long_check( _obj ) == true )
             {
                 return this->class_info<int>();
@@ -546,12 +546,12 @@ namespace pybind
             {
                 return this->class_info<float>();
             }
-#   if PYBIND_PYTHON_VERSION < 300
+#if PYBIND_PYTHON_VERSION < 300
             else if( pybind::string_check( _obj ) == true )
             {
                 return this->class_info<const char *>();
             }
-#	endif
+#endif
             else if( pybind::unicode_check( _obj ) == true )
             {
                 return this->class_info<const wchar_t *>();

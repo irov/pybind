@@ -638,11 +638,11 @@ namespace pybind
         m_module = py_module;
         Py_INCREF( m_module );
 
-#   if PYBIND_PYTHON_VERSION < 300
+#if PYBIND_PYTHON_VERSION < 300
         PyObject * py_name = PyString_InternFromString( m_name );
-#	else
+#else
         PyObject * py_name = PyUnicode_InternFromString( m_name );
-#	endif
+#endif
 
         PyObject * py_bases;
 
@@ -1264,7 +1264,7 @@ namespace pybind
         return py_nb_divide_2( kernel, _value, _obj, true );
     }
     //////////////////////////////////////////////////////////////////////////
-#	if PYBIND_PYTHON_VERSION < 300
+#if PYBIND_PYTHON_VERSION < 300
     static PyNumberMethods py_as_number = {
         (binaryfunc)py_nb_add,
         (binaryfunc)py_nb_subtract,
