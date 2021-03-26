@@ -11,6 +11,45 @@
 namespace pybind
 {
     template<class T, class V>
+    struct extract_stl_optional_type
+        : public pybind::type_cast_result<V>
+    {
+        typedef typename pybind::type_cast_result<V>::TCastRef TCastRef;
+
+        bool apply( kernel_interface * _kernel, PyObject * _obj, V & _optional, bool _nothrow ) override
+        {
+            (void)_nothrow;
+
+            if( _kernel->is_none( _obj ) == true )
+            {
+                _optional.reset();
+
+                return true;
+            }
+
+            T value = pybind::extract<T>( _kernel, _obj );
+
+            _optional.emplace( value );
+
+            return true;
+        }
+
+        PyObject * wrap( kernel_interface * _kernel, TCastRef _optional ) override
+        {
+            if( _optional.has_value() == false )
+            {
+                return _kernel->ret_none();
+            }
+
+            const T & value = _optional.value();
+
+            PyObject * ptr = pybind::ptr( _kernel, value );
+
+            return ptr;
+        }
+    };
+
+    template<class T, class V>
     struct extract_stl_vector_type
         : public pybind::type_cast_result<V>
     {
@@ -18,7 +57,6 @@ namespace pybind
 
         bool apply( kernel_interface * _kernel, PyObject * _obj, V & _vector, bool _nothrow ) override
         {
-            (void)_kernel;
             (void)_nothrow;
 
             if( _kernel->tuple_check( _obj ) == true )
@@ -57,8 +95,6 @@ namespace pybind
 
         PyObject * wrap( kernel_interface * _kernel, TCastRef _vector ) override
         {
-            (void)_kernel;
-
             pybind::list py_vector = pybind::make_list_container_t( _kernel, _vector );
 
             return py_vector.ret();
@@ -73,7 +109,6 @@ namespace pybind
 
         bool apply( kernel_interface * _kernel, PyObject * _obj, M & _map, bool _nothrow ) override
         {
-            (void)_kernel;
             (void)_nothrow;
 
             if( _kernel->dict_check( _obj ) == true )
@@ -97,8 +132,6 @@ namespace pybind
 
         PyObject * wrap( kernel_interface * _kernel, TCastRef _value ) override
         {
-            (void)_kernel;
-
             PyObject * py_dict = _kernel->dict_new();
 
             for( typename M::const_iterator
@@ -117,28 +150,40 @@ namespace pybind
         }
     };
 
-    template<class T, class V>
+    template<class T>
+    inline void registration_stl_optional_type_cast( kernel_interface * _kernel )
+    {
+        _kernel->register_type_info_extract_t<T>( pybind::make_type_cast<extract_stl_optional_type<typename T::value_type, T>>(_kernel) );
+    }
+
+    template<class T>
+    inline void unregistration_stl_optional_type_cast( kernel_interface * _kernel )
+    {
+        _kernel->unregister_type_info_extract_t<T>();
+    }
+
+    template<class T>
     inline void registration_stl_vector_type_cast( kernel_interface * _kernel )
     {
-        _kernel->register_type_info_extract_t<V>( pybind::make_type_cast<extract_stl_vector_type<T, V>>(_kernel) );
+        _kernel->register_type_info_extract_t<T>( pybind::make_type_cast<extract_stl_vector_type<typename T::value_type, T>>(_kernel) );
     }
 
-    template<class T, class V>
+    template<class T>
     inline void unregistration_stl_vector_type_cast( kernel_interface * _kernel )
     {
-        _kernel->unregister_type_info_extract_t<V>();
+        _kernel->unregister_type_info_extract_t<T>();
     }
 
-    template<class K, class V, class M>
+    template<class T>
     inline void registration_stl_map_type_cast( kernel_interface * _kernel )
     {
-        _kernel->register_type_info_extract_t<M>( pybind::make_type_cast<extract_stl_map_type<K, V, M>>(_kernel) );
+        _kernel->register_type_info_extract_t<T>( pybind::make_type_cast<extract_stl_map_type<typename T::key_type, typename T::mapped_type, T>>(_kernel) );
     }
 
-    template<class K, class V, class M>
+    template<class T>
     inline void unregistration_stl_map_type_cast( kernel_interface * _kernel )
     {
-        _kernel->unregister_type_info_extract_t<M>();
+        _kernel->unregister_type_info_extract_t<T>();
     }
 
     PYBIND_API bool initialize_stl_type_cast( kernel_interface * _kernel );
