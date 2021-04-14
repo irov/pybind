@@ -41,7 +41,7 @@ namespace pybind
                 return _kernel->ret_none();
             }
 
-            const T & value = _optional.value();
+            T value = *_optional;
 
             PyObject * ptr = pybind::ptr( _kernel, value );
 
