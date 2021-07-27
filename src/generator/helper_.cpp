@@ -11,7 +11,7 @@ namespace pybind
         (void)_args;
         (void)_kwds;
 
-        pybind::throw_exception( "scope %s not support 'new_interface'"
+        pybind::throw_exception( "scope '%s' not support 'new_interface'"
             , _scope->get_name()
         );
 

@@ -75,7 +75,7 @@ namespace pybind
 
             if( kernel->has_class_type_scope( tinfo ) == false )
             {
-                pybind::throw_exception( "class_type_scope_interface::add_base_t %s not bind base type %s"
+                pybind::throw_exception( "class_type_scope_interface::add_base_t '%s' not bind base type '%s'"
                     , this->get_name()
                     , kernel->get_class_type_info( tinfo )
                 );

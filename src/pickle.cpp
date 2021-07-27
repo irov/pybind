@@ -238,14 +238,14 @@ namespace pybind
                 return;
             }
 
-            pybind::throw_exception( "pickle obj %s type %s has 'value' but not type in types!"
+            pybind::throw_exception( "pickle obj '%s' type '%s' has 'value' but not type in types!"
                 , _kernel->object_repr( _obj ).c_str()
                 , _kernel->object_repr_type( _obj ).c_str()
             );
         }
         else
         {
-            pybind::throw_exception( "pickle obj %s type %s invalid pickle"
+            pybind::throw_exception( "pickle obj '%s' type '%s' invalid pickle"
                 , _kernel->object_repr( _obj ).c_str()
                 , _kernel->object_repr_type( _obj ).c_str()
             );
@@ -266,7 +266,7 @@ namespace pybind
         }
         catch( const pybind::pybind_exception & _ex )
         {
-            _kernel->error_message( "ptr value %s"
+            _kernel->error_message( "ptr value: %s"
                 , _ex.what()
             );
 
@@ -501,7 +501,7 @@ namespace pybind
 
                 if( obj == nullptr )
                 {
-                    pybind::throw_exception( "unpickle invalid create object %s type index %d"
+                    pybind::throw_exception( "unpickle invalid create object '%s' type index %u"
                         , _kernel->object_repr_type( object_type ).c_str()
                         , index
                     );
@@ -532,7 +532,7 @@ namespace pybind
         }
         catch( const pybind::pybind_exception & _ex )
         {
-            _kernel->error_message( "ptr value %s"
+            _kernel->error_message( "ptr value: %s"
                 , _ex.what()
             );
         }

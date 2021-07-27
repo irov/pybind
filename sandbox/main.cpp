@@ -1,5 +1,4 @@
 #include "pybind/pybind.hpp"
-#include "stdex/allocator.h"
 
 #include <cstdio>
 
@@ -183,8 +182,6 @@ void test_function( pybind::kernel_interface * _kernel, PyObject * m, uint32_t i
 
 void main()
 {
-    stdex_allocator_initialize();
-
     pybind::kernel_interface * kernel = pybind::initialize( nullptr, L"", false, false, true );
 
     pybind::list syspath( kernel );
@@ -249,8 +246,6 @@ void main()
         test_tuple( kernel, i );
         test_function( kernel, m, i );
     }
-
-    stdex_allocator_finalize();
 
     printf( "done" );
 }

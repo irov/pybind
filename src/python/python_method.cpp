@@ -162,7 +162,7 @@ namespace pybind
 
         if( argc == 0 )
         {
-            pybind::error_message( "descr_call: method %s take none args"
+            pybind::error_message( "descr_call: method '%s' take none args"
                 , _descr->iadapter->getName()
             );
 

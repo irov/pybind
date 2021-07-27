@@ -152,7 +152,7 @@ namespace pybind
         {
             if( _size > PYBIND_OBJECT_POD_SIZE )
             {
-                pybind::throw_exception( "wrap_pod obj %s size %d > max pod size %d"
+                pybind::throw_exception( "wrap_pod obj '%s' size %u > max pod size %u"
                     , pybind::object_str( _obj )
                     , _size
                     , PYBIND_OBJECT_POD_SIZE
@@ -300,7 +300,7 @@ namespace pybind
                 }
             }
 
-            pybind::throw_exception( "obj %s not wrap pybind (impl)"
+            pybind::throw_exception( "obj '%s' not wrap pybind (impl)"
                 , pybind::object_str( _obj )
             );
 

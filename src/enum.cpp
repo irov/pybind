@@ -17,7 +17,7 @@ namespace pybind
 
                 if( py_module == nullptr )
                 {
-                    pybind::throw_exception( "scope %s initialize not setup python module"
+                    pybind::throw_exception( "scope '%s' initialize not setup python module"
                         , _id
                     );
 

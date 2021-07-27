@@ -557,7 +557,7 @@ namespace pybind
                 return this->class_info<const wchar_t *>();
             }
 
-            pybind::throw_exception( "obj %s not wrap pybind (scope)"
+            pybind::throw_exception( "obj '%s' not wrap pybind (scope)"
                 , this->object_str( (PyObject *)objtype ).c_str()
             );
 
@@ -740,7 +740,7 @@ namespace pybind
         }
         else
         {
-            pybind::error_message( "invalid extract from unknown object type %s to %s"
+            pybind::error_message( "invalid extract from unknown object type '%s' to '%s'"
                 , pybind::object_type_name( _obj )
                 , typeinfo_name
             );
