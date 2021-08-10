@@ -120,7 +120,7 @@ namespace pybind
             *_impl = (void *)py_pod_hash->buff;
         }
         //////////////////////////////////////////////////////////////////////////
-        static constexpr uint32_t s_pod_type_matrix[] = {
+        static constexpr uint32_t s_pod_type_matrix[64] = {
             0, 0, 0, 0,
             1, 1, 1, 1,
             2, 2, 2, 2, 2, 2, 2, 2,
@@ -161,7 +161,7 @@ namespace pybind
                 return;
             }
 
-            uint32_t pod_matrix_index = s_pod_type_matrix[_size];
+            uint32_t pod_matrix_index = s_pod_type_matrix[_size - 1];
 
             if( _hash == false )
             {
