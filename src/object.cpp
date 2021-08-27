@@ -86,7 +86,7 @@ namespace pybind
         return pybind::object( m_kernel, py_attr );
     }
     //////////////////////////////////////////////////////////////////////////
-    void object::set_attr_i( const detail::import_operator_t& _name, const detail::import_operator_t& _value )
+    void object::set_attr_i( const detail::import_operator_t & _name, const detail::import_operator_t & _value )
     {
         m_kernel->set_attr( m_obj, _name, _value );
     }
@@ -98,12 +98,12 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     detail::extract_operator_t object::call_i( std::initializer_list<detail::import_operator_t> && _t ) const
     {
-        return pybind::call_i( m_kernel, m_obj, std::forward<std::initializer_list<detail::import_operator_t>>( _t ) );
+        return pybind::call_i( m_kernel, m_obj, std::forward<std::initializer_list<detail::import_operator_t>>( std::forward< std::initializer_list<detail::import_operator_t> && >( _t ) ) );
     }
     //////////////////////////////////////////////////////////////////////////
     detail::extract_operator_t object::call_args_i( std::initializer_list<detail::import_operator_t> && _t, const args & _args ) const
     {
-        return pybind::call_args_i( m_kernel, m_obj, std::forward<std::initializer_list<detail::import_operator_t>>( _t ), _args );
+        return pybind::call_args_i( m_kernel, m_obj, std::forward<std::initializer_list<detail::import_operator_t>>( std::forward<std::initializer_list<detail::import_operator_t> && >( _t ) ), _args );
     }
     //////////////////////////////////////////////////////////////////////////
     detail::extract_operator_t object::call_native( const pybind::tuple & _args )
