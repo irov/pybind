@@ -106,6 +106,11 @@ namespace pybind
         return pybind::call_args_i( m_kernel, m_obj, std::forward<std::initializer_list<detail::import_operator_t>>( _t ), _args );
     }
     //////////////////////////////////////////////////////////////////////////
+    detail::extract_operator_t object::call_native( const pybind::tuple & _args )
+    {
+        return pybind::ask_tuple_t( m_kernel, m_obj, _args );
+    }
+    //////////////////////////////////////////////////////////////////////////
     pybind::object make_none_t( kernel_interface * _kernel )
     {
         PyObject * py_none = _kernel->ret_none();

@@ -250,8 +250,11 @@ namespace pybind
         virtual void set_module_finder( PyObject * _finder ) = 0;
         virtual void remove_module_finder() = 0;
 
+        virtual void call_native( PyObject * _obj, PyObject * _args ) = 0;
         virtual void call_method( PyObject * _obj, const char * _method, const char * _format, ... ) = 0;
         virtual void call_method_native( PyObject * _obj, const char * _method, PyObject * _args ) = 0;
+
+        virtual PyObject * ask_native( PyObject * _obj, PyObject * _args ) = 0;
         virtual PyObject * ask_method_native( PyObject * _obj, const char * _method, PyObject * _args ) = 0;
         virtual PyObject * ask_adapter( void * _self, const class_type_scope_interface_ptr & _scope, const char * _name, PyObject * _args ) = 0;
 
@@ -334,8 +337,6 @@ namespace pybind
         virtual PyObject * ptr_ulong( unsigned long _value ) = 0;
         virtual PyObject * ptr_string( const char * _str ) = 0;
         virtual PyObject * ptr_unicode( const wchar_t * _value ) = 0;
-
-        virtual PyObject * ask_native( PyObject * _obj, PyObject * _args ) = 0;
 
         virtual bool bool_check( PyObject * _obj ) = 0;
         virtual bool is_true( PyObject * _obj ) = 0;

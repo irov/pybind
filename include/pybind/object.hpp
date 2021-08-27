@@ -99,6 +99,8 @@ namespace pybind
                 , std::make_integer_sequence<uint32_t, sizeof ... (T) - 1u>()
             );
         }
+
+        detail::extract_operator_t call_native( const pybind::tuple & _args );
     };
     //////////////////////////////////////////////////////////////////////////
     template<class It>

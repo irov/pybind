@@ -849,6 +849,11 @@ namespace pybind
         pybind::remove_module_finder();
     }
     //////////////////////////////////////////////////////////////////////////
+    void python_kernel::call_native( PyObject * _obj, PyObject * _args )
+    {
+        pybind::call_native( _obj, _args );
+    }
+    //////////////////////////////////////////////////////////////////////////
     void python_kernel::call_method( PyObject * _obj, const char * _method, const char * _format, ... )
     {
         va_list valist;
@@ -860,6 +865,11 @@ namespace pybind
     void python_kernel::call_method_native( PyObject * _obj, const char * _method, PyObject * _args )
     {
         pybind::call_method_native( _obj, _method, _args );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::ask_native( PyObject * _obj, PyObject * _args )
+    {
+        return pybind::ask_native( _obj, _args );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::ask_method_native( PyObject * _obj, const char * _method, PyObject * _args )
@@ -1189,11 +1199,6 @@ namespace pybind
     PyObject * python_kernel::ptr_unicode( const wchar_t * _value )
     {
         return pybind::unicode_from_wchar( _value );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    PyObject * python_kernel::ask_native( PyObject * _obj, PyObject * _args )
-    {
-        return pybind::ask_native( _obj, _args );
     }
     //////////////////////////////////////////////////////////////////////////
     bool python_kernel::int_check( PyObject * _obj )
