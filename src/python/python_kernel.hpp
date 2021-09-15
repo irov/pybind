@@ -159,9 +159,9 @@ namespace pybind
         void decref( PyObject * _obj ) override;
         uint32_t refcount( PyObject * _obj ) override;
 
-        bool is_none( PyObject * _obj ) override;        
-        bool is_callable( PyObject * _obj ) override;
-        bool is_instanceof( PyObject * _obj, PyTypeObject * _type ) override;
+        bool is_none( PyObject * _obj ) const override;
+        bool is_callable( PyObject * _obj ) const override;
+        bool is_instanceof( PyObject * _obj, PyTypeObject * _type ) const override;
         bool test_equal( PyObject * _lhs, PyObject * _rhs ) override;
         bool has_attr( PyObject * _obj, PyObject * _attr ) override;
         PyObject * get_attr( PyObject * _obj, PyObject * _attr ) override;
@@ -206,25 +206,25 @@ namespace pybind
         PyObject * ptr_string( const char * _str ) override;
         PyObject * ptr_unicode( const wchar_t * _value ) override;
 
-        bool bool_check( PyObject * _obj ) override;
-        bool is_true( PyObject * _obj ) override;
+        bool bool_check( PyObject * _obj ) const override;
+        bool is_true( PyObject * _obj ) const override;
         PyObject * ret_bool( bool _value ) override;
         PyObject * ret_true() override;
         PyObject * ret_false() override;
 
-        bool int_check( PyObject * _obj ) override;
-        bool long_check( PyObject * _obj ) override;
-        bool float_check( PyObject * _obj ) override;
+        bool int_check( PyObject * _obj ) const override;
+        bool long_check( PyObject * _obj ) const override;
+        bool float_check( PyObject * _obj ) const override;        
 
-        bool string_check( PyObject * _obj ) override;
-        uint32_t string_size( PyObject * _obj ) override;
-        int64_t string_hash( PyObject * _obj ) override;
+        bool string_check( PyObject * _obj ) const override;
+        uint32_t string_size( PyObject * _obj ) const override;
+        int64_t string_hash( PyObject * _obj ) const override;
         const char * string_to_char( PyObject * _obj ) override;
         const char * string_to_char_and_size( PyObject * _obj, size_t * _size ) override;
         PyObject * string_from_char( const char * _str ) override;
         PyObject * string_from_char_size( const char * _str, size_t _size ) override;
 
-        bool unicode_check( PyObject * _obj ) override;
+        bool unicode_check( PyObject * _obj ) const override;
         const wchar_t * unicode_to_wchar( PyObject * _obj ) override;
         const wchar_t * unicode_to_wchar_and_size( PyObject * _obj, size_t * _size ) override;
         PyObject * unicode_from_wchar( const wchar_t * _value ) override;
@@ -235,8 +235,8 @@ namespace pybind
         PyObject * unicode_from_utf8_size( const char * _utf8, size_t _size ) override;
 
         PyObject * list_new( uint32_t _size ) override;
-        bool list_check( PyObject * _obj ) override;
-        uint32_t list_size( PyObject * _obj ) override;
+        bool list_check( PyObject * _obj ) const override;
+        uint32_t list_size( PyObject * _obj ) const override;
         PyObject * list_getitem( PyObject * _obj, uint32_t _it ) override;
         bool list_insert( PyObject * _obj, uint32_t _it, PyObject * _item ) override;
         bool list_remove( PyObject * _obj, uint32_t _it ) override;
@@ -246,8 +246,8 @@ namespace pybind
         PyObject * dict_new() override;
         PyObject * dict_new_presized( uint32_t _count ) override;
         PyObject * dict_from( PyObject * _obj ) override;
-        bool dict_check( PyObject * _obj ) override;
-        uint32_t dict_size( PyObject * _obj ) override;
+        bool dict_check( PyObject * _obj ) const override;
+        uint32_t dict_size( PyObject * _obj ) const override;
         bool dict_set( PyObject * _obj, PyObject * _name, PyObject * _value ) override;
         bool dict_setstring( PyObject * _obj, const char * _name, PyObject * _value ) override;
         bool dict_remove( PyObject * _obj, PyObject * _name ) override;
@@ -259,8 +259,8 @@ namespace pybind
         bool dict_next( PyObject * _obj, uint32_t & _pos, PyObject ** _key, PyObject ** _value ) override;
         
         PyObject * tuple_new( uint32_t _it ) override;
-        bool tuple_check( PyObject * _obj ) override;
-        uint32_t tuple_size( PyObject * _obj ) override;
+        bool tuple_check( PyObject * _obj ) const override;
+        uint32_t tuple_size( PyObject * _obj ) const override;
         PyObject * tuple_getitem( PyObject * _obj, uint32_t _it ) override;
         PyObject * tuple_slice( PyObject * _obj, uint32_t _low, uint32_t _high ) override;
         PyObject * tuple_slice_tail( PyObject * _obj, uint32_t _size ) override;

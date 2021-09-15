@@ -291,9 +291,9 @@ namespace pybind
         virtual void decref( PyObject * _obj ) = 0;
         virtual uint32_t refcount( PyObject * _obj ) = 0;
 
-        virtual bool is_none( PyObject * _obj ) = 0;
-        virtual bool is_callable( PyObject * _obj ) = 0;
-        virtual bool is_instanceof( PyObject * _obj, PyTypeObject * _type ) = 0;
+        virtual bool is_none( PyObject * _obj ) const = 0;
+        virtual bool is_callable( PyObject * _obj ) const = 0;
+        virtual bool is_instanceof( PyObject * _obj, PyTypeObject * _type ) const = 0;
         virtual bool test_equal( PyObject * _lhs, PyObject * _rhs ) = 0;
         virtual bool has_attr( PyObject * _obj, PyObject * _attr ) = 0;
         virtual PyObject * get_attr( PyObject * _obj, PyObject * _attr ) = 0;
@@ -338,25 +338,25 @@ namespace pybind
         virtual PyObject * ptr_string( const char * _str ) = 0;
         virtual PyObject * ptr_unicode( const wchar_t * _value ) = 0;
 
-        virtual bool bool_check( PyObject * _obj ) = 0;
-        virtual bool is_true( PyObject * _obj ) = 0;
+        virtual bool bool_check( PyObject * _obj ) const = 0;
+        virtual bool is_true( PyObject * _obj ) const = 0;
         virtual PyObject * ret_bool( bool _value ) = 0;
         virtual PyObject * ret_true() = 0;
         virtual PyObject * ret_false() = 0;
 
-        virtual bool int_check( PyObject * _obj ) = 0;
-        virtual bool long_check( PyObject * _obj ) = 0;
-        virtual bool float_check( PyObject * _obj ) = 0;
+        virtual bool int_check( PyObject * _obj ) const = 0;
+        virtual bool long_check( PyObject * _obj ) const = 0;
+        virtual bool float_check( PyObject * _obj ) const = 0;
 
-        virtual bool string_check( PyObject * _string ) = 0;
-        virtual uint32_t string_size( PyObject * _string ) = 0;
-        virtual int64_t string_hash( PyObject * _string ) = 0;
+        virtual bool string_check( PyObject * _string ) const = 0;
+        virtual uint32_t string_size( PyObject * _string ) const = 0;
+        virtual int64_t string_hash( PyObject * _string ) const = 0;
         virtual const char * string_to_char( PyObject * _string ) = 0;
         virtual const char * string_to_char_and_size( PyObject * _string, size_t * _size ) = 0;
         virtual PyObject * string_from_char( const char * _str ) = 0;
         virtual PyObject * string_from_char_size( const char * _str, size_t _size ) = 0;
 
-        virtual bool unicode_check( PyObject * _unicode ) = 0;
+        virtual bool unicode_check( PyObject * _unicode ) const = 0;
         virtual const wchar_t * unicode_to_wchar( PyObject * _unicode ) = 0;
         virtual const wchar_t * unicode_to_wchar_and_size( PyObject * _unicode, size_t * _size ) = 0;
         virtual PyObject * unicode_from_wchar( const wchar_t * _value ) = 0;
@@ -367,8 +367,8 @@ namespace pybind
         virtual PyObject * unicode_from_utf8_size( const char * _utf8, size_t _size ) = 0;
 
         virtual PyObject * list_new( uint32_t _size ) = 0;
-        virtual bool list_check( PyObject * _list ) = 0;
-        virtual uint32_t list_size( PyObject * _list ) = 0;
+        virtual bool list_check( PyObject * _list ) const = 0;
+        virtual uint32_t list_size( PyObject * _list ) const = 0;
         virtual PyObject * list_getitem( PyObject * _list, uint32_t _it ) = 0;
         virtual bool list_insert( PyObject * _list, uint32_t _it, PyObject * _item ) = 0;
         virtual bool list_remove( PyObject * _list, uint32_t _it ) = 0;
@@ -378,8 +378,8 @@ namespace pybind
         virtual PyObject * dict_new() = 0;
         virtual PyObject * dict_new_presized( uint32_t _count ) = 0;
         virtual PyObject * dict_from( PyObject * _obj ) = 0;
-        virtual bool dict_check( PyObject * _dict ) = 0;
-        virtual uint32_t dict_size( PyObject * _obj ) = 0;
+        virtual bool dict_check( PyObject * _dict ) const = 0;
+        virtual uint32_t dict_size( PyObject * _obj ) const = 0;
         virtual bool dict_set( PyObject * _dict, PyObject * _name, PyObject * _value ) = 0;
         virtual bool dict_setstring( PyObject * _dict, const char * _name, PyObject * _value ) = 0;
         virtual bool dict_remove( PyObject * _dict, PyObject * _name ) = 0;
@@ -391,8 +391,8 @@ namespace pybind
         virtual bool dict_next( PyObject * _dict, uint32_t & _pos, PyObject ** _key, PyObject ** _value ) = 0;
 
         virtual PyObject * tuple_new( uint32_t _it ) = 0;
-        virtual bool tuple_check( PyObject * _tuple ) = 0;
-        virtual uint32_t tuple_size( PyObject * _tuple ) = 0;
+        virtual bool tuple_check( PyObject * _tuple ) const = 0;
+        virtual uint32_t tuple_size( PyObject * _tuple ) const = 0;
         virtual PyObject * tuple_getitem( PyObject * _tuple, uint32_t _it ) = 0;
         virtual PyObject * tuple_slice( PyObject * _tuple, uint32_t _low, uint32_t _high ) = 0;
         virtual PyObject * tuple_slice_tail( PyObject * _tuple, uint32_t _size ) = 0;

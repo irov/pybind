@@ -47,6 +47,9 @@ namespace pybind
         bool is_type_class() const;
         bool is_none() const;
         bool is_bool() const;
+        bool is_integer() const;
+        bool is_long() const;
+        bool is_float() const;
         bool is_string() const;
         bool is_unicode() const;
         bool is_list() const;

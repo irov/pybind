@@ -921,22 +921,22 @@ namespace pybind
         return pybind::refcount( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::is_none( PyObject * _obj )
+    bool python_kernel::is_none( PyObject * _obj ) const
     {
         return pybind::is_none( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::bool_check( PyObject * _obj )
+    bool python_kernel::bool_check( PyObject * _obj ) const
     {
         return pybind::bool_check( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::is_callable( PyObject * _obj )
+    bool python_kernel::is_callable( PyObject * _obj ) const
     {
         return pybind::is_callable( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::is_instanceof( PyObject * _obj, PyTypeObject * _type )
+    bool python_kernel::is_instanceof( PyObject * _obj, PyTypeObject * _type ) const
     {
         return pybind::is_instanceof( _obj, _type );
     }
@@ -1046,7 +1046,7 @@ namespace pybind
         return pybind::ret_none();
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::is_true( PyObject * _obj )
+    bool python_kernel::is_true( PyObject * _obj ) const
     {
         return pybind::is_true( _obj );
     }
@@ -1201,32 +1201,32 @@ namespace pybind
         return pybind::unicode_from_wchar( _value );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::int_check( PyObject * _obj )
+    bool python_kernel::int_check( PyObject * _obj ) const
     {
         return pybind::int_check( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::long_check( PyObject * _obj )
+    bool python_kernel::long_check( PyObject * _obj ) const
     {
         return pybind::long_check( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::float_check( PyObject * _obj )
+    bool python_kernel::float_check( PyObject * _obj ) const
     {
         return pybind::float_check( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::string_check( PyObject * _obj )
+    bool python_kernel::string_check( PyObject * _obj ) const
     {
         return pybind::string_check( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
-    uint32_t python_kernel::string_size( PyObject * _obj )
+    uint32_t python_kernel::string_size( PyObject * _obj ) const
     {
         return pybind::string_size( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
-    int64_t python_kernel::string_hash( PyObject * _obj )
+    int64_t python_kernel::string_hash( PyObject * _obj ) const
     {
         return pybind::string_hash( _obj );
     }
@@ -1251,7 +1251,7 @@ namespace pybind
         return pybind::string_from_char_size( _str, _size );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::unicode_check( PyObject * _obj )
+    bool python_kernel::unicode_check( PyObject * _obj ) const
     {
         return pybind::unicode_check( _obj );
     }
@@ -1301,12 +1301,12 @@ namespace pybind
         return pybind::list_new( _size );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::list_check( PyObject * _list )
+    bool python_kernel::list_check( PyObject * _list ) const
     {
         return pybind::list_check( _list );
     }
     //////////////////////////////////////////////////////////////////////////
-    uint32_t python_kernel::list_size( PyObject * _list )
+    uint32_t python_kernel::list_size( PyObject * _list ) const
     {
         return pybind::list_size( _list );
     }
@@ -1351,12 +1351,12 @@ namespace pybind
         return pybind::dict_from( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::dict_check( PyObject * _dict )
+    bool python_kernel::dict_check( PyObject * _dict ) const
     {
         return pybind::dict_check( _dict );
     }
     //////////////////////////////////////////////////////////////////////////
-    uint32_t python_kernel::dict_size( PyObject * _obj )
+    uint32_t python_kernel::dict_size( PyObject * _obj ) const
     {
         return pybind::dict_size( _obj );
     }
@@ -1411,12 +1411,12 @@ namespace pybind
         return pybind::tuple_new( _it );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::tuple_check( PyObject * _obj )
+    bool python_kernel::tuple_check( PyObject * _obj ) const
     {
         return pybind::tuple_check( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
-    uint32_t python_kernel::tuple_size( PyObject * _obj )
+    uint32_t python_kernel::tuple_size( PyObject * _obj ) const
     {
         return pybind::tuple_size( _obj );
     }

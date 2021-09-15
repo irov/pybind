@@ -205,6 +205,36 @@ namespace pybind
         return m_kernel->bool_check( m_obj );
     }
     //////////////////////////////////////////////////////////////////////////
+    bool base::is_integer() const
+    {
+        if( m_kernel == nullptr )
+        {
+            return false;
+        }
+
+        return m_kernel->int_check( m_obj );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool base::is_long() const
+    {
+        if( m_kernel == nullptr )
+        {
+            return false;
+        }
+
+        return m_kernel->long_check( m_obj );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool base::is_float() const
+    {
+        if( m_kernel == nullptr )
+        {
+            return false;
+        }
+
+        return m_kernel->float_check( m_obj );
+    }
+    //////////////////////////////////////////////////////////////////////////
     bool base::is_string() const
     {
         if( m_kernel == nullptr )

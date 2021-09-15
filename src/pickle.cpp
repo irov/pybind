@@ -22,7 +22,7 @@ namespace pybind
     static constexpr uint8_t PICKLE_LONG = 11;
     //////////////////////////////////////////////////////////////////////////
     template<class T>
-    static void s_write_buffer_t( void * _buffer, size_t _capacity, const T & _t, size_t & _offset )
+    static void s_write_buffer_t( void * _buffer, size_t _capacity, T _t, size_t & _offset )
     {
         size_t size = sizeof( T );
 

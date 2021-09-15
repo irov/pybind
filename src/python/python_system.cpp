@@ -753,12 +753,12 @@ namespace pybind
 #   if PYBIND_PYTHON_VERSION < 300
         else if( PyInt_Check( _obj ) )
         {
-            _value = (PyInt_AsLong( _obj ) != 0);
+            _value = (PyInt_AS_LONG( _obj ) != 0);
         }
 #	endif
         else if( PyFloat_Check( _obj ) )
         {
-            _value = (PyFloat_AsDouble( _obj ) != 0.0);
+            _value = (PyFloat_AS_DOUBLE( _obj ) != 0.0);
         }
         else if( PyLong_Check( _obj ) )
         {
@@ -792,7 +792,7 @@ namespace pybind
         }
         else if( PyFloat_Check( _obj ) )
         {
-            _value = (T)PyFloat_AsDouble( _obj );
+            _value = (T)PyFloat_AS_DOUBLE( _obj );
         }
         else if( PyBool_Check( _obj ) )
         {
@@ -847,7 +847,7 @@ namespace pybind
             }
             else if( PyFloat_Check( _obj ) )
             {
-                _value = (T)PyFloat_AsDouble( _obj );
+                _value = (T)PyFloat_AS_DOUBLE( _obj );
             }
             else if( PyBool_Check( _obj ) )
             {
@@ -891,12 +891,12 @@ namespace pybind
 
         if( PyFloat_Check( _obj ) )
         {
-            _value = (T)PyFloat_AsDouble( _obj );
+            _value = (T)PyFloat_AS_DOUBLE( _obj );
         }
 #   if PYBIND_PYTHON_VERSION < 300
         else if( PyInt_Check( _obj ) )
         {
-            _value = (T)PyInt_AsLong( _obj );
+            _value = (T)PyInt_AS_LONG( _obj );
         }
 #	endif
         else if( PyLong_Check( _obj ) )
