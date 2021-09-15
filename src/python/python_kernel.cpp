@@ -886,6 +886,21 @@ namespace pybind
         return py_result;
     }
     //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::compile_string( const char * _string, const char * _file )
+    {
+        return pybind::compile_string( _string, _file );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::eval_string( const char * _string, PyObject * _globals, PyObject * _locals )
+    {
+        return pybind::eval_string( _string, _globals, _locals );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::exec_file( const char * _code, PyObject * _globals, PyObject * _locals )
+    {
+        return pybind::exec_file( _code, _globals, _locals );
+    }
+    //////////////////////////////////////////////////////////////////////////
     void python_kernel::setStdOutHandle( PyObject * _obj )
     {
         pybind::setStdOutHandle( _obj );

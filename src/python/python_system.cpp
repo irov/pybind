@@ -536,9 +536,9 @@ namespace pybind
         Py_DECREF( res );
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * exec( const char * _code, PyObject * _global, PyObject * _local )
+    PyObject * exec_file( const char * _code, PyObject * _globals, PyObject * _locals )
     {
-        PyObject * result = PyRun_String( _code, Py_file_input, _global, _local );
+        PyObject * result = PyRun_String( _code, Py_file_input, _globals, _locals );
 
         check_error();
 
@@ -552,6 +552,15 @@ namespace pybind
         check_error();
 
         return result;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PYBIND_API PyObject * eval_string( const char * _string, PyObject * _globals, PyObject * _locals )
+    {
+        PyObject * obj = PyRun_String( _string, Py_eval_input, _globals, _locals );
+
+        check_error();
+
+        return obj;
     }
     //////////////////////////////////////////////////////////////////////////
     void set_path( const wchar_t * _value )
@@ -1904,7 +1913,7 @@ namespace pybind
         Py_ssize_t py_size = PyUnicode_GET_LENGTH( _unicode );
 #endif
 
-        *_size = (size_t)py_size;
+        * _size = (size_t)py_size;
 
         return wstr;
     }

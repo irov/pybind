@@ -50,8 +50,8 @@ namespace pybind
     PYBIND_API void call_method_native( PyObject * _obj, const char * _method, PyObject * _args );
 
     PYBIND_API PyObject * compile_string( const char * _string, const char * _file );
-    PYBIND_API PyObject * exec( const char * _code, PyObject * _global = 0, PyObject * _local = 0 );
-    //PYBIND_API PyObject * exec_file( const char * _filename, PyObject * _global = 0, PyObject * _local = 0 );
+    PYBIND_API PyObject * eval_string( const char * _string, PyObject * _global, PyObject * _local );
+    PYBIND_API PyObject * exec_file( const char * _code, PyObject * _global, PyObject * _local );
 
     PYBIND_API void set_path( const wchar_t * _value );
     PYBIND_API void set_syspath( PyObject * _value );

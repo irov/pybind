@@ -13,6 +13,7 @@ namespace pybind
         typedef uint32_t size_type;
 
     public:
+        dict();
         dict( const dict & _dict );
         dict( dict && _dict );
 

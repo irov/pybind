@@ -258,6 +258,10 @@ namespace pybind
         virtual PyObject * ask_method_native( PyObject * _obj, const char * _method, PyObject * _args ) = 0;
         virtual PyObject * ask_adapter( void * _self, const class_type_scope_interface_ptr & _scope, const char * _name, PyObject * _args ) = 0;
 
+        virtual PyObject * compile_string( const char * _string, const char * _file ) = 0;
+        virtual PyObject * eval_string( const char * _string, PyObject * _globals, PyObject * _locals ) = 0;
+        virtual PyObject * exec_file( const char * _code, PyObject * _globals, PyObject * _locals ) = 0;
+
         virtual void setStdOutHandle( PyObject * _obj ) = 0;
         virtual void setStdErrorHandle( PyObject * _obj ) = 0;
         virtual PyObject * getStdOutHandle() = 0;

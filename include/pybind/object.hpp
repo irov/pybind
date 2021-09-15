@@ -100,7 +100,7 @@ namespace pybind
             );
         }
 
-        detail::extract_operator_t call_native( const pybind::tuple & _args );
+        detail::extract_operator_t call_native( const pybind::tuple & _args ) const;
     };
     //////////////////////////////////////////////////////////////////////////
     template<class It>

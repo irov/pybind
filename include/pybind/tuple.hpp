@@ -13,6 +13,7 @@ namespace pybind
         typedef uint32_t size_type;
 
     public:
+        tuple();
         tuple( kernel_interface * _kernel );
         tuple( const tuple & _tuple );
         tuple( tuple && _tuple );

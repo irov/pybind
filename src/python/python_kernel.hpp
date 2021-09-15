@@ -125,6 +125,10 @@ namespace pybind
         PyObject * ask_method_native( PyObject * _obj, const char * _method, PyObject * _args ) override;
         PyObject * ask_adapter( void * _self, const class_type_scope_interface_ptr & _scope, const char * _name, PyObject * _args ) override;
 
+        PyObject * compile_string( const char * _string, const char * _file ) override;
+        PyObject * eval_string( const char * _string, PyObject * _globals, PyObject * _locals ) override;
+        PyObject * exec_file( const char * _code, PyObject * _globals, PyObject * _locals ) override;
+
         void setStdOutHandle( PyObject * _obj ) override;
         void setStdErrorHandle( PyObject * _obj ) override;
         PyObject * getStdOutHandle() override;

@@ -14,6 +14,7 @@ namespace pybind
         typedef uint32_t size_type;
 
     public:
+        list();
         explicit list( kernel_interface * _kernel );
         list( kernel_interface * _kernel, size_type _size );
         list( const list & _list );

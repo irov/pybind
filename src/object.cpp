@@ -106,7 +106,7 @@ namespace pybind
         return pybind::call_args_i( m_kernel, m_obj, std::forward<std::initializer_list<detail::import_operator_t>>( std::forward<std::initializer_list<detail::import_operator_t> && >( _t ) ), _args );
     }
     //////////////////////////////////////////////////////////////////////////
-    detail::extract_operator_t object::call_native( const pybind::tuple & _args )
+    detail::extract_operator_t object::call_native( const pybind::tuple & _args ) const
     {
         return pybind::ask_tuple_t( m_kernel, m_obj, _args );
     }
