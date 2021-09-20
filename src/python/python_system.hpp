@@ -24,6 +24,7 @@ namespace pybind
     PYBIND_API PyObject * module_dict( PyObject * _module );
     PYBIND_API void module_addobject( PyObject * _module, const char * _name, PyObject * _obj );
     PYBIND_API void module_removeobject( PyObject * _module, const char * _name );
+    PYBIND_API bool module_hasobject( PyObject * _module, const char * _name );
     PYBIND_API PyObject * module_execcode( const char * _name, PyObject * _code );
     PYBIND_API PyObject * module_reload( PyObject * _module );
 

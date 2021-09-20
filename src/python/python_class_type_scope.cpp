@@ -729,6 +729,19 @@ namespace pybind
         PyType_Modified( m_pytypeobject );
 
         Py_INCREF( (PyObject*)m_pytypeobject );
+
+#ifndef NDEBUG
+        if( pybind::module_hasobject( m_module, m_pytypeobject->tp_name ) == true )
+        {
+            pybind::throw_exception( "python_class_type_scope module '%s' overriding object '%s'"
+                , m_name
+                , m_pytypeobject->tp_name
+            );
+
+            return false;
+        }
+#endif
+
         pybind::module_addobject( m_module, m_pytypeobject->tp_name, (PyObject*)m_pytypeobject );
 
         m_kernel->cache_class_scope_type( python_class_type_scope_ptr( this ) );

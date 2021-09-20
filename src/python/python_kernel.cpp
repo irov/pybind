@@ -174,6 +174,18 @@ namespace pybind
 
         const char * name = _adapter->getName();
 
+#ifndef NDEBUG
+        if( pybind::module_hasobject( _module, name ) == true )
+        {
+            pybind::throw_exception( "def_function_adapter module '%s' overriding object '%s'"
+                , this->object_repr( _module ).c_str()
+                , name
+            );
+
+            return;
+        }
+#endif
+
         pybind::module_addobject( _module, name, py_func );
     }
     //////////////////////////////////////////////////////////////////////////
@@ -195,6 +207,18 @@ namespace pybind
         }
 
         const char * name = _adapter->getName();
+
+#ifndef NDEBUG
+        if( pybind::module_hasobject( _module, name ) == true )
+        {
+            pybind::throw_exception( "def_functor_adapter module '%s' overriding object '%s'"
+                , this->object_repr( _module ).c_str()
+                , name
+            );
+
+            return;
+        }
+#endif
 
         pybind::module_addobject( _module, name, py_func );
     }

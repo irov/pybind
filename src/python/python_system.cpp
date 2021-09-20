@@ -91,7 +91,7 @@ namespace pybind
         {
             Py_SetPath( _path );
 
-            check_error();
+            pybind::check_error();
         }
 #endif
 
@@ -336,6 +336,15 @@ namespace pybind
         PyModule_AddObject( _module, _name, Py_None );
     }
     //////////////////////////////////////////////////////////////////////////
+    bool module_hasobject( PyObject * _module, const char * _name )
+    {
+        PyObject * dict = pybind::module_dict( _module );
+
+        bool result = pybind::dict_existstring( dict, _name );
+
+        return result;
+    }
+    //////////////////////////////////////////////////////////////////////////
     PyObject * module_execcode( const char * _name, PyObject * _code )
     {
         char * unconst_name = const_cast<char *>(_name);
@@ -348,7 +357,7 @@ namespace pybind
     {
         PyObject * reload_module = PyImport_ReloadModule( _module );
 
-        check_error();
+        pybind::check_error();
 
         return reload_module;
     }
@@ -389,7 +398,7 @@ namespace pybind
     {
         PyObject * result = PyObject_CallObject( _obj, _args );
 
-        check_error();
+        pybind::check_error();
 
         return result;
     }
@@ -399,7 +408,7 @@ namespace pybind
         va_list valist;
         va_start( valist, _format );
 
-        PyObject * result = ask_va( _obj, _format, valist );
+        PyObject * result = pybind::ask_va( _obj, _format, valist );
 
         va_end( valist );
 
@@ -411,7 +420,7 @@ namespace pybind
         va_list valist;
         va_start( valist, _format );
 
-        PyObject * result = ask_method_va( _obj, _method, _format, valist );
+        PyObject * result = pybind::ask_method_va( _obj, _method, _format, valist );
 
         va_end( valist );
 
@@ -424,12 +433,12 @@ namespace pybind
 
         if( value == nullptr )
         {
-            check_error();
+            pybind::check_error();
 
             return nullptr;
         }
 
-        PyObject * result = ask_native( _obj, value );
+        PyObject * result = pybind::ask_native( _obj, value );
 
         Py_DECREF( value );
 
@@ -445,7 +454,7 @@ namespace pybind
             Py_RETURN_NONE;
         }
 
-        PyObject * result = ask_va( method, _format, _va );
+        PyObject * result = pybind::ask_va( method, _format, _va );
 
         Py_DECREF( method );
 
@@ -461,7 +470,7 @@ namespace pybind
             Py_RETURN_NONE;
         }
 
-        PyObject * result = ask_native( method, _args );
+        PyObject * result = pybind::ask_native( method, _args );
 
         Py_DECREF( method );
 
@@ -470,7 +479,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void call_native( PyObject * _obj, PyObject * _args )
     {
-        PyObject * res = ask_native( _obj, _args );
+        PyObject * res = pybind::ask_native( _obj, _args );
 
         if( res == nullptr )
         {
@@ -485,7 +494,7 @@ namespace pybind
         va_list valist;
         va_start( valist, _format );
 
-        call_va( _obj, _format, valist );
+        pybind::call_va( _obj, _format, valist );
 
         va_end( valist );
     }
@@ -495,7 +504,7 @@ namespace pybind
         va_list valist;
         va_start( valist, _format );
 
-        call_method_va( _obj, _method, _format, valist );
+        pybind::call_method_va( _obj, _method, _format, valist );
 
         va_end( valist );
     }
@@ -514,7 +523,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void call_va( PyObject * _obj, const char * _format, va_list _va )
     {
-        PyObject * res = ask_va( _obj, _format, _va );
+        PyObject * res = pybind::ask_va( _obj, _format, _va );
 
         if( res == nullptr )
         {
@@ -526,7 +535,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void call_method_va( PyObject * _obj, const char * _method, const char * _format, va_list _va )
     {
-        PyObject * res = ask_method_va( _obj, _method, _format, _va );
+        PyObject * res = pybind::ask_method_va( _obj, _method, _format, _va );
 
         if( res == NULL )
         {
@@ -540,7 +549,7 @@ namespace pybind
     {
         PyObject * result = PyRun_String( _code, Py_file_input, _globals, _locals );
 
-        check_error();
+        pybind::check_error();
 
         return result;
     }
@@ -549,7 +558,7 @@ namespace pybind
     {
         PyObject * result = Py_CompileString( _string, _file, Py_file_input );
 
-        check_error();
+        pybind::check_error();
 
         return result;
     }
@@ -558,7 +567,7 @@ namespace pybind
     {
         PyObject * obj = PyRun_String( _string, Py_eval_input, _globals, _locals );
 
-        check_error();
+        pybind::check_error();
 
         return obj;
     }
@@ -570,14 +579,14 @@ namespace pybind
         Py_SetPath( _value );
 #   endif
 
-        check_error();
+        pybind::check_error();
     }
     //////////////////////////////////////////////////////////////////////////
     void set_syspath( PyObject * _value )
     {
         PySys_SetObject( const_cast<char *>("path"), _value );
 
-        check_error();
+        pybind::check_error();
     }
     //////////////////////////////////////////////////////////////////////////
     char get_sysdelim()
@@ -631,12 +640,12 @@ namespace pybind
     {
         if( _value == true )
         {
-            PyObject * py_true = ret_true();
+            PyObject * py_true = pybind::ret_true();
 
             return py_true;
         }
 
-        PyObject * py_false = ret_false();
+        PyObject * py_false = pybind::ret_false();
 
         return py_false;
     }
@@ -690,7 +699,7 @@ namespace pybind
 
         if( res != 0 )
         {
-            check_error();
+            pybind::check_error();
 
             return false;
         }
@@ -706,7 +715,7 @@ namespace pybind
 
         if( res != 0 )
         {
-            check_error();
+            pybind::check_error();
 
             return false;
         }
@@ -817,22 +826,22 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool extract_int8( PyObject * _obj, int8_t & _value )
     {
-        return extract_int_t<int8_t>( _obj, _value );
+        return pybind::extract_int_t<int8_t>( _obj, _value );
     }
     //////////////////////////////////////////////////////////////////////////
     bool extract_int16( PyObject * _obj, int16_t & _value )
     {
-        return extract_int_t<int16_t>( _obj, _value );
+        return pybind::extract_int_t<int16_t>( _obj, _value );
     }
     //////////////////////////////////////////////////////////////////////////
     bool extract_int32( PyObject * _obj, int32_t & _value )
     {
-        return extract_int_t<int32_t>( _obj, _value );
+        return pybind::extract_int_t<int32_t>( _obj, _value );
     }
     //////////////////////////////////////////////////////////////////////////
     bool extract_int64( PyObject * _obj, int64_t & _value )
     {
-        return extract_int_t<int64_t>( _obj, _value );
+        return pybind::extract_int_t<int64_t>( _obj, _value );
     }
     //////////////////////////////////////////////////////////////////////////
     template<class T>
@@ -872,22 +881,22 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool extract_uint8( PyObject * _obj, uint8_t & _value )
     {
-        return extract_unsigned_int_t<uint8_t>( _obj, _value );
+        return pybind::extract_unsigned_int_t<uint8_t>( _obj, _value );
     }
     //////////////////////////////////////////////////////////////////////////
     bool extract_uint16( PyObject * _obj, uint16_t & _value )
     {
-        return extract_unsigned_int_t<uint16_t>( _obj, _value );
+        return pybind::extract_unsigned_int_t<uint16_t>( _obj, _value );
     }
     //////////////////////////////////////////////////////////////////////////
     bool extract_uint32( PyObject * _obj, uint32_t & _value )
     {
-        return extract_unsigned_int_t<uint32_t>( _obj, _value );
+        return pybind::extract_unsigned_int_t<uint32_t>( _obj, _value );
     }
     //////////////////////////////////////////////////////////////////////////
     bool extract_uint64( PyObject * _obj, uint64_t & _value )
     {
-        return extract_unsigned_int_t<uint64_t>( _obj, _value );
+        return pybind::extract_unsigned_int_t<uint64_t>( _obj, _value );
     }
     //////////////////////////////////////////////////////////////////////////
     template<class T>
@@ -926,12 +935,12 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool extract_float( PyObject * _obj, float & _value )
     {
-        return extract_float_t<float>( _obj, _value );
+        return pybind::extract_float_t<float>( _obj, _value );
     }
     //////////////////////////////////////////////////////////////////////////
     bool extract_double( PyObject * _obj, double & _value )
     {
-        return extract_float_t<double>( _obj, _value );
+        return pybind::extract_float_t<double>( _obj, _value );
     }
     //////////////////////////////////////////////////////////////////////////
     bool extract_wchar( PyObject * _obj, wchar_t & _value )
@@ -993,17 +1002,17 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_int8( int8_t _value )
     {
-        return ptr_int_t<int8_t>( _value );
+        return pybind::ptr_int_t<int8_t>( _value );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_int16( int16_t _value )
     {
-        return ptr_int_t<int16_t>( _value );
+        return pybind::ptr_int_t<int16_t>( _value );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_int32( int32_t _value )
     {
-        return ptr_int_t<int32_t>( _value );
+        return pybind::ptr_int_t<int32_t>( _value );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_int64( int64_t _value )
@@ -1013,17 +1022,17 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_uint8( uint8_t _value )
     {
-        return ptr_int_t<uint8_t>( _value );
+        return pybind::ptr_int_t<uint8_t>( _value );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_uint16( uint16_t _value )
     {
-        return ptr_int_t<uint16_t>( _value );
+        return pybind::ptr_int_t<uint16_t>( _value );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_uint32( uint32_t _value )
     {
-        return ptr_int_t<uint32_t>( _value );
+        return pybind::ptr_int_t<uint32_t>( _value );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_uint64( uint64_t _value )
@@ -1072,7 +1081,7 @@ namespace pybind
 
         if( size == -1 )
         {
-            check_error();
+            pybind::check_error();
 
             return 0;
         }
@@ -1087,7 +1096,7 @@ namespace pybind
 
         if( obj == nullptr )
         {
-            check_error();
+            pybind::check_error();
         }
 
         return obj;
@@ -1100,7 +1109,7 @@ namespace pybind
 
         if( res != 0 )
         {
-            check_error();
+            pybind::check_error();
 
             return false;
         }
@@ -1116,7 +1125,7 @@ namespace pybind
 
         if( res != 0 )
         {
-            check_error();
+            pybind::check_error();
 
             return false;
         }
@@ -1131,7 +1140,7 @@ namespace pybind
 
         if( res != 0 )
         {
-            check_error();
+            pybind::check_error();
 
             return false;
         }
@@ -1147,7 +1156,7 @@ namespace pybind
 
         if( res == -1 )
         {
-            check_error();
+            pybind::check_error();
 
             return false;
         }
@@ -1219,7 +1228,7 @@ namespace pybind
 
         if( res == -1 )
         {
-            check_error();
+            pybind::check_error();
 
             return false;
         }
@@ -1235,7 +1244,7 @@ namespace pybind
 
         if( res == -1 )
         {
-            check_error();
+            pybind::check_error();
 
             return false;
         }
@@ -1251,7 +1260,7 @@ namespace pybind
 
         if( res == -1 )
         {
-            check_error();
+            pybind::check_error();
 
             return false;
         }
@@ -1265,7 +1274,7 @@ namespace pybind
 
         if( res == -1 )
         {
-            check_error();
+            pybind::check_error();
 
             return false;
         }
@@ -1301,9 +1310,9 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool dict_existstring( PyObject * _dict, const char * _key )
     {
-        PyObject * kv = string_from_char( _key );
+        PyObject * kv = pybind::string_from_char( _key );
 
-        bool result = dict_exist( _dict, kv );
+        bool result = pybind::dict_exist( _dict, kv );
 
         Py_DECREF( kv );
 
@@ -1349,7 +1358,7 @@ namespace pybind
 
         if( res != 0 )
         {
-            check_error();
+            pybind::check_error();
 
             return false;
         }
@@ -1505,7 +1514,7 @@ namespace pybind
 
         if( function == nullptr )
         {
-            check_error();
+            pybind::check_error();
 
             Py_XDECREF( modtraceback );
 
@@ -1519,7 +1528,7 @@ namespace pybind
 
         if( result == nullptr )
         {
-            check_error();
+            pybind::check_error();
 
             Py_XDECREF( function );
             Py_XDECREF( modtraceback );
@@ -1568,7 +1577,7 @@ namespace pybind
 
         if( function == nullptr )
         {
-            check_error();
+            pybind::check_error();
 
             Py_XDECREF( modtraceback );
 
@@ -1581,7 +1590,7 @@ namespace pybind
 
         if( result == nullptr )
         {
-            check_error();
+            pybind::check_error();
 
             Py_XDECREF( function );
             Py_XDECREF( modtraceback );
@@ -1611,7 +1620,7 @@ namespace pybind
         va_list valist;
         va_start( valist, _format );
 
-        error_traceback_va( _format, valist );
+        pybind::error_traceback_va( _format, valist );
 
         va_end( valist );
     }
@@ -1651,7 +1660,7 @@ namespace pybind
     {
         va_list valist;
         va_start( valist, _format );
-        error_message_va( _format, valist );
+        pybind::error_message_va( _format, valist );
         va_end( valist );
     }
     //////////////////////////////////////////////////////////////////////////
@@ -1669,14 +1678,14 @@ namespace pybind
     {
         va_list valist;
         va_start( valist, _format );
-        throw_message_va( _format, valist );
+        pybind::throw_message_va( _format, valist );
         va_end( valist );
     }
     //////////////////////////////////////////////////////////////////////////
     void throw_message_va( const char * _format, va_list _va )
     {
-        error_message_va( _format, _va );
-        throw_exception_va( _format, _va );
+        pybind::error_message_va( _format, _va );
+        pybind::throw_exception_va( _format, _va );
     }
     //////////////////////////////////////////////////////////////////////////
     void warning_traceback( const char * _format, ... )
@@ -1684,7 +1693,7 @@ namespace pybind
         va_list valist;
         va_start( valist, _format );
 
-        warning_traceback_va( _format, valist );
+        pybind::warning_traceback_va( _format, valist );
         va_end( valist );
     }
     //////////////////////////////////////////////////////////////////////////
