@@ -46,6 +46,13 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////    
+    dict & dict::operator = ( std::nullptr_t )
+    {
+        this->base::operator = ( nullptr );
+
+        return *this;
+    }
+    //////////////////////////////////////////////////////////////////////////    
     dict & dict::operator = ( const dict & _obj )
     {
         this->base::operator = ( _obj );

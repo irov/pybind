@@ -28,6 +28,7 @@ namespace pybind
         ~dict();
 
     public:
+        dict & operator = ( std::nullptr_t );
         dict & operator = ( const dict & _obj );
         dict & operator = ( dict && _obj );
 

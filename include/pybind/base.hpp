@@ -30,6 +30,12 @@ namespace pybind
         base & operator = ( base && _obj );
 
     public:
+        bool operator == ( std::nullptr_t ) const
+        {
+            return m_kernel == nullptr;
+        }
+
+    public:
         kernel_interface * kernel() const;
 
     public:

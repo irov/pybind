@@ -41,6 +41,13 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////    
+    tuple & tuple::operator = ( std::nullptr_t )
+    {
+        this->base::operator = ( nullptr );
+
+        return *this;
+    }
+    //////////////////////////////////////////////////////////////////////////    
     tuple & tuple::operator = ( const tuple & _obj )
     {
         this->base::operator = ( _obj );

@@ -27,6 +27,7 @@ namespace pybind
         ~tuple();
 
     public:
+        tuple & operator = ( std::nullptr_t );
         tuple & operator = ( const tuple & _obj );
         tuple & operator = ( tuple && _obj );
 
