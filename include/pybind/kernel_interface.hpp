@@ -255,6 +255,7 @@ namespace pybind
         virtual void call_method_native( PyObject * _obj, const char * _method, PyObject * _args ) = 0;
 
         virtual PyObject * ask_native( PyObject * _obj, PyObject * _args ) = 0;
+        virtual PyObject * ask_method( PyObject * _obj, const char * _method, const char * _format, ... ) = 0;
         virtual PyObject * ask_method_native( PyObject * _obj, const char * _method, PyObject * _args ) = 0;
         virtual PyObject * ask_adapter( void * _self, const class_type_scope_interface_ptr & _scope, const char * _name, PyObject * _args ) = 0;
 
@@ -344,6 +345,7 @@ namespace pybind
 
         virtual bool bool_check( PyObject * _obj ) const = 0;
         virtual bool is_true( PyObject * _obj ) const = 0;
+        virtual bool is_false( PyObject * _obj ) const = 0;
         virtual PyObject * ret_bool( bool _value ) = 0;
         virtual PyObject * ret_true() = 0;
         virtual PyObject * ret_false() = 0;

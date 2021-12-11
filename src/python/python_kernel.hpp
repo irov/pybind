@@ -122,6 +122,7 @@ namespace pybind
         void call_method_native( PyObject * _obj, const char * _method, PyObject * _args ) override;
 
         PyObject * ask_native( PyObject * _obj, PyObject * _args ) override;
+        PyObject * ask_method( PyObject * _obj, const char * _method, const char * _format, ... ) override;
         PyObject * ask_method_native( PyObject * _obj, const char * _method, PyObject * _args ) override;
         PyObject * ask_adapter( void * _self, const class_type_scope_interface_ptr & _scope, const char * _name, PyObject * _args ) override;
 
@@ -212,6 +213,7 @@ namespace pybind
 
         bool bool_check( PyObject * _obj ) const override;
         bool is_true( PyObject * _obj ) const override;
+        bool is_false( PyObject * _obj ) const override;
         PyObject * ret_bool( bool _value ) override;
         PyObject * ret_true() override;
         PyObject * ret_false() override;

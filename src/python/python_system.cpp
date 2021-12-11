@@ -1828,9 +1828,14 @@ namespace pybind
         return value == 1;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool is_true( PyObject * _value )
+    bool is_true( PyObject * _obj )
     {
-        return _value == Py_True;
+        return _obj == Py_True;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool is_false( PyObject * _obj )
+    {
+        return _obj == Py_False;
     }
     //////////////////////////////////////////////////////////////////////////
     bool string_check( PyObject * _string )

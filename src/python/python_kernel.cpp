@@ -893,12 +893,26 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::ask_native( PyObject * _obj, PyObject * _args )
     {
-        return pybind::ask_native( _obj, _args );
+        PyObject * py_result = pybind::ask_native( _obj, _args );
+
+        return py_result;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::ask_method( PyObject * _obj, const char * _method, const char * _format, ... )
+    {
+        va_list valist;
+        va_start( valist, _format );
+        PyObject * py_result = pybind::ask_method_va( _obj, _method, _format, valist );
+        va_end( valist );
+
+        return py_result;
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::ask_method_native( PyObject * _obj, const char * _method, PyObject * _args )
     {
-        return pybind::ask_method_native( _obj, _method, _args );
+        PyObject * py_result = pybind::ask_method_native( _obj, _method, _args );
+
+        return py_result;
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::ask_adapter( void * _self, const class_type_scope_interface_ptr & _scope, const char * _name, PyObject * _args )
@@ -1088,6 +1102,11 @@ namespace pybind
     bool python_kernel::is_true( PyObject * _obj ) const
     {
         return pybind::is_true( _obj );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool python_kernel::is_false( PyObject * _obj ) const
+    {
+        return pybind::is_false( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::ret_bool( bool _value )
