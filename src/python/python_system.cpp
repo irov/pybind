@@ -350,6 +350,8 @@ namespace pybind
         char * unconst_name = const_cast<char *>(_name);
         PyObject * module = PyImport_ExecCodeModule( unconst_name, _code );
 
+        pybind::check_error();
+
         return module;
     }
     //////////////////////////////////////////////////////////////////////////
