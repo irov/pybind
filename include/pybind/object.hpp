@@ -37,12 +37,6 @@ namespace pybind
         object & operator = ( object && _obj );
 
     public:
-        bool operator == ( std::nullptr_t ) const
-        {
-            return m_kernel == nullptr;
-        }
-
-    public:
         template<class T>
         bool has_attr( const T & _name ) const
         {

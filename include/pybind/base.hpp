@@ -35,6 +35,11 @@ namespace pybind
             return m_kernel == nullptr;
         }
 
+        bool operator != ( std::nullptr_t ) const
+        {
+            return m_kernel != nullptr;
+        }
+
     public:
         kernel_interface * kernel() const;
 
@@ -67,6 +72,7 @@ namespace pybind
     public:
         string_view str() const;
         string_view repr() const;
+        string_view repr_type() const;
 
     protected:
         kernel_interface * m_kernel;

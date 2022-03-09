@@ -308,4 +308,17 @@ namespace pybind
 
         return py_repr;
     }
+    //////////////////////////////////////////////////////////////////////////
+    string_view base::repr_type() const
+    {
+        if( m_kernel == nullptr )
+        {
+            return string_view( nullptr, nullptr );
+        }
+
+        string_view py_repr = m_kernel->object_repr_type( m_obj );
+
+        return py_repr;
+    }
+    //////////////////////////////////////////////////////////////////////////
 }
