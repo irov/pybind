@@ -52,6 +52,19 @@ namespace pybind
             return this->get_i( detail::import_operator_t( m_kernel, _name ) );
         }
 
+        template<class K, class T>
+        T get_default( const K & _name, const T & _default ) const
+        {
+            if( this->exist( _name ) == false )
+            {
+                return _default;
+            }
+
+            T value = this->get_i( detail::import_operator_t( m_kernel, _name ) );
+
+            return value;
+        }
+
         template<class K, class V>
         void set( const K & _name, const V & _value )
         {
