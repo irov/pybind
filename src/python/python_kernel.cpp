@@ -1124,6 +1124,16 @@ namespace pybind
         return pybind::ret_false();
     }
     //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::get_true()
+    {
+        return pybind::get_true();
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::get_false()
+    {
+        return pybind::get_false();
+    }
+    //////////////////////////////////////////////////////////////////////////
     bool python_kernel::extract_bool( PyObject * _obj, bool & _value )
     {
         return pybind::extract_bool( _obj, _value );

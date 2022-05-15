@@ -217,6 +217,8 @@ namespace pybind
         PyObject * ret_bool( bool _value ) override;
         PyObject * ret_true() override;
         PyObject * ret_false() override;
+        PyObject * get_true() override;
+        PyObject * get_false() override;
 
         bool int_check( PyObject * _obj ) const override;
         bool long_check( PyObject * _obj ) const override;

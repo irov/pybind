@@ -349,6 +349,8 @@ namespace pybind
         virtual PyObject * ret_bool( bool _value ) = 0;
         virtual PyObject * ret_true() = 0;
         virtual PyObject * ret_false() = 0;
+        virtual PyObject * get_true() = 0;
+        virtual PyObject * get_false() = 0;
 
         virtual bool int_check( PyObject * _obj ) const = 0;
         virtual bool long_check( PyObject * _obj ) const = 0;
