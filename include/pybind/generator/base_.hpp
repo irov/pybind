@@ -160,6 +160,22 @@ namespace pybind
         }
 
         template<class F>
+        base_ & def_native_silent_kernel( const char * _name, F f )
+        {
+            allocator_interface * allocator = m_kernel->get_allocator();
+
+            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_native_kernel<C, F>>( _name, f );
+
+#ifdef PYBIND_CALL_DEBUG
+            iadapter->setCallDebugSilent( true );
+#endif
+
+            m_scope->add_method( iadapter );
+
+            return *this;
+        }
+
+        template<class F>
         base_ & def_static_native( const char * _name, F f )
         {
             allocator_interface * allocator = m_kernel->get_allocator();

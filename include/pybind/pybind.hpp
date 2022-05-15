@@ -16,6 +16,9 @@
 #include "pybind/dictobject.hpp"
 #include "pybind/enum.hpp"
 #include "pybind/module.hpp"
+#include "pybind/pickle.hpp"
+
+#include "pybind/stl/stl_type_cast.hpp"
 
 #include "pybind/generator/class_.hpp"
 #include "pybind/generator/interface_.hpp"

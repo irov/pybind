@@ -1,6 +1,6 @@
 #pragma once
 
-#include "pybind/adapter_interface.hpp"
+#include "pybind/adapter/base_adapter.hpp"
 
 #include "pybind/call/method_call.hpp"
 #include "pybind/call/method_proxy_call.hpp"
@@ -9,11 +9,11 @@ namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
     class smart_pointer_adapter_interface
-        : public adapter_interface
+        : public base_adapter_interface
     {
     public:
         smart_pointer_adapter_interface( const char * _name )
-            : m_name( _name )
+            : base_adapter_interface( _name )
         {
         }
 
@@ -22,17 +22,8 @@ namespace pybind
         }
 
     public:
-        inline const char * getName() const
-        {
-            return m_name;
-        }
-
-    public:
         virtual void incref_smart_pointer( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope ) = 0;
         virtual void decref_smart_pointer( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope ) = 0;
-
-    protected:
-        const char * m_name;
     };
     //////////////////////////////////////////////////////////////////////////
     typedef intrusive_ptr<smart_pointer_adapter_interface> smart_pointer_adapter_interface_ptr;

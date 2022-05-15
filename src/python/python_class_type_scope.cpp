@@ -71,9 +71,9 @@ namespace pybind
 
         try
         {
-            DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( kernel, scope->get_name(), adapter->getName(), _args, _kwds );
+            DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), _args, _kwds );
             PyObject * ret = adapter->call( kernel, impl, scope, _args, _kwds );
-            DEBUG_PYBIND_NOTIFY_END_BIND_CALL( kernel, scope->get_name(), adapter->getName(), _args, _kwds );
+            DEBUG_PYBIND_NOTIFY_END_BIND_CALL( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), _args, _kwds );
 
             return ret;
         }
@@ -289,9 +289,9 @@ namespace pybind
 
         try
         {
-            DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( kernel, scope->get_name(), adapter->getName(), _key, nullptr );
+            DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), _key, nullptr );
             PyObject * res = adapter->call( kernel, impl, scope, _key );
-            DEBUG_PYBIND_NOTIFY_END_BIND_CALL( kernel, scope->get_name(), adapter->getName(), _key, nullptr );
+            DEBUG_PYBIND_NOTIFY_END_BIND_CALL( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), _key, nullptr );
 
             return res;
         }
@@ -328,9 +328,9 @@ namespace pybind
 
         try
         {
-            DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( kernel, scope->get_name(), adapter->getName(), _key, nullptr );
+            DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), _key, nullptr );
             PyObject * res = adapter->call( kernel, impl, scope, _key );
-            DEBUG_PYBIND_NOTIFY_END_BIND_CALL( kernel, scope->get_name(), adapter->getName(), _key, nullptr );
+            DEBUG_PYBIND_NOTIFY_END_BIND_CALL( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), _key, nullptr );
 
             return res;
         }
@@ -373,9 +373,9 @@ namespace pybind
 
         try
         {
-            DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( kernel, scope->get_name(), adapter->getName(), nullptr, nullptr );
+            DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), nullptr, nullptr );
             PyObject * res = adapter->call( kernel, impl, scope, (uint32_t)_index );
-            DEBUG_PYBIND_NOTIFY_END_BIND_CALL( kernel, scope->get_name(), adapter->getName(), nullptr, nullptr );
+            DEBUG_PYBIND_NOTIFY_END_BIND_CALL( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), nullptr, nullptr );
 
             return res;
         }
@@ -412,9 +412,9 @@ namespace pybind
 
         try
         {
-            DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( kernel, scope->get_name(), adapter->getName(), nullptr, nullptr );
+            DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), nullptr, nullptr );
             adapter->call( kernel, impl, scope, (uint32_t)_index, _value );
-            DEBUG_PYBIND_NOTIFY_END_BIND_CALL( kernel, scope->get_name(), adapter->getName(), nullptr, nullptr );
+            DEBUG_PYBIND_NOTIFY_END_BIND_CALL( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), nullptr, nullptr );
 
             return 0;
         }
@@ -1035,9 +1035,9 @@ namespace pybind
             return nullptr;
         }
 
-        DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( _kernel, _scope->get_name(), _adapter->getName(), nullptr, nullptr );
+        DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( _kernel, _scope->get_name(), _adapter->getName(), _adapter->getCallDebugSilent(), nullptr, nullptr );
         PyObject * res = _adapter->call( _kernel, impl, _scope, _value, _rotate );
-        DEBUG_PYBIND_NOTIFY_END_BIND_CALL( _kernel, _scope->get_name(), _adapter->getName(), nullptr, nullptr );
+        DEBUG_PYBIND_NOTIFY_END_BIND_CALL( _kernel, _scope->get_name(), _adapter->getName(), _adapter->getCallDebugSilent(), nullptr, nullptr );
 
         return res;
     }

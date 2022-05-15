@@ -9,6 +9,7 @@ namespace pybind
     {
         observer_bind_call * old_observer = g_observer;
         g_observer = _observer;
+
         return old_observer;
     }
     //////////////////////////////////////////////////////////////////////////
@@ -17,9 +18,14 @@ namespace pybind
         return g_observer;
     }
     //////////////////////////////////////////////////////////////////////////
-    void notify_begin_bind_call( kernel_interface * _kernel, const char * _className, const char * _functionName, PyObject * _args, PyObject * _kwds )
+    void notify_begin_bind_call( kernel_interface * _kernel, const char * _className, const char * _functionName, bool _silent, PyObject * _args, PyObject * _kwds )
     {
         if( g_observer == nullptr )
+        {
+            return;
+        }
+
+        if( _silent == true )
         {
             return;
         }
@@ -27,9 +33,14 @@ namespace pybind
         g_observer->begin_bind_call( _kernel, _className, _functionName, _args, _kwds );
     }
     //////////////////////////////////////////////////////////////////////////
-    void notify_end_bind_call( kernel_interface * _kernel, const char * _className, const char * _functionName, PyObject * _args, PyObject * _kwds )
+    void notify_end_bind_call( kernel_interface * _kernel, const char * _className, const char * _functionName, bool _silent, PyObject * _args, PyObject * _kwds )
     {
         if( g_observer == nullptr )
+        {
+            return;
+        }
+
+        if( _silent == true )
         {
             return;
         }

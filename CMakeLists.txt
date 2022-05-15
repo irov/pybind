@@ -152,11 +152,11 @@ ADD_LIBRARY(${PROJECT_NAME} STATIC
 	)
     
 add_definitions(-DMS_NO_COREDLL)
-add_definitions(-DPy_NO_ENABLE_SHARED)    
+add_definitions(-DPy_NO_ENABLE_SHARED)
     
 ADD_LIBRARY(${PROJECT_NAME}_python STATIC 
     ${files_private_python_sources}
-	)    
+    )
     
 IF(NOT PYBIND_EXTERNAL_BUILD)
     add_dependencies(${PROJECT_NAME} stdex_download)
@@ -165,7 +165,7 @@ IF(NOT PYBIND_EXTERNAL_BUILD)
     add_dependencies(${PROJECT_NAME}_python stdex_download)
     add_dependencies(${PROJECT_NAME}_python python_download)
 ENDIF()
-    
+
 if(PYBIND_SANDBOX)
     file(GLOB files_private_sandbox_sources ${CMAKE_CURRENT_SOURCE_DIR}/sandbox/*.cpp)
 

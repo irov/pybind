@@ -77,9 +77,9 @@ namespace pybind
 
             method_adapter_interface * adapter = mct->iadapter;
 
-            DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( kernel, scope->get_name(), adapter->getName(), _args, _kwds );
+            DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), _args, _kwds );
             PyObject * py_value = adapter->call( kernel, impl, scope, _args, _kwds );
-            DEBUG_PYBIND_NOTIFY_END_BIND_CALL( kernel, scope->get_name(), adapter->getName(), _args, _kwds );
+            DEBUG_PYBIND_NOTIFY_END_BIND_CALL( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), _args, _kwds );
 
             return py_value;
         }

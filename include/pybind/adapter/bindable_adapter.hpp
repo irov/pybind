@@ -1,16 +1,16 @@
 #pragma once
 
-#include "pybind/adapter_interface.hpp"
+#include "pybind/adapter/base_adapter.hpp"
 
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
     class bindable_adapter_interface
-        : public adapter_interface
+        : public base_adapter_interface
     {
     public:
         bindable_adapter_interface( const char * _name )
-            : m_name( _name )
+            : base_adapter_interface( _name )
         {
         }
 
@@ -19,16 +19,7 @@ namespace pybind
         }
 
     public:
-        inline const char * getName() const
-        {
-            return m_name;
-        }
-
-    public:
         virtual void clear( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope ) = 0;
-
-    protected:
-        const char * m_name;
     };
     //////////////////////////////////////////////////////////////////////////
     typedef intrusive_ptr<bindable_adapter_interface> bindable_adapter_interface_ptr;

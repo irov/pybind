@@ -1,6 +1,6 @@
 #pragma once
 
-#include "pybind/adapter_interface.hpp"
+#include "pybind/adapter/base_adapter.hpp"
 
 #include "pybind/call/method_call.hpp"
 #include "pybind/call/method_proxy_call.hpp"
@@ -11,11 +11,11 @@ namespace pybind
     typedef intrusive_ptr<class class_type_scope_interface> class_type_scope_interface_ptr;
     //////////////////////////////////////////////////////////////////////////
     class number_binary_adapter_interface
-        : public adapter_interface
+        : public base_adapter_interface
     {
     public:
         number_binary_adapter_interface( const char * _name )
-            : m_name( _name )
+            : base_adapter_interface( _name )
         {
         }
 
@@ -24,16 +24,7 @@ namespace pybind
         }
 
     public:
-        inline const char * getName() const
-        {
-            return m_name;
-        }
-
-    public:
         virtual PyObject * call( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope, PyObject * _value, bool _rotate ) = 0;
-
-    protected:
-        const char * m_name;
     };
     //////////////////////////////////////////////////////////////////////////
     typedef intrusive_ptr<number_binary_adapter_interface> number_binary_adapter_interface_ptr;
