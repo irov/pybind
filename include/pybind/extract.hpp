@@ -141,7 +141,7 @@ namespace pybind
 
             const char * type_name = tinfo.name();
 
-            pybind::throw_exception( "extract_throw: extract invalid '%s:%s' not cast to '%s'"
+            pybind::throw_exception( "extract_throw<T>: extract invalid '%s:%s' not cast to '%s'"
                 , _kernel->object_repr( _obj ).c_str()
                 , _kernel->object_repr_type( _obj ).c_str()
                 , type_name
@@ -187,7 +187,7 @@ namespace pybind
 
             if( extract_value( _kernel, _obj, value, true ) == false )
             {
-                _kernel->log( "extract_value<T>: extract invalid '%s:%s' not cast to 'uint32_t'"
+                _kernel->log( "extract_value<T>: extract invalid '%s:%s' not cast to 'uint32_t' [enum]"
                     , _kernel->object_repr( _obj ).c_str()
                     , _kernel->object_repr_type( _obj ).c_str()
                 );
