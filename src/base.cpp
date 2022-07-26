@@ -39,7 +39,10 @@ namespace pybind
         : m_kernel( _kernel )
         , m_obj( _obj )
     {
-        m_kernel->incref( m_obj );
+        if( m_kernel != nullptr )
+        {
+            m_kernel->incref( m_obj );
+        }
     }
     //////////////////////////////////////////////////////////////////////////
     base::base( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed_t )
