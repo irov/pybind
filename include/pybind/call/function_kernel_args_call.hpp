@@ -68,7 +68,7 @@ namespace pybind
                 return nullptr;
             }
 
-            if constexpr( std::is_same<typename f_info::last3_param, const pybind::object &>::value == true )
+            if constexpr( std::is_same<typename f_info::template reverse_iterator_param<2>, const pybind::object &>::value == true )
             {
                 PyObject * py_cb = _kernel->tuple_getitem( _arg, fn_arity - 3 );
 
