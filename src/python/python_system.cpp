@@ -867,17 +867,23 @@ namespace pybind
 #   if PYBIND_PYTHON_VERSION < 300
         if( PyInt_Check( _obj ) )
         {
-            _value = (T)PyInt_AS_LONG( _obj );
+            long value = PyInt_AS_LONG( _obj );
+
+            _value = (T)value;
         }
         else
 #	endif
             if( PyLong_Check( _obj ) )
             {
-                _value = (T)PyLong_AsUnsignedLong( _obj );
+                unsigned PY_LONG_LONG value = PyLong_AsUnsignedLongLong( _obj );
+
+                _value = (T)value;
             }
             else if( PyFloat_Check( _obj ) )
             {
-                _value = (T)PyFloat_AS_DOUBLE( _obj );
+                double value = PyFloat_AS_DOUBLE( _obj );
+
+                _value = (T)value;
             }
             else if( PyBool_Check( _obj ) )
             {
