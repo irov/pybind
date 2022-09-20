@@ -110,12 +110,12 @@ SOURCE_GROUP(mutex FILES ${files_public_mutex_headers})
 
 INCLUDE_DIRECTORIES(${PROJECT_NAME} include)
 
-if(PYBIND_PYTHON_INCLUDE_PATH)
-    include_directories(${PYBIND_PYTHON_INCLUDE_PATH})
-endif()
-
 if(PYBIND_PYTHON_CONFIG_INCLUDE_PATH)
     include_directories(${PYBIND_PYTHON_CONFIG_INCLUDE_PATH})
+endif()
+
+if(PYBIND_PYTHON_INCLUDE_PATH)
+    include_directories(${PYBIND_PYTHON_INCLUDE_PATH})
 endif()
 
 if(PYBIND_STDEX_INCLUDE_PATH)

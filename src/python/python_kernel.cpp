@@ -78,8 +78,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::finalize()
     {
-        Py_Finalize();
-
 #ifdef PYBIND_STL_SUPPORT
         pybind::finalize_stl_type_cast( this );
 #endif
@@ -117,6 +115,8 @@ namespace pybind
         m_members.finalize();
         m_methods.finalize();
         m_pods.finalize();
+
+        Py_Finalize();
     }
     //////////////////////////////////////////////////////////////////////////
     allocator_interface * python_kernel::get_allocator() const
