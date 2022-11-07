@@ -45,14 +45,14 @@ namespace pybind
     dict::~dict()
     {
     }
-    //////////////////////////////////////////////////////////////////////////    
+    //////////////////////////////////////////////////////////////////////////
     dict & dict::operator = ( std::nullptr_t )
     {
         this->base::operator = ( nullptr );
 
         return *this;
     }
-    //////////////////////////////////////////////////////////////////////////    
+    //////////////////////////////////////////////////////////////////////////
     dict & dict::operator = ( const dict & _obj )
     {
         this->base::operator = ( _obj );
@@ -85,6 +85,13 @@ namespace pybind
     detail::extract_operator_t dict::get_i( const detail::import_operator_t & _name ) const
     {
         PyObject * py_attr = m_kernel->dict_get( m_obj, _name );
+        
+        if( py_attr == nullptr )
+        {
+            PyObject * py_none = m_kernel->ret_none();
+            
+            return detail::extract_operator_t( m_kernel, py_none, pybind::borrowed );
+        }
 
         return detail::extract_operator_t( m_kernel, py_attr );
     }
