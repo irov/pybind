@@ -41,63 +41,63 @@ namespace pybind
 
     public:
         template<class T>
-        bool exist( const T & _name ) const
+        bool exist( const T & _key ) const
         {
-            return this->exist_i( detail::import_operator_t( m_kernel, _name ) );
+            return this->exist_i( detail::import_operator_t( m_kernel, _key ) );
         }
 
         template<class T>
-        detail::extract_operator_t get( const T & _name ) const
+        detail::extract_operator_t get( const T & _key ) const
         {
-            return this->get_i( detail::import_operator_t( m_kernel, _name ) );
+            return this->get_i( detail::import_operator_t( m_kernel, _key ) );
         }
 
         template<class K, class T>
-        T get_default( const K & _name, const T & _default ) const
+        T get_default( const K & _key, const T & _default ) const
         {
-            if( this->exist( _name ) == false )
+            if( this->exist( _key ) == false )
             {
                 return _default;
             }
 
-            T value = this->get_i( detail::import_operator_t( m_kernel, _name ) );
+            T value = this->get_i( detail::import_operator_t( m_kernel, _key ) );
 
             return value;
         }
 
         template<class K, class V>
-        void set( const K & _name, const V & _value )
+        void set( const K & _key, const V & _value )
         {
-            this->set_i( detail::import_operator_t( m_kernel, _name ) ) = _value;
+            this->set_i( detail::import_operator_t( m_kernel, _key ) ) = _value;
         }
 
     public:
         template<class T>
-        detail::set_dict_operator_t operator [] ( const T & _name )
+        detail::set_dict_operator_t operator [] ( const T & _key )
         {
-            return this->set_i( detail::import_operator_t( m_kernel, _name ) );
+            return this->set_i( detail::import_operator_t( m_kernel, _key ) );
         }
 
         template<class T>
-        detail::extract_operator_t operator [] ( const T & _name ) const
+        detail::extract_operator_t operator [] ( const T & _key ) const
         {
-            return this->get_i( detail::import_operator_t( m_kernel, _name ) );
+            return this->get_i( detail::import_operator_t( m_kernel, _key ) );
         }
 
     public:
         template<class T>
-        void remove( const T & _name ) const
+        void remove( const T & _key ) const
         {
-            this->remove_i( detail::import_operator_t( m_kernel, _name ) );
+            this->remove_i( detail::import_operator_t( m_kernel, _key ) );
         }
 
     public:
-        bool exist_i( const detail::import_operator_t & _name ) const;
-        detail::extract_operator_t get_i( const detail::import_operator_t & _name ) const;
-        detail::set_dict_operator_t set_i( const detail::import_operator_t & _name );
+        bool exist_i( const detail::import_operator_t & _key ) const;
+        detail::extract_operator_t get_i( const detail::import_operator_t & _key ) const;
+        detail::set_dict_operator_t set_i( const detail::import_operator_t & _key );
 
     public:
-        void remove_i( const detail::import_operator_t & _name ) const;
+        void remove_i( const detail::import_operator_t & _key ) const;
 
     public:
         size_type size() const;

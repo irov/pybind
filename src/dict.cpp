@@ -77,33 +77,24 @@ namespace pybind
         return dict::iterator( m_kernel, m_obj, t_dict_iterator_end_tag() );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool dict::exist_i( const detail::import_operator_t & _name ) const
+    bool dict::exist_i( const detail::import_operator_t & _key ) const
     {
-        return m_kernel->dict_exist( m_obj, _name );
+        return m_kernel->dict_exist( m_obj, _key );
     }
     //////////////////////////////////////////////////////////////////////////
-    detail::extract_operator_t dict::get_i( const detail::import_operator_t & _name ) const
+    detail::extract_operator_t dict::get_i( const detail::import_operator_t & _key ) const
     {
-        PyObject * py_attr = m_kernel->dict_get( m_obj, _name );
-        
-        if( py_attr == nullptr )
-        {
-            PyObject * py_none = m_kernel->ret_none();
-            
-            return detail::extract_operator_t( m_kernel, py_none, pybind::borrowed );
-        }
-
-        return detail::extract_operator_t( m_kernel, py_attr );
+        return pybind::dict_get_i( m_kernel, m_obj, _key );
     }
     //////////////////////////////////////////////////////////////////////////
-    detail::set_dict_operator_t dict::set_i( const detail::import_operator_t & _name )
+    detail::set_dict_operator_t dict::set_i( const detail::import_operator_t & _key )
     {
-        return detail::set_dict_operator_t( m_kernel, m_obj, _name );
+        return detail::set_dict_operator_t( m_kernel, m_obj, _key );
     }
     //////////////////////////////////////////////////////////////////////////
-    void dict::remove_i( const detail::import_operator_t & _name ) const
+    void dict::remove_i( const detail::import_operator_t & _key ) const
     {
-        m_kernel->dict_remove( m_obj, _name );
+        m_kernel->dict_remove( m_obj, _key );
     }
     //////////////////////////////////////////////////////////////////////////
     dict::size_type dict::size() const
