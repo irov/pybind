@@ -845,27 +845,6 @@ namespace pybind
         return m_pytypeobject;
     }
     //////////////////////////////////////////////////////////////////////////
-    namespace detail
-    {
-        class FCharCmp
-        {
-        public:
-            FCharCmp( const char * _name )
-                : m_name( _name )
-            {
-            }
-
-        public:
-            bool operator () ( const char * _name ) const
-            {
-                return strcmp( m_name, _name ) == 0;
-            }
-
-        protected:
-            const char * m_name;
-        };
-    }
-    //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::add_method( const method_adapter_interface_ptr & _imethod )
     {
         if( m_methodCount == 256 )

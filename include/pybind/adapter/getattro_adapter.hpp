@@ -25,9 +25,6 @@ namespace pybind
 
     public:
         virtual PyObject * call( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope, PyObject * _key ) = 0;
-
-    protected:
-        const char * m_name;
     };
     //////////////////////////////////////////////////////////////////////////
     typedef intrusive_ptr<getattro_adapter_interface> getattro_adapter_interface_ptr;
