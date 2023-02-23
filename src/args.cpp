@@ -14,7 +14,7 @@ namespace pybind
         : m_kernel( _r.m_kernel )
         , m_args( _r.m_args )
     {
-        if( m_kernel != nullptr )
+        if( m_args != nullptr )
         {
             m_kernel->incref( m_args );
         }
@@ -32,7 +32,7 @@ namespace pybind
         : m_kernel( _kernel )
         , m_args( _args )
     {
-        if( m_kernel != nullptr )
+        if( m_args != nullptr )
         {
             m_kernel->incref( m_args );
         }
@@ -46,7 +46,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     args::~args()
     {
-        if( m_kernel != nullptr )
+        if( m_args != nullptr )
         {
             m_kernel->decref( m_args );
         }
@@ -54,7 +54,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     args & args::operator = ( const args & _args )
     {
-        if( m_kernel != nullptr )
+        if( m_args != nullptr )
         {
             m_kernel->decref( m_args );
         }
@@ -62,7 +62,7 @@ namespace pybind
         m_kernel = _args.m_kernel;
         m_args = _args.ptr();
 
-        if( m_kernel != nullptr )
+        if( m_args != nullptr )
         {
             m_kernel->incref( m_args );
         }

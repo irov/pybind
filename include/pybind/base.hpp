@@ -1,13 +1,14 @@
 #pragma once
 
 #include "pybind/types.hpp"
+#include "pybind/exports.hpp"
 #include "pybind/string_view.hpp"
 
 namespace pybind
 {
     class kernel_interface;
 
-    class base
+    class PYBIND_API base
     {
     public:
         base();

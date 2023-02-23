@@ -274,6 +274,8 @@ void main()
         test_function( kernel, m, i );
     }
 
+    syspath.reset();
+
     kernel->module_fini( module );
     kernel->collect();
     kernel->destroy();

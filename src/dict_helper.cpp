@@ -11,7 +11,7 @@ namespace pybind
             , m_dict( _dict )
             , m_key( _key )
         {
-            if( m_kernel != nullptr )
+            if( m_key != nullptr )
             {
                 m_kernel->incref( m_key );
             }
@@ -22,7 +22,7 @@ namespace pybind
             , m_dict( _r.m_dict )
             , m_key( _r.m_key )
         {
-            if( m_kernel != nullptr )
+            if( m_key != nullptr )
             {
                 m_kernel->incref( m_key );
             }
@@ -40,7 +40,7 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         set_dict_operator_t::~set_dict_operator_t()
         {
-            if( m_kernel != nullptr )
+            if( m_key != nullptr )
             {
                 m_kernel->decref( m_key );
             }
@@ -52,7 +52,7 @@ namespace pybind
             this->m_dict = _op.m_dict;
             this->m_key = _op.m_key;
 
-            if( m_kernel != nullptr )
+            if( m_key != nullptr )
             {
                 m_kernel->incref( m_key );
             }

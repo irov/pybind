@@ -15,7 +15,7 @@ namespace pybind
                 : m_kernel( _r.m_kernel )
                 , m_obj( _r.m_obj )
             {
-                if( m_kernel != nullptr )
+                if( m_obj != nullptr )
                 {
                     m_kernel->incref( m_obj );
                 }
@@ -33,7 +33,7 @@ namespace pybind
                 : m_kernel( _kernel )
                 , m_obj( _obj )
             {
-                if( m_kernel != nullptr )
+                if( m_obj != nullptr )
                 {
                     m_kernel->incref( m_obj );
                 }
@@ -47,7 +47,7 @@ namespace pybind
 
             ~extract_operator_t()
             {
-                if( m_kernel != nullptr )
+                if( m_obj != nullptr )
                 {
                     m_kernel->decref( m_obj );
                 }

@@ -14,7 +14,7 @@ namespace pybind
         : m_kernel( _base.m_kernel )
         , m_obj( _base.m_obj )
     {
-        if( m_kernel != nullptr )
+        if( m_obj != nullptr )
         {
             m_kernel->incref( m_obj );
         }
@@ -30,7 +30,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     string_view::~string_view()
     {
-        if( m_kernel != nullptr )
+        if( m_obj != nullptr )
         {
             m_kernel->decref( m_obj );
         }
@@ -62,4 +62,5 @@ namespace pybind
 
         return str;
     }
+    //////////////////////////////////////////////////////////////////////////
 }
