@@ -15,7 +15,7 @@ namespace pybind
         : m_kernel( _base.m_kernel )
         , m_obj( _base.m_obj )
     {
-        if( m_kernel != nullptr )
+        if( m_obj != nullptr )
         {
             m_kernel->incref( m_obj );
         }
@@ -39,7 +39,7 @@ namespace pybind
         : m_kernel( _kernel )
         , m_obj( _obj )
     {
-        if( m_kernel != nullptr )
+        if( m_obj != nullptr )
         {
             m_kernel->incref( m_obj );
         }
@@ -59,7 +59,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     base::~base()
     {
-        if( m_kernel != nullptr )
+        if( m_obj != nullptr )
         {
             m_kernel->decref( m_obj );
 #ifndef NDEBUG
@@ -70,7 +70,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     base & base::operator = ( std::nullptr_t )
     {
-        if( m_kernel != nullptr )
+        if( m_obj != nullptr )
         {
             m_kernel->decref( m_obj );
         }
@@ -83,7 +83,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     base & base::operator = ( const base & _obj )
     {
-        if( m_kernel != nullptr )
+        if( m_obj != nullptr )
         {
             m_kernel->decref( m_obj );
         }
@@ -91,7 +91,7 @@ namespace pybind
         m_kernel = _obj.m_kernel;
         m_obj = _obj.ptr();
 
-        if( m_kernel != nullptr )
+        if( m_obj != nullptr )
         {
             m_kernel->incref( m_obj );
         }
@@ -101,7 +101,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     base & base::operator = ( base && _obj )
     {
-        if( m_kernel != nullptr )
+        if( m_obj != nullptr )
         {
             m_kernel->decref( m_obj );
         }
@@ -127,7 +127,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * base::ret() const
     {
-        if( m_kernel != nullptr )
+        if( m_obj != nullptr )
         {
             m_kernel->incref( m_obj );
         }
@@ -137,7 +137,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void base::reset()
     {
-        if( m_kernel != nullptr )
+        if( m_obj != nullptr )
         {
             m_kernel->decref( m_obj );
             m_obj = nullptr;

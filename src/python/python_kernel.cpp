@@ -109,7 +109,7 @@ namespace pybind
         }
 
         m_class_type_dummy = nullptr;
-
+        
         m_functions.finalize();
         m_functors.finalize();
         m_members.finalize();
@@ -1029,30 +1029,6 @@ namespace pybind
         return pybind::get_attrstring( _obj, _attr );
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * python_kernel::dictobject_new( PyObject * _dict )
-    {
-        PyObject * py_name = PyBytes_FromString( "" );
-
-        PyObject * py_bases = PyTuple_New( 1 );
-        PyTuple_SetItem( py_bases, 0, (PyObject *)&PyDict_Type );
-
-        PyObject * py_args = PyTuple_Pack( 3, py_name, py_bases, _dict );
-        Py_DECREF( py_name );
-        Py_DECREF( py_bases );
-
-        PyObject * py_typeobject = PyType_Type.tp_call( (PyObject *)&PyType_Type, py_args, 0 );
-
-        Py_DECREF( py_args );
-
-        PyObject * py_self = PyObject_CallObject( py_typeobject, nullptr );
-
-        Py_DECREF( py_typeobject );
-
-        PyDict_Merge( py_self, _dict, 1 );
-
-        return py_self;
-    }
-    //////////////////////////////////////////////////////////////////////////
     string_view python_kernel::object_str( PyObject * _obj )
     {
         PyObject * py_str = pybind::object_str( _obj );
@@ -1092,6 +1068,11 @@ namespace pybind
         }
 
         return string_view( this, py_repr );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::get_none()
+    {
+        return pybind::get_none();
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::ret_none()

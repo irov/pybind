@@ -14,11 +14,11 @@ namespace pybind
         {
         }
         //////////////////////////////////////////////////////////////////////////
-        import_operator_t::import_operator_t( const import_operator_t  & _op )
+        import_operator_t::import_operator_t( const import_operator_t & _op )
             : m_kernel( _op.m_kernel )
             , m_obj( _op.m_obj )
         {
-            if( m_kernel != nullptr )
+            if( m_obj != nullptr )
             {
                 m_kernel->incref( m_obj );
             }
@@ -42,7 +42,7 @@ namespace pybind
             : m_kernel( _kernel )
             , m_obj( _value )
         {
-            if( m_kernel != nullptr )
+            if( m_obj != nullptr )
             {
                 m_kernel->incref( m_obj );
             }
@@ -56,7 +56,7 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         import_operator_t::~import_operator_t()
         {
-            if( m_kernel != nullptr )
+            if( m_obj != nullptr )
             {
                 m_kernel->decref( m_obj );
             }
@@ -71,5 +71,6 @@ namespace pybind
         {
             return m_obj;
         }
+        //////////////////////////////////////////////////////////////////////////
     }
 }

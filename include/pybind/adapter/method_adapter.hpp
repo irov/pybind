@@ -39,7 +39,7 @@ namespace pybind
 
             C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
-            PyObject *ret = method_call<C, F>::call( _kernel, self, m_fn, _args );
+            PyObject * ret = method_call<C, F>::call( _kernel, self, m_fn, _args );
 
             return ret;
         }

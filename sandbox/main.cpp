@@ -180,9 +180,36 @@ void test_function( pybind::kernel_interface * _kernel, PyObject * m, uint32_t i
     _kernel->call_method( m, "go", "(i)", i );
 }
 
+class malloc_allocator
+    : public pybind::allocator_interface
+{
+public:
+    void * malloc( size_t _size ) override
+    {
+        return ::malloc( _size );
+    }
+
+    void * calloc( size_t _num, size_t _size ) override
+    {
+        return ::calloc( _num, _size );
+    }
+
+    void * realloc( void * _ptr, size_t _size ) override
+    {
+        return ::realloc( _ptr, _size );
+    }
+
+    void free( void * _ptr ) override
+    {
+        ::free( _ptr );
+    }
+};;
+
 void main()
 {
-    pybind::kernel_interface * kernel = pybind::initialize( nullptr, L"", false, false, true );
+    malloc_allocator * a = new malloc_allocator;
+
+    pybind::kernel_interface * kernel = pybind::initialize( a, L"", false, false, true );
 
     pybind::list syspath( kernel );
     syspath.append( "d:/Projects/Mengine/dependencies/pybind/sandbox/" );
@@ -246,6 +273,10 @@ void main()
         test_tuple( kernel, i );
         test_function( kernel, m, i );
     }
+
+    kernel->module_fini( module );
+    kernel->collect();
+    kernel->destroy();
 
     printf( "done" );
 }

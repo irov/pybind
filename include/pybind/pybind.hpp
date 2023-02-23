@@ -13,7 +13,6 @@
 #include "pybind/tuple.hpp"
 #include "pybind/list.hpp"
 #include "pybind/dict.hpp"
-#include "pybind/dictobject.hpp"
 #include "pybind/enum.hpp"
 #include "pybind/module.hpp"
 #include "pybind/pickle.hpp"

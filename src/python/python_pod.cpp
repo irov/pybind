@@ -394,7 +394,7 @@ namespace pybind
             }
         }
 
-        Py_INCREF( (PyObject *)py_pybind_type );
+        pybind::incref( (PyObject *)py_pybind_type );
 
         return py_pybind_type;
     }

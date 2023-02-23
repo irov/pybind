@@ -180,11 +180,12 @@ namespace pybind
         PyObject * py_get = PyCFunction_New( &m_getmethod, (PyObject*)py_member );
         PyObject * py_set = PyCFunction_New( &m_setmethod, (PyObject*)py_member );
 
-        Py_DecRef( (PyObject *)py_member );
+        pybind::decref( (PyObject *)py_member );
 
         PyObject * py_result = PyObject_CallFunction( (PyObject*)&PyProperty_Type, const_cast<char *>("OOss"), py_get, py_set, 0, "member_type_scope" );
-        Py_DecRef( py_get );
-        Py_DecRef( py_set );
+
+        pybind::decref( py_get );
+        pybind::decref( py_set );
 
         return py_result;
     }

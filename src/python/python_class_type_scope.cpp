@@ -193,7 +193,7 @@ namespace pybind
                 , kernel->object_str( _obj ).c_str()
             );
 
-            Py_INCREF( Py_NotImplemented );
+            pybind::incref( Py_NotImplemented );
 
             return Py_NotImplemented;
         }
@@ -245,7 +245,7 @@ namespace pybind
             bool test_result;
             if( adapter->compare( kernel, _obj, impl, scope, _compare, pybind_op, test_result ) == false )
             {
-                Py_INCREF( Py_NotImplemented );
+                pybind::incref( Py_NotImplemented );
 
                 return Py_NotImplemented;
             }
@@ -444,7 +444,7 @@ namespace pybind
 
             if( impl == nullptr )
             {
-                Py_DECREF( py_self );
+                pybind::decref( py_self );
 
                 return nullptr;
             }
@@ -636,7 +636,7 @@ namespace pybind
         }
 
         m_module = py_module;
-        Py_INCREF( m_module );
+        pybind::incref( m_module );
 
 #if PYBIND_PYTHON_VERSION < 300
         PyObject * py_name = PyString_InternFromString( m_name );
@@ -650,7 +650,7 @@ namespace pybind
         {
             Py_ssize_t py_basesCount = (Py_ssize_t)m_basesCount;
             py_bases = PyTuple_New( py_basesCount );
-            Py_ssize_t index = 0;
+            uint32_t index = 0;
 
             for( uint32_t i = 0; i != m_basesCount; ++i )
             {
@@ -658,8 +658,7 @@ namespace pybind
 
                 PyTypeObject * py_base = mc.scope->get_typeobject();
 
-                Py_INCREF( (PyObject *)py_base );
-                PyTuple_SetItem( py_bases, index++, (PyObject*)py_base );
+                pybind::tuple_setitem( py_bases, index++, (PyObject *)py_base );
 
                 const smart_pointer_adapter_interface_ptr & base_smart_pointer = mc.scope->get_smart_pointer();
 
@@ -691,18 +690,22 @@ namespace pybind
                 );
             }
 
-            PyTuple_SetItem( py_bases, 0, (PyObject *)py_pybind_type );
+            pybind::tuple_setitem( py_bases, 0, (PyObject *)py_pybind_type );
+
+            pybind::decref( (PyObject *)py_pybind_type );
         }
 
         PyObject * py_dict = PyDict_New();
 
         PyObject * py_args = PyTuple_Pack( 3, py_name, py_bases, py_dict );
-        Py_DECREF( py_name );
-        Py_DECREF( py_bases );
-        Py_DECREF( py_dict );
+
+        pybind::decref( py_name );
+        pybind::decref( py_bases );
+        pybind::decref( py_dict );
 
         m_pytypeobject = (PyTypeObject *)PyType_Type.tp_call( (PyObject *)&PyType_Type, py_args, 0 );
-        Py_DECREF( py_args );
+        
+        pybind::decref( py_args );
 
         if( m_pytypeobject == nullptr )
         {
@@ -751,14 +754,17 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::finalize()
     {
-        pybind::module_removeobject( m_module, m_name );
-        Py_DECREF( m_module );
+        if( m_module != nullptr )
+        {
+            pybind::module_removeobject( m_module, m_name );
 
-        PyDict_Clear( m_pytypeobject->tp_dict );
+            pybind::decref( m_module );
+            m_module = nullptr;
+        }
 
         m_kernel->remove_class_scope_type( python_class_type_scope_ptr( this ) );
 
-        Py_DECREF( (PyObject*)m_pytypeobject );
+        pybind::decref( (PyObject *)m_pytypeobject );
 
         for( uint32_t i = 0; i != m_basesCount; ++i )
         {
@@ -790,6 +796,19 @@ namespace pybind
         m_number_sub = nullptr;
         m_number_mul = nullptr;
         m_number_div = nullptr;
+
+        m_number_none = nullptr;
+
+        if( m_number_multy != nullptr )
+        {
+            for( uint32_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
+            {
+                m_number_multy->adds[index] = nullptr;
+                m_number_multy->subs[index] = nullptr;
+                m_number_multy->muls[index] = nullptr;
+                m_number_multy->divs[index] = nullptr;
+            }
+        }
 
         m_smart_pointer = nullptr;
         m_bindable = nullptr;
@@ -861,8 +880,10 @@ namespace pybind
 
         const char * name = _imethod->getName();
 
-        if( PyDict_SetItemString( m_pytypeobject->tp_dict, name, py_type_method ) == -1 )
+        if( pybind::dict_setstring( m_pytypeobject->tp_dict, name, py_type_method ) == false )
         {
+            pybind::decref( py_type_method );
+
             pybind::throw_exception( "scope '%s' add_method '%s' python error"
                 , this->m_name
                 , name
@@ -916,8 +937,10 @@ namespace pybind
 
         const char * name = _imember->getName();
 
-        if( PyDict_SetItemString( m_pytypeobject->tp_dict, name, py_member ) == -1 )
+        if( pybind::dict_setstring( m_pytypeobject->tp_dict, name, py_member ) == false )
         {
+            pybind::decref( py_member );
+
             pybind::throw_exception( "scope '%s' add_member '%s' python error"
                 , this->m_name
                 , name
@@ -926,7 +949,7 @@ namespace pybind
             return;
         }
 
-        Py_DECREF( py_member );
+        pybind::decref( py_member );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_convert( const convert_adapter_interface_ptr & _iconvert )

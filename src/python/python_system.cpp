@@ -275,8 +275,6 @@ namespace pybind
     void module_fini( PyObject * _module )
     {
         _PyModule_Clear( _module );
-
-        pybind::decref( _module );
     }
     //////////////////////////////////////////////////////////////////////////
 #else
@@ -442,7 +440,7 @@ namespace pybind
 
         PyObject * result = pybind::ask_native( _obj, value );
 
-        Py_DECREF( value );
+        pybind::decref( value );
 
         return result;
     }
@@ -453,12 +451,12 @@ namespace pybind
 
         if( method == nullptr )
         {
-            Py_RETURN_NONE;
+            return pybind::ret_none();
         }
 
         PyObject * result = pybind::ask_va( method, _format, _va );
 
-        Py_DECREF( method );
+        pybind::decref( method );
 
         return result;
     }
@@ -469,12 +467,12 @@ namespace pybind
 
         if( method == nullptr )
         {
-            Py_RETURN_NONE;
+            return pybind::ret_none();
         }
 
         PyObject * result = pybind::ask_native( method, _args );
 
-        Py_DECREF( method );
+        pybind::decref( method );
 
         return result;
     }
@@ -488,7 +486,7 @@ namespace pybind
             return;
         }
 
-        Py_DECREF( res );
+        pybind::decref( res );
     }
     //////////////////////////////////////////////////////////////////////////
     void call( PyObject * _obj, const char * _format, ... )
@@ -520,7 +518,7 @@ namespace pybind
             return;
         }
 
-        Py_DECREF( res );
+        pybind::decref( res );
     }
     //////////////////////////////////////////////////////////////////////////
     void call_va( PyObject * _obj, const char * _format, va_list _va )
@@ -532,19 +530,19 @@ namespace pybind
             return;
         }
 
-        Py_DECREF( res );
+        pybind::decref( res );
     }
     //////////////////////////////////////////////////////////////////////////
     void call_method_va( PyObject * _obj, const char * _method, const char * _format, va_list _va )
     {
         PyObject * res = pybind::ask_method_va( _obj, _method, _format, _va );
 
-        if( res == NULL )
+        if( res == nullptr )
         {
             return;
         }
 
-        Py_DECREF( res );
+        pybind::decref( res );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * exec_file( const char * _code, PyObject * _globals, PyObject * _locals )
@@ -598,10 +596,20 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void incref( PyObject * _obj )
     {
-        Py_XINCREF( _obj );
+        Py_INCREF( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
     void decref( PyObject * _obj )
+    {
+        Py_DECREF( _obj );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void xincref( PyObject * _obj )
+    {
+        Py_XINCREF( _obj );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void xdecref( PyObject * _obj )
     {
         Py_XDECREF( _obj );
     }
@@ -621,6 +629,16 @@ namespace pybind
         int result = PyObject_TypeCheck( _obj, _type );
 
         return result == 1;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool is_none( PyObject * _obj )
+    {
+        return _obj == Py_None;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * get_none()
+    {
+        return Py_None;
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * ret_none()
@@ -662,19 +680,14 @@ namespace pybind
         return py_false;
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * get_none()
-    {
-        return Py_None;
-    }
-    //////////////////////////////////////////////////////////////////////////
     PyObject * get_bool( bool _value )
     {
         if( _value == true )
         {
-            return Py_True;
+            return pybind::get_true();
         }
 
-        return Py_False;
+        return pybind::get_false();
     }
     //////////////////////////////////////////////////////////////////////////
     bool has_attr( PyObject * _obj, PyObject * _attr )
@@ -716,8 +729,6 @@ namespace pybind
             return false;
         }
 
-        //Py_XDECREF( _value );
-
         return true;
     }
     //////////////////////////////////////////////////////////////////////////
@@ -731,8 +742,6 @@ namespace pybind
 
             return false;
         }
-
-        //Py_XDECREF( _value );
 
         return true;
     }
@@ -1081,6 +1090,7 @@ namespace pybind
     PyObject * list_new( uint32_t _size )
     {
         Py_ssize_t py_size = (Py_ssize_t)_size;
+
         PyObject * obj = PyList_New( py_size );
 
         return obj;
@@ -1110,6 +1120,7 @@ namespace pybind
     PyObject * list_getitem( PyObject * _obj, uint32_t _index )
     {
         Py_ssize_t py_index = (Py_ssize_t)_index;
+
         PyObject * obj = PyList_GetItem( _obj, py_index );
 
         if( obj == nullptr )
@@ -1123,6 +1134,7 @@ namespace pybind
     bool list_insert( PyObject * _obj, uint32_t _index, PyObject * _item )
     {
         Py_ssize_t py_index = (Py_ssize_t)_index;
+
         int res = PyList_Insert( _obj, py_index, _item );
 
         if( res != 0 )
@@ -1131,8 +1143,6 @@ namespace pybind
 
             return false;
         }
-
-        //Py_DECREF( _item );
 
         return true;
     }
@@ -1153,7 +1163,10 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool list_setitem( PyObject * _obj, uint32_t _index, PyObject * _item )
     {
+        pybind::incref( _item );
+
         Py_ssize_t py_index = (Py_ssize_t)_index;
+
         int res = PyList_SetItem( _obj, py_index, _item );
 
         if( res != 0 )
@@ -1162,8 +1175,6 @@ namespace pybind
 
             return false;
         }
-
-        Py_INCREF( _item );
 
         return true;
     }
@@ -1178,8 +1189,6 @@ namespace pybind
 
             return false;
         }
-
-        //Py_DECREF( _item );
 
         return true;
     }
@@ -1218,10 +1227,10 @@ namespace pybind
                 continue;
             }
 
-            Py_DECREF( py_value );
+            pybind::decref( py_value );
         }
 
-        Py_DECREF( py_dir );
+        pybind::decref( py_dir );
 
         return py_dict;
     }
@@ -1251,8 +1260,6 @@ namespace pybind
             return false;
         }
 
-        //Py_DECREF( _value );
-
         return true;
     }
     //////////////////////////////////////////////////////////////////////////
@@ -1266,8 +1273,6 @@ namespace pybind
 
             return false;
         }
-
-        //Py_DECREF( _value );
 
         return true;
     }
@@ -1332,7 +1337,7 @@ namespace pybind
 
         bool result = pybind::dict_exist( _dict, kv );
 
-        Py_DECREF( kv );
+        pybind::decref( kv );
 
         return result;
     }
@@ -1370,6 +1375,8 @@ namespace pybind
             return false;
         }
 
+        pybind::incref( _value );
+
         Py_ssize_t py_index = (Py_ssize_t)_index;
 
         int res = PyTuple_SetItem( _tuple, py_index, _value );
@@ -1380,8 +1387,6 @@ namespace pybind
 
             return false;
         }
-
-        Py_INCREF( _value );
 
         return true;
     }
@@ -1534,7 +1539,7 @@ namespace pybind
         {
             pybind::check_error();
 
-            Py_XDECREF( modtraceback );
+            pybind::decref( modtraceback );
 
             _buffer[0] = '\0';
             *_lineno = 0;
@@ -1548,8 +1553,8 @@ namespace pybind
         {
             pybind::check_error();
 
-            Py_XDECREF( function );
-            Py_XDECREF( modtraceback );
+            pybind::decref( function );
+            pybind::decref( modtraceback );
 
             _buffer[0] = '\0';
             *_lineno = 0;
@@ -1566,9 +1571,9 @@ namespace pybind
 
         *_lineno = (uint32_t)PyNumber_AsSsize_t( int_stackLineno, nullptr );
 
-        Py_XDECREF( result );
-        Py_XDECREF( function );
-        Py_XDECREF( modtraceback );
+        pybind::decref( result );
+        pybind::decref( function );
+        pybind::decref( modtraceback );
 
         return true;
     }
@@ -1597,7 +1602,7 @@ namespace pybind
         {
             pybind::check_error();
 
-            Py_XDECREF( modtraceback );
+            pybind::decref( modtraceback );
 
             _buffer[0] = '\0';
 
@@ -1610,25 +1615,32 @@ namespace pybind
         {
             pybind::check_error();
 
-            Py_XDECREF( function );
-            Py_XDECREF( modtraceback );
+            pybind::decref( function );
+            pybind::decref( modtraceback );
 
             _buffer[0] = '\0';
 
             return false;
         }
 
-        if( result == Py_None )
+        if( pybind::is_none( result ) == true )
         {
+            pybind::decref( result );
+            pybind::decref( function );
+            pybind::decref( modtraceback );
+
+            _buffer[0] = '\0';
+
             return false;
         }
 
         char * sresult = PyBytes_AsString( result );
         strncpy( _buffer, sresult, _maxlen );
         _buffer[_maxlen - 1] = '\0';
-        Py_XDECREF( result );
-        Py_XDECREF( function );
-        Py_XDECREF( modtraceback );
+
+        pybind::decref( result );
+        pybind::decref( function );
+        pybind::decref( modtraceback );
 
         return true;
     }
@@ -1825,11 +1837,6 @@ namespace pybind
         scope->type_initialize( type );
 
         return true;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    bool is_none( PyObject * _obj )
-    {
-        return _obj == Py_None;
     }
     //////////////////////////////////////////////////////////////////////////
     bool bool_check( PyObject * _obj )

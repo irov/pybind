@@ -8,7 +8,7 @@ namespace pybind
     }
     //////////////////////////////////////////////////////////////////////////
     tuple::tuple( kernel_interface * _kernel )
-        : pybind::object( _kernel, _kernel->tuple_new( 0 ) )
+        : pybind::object( _kernel, _kernel->tuple_new( 0 ), pybind::borrowed )
     {
     }
     //////////////////////////////////////////////////////////////////////////
@@ -17,7 +17,7 @@ namespace pybind
     }
     //////////////////////////////////////////////////////////////////////////
     tuple::tuple( const tuple & _tuple )
-        : pybind::object( _tuple.kernel(), _tuple.ptr() )
+        : pybind::object( _tuple )
     {
     }
     //////////////////////////////////////////////////////////////////////////

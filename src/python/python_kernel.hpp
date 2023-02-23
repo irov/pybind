@@ -175,11 +175,11 @@ namespace pybind
         bool has_attrstring( PyObject * _obj, const char * _attr ) override;
         PyObject * get_attrstring( PyObject * _obj, const char * _attr ) override;
 
-        PyObject * dictobject_new( PyObject * _dict ) override;
         string_view object_str( PyObject * _obj ) override;
         string_view object_repr( PyObject * _obj ) override;
         string_view object_repr_type( PyObject * _obj ) override;
 
+        PyObject * get_none() override;
         PyObject * ret_none() override;
 
         bool extract_bool( PyObject * _obj, bool & _value ) override;

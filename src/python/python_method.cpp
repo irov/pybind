@@ -20,6 +20,7 @@ namespace pybind
     struct py_method_caller_type
     {
         PyObject_HEAD
+
             method_adapter_interface * iadapter;
         PyObject * self;
     };
@@ -30,7 +31,7 @@ namespace pybind
 
         factorable::intrusive_ptr_release( mct->iadapter );
 
-        Py_DECREF( mct->self );
+        pybind::decref( mct->self );
 
         PyObject_Free( _obj );
     }
@@ -114,7 +115,7 @@ namespace pybind
     {
         if( _obj == nullptr )
         {
-            Py_INCREF( (PyObject *)_descr );
+            pybind::incref( (PyObject *)_descr );
             *_pres = (PyObject *)_descr;
 
             return 1;
@@ -150,7 +151,7 @@ namespace pybind
 
         factorable::intrusive_ptr_setup( mct->iadapter, _descr->iadapter );
 
-        Py_INCREF( _obj );
+        pybind::incref( _obj );
         mct->self = _obj;
 
         return (PyObject*)mct;
@@ -185,11 +186,11 @@ namespace pybind
     {
         py_method_generator_type * mgt = (py_method_generator_type *)_obj;
 
-        Py_DECREF( (PyObject *)mgt->method_caller_type );
+        pybind::decref( (PyObject *)mgt->method_caller_type );
 
         factorable::intrusive_ptr_release( mgt->iadapter );
 
-        Py_XDECREF( (PyObject *)mgt->classtype );
+        pybind::xdecref( (PyObject *)mgt->classtype );
 
         PyObject_Free( _obj );
     }
@@ -328,14 +329,14 @@ namespace pybind
         py_method_generator_type * generator = (py_method_generator_type *)PyType_GenericAlloc( &m_method_generator_type, 0 );
 
         generator->method_caller_type = &m_method_caller_type;
-        Py_INCREF( (PyObject *)generator->method_caller_type );
+        pybind::incref( (PyObject *)generator->method_caller_type );
 
         factorable::intrusive_ptr_setup( generator->iadapter, _ifunc.get() );
 
         if( _type != nullptr )
         {
             generator->classtype = _type;
-            Py_INCREF( (PyObject *)generator->classtype );
+            pybind::incref( (PyObject *)generator->classtype );
         }
         else
         {
