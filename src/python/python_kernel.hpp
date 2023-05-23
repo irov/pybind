@@ -165,6 +165,9 @@ namespace pybind
         uint32_t refcount( PyObject * _obj ) override;
 
         bool is_none( PyObject * _obj ) const override;
+        PyObject * get_none() override;
+        PyObject * ret_none() override;
+
         bool is_callable( PyObject * _obj ) const override;
         bool is_instanceof( PyObject * _obj, PyTypeObject * _type ) const override;
         bool test_equal( PyObject * _lhs, PyObject * _rhs ) override;
@@ -178,9 +181,6 @@ namespace pybind
         string_view object_str( PyObject * _obj ) override;
         string_view object_repr( PyObject * _obj ) override;
         string_view object_repr_type( PyObject * _obj ) override;
-
-        PyObject * get_none() override;
-        PyObject * ret_none() override;
 
         bool extract_bool( PyObject * _obj, bool & _value ) override;
         bool extract_int8( PyObject * _obj, int8_t & _value ) override;

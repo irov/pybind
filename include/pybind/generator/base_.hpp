@@ -136,11 +136,11 @@ namespace pybind
         }
 
         template<class F>
-        base_ & def_native( const char * _name, F f )
+        base_ & def_native( const char * _name, F _fn )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_native<C, F>>( _name, f );
+            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_native<C, F>>( _name, _fn );
 
             m_scope->add_method( iadapter );
 
@@ -148,11 +148,11 @@ namespace pybind
         }
 
         template<class F>
-        base_ & def_native_kernel( const char * _name, F f )
+        base_ & def_native_kernel( const char * _name, F _fn )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_native_kernel<C, F>>( _name, f );
+            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_native_kernel<C, F>>( _name, _fn );
 
             m_scope->add_method( iadapter );
 
@@ -160,11 +160,11 @@ namespace pybind
         }
 
         template<class F>
-        base_ & def_native_silent_kernel( const char * _name, F f )
+        base_ & def_native_silent_kernel( const char * _name, F _fn )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_native_kernel<C, F>>( _name, f );
+            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_native_kernel<C, F>>( _name, _fn );
 
 #ifdef PYBIND_CALL_DEBUG
             iadapter->setCallDebugSilent( true );
@@ -176,11 +176,11 @@ namespace pybind
         }
 
         template<class F>
-        base_ & def_static_native( const char * _name, F f )
+        base_ & def_static_native( const char * _name, F _fn )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_static_native<C, F>>( _name, f );
+            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_static_native<C, F>>( _name, _fn );
 
             m_scope->add_method( iadapter );
 
@@ -188,11 +188,11 @@ namespace pybind
         }
 
         template<class F>
-        base_ & def_static_native_kernel( const char * _name, F f )
+        base_ & def_static_native_kernel( const char * _name, F _fn )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_static_native_kernel<C, F>>( _name, f );
+            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_static_native_kernel<C, F>>( _name, _fn );
 
             m_scope->add_method( iadapter );
 
@@ -200,11 +200,11 @@ namespace pybind
         }
 
         template<class F>
-        base_ & def_convert( F f, void * _user )
+        base_ & def_convert( F _fn, void * _user )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            convert_adapter_interface_ptr iadapter = allocator->newT<convert_adapter<C, F>>( f, _user );
+            convert_adapter_interface_ptr iadapter = allocator->newT<convert_adapter<C, F>>( _fn, _user );
 
             m_scope->set_convert( iadapter );
 
@@ -212,11 +212,11 @@ namespace pybind
         }
 
         template<class F>
-        base_ & def_static( const char * _name, F f )
+        base_ & def_static( const char * _name, F _fn )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_function<C, F>>( _name, f );
+            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_function<C, F>>( _name, _fn );
 
             m_scope->add_method( iadapter );
 
@@ -224,11 +224,11 @@ namespace pybind
         }
 
         template<class F>
-        base_ & def_static_deprecated( const char * _name, F f, const char * _doc )
+        base_ & def_static_deprecated( const char * _name, F _fn, const char * _doc )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_function_deprecated<C, F>>( _name, f, _doc );
+            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_function_deprecated<C, F>>( _name, _fn, _doc );
 
             m_scope->add_method( iadapter );
 
@@ -236,11 +236,11 @@ namespace pybind
         }
 
         template<class F>
-        base_ & def_static_kernel( const char * _name, F f )
+        base_ & def_static_kernel( const char * _name, F _fn )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_function_kernel<C, F>>( _name, f );
+            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_function_kernel<C, F>>( _name, _fn );
 
             m_scope->add_method( iadapter );
 
@@ -248,11 +248,11 @@ namespace pybind
         }
 
         template<class F>
-        base_ & def_static_args( const char * _name, F f )
+        base_ & def_static_args( const char * _name, F _fn )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_function_args<C, F>>( _name, f );
+            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_function_args<C, F>>( _name, _fn );
 
             m_scope->add_method( iadapter );
 
@@ -260,11 +260,11 @@ namespace pybind
         }
 
         template<class P, class F>
-        base_ & def_proxy_static( const char * _name, P * _proxy, F f )
+        base_ & def_proxy_static( const char * _name, P * _proxy, F _fn )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy<C, P, F>>( _name, f, _proxy );
+            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy<C, P, F>>( _name, _fn, _proxy );
 
             m_scope->add_method( iadapter );
 
@@ -272,11 +272,11 @@ namespace pybind
         }
 
         template<class P, class F>
-        base_ & def_proxy_static( const char * _name, const stdex::intrusive_ptr<P> & _proxy, F f )
+        base_ & def_proxy_static( const char * _name, const stdex::intrusive_ptr<P> & _proxy, F _fn )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy<C, P, F>>( _name, f, _proxy.get() );
+            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy<C, P, F>>( _name, _fn, _proxy.get() );
 
             m_scope->add_method( iadapter );
 
@@ -284,11 +284,11 @@ namespace pybind
         }
 
         template<class P, class F>
-        base_ & def_proxy_static_deprecated( const char * _name, P * _proxy, F f, const char * _doc )
+        base_ & def_proxy_static_deprecated( const char * _name, P * _proxy, F _fn, const char * _doc )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_deprecated<C, P, F>>( _name, f, _proxy, _doc );
+            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_deprecated<C, P, F>>( _name, _fn, _proxy, _doc );
 
             m_scope->add_method( iadapter );
 
@@ -296,34 +296,22 @@ namespace pybind
         }
 
         template<class P, class F>
-        base_ & def_proxy_static_deprecated( const char * _name, const stdex::intrusive_ptr<P> & _proxy, F f, const char * _doc )
+        base_ & def_proxy_static_deprecated( const char * _name, const stdex::intrusive_ptr<P> & _proxy, F _fn, const char * _doc )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_deprecated<C, P, F>>( _name, f, _proxy.get(), _doc );
+            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_deprecated<C, P, F>>( _name, _fn, _proxy.get(), _doc );
             m_scope->add_method( iadapter );
 
             return *this;
         }
 
         template<class P, class F>
-        base_ & def_proxy_static_kernel( const char * _name, P * _proxy, F f )
+        base_ & def_proxy_static_kernel( const char * _name, P * _proxy, F _fn )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_kernel<C, P, F>>( _name, f, _proxy );
-
-            m_scope->add_method( iadapter );
-
-            return *this;
-        }
-
-        template<class P, class F>
-        base_ & def_proxy_static_kernel( const char * _name, const stdex::intrusive_ptr<P> & _proxy, F f )
-        {
-            allocator_interface * allocator = m_kernel->get_allocator();
-
-            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_kernel<C, P, F>>( _name, f, _proxy.get() );
+            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_kernel<C, P, F>>( _name, _fn, _proxy );
 
             m_scope->add_method( iadapter );
 
@@ -331,11 +319,11 @@ namespace pybind
         }
 
         template<class P, class F>
-        base_ & def_proxy_static_kernel_args( const char * _name, P * _proxy, F f )
+        base_ & def_proxy_static_kernel( const char * _name, const stdex::intrusive_ptr<P> & _proxy, F _fn )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_kernel_args<C, P, F>>( _name, f, _proxy );
+            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_kernel<C, P, F>>( _name, _fn, _proxy.get() );
 
             m_scope->add_method( iadapter );
 
@@ -343,11 +331,11 @@ namespace pybind
         }
 
         template<class P, class F>
-        base_ & def_proxy_static_kernel_args( const char * _name, const stdex::intrusive_ptr<P> & _proxy, F f )
+        base_ & def_proxy_static_kernel_args( const char * _name, P * _proxy, F _fn )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_kernel_args<C, P, F>>( _name, f, _proxy.get() );
+            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_kernel_args<C, P, F>>( _name, _fn, _proxy );
 
             m_scope->add_method( iadapter );
 
@@ -355,11 +343,11 @@ namespace pybind
         }
 
         template<class P, class F>
-        base_ & def_proxy_static_args( const char * _name, P * _proxy, F f )
+        base_ & def_proxy_static_kernel_args( const char * _name, const stdex::intrusive_ptr<P> & _proxy, F _fn )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_args<C, P, F>>( _name, f, _proxy );
+            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_kernel_args<C, P, F>>( _name, _fn, _proxy.get() );
 
             m_scope->add_method( iadapter );
 
@@ -367,11 +355,11 @@ namespace pybind
         }
 
         template<class P, class F>
-        base_ & def_proxy_static_args( const char * _name, const stdex::intrusive_ptr<P> & _proxy, F f )
+        base_ & def_proxy_static_args( const char * _name, P * _proxy, F _fn )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_args<C, P, F>>( _name, f, _proxy.get() );
+            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_args<C, P, F>>( _name, _fn, _proxy );
 
             m_scope->add_method( iadapter );
 
@@ -379,11 +367,11 @@ namespace pybind
         }
 
         template<class P, class F>
-        base_ & def_proxy_native( const char * _name, P * _proxy, F f )
+        base_ & def_proxy_static_args( const char * _name, const stdex::intrusive_ptr<P> & _proxy, F _fn )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_native<C, P, F>>( _name, f, _proxy );
+            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_args<C, P, F>>( _name, _fn, _proxy.get() );
 
             m_scope->add_method( iadapter );
 
@@ -391,11 +379,11 @@ namespace pybind
         }
 
         template<class P, class F>
-        base_ & def_proxy_native( const char * _name, stdex::intrusive_ptr<P> & _proxy, F f )
+        base_ & def_proxy_native( const char * _name, P * _proxy, F _fn )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_native<C, P, F>>( _name, f, _proxy.get() );
+            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_native<C, P, F>>( _name, _fn, _proxy );
 
             m_scope->add_method( iadapter );
 
@@ -403,11 +391,11 @@ namespace pybind
         }
 
         template<class P, class F>
-        base_ & def_proxy_native_kernel( const char * _name, P * _proxy, F f )
+        base_ & def_proxy_native( const char * _name, stdex::intrusive_ptr<P> & _proxy, F _fn )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_native_kernel<C, P, F>>( _name, f, _proxy );
+            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_native<C, P, F>>( _name, _fn, _proxy.get() );
 
             m_scope->add_method( iadapter );
 
@@ -415,11 +403,23 @@ namespace pybind
         }
 
         template<class P, class F>
-        base_ & def_proxy_native_kernel( const char * _name, const stdex::intrusive_ptr<P> & _proxy, F f )
+        base_ & def_proxy_native_kernel( const char * _name, P * _proxy, F _fn )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_native_kernel<C, P, F>>( _name, f, _proxy.get() );
+            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_native_kernel<C, P, F>>( _name, _fn, _proxy );
+
+            m_scope->add_method( iadapter );
+
+            return *this;
+        }
+
+        template<class P, class F>
+        base_ & def_proxy_native_kernel( const char * _name, const stdex::intrusive_ptr<P> & _proxy, F _fn )
+        {
+            allocator_interface * allocator = m_kernel->get_allocator();
+
+            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_native_kernel<C, P, F>>( _name, _fn, _proxy.get() );
 
             m_scope->add_method( iadapter );
 
@@ -468,6 +468,18 @@ namespace pybind
             allocator_interface * allocator = m_kernel->get_allocator();
 
             method_adapter_interface_ptr iadapter = allocator->newT<method_adapter<C, F>>( "__call__", _fn );
+
+            m_scope->set_call( iadapter );
+
+            return *this;
+        }
+
+        template<class F>
+        base_ & def_call_native( F _fn )
+        {
+            allocator_interface * allocator = m_kernel->get_allocator();
+
+            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_native<C, F>>( "__call__", _fn );
 
             m_scope->set_call( iadapter );
 
@@ -620,11 +632,11 @@ namespace pybind
         }
 
         template<class P, class F>
-        base_ & def_proxy_static_add( P * _proxy, F f )
+        base_ & def_proxy_static_add( P * _proxy, F _fn )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter_proxy<C, P, F>>( "proxy_static_add", f, _proxy );
+            number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter_proxy<C, P, F>>( "proxy_static_add", _fn, _proxy );
 
             m_scope->set_number_add( iadapter );
 
@@ -718,11 +730,11 @@ namespace pybind
         }
 
         template<class P, class F>
-        base_ & def_proxy_static_sub( P * _proxy, F f )
+        base_ & def_proxy_static_sub( P * _proxy, F _fn )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter_proxy<C, P, F>>( "proxy_static_sub", f, _proxy );
+            number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter_proxy<C, P, F>>( "proxy_static_sub", _fn, _proxy );
 
             m_scope->set_number_sub( iadapter );
 
@@ -754,11 +766,11 @@ namespace pybind
         }
 
         template<class P, class F>
-        base_ & def_proxy_static_mul( P * _proxy, F f )
+        base_ & def_proxy_static_mul( P * _proxy, F _fn )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter_proxy<C, P, F>>( "proxy_static_mul", f, _proxy );
+            number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter_proxy<C, P, F>>( "proxy_static_mul", _fn, _proxy );
 
             m_scope->set_number_mul( iadapter );
 
@@ -821,11 +833,11 @@ namespace pybind
         }
 
         template<class P, class F>
-        base_ & def_proxy_static_div( P * _proxy, F f )
+        base_ & def_proxy_static_div( P * _proxy, F _fn )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter_proxy<C, P, F>>( "proxy_static_div", f, _proxy );
+            number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter_proxy<C, P, F>>( "proxy_static_div", _fn, _proxy );
 
             m_scope->set_number_div( iadapter );
 

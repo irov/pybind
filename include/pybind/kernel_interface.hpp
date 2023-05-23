@@ -297,6 +297,9 @@ namespace pybind
         virtual uint32_t refcount( PyObject * _obj ) = 0;
 
         virtual bool is_none( PyObject * _obj ) const = 0;
+        virtual PyObject * get_none() = 0;
+        virtual PyObject * ret_none() = 0;
+
         virtual bool is_callable( PyObject * _obj ) const = 0;
         virtual bool is_instanceof( PyObject * _obj, PyTypeObject * _type ) const = 0;
         virtual bool test_equal( PyObject * _lhs, PyObject * _rhs ) = 0;
@@ -310,9 +313,6 @@ namespace pybind
         virtual string_view object_str( PyObject * _obj ) = 0;
         virtual string_view object_repr( PyObject * _obj ) = 0;
         virtual string_view object_repr_type( PyObject * _obj ) = 0;
-
-        virtual PyObject * get_none() = 0;
-        virtual PyObject * ret_none() = 0;
 
         virtual bool extract_bool( PyObject * _obj, bool & _value ) = 0;
         virtual bool extract_int8( PyObject * _obj, int8_t & _value ) = 0;
