@@ -11,23 +11,14 @@ namespace pybind
         : public std::exception
     {
     public:
-        pybind_exception( const char * _message )
-            : m_message( _message )
-        {
-        }
-
-        ~pybind_exception() throw() override
-        {
-        }
+        pybind_exception( const char * _message );
+        ~pybind_exception() throw() override;
 
     public:
-        const char * what() const throw() override
-        {
-            return m_message;
-        }
+        const char * what() const throw() override;
 
     protected:
-        const char * m_message;
+        char m_message[4096];
     };
 
     PYBIND_API void throw_exception( const char * _format, ... );

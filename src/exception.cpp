@@ -1,10 +1,25 @@
 #include "pybind/exception.hpp"
 
+#include <cstring>
 #include <cstdio>
 #include <cstdarg>
 
 namespace pybind
 {
+    //////////////////////////////////////////////////////////////////////////
+    pybind_exception::pybind_exception( const char * _message )
+    {
+        strcpy( m_message, _message );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    pybind_exception::~pybind_exception() throw()
+    {
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const char * pybind_exception::what() const throw()
+    {
+        return m_message;
+    }
     //////////////////////////////////////////////////////////////////////////
     void throw_exception( const char * _format, ... )
     {
@@ -12,7 +27,7 @@ namespace pybind
 
         va_start( valist, _format );
 
-        char message[4096] = { 0 };
+        char message[4096] = {'\0'};
         vsprintf( message, _format, valist );
 
         va_end( valist );
@@ -22,9 +37,10 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void throw_exception_va( const char * _format, va_list _va )
     {
-        char message[4096] = { 0 };
+        char message[4096] = {'\0'};
         vsprintf( message, _format, _va );
 
         throw pybind_exception( message );
     }
+    //////////////////////////////////////////////////////////////////////////
 }
