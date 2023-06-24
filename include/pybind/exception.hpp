@@ -11,7 +11,7 @@ namespace pybind
         : public std::exception
     {
     public:
-        pybind_exception( const char * _message );
+        explicit pybind_exception( const char * _message );
         ~pybind_exception() throw() override;
 
     public:
