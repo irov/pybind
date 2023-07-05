@@ -67,6 +67,28 @@ namespace pybind
         bool is_list() const;
         bool is_callable() const;
 
+        template<class T>
+        bool is_embedded_type() const
+        { 
+            PyTypeObject * objtype = m_kernel->get_object_type( m_obj );
+
+            const class_type_scope_interface_ptr & scope = m_kernel->get_class_scope( objtype );
+
+            if( scope == nullptr )
+            {
+                return false;
+            }
+            
+            const class_type_scope_interface_ptr & tscope = m_kernel->get_class_type_scope_t<T>();
+
+            if( scope != tscope )
+            {
+                return false;
+            }
+
+            return true;
+        }
+
     public:
         void unwrap() const;
 
