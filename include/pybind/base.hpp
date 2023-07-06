@@ -3,11 +3,10 @@
 #include "pybind/types.hpp"
 #include "pybind/exports.hpp"
 #include "pybind/string_view.hpp"
+#include "pybind/kernel_interface.hpp"
 
 namespace pybind
 {
-    class kernel_interface;
-
     class PYBIND_API base
     {
     public:

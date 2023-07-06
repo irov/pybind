@@ -1,11 +1,11 @@
 #pragma once
 
-#include <cstdint>
-#include <cstddef>
-
 #include "pybind/intrusive_ptr.hpp"
 
 #include "config/stdex.hpp"
+
+#include <cstdint>
+#include <cstddef>
 
 extern "C"
 {
