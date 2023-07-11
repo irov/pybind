@@ -1,10 +1,11 @@
 #include "python_pod.hpp"
 #include "python_system.hpp"
 
-#include "config/config.hpp"
-
+#include "pybind/kernel_interface.hpp"
 #include "pybind/exception.hpp"
 #include "pybind/logger.hpp"
+
+#include "config/config.hpp"
 
 namespace pybind
 {
@@ -148,12 +149,12 @@ namespace pybind
             wrap_pod_hash_I<4>
         };
         //////////////////////////////////////////////////////////////////////////
-        void wrap_pod( PyObject * _obj, void ** _impl, uint32_t _size, bool _hash )
+        void wrap_pod( pybind::kernel_interface * _kernel, PyObject * _obj, void ** _impl, uint32_t _size, bool _hash )
         {
             if( _size > PYBIND_OBJECT_POD_SIZE )
             {
                 pybind::throw_exception( "wrap_pod obj '%s' size %u > max pod size %u"
-                    , pybind::object_str( _obj )
+                    , _kernel->object_repr( _obj ).c_str()
                     , _size
                     , PYBIND_OBJECT_POD_SIZE
                 );
@@ -193,7 +194,7 @@ namespace pybind
             py_base->hash = _hash;
         }
         //////////////////////////////////////////////////////////////////////////
-        void * get_pod_impl( PyObject * _obj )
+        void * get_pod_impl( pybind::kernel_interface * _kernel, PyObject * _obj )
         {
             py_base_object * py_base = (py_base_object *)_obj;
 
@@ -301,7 +302,7 @@ namespace pybind
             }
 
             pybind::throw_exception( "obj '%s' not wrap pybind (impl)"
-                , pybind::object_str( _obj )
+                , _kernel->object_repr( _obj ).c_str()
             );
 
             return nullptr;

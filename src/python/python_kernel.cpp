@@ -316,7 +316,7 @@ namespace pybind
             return nullptr;
         }
 
-        void * impl = get_class_impl( _obj );
+        void * impl = this->get_class_impl( _obj );
 
         pybind::detail::unwrap_pod( _obj );
 
@@ -798,7 +798,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void * python_kernel::get_class_impl( PyObject * _obj )
     {
-        void * impl = pybind::detail::get_pod_impl( _obj );
+        void * impl = pybind::detail::get_pod_impl( this, _obj );
 
         return impl;
     }

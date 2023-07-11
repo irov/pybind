@@ -520,7 +520,7 @@ namespace pybind
             uint32_t pod_size = scope->get_pod_size();
             bool pod_hash = scope->get_pod_hash();
 
-            pybind::detail::wrap_pod( py_self, &buff, pod_size, pod_hash );
+            pybind::detail::wrap_pod( kernel, py_self, &buff, pod_size, pod_hash );
 
             void * impl = scope->call_new( py_self, _args, _kwds );
 
@@ -1625,7 +1625,7 @@ namespace pybind
     {
         PyObject * py_self = py_alloc_class( m_pytypeobject, nullptr, nullptr );
 
-        pybind::detail::wrap_pod( py_self, _impl, m_pod_size, m_pod_hash );
+        pybind::detail::wrap_pod( m_kernel, py_self, _impl, m_pod_size, m_pod_hash );
 
 #ifndef NDEBUG
         this->addObject( py_self );
