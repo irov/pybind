@@ -63,6 +63,10 @@ namespace pybind
         virtual const method_adapter_interface_ptr & get_method( uint32_t _index ) const = 0;
 
         virtual void add_member( const member_adapter_interface_ptr & _imember ) = 0;
+        virtual const member_adapter_interface_ptr & find_member( const char * _name ) const = 0;
+        virtual uint32_t get_members_count() const = 0;
+        virtual const member_adapter_interface_ptr & get_member( uint32_t _index ) const = 0;
+
         virtual void add_base( uint32_t _info, const class_type_scope_interface_ptr & _scope, pybind_metacast _cast ) = 0;
 
         template<class B>

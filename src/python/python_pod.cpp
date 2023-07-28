@@ -13,33 +13,47 @@ namespace pybind
     struct py_base_object
     {
         PyObject_HEAD
+
             uint32_t flag;
-        //int64_t hash;
     };
     //////////////////////////////////////////////////////////////////////////
     struct py_ptr_object
-        : public py_base_object
     {
+        PyObject_HEAD
+
+            uint32_t flag;
+
         void * impl;
     };
     //////////////////////////////////////////////////////////////////////////
     template<uint32_t I>
     struct py_pod_object
-        : public py_base_object
     {
+        PyObject_HEAD
+
+            uint32_t flag;
+
         uint8_t buff[4 << I];
     };
     //////////////////////////////////////////////////////////////////////////
     struct py_hash_object
-        : public py_base_object
     {
+        PyObject_HEAD
+
+            uint32_t flag;
+
         int64_t hash;
     };
     //////////////////////////////////////////////////////////////////////////
     template<uint32_t I>
     struct py_pod_hash_object
-        : public py_hash_object
     {
+        PyObject_HEAD
+
+            uint32_t flag;
+
+        int64_t hash;
+
         uint8_t buff[4 << I];
     };
     //////////////////////////////////////////////////////////////////////////

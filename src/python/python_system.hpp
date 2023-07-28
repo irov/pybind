@@ -188,6 +188,7 @@ namespace pybind
     PYBIND_API bool is_type_class( PyTypeObject * _type );
 
     PYBIND_API bool type_initialize( PyObject * _obj );
+    PYBIND_API int64_t type_hash( PyTypeObject * _obj );
 
     PYBIND_API void exception_filter();
 

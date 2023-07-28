@@ -166,6 +166,11 @@ Bar * test_function_5( Bar * _b )
     return _b;
 }
 
+Vec2 test_function_6( const Vec2 & _v )
+{
+    return Vec2( _v.y, _v.x );
+}
+
 void test_function_decl( pybind::kernel_interface * _kernel )
 {
     pybind::def_function_kernel( _kernel, "test_function_1", &test_function_1 );
@@ -173,37 +178,77 @@ void test_function_decl( pybind::kernel_interface * _kernel )
     pybind::def_function( _kernel, "test_function_3", &test_function_3 );
     pybind::def_function( _kernel, "test_function_4", &test_function_4 );
     pybind::def_function( _kernel, "test_function_5", &test_function_5 );
+    pybind::def_function( _kernel, "test_function_6", &test_function_6 );
 }
 
-void test_function( pybind::kernel_interface * _kernel, PyObject * m, uint32_t i )
+void test_function_go1( pybind::kernel_interface * _kernel, PyObject * m, uint32_t i )
 {
-    _kernel->call_method( m, "go", "(i)", i );
+    _kernel->call_method( m, "go1", "(i)", i );
+}
+
+void test_function_go2( pybind::kernel_interface * _kernel, PyObject * m, const Vec2 & v )
+{
+    _kernel->call_method( m, "go2", "(O)", pybind::ptr( _kernel, v ) );
 }
 
 class malloc_allocator
     : public pybind::allocator_interface
 {
 public:
+    malloc_allocator()
+        : m_count( 0 )
+    {
+    }
+    
+
+public:
     void * malloc( size_t _size ) override
     {
+        m_count += _size;
+
         return ::malloc( _size );
     }
 
     void * calloc( size_t _num, size_t _size ) override
     {
+        m_count += _num * _size;
+
         return ::calloc( _num, _size );
     }
 
     void * realloc( void * _ptr, size_t _size ) override
     {
+        if( _ptr != nullptr )
+        {
+            size_t ptr_size = ::_msize( (_ptr) );
+            m_count -= ptr_size;
+        }
+
+        m_count += _size;
+
         return ::realloc( _ptr, _size );
     }
 
     void free( void * _ptr ) override
     {
+        if( _ptr != nullptr )
+        {
+            size_t ptr_size = ::_msize( (_ptr) );
+            m_count -= ptr_size;
+        }
+
         ::free( _ptr );
     }
-};;
+
+public:
+    size_t getCount() const
+    {
+        return m_count;
+    }
+
+protected:
+    size_t m_count;
+};
 
 void main()
 {
@@ -212,7 +257,7 @@ void main()
     pybind::kernel_interface * kernel = pybind::initialize( a, L"", false, false, true );
 
     pybind::list syspath( kernel );
-    syspath.append( "d:/Projects/Mengine/dependencies/pybind/sandbox/" );
+    syspath.append( PYBIND_SANDBOX_SCRIPTS_PATH );
 
     kernel->set_syspath( syspath.ret() );
 
@@ -245,11 +290,13 @@ void main()
         .def_proxy_static( "helper_for_script_function", helper, &Helper::helper_for_script_function )
         ;
 
-    pybind::class_<Vec2>( kernel, "Vec2" )
+    pybind::struct_<Vec2>( kernel, "Vec2" )
         .def_constructor( pybind::init<float, float>() )
         .def_member( "x", &Vec2::x )
         .def_member( "y", &Vec2::y )
         ;
+
+    Vec2 v( 1.f, 2.f );
 
     Bar * b = new Bar;
 
@@ -271,7 +318,12 @@ void main()
         test_dict( kernel, i );
         test_list( kernel, i );
         test_tuple( kernel, i );
-        test_function( kernel, m, i );
+        test_function_go1( kernel, m, i );
+    }
+
+    for( uint32_t i = 0; i != 100000; ++i )
+    {
+        test_function_go2( kernel, m, v );
     }
 
     syspath.reset();
@@ -280,5 +332,7 @@ void main()
     kernel->collect();
     kernel->destroy();
 
-    printf( "done" );
+    size_t c = a->getCount();
+
+    printf( "done: %zu", c );
 }

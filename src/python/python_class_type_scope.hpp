@@ -47,6 +47,10 @@ namespace pybind
         const method_adapter_interface_ptr & get_method( uint32_t _index ) const override;
 
         void add_member( const member_adapter_interface_ptr & _imember ) override;
+        const member_adapter_interface_ptr & find_member( const char * _name ) const override;
+        uint32_t get_members_count() const override;
+        const member_adapter_interface_ptr & get_member( uint32_t _index ) const override;
+
         void add_base( uint32_t _info, const class_type_scope_interface_ptr & _scope, pybind_metacast _cast ) override;
 
         void set_construct( const constructor_adapter_interface_ptr & _iconstruct ) override;
@@ -147,6 +151,9 @@ namespace pybind
 
         method_adapter_interface_ptr m_methods[256];
         uint32_t m_methodCount;
+
+        member_adapter_interface_ptr m_members[256];
+        uint32_t m_memberCount;
 
         new_adapter_interface_ptr m_new;
         destroy_adapter_interface_ptr m_destructor;

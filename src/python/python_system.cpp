@@ -1839,6 +1839,13 @@ namespace pybind
         return true;
     }
     //////////////////////////////////////////////////////////////////////////
+    int64_t type_hash( PyTypeObject * _obj )
+    {
+        int64_t py_hash = (int64_t)PyObject_Hash( (PyObject *)_obj );
+
+        return py_hash;
+    }
+    //////////////////////////////////////////////////////////////////////////
     bool bool_check( PyObject * _obj )
     {
         bool result = PyBool_Check( _obj );

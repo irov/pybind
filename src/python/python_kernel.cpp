@@ -94,6 +94,8 @@ namespace pybind
                 scope = nullptr;
             }
 
+            m_class_info_desc[index].name = nullptr;
+
             m_class_type_scopes[index] = nullptr;
 
             m_type_cast[index] = nullptr;
@@ -597,7 +599,7 @@ namespace pybind
     {
         PyTypeObject * py_type = _scope->get_typeobject();
 
-        uint64_t py_hash = pybind::object_hash( (PyObject *)py_type );
+        uint64_t py_hash = pybind::type_hash( py_type );
 
         uint32_t slot = py_hash % PYBIND_TYPE_COUNT_HASH;
 
@@ -620,7 +622,7 @@ namespace pybind
     {
         PyTypeObject * py_type = _scope->get_typeobject();
 
-        uint64_t py_hash = pybind::object_hash( (PyObject *)py_type );
+        uint64_t py_hash = pybind::type_hash( py_type );
 
         uint32_t slot = py_hash % PYBIND_TYPE_COUNT_HASH;
 
@@ -648,7 +650,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     const class_type_scope_interface_ptr & python_kernel::get_class_scope( PyTypeObject * _type )
     {
-        uint64_t py_hash = pybind::object_hash( (PyObject *)_type );
+        uint64_t py_hash = pybind::type_hash( _type );
 
         uint32_t slot = py_hash % PYBIND_TYPE_COUNT_HASH;
 
@@ -699,7 +701,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool python_kernel::is_type_class( PyTypeObject * _type )
     {
-        uint64_t py_hash = pybind::object_hash( (PyObject *)_type );
+        uint64_t py_hash = pybind::type_hash( _type );
 
         uint32_t slot = py_hash % PYBIND_TYPE_COUNT_HASH;
 

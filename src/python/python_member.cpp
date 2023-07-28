@@ -15,7 +15,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     static void py_member_dealloc( PyObject * _obj )
     {
-        py_member_type * mt = (py_member_type *)(_obj);
+        py_member_type * mt = (py_member_type *)_obj;
 
         factorable::intrusive_ptr_release( mt->iadapter );
 
@@ -63,7 +63,7 @@ namespace pybind
     {
         kernel_interface * kernel = pybind::get_kernel();
 
-        py_member_type * mt = (py_member_type *)(_member);
+        py_member_type * mt = (py_member_type *)_member;
 
         PyObject * py_self = PyTuple_GetItem( _args, 0 );
         PyObject * py_value = PyTuple_GetItem( _args, 1 );
@@ -173,20 +173,23 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * member_python::create_member_adapter( const member_adapter_interface_ptr & _iadapter )
     {
-        py_member_type * py_member = (py_member_type *)PyType_GenericAlloc( &m_member_type, 0 );
+        PyObject * new_py_member = PyType_GenericAlloc( &m_member_type, 0 );
+
+        py_member_type * py_member = (py_member_type *)new_py_member;
 
         factorable::intrusive_ptr_setup( py_member->iadapter, _iadapter.get() );
 
-        PyObject * py_get = PyCFunction_New( &m_getmethod, (PyObject*)py_member );
-        PyObject * py_set = PyCFunction_New( &m_setmethod, (PyObject*)py_member );
+        PyObject * py_get = PyCFunction_New( &m_getmethod, new_py_member );
+        PyObject * py_set = PyCFunction_New( &m_setmethod, new_py_member );
 
-        pybind::decref( (PyObject *)py_member );
+        pybind::decref( new_py_member );
 
-        PyObject * py_result = PyObject_CallFunction( (PyObject*)&PyProperty_Type, const_cast<char *>("OOss"), py_get, py_set, 0, "member_type_scope" );
+        PyObject * py_result = PyObject_CallFunction( (PyObject *)&PyProperty_Type, const_cast<char *>("OOss"), py_get, py_set, 0, "member_type_scope" );
 
         pybind::decref( py_get );
         pybind::decref( py_set );
 
         return py_result;
     }
+    //////////////////////////////////////////////////////////////////////////
 }

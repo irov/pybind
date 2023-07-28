@@ -178,14 +178,17 @@ namespace pybind
             }
         }
 
-        py_function_type * py_self = (py_function_type *)PyType_GenericAlloc( &m_function_type, 0 );
+        PyObject * new_py_self = PyType_GenericAlloc( &m_function_type, 0 );
+
+        py_function_type * py_self = (py_function_type *)new_py_self;
 
         factorable::intrusive_ptr_setup( py_self->iadapter, _adapter.get() );
 
-        PyObject * py_func = PyCFunction_New( method, (PyObject *)py_self );
+        PyObject * py_func = PyCFunction_New( method, new_py_self );
 
-        pybind::decref( (PyObject *)py_self );
+        pybind::decref( new_py_self );
 
         return py_func;
     }
+    //////////////////////////////////////////////////////////////////////////
 }

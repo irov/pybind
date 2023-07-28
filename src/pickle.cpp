@@ -383,9 +383,7 @@ namespace pybind
         case PICKLE_STRING:
             {
                 uint32_t str_size;
-                s_read_size_t( _buffer, _capacity, _carriage, str_size );
-
-                const char * str_buffer = (const char *)(static_cast<const uint8_t *>(_buffer) + _carriage);
+                s_read_size_t( _buffer, _capacity, _carriage, str_size );                
 
                 if( _carriage + str_size > _capacity )
                 {
@@ -395,6 +393,8 @@ namespace pybind
                         , _capacity
                     );
                 }
+
+                const char * str_buffer = (const char *)(static_cast<const uint8_t *>(_buffer) + _carriage);
 
                 _carriage += str_size;
 
@@ -407,8 +407,6 @@ namespace pybind
                 uint32_t utf8_size;
                 s_read_size_t( _buffer, _capacity, _carriage, utf8_size );
 
-                const char * utf8_buffer = (const char *)(static_cast<const uint8_t *>(_buffer) + _carriage);
-
                 if( _carriage + utf8_size > _capacity )
                 {
                     pybind::throw_exception( "unpickle object unicode out of buffer %d + %d > %d"
@@ -417,6 +415,8 @@ namespace pybind
                         , _capacity
                     );
                 }
+
+                const char * utf8_buffer = (const char *)(static_cast<const uint8_t *>(_buffer) + _carriage);
 
                 _carriage += utf8_size;
 

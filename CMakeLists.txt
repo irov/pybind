@@ -167,6 +167,8 @@ IF(NOT PYBIND_EXTERNAL_BUILD)
 ENDIF()
 
 if(PYBIND_SANDBOX)
+    add_definitions(-DPYBIND_SANDBOX_SCRIPTS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/sandbox")
+    
     file(GLOB files_private_sandbox_sources ${CMAKE_CURRENT_SOURCE_DIR}/sandbox/*.cpp)
 
     SOURCE_GROUP(sandbox FILES ${files_private_sandbox_sources})

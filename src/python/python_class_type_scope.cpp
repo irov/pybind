@@ -30,12 +30,12 @@
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
-    static PyObject* py_alloc_class( PyTypeObject* _type, PyObject* _args, PyObject* _kwds )
+    static PyObject * py_alloc_class( PyTypeObject * _type, PyObject * _args, PyObject * _kwds )
     {
         (void)_args;
         (void)_kwds;
 
-        PyObject* py_self = PyType_GenericAlloc( _type, 0 );
+        PyObject * py_self = PyType_GenericAlloc( _type, 0 );
 
         if( py_self == nullptr )
         {
@@ -595,6 +595,7 @@ namespace pybind
         , m_basesCount( 0 )
         , m_user( _user )
         , m_methodCount( 0 )
+        , m_memberCount( 0 )
         , m_new( _pynew )
         , m_destructor( _pydestructor )
         , m_number_multy( nullptr )
@@ -703,8 +704,10 @@ namespace pybind
         pybind::decref( py_bases );
         pybind::decref( py_dict );
 
-        m_pytypeobject = (PyTypeObject *)PyType_Type.tp_call( (PyObject *)&PyType_Type, py_args, 0 );
-        
+        PyObject * new_pytypeobject = PyType_Type.tp_call( (PyObject *)&PyType_Type, py_args, 0 );
+
+        m_pytypeobject = (PyTypeObject *)new_pytypeobject;
+
         pybind::decref( py_args );
 
         if( m_pytypeobject == nullptr )
@@ -731,7 +734,7 @@ namespace pybind
 
         PyType_Modified( m_pytypeobject );
 
-        Py_INCREF( (PyObject*)m_pytypeobject );
+        Py_INCREF( (PyObject *)m_pytypeobject );
 
 #ifndef NDEBUG
         if( pybind::module_hasobject( m_module, m_pytypeobject->tp_name ) == true )
@@ -745,7 +748,7 @@ namespace pybind
         }
 #endif
 
-        pybind::module_addobject( m_module, m_pytypeobject->tp_name, (PyObject*)m_pytypeobject );
+        pybind::module_addobject( m_module, m_pytypeobject->tp_name, (PyObject *)m_pytypeobject );
 
         m_kernel->cache_class_scope_type( python_class_type_scope_ptr( this ) );
 
@@ -764,8 +767,6 @@ namespace pybind
 
         m_kernel->remove_class_scope_type( python_class_type_scope_ptr( this ) );
 
-        pybind::decref( (PyObject *)m_pytypeobject );
-
         for( uint32_t i = 0; i != m_basesCount; ++i )
         {
             Metacast & m = m_bases[i];
@@ -777,8 +778,27 @@ namespace pybind
 
         for( uint32_t i = 0; i != m_methodCount; ++i )
         {
-            m_methods[i] = nullptr;
+            method_adapter_interface_ptr & adapter = m_methods[i];
+
+            const char * name = adapter->getName();
+
+            pybind::dict_removestring( m_pytypeobject->tp_dict, name );
+
+            adapter = nullptr;
         }
+
+        for( uint32_t i = 0; i != m_memberCount; ++i )
+        {
+            member_adapter_interface_ptr & adapter = m_members[i];
+
+            const char * name = adapter->getName();
+
+            pybind::dict_removestring( m_pytypeobject->tp_dict, name );
+
+            adapter = nullptr;
+        }
+
+        pybind::decref( (PyObject *)m_pytypeobject );
 
         m_new = nullptr;
         m_destructor = nullptr;
@@ -913,7 +933,7 @@ namespace pybind
             return method;
         }
 
-        pybind::throw_exception( "scope '%s' get_method '%s' python error"
+        pybind::throw_exception( "scope '%s' find_method '%s' python error"
             , this->m_name
             , _name
         );
@@ -931,8 +951,52 @@ namespace pybind
         return m_methods[_index];
     }
     //////////////////////////////////////////////////////////////////////////
+    const member_adapter_interface_ptr & python_class_type_scope::find_member( const char * _name ) const
+    {
+        for( uint32_t index = 0; index != m_memberCount; ++index )
+        {
+            const member_adapter_interface_ptr & method = m_members[index];
+
+            const char * memberName = method->getName();
+
+            if( strcmp( memberName, _name ) != 0 )
+            {
+                continue;
+            }
+
+            return method;
+        }
+
+        pybind::throw_exception( "scope '%s' find_member '%s' python error"
+            , this->m_name
+            , _name
+        );
+
+        return member_adapter_interface_ptr::none();
+    }
+    //////////////////////////////////////////////////////////////////////////
+    uint32_t python_class_type_scope::get_members_count() const
+    {
+        return m_memberCount;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const member_adapter_interface_ptr & python_class_type_scope::get_member( uint32_t _index ) const
+    {
+        return m_members[_index];
+    }
+    //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::add_member( const member_adapter_interface_ptr & _imember )
     {
+        if( m_memberCount == 256 )
+        {
+            pybind::throw_exception( "scope '%s' add_member '%s' max count"
+                , this->m_name
+                , _imember->getName()
+            );
+
+            return;
+        }
+
         PyObject * py_member = m_kernel->create_member_adapter( _imember );
 
         const char * name = _imember->getName();
@@ -950,6 +1014,8 @@ namespace pybind
         }
 
         pybind::decref( py_member );
+
+        m_members[m_memberCount++] = _imember;
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_convert( const convert_adapter_interface_ptr & _iconvert )

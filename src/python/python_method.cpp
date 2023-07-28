@@ -12,6 +12,7 @@ namespace pybind
     struct py_method_generator_type
     {
         PyObject_HEAD
+
             PyTypeObject * method_caller_type;
         method_adapter_interface * iadapter;
         PyTypeObject * classtype;
@@ -121,7 +122,8 @@ namespace pybind
             return 1;
         }
 
-        if( !PyObject_TypeCheck( _obj, _descr->classtype ) ) {
+        if( !PyObject_TypeCheck( _obj, _descr->classtype ) )
+        {
             //PyErr_Format(PyExc_TypeError,
             //	"descriptor '%s' for '%s' objects "
             //	"doesn't apply to '%s' object",
@@ -140,21 +142,23 @@ namespace pybind
     {
         (void)_type;
 
-        PyObject *res;
+        PyObject * res;
 
         if( py_method_descr_check( _descr, _obj, &res ) == 1 )
         {
             return res;
         }
 
-        py_method_caller_type * mct = (py_method_caller_type *)PyType_GenericAlloc( _descr->method_caller_type, 0 );
+        PyObject * new_mct = PyType_GenericAlloc( _descr->method_caller_type, 0 );
+
+        py_method_caller_type * mct = (py_method_caller_type *)new_mct;
 
         factorable::intrusive_ptr_setup( mct->iadapter, _descr->iadapter );
 
         pybind::incref( _obj );
         mct->self = _obj;
 
-        return (PyObject*)mct;
+        return new_mct;
     }
     //////////////////////////////////////////////////////////////////////////
     static PyObject * py_method_descr_call( py_method_generator_type * _descr, PyObject * _args, PyObject * _kwds )
@@ -170,14 +174,16 @@ namespace pybind
             return nullptr;
         }
 
-        py_method_caller_type * mct = (py_method_caller_type *)PyType_GenericAlloc( _descr->method_caller_type, 0 );
+        PyObject * new_mct = PyType_GenericAlloc( _descr->method_caller_type, 0 );
+
+        py_method_caller_type * mct = (py_method_caller_type *)new_mct;
         factorable::intrusive_ptr_setup( mct->iadapter, _descr->iadapter );
 
         mct->self = PyTuple_GetItem( _args, 0 );
 
         PyObject * new_args = PyTuple_GetSlice( _args, 1, argc );
 
-        PyObject * py_method = PyEval_CallObjectWithKeywords( (PyObject*)mct, new_args, _kwds );
+        PyObject * py_method = PyEval_CallObjectWithKeywords( new_mct, new_args, _kwds );
 
         return py_method;
     }
@@ -240,17 +246,17 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         PyMemberDef descr_members[] =
         {
-            { const_cast<char*>("__objclass__"), T_OBJECT, offsetof( py_method_generator_type, classtype ), READONLY },
+            {const_cast<char *>("__objclass__"), T_OBJECT, offsetof( py_method_generator_type, classtype ), READONLY},
             //{const_cast<char*>("__name__"), T_OBJECT, offsetof(py_method_generator_type, methodname), READONLY},
-        { 0 }
+            {0}
         };
 #	else
         //////////////////////////////////////////////////////////////////////////
         PyMemberDef descr_members[] =
         {
-            { "__objclass__", T_OBJECT, offsetof( py_method_generator_type, classtype ), READONLY, "__objclass__" },
+            {"__objclass__", T_OBJECT, offsetof( py_method_generator_type, classtype ), READONLY, "__objclass__"},
             //{"__name__", T_OBJECT, offsetof(py_method_generator_type, methodname), READONLY, "__name__"},
-        { 0 }
+            {0}
         };
 #	endif
 
@@ -326,7 +332,9 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * method_python::create_method_adapter( const method_adapter_interface_ptr & _ifunc, PyTypeObject * _type )
     {
-        py_method_generator_type * generator = (py_method_generator_type *)PyType_GenericAlloc( &m_method_generator_type, 0 );
+        PyObject * new_generator = PyType_GenericAlloc( &m_method_generator_type, 0 );
+
+        py_method_generator_type * generator = (py_method_generator_type *)new_generator;
 
         generator->method_caller_type = &m_method_caller_type;
         pybind::incref( (PyObject *)generator->method_caller_type );
@@ -343,7 +351,7 @@ namespace pybind
             generator->classtype = nullptr;
         }
 
-        return (PyObject*)generator;
+        return (PyObject *)generator;
     }
     //////////////////////////////////////////////////////////////////////////
     method_adapter_interface * method_python::get_method_adapter( PyObject * _obj )
@@ -354,4 +362,5 @@ namespace pybind
 
         return iadapter;
     }
+    //////////////////////////////////////////////////////////////////////////
 }
