@@ -156,7 +156,7 @@ namespace pybind
 
         if( PyType_Ready( &m_member_type ) < 0 )
         {
-            pybind::log( "invalid embedding member type '%s' \n"
+            pybind::log( "invalid embedding member type '%s'"
                 , m_member_type.tp_name
             );
 

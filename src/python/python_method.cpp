@@ -306,7 +306,7 @@ namespace pybind
 
         if( PyType_Ready( &m_method_generator_type ) < 0 )
         {
-            pybind::log( "invalid embedding class '%s'\n"
+            pybind::log( "invalid embedding class '%s'"
                 , m_method_generator_type.tp_name
             );
 
@@ -315,7 +315,7 @@ namespace pybind
 
         if( PyType_Ready( &m_method_caller_type ) < 0 )
         {
-            pybind::log( "invalid embedding class '%s'\n"
+            pybind::log( "invalid embedding class '%s'"
                 , m_method_caller_type.tp_name
             );
 

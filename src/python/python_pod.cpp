@@ -480,7 +480,7 @@ namespace pybind
 
         if( PyType_Ready( &m_ptr_type ) < 0 )
         {
-            pybind::log( "invalid embedding class '%s' \n"
+            pybind::log( "invalid embedding class '%s'"
                 , m_ptr_type.tp_name
             );
 
@@ -491,7 +491,7 @@ namespace pybind
         {
             if( PyType_Ready( &m_pod_type[i] ) < 0 )
             {
-                pybind::log( "invalid embedding class '%s' \n"
+                pybind::log( "invalid embedding class '%s'"
                     , m_pod_type[i].tp_name
                 );
 
@@ -503,7 +503,7 @@ namespace pybind
         {
             if( PyType_Ready( &m_pod_hash_type[i] ) < 0 )
             {
-                pybind::log( "invalid embedding class '%s' \n"
+                pybind::log( "invalid embedding class '%s'"
                     , m_pod_hash_type[i].tp_name
                 );
 

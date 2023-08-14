@@ -54,7 +54,7 @@ namespace pybind
         }
         catch( const pybind_exception & _ex )
         {
-            pybind::error_message( "obj '%s' invalid function call '%s' error '%s'\n"
+            pybind::error_message( "obj '%s' invalid function call '%s' error '%s'"
                 , kernel->object_str( _obj ).c_str()
                 , adapter->getName()
                 , _ex.what()
@@ -127,7 +127,7 @@ namespace pybind
 
         if( PyType_Ready( &m_function_type ) < 0 )
         {
-            pybind::log( "invalid embedding class '%s'\n"
+            pybind::log( "invalid embedding class '%s'"
                 , m_function_type.tp_name
             );
 

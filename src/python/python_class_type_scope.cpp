@@ -79,7 +79,7 @@ namespace pybind
         }
         catch( const pybind_exception & _ex )
         {
-            pybind::error_message( "obj '%s' py_callfunc invalid call '%s' error '%s'\n"
+            pybind::error_message( "obj '%s' py_callfunc invalid call '%s' error '%s'"
                 , kernel->object_str( _obj ).c_str()
                 , adapter->getName()
                 , _ex.what()
@@ -123,7 +123,7 @@ namespace pybind
         }
         catch( const pybind_exception & _ex )
         {
-            pybind::error_message( "obj '%s' py_reprfunc invalid call error '%s'\n"
+            pybind::error_message( "obj '%s' py_reprfunc invalid call error '%s'"
                 , kernel->object_str( _obj ).c_str()
                 , _ex.what()
             );
@@ -172,7 +172,7 @@ namespace pybind
         }
         catch( const pybind_exception & _ex )
         {
-            pybind::error_message( "obj '%s' py_hash invalid call error '%s'\n"
+            pybind::error_message( "obj '%s' py_hash invalid call error '%s'"
                 , kernel->object_str( _obj ).c_str()
                 , _ex.what()
             );
@@ -228,7 +228,7 @@ namespace pybind
             }break;
         default:
             {
-                pybind::error_message( "invalid compare op '%d'\n"
+                pybind::error_message( "invalid compare op '%d'"
                     , _op
                 );
             }break;
@@ -256,7 +256,7 @@ namespace pybind
         }
         catch( const pybind_exception & _ex )
         {
-            pybind::error_message( "obj '%s' py_richcompare '%s' invalid compare '%s'\n"
+            pybind::error_message( "obj '%s' py_richcompare '%s' invalid compare '%s'"
                 , kernel->object_str( _obj ).c_str()
                 , kernel->object_str( _compare ).c_str()
                 , _ex.what()
@@ -297,7 +297,7 @@ namespace pybind
         }
         catch( const pybind_exception & _ex )
         {
-            pybind::error_message( "obj '%s' py_getattro invalid call '%s' error '%s'\n"
+            pybind::error_message( "obj '%s' py_getattro invalid call '%s' error '%s'"
                 , kernel->object_str( _obj ).c_str()
                 , adapter->getName()
                 , _ex.what()
@@ -336,7 +336,7 @@ namespace pybind
         }
         catch( const pybind_exception & _ex )
         {
-            pybind::error_message( "obj '%s' py_subscript invalid call '%s' error '%s'\n"
+            pybind::error_message( "obj '%s' py_subscript invalid call '%s' error '%s'"
                 , kernel->object_str( _obj ).c_str()
                 , adapter->getName()
                 , _ex.what()
@@ -381,7 +381,7 @@ namespace pybind
         }
         catch( const pybind_exception & _ex )
         {
-            pybind::error_message( "obj '%s' py_item_get invalid call '%s' error '%s'\n"
+            pybind::error_message( "obj '%s' py_item_get invalid call '%s' error '%s'"
                 , kernel->object_str( _obj ).c_str()
                 , adapter->getName()
                 , _ex.what()
@@ -420,7 +420,7 @@ namespace pybind
         }
         catch( const pybind_exception & _ex )
         {
-            pybind::error_message( "obj '%s' py_item_set invalid call '%s' error '%s'\n"
+            pybind::error_message( "obj '%s' py_item_set invalid call '%s' error '%s'"
                 , kernel->object_str( _obj ).c_str()
                 , adapter->getName()
                 , _ex.what()
@@ -461,7 +461,7 @@ namespace pybind
         }
         catch( const pybind_exception & _ex )
         {
-            pybind::error_message( "obj '%s' py_new_class scope '%s' error '%s'\n"
+            pybind::error_message( "obj '%s' py_new_class scope '%s' error '%s'"
                 , kernel->object_str( (PyObject *)_type ).c_str()
                 , scope->get_name()
                 , _ex.what()
@@ -498,7 +498,7 @@ namespace pybind
         }
         catch( const pybind_exception & _ex )
         {
-            pybind::error_message( "obj '%s' py_del_class scope %s error '%s'\n"
+            pybind::error_message( "obj '%s' py_del_class scope %s error '%s'"
                 , kernel->object_str( _obj ).c_str()
                 , scope->get_name()
                 , _ex.what()
@@ -534,7 +534,7 @@ namespace pybind
         }
         catch( const pybind_exception & _ex )
         {
-            pybind::error_message( "obj '%s' py_new_class scope '%s' error '%s'\n"
+            pybind::error_message( "obj '%s' py_new_class scope '%s' error '%s'"
                 , kernel->object_str( (PyObject *)_type ).c_str()
                 , scope->get_name()
                 , _ex.what()
@@ -554,7 +554,7 @@ namespace pybind
 
         if( scope == nullptr )
         {
-            pybind::error_message( "obj '%s' py_del_pod scope is null\n"
+            pybind::error_message( "obj '%s' py_del_pod scope is null"
                 , kernel->object_str( _obj ).c_str()
             );
 
@@ -580,7 +580,7 @@ namespace pybind
         }
         catch( const pybind_exception & _ex )
         {
-            pybind::error_message( "obj '%s' py_del_pod scope '%s' error '%s'\n"
+            pybind::error_message( "obj '%s' py_del_pod scope '%s' error '%s'"
                 , kernel->object_str( _obj ).c_str()
                 , scope->get_name()
                 , _ex.what()

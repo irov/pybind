@@ -62,9 +62,10 @@ namespace pybind
 
             if( arg_size + 1 < fn_arity )
             {
-                pybind::throw_exception( "invalid method call args is not equal %d < %d\n"
+                pybind::throw_exception( "invalid method call args is not equal %d < %d (%s)"
                     , arg_size + 1
                     , fn_arity
+                    , _kernel->object_repr_type( _arg ).c_str()
                 );
 
                 return nullptr;
