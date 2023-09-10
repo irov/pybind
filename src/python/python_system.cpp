@@ -331,7 +331,9 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void module_removeobject( PyObject * _module, const char * _name )
     {
-        PyModule_AddObject( _module, _name, Py_None );
+        PyObject * py_none = pybind::ret_none();
+
+        PyModule_AddObject( _module, _name, py_none );
     }
     //////////////////////////////////////////////////////////////////////////
     bool module_hasobject( PyObject * _module, const char * _name )

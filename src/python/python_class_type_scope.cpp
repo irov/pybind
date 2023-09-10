@@ -734,7 +734,7 @@ namespace pybind
 
         PyType_Modified( m_pytypeobject );
 
-        Py_INCREF( (PyObject *)m_pytypeobject );
+        pybind::xincref( (PyObject *)m_pytypeobject );
 
 #ifndef NDEBUG
         if( pybind::module_hasobject( m_module, m_pytypeobject->tp_name ) == true )
@@ -798,7 +798,7 @@ namespace pybind
             adapter = nullptr;
         }
 
-        pybind::decref( (PyObject *)m_pytypeobject );
+        pybind::xdecref( (PyObject *)m_pytypeobject );
 
         m_new = nullptr;
         m_destructor = nullptr;
