@@ -78,6 +78,10 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::finalize()
     {
+        PyType_ClearCache();
+        PyImport_Cleanup();
+        PyGC_Collect();
+
 #ifdef PYBIND_STL_SUPPORT
         pybind::finalize_stl_type_cast( this );
 #endif
