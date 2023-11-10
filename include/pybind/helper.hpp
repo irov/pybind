@@ -110,7 +110,7 @@ namespace pybind
     detail::extract_operator_t call_t( kernel_interface * _kernel, PyObject * _obj, const T & ... _t )
     {
         return call_i( _kernel, _obj
-            , { detail::import_operator_t( _kernel, _t ) ... }
+            , {detail::import_operator_t( _kernel, _t ) ...}
         );
     }
     //////////////////////////////////////////////////////////////////////////
@@ -120,7 +120,7 @@ namespace pybind
     detail::extract_operator_t call_args_t_i( kernel_interface * _kernel, PyObject * _obj, args && _args, std::tuple<T ...> && _t, std::integer_sequence<uint32_t, I...> )
     {
         return call_args_i( _kernel, _obj
-            , { detail::import_operator_t( _kernel, std::get<I>( _t ) ) ... }
+            , {detail::import_operator_t( _kernel, std::get<I>( _t ) ) ...}
             , _args
         );
     }

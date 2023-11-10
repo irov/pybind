@@ -383,7 +383,7 @@ namespace pybind
         case PICKLE_STRING:
             {
                 uint32_t str_size;
-                s_read_size_t( _buffer, _capacity, _carriage, str_size );                
+                s_read_size_t( _buffer, _capacity, _carriage, str_size );
 
                 if( _carriage + str_size > _capacity )
                 {

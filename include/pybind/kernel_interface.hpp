@@ -29,8 +29,12 @@ namespace pybind
     class kernel_interface
     {
     public:
-        kernel_interface() {};
-        virtual ~kernel_interface() {};
+        kernel_interface()
+        {
+        };
+        virtual ~kernel_interface()
+        {
+        };
 
     public:
         virtual allocator_interface * get_allocator() const = 0;

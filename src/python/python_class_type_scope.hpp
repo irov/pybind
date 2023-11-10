@@ -121,14 +121,6 @@ namespace pybind
         void call_destructor( PyObject * _obj, void * _impl ) override;
         void clear_bindable( void * _impl ) override;
 
-#ifndef NDEBUG
-    public:
-        void addObject( PyObject * _obj ) override;
-        void removeObject( PyObject * _obj ) override;
-
-        uint32_t getObjectCount() const override;
-#endif
-
     protected:
         kernel_interface * m_kernel;
 

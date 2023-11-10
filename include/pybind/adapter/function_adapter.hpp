@@ -53,7 +53,7 @@ namespace pybind
 
             F fn = this->getFn();
 
-            PyObject *ret = function_call<F>::call( _kernel, fn, _args );
+            PyObject * ret = function_call<F>::call( _kernel, fn, _args );
 
             return ret;
         }
@@ -77,7 +77,7 @@ namespace pybind
 
             F fn = this->getFn();
 
-            PyObject *ret = function_args_call<F>::call( _kernel, fn, _args );
+            PyObject * ret = function_args_call<F>::call( _kernel, fn, _args );
 
             return ret;
         }
@@ -102,7 +102,7 @@ namespace pybind
 
             F fn = this->getFn();
 
-            PyObject *ret = function_proxy_call<F, P>::call( _kernel, fn, _args, m_proxy );
+            PyObject * ret = function_proxy_call<F, P>::call( _kernel, fn, _args, m_proxy );
 
             return ret;
         }
@@ -130,7 +130,7 @@ namespace pybind
 
             F fn = this->getFn();
 
-            PyObject *ret = function_proxy_args_call<F, P>::call( _kernel, fn, _args, m_proxy );
+            PyObject * ret = function_proxy_args_call<F, P>::call( _kernel, fn, _args, m_proxy );
 
             return ret;
         }
@@ -165,7 +165,7 @@ namespace pybind
 
             F fn = this->getFn();
 
-            PyObject *ret = function_call<F>::call( _kernel, fn, _args );
+            PyObject * ret = function_call<F>::call( _kernel, fn, _args );
 
             return ret;
         }
@@ -192,7 +192,7 @@ namespace pybind
 
             F fn = this->getFn();
 
-            PyObject *ret = function_kernel_call<F>::call( _kernel, fn, _args );
+            PyObject * ret = function_kernel_call<F>::call( _kernel, fn, _args );
 
             return ret;
         }
@@ -215,7 +215,7 @@ namespace pybind
 
             F fn = this->getFn();
 
-            PyObject *ret = function_kernel_args_call<F>::call( _kernel, fn, _args );
+            PyObject * ret = function_kernel_args_call<F>::call( _kernel, fn, _args );
 
             return ret;
         }

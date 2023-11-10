@@ -53,7 +53,7 @@ namespace pybind
     pybind::tuple make_tuple_t( kernel_interface * _kernel, const T & ... _t )
     {
         return make_tuple_i( _kernel
-            , { detail::import_operator_t( _kernel, _t ) ... }
+            , {detail::import_operator_t( _kernel, _t ) ...}
         );
     }
     //////////////////////////////////////////////////////////////////////////

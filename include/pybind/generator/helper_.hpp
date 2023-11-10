@@ -34,7 +34,7 @@ namespace pybind
             (void)_kernel;
             (void)_scope;
 
-            C * obj = static_cast<C*>(_impl);
+            C * obj = static_cast<C *>(_impl);
 
             delete obj;
         }
@@ -50,7 +50,7 @@ namespace pybind
             (void)_kernel;
             (void)_scope;
 
-            C * obj = static_cast<C*>(_impl);
+            C * obj = static_cast<C *>(_impl);
 
             (void)obj;
 
@@ -87,7 +87,7 @@ namespace pybind
                 return false;
             }
 
-            _value = static_cast<C*>(impl);
+            _value = static_cast<C *>(impl);
 
             return true;
         }
@@ -136,7 +136,7 @@ namespace pybind
                 return false;
             }
 
-            _value = static_cast<C*>(impl);
+            _value = static_cast<C *>(impl);
 
             return true;
         }
@@ -193,7 +193,7 @@ namespace pybind
                 return true;
             }
 
-            _value = *static_cast<C*>(impl);
+            _value = *static_cast<C *>(impl);
 
             return true;
         }

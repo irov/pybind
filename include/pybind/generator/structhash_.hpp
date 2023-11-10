@@ -9,6 +9,8 @@ namespace pybind
     class structhash_
         : public base_<C, B>
     {
+        static_assert(sizeof( C ) <= PYBIND_OBJECT_POD_SIZE, "struct must be POD");
+
     public:
         typedef extract_struct_type_ref<C> extract_type_ref;
 

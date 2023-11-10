@@ -7,7 +7,7 @@
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
-    typedef void( *pybind_logger_t )(void * _impl, const char * _msg);
+    typedef void(*pybind_logger_t)(void * _impl, const char * _msg);
     //////////////////////////////////////////////////////////////////////////
     PYBIND_API void set_logger( pybind_logger_t _logger, void * _user );
     PYBIND_API pybind_logger_t get_logger();

@@ -39,12 +39,12 @@ namespace pybind
 
     typedef void * (*pybind_metacast)(void *);
 
-    typedef void( *pybind_callback )();
+    typedef void(*pybind_callback)();
     typedef PyObject * (*pybind_cfunction)(PyObject *, PyObject *);
     typedef PyObject * (*pybind_newfunc)(PyTypeObject *, PyObject *, PyObject *);
 
-    typedef PyObject *(*pybind_getter)(PyObject *, void *);
-    typedef int( *pybind_setter )(PyObject *, PyObject *, void *);
+    typedef PyObject * (*pybind_getter)(PyObject *, void *);
+    typedef int(*pybind_setter)(PyObject *, PyObject *, void *);
 
     class visitor_class_type_scope
     {

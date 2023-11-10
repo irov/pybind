@@ -29,7 +29,7 @@
 #endif
 
 #ifndef PYBIND_OBJECT_POD_SIZE
-#define PYBIND_OBJECT_POD_SIZE 64
+#define PYBIND_OBJECT_POD_SIZE 256
 #endif
 
 #ifndef PYBIND_MEMCPY

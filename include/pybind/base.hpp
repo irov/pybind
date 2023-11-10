@@ -68,7 +68,7 @@ namespace pybind
 
         template<class T>
         bool is_embedded_type() const
-        { 
+        {
             PyTypeObject * objtype = m_kernel->get_object_type( m_obj );
 
             const class_type_scope_interface_ptr & scope = m_kernel->get_class_scope( objtype );
@@ -77,7 +77,7 @@ namespace pybind
             {
                 return false;
             }
-            
+
             const class_type_scope_interface_ptr & tscope = m_kernel->get_class_type_scope_t<T>();
 
             if( scope != tscope )

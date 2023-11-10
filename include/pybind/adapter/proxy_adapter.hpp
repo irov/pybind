@@ -34,7 +34,7 @@ namespace pybind
         void * get_proxy( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope ) override
         {
             C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
-            
+
             P * proxy = (self->*m_fn)();
 
             return reinterpret_cast<void *>(proxy);

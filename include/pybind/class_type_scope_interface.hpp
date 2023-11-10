@@ -74,7 +74,7 @@ namespace pybind
         {
             kernel_interface * kernel = this->get_kernel();
 
-            uint32_t tptrinfo = kernel->class_info<B*>();
+            uint32_t tptrinfo = kernel->class_info<B *>();
             uint32_t tinfo = kernel->class_info<B>();
 
             if( kernel->has_class_type_scope( tinfo ) == false )
@@ -97,7 +97,7 @@ namespace pybind
         virtual void set_call( const method_adapter_interface_ptr & _icall ) = 0;
         virtual void set_repr( const repr_adapter_interface_ptr & _irepr ) = 0;
         virtual void set_hash( const hash_adapter_interface_ptr & _ihash ) = 0;
-        virtual void set_compare( const compare_adapter_interface_ptr &  _iadapter ) = 0;
+        virtual void set_compare( const compare_adapter_interface_ptr & _iadapter ) = 0;
         virtual void set_getattro( const getattro_adapter_interface_ptr & _igetattro ) = 0;
         virtual void set_mapping( const mapping_adapter_interface_ptr & _imapping ) = 0;
         virtual void set_sequence_get( const sequence_get_adapter_interface_ptr & _isequence ) = 0;
@@ -159,13 +159,6 @@ namespace pybind
         virtual void * call_new( PyObject * _obj, PyObject * _args, PyObject * _kwds ) = 0;
         virtual void call_destructor( PyObject * _obj, void * _impl ) = 0;
         virtual void clear_bindable( void * _impl ) = 0;
-
-#ifndef NDEBUG 
-    public:
-        virtual void addObject( PyObject * _obj ) = 0;
-        virtual void removeObject( PyObject * _obj ) = 0;
-        virtual uint32_t getObjectCount() const = 0;
-#endif
     };
     //////////////////////////////////////////////////////////////////////////
     typedef intrusive_ptr<class_type_scope_interface> class_type_scope_interface_ptr;

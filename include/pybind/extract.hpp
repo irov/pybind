@@ -75,7 +75,7 @@ namespace pybind
                         const char * type_name = tinfo.name();
 
                         string_view repr_obj = _kernel->object_repr( _obj );
-                        
+
                         if( repr_obj.is_valid() == true )
                         {
                             _kernel->throw_message( "extract from '%.256s' type '%.256s' to '%.256s'"
@@ -120,10 +120,10 @@ namespace pybind
     PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, wchar_t & _value, bool _nothrow );
     PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, float & _value, bool _nothrow );
     PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, double & _value, bool _nothrow );
-    PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, const char * & _value, bool _nothrow );
-    PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, const wchar_t * & _value, bool _nothrow );
-    PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, PyObject * & _value, bool _nothrow );
-    PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, PyTypeObject * & _value, bool _nothrow );
+    PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, const char *& _value, bool _nothrow );
+    PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, const wchar_t *& _value, bool _nothrow );
+    PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, PyObject *& _value, bool _nothrow );
+    PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, PyTypeObject *& _value, bool _nothrow );
     PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, pybind::object & _value, bool _nothrow );
     PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, pybind::list & _value, bool _nothrow );
     PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, pybind::tuple & _value, bool _nothrow );

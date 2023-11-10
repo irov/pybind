@@ -29,12 +29,12 @@ namespace pybind
     public:
         int64_t hash( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope ) override
         {
-            uint32_t class_name = _kernel->class_info<C*>();
+            uint32_t class_name = _kernel->class_info<C *>();
             uint32_t scope_name = _kernel->class_info<C>();
 
             void * impl = _kernel->meta_cast_scope( _self, scope_name, class_name, _scope );
 
-            C * inst = static_cast<C*>(impl);
+            C * inst = static_cast<C *>(impl);
 
             int64_t hash = (*m_hash)(inst);
 

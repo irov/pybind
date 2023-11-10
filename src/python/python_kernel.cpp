@@ -324,14 +324,14 @@ namespace pybind
 
         void * impl = this->get_class_impl( _obj );
 
-        pybind::detail::unwrap_pod( _obj );
+        pybind::helper::unwrap_pod( _obj );
 
         return impl;
     }
     //////////////////////////////////////////////////////////////////////////
     bool python_kernel::is_wrap( PyObject * _obj )
     {
-        return pybind::detail::is_pod_wrap( _obj );
+        return pybind::helper::is_pod_wrap( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
     void * python_kernel::meta_cast_scope( void * _self, uint32_t _typeId, uint32_t _name, const class_type_scope_interface_ptr & _scope )
@@ -804,14 +804,14 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void * python_kernel::get_class_impl( PyObject * _obj )
     {
-        void * impl = pybind::detail::get_pod_impl( this, _obj );
+        void * impl = pybind::helper::get_pod_impl( _obj );
 
         return impl;
     }
     //////////////////////////////////////////////////////////////////////////
     bool python_kernel::is_class_weak( PyObject * _obj )
     {
-        bool result = pybind::detail::is_pod_weak( _obj );
+        bool result = pybind::helper::is_pod_weak( _obj );
 
         return result;
     }

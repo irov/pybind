@@ -70,7 +70,7 @@ namespace pybind
         _kernel->def_functor_adapter( adapter, false, _module );
     }
     //////////////////////////////////////////////////////////////////////////
-    template<class C, class D, template <typename, typename> typename P,  class F>
+    template<class C, class D, template <typename, typename> typename P, class F>
     void def_functor_kernel( kernel_interface * _kernel, const char * _name, const P<C, D> & _self, F _method, PyObject * _module = 0 )
     {
         typedef typename stdex::function_traits<F>::result t_info;

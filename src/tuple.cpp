@@ -121,7 +121,7 @@ namespace pybind
         std::initializer_list<detail::import_operator_t>::size_type t_size = _t.size();
         args::size_type args_size = _args.size();
 
-        PyObject* py_tuple = _kernel->tuple_new( (tuple::size_type)t_size + args_size );
+        PyObject * py_tuple = _kernel->tuple_new( (tuple::size_type)t_size + args_size );
 
         uint32_t enumerator = 0;
 

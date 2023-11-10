@@ -50,7 +50,7 @@ namespace pybind
         }
 
         template<class K, class V>
-        void set_attr( const K& _name, const V& _value )
+        void set_attr( const K & _name, const V & _value )
         {
             this->set_attr_i( detail::import_operator_t( m_kernel, _name ), detail::import_operator_t( m_kernel, _value ) );
         }
@@ -58,7 +58,7 @@ namespace pybind
     public:
         bool has_attr_i( const detail::import_operator_t & _name ) const;
         pybind::object get_attr_i( const detail::import_operator_t & _name ) const;
-        void set_attr_i( const detail::import_operator_t& _name, const detail::import_operator_t& _value );
+        void set_attr_i( const detail::import_operator_t & _name, const detail::import_operator_t & _value );
 
     public:
         detail::extract_operator_t extract() const;
@@ -72,7 +72,7 @@ namespace pybind
         detail::extract_operator_t call( const T & ... _t ) const
         {
             return this->call_i(
-                { detail::import_operator_t( m_kernel, _t ) ... }
+                {detail::import_operator_t( m_kernel, _t ) ...}
             );
         }
 
@@ -80,7 +80,7 @@ namespace pybind
         template<class ... T, uint32_t ... I>
         inline detail::extract_operator_t call_args_ii( args && _args, std::tuple<T ...> && _t, std::integer_sequence<uint32_t, I...> ) const
         {
-            return this->call_args_i( { detail::import_operator_t( m_kernel, std::get<I>( _t ) ) ... }
+            return this->call_args_i( {detail::import_operator_t( m_kernel, std::get<I>( _t ) ) ...}
                 , _args
             );
         }
