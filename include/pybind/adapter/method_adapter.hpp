@@ -13,6 +13,7 @@
 #include "pybind/call/function_proxy_call.hpp"
 #include "pybind/call/function_proxy_kernel_call.hpp"
 #include "pybind/call/function_proxy_args_call.hpp"
+#include "pybind/call/function_proxy_kernel_args_call.hpp"
 
 namespace pybind
 {
@@ -480,7 +481,38 @@ namespace pybind
 
             C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
-            PyObject * ret = function_proxy_args_call<F, C>::call( _kernel, m_fn, _args, self );
+            PyObject * ret = function_proxy_args_call<F, C>::call( _kernel, self, m_fn, _args );
+
+            return ret;
+        }
+
+    protected:
+        F m_fn;
+    };
+    //////////////////////////////////////////////////////////////////////////
+    template<class C, class F>
+    class method_adapter_proxy_function_kernel_args
+        : public method_adapter_interface
+    {
+    public:
+        method_adapter_proxy_function_kernel_args( const char * _name, F _fn )
+            : method_adapter_interface( _name )
+            , m_fn( _fn )
+        {
+        }
+
+        ~method_adapter_proxy_function_kernel_args() override
+        {
+        }
+
+    protected:
+        PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _args, PyObject * _kwds ) override
+        {
+            (void)_kwds;
+
+            C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
+
+            PyObject * ret = function_proxy_kernel_args_call<C, F>::call( _kernel, self, m_fn, _args );
 
             return ret;
         }

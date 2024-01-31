@@ -8,6 +8,7 @@
 #include "pybind/call/function_proxy_args_call.hpp"
 #include "pybind/call/function_kernel_call.hpp"
 #include "pybind/call/function_kernel_args_call.hpp"
+#include "pybind/call/function_proxy_kernel_args_call.hpp"
 
 #include "pybind/types.hpp"
 

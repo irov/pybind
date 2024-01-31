@@ -259,6 +259,18 @@ namespace pybind
             return *this;
         }
 
+        template<class F>
+        base_ & def_static_kernel_args( const char * _name, F _fn )
+        {
+            allocator_interface * allocator = m_kernel->get_allocator();
+
+            method_adapter_interface_ptr iadapter = allocator->newT<method_adapter_proxy_function_kernel_args<C, F>>( _name, _fn );
+
+            m_scope->add_method( iadapter );
+
+            return *this;
+        }
+
         template<class P, class F>
         base_ & def_proxy_static( const char * _name, P * _proxy, F _fn )
         {
