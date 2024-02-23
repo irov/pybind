@@ -820,7 +820,18 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool python_kernel::type_initialize( PyObject * _obj )
     {
-        return pybind::type_initialize( _obj );
+        PyTypeObject * type = (PyTypeObject *)_obj;
+
+        const class_type_scope_interface_ptr & scope = this->get_class_scope( type );
+
+        if( scope == nullptr )
+        {
+            return false;
+        }
+
+        scope->type_initialize( type );
+
+        return true;
     }
     //////////////////////////////////////////////////////////////////////////
     uint32_t python_kernel::get_python_version()
@@ -831,11 +842,6 @@ namespace pybind
     PyObject * python_kernel::get_builtins()
     {
         return pybind::get_builtins();
-    }
-    //////////////////////////////////////////////////////////////////////////
-    PyObject * python_kernel::set_currentmodule( PyObject * _obj )
-    {
-        return pybind::set_currentmodule( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::set_syspath( PyObject * _path )

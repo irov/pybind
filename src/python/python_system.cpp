@@ -10,6 +10,17 @@
 #include <stdexcept>
 #include <cstdio>
 
+#ifndef NDEBUG
+#include <thread>
+#endif
+
+#ifndef NDEBUG
+#   define PYBIND_CHECK_MAIN_THREAD() assert( g_main_thread_id == std::this_thread::get_id() )
+#else
+#   define PYBIND_CHECK_MAIN_THREAD() 
+#endif
+
+
 #if PYBIND_PYTHON_ERROR_FORMAT_FLAG
 #if PYBIND_PYTHON_VERSION < 300
 #ifdef __cplusplus
@@ -29,11 +40,19 @@ namespace pybind
     static PyThreadState * gtstate;
 #endif
     //////////////////////////////////////////////////////////////////////////
+    std::thread::id g_main_thread_id;
+    //////////////////////////////////////////////////////////////////////////
     kernel_interface * initialize( allocator_interface * _allocator, const wchar_t * _path, bool _debug, bool install_sigs, bool _nosite )
     {
         (void)_allocator;
         (void)_path;
         (void)_debug;
+
+#ifndef NDEBUG
+        std::thread::id main_thread_id = std::this_thread::get_id();
+
+        g_main_thread_id = main_thread_id;
+#endif
 
 #if PYBIND_PYTHON_ERROR_FORMAT_FLAG
 #if PYBIND_PYTHON_VERSION < 300
@@ -177,6 +196,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void check_error()
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         if( PyErr_Occurred() != nullptr )
         {
             PyErr_Print();
@@ -192,6 +213,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void setStdErrorHandle( PyObject * _handle )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * sysModule = PyImport_AddModule( "sys" );
 
         PyObject_SetAttrString( sysModule, "stderr", _handle );
@@ -199,6 +222,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void setStdOutHandle( PyObject * _handle )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * sysModule = PyImport_AddModule( "sys" );
 
         PyObject_SetAttrString( sysModule, "stdout", _handle );
@@ -206,6 +231,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * getStdErrorHandle()
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * sysModule = PyImport_AddModule( "sys" );
 
         PyObject * stderr_handle = PyObject_GetAttrString( sysModule, "stderr" );
@@ -215,6 +242,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * getStdOutHandle()
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * sysModule = PyImport_AddModule( "sys" );
 
         PyObject * stdout_handle = PyObject_GetAttrString( sysModule, "stdout" );
@@ -224,6 +253,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * get_builtins()
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
 #if PYBIND_PYTHON_VERSION < 300
         PyObject * builtins = PyImport_ImportModuleLevel( const_cast<char *>("__builtin__"),
             nullptr, nullptr, nullptr, 0 );
@@ -240,6 +271,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * module_import( const char * _name, bool & _exsist )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * module = PyImport_ImportModule( _name );
 
         if( PyErr_Occurred() )
@@ -267,6 +300,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * module_init( const char * _name )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * module = PyImport_AddModule( _name );
 
         return module;
@@ -274,6 +309,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void module_fini( PyObject * _module )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         _PyModule_Clear( _module );
     }
     //////////////////////////////////////////////////////////////////////////
@@ -321,16 +358,22 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * module_dict( PyObject * _module )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         return PyModule_GetDict( _module );
     }
     //////////////////////////////////////////////////////////////////////////
     void module_addobject( PyObject * _module, const char * _name, PyObject * _obj )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyModule_AddObject( _module, _name, _obj );
     }
     //////////////////////////////////////////////////////////////////////////
     void module_removeobject( PyObject * _module, const char * _name )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * py_none = pybind::ret_none();
 
         PyModule_AddObject( _module, _name, py_none );
@@ -338,6 +381,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool module_hasobject( PyObject * _module, const char * _name )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * dict = pybind::module_dict( _module );
 
         bool result = pybind::dict_existstring( dict, _name );
@@ -347,6 +392,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * module_execcode( const char * _name, PyObject * _code )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         char * unconst_name = const_cast<char *>(_name);
         PyObject * module = PyImport_ExecCodeModule( unconst_name, _code );
 
@@ -357,6 +404,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * module_reload( PyObject * _module )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * reload_module = PyImport_ReloadModule( _module );
 
         pybind::check_error();
@@ -366,38 +415,24 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool code_check( PyObject * _code )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         return PyCode_Check( _code );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * code_compile_file( const void * _buf, const char * _module )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * code = Py_CompileString( (const char *)_buf, _module, Py_file_input );
 
         return code;
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * set_currentmodule( PyObject * _obj )
-    {
-        kernel_interface * kernel = pybind::get_kernel();
-
-        PyObject * old_module = kernel->get_current_module();
-
-        kernel->set_current_module( _obj );
-
-        return old_module;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    PyObject * get_currentmodule()
-    {
-        kernel_interface * kernel = pybind::get_kernel();
-
-        PyObject * module = kernel->get_current_module();
-
-        return module;
-    }
-    //////////////////////////////////////////////////////////////////////////
     PyObject * ask_native( PyObject * _obj, PyObject * _args )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * result = PyObject_CallObject( _obj, _args );
 
         pybind::check_error();
@@ -549,6 +584,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * exec_file( const char * _code, PyObject * _globals, PyObject * _locals )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * result = PyRun_String( _code, Py_file_input, _globals, _locals );
 
         pybind::check_error();
@@ -558,6 +595,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * compile_string( const char * _string, const char * _file )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * result = Py_CompileString( _string, _file, Py_file_input );
 
         pybind::check_error();
@@ -567,6 +606,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PYBIND_API PyObject * eval_string( const char * _string, PyObject * _globals, PyObject * _locals )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * obj = PyRun_String( _string, Py_eval_input, _globals, _locals );
 
         pybind::check_error();
@@ -598,21 +639,29 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void incref( PyObject * _obj )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         Py_INCREF( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
     void decref( PyObject * _obj )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         Py_DECREF( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
     void xincref( PyObject * _obj )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         Py_XINCREF( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
     void xdecref( PyObject * _obj )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         Py_XDECREF( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
@@ -640,36 +689,50 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * get_none()
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         return Py_None;
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * ret_none()
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         Py_RETURN_NONE;
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * get_true()
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         return Py_True;
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * get_false()
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         return Py_False;
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * ret_true()
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         Py_RETURN_TRUE;
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * ret_false()
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         Py_RETURN_FALSE;
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * ret_bool( bool _value )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         if( _value == true )
         {
             PyObject * py_true = pybind::ret_true();
@@ -684,6 +747,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * get_bool( bool _value )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         if( _value == true )
         {
             return pybind::get_true();
@@ -694,6 +759,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool has_attr( PyObject * _obj, PyObject * _attr )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         int value = PyObject_HasAttr( _obj, _attr );
 
         return value == 1;
@@ -701,6 +768,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * get_attr( PyObject * _obj, PyObject * _attr )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * obj = PyObject_GetAttr( _obj, _attr );
 
         return obj;
@@ -708,6 +777,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool has_attrstring( PyObject * _obj, const char * _attr )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         int value = PyObject_HasAttrString( _obj, _attr );
 
         return value == 1;
@@ -715,6 +786,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * get_attrstring( PyObject * _obj, const char * _attr )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * obj = PyObject_GetAttrString( _obj, _attr );
 
         return obj;
@@ -722,6 +795,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool set_attr( PyObject * _obj, PyObject * _attr, PyObject * _value )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         int res = PyObject_SetAttr( _obj, _attr, _value );
 
         if( res != 0 )
@@ -736,6 +811,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool set_attrstring( PyObject * _obj, const char * _attr, PyObject * _value )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         int res = PyObject_SetAttrString( _obj, _attr, _value );
 
         if( res != 0 )
@@ -782,6 +859,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool extract_bool( PyObject * _obj, bool & _value )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         if( _obj == nullptr )
         {
             return false;
@@ -816,6 +895,8 @@ namespace pybind
     template<class T>
     static bool extract_int_t( PyObject * _obj, T & _value )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         if( _obj == nullptr )
         {
             return false;
@@ -870,6 +951,8 @@ namespace pybind
     template<class T>
     static bool extract_unsigned_int_t( PyObject * _obj, T & _value )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         if( _obj == nullptr )
         {
             return false;
@@ -931,6 +1014,8 @@ namespace pybind
     template<class T>
     static bool extract_float_t( PyObject * _obj, T & _value )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         if( _obj == nullptr )
         {
             return false;
@@ -974,6 +1059,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool extract_wchar( PyObject * _obj, wchar_t & _value )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         if( _obj == nullptr )
         {
             return false;
@@ -1022,6 +1109,8 @@ namespace pybind
     template<class T>
     static PyObject * ptr_int_t( T _value )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
 #   if PYBIND_PYTHON_VERSION < 300
         return PyInt_FromLong( _value );
 #	else
@@ -1046,6 +1135,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_int64( int64_t _value )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         return PyLong_FromLongLong( _value );
     }
     //////////////////////////////////////////////////////////////////////////
@@ -1066,31 +1157,43 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_uint64( uint64_t _value )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         return PyLong_FromUnsignedLongLong( _value );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_float( float _value )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         return PyFloat_FromDouble( _value );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_double( double _value )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         return PyFloat_FromDouble( _value );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_long( long _value )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         return PyLong_FromLong( _value );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_ulong( unsigned long _value )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         return PyLong_FromUnsignedLong( _value );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * list_new( uint32_t _size )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         Py_ssize_t py_size = (Py_ssize_t)_size;
 
         PyObject * obj = PyList_New( py_size );
@@ -1121,6 +1224,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * list_getitem( PyObject * _obj, uint32_t _index )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         Py_ssize_t py_index = (Py_ssize_t)_index;
 
         PyObject * obj = PyList_GetItem( _obj, py_index );
@@ -1135,6 +1240,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool list_insert( PyObject * _obj, uint32_t _index, PyObject * _item )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         Py_ssize_t py_index = (Py_ssize_t)_index;
 
         int res = PyList_Insert( _obj, py_index, _item );
@@ -1151,6 +1258,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool list_remove( PyObject * _obj, uint32_t _it )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         int res = PyList_SetSlice( _obj, _it, _it + 1, nullptr );
 
         if( res != 0 )
@@ -1165,6 +1274,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool list_setitem( PyObject * _obj, uint32_t _index, PyObject * _item )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         pybind::incref( _item );
 
         Py_ssize_t py_index = (Py_ssize_t)_index;
@@ -1183,6 +1294,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool list_appenditem( PyObject * _obj, PyObject * _item )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         int res = PyList_Append( _obj, _item );
 
         if( res == -1 )
@@ -1197,6 +1310,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * dict_new()
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * obj = PyDict_New();
 
         return obj;
@@ -1204,6 +1319,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * dict_new_presized( uint32_t _count )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * obj = _PyDict_NewPresized( _count );
 
         return obj;
@@ -1211,6 +1328,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * dict_from( PyObject * _obj )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * py_dict = pybind::dict_new();
 
         PyObject * py_dir = PyObject_Dir( _obj );
@@ -1246,6 +1365,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     uint32_t dict_size( PyObject * _obj )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         Py_ssize_t size = PyDict_Size( _obj );
 
         return (uint32_t)size;
@@ -1253,6 +1374,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool dict_setstring( PyObject * _dict, const char * _name, PyObject * _value )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         int res = PyDict_SetItemString( _dict, _name, _value );
 
         if( res == -1 )
@@ -1267,6 +1390,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool dict_set( PyObject * _dict, PyObject * _name, PyObject * _value )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         int res = PyDict_SetItem( _dict, _name, _value );
 
         if( res == -1 )
@@ -1281,6 +1406,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool dict_removestring( PyObject * _dict, const char * _key )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         int res = PyDict_DelItemString( _dict, _key );
 
         if( res == -1 )
@@ -1295,6 +1422,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool dict_remove( PyObject * _dict, PyObject * _key )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         int res = PyDict_DelItem( _dict, _key );
 
         if( res == -1 )
@@ -1309,6 +1438,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * dict_getstring( PyObject * _dict, const char * _key )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * obj = PyDict_GetItemString( _dict, _key );
 
         return obj;
@@ -1316,6 +1447,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * dict_get( PyObject * _dict, PyObject * _key )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * obj = PyDict_GetItem( _dict, _key );
 
         return obj;
@@ -1323,6 +1456,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool dict_exist( PyObject * _dict, PyObject * _key )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         int contains = PyDict_Contains( _dict, _key );
 
         if( contains == 1 )
@@ -1335,6 +1470,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool dict_existstring( PyObject * _dict, const char * _key )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * kv = pybind::string_from_char( _key );
 
         bool result = pybind::dict_exist( _dict, kv );
@@ -1346,6 +1483,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool dict_next( PyObject * _dict, uint32_t & _pos, PyObject ** _key, PyObject ** _value )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         Py_ssize_t ps = (Py_ssize_t)(_pos);
 
         int res = PyDict_Next( _dict, &ps, _key, _value );
@@ -1357,6 +1496,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * dict_items( PyObject * _dict )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * obj = PyDict_Items( _dict );
 
         return obj;
@@ -1364,6 +1505,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * tuple_new( uint32_t _size )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         Py_ssize_t py_size = (Py_ssize_t)_size;
         PyObject * obj = PyTuple_New( py_size );
 
@@ -1372,6 +1515,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool tuple_setitem( PyObject * _tuple, uint32_t _index, PyObject * _value )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         if( _value == nullptr )
         {
             return false;
@@ -1402,6 +1547,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     uint32_t tuple_size( PyObject * _obj )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         Py_ssize_t size = PyTuple_Size( _obj );
 
         return (uint32_t)size;
@@ -1409,6 +1556,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * tuple_getitem( PyObject * _obj, uint32_t _index )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         Py_ssize_t py_index = (Py_ssize_t)_index;
         PyObject * obj = PyTuple_GetItem( _obj, py_index );
 
@@ -1417,6 +1566,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * tuple_slice( PyObject * _obj, uint32_t _low, uint32_t _high )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         Py_ssize_t py_low = (Py_ssize_t)_low;
         Py_ssize_t py_high = (Py_ssize_t)_high;
         PyObject * obj_slice = PyTuple_GetSlice( _obj, py_low, py_high );
@@ -1426,6 +1577,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * tuple_slice_tail( PyObject * _obj, uint32_t _size )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         uint32_t size = pybind::tuple_size( _obj );
 
         PyObject * obj_slice = pybind::tuple_slice( _obj, _size, size );
@@ -1435,6 +1588,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * object_dir( PyObject * _obj )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * py_dir = PyObject_Dir( _obj );
 
         return py_dir;
@@ -1442,6 +1597,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyTypeObject * object_type( PyObject * _obj )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyTypeObject * type = Py_TYPE( _obj );
 
         return type;
@@ -1449,6 +1606,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     const char * object_type_name( PyObject * _obj )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyTypeObject * type = Py_TYPE( _obj );
 
         const char * name = type->tp_name;
@@ -1458,6 +1617,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * object_repr_type( PyObject * _obj )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         if( _obj == nullptr )
         {
             return nullptr;
@@ -1477,6 +1638,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * object_repr( PyObject * _obj )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         if( _obj == nullptr )
         {
             return nullptr;
@@ -1494,6 +1657,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * object_str( PyObject * _obj )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         if( _obj == nullptr )
         {
             return nullptr;
@@ -1511,6 +1676,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     int64_t object_hash( PyObject * _obj )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         int64_t py_hash = (int64_t)PyObject_Hash( _obj );
 
         return py_hash;
@@ -1518,6 +1685,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool get_traceback_function( char * _buffer, size_t _maxlen, uint32_t * _lineno )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         if( _maxlen == 0 )
         {
             return true;
@@ -1582,6 +1751,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool get_traceback( char * _buffer, size_t _maxlen )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         if( _maxlen == 0 )
         {
             return true;
@@ -1649,6 +1820,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void error_traceback( const char * _format, ... )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         va_list valist;
         va_start( valist, _format );
 
@@ -1659,6 +1832,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void error_traceback_va( const char * _format, va_list _va )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         pybind::check_error();
 
         char buffer[4096];
@@ -1690,6 +1865,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void error_message( const char * _format, ... )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         va_list valist;
         va_start( valist, _format );
         pybind::error_message_va( _format, valist );
@@ -1698,6 +1875,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void error_message_va( const char * _format, va_list _va )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         pybind::check_error();
 
         char buffer[2048];
@@ -1708,6 +1887,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void throw_message( const char * _format, ... )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         va_list valist;
         va_start( valist, _format );
         pybind::throw_message_va( _format, valist );
@@ -1716,12 +1897,16 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void throw_message_va( const char * _format, va_list _va )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         pybind::error_message_va( _format, _va );
         pybind::throw_exception_va( _format, _va );
     }
     //////////////////////////////////////////////////////////////////////////
     void warning_traceback( const char * _format, ... )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         va_list valist;
         va_start( valist, _format );
 
@@ -1731,6 +1916,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void warning_traceback_va( const char * _format, va_list _va )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         pybind::check_error();
 
         char buffer[4096];
@@ -1760,11 +1947,15 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void error_clear()
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyErr_Clear();
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * build_value( const char * _format, ... )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         va_list valist;
         va_start( valist, _format );
 
@@ -1777,6 +1968,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * build_value_va( const char * _format, va_list _va )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * value = Py_VaBuildValue( _format, _va );
 
         if( value == nullptr )
@@ -1789,60 +1982,10 @@ namespace pybind
         return value;
     }
     //////////////////////////////////////////////////////////////////////////
-    void unwrap( PyObject * _value )
-    {
-        kernel_interface * kernel = pybind::get_kernel();
-
-        kernel->unwrap( _value );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    bool is_wrap( PyObject * _value )
-    {
-        kernel_interface * kernel = pybind::get_kernel();
-
-        bool result = kernel->is_wrap( _value );
-
-        return result;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    bool is_class( PyObject * _obj )
-    {
-        kernel_interface * kernel = pybind::get_kernel();
-
-        bool result = kernel->is_class( _obj );
-
-        return result;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    bool is_type_class( PyTypeObject * _type )
-    {
-        kernel_interface * kernel = pybind::get_kernel();
-
-        bool result = kernel->is_type_class( _type );
-
-        return result;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    bool type_initialize( PyObject * _obj )
-    {
-        kernel_interface * kernel = pybind::get_kernel();
-
-        PyTypeObject * type = (PyTypeObject *)_obj;
-
-        const class_type_scope_interface_ptr & scope = kernel->get_class_scope( type );
-
-        if( scope == nullptr )
-        {
-            return false;
-        }
-
-        scope->type_initialize( type );
-
-        return true;
-    }
-    //////////////////////////////////////////////////////////////////////////
     int64_t type_hash( PyTypeObject * _obj )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         int64_t py_hash = (int64_t)PyObject_Hash( (PyObject *)_obj );
 
         return py_hash;
@@ -1857,6 +2000,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool test_equal( PyObject * _left, PyObject * _right )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         int value = PyObject_RichCompareBool( _left, _right, Py_EQ );
 
         return value == 1;
@@ -1902,6 +2047,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     const char * string_to_char( PyObject * _string )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         char * ch_buff_unconst = PyBytes_AsString( _string );
 
         const char * ch_buff = const_cast<const char *>(ch_buff_unconst);
@@ -1911,6 +2058,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     const char * string_to_char_and_size( PyObject * _string, size_t * _size )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         char * ch_buff_unconst;
         Py_ssize_t len;
         PyBytes_AsStringAndSize( _string, &ch_buff_unconst, &len );
@@ -1924,6 +2073,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * string_from_char( const char * _str )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * py_str = PyBytes_FromString( _str );
 
         return py_str;
@@ -1931,6 +2082,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * string_from_char_size( const char * _str, size_t _size )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         Py_ssize_t py_size = (Py_ssize_t)_size;
         PyObject * py_str = PyBytes_FromStringAndSize( _str, py_size );
 
@@ -1939,6 +2092,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool unicode_check( PyObject * _unicode )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         bool value = PyUnicode_CheckExact( _unicode );
 
         return value;
@@ -1946,6 +2101,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     const wchar_t * unicode_to_wchar( PyObject * _unicode )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         const wchar_t * wstr = PyUnicode_AsUnicode( _unicode );
 
         return wstr;
@@ -1953,6 +2110,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     const wchar_t * unicode_to_wchar_and_size( PyObject * _unicode, size_t * _size )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         const wchar_t * wstr = PyUnicode_AsUnicode( _unicode );
 
 #if PYBIND_PYTHON_VERSION < 300
@@ -1968,6 +2127,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * unicode_from_wchar( const wchar_t * _value )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         size_t size = wcslen( _value );
 
         Py_ssize_t py_size = (Py_ssize_t)size;
@@ -1978,6 +2139,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * unicode_from_wchar_size( const wchar_t * _value, size_t _size )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         Py_ssize_t py_size = (Py_ssize_t)_size;
         PyObject * py_unicode = PyUnicode_FromWideChar( _value, py_size );
 
@@ -1986,6 +2149,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     const char * unicode_to_utf8( PyObject * _unicode )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * py_utf8 = _unicode_to_utf8_obj( _unicode );
 
         const char * ch_buff = pybind::string_to_char( py_utf8 );
@@ -1995,6 +2160,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     const char * unicode_to_utf8_and_size( PyObject * _unicode, size_t * _size )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * py_utf8 = PyUnicode_AsUTF8String( _unicode );
 
         const char * ch_buff = pybind::string_to_char_and_size( py_utf8, _size );
@@ -2004,6 +2171,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * unicode_from_utf8( const char * _utf8 )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * unicode = PyUnicode_FromString( _utf8 );
 
         return unicode;
@@ -2011,6 +2180,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * unicode_from_utf8_size( const char * _utf8, size_t _size )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         Py_ssize_t py_size = (Py_ssize_t)_size;
         PyObject * unicode = PyUnicode_FromStringAndSize( _utf8, py_size );
 
@@ -2019,6 +2190,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * _unicode_to_utf8_obj( PyObject * _unicode )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * py_utf8 = PyUnicode_AsUTF8String( _unicode );
 
         return py_utf8;
@@ -2026,11 +2199,15 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool void_ptr_check( PyObject * _obj )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         return PyCapsule_CheckExact( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * void_ptr_new( void * _impl )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PyObject * py_void = PyCapsule_New( _impl, nullptr, nullptr );
 
         return py_void;
@@ -2038,6 +2215,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void * void_ptr_get( PyObject * _obj )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         void * impl = PyCapsule_GetPointer( _obj, nullptr );
 
         return impl;
@@ -2045,6 +2224,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     long marshal_magic_number()
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         long py_magic = PyImport_GetMagicNumber();
 
         return py_magic;
@@ -2052,6 +2233,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * marshal_get_object( const void * _buf, size_t _len )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         Py_ssize_t py_len = (Py_ssize_t)_len;
 
         char * buf_unconst = const_cast<char *>(static_cast<const char *>(_buf));
@@ -2063,6 +2246,8 @@ namespace pybind
     void set_module_finder( PyObject * _finder )
     {
         (void)_finder;
+
+        PYBIND_CHECK_MAIN_THREAD();
 
 #if PYBIND_PYTHON_VERSION < 300
         PyObject * py_meta_path = PySys_GetObject( const_cast<char *>("meta_path") );
@@ -2079,6 +2264,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void remove_module_finder()
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
 #if PYBIND_PYTHON_VERSION < 300
         PyObject * py_meta_path = PySys_GetObject( const_cast<char *>("meta_path") );
 

@@ -242,7 +242,6 @@ namespace pybind
         virtual uint32_t get_python_version() = 0;
 
         virtual PyObject * get_builtins() = 0;
-        virtual PyObject * set_currentmodule( PyObject * _obj ) = 0;
 
         virtual void set_syspath( PyObject * _path ) = 0;
 

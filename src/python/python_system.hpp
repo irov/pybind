@@ -31,9 +31,6 @@ namespace pybind
     PYBIND_API bool code_check( PyObject * _code );
     PYBIND_API PyObject * code_compile_file( const void * _buf, const char * _module );
 
-    PYBIND_API PyObject * set_currentmodule( PyObject * _obj );
-    PYBIND_API PyObject * get_currentmodule();
-
     PYBIND_API PyObject * ask( PyObject * _obj, const char * _format, ... );
     PYBIND_API PyObject * ask_va( PyObject * _obj, const char * _format, va_list );
     PYBIND_API PyObject * ask_native( PyObject * _obj, PyObject * _args );
@@ -181,16 +178,7 @@ namespace pybind
     PYBIND_API PyObject * build_value( const char * _format, ... );
     PYBIND_API PyObject * build_value_va( const char * _format, va_list _va );
 
-    PYBIND_API void unwrap( PyObject * _value );
-    PYBIND_API bool is_wrap( PyObject * _value );
-
-    PYBIND_API bool is_class( PyObject * _obj );
-    PYBIND_API bool is_type_class( PyTypeObject * _type );
-
-    PYBIND_API bool type_initialize( PyObject * _obj );
     PYBIND_API int64_t type_hash( PyTypeObject * _obj );
-
-    PYBIND_API void exception_filter();
 
     PYBIND_API bool test_equal( PyObject * _left, PyObject * _right );
 

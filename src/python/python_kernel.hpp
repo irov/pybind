@@ -105,7 +105,6 @@ namespace pybind
         uint32_t get_python_version() override;
 
         PyObject * get_builtins() override;
-        PyObject * set_currentmodule( PyObject * _obj ) override;
 
         void set_syspath( PyObject * _path ) override;
 

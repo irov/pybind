@@ -278,7 +278,7 @@ void main()
         return;
     }
 
-    kernel->set_currentmodule( module );
+    kernel->set_current_module( module );
 
     Helper * helper = new Helper;
 
