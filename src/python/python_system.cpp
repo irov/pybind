@@ -20,7 +20,6 @@
 #   define PYBIND_CHECK_MAIN_THREAD() 
 #endif
 
-
 #if PYBIND_PYTHON_ERROR_FORMAT_FLAG
 #if PYBIND_PYTHON_VERSION < 300
 #ifdef __cplusplus
@@ -40,7 +39,9 @@ namespace pybind
     static PyThreadState * gtstate;
 #endif
     //////////////////////////////////////////////////////////////////////////
+#ifndef NDEBUG
     std::thread::id g_main_thread_id;
+#endif
     //////////////////////////////////////////////////////////////////////////
     kernel_interface * initialize( allocator_interface * _allocator, const wchar_t * _path, bool _debug, bool install_sigs, bool _nosite )
     {
@@ -341,6 +342,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * module_init( const char * _name )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         //PyImport_AppendInittab( _name, &initfunc );
         PyObject * module = PyImport_AddModule( _name );
 
@@ -349,6 +352,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void module_fini( PyObject * _module )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         _PyModule_Clear( _module );
 
         pybind::decref( _module );
@@ -617,6 +622,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void set_path( const wchar_t * _value )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         (void)_value;
 #   if PYBIND_PYTHON_VERSION >= 300
         Py_SetPath( _value );
@@ -627,6 +634,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void set_syspath( PyObject * _value )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         PySys_SetObject( const_cast<char *>("path"), _value );
 
         pybind::check_error();
@@ -1210,6 +1219,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     uint32_t list_size( PyObject * _obj )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         Py_ssize_t size = PyList_Size( _obj );
 
         if( size == -1 )
@@ -1836,7 +1847,7 @@ namespace pybind
 
         pybind::check_error();
 
-        char buffer[4096];
+        char buffer[4096] = {'\0'};
         vsprintf( buffer, _format, _va );
 
         PyThreadState * tstate = PyThreadState_GET();
@@ -1851,7 +1862,7 @@ namespace pybind
 
         const char * str_filename = pybind::string_to_char( py_filename );
 
-        char trace_buffer[4096 + 256];
+        char trace_buffer[4096 + 256] = {'\0'};
         sprintf( trace_buffer, "%s[%d]: %s"
             , str_filename
             , fileline
@@ -1879,7 +1890,7 @@ namespace pybind
 
         pybind::check_error();
 
-        char buffer[2048];
+        char buffer[2048] = {'\0'};
         vsprintf( buffer, _format, _va );
 
         PyErr_SetString( PyExc_RuntimeError, buffer );
@@ -1920,7 +1931,7 @@ namespace pybind
 
         pybind::check_error();
 
-        char buffer[4096];
+        char buffer[4096] = {'\0'};
         vsprintf( buffer, _format, _va );
 
         PyThreadState * tstate = PyThreadState_GET();
@@ -1935,7 +1946,7 @@ namespace pybind
 
         const char * str_filename = pybind::string_to_char( py_filename );
 
-        char trace_buffer[4096 + 256];
+        char trace_buffer[4096 + 256] = {'\0'};
         sprintf( trace_buffer, "%s[%d]: %s"
             , str_filename
             , fileline
@@ -2029,6 +2040,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     uint32_t string_size( PyObject * _string )
     {
+        PYBIND_CHECK_MAIN_THREAD();
+
         Py_ssize_t size = PyBytes_Size( _string );
 
         return (uint32_t)size;
@@ -2278,5 +2291,6 @@ namespace pybind
         interp->importlib = nullptr;
 #endif
     }
+    //////////////////////////////////////////////////////////////////////////
 }
 
