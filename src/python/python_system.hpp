@@ -164,6 +164,7 @@ namespace pybind
     PYBIND_API PyObject * object_str( PyObject * _obj );
     PYBIND_API int64_t object_hash( PyObject * _obj );
 
+    PYBIND_API PyObject * get_exception_traceback( PyObject * _exception );
     PYBIND_API bool get_traceback_function( char * _buffer, size_t _maxlen, uint32_t * _lineno );
     PYBIND_API bool get_traceback( char * _buffer, size_t _maxlen );
     PYBIND_API void error_traceback( const char * _format, ... );
@@ -179,6 +180,7 @@ namespace pybind
     PYBIND_API PyObject * build_value_va( const char * _format, va_list _va );
 
     PYBIND_API int64_t type_hash( PyTypeObject * _obj );
+    PYBIND_API const char * type_name( PyTypeObject * _obj );
 
     PYBIND_API bool test_equal( PyObject * _left, PyObject * _right );
 

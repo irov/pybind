@@ -216,27 +216,33 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        PyObject * sysModule = PyImport_AddModule( "sys" );
+        PyObject * sysModule = PyImport_ImportModule( "sys" );
 
         PyObject_SetAttrString( sysModule, "stderr", _handle );
+
+        Py_DECREF( sysModule );
     }
     //////////////////////////////////////////////////////////////////////////
     void setStdOutHandle( PyObject * _handle )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        PyObject * sysModule = PyImport_AddModule( "sys" );
+        PyObject * sysModule = PyImport_ImportModule( "sys" );
 
         PyObject_SetAttrString( sysModule, "stdout", _handle );
+
+        Py_DECREF( sysModule );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * getStdErrorHandle()
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        PyObject * sysModule = PyImport_AddModule( "sys" );
+        PyObject * sysModule = PyImport_ImportModule( "sys" );
 
         PyObject * stderr_handle = PyObject_GetAttrString( sysModule, "stderr" );
+
+        Py_DECREF( sysModule );
 
         return stderr_handle;
     }
@@ -245,9 +251,11 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        PyObject * sysModule = PyImport_AddModule( "sys" );
+        PyObject * sysModule = PyImport_ImportModule( "sys" );
 
         PyObject * stdout_handle = PyObject_GetAttrString( sysModule, "stdout" );
+
+        Py_DECREF( sysModule );
 
         return stdout_handle;
     }
@@ -1694,6 +1702,31 @@ namespace pybind
         return py_hash;
     }
     //////////////////////////////////////////////////////////////////////////
+    PyObject * get_exception_traceback( PyObject * _exception )
+    {
+        PyObject * traceback_module = PyImport_ImportModule( "traceback" );
+        
+        if( traceback_module == nullptr )
+        {
+            pybind::check_error();
+
+            return nullptr;
+        }
+        
+        PyObject * traceback_list = PyObject_CallMethod( traceback_module, (char *)"extract_tb", (char *)"O", _exception );
+
+        Py_DECREF( traceback_module );
+
+        if( traceback_list == nullptr )
+        {
+            pybind::check_error();
+
+            return nullptr;
+        }
+
+        return traceback_list;
+    }
+    //////////////////////////////////////////////////////////////////////////
     bool get_traceback_function( char * _buffer, size_t _maxlen, uint32_t * _lineno )
     {
         PYBIND_CHECK_MAIN_THREAD();
@@ -2000,6 +2033,15 @@ namespace pybind
         int64_t py_hash = (int64_t)PyObject_Hash( (PyObject *)_obj );
 
         return py_hash;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const char * type_name( PyTypeObject * _obj )
+    {
+        PYBIND_CHECK_MAIN_THREAD();
+
+        const char * name = _obj->tp_name;
+
+        return name;
     }
     //////////////////////////////////////////////////////////////////////////
     bool bool_check( PyObject * _obj )

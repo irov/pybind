@@ -82,6 +82,9 @@ namespace pybind
         PyTypeObject * get_object_type( PyObject * _type ) override;
         uint32_t get_object_type_id( PyObject * _type ) override;
 
+        const char * object_type_name( PyObject * _type ) override;
+        const char * type_name( PyTypeObject * _type ) override;
+
         const class_type_scope_interface_ptr & get_class_scope( PyTypeObject * _type ) override;
         void cache_class_scope_type( const class_type_scope_interface_ptr & _scope ) override;
         void remove_class_scope_type( const class_type_scope_interface_ptr & _scope ) override;
@@ -116,6 +119,8 @@ namespace pybind
         void set_module_finder( PyObject * _finder ) override;
         void remove_module_finder() override;
 
+        void set_sys_excepthook( pybind_excepthook_handler_f _excepthook, void * _ud ) override;
+
         void call_native( PyObject * _obj, PyObject * _args ) override;
         void call_method( PyObject * _obj, const char * _method, const char * _format, ... ) override;
         void call_method_native( PyObject * _obj, const char * _method, PyObject * _args ) override;
@@ -137,7 +142,8 @@ namespace pybind
     public:
         void log( const char * _format, ... ) override;
         void log_va( const char * _format, va_list _va ) override;
-
+        
+        PyObject * get_exception_traceback( PyObject * _exception ) override;
         bool get_traceback_function( char * _buffer, size_t _maxlen, uint32_t * _lineno ) override;
         bool get_traceback( char * _buffer, size_t _maxlen ) override;
         void error_traceback( const char * _format, ... ) override;

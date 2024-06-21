@@ -4,6 +4,8 @@
 #include "pybind/exception.hpp"
 #include "pybind/debug.hpp"
 
+#include "pybind/function.hpp"
+
 #include "pybind/method_interface.hpp"
 
 #include "python_class_type_scope.hpp"
@@ -601,6 +603,20 @@ namespace pybind
         return type_id;
     }
     //////////////////////////////////////////////////////////////////////////
+    const char * python_kernel::object_type_name( PyObject * _type )
+    {
+        const char * type_name = pybind::object_type_name( _type );
+
+        return type_name;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const char * python_kernel::type_name( PyTypeObject * _type )
+    {
+        const char * type_name = pybind::type_name( _type );
+
+        return type_name;
+    }
+    //////////////////////////////////////////////////////////////////////////
     void python_kernel::cache_class_scope_type( const class_type_scope_interface_ptr & _scope )
     {
         PyTypeObject * py_type = _scope->get_typeobject();
@@ -885,6 +901,20 @@ namespace pybind
     void python_kernel::remove_module_finder()
     {
         pybind::remove_module_finder();
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void python_kernel::set_sys_excepthook( pybind_excepthook_handler_f _excepthook, void * _ud )
+    {
+        function_adapter_interface_ptr adapter = pybind::make_function_proxy( this, "excepthook", _excepthook, _ud );
+
+        PyObject * py_excepthook = this->create_function_adapter( adapter, false );
+
+        PyObject * sysModule = PyImport_ImportModule( "sys" );
+
+        PyObject_SetAttrString( sysModule, "excepthook", py_excepthook );
+
+        Py_DECREF( py_excepthook );
+        Py_DECREF( sysModule );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::call_native( PyObject * _obj, PyObject * _args )
@@ -1515,6 +1545,13 @@ namespace pybind
     void python_kernel::log_va( const char * _format, va_list _va )
     {
         pybind::log_va( _format, _va );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::get_exception_traceback( PyObject * _exception )
+    {
+        PyObject * traceback = pybind::get_exception_traceback( _exception );
+
+        return traceback;
     }
     //////////////////////////////////////////////////////////////////////////
     bool python_kernel::get_traceback_function( char * _buffer, size_t _maxlen, uint32_t * _lineno )

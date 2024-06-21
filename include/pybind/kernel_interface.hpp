@@ -26,6 +26,8 @@ namespace pybind
     PYBIND_API class kernel_interface * get_kernel();
     PYBIND_API void set_kernel( class kernel_interface * _kernel );
 
+    typedef void (*pybind_excepthook_handler_f)(void * _ud, PyTypeObject * _exctype, PyObject * _value, PyObject * _traceback);
+
     class kernel_interface
     {
     public:
@@ -103,6 +105,9 @@ namespace pybind
 
             return type_id;
         }
+
+        virtual const char * object_type_name( PyObject * _type ) = 0;
+        virtual const char * type_name( PyTypeObject * _type ) = 0;
 
         virtual uint32_t find_class_info_desc_name( const char * _name ) = 0;
 
@@ -253,6 +258,8 @@ namespace pybind
         virtual void set_module_finder( PyObject * _finder ) = 0;
         virtual void remove_module_finder() = 0;
 
+        virtual void set_sys_excepthook( pybind_excepthook_handler_f _excepthook, void * _ud ) = 0;
+
         virtual void call_native( PyObject * _obj, PyObject * _args ) = 0;
         virtual void call_method( PyObject * _obj, const char * _method, const char * _format, ... ) = 0;
         virtual void call_method_native( PyObject * _obj, const char * _method, PyObject * _args ) = 0;
@@ -274,6 +281,7 @@ namespace pybind
         virtual void log( const char * _format, ... ) = 0;
         virtual void log_va( const char * _format, va_list _va ) = 0;
 
+        virtual PyObject * get_exception_traceback( PyObject * _exception ) = 0;
         virtual bool get_traceback_function( char * _buffer, size_t _maxlen, uint32_t * _lineno ) = 0;
         virtual bool get_traceback( char * _buffer, size_t _maxlen ) = 0;
         virtual void error_traceback( const char * _format, ... ) = 0;
