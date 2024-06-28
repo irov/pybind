@@ -120,19 +120,7 @@ namespace pybind
     pybind::list extract_specialized<pybind::list>::operator () ( kernel_interface * _kernel, PyObject * _obj ) const
     {
         pybind::list value( pybind::invalid );
-
-        if( pybind::extract_value( _kernel, _obj, value, true ) == false )
-        {
-            const std::type_info & tinfo = typeid(pybind::list);
-
-            const char * type_name = tinfo.name();
-
-            _kernel->log( "extract_value<T>: extract invalid '%s:%s' not cast to '%s' [list]"
-                , _kernel->object_repr( _obj ).c_str()
-                , _kernel->object_repr_type( _obj ).c_str()
-                , type_name
-            );
-        }
+        pybind::extract_value( _kernel, _obj, value, true );
 
         return value;
     }

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "pybind/exception.hpp"
-#include "pybind/logger.hpp"
 
 #include "pybind/type_cast_result.hpp"
 
@@ -135,7 +134,7 @@ namespace pybind
         typedef typename stdex::mpl::remove_cref<T>::type type_value;
         type_value value;
 
-        if( extract_value( _kernel, _obj, value, false ) == false )
+        if( pybind::extract_value( _kernel, _obj, value, false ) == false )
         {
             const std::type_info & tinfo = typeid(type_value);
 
@@ -157,20 +156,9 @@ namespace pybind
         typename stdex::mpl::remove_cref<T>::type operator () ( kernel_interface * _kernel, PyObject * _obj ) const
         {
             typedef typename stdex::mpl::remove_cref<T>::type type_value;
+
             type_value value;
-
-            if( extract_value( _kernel, _obj, value, true ) == false )
-            {
-                const std::type_info & tinfo = typeid(type_value);
-
-                const char * type_name = tinfo.name();
-
-                _kernel->log( "extract_value<T>: extract invalid '%s:%s' not cast to '%s'"
-                    , _kernel->object_repr( _obj ).c_str()
-                    , _kernel->object_repr_type( _obj ).c_str()
-                    , type_name
-                );
-            }
+            pybind::extract_value( _kernel, _obj, value, true );
 
             return std::move( value );
         }
@@ -184,14 +172,7 @@ namespace pybind
         T operator () ( kernel_interface * _kernel, PyObject * _obj ) const
         {
             uint32_t value;
-
-            if( extract_value( _kernel, _obj, value, true ) == false )
-            {
-                _kernel->log( "extract_value<T>: extract invalid '%s:%s' not cast to 'uint32_t' [enum]"
-                    , _kernel->object_repr( _obj ).c_str()
-                    , _kernel->object_repr_type( _obj ).c_str()
-                );
-            }
+            pybind::extract_value( _kernel, _obj, value, true );
 
             return static_cast<T>(value);
         }
@@ -203,19 +184,7 @@ namespace pybind
         T * operator () ( kernel_interface * _kernel, PyObject * _obj ) const
         {
             T * value = nullptr;
-
-            if( extract_value( _kernel, _obj, value, true ) == false )
-            {
-                const std::type_info & tinfo = typeid(T *);
-
-                const char * type_name = tinfo.name();
-
-                _kernel->log( "extract_value<T*>: extract invalid '%s:%s' not cast to '%s'"
-                    , _kernel->object_repr( _obj ).c_str()
-                    , _kernel->object_repr_type( _obj ).c_str()
-                    , type_name
-                );
-            }
+            pybind::extract_value( _kernel, _obj, value, true );
 
             return value;
         }
@@ -227,19 +196,7 @@ namespace pybind
         stdex::intrusive_ptr<T, D> operator () ( kernel_interface * _kernel, PyObject * _obj ) const
         {
             T * value = nullptr;
-
-            if( extract_value( _kernel, _obj, value, true ) == false )
-            {
-                const std::type_info & tinfo = typeid(T *);
-
-                const char * type_name = tinfo.name();
-
-                _kernel->log( "extract_value<intrusive>: extract invalid '%s:%s' not cast to '%s'"
-                    , _kernel->object_repr( _obj ).c_str()
-                    , _kernel->object_repr_type( _obj ).c_str()
-                    , type_name
-                );
-            }
+            pybind::extract_value( _kernel, _obj, value, true );
 
             return stdex::intrusive_ptr<T, D>( value );
         }
@@ -316,7 +273,7 @@ namespace pybind
     {
         PyObject * operator () ( kernel_interface * _kernel, const T & _t ) const
         {
-            return ptr_throw_i( _kernel, _t );
+            return pybind::ptr_throw_i( _kernel, _t );
         }
     };
     //////////////////////////////////////////////////////////////////////////
@@ -327,7 +284,7 @@ namespace pybind
     {
         PyObject * operator () ( kernel_interface * _kernel, T _t ) const
         {
-            return ptr_throw_i( _kernel, static_cast<uint32_t>(_t) );
+            return pybind::ptr_throw_i( _kernel, static_cast<uint32_t>(_t) );
         }
     };
     //////////////////////////////////////////////////////////////////////////
@@ -396,7 +353,7 @@ namespace pybind
     {
         try
         {
-            PyObject * value = ptr_throw( _kernel, _value );
+            PyObject * value = pybind::ptr_throw( _kernel, _value );
 
             return value;
         }

@@ -773,26 +773,26 @@ namespace pybind
 
         PyObject * obj_repr = pybind::object_repr( _obj );
 
-        if( obj_repr != nullptr )
+        if( obj_repr == nullptr )
         {
-            PyObject * obj_repr_type = pybind::object_repr_type( _obj );
-
-            pybind::error_message( "invalid extract from %.256s type %.256s to %.256s"
-                , pybind::string_to_char( obj_repr )
-                , pybind::string_to_char( obj_repr_type )
-                , typeinfo_name
-            );
-
-            pybind::decref( obj_repr );
-            pybind::decref( obj_repr_type );
-        }
-        else
-        {
-            pybind::error_message( "invalid extract from unknown object type '%s' to '%s'"
+            pybind::error_traceback( "invalid extract from unknown object type '%s' to '%s'"
                 , pybind::object_type_name( _obj )
                 , typeinfo_name
             );
+
+            return;
         }
+
+        PyObject * obj_repr_type = pybind::object_repr_type( _obj );
+
+        pybind::error_traceback( "invalid extract from %.256s type %.256s to %.256s"
+            , pybind::string_to_char( obj_repr )
+            , pybind::string_to_char( obj_repr_type )
+            , typeinfo_name
+        );
+
+        pybind::decref( obj_repr );
+        pybind::decref( obj_repr_type );
     }
     //////////////////////////////////////////////////////////////////////////
     bool python_kernel::instance_of_type( PyObject * _obj, uint32_t _tinfo )
@@ -1534,22 +1534,16 @@ namespace pybind
         return pybind::tuple_slice_tail( _obj, _size );
     }
     //////////////////////////////////////////////////////////////////////////
-    void python_kernel::log( const char * _format, ... )
-    {
-        va_list valist;
-        va_start( valist, _format );
-        this->log_va( _format, valist );
-        va_end( valist );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    void python_kernel::log_va( const char * _format, va_list _va )
-    {
-        pybind::log_va( _format, _va );
-    }
-    //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::get_exception_traceback( PyObject * _exception )
     {
         PyObject * traceback = pybind::get_exception_traceback( _exception );
+
+        return traceback;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::get_current_traceback()
+    {
+        PyObject * traceback = pybind::get_current_traceback();
 
         return traceback;
     }

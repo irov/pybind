@@ -278,10 +278,8 @@ namespace pybind
         virtual PyObject * getStdOutHandle() = 0;
         virtual PyObject * getStdErrorHandle() = 0;
 
-        virtual void log( const char * _format, ... ) = 0;
-        virtual void log_va( const char * _format, va_list _va ) = 0;
-
         virtual PyObject * get_exception_traceback( PyObject * _exception ) = 0;
+        virtual PyObject * get_current_traceback() = 0;
         virtual bool get_traceback_function( char * _buffer, size_t _maxlen, uint32_t * _lineno ) = 0;
         virtual bool get_traceback( char * _buffer, size_t _maxlen ) = 0;
         virtual void error_traceback( const char * _format, ... ) = 0;

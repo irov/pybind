@@ -148,19 +148,7 @@ namespace pybind
     pybind::tuple extract_specialized<pybind::tuple>::operator () ( kernel_interface * _kernel, PyObject * _obj ) const
     {
         pybind::tuple value( pybind::invalid );
-
-        if( pybind::extract_value( _kernel, _obj, value, true ) == false )
-        {
-            const std::type_info & tinfo = typeid(pybind::tuple);
-
-            const char * type_name = tinfo.name();
-
-            _kernel->log( "extract_value<T>: extract invalid '%s:%s' not cast to '%s' [tuple]"
-                , _kernel->object_repr( _obj ).c_str()
-                , _kernel->object_repr_type( _obj ).c_str()
-                , type_name
-            );
-        }
+        pybind::extract_value( _kernel, _obj, value, true );
 
         return value;
     }

@@ -3,7 +3,6 @@
 
 #include "pybind/class_type_scope_interface.hpp"
 
-#include "pybind/logger.hpp"
 #include "pybind/debug.hpp"
 
 namespace pybind
@@ -306,19 +305,11 @@ namespace pybind
 
         if( PyType_Ready( &m_method_generator_type ) < 0 )
         {
-            pybind::log( "invalid embedding class '%s'"
-                , m_method_generator_type.tp_name
-            );
-
             return false;
         }
 
         if( PyType_Ready( &m_method_caller_type ) < 0 )
         {
-            pybind::log( "invalid embedding class '%s'"
-                , m_method_caller_type.tp_name
-            );
-
             return false;
         }
 

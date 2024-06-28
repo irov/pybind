@@ -5,7 +5,6 @@
 
 #include "pybind/debug.hpp"
 #include "pybind/exception.hpp"
-#include "pybind/logger.hpp"
 
 namespace pybind
 {
@@ -124,10 +123,6 @@ namespace pybind
 
         if( PyType_Ready( &m_functor_type ) < 0 )
         {
-            pybind::log( "invalid embedding class '%s'"
-                , m_functor_type.tp_name
-            );
-
             return false;
         }
 

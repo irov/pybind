@@ -165,6 +165,8 @@ namespace pybind
     PYBIND_API int64_t object_hash( PyObject * _obj );
 
     PYBIND_API PyObject * get_exception_traceback( PyObject * _exception );
+    PYBIND_API PyObject * get_current_traceback();
+
     PYBIND_API bool get_traceback_function( char * _buffer, size_t _maxlen, uint32_t * _lineno );
     PYBIND_API bool get_traceback( char * _buffer, size_t _maxlen );
     PYBIND_API void error_traceback( const char * _format, ... );

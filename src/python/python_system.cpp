@@ -1727,6 +1727,31 @@ namespace pybind
         return traceback_list;
     }
     //////////////////////////////////////////////////////////////////////////
+    PyObject * get_current_traceback()
+    {
+        PyObject * traceback_module = PyImport_ImportModule( "traceback" );
+
+        if( traceback_module == nullptr )
+        {
+            pybind::check_error();
+
+            return nullptr;
+        }
+
+        PyObject * traceback_list = PyObject_CallMethod( traceback_module, (char *)"extract_stack", (char *)"" );
+
+        Py_DECREF( traceback_module );
+
+        if( traceback_list == nullptr )
+        {
+            pybind::check_error();
+
+            return nullptr;
+        }
+
+        return traceback_list;
+    }
+    //////////////////////////////////////////////////////////////////////////
     bool get_traceback_function( char * _buffer, size_t _maxlen, uint32_t * _lineno )
     {
         PYBIND_CHECK_MAIN_THREAD();

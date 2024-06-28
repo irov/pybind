@@ -140,10 +140,9 @@ namespace pybind
         PyObject * getStdErrorHandle() override;
 
     public:
-        void log( const char * _format, ... ) override;
-        void log_va( const char * _format, va_list _va ) override;
-        
         PyObject * get_exception_traceback( PyObject * _exception ) override;
+        PyObject * get_current_traceback() override;
+
         bool get_traceback_function( char * _buffer, size_t _maxlen, uint32_t * _lineno ) override;
         bool get_traceback( char * _buffer, size_t _maxlen ) override;
         void error_traceback( const char * _format, ... ) override;
