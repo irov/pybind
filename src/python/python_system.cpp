@@ -2142,7 +2142,12 @@ namespace pybind
 
         char * ch_buff_unconst;
         Py_ssize_t len;
-        PyBytes_AsStringAndSize( _string, &ch_buff_unconst, &len );
+        if( PyBytes_AsStringAndSize( _string, &ch_buff_unconst, &len ) == -1 )
+        {
+            *_size = 0;
+
+            return nullptr;
+        }
 
         *_size = (size_t)len;
 
