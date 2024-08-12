@@ -195,6 +195,13 @@ namespace pybind
         return kernel;
     }
     //////////////////////////////////////////////////////////////////////////
+    void update_main_thread()
+    {        
+#ifndef NDEBUG
+        g_main_thread_id = std::this_thread::get_id();
+#endif
+    }
+    //////////////////////////////////////////////////////////////////////////
     void check_error()
     {
         PYBIND_CHECK_MAIN_THREAD();

@@ -26,6 +26,8 @@ namespace pybind
     PYBIND_API class kernel_interface * get_kernel();
     PYBIND_API void set_kernel( class kernel_interface * _kernel );
 
+    PYBIND_API void update_main_thread();
+
     typedef void (*pybind_excepthook_handler_f)(void * _ud, PyTypeObject * _exctype, PyObject * _value, PyObject * _traceback);
 
     class kernel_interface
