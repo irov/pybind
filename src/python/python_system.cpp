@@ -14,12 +14,6 @@
 #include <thread>
 #endif
 
-#ifndef NDEBUG
-#   define PYBIND_CHECK_MAIN_THREAD() assert( g_main_thread_id == std::this_thread::get_id() )
-#else
-#   define PYBIND_CHECK_MAIN_THREAD() 
-#endif
-
 #if PYBIND_PYTHON_ERROR_FORMAT_FLAG
 #if PYBIND_PYTHON_VERSION < 300
 #ifdef __cplusplus
@@ -41,6 +35,18 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
 #ifndef NDEBUG
     std::thread::id g_main_thread_id;
+
+    static void check_main_thread()
+    {
+        if( g_main_thread_id != std::this_thread::get_id() )
+        {
+            throw std::runtime_error( "pybind: not main thread" );
+        }
+    }
+
+#   define PYBIND_CHECK_MAIN_THREAD() pybind::check_main_thread()
+#else
+#   define PYBIND_CHECK_MAIN_THREAD()
 #endif
     //////////////////////////////////////////////////////////////////////////
     kernel_interface * initialize( allocator_interface * _allocator, const wchar_t * _path, bool _debug, bool install_sigs, bool _nosite )
