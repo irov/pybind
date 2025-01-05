@@ -11,6 +11,12 @@ namespace pybind
         class extract_operator_t
         {
         public:
+            extract_operator_t()
+                : m_kernel( nullptr )
+                , m_obj( nullptr )
+            {
+            }
+
             extract_operator_t( const extract_operator_t & _r )
                 : m_kernel( _r.m_kernel )
                 , m_obj( _r.m_obj )

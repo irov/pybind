@@ -18,4 +18,3 @@ namespace pybind
         return nullptr;
     }
 }
-

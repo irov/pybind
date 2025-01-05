@@ -127,4 +127,5 @@ namespace pybind
     {
         return detail::extract_operator_t( _kernel, _obj );
     }
+    //////////////////////////////////////////////////////////////////////////
 }

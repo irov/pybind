@@ -70,6 +70,25 @@ namespace pybind
         return *this;
     }
     //////////////////////////////////////////////////////////////////////////
+    args & args::operator = ( args && _args )
+    {
+        m_kernel = _args.m_kernel;
+        m_args = _args.m_args;
+
+        _args.m_kernel = nullptr;
+        _args.m_args = nullptr;
+
+        return *this;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    args & args::operator = ( std::nullptr_t )
+    {
+        m_kernel = nullptr;
+        m_args = nullptr;
+
+        return *this;
+    }
+    //////////////////////////////////////////////////////////////////////////
     void args::reset()
     {
         if( m_kernel != nullptr )
@@ -116,4 +135,5 @@ namespace pybind
 
         return const_iterator( m_kernel, m_args, size );
     }
+    //////////////////////////////////////////////////////////////////////////
 }

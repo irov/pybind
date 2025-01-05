@@ -14,6 +14,8 @@ namespace pybind
 
     public:
         dict();
+        dict( const object & _dict );
+        dict( object && _dict );
         dict( const dict & _dict );
         dict( dict && _dict );
 

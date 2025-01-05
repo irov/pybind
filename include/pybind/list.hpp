@@ -15,10 +15,14 @@ namespace pybind
 
     public:
         list();
-        explicit list( kernel_interface * _kernel );
-        list( kernel_interface * _kernel, size_type _size );
+        list( const object & _list );
+        list( object && _list );
         list( const list & _list );
         list( list && _list );
+
+    public:
+        explicit list( kernel_interface * _kernel );
+        list( kernel_interface * _kernel, size_type _size );
 
     public:
         explicit list( pybind::invalid_t );

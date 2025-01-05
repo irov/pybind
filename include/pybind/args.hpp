@@ -25,6 +25,8 @@ namespace pybind
 
     public:
         args & operator = ( const args & _args );
+        args & operator = ( args && _args );
+        args & operator = ( std::nullptr_t );
 
     public:
         void reset();
