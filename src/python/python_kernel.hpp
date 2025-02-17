@@ -140,11 +140,8 @@ namespace pybind
         PyObject * getStdErrorHandle() override;
 
     public:
-        PyObject * get_exception_traceback( PyObject * _exception ) override;
-        PyObject * get_current_traceback() override;
-
-        bool get_traceback_function( char * _buffer, size_t _maxlen, uint32_t * _lineno ) override;
-        bool get_traceback( char * _buffer, size_t _maxlen ) override;
+        bool get_statetrace_top( char * const _filename, size_t _maxlenfilename, char * const _function, size_t _maxlenfunction, uint32_t * _lineno ) override;
+        bool get_statetrace( char * _buffer, size_t _maxlen ) override;
         void error_traceback( const char * _format, ... ) override;
         void error_traceback_va( const char * _format, va_list _va ) override;
         void error_message( const char * _format, ... ) override;
@@ -155,6 +152,12 @@ namespace pybind
         void warning_traceback_va( const char * _format, va_list _va ) override;
         PyObject * build_value( const char * _format, ... ) override;
         PyObject * build_value_va( const char * _format, va_list _va ) override;
+
+        bool traceback_check( PyObject * _traceback ) override;
+        string_view traceback_filename( PyObject * _traceback ) override;
+        uint32_t traceback_lineno( PyObject * _traceback ) override;
+        string_view traceback_function( PyObject * _traceback ) override;
+        PyObject * traceback_next( PyObject * _traceback ) override;
 
         PyObject * module_import( const char * _name, bool & _exsist ) override;
         PyObject * module_init( const char * _name ) override;

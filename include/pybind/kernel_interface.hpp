@@ -280,10 +280,8 @@ namespace pybind
         virtual PyObject * getStdOutHandle() = 0;
         virtual PyObject * getStdErrorHandle() = 0;
 
-        virtual PyObject * get_exception_traceback( PyObject * _exception ) = 0;
-        virtual PyObject * get_current_traceback() = 0;
-        virtual bool get_traceback_function( char * _buffer, size_t _maxlen, uint32_t * _lineno ) = 0;
-        virtual bool get_traceback( char * _buffer, size_t _maxlen ) = 0;
+        virtual bool get_statetrace_top( char * const _filename, size_t _maxlenfilename, char * const _function, size_t _maxlenfunction, uint32_t * _lineno ) = 0;
+        virtual bool get_statetrace( char * _buffer, size_t _maxlen ) = 0;
         virtual void error_traceback( const char * _format, ... ) = 0;
         virtual void error_traceback_va( const char * _format, va_list _va ) = 0;
         virtual void error_message( const char * _format, ... ) = 0;
@@ -294,6 +292,12 @@ namespace pybind
         virtual void warning_traceback_va( const char * _format, va_list _va ) = 0;
         virtual PyObject * build_value( const char * _format, ... ) = 0;
         virtual PyObject * build_value_va( const char * _format, va_list _va ) = 0;
+
+        virtual bool traceback_check( PyObject * _traceback ) = 0;
+        virtual string_view traceback_filename( PyObject * _traceback ) = 0;
+        virtual uint32_t traceback_lineno( PyObject * _traceback ) = 0;
+        virtual string_view traceback_function( PyObject * _traceback ) = 0;
+        virtual PyObject * traceback_next( PyObject * _traceback ) = 0;
 
         virtual PyObject * module_import( const char * _name, bool & _exsist ) = 0;
         virtual PyObject * module_init( const char * _name ) = 0;

@@ -588,7 +588,6 @@ namespace pybind
             (ssizeargfunc)0,          /* sq_inplace_repeat */
         };
         //////////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////
         static PyObject * py_nb_method( kernel_interface * _kernel, PyObject * _obj, PyObject * _value, const class_type_scope_interface_ptr & _scope, const number_binary_adapter_interface_ptr & _adapter, bool _rotate )
         {
             void * impl = _kernel->get_class_impl( _obj );

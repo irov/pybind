@@ -10,6 +10,7 @@ namespace pybind
     {
     public:
         string_view( kernel_interface * _kernel, PyObject * _obj );
+        string_view( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed_t );
         string_view( const string_view & _base );
         string_view( string_view && _base );
         ~string_view();

@@ -909,12 +909,9 @@ namespace pybind
 
         PyObject * py_excepthook = this->create_function_adapter( adapter, false );
 
-        PyObject * sysModule = PyImport_ImportModule( "sys" );
-
-        PyObject_SetAttrString( sysModule, "excepthook", py_excepthook );
+        PySys_SetObject( "excepthook", py_excepthook );
 
         Py_DECREF( py_excepthook );
-        Py_DECREF( sysModule );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::call_native( PyObject * _obj, PyObject * _args )
@@ -1077,7 +1074,7 @@ namespace pybind
     {
         PyObject * py_str = pybind::object_str( _obj );
 
-        return string_view( this, py_str );
+        return string_view( this, py_str, pybind::borrowed );
     }
     //////////////////////////////////////////////////////////////////////////
     string_view python_kernel::object_repr( PyObject * _obj )
@@ -1086,15 +1083,17 @@ namespace pybind
 
         if( py_repr == nullptr )
         {
-            return string_view( this, nullptr );
+            return string_view( this, nullptr, pybind::borrowed );
         }
 
         if( pybind::string_check( py_repr ) == false )
         {
-            return string_view( this, nullptr );
+            pybind::xdecref( py_repr );
+
+            return string_view( this, nullptr, pybind::borrowed );
         }
 
-        return string_view( this, py_repr );
+        return string_view( this, py_repr, pybind::borrowed );
     }
     //////////////////////////////////////////////////////////////////////////
     string_view python_kernel::object_repr_type( PyObject * _obj )
@@ -1103,15 +1102,17 @@ namespace pybind
 
         if( py_repr == nullptr )
         {
-            return string_view( this, nullptr );
+            return string_view( this, nullptr, pybind::borrowed );
         }
 
         if( pybind::string_check( py_repr ) == false )
         {
-            return string_view( this, nullptr );
+            pybind::xdecref( py_repr );
+
+            return string_view( this, nullptr, pybind::borrowed );
         }
 
-        return string_view( this, py_repr );
+        return string_view( this, py_repr, pybind::borrowed );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::get_none()
@@ -1534,30 +1535,14 @@ namespace pybind
         return pybind::tuple_slice_tail( _obj, _size );
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * python_kernel::get_exception_traceback( PyObject * _exception )
+    bool python_kernel::get_statetrace_top( char * const _filename, size_t _maxlenfilename, char * const _function, size_t _maxlenfunction, uint32_t * _lineno )
     {
-        PyObject * traceback = pybind::get_exception_traceback( _exception );
-
-        return traceback;
+        return pybind::get_statetrace_top( _filename, _maxlenfilename, _function, _maxlenfunction, _lineno );
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * python_kernel::get_current_traceback()
+    bool python_kernel::get_statetrace( char * _buffer, size_t _maxlen )
     {
-        PyObject * traceback = pybind::get_current_traceback();
-
-        return traceback;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::get_traceback_function( char * _buffer, size_t _maxlen, uint32_t * _lineno )
-    {
-        bool successful = pybind::get_traceback_function( _buffer, _maxlen, _lineno );
-
-        return successful;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::get_traceback( char * _buffer, size_t _maxlen )
-    {
-        bool successful = pybind::get_traceback( _buffer, _maxlen );
+        bool successful = pybind::get_statetrace( _buffer, _maxlen );
 
         return successful;
     }
@@ -1629,6 +1614,39 @@ namespace pybind
     PyObject * python_kernel::build_value_va( const char * _format, va_list _va )
     {
         return pybind::build_value_va( _format, _va );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool python_kernel::traceback_check( PyObject * _traceback )
+    {
+        return pybind::traceback_check( _traceback );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    string_view python_kernel::traceback_filename( PyObject * _traceback )
+    {
+        PyObject * filename = pybind::traceback_filename( _traceback );
+
+        return string_view( this, filename );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    uint32_t python_kernel::traceback_lineno( PyObject * _traceback )
+    {
+        uint32_t lineno = pybind::traceback_lineno( _traceback );
+
+        return lineno;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    string_view python_kernel::traceback_function( PyObject * _traceback )
+    {
+        PyObject * function = pybind::traceback_function( _traceback );
+
+        return string_view( this, function );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::traceback_next( PyObject * _traceback )
+    {
+        PyObject * next = pybind::traceback_next( _traceback );
+
+        return next;
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::module_import( const char * _name, bool & _exsist )

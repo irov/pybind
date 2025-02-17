@@ -302,7 +302,7 @@ namespace pybind
     {
         if( m_kernel == nullptr )
         {
-            return string_view( nullptr, nullptr );
+            return string_view( nullptr, nullptr, pybind::borrowed );
         }
 
         string_view py_str = m_kernel->object_str( m_obj );
@@ -314,7 +314,7 @@ namespace pybind
     {
         if( m_kernel == nullptr )
         {
-            return string_view( nullptr, nullptr );
+            return string_view( nullptr, nullptr, pybind::borrowed );
         }
 
         string_view py_repr = m_kernel->object_repr( m_obj );
@@ -326,7 +326,7 @@ namespace pybind
     {
         if( m_kernel == nullptr )
         {
-            return string_view( nullptr, nullptr );
+            return string_view( nullptr, nullptr, pybind::borrowed );
         }
 
         string_view py_repr = m_kernel->object_repr_type( m_obj );

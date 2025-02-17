@@ -202,10 +202,9 @@ namespace pybind
         {
             uint32_t tinfo = _kernel->class_info<C>();
 
-            void * obj_place = nullptr;
-
             const class_type_scope_interface_ptr & scope = _kernel->get_class_type_scope( tinfo );
 
+            void * obj_place = nullptr;
             PyObject * py_obj = scope->create_pod( &obj_place );
 
             if( py_obj == nullptr )
@@ -219,4 +218,3 @@ namespace pybind
         }
     };
 }
-

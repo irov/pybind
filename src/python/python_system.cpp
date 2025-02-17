@@ -229,33 +229,21 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        PyObject * sysModule = PyImport_ImportModule( "sys" );
-
-        PyObject_SetAttrString( sysModule, "stderr", _handle );
-
-        Py_DECREF( sysModule );
+        PySys_SetObject( "stderr", _handle );
     }
     //////////////////////////////////////////////////////////////////////////
     void setStdOutHandle( PyObject * _handle )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        PyObject * sysModule = PyImport_ImportModule( "sys" );
-
-        PyObject_SetAttrString( sysModule, "stdout", _handle );
-
-        Py_DECREF( sysModule );
+        PySys_SetObject( "stdout", _handle );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * getStdErrorHandle()
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        PyObject * sysModule = PyImport_ImportModule( "sys" );
-
-        PyObject * stderr_handle = PyObject_GetAttrString( sysModule, "stderr" );
-
-        Py_DECREF( sysModule );
+        PyObject * stderr_handle = PySys_GetObject( "stderr" );
 
         return stderr_handle;
     }
@@ -264,11 +252,7 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        PyObject * sysModule = PyImport_ImportModule( "sys" );
-
-        PyObject * stdout_handle = PyObject_GetAttrString( sysModule, "stdout" );
-
-        Py_DECREF( sysModule );
+        PyObject * stdout_handle = PySys_GetObject( "stdout" );
 
         return stdout_handle;
     }
@@ -337,29 +321,6 @@ namespace pybind
     }
     //////////////////////////////////////////////////////////////////////////
 #else
-    //   //////////////////////////////////////////////////////////////////////////
-    //static PyObject* initfunc(void)
-    //{
-    //	static PyMethodDef module_methods[] = {
-    //		{NULL}  /* Sentinel */
-    //	};
-
-    //	static struct PyModuleDef module_definition = {
-    //		PyModuleDef_HEAD_INIT,
-    //		"pybind_module",
-    //		NULL,
-    //		-1,
-    //		module_methods,
-    //		NULL,
-    //		NULL,
-    //		NULL,
-    //		NULL
-    //	};
-
-    //	PyObject * obj = PyModule_Create( &module_definition );
-
-    //	return obj;
-    //}
     //////////////////////////////////////////////////////////////////////////
     PyObject * module_init( const char * _name )
     {
@@ -1715,187 +1676,87 @@ namespace pybind
         return py_hash;
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * get_exception_traceback( PyObject * _exception )
-    {
-        PyObject * traceback_module = PyImport_ImportModule( "traceback" );
-        
-        if( traceback_module == nullptr )
-        {
-            pybind::check_error();
-
-            return nullptr;
-        }
-        
-        PyObject * traceback_list = PyObject_CallMethod( traceback_module, (char *)"extract_tb", (char *)"O", _exception );
-
-        Py_DECREF( traceback_module );
-
-        if( traceback_list == nullptr )
-        {
-            pybind::check_error();
-
-            return nullptr;
-        }
-
-        return traceback_list;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    PyObject * get_current_traceback()
-    {
-        PyObject * traceback_module = PyImport_ImportModule( "traceback" );
-
-        if( traceback_module == nullptr )
-        {
-            pybind::check_error();
-
-            return nullptr;
-        }
-
-        PyObject * traceback_list = PyObject_CallMethod( traceback_module, (char *)"extract_stack", (char *)"" );
-
-        Py_DECREF( traceback_module );
-
-        if( traceback_list == nullptr )
-        {
-            pybind::check_error();
-
-            return nullptr;
-        }
-
-        return traceback_list;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    bool get_traceback_function( char * _buffer, size_t _maxlen, uint32_t * _lineno )
+    bool get_statetrace_top( char * const _filename, size_t _maxlenfilename, char * const _function, size_t _maxlenfunction, uint32_t * _lineno )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        if( _maxlen == 0 )
+        PyThreadState * thread_state = PyThreadState_GET();
+
+        if( thread_state == nullptr )
         {
-            return true;
-        }
-
-        PyObject * modtraceback = PyImport_ImportModule( "traceback" );
-
-        if( modtraceback == nullptr )
-        {
-            PyErr_Clear();
-
-            _buffer[0] = '\0';
-            *_lineno = 0;
-
             return false;
         }
 
-        PyObject * function = PyObject_GetAttrString( modtraceback, "top_stack_function" );
+        PyFrameObject * frame = thread_state->frame;
 
-        if( function == nullptr )
+        if( frame == nullptr )
         {
-            pybind::check_error();
-
-            pybind::decref( modtraceback );
-
-            _buffer[0] = '\0';
-            *_lineno = 0;
-
             return false;
         }
 
-        PyObject * result = PyObject_CallObject( function, nullptr );
-
-        if( result == nullptr )
+        while( frame->f_back != nullptr )
         {
-            pybind::check_error();
-
-            pybind::decref( function );
-            pybind::decref( modtraceback );
-
-            _buffer[0] = '\0';
-            *_lineno = 0;
-
-            return false;
+            frame = frame->f_back;
         }
 
-        PyObject * string_stackFunc = PyTuple_GetItem( result, 0 );
-        PyObject * int_stackLineno = PyTuple_GetItem( result, 1 );
+        const char * co_filename = pybind::string_to_char( frame->f_code->co_filename );
+        const char * co_name = pybind::string_to_char( frame->f_code->co_name );
 
-        char * sresult = PyBytes_AsString( string_stackFunc );
-        strncpy( _buffer, sresult, _maxlen );
-        _buffer[_maxlen - 1] = '\0';
+        strncpy( _filename, co_filename, _maxlenfilename );
+        strncpy( _function, co_name, _maxlenfunction );
 
-        *_lineno = (uint32_t)PyNumber_AsSsize_t( int_stackLineno, nullptr );
-
-        pybind::decref( result );
-        pybind::decref( function );
-        pybind::decref( modtraceback );
+        *_lineno = frame->f_lineno;
 
         return true;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool get_traceback( char * _buffer, size_t _maxlen )
+    bool get_statetrace( char * const _buffer, size_t _maxlen )
     {
         PYBIND_CHECK_MAIN_THREAD();
+
+        PyThreadState * thread_state = PyThreadState_GET();
+
+        if( thread_state == nullptr )
+        {
+            return false;
+        }
+
+        PyFrameObject * frame = thread_state->frame;
+
+        if( frame == nullptr )
+        {
+            return false;
+        }
+
+        strncpy( _buffer, "", _maxlen );
 
         if( _maxlen == 0 )
         {
             return true;
         }
 
-        PyObject * modtraceback = PyImport_ImportModule( "traceback" );
+        PyFrameObject * frames[1024] = {nullptr};
+        uint32_t frame_count = 0;
 
-        if( modtraceback == nullptr )
+        while( frame != nullptr && frame_count < 1024 )
         {
-            PyErr_Clear();
-
-            _buffer[0] = '\0';
-
-            return false;
+            frames[frame_count++] = frame;
+            frame = frame->f_back;
         }
 
-        PyObject * function = PyObject_GetAttrString( modtraceback, "string_stack" );
-
-        if( function == nullptr )
+        for( uint32_t index = frame_count; index != 0; index-- )
         {
-            pybind::check_error();
+            PyFrameObject * f = frames[index - 1];
+            
+            const char * co_filename = pybind::string_to_char( f->f_code->co_filename );
+            const char * co_name = pybind::string_to_char( f->f_code->co_name );
+            int lineno = f->f_lineno;
 
-            pybind::decref( modtraceback );
+            char line[1024 + 1] = {'\0'};
+            snprintf( line, 1024, "File \"%s\", line %d, in %s\n", co_filename, lineno, co_name );
 
-            _buffer[0] = '\0';
-
-            return false;
+            strncat( _buffer, line, _maxlen );
         }
-
-        PyObject * result = PyObject_CallObject( function, nullptr );
-
-        if( result == nullptr )
-        {
-            pybind::check_error();
-
-            pybind::decref( function );
-            pybind::decref( modtraceback );
-
-            _buffer[0] = '\0';
-
-            return false;
-        }
-
-        if( pybind::is_none( result ) == true )
-        {
-            pybind::decref( result );
-            pybind::decref( function );
-            pybind::decref( modtraceback );
-
-            _buffer[0] = '\0';
-
-            return false;
-        }
-
-        char * sresult = PyBytes_AsString( result );
-        strncpy( _buffer, sresult, _maxlen );
-        _buffer[_maxlen - 1] = '\0';
-
-        pybind::decref( result );
-        pybind::decref( function );
-        pybind::decref( modtraceback );
 
         return true;
     }
@@ -1919,22 +1780,22 @@ namespace pybind
         pybind::check_error();
 
         char buffer[4096] = {'\0'};
-        vsprintf( buffer, _format, _va );
+        vsnprintf( buffer, 4096, _format, _va );
 
-        PyThreadState * tstate = PyThreadState_GET();
+        PyThreadState * thread_state = PyThreadState_GET();
 
-        if( tstate->frame == nullptr )
+        if( thread_state->frame == nullptr )
         {
             return;
         }
 
-        PyObject * py_filename = tstate->frame->f_code->co_filename;
-        int fileline = tstate->frame->f_lineno;
+        PyObject * py_filename = thread_state->frame->f_code->co_filename;
+        int fileline = thread_state->frame->f_lineno;
 
         const char * str_filename = pybind::string_to_char( py_filename );
 
-        char trace_buffer[4096 + 256] = {'\0'};
-        sprintf( trace_buffer, "%s[%d]: %s"
+        char trace_buffer[4096 + 256 + 1] = {'\0'};
+        snprintf( trace_buffer, 4096 + 256, "%s[%d]: %s"
             , str_filename
             , fileline
             , buffer
@@ -2005,15 +1866,15 @@ namespace pybind
         char buffer[4096] = {'\0'};
         vsprintf( buffer, _format, _va );
 
-        PyThreadState * tstate = PyThreadState_GET();
+        PyThreadState * thread_state = PyThreadState_GET();
 
-        if( tstate->frame == nullptr )
+        if( thread_state->frame == nullptr )
         {
             return;
         }
 
-        PyObject * py_filename = tstate->frame->f_code->co_filename;
-        int fileline = tstate->frame->f_lineno;
+        PyObject * py_filename = thread_state->frame->f_code->co_filename;
+        int fileline = thread_state->frame->f_lineno;
 
         const char * str_filename = pybind::string_to_char( py_filename );
 
@@ -2062,6 +1923,57 @@ namespace pybind
         }
 
         return value;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool traceback_check( PyObject * _traceback )
+    {
+        int result = PyTraceBack_Check( _traceback );
+
+        return result == 1;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * traceback_filename( PyObject * _traceback )
+    {
+        PYBIND_CHECK_MAIN_THREAD();
+
+        PyTracebackObject * tb = (PyTracebackObject *)_traceback;
+
+        PyObject * filename = tb->tb_frame->f_code->co_filename;
+
+        return filename;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    uint32_t traceback_lineno( PyObject * _traceback )
+    {
+        PYBIND_CHECK_MAIN_THREAD();
+        
+        PyTracebackObject * tb = (PyTracebackObject *)_traceback;
+
+        uint32_t lineno = tb->tb_lineno;
+
+        return lineno;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * traceback_function( PyObject * _traceback )
+    {
+        PYBIND_CHECK_MAIN_THREAD();
+
+        PyTracebackObject * tb = (PyTracebackObject *)_traceback;
+
+        PyObject * function = tb->tb_frame->f_code->co_name;
+
+        return function;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PYBIND_API PyObject * traceback_next( PyObject * _traceback )
+    {
+        PYBIND_CHECK_MAIN_THREAD();
+
+        PyTracebackObject * tb = (PyTracebackObject *)_traceback;
+
+        PyTracebackObject * next = tb->tb_next;
+
+        return (PyObject *)next;
     }
     //////////////////////////////////////////////////////////////////////////
     int64_t type_hash( PyTypeObject * _obj )

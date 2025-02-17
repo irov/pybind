@@ -8,6 +8,16 @@ namespace pybind
         : m_kernel( _kernel )
         , m_obj( _obj )
     {
+        if( m_obj != nullptr )
+        {
+            m_kernel->incref( m_obj );
+        }
+    }
+    //////////////////////////////////////////////////////////////////////////
+    string_view::string_view( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed_t )
+        : m_kernel( _kernel )
+        , m_obj( _obj )
+    {
     }
     //////////////////////////////////////////////////////////////////////////
     string_view::string_view( const string_view & _base )
