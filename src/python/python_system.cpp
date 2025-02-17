@@ -1676,7 +1676,7 @@ namespace pybind
         return py_hash;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool get_statetrace_top( char * const _filename, size_t _maxlenfilename, char * const _function, size_t _maxlenfunction, uint32_t * _lineno )
+    bool get_statetrace_top( char * const _filename, size_t _maxlenfilename, char * const _function, size_t _maxlenfunction, uint32_t * const _lineno )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
