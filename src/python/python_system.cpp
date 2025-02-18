@@ -229,21 +229,21 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        PySys_SetObject( "stderr", _handle );
+        PySys_SetObject( (char *)"stderr", _handle );
     }
     //////////////////////////////////////////////////////////////////////////
     void setStdOutHandle( PyObject * _handle )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        PySys_SetObject( "stdout", _handle );
+        PySys_SetObject( (char *)"stdout", _handle );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * getStdErrorHandle()
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        PyObject * stderr_handle = PySys_GetObject( "stderr" );
+        PyObject * stderr_handle = PySys_GetObject( (char *)"stderr" );
 
         return stderr_handle;
     }
@@ -252,7 +252,7 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        PyObject * stdout_handle = PySys_GetObject( "stdout" );
+        PyObject * stdout_handle = PySys_GetObject( (char *)"stdout" );
 
         return stdout_handle;
     }
@@ -618,7 +618,7 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        PySys_SetObject( const_cast<char *>("path"), _value );
+        PySys_SetObject( (char *)"path", _value );
 
         pybind::check_error();
     }
@@ -2260,7 +2260,7 @@ namespace pybind
         PYBIND_CHECK_MAIN_THREAD();
 
 #if PYBIND_PYTHON_VERSION < 300
-        PyObject * py_meta_path = PySys_GetObject( const_cast<char *>("meta_path") );
+        PyObject * py_meta_path = PySys_GetObject( (char *)"meta_path" );
 
         pybind::list_insert( py_meta_path, 0, _finder );
 #endif
@@ -2277,7 +2277,7 @@ namespace pybind
         PYBIND_CHECK_MAIN_THREAD();
 
 #if PYBIND_PYTHON_VERSION < 300
-        PyObject * py_meta_path = PySys_GetObject( const_cast<char *>("meta_path") );
+        PyObject * py_meta_path = PySys_GetObject( (char *)"meta_path" );
 
         pybind::list_remove( py_meta_path, 0 );
 #endif
