@@ -27,14 +27,14 @@ namespace pybind
         return m_allocator;
     }
     //////////////////////////////////////////////////////////////////////////
-    uint32_t factorable::incref()
+    uint32_t factorable::incref() noexcept
     {
         ++m_refcount;
 
         return m_refcount;
     }
     //////////////////////////////////////////////////////////////////////////
-    void factorable::decref()
+    void factorable::decref() noexcept
     {
         if( --m_refcount == 0 )
         {
@@ -42,8 +42,9 @@ namespace pybind
         }
     }
     //////////////////////////////////////////////////////////////////////////
-    uint32_t factorable::getrefcount() const
+    uint32_t factorable::getrefcount() const noexcept
     {
         return m_refcount;
     }
+    //////////////////////////////////////////////////////////////////////////
 }

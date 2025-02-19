@@ -909,7 +909,7 @@ namespace pybind
 
         PyObject * py_excepthook = this->create_function_adapter( adapter, false );
 
-        PySys_SetObject( "excepthook", py_excepthook );
+        PySys_SetObject( (char *)"excepthook", py_excepthook );
 
         Py_DECREF( py_excepthook );
     }

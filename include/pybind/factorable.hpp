@@ -5,12 +5,11 @@
 
 #include "config/stdex.hpp"
 
-#include <new>
-
 namespace pybind
 {
+    //////////////////////////////////////////////////////////////////////////
     class allocator_interface;
-
+    //////////////////////////////////////////////////////////////////////////
     class factorable
         : public stdex::intrusive_ptr_base
     {
@@ -23,9 +22,9 @@ namespace pybind
         allocator_interface * get_allocator() const;
 
     public:
-        uint32_t incref() override;
-        void decref() override;
-        uint32_t getrefcount() const override;
+        uint32_t incref() noexcept override;
+        void decref() noexcept override;
+        uint32_t getrefcount() const noexcept override;
 
     protected:
         allocator_interface * m_allocator;
