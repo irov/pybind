@@ -1735,27 +1735,18 @@ namespace pybind
             return true;
         }
 
-        PyFrameObject * frames[1024] = {nullptr};
-        uint32_t frame_count = 0;
-
-        while( frame != nullptr && frame_count < 1024 )
+        while( frame != nullptr )
         {
-            frames[frame_count++] = frame;
-            frame = frame->f_back;
-        }
-
-        for( uint32_t index = frame_count; index != 0; index-- )
-        {
-            PyFrameObject * f = frames[index - 1];
-            
-            const char * co_filename = pybind::string_to_char( f->f_code->co_filename );
-            const char * co_name = pybind::string_to_char( f->f_code->co_name );
-            int lineno = f->f_lineno;
+            const char * co_filename = pybind::string_to_char( frame->f_code->co_filename );
+            const char * co_name = pybind::string_to_char( frame->f_code->co_name );
+            int lineno = frame->f_lineno;
 
             char line[1024 + 1] = {'\0'};
             snprintf( line, 1024, "File \"%s\", line %d, in %s\n", co_filename, lineno, co_name );
 
             strncat( _buffer, line, _maxlen );
+
+            frame = frame->f_back;
         }
 
         return true;
