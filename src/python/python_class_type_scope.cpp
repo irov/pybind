@@ -246,7 +246,7 @@ namespace pybind
                 const compare_adapter_interface_ptr & adapter = scope->get_compare_adapter();
 
                 bool test_result;
-                if( adapter->compare( kernel, _obj, impl, scope, _compare, pybind_op, test_result ) == false )
+                if( adapter->compare( kernel, _obj, impl, scope, _compare, pybind_op, &test_result ) == false )
                 {
                     pybind::incref( Py_NotImplemented );
 
