@@ -20,7 +20,7 @@ namespace pybind
     public:
         virtual void * call( kernel_interface * _kernel, PyObject * _obj, PyObject * _args ) = 0;
 
-#ifndef NDEBUG
+#if defined(PYBIND_DEBUG)
     protected:
         bool valid( kernel_interface * _kernel, PyObject * _args ) const;
 #endif

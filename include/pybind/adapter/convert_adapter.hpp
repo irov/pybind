@@ -19,9 +19,8 @@ namespace pybind
         : public convert_adapter_interface
     {
     public:
-        convert_adapter( F _convert, void * _user )
+        convert_adapter( F _convert )
             : m_convert( _convert )
-            , m_user( _user )
         {
         }
 
@@ -30,14 +29,13 @@ namespace pybind
         {
             C * c = static_cast<C *>(_place);
 
-            bool result = (*m_convert)(_kernel, _obj, c, m_user);
+            bool result = (*m_convert)(_kernel, _obj, c);
 
             return result;
         }
 
     protected:
         F m_convert;
-        void * m_user;
     };
 }
 

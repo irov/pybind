@@ -175,6 +175,8 @@ namespace pybind
         PyObject * get_none() override;
         PyObject * ret_none() override;
 
+        PyObject * ret_not_implemented() override;
+
         bool is_callable( PyObject * _obj ) const override;
         bool is_instanceof( PyObject * _obj, PyTypeObject * _type ) const override;
         bool test_equal( PyObject * _lhs, PyObject * _rhs ) override;

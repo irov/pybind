@@ -32,7 +32,7 @@ namespace pybind
     public:
         void * call( kernel_interface * _kernel, PyObject * _obj, PyObject * _args ) override
         {
-#ifndef NDEBUG
+#if defined(PYBIND_DEBUG)
             if( this->valid( _kernel, _args ) == false )
             {
                 return nullptr;

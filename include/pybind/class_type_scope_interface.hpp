@@ -23,7 +23,9 @@ namespace pybind
     typedef intrusive_ptr<class getattro_adapter_interface> getattro_adapter_interface_ptr;
     typedef intrusive_ptr<class mapping_adapter_interface> mapping_adapter_interface_ptr;
     typedef intrusive_ptr<class sequence_get_adapter_interface> sequence_get_adapter_interface_ptr;
-    typedef intrusive_ptr<class sequence_set_adapter_interface> sequence_set_adapter_interface_ptr;
+    typedef intrusive_ptr<class sequence_set_adapter_interface> sequence_set_adapter_interface_ptr;    
+    typedef intrusive_ptr<class number_unary_adapter_interface> number_unary_adapter_interface_ptr;
+    typedef intrusive_ptr<class number_inplace_adapter_interface> number_inplace_adapter_interface_ptr;
     typedef intrusive_ptr<class number_binary_adapter_interface> number_binary_adapter_interface_ptr;
     typedef intrusive_ptr<class smart_pointer_adapter_interface> smart_pointer_adapter_interface_ptr;
     typedef intrusive_ptr<class bindable_adapter_interface> bindable_adapter_interface_ptr;
@@ -97,19 +99,21 @@ namespace pybind
         virtual void set_call( const method_adapter_interface_ptr & _icall ) = 0;
         virtual void set_repr( const repr_adapter_interface_ptr & _irepr ) = 0;
         virtual void set_hash( const hash_adapter_interface_ptr & _ihash ) = 0;
-        virtual void set_compare( const compare_adapter_interface_ptr & _iadapter ) = 0;
+        virtual void set_compare( uint32_t _typeId, const compare_adapter_interface_ptr & _iadapter ) = 0;
         virtual void set_getattro( const getattro_adapter_interface_ptr & _igetattro ) = 0;
         virtual void set_mapping( const mapping_adapter_interface_ptr & _imapping ) = 0;
         virtual void set_sequence_get( const sequence_get_adapter_interface_ptr & _isequence ) = 0;
         virtual void set_sequence_set( const sequence_set_adapter_interface_ptr & _isequence ) = 0;
-        virtual void set_number_add( const number_binary_adapter_interface_ptr & _iadapter ) = 0;
-        virtual void set_number_sub( const number_binary_adapter_interface_ptr & _iadapter ) = 0;
-        virtual void set_number_mul( const number_binary_adapter_interface_ptr & _iadapter ) = 0;
-        virtual void set_number_div( const number_binary_adapter_interface_ptr & _iadapter ) = 0;
-        virtual void add_number_add( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter ) = 0;
-        virtual void add_number_sub( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter ) = 0;
-        virtual void add_number_mul( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter ) = 0;
-        virtual void add_number_div( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter ) = 0;
+        virtual void set_number_neg( const number_unary_adapter_interface_ptr & _iadapter ) = 0;
+        virtual void set_number_abs( const number_unary_adapter_interface_ptr & _iadapter ) = 0;
+        virtual void set_number_add( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter ) = 0;
+        virtual void set_number_sub( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter ) = 0;
+        virtual void set_number_mul( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter ) = 0;
+        virtual void set_number_div( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter ) = 0;
+        virtual void set_number_inplace_add( uint32_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter ) = 0;
+        virtual void set_number_inplace_sub( uint32_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter ) = 0;
+        virtual void set_number_inplace_mul( uint32_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter ) = 0;
+        virtual void set_number_inplace_div( uint32_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter ) = 0;
         virtual void set_smart_pointer( const smart_pointer_adapter_interface_ptr & _iadapter ) = 0;
         virtual void set_bindable( const bindable_adapter_interface_ptr & _iadapter ) = 0;
         virtual void add_proxy_interface( const class_type_scope_interface_ptr & _scope, const proxy_adapter_interface_ptr & _iproxy ) = 0;
@@ -125,28 +129,31 @@ namespace pybind
         virtual bool is_instance( PyTypeObject * _type ) const = 0;
 
     public:
-        virtual const new_adapter_interface_ptr & get_new_adapter() const = 0;
-        virtual const destroy_adapter_interface_ptr & get_destroy_adapter() const = 0;
-        virtual const constructor_adapter_interface_ptr & get_constructor_adapter() const = 0;
-        virtual const convert_adapter_interface_ptr & get_convert_adapter() const = 0;
-        virtual const method_adapter_interface_ptr & get_call_adapter() const = 0;
-        virtual const repr_adapter_interface_ptr & get_repr_adapter() const = 0;
-        virtual const hash_adapter_interface_ptr & get_hash_adapter() const = 0;
-        virtual const compare_adapter_interface_ptr & get_compare_adapter() const = 0;
-        virtual const getattro_adapter_interface_ptr & get_getattro_adapter() const = 0;
-        virtual const mapping_adapter_interface_ptr & get_mapping_adapter() const = 0;
-        virtual const sequence_get_adapter_interface_ptr & get_sequence_get_adapter() const = 0;
-        virtual const sequence_set_adapter_interface_ptr & get_sequence_set_adapter() const = 0;
+        virtual const new_adapter_interface_ptr & get_new() const = 0;
+        virtual const destroy_adapter_interface_ptr & get_destroy() const = 0;
+        virtual const constructor_adapter_interface_ptr & get_constructor() const = 0;
+        virtual const convert_adapter_interface_ptr & get_convert() const = 0;
+        virtual const method_adapter_interface_ptr & get_call() const = 0;
+        virtual const repr_adapter_interface_ptr & get_repr() const = 0;
+        virtual const hash_adapter_interface_ptr & get_hash() const = 0;
+        virtual const compare_adapter_interface_ptr & get_compare( uint32_t _typeId ) const = 0;
+        virtual const getattro_adapter_interface_ptr & get_getattro() const = 0;
+        virtual const mapping_adapter_interface_ptr & get_mapping() const = 0;
+        virtual const sequence_get_adapter_interface_ptr & get_sequence_get() const = 0;
+        virtual const sequence_set_adapter_interface_ptr & get_sequence_set() const = 0;
 
-        virtual const number_binary_adapter_interface_ptr & get_number_add_adapter() const = 0;
-        virtual const number_binary_adapter_interface_ptr & get_number_sub_adapter() const = 0;
-        virtual const number_binary_adapter_interface_ptr & get_number_mul_adapter() const = 0;
-        virtual const number_binary_adapter_interface_ptr & get_number_div_adapter() const = 0;
+        virtual const number_unary_adapter_interface_ptr & get_number_neg() const = 0;
+        virtual const number_unary_adapter_interface_ptr & get_number_abs() const = 0;
 
-        virtual const number_binary_adapter_interface_ptr & get_number_add_adapters( uint32_t _typeId ) const = 0;
-        virtual const number_binary_adapter_interface_ptr & get_number_sub_adapters( uint32_t _typeId ) const = 0;
-        virtual const number_binary_adapter_interface_ptr & get_number_mul_adapters( uint32_t _typeId ) const = 0;
-        virtual const number_binary_adapter_interface_ptr & get_number_div_adapters( uint32_t _typeId ) const = 0;
+        virtual const number_binary_adapter_interface_ptr & get_number_add( uint32_t _typeId ) const = 0;
+        virtual const number_binary_adapter_interface_ptr & get_number_sub( uint32_t _typeId ) const = 0;
+        virtual const number_binary_adapter_interface_ptr & get_number_mul( uint32_t _typeId ) const = 0;
+        virtual const number_binary_adapter_interface_ptr & get_number_div( uint32_t _typeId ) const = 0;
+
+        virtual const number_inplace_adapter_interface_ptr & get_number_inplace_add( uint32_t _typeId ) const = 0;
+        virtual const number_inplace_adapter_interface_ptr & get_number_inplace_sub( uint32_t _typeId ) const = 0;
+        virtual const number_inplace_adapter_interface_ptr & get_number_inplace_mul( uint32_t _typeId ) const = 0;
+        virtual const number_inplace_adapter_interface_ptr & get_number_inplace_div( uint32_t _typeId ) const = 0;
 
         virtual const smart_pointer_adapter_interface_ptr & get_smart_pointer() const = 0;
         virtual const bindable_adapter_interface_ptr & get_bindable() const = 0;

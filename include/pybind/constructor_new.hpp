@@ -37,7 +37,7 @@ namespace pybind
             (void)_kernel;
             (void)_obj;
 
-#ifndef NDEBUG
+#if defined(PYBIND_DEBUG)
             if( this->valid( _kernel, _args ) == false )
             {
                 return nullptr;

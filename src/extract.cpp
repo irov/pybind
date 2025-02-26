@@ -10,7 +10,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool extract_value( kernel_interface * _kernel, PyObject * _obj, bool & _value, bool _nothrow )
     {
-        (void)_kernel;
         (void)_nothrow;
 
         bool successful = _kernel->extract_bool( _obj, _value );
@@ -20,7 +19,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool extract_value( kernel_interface * _kernel, PyObject * _obj, int8_t & _value, bool _nothrow )
     {
-        (void)_kernel;
         (void)_nothrow;
 
         bool successful = _kernel->extract_int8( _obj, _value );
@@ -30,7 +28,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool extract_value( kernel_interface * _kernel, PyObject * _obj, int16_t & _value, bool _nothrow )
     {
-        (void)_kernel;
         (void)_nothrow;
 
         bool successful = _kernel->extract_int16( _obj, _value );
@@ -40,7 +37,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool extract_value( kernel_interface * _kernel, PyObject * _obj, int32_t & _value, bool _nothrow )
     {
-        (void)_kernel;
         (void)_nothrow;
 
         bool successful = _kernel->extract_int32( _obj, _value );
@@ -50,7 +46,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool extract_value( kernel_interface * _kernel, PyObject * _obj, int64_t & _value, bool _nothrow )
     {
-        (void)_kernel;
         (void)_nothrow;
 
         bool successful = _kernel->extract_int64( _obj, _value );
@@ -60,7 +55,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool extract_value( kernel_interface * _kernel, PyObject * _obj, uint8_t & _value, bool _nothrow )
     {
-        (void)_kernel;
         (void)_nothrow;
 
         bool successful = _kernel->extract_uint8( _obj, _value );
@@ -70,7 +64,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool extract_value( kernel_interface * _kernel, PyObject * _obj, uint16_t & _value, bool _nothrow )
     {
-        (void)_kernel;
         (void)_nothrow;
 
         bool successful = _kernel->extract_uint16( _obj, _value );
@@ -80,7 +73,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool extract_value( kernel_interface * _kernel, PyObject * _obj, uint32_t & _value, bool _nothrow )
     {
-        (void)_kernel;
         (void)_nothrow;
 
         bool successful = _kernel->extract_uint32( _obj, _value );
@@ -90,7 +82,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool extract_value( kernel_interface * _kernel, PyObject * _obj, uint64_t & _value, bool _nothrow )
     {
-        (void)_kernel;
         (void)_nothrow;
 
         bool successful = _kernel->extract_uint64( _obj, _value );
@@ -100,7 +91,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool extract_value( kernel_interface * _kernel, PyObject * _obj, wchar_t & _value, bool _nothrow )
     {
-        (void)_kernel;
         (void)_nothrow;
 
         bool successful = _kernel->extract_wchar( _obj, _value );
@@ -110,7 +100,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool extract_value( kernel_interface * _kernel, PyObject * _obj, float & _value, bool _nothrow )
     {
-        (void)_kernel;
         (void)_nothrow;
 
         bool successful = _kernel->extract_float( _obj, _value );
@@ -120,7 +109,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool extract_value( kernel_interface * _kernel, PyObject * _obj, double & _value, bool _nothrow )
     {
-        (void)_kernel;
         (void)_nothrow;
 
         bool successful = _kernel->extract_double( _obj, _value );
@@ -130,7 +118,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool extract_value( kernel_interface * _kernel, PyObject * _obj, const char *& _value, bool _nothrow )
     {
-        (void)_kernel;
         (void)_nothrow;
 
         if( _obj == nullptr )
@@ -159,7 +146,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool extract_value( kernel_interface * _kernel, PyObject * _obj, const wchar_t *& _value, bool _nothrow )
     {
-        (void)_kernel;
         (void)_nothrow;
 
         if( _obj == nullptr )
@@ -319,8 +305,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_throw_i( kernel_interface * _kernel, uint16_t _value )
     {
-        (void)_kernel;
-
         return _kernel->ptr_uint16( _value );
     }
     //////////////////////////////////////////////////////////////////////////
@@ -336,26 +320,20 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_throw_i( kernel_interface * _kernel, wchar_t _value )
     {
-        (void)_kernel;
-
         wchar_t tmp[2];
         tmp[0] = _value;
-        tmp[1] = 0;
+        tmp[1] = L'\0';
 
         return _kernel->unicode_from_wchar( tmp );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_throw_i( kernel_interface * _kernel, float _value )
     {
-        (void)_kernel;
-
         return _kernel->ptr_float( _value );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_throw_i( kernel_interface * _kernel, double _value )
     {
-        (void)_kernel;
-
         return _kernel->ptr_double( _value );
     }
     //////////////////////////////////////////////////////////////////////////
@@ -428,4 +406,5 @@ namespace pybind
 
         return obj;
     }
+    //////////////////////////////////////////////////////////////////////////
 }

@@ -1,11 +1,25 @@
 #pragma once
 
+#ifndef NDEBUG
+#   define PYBIND_DEBUG
+#else
+#   define PYBIND_RELEASE
+#endif
+
 #ifndef PYBIND_PYTHON_VERSION
 #define PYBIND_PYTHON_VERSION 276
 #endif
 
 #ifndef PYBIND_BASES_COUNT
 #define PYBIND_BASES_COUNT 16
+#endif
+
+#ifndef PYBIND_METHOD_COUNT
+#define PYBIND_METHOD_COUNT 256
+#endif
+
+#ifndef PYBIND_MEMBER_COUNT
+#define PYBIND_MEMBER_COUNT 256
 #endif
 
 #ifndef PYBIND_TYPE_COUNT

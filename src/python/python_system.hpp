@@ -69,6 +69,8 @@ namespace pybind
     PYBIND_API bool is_none( PyObject * _obj );
     PYBIND_API PyObject * ret_none();
 
+    PYBIND_API PyObject * ret_not_implemented();
+
     PYBIND_API bool bool_check( PyObject * _obj );
     PYBIND_API bool is_true( PyObject * _obj );
     PYBIND_API bool is_false( PyObject * _obj );

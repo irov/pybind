@@ -315,6 +315,8 @@ namespace pybind
         virtual PyObject * get_none() = 0;
         virtual PyObject * ret_none() = 0;
 
+        virtual PyObject * ret_not_implemented() = 0;
+
         virtual bool is_callable( PyObject * _obj ) const = 0;
         virtual bool is_instanceof( PyObject * _obj, PyTypeObject * _type ) const = 0;
         virtual bool test_equal( PyObject * _lhs, PyObject * _rhs ) = 0;

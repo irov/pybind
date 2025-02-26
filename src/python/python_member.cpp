@@ -49,7 +49,7 @@ namespace pybind
         }
         catch( const pybind_exception & _ex )
         {
-            pybind::error_message( "py_getmethod: obj '%s' method %s invalid call exception '%s'"
+            pybind::error_message( "py_getmethod: obj '%s' method %s invalid call exception: %s"
                 , kernel->object_repr( py_self ).c_str()
                 , mt->iadapter->getName()
                 , _ex.what()
@@ -87,7 +87,7 @@ namespace pybind
         }
         catch( const pybind_exception & _ex )
         {
-            pybind::error_message( "py_setmethod: obj '%s' method %s invalid call exception '%s'"
+            pybind::error_message( "py_setmethod: obj '%s' method %s invalid call exception: %s"
                 , kernel->object_repr( py_self ).c_str()
                 , mt->iadapter->getName()
                 , _ex.what()

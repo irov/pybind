@@ -62,7 +62,7 @@ namespace pybind
         if( m_obj != nullptr )
         {
             m_kernel->decref( m_obj );
-#ifndef NDEBUG
+#if defined(PYBIND_DEBUG)
             m_obj = nullptr;
 #endif
         }

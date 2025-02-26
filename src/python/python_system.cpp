@@ -10,8 +10,8 @@
 #include <stdexcept>
 #include <cstdio>
 
-#ifndef NDEBUG
-#include <thread>
+#if defined(PYBIND_DEBUG)
+#   include <thread>
 #endif
 
 #if PYBIND_PYTHON_ERROR_FORMAT_FLAG
@@ -33,14 +33,16 @@ namespace pybind
     static PyThreadState * gtstate;
 #endif
     //////////////////////////////////////////////////////////////////////////
-#ifndef NDEBUG
+#if defined(PYBIND_DEBUG)
     std::thread::id g_main_thread_id;
 
     static void check_main_thread()
     {
-        if( g_main_thread_id != std::this_thread::get_id() )
+        std::thread::id current_thread_id = std::this_thread::get_id();
+
+        if( g_main_thread_id != current_thread_id )
         {
-            throw std::runtime_error( "pybind: not main thread" );
+            throw std::runtime_error( "not main thread" );
         }
     }
 
@@ -55,7 +57,7 @@ namespace pybind
         (void)_path;
         (void)_debug;
 
-#ifndef NDEBUG
+#if defined(PYBIND_DEBUG)
         std::thread::id main_thread_id = std::this_thread::get_id();
 
         g_main_thread_id = main_thread_id;
@@ -203,7 +205,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void update_main_thread()
     {        
-#ifndef NDEBUG
+#if defined(PYBIND_DEBUG)
         g_main_thread_id = std::this_thread::get_id();
 #endif
     }
@@ -212,7 +214,9 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        if( PyErr_Occurred() != nullptr )
+        PyObject * err = PyErr_Occurred();
+
+        if( err != nullptr )
         {
             PyErr_Print();
         }
@@ -281,7 +285,9 @@ namespace pybind
 
         PyObject * module = PyImport_ImportModule( _name );
 
-        if( PyErr_Occurred() )
+        PyObject * err = PyErr_Occurred();
+
+        if( err != nullptr )
         {
             if( PyErr_ExceptionMatches( PyExc_ImportError ) == 1 )
             {
@@ -690,6 +696,15 @@ namespace pybind
         PYBIND_CHECK_MAIN_THREAD();
 
         Py_RETURN_NONE;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PYBIND_API PyObject * ret_not_implemented()
+    {
+        PYBIND_CHECK_MAIN_THREAD();
+
+        Py_INCREF( Py_NotImplemented );
+
+        return Py_NotImplemented;
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * get_true()

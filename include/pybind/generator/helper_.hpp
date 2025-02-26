@@ -168,7 +168,7 @@ namespace pybind
             {
                 const class_type_scope_interface_ptr & scope = _kernel->get_class_type_scope( tinfo );
 
-                const convert_adapter_interface_ptr & convert = scope->get_convert_adapter();
+                const convert_adapter_interface_ptr & convert = scope->get_convert();
 
                 if( convert == nullptr )
                 {

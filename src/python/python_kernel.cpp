@@ -184,7 +184,7 @@ namespace pybind
 
         const char * name = _adapter->getName();
 
-#ifndef NDEBUG
+#if defined(PYBIND_DEBUG)
         if( pybind::module_hasobject( _module, name ) == true )
         {
             pybind::throw_exception( "def_function_adapter module '%s' overriding object '%s'"
@@ -218,7 +218,7 @@ namespace pybind
 
         const char * name = _adapter->getName();
 
-#ifndef NDEBUG
+#if defined(PYBIND_DEBUG)
         if( pybind::module_hasobject( _module, name ) == true )
         {
             pybind::throw_exception( "def_functor_adapter module '%s' overriding object '%s'"
@@ -470,7 +470,7 @@ namespace pybind
     {
         const type_cast_ptr & cast = m_type_cast[_info];
 
-#ifndef NDEBUG
+#if defined(PYBIND_DEBUG)
         if( cast == nullptr )
         {
             return nullptr;
@@ -486,7 +486,7 @@ namespace pybind
     {
         class_type_scope_interface_ptr scope = m_allocator->newT<python_class_type_scope>( this, _name, _info, _user, _pynew, _pydestructor, _pod, _hash );
 
-#ifndef NDEBUG
+#if defined(PYBIND_DEBUG)
         if( scope == nullptr )
         {
             return nullptr;
@@ -502,7 +502,7 @@ namespace pybind
     {
         const class_type_scope_interface_ptr & scope = m_class_type_scopes[_info];
 
-#ifndef NDEBUG
+#if defined(PYBIND_DEBUG)
         if( scope == nullptr )
         {
             return;
@@ -1125,6 +1125,11 @@ namespace pybind
         return pybind::ret_none();
     }
     //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::ret_not_implemented()
+    {
+        return pybind::ret_not_implemented();
+    }
+    //////////////////////////////////////////////////////////////////////////
     bool python_kernel::is_true( PyObject * _obj ) const
     {
         return pybind::is_true( _obj );
@@ -1683,4 +1688,5 @@ namespace pybind
     {
         return pybind::module_reload( _module );
     }
+    //////////////////////////////////////////////////////////////////////////
 }

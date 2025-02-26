@@ -56,7 +56,7 @@ namespace pybind
             static_assert(std::is_same<typename f_info::template iterator_param<0>, pybind::kernel_interface *>::value == true, "[pybind] add kernel");
             static_assert(std::is_same<typename f_info::template reverse_iterator_param<0>, const pybind::args &>::value == true, "[pybind] use args bind");
 
-#ifndef NDEBUG
+#if defined(PYBIND_DEBUG)
             uint32_t arg_size = _kernel->tuple_size( _arg );
             uint32_t fn_arity = f_info::arity;
 

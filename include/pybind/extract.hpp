@@ -65,7 +65,7 @@ namespace pybind
 
                 type_cast_result_T_WOCR * etype_impl = static_cast<type_cast_result_T_WOCR *>(etype);
 
-                if( etype_impl->apply( _kernel, _obj, _value, false ) == false )
+                if( etype_impl->apply( _kernel, _obj, _value, _nothrow ) == false )
                 {
                     if( _nothrow == false )
                     {
