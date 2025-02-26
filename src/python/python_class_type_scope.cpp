@@ -245,6 +245,11 @@ namespace pybind
                     bool test_result;
                     if( adapter->compare( kernel, _obj, impl, scope, _compare, pybind_op, &test_result ) == false )
                     {
+                        pybind::error_message( "obj '%s' py_richcompare '%s' invalid compare adapter"
+                            , kernel->object_str( _obj ).c_str()
+                            , kernel->object_str( _compare ).c_str()
+                        );
+
                         return nullptr;
                     }
 
@@ -273,6 +278,11 @@ namespace pybind
                     bool test_result;
                     if( base_adapter->compare( kernel, _obj, impl, scope, _compare, pybind_op, &test_result ) == false )
                     {
+                        pybind::error_message( "obj '%s' py_richcompare '%s' invalid base compare adapter"
+                            , kernel->object_str( _obj ).c_str()
+                            , kernel->object_str( _compare ).c_str()
+                        );
+
                         return nullptr;
                     }
 
