@@ -281,7 +281,7 @@ namespace pybind
         virtual PyObject * getStdErrorHandle() = 0;
 
         virtual bool get_statetrace_top( char * const _filename, size_t _maxlenfilename, char * const _function, size_t _maxlenfunction, uint32_t * _lineno ) = 0;
-        virtual bool get_statetrace( char * _buffer, size_t _maxlen ) = 0;
+        virtual bool get_statetrace( char * _buffer, size_t _maxlen, bool _append ) = 0;
         virtual void error_traceback( const char * _format, ... ) = 0;
         virtual void error_traceback_va( const char * _format, va_list _va ) = 0;
         virtual void error_message( const char * _format, ... ) = 0;

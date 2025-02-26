@@ -42,9 +42,9 @@ namespace pybind
 
         try
         {
-            DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( kernel, "", adapter->getName(), adapter->getCallDebugSilent(), _args, _kwds );
-            PyObject * ret = adapter->call( kernel, _args, _kwds );
-            DEBUG_PYBIND_NOTIFY_END_BIND_CALL( kernel, "", adapter->getName(), adapter->getCallDebugSilent(), _args, _kwds );
+            DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, "", adapter->getName(), adapter->getCallDebugSilent(), _args, _kwds );
+
+            PyObject * ret = adapter->call( kernel, _args, _kwds );            
 
             return ret;
         }

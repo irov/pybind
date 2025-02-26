@@ -1725,7 +1725,7 @@ namespace pybind
         return true;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool get_statetrace( char * const _buffer, size_t _maxlen )
+    bool get_statetrace( char * const _buffer, size_t _maxlen, bool _append )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
@@ -1743,11 +1743,19 @@ namespace pybind
             return false;
         }
 
-        strncpy( _buffer, "", _maxlen );
+        if( _append == false )
+        {
+            strncpy( _buffer, "", _maxlen );
+        }
 
         if( _maxlen == 0 )
         {
             return true;
+        }
+
+        if( _append == true )
+        {
+            strncat( _buffer, "\n", _maxlen );
         }
 
         while( frame != nullptr )
@@ -1828,8 +1836,10 @@ namespace pybind
 
         pybind::check_error();
 
-        char buffer[2048] = {'\0'};
-        vsprintf( buffer, _format, _va );
+        char buffer[4096 + 1] = {'\0'};
+        vsnprintf( buffer, 4096, _format, _va );
+
+        pybind::get_statetrace( buffer, 4096, true );
 
         PyErr_SetString( PyExc_RuntimeError, buffer );
     }
@@ -1858,7 +1868,6 @@ namespace pybind
 
         va_list valist;
         va_start( valist, _format );
-
         pybind::warning_traceback_va( _format, valist );
         va_end( valist );
     }

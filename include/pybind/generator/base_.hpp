@@ -981,6 +981,26 @@ namespace pybind
             return *this;
         }
 
+        template<class V, class VC>
+        base_ & def_operator_inplace_mul_t()
+        {
+            allocator_interface * allocator = m_kernel->get_allocator();
+
+            number_inplace_adapter_interface_ptr iadapter = allocator->newT<number_inplace_adapter_operator_mul<C, V>>( "operator_inplace_mul" );
+
+            uint32_t typeId = m_kernel->class_info<VC>();
+
+            m_scope->set_number_inplace_mul( typeId, iadapter );
+
+            return *this;
+        }
+
+        template<class V>
+        base_ & def_operator_inplace_mul_t()
+        {
+            return this->def_operator_inplace_mul_t<V, V>();
+        }
+
         base_ & def_operator_inplace_mul()
         {
             allocator_interface * allocator = m_kernel->get_allocator();
@@ -1067,6 +1087,26 @@ namespace pybind
             m_scope->set_number_div( typeId, iadapter );
 
             return *this;
+        }
+
+        template<class V, class VC>
+        base_ & def_operator_inplace_div_t()
+        {
+            allocator_interface * allocator = m_kernel->get_allocator();
+
+            number_inplace_adapter_interface_ptr iadapter = allocator->newT<number_inplace_adapter_operator_div<C, V>>( "operator_div" );
+
+            uint32_t typeId = m_kernel->class_info<VC>();
+
+            m_scope->set_number_inplace_div( typeId, iadapter );
+
+            return *this;
+        }
+
+        template<class V>
+        base_ & def_operator_inplace_div_t()
+        {
+            return this->def_operator_inplace_div_t<V, V>();
         }
 
         base_ & def_operator_inplace_div()

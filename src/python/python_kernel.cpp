@@ -311,12 +311,12 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     observer_bind_call * python_kernel::set_observer_bind_call( observer_bind_call * _observer )
     {
-        return pybind::set_observer_bind_call( _observer );
+        return DEBUG_PYBIND_SET_OBSERVER_BIND_CALL( _observer );
     }
     //////////////////////////////////////////////////////////////////////////
     observer_bind_call * python_kernel::get_observer_bind_call()
     {
-        return pybind::get_observer_bind_call();
+        return DEBUG_PYBIND_GET_OBSERVER_BIND_CALL();
     }
     //////////////////////////////////////////////////////////////////////////
     void * python_kernel::unwrap( PyObject * _obj )
@@ -1545,9 +1545,9 @@ namespace pybind
         return pybind::get_statetrace_top( _filename, _maxlenfilename, _function, _maxlenfunction, _lineno );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::get_statetrace( char * _buffer, size_t _maxlen )
+    bool python_kernel::get_statetrace( char * _buffer, size_t _maxlen, bool _append )
     {
-        bool successful = pybind::get_statetrace( _buffer, _maxlen );
+        bool successful = pybind::get_statetrace( _buffer, _maxlen, _append );
 
         return successful;
     }

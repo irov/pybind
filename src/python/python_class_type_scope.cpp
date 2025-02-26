@@ -56,10 +56,10 @@ namespace pybind
             const method_adapter_interface_ptr & adapter = scope->get_call();
 
             try
-            {
-                DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), _args, _kwds );
+            {                
+                DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), _args, _kwds );
+
                 PyObject * ret = adapter->call( kernel, impl, scope, _args, _kwds );
-                DEBUG_PYBIND_NOTIFY_END_BIND_CALL( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), _args, _kwds );
 
                 return ret;
             }
@@ -328,9 +328,9 @@ namespace pybind
 
             try
             {
-                DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), _key, nullptr );
-                PyObject * res = adapter->call( kernel, impl, scope, _key );
-                DEBUG_PYBIND_NOTIFY_END_BIND_CALL( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), _key, nullptr );
+                DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), _key, nullptr );
+
+                PyObject * res = adapter->call( kernel, impl, scope, _key );                
 
                 return res;
             }
@@ -371,9 +371,9 @@ namespace pybind
 
             try
             {
-                DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), _key, nullptr );
-                PyObject * res = adapter->call( kernel, impl, scope, _key );
-                DEBUG_PYBIND_NOTIFY_END_BIND_CALL( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), _key, nullptr );
+                DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), _key, nullptr );
+
+                PyObject * res = adapter->call( kernel, impl, scope, _key );                
 
                 return res;
             }
@@ -420,9 +420,9 @@ namespace pybind
 
             try
             {
-                DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), nullptr, nullptr );
+                DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), nullptr, nullptr );
+
                 PyObject * res = adapter->call( kernel, impl, scope, (uint32_t)_index );
-                DEBUG_PYBIND_NOTIFY_END_BIND_CALL( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), nullptr, nullptr );
 
                 return res;
             }
@@ -463,9 +463,9 @@ namespace pybind
 
             try
             {
-                DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), nullptr, nullptr );
-                adapter->call( kernel, impl, scope, (uint32_t)_index, _value );
-                DEBUG_PYBIND_NOTIFY_END_BIND_CALL( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), nullptr, nullptr );
+                DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), nullptr, nullptr );
+
+                adapter->call( kernel, impl, scope, (uint32_t)_index, _value );                
 
                 return 0;
             }
@@ -654,9 +654,9 @@ namespace pybind
             }
 #endif
 
-            DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( _kernel, _scope->get_name(), _adapter->getName(), _adapter->getCallDebugSilent(), nullptr, nullptr );
+            DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( _kernel, _scope->get_name(), _adapter->getName(), _adapter->getCallDebugSilent(), nullptr, nullptr );
+
             PyObject * res = _adapter->call( _kernel, impl, _scope );
-            DEBUG_PYBIND_NOTIFY_END_BIND_CALL( _kernel, _scope->get_name(), _adapter->getName(), _adapter->getCallDebugSilent(), nullptr, nullptr );
 
             return res;
         }
@@ -677,9 +677,9 @@ namespace pybind
             }
 #endif
 
-            DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( _kernel, _scope->get_name(), _adapter->getName(), _adapter->getCallDebugSilent(), nullptr, nullptr );
+            DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( _kernel, _scope->get_name(), _adapter->getName(), _adapter->getCallDebugSilent(), nullptr, nullptr );
+
             PyObject * res = _adapter->call( _kernel, impl, _scope, _value, _rotate );
-            DEBUG_PYBIND_NOTIFY_END_BIND_CALL( _kernel, _scope->get_name(), _adapter->getName(), _adapter->getCallDebugSilent(), nullptr, nullptr );
 
             return res;
         }
@@ -700,9 +700,9 @@ namespace pybind
             }
 #endif
 
-            DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( _kernel, _scope->get_name(), _adapter->getName(), _adapter->getCallDebugSilent(), nullptr, nullptr );
+            DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( _kernel, _scope->get_name(), _adapter->getName(), _adapter->getCallDebugSilent(), nullptr, nullptr );
+
             _adapter->call( _kernel, impl, _scope, _value );
-            DEBUG_PYBIND_NOTIFY_END_BIND_CALL( _kernel, _scope->get_name(), _adapter->getName(), _adapter->getCallDebugSilent(), nullptr, nullptr );
         }
         //////////////////////////////////////////////////////////////////////////
         static PyObject * py_nb_neg( PyObject * _obj )
@@ -725,6 +725,12 @@ namespace pybind
                 }
                 catch( const pybind_exception & )
                 {
+                    pybind::error_message( "obj '%s' nb neg invalid call '%s'"
+                        , kernel->object_str( _obj ).c_str()
+                        , adapter->getName()
+                    );
+
+                    return kernel->ret_not_implemented();
                 }
             }
 
@@ -751,6 +757,12 @@ namespace pybind
                 }
                 catch( const pybind_exception & )
                 {
+                    pybind::error_message( "obj '%s' nb abs invalid call '%s'"
+                        , kernel->object_str( _obj ).c_str()
+                        , adapter->getName()
+                    );
+
+                    return kernel->ret_not_implemented();
                 }
             }
 
@@ -777,6 +789,12 @@ namespace pybind
                 }
                 catch( const pybind_exception & )
                 {
+                    pybind::error_message( "obj '%s' nb add invalid call '%s'"
+                        , _kernel->object_str( _obj ).c_str()
+                        , adapter->getName()
+                    );
+
+                    return _kernel->ret_not_implemented();
                 }
             }
 
@@ -794,6 +812,12 @@ namespace pybind
                 }
                 catch( const pybind_exception & )
                 {
+                    pybind::error_message( "obj '%s' nb base add invalid call '%s'"
+                        , _kernel->object_str( _obj ).c_str()
+                        , base_adapter->getName()
+                    );
+
+                    return _kernel->ret_not_implemented();
                 }
             }
 
@@ -832,6 +856,12 @@ namespace pybind
                 }
                 catch( const pybind_exception & )
                 {
+                    pybind::error_message( "obj '%s' nb sub invalid call '%s'"
+                        , _kernel->object_str( _obj ).c_str()
+                        , adapter->getName()
+                    );
+
+                    return _kernel->ret_not_implemented();
                 }
             }
 
@@ -849,6 +879,12 @@ namespace pybind
                 }
                 catch( const pybind_exception & )
                 {
+                    pybind::error_message( "obj '%s' nb base sub invalid call '%s'"
+                        , _kernel->object_str( _obj ).c_str()
+                        , base_adapter->getName()
+                    );
+
+                    return _kernel->ret_not_implemented();
                 }
             }
 
@@ -887,6 +923,12 @@ namespace pybind
                 }
                 catch( const pybind_exception & )
                 {
+                    pybind::error_message( "obj '%s' nb mul invalid call '%s'"
+                        , _kernel->object_str( _obj ).c_str()
+                        , adapter->getName()
+                    );
+
+                    return _kernel->ret_not_implemented();
                 }
             }
 
@@ -904,6 +946,12 @@ namespace pybind
                 }
                 catch( const pybind_exception & )
                 {
+                    pybind::error_message( "obj '%s' nb base mul invalid call '%s'"
+                        , _kernel->object_str( _obj ).c_str()
+                        , base_adapter->getName()
+                    );
+
+                    return _kernel->ret_not_implemented();
                 }
             }
 
@@ -942,6 +990,12 @@ namespace pybind
                 }
                 catch( const pybind_exception & )
                 {
+                    pybind::error_message( "obj '%s' nb div invalid call '%s'"
+                        , _kernel->object_str( _obj ).c_str()
+                        , adapter->getName()
+                    );
+
+                    return _kernel->ret_not_implemented();
                 }
             }
 
@@ -959,6 +1013,12 @@ namespace pybind
                 }
                 catch( const pybind_exception & )
                 {
+                    pybind::error_message( "obj '%s' nb base div invalid call '%s'"
+                        , _kernel->object_str( _obj ).c_str()
+                        , base_adapter->getName()
+                    );
+
+                    return _kernel->ret_not_implemented();
                 }
             }
 
@@ -1001,6 +1061,12 @@ namespace pybind
                 }
                 catch( const pybind_exception & )
                 {
+                    pybind::error_message( "obj '%s' nb inplace add invalid call '%s'"
+                        , kernel->object_str( _obj ).c_str()
+                        , adapter->getName()
+                    );
+
+                    return kernel->ret_not_implemented();
                 }
             }
 
@@ -1020,6 +1086,12 @@ namespace pybind
                 }
                 catch( const pybind_exception & )
                 {
+                    pybind::error_message( "obj '%s' nb inplace base add invalid call '%s'"
+                        , kernel->object_str( _obj ).c_str()
+                        , base_adapter->getName()
+                    );
+
+                    return kernel->ret_not_implemented();
                 }
             }
 
@@ -1050,6 +1122,12 @@ namespace pybind
                 }
                 catch( const pybind_exception & )
                 {
+                    pybind::error_message( "obj '%s' nb inplace sub invalid call '%s'"
+                        , kernel->object_str( _obj ).c_str()
+                        , adapter->getName()
+                    );
+
+                    return kernel->ret_not_implemented();
                 }
             }
 
@@ -1069,6 +1147,12 @@ namespace pybind
                 }
                 catch( const pybind_exception & )
                 {
+                    pybind::error_message( "obj '%s' nb inplace base sub invalid call '%s'"
+                        , kernel->object_str( _obj ).c_str()
+                        , base_adapter->getName()
+                    );
+
+                    return kernel->ret_not_implemented();
                 }
             }
 
@@ -1099,6 +1183,12 @@ namespace pybind
                 }
                 catch( const pybind_exception & )
                 {
+                    pybind::error_message( "obj '%s' nb inplace mul invalid call '%s'"
+                        , kernel->object_str( _obj ).c_str()
+                        , adapter->getName()
+                    );
+
+                    return kernel->ret_not_implemented();
                 }
             }
 
@@ -1118,6 +1208,12 @@ namespace pybind
                 }
                 catch( const pybind_exception & )
                 {
+                    pybind::error_message( "obj '%s' nb inplace base mul invalid call '%s'"
+                        , kernel->object_str( _obj ).c_str()
+                        , base_adapter->getName()
+                    );
+
+                    return kernel->ret_not_implemented();
                 }
             }
 
@@ -1148,6 +1244,12 @@ namespace pybind
                 }
                 catch( const pybind_exception & )
                 {
+                    pybind::error_message( "obj '%s' nb inplace div invalid call '%s'"
+                        , kernel->object_str( _obj ).c_str()
+                        , adapter->getName()
+                    );
+
+                    return kernel->ret_not_implemented();
                 }
             }
 
@@ -1167,6 +1269,12 @@ namespace pybind
                 }
                 catch( const pybind_exception & )
                 {
+                    pybind::error_message( "obj '%s' nb inplace base div invalid call '%s'"
+                        , kernel->object_str( _obj ).c_str()
+                        , base_adapter->getName()
+                    );
+
+                    return kernel->ret_not_implemented();
                 }
             }
 

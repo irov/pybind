@@ -51,36 +51,36 @@ namespace pybind
             return nullptr;
         }
 
+        void * impl = kernel->get_class_impl( mct->self );
+
+        if( impl == nullptr )
+        {
+            pybind::error_message( "descr_call2: method '%s' invalid call unbind object"
+                , mct->iadapter->getName()
+            );
+
+            return nullptr;
+        }
+
+        const class_type_scope_interface_ptr & scope = kernel->get_class_scope( mct->self->ob_type );
+
+        if( scope == nullptr )
+        {
+            pybind::error_message( "descr_call2: method '%s' invalid call not found scope for object '%s'"
+                , mct->iadapter->getName()
+                , kernel->object_repr( mct->self ).c_str()
+            );
+
+            return nullptr;
+        }
+
+        method_adapter_interface * adapter = mct->iadapter;
+
         try
         {
-            void * impl = kernel->get_class_impl( mct->self );
+            DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), _args, _kwds );
 
-            if( impl == nullptr )
-            {
-                pybind::error_message( "descr_call2: method '%s' invalid call unbind object"
-                    , mct->iadapter->getName()
-                );
-
-                return nullptr;
-            }
-
-            const class_type_scope_interface_ptr & scope = kernel->get_class_scope( mct->self->ob_type );
-
-            if( scope == nullptr )
-            {
-                pybind::error_message( "descr_call2: method '%s' invalid call not found scope for object '%s'"
-                    , mct->iadapter->getName()
-                    , kernel->object_repr( mct->self ).c_str()
-                );
-
-                return nullptr;
-            }
-
-            method_adapter_interface * adapter = mct->iadapter;
-
-            DEBUG_PYBIND_NOTIFY_BEGIN_BIND_CALL( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), _args, _kwds );
             PyObject * py_value = adapter->call( kernel, impl, scope, _args, _kwds );
-            DEBUG_PYBIND_NOTIFY_END_BIND_CALL( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), _args, _kwds );
 
             return py_value;
         }
