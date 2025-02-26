@@ -654,7 +654,7 @@ namespace pybind
 
             number_unary_adapter_interface_ptr iadapter = allocator->newT<number_unary_adapter<C, F>>( "neg", _fn );
 
-            m_scope->set_number_add( iadapter );
+            m_scope->set_number_neg( iadapter );
 
             return *this;
         }
