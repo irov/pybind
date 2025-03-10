@@ -67,6 +67,12 @@ namespace pybind
         return dict_setstring_i( _kernel, _dict, _name, detail::import_operator_t( _kernel, _value ) );
     }
     //////////////////////////////////////////////////////////////////////////
+    template<class V>
+    bool dict_setobject_t( kernel_interface * _kernel, PyObject * _dict, PyObject * _name, const V & _value )
+    {
+        return dict_setobject_i( _kernel, _dict, _name, detail::import_operator_t( _kernel, _value ) );
+    }
+    //////////////////////////////////////////////////////////////////////////
     template<class K, class V>
     bool dict_set_t( kernel_interface * _kernel, PyObject * _dict, const K & _name, const V & _value )
     {
