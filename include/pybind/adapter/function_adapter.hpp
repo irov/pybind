@@ -20,7 +20,7 @@ namespace pybind
         : public function_adapter_interface
     {
     public:
-        function_adapter_base( const char * _name, uint32_t _arity, F _fn )
+        function_adapter_base( const char * _name, size_t _arity, F _fn )
             : function_adapter_interface( _name, _arity )
             , m_fn( _fn )
         {
@@ -41,7 +41,7 @@ namespace pybind
         : public function_adapter_base<F>
     {
     public:
-        function_adapter( const char * _name, uint32_t _arity, F _fn )
+        function_adapter( const char * _name, size_t _arity, F _fn )
             : function_adapter_base<F>( _name, _arity, _fn )
         {
         }
@@ -65,7 +65,7 @@ namespace pybind
         : public function_adapter_base<F>
     {
     public:
-        function_adapter_args( const char * _name, uint32_t _arity, F _fn )
+        function_adapter_args( const char * _name, size_t _arity, F _fn )
             : function_adapter_base<F>( _name, _arity, _fn )
         {
         }
@@ -89,7 +89,7 @@ namespace pybind
         : public function_adapter_base<F>
     {
     public:
-        function_proxy_adapter( const char * _name, uint32_t _arity, F _fn, P * _proxy )
+        function_proxy_adapter( const char * _name, size_t _arity, F _fn, P * _proxy )
             : function_adapter_base<F>( _name, _arity, _fn )
             , m_proxy( _proxy )
         {
@@ -117,7 +117,7 @@ namespace pybind
         : public function_adapter_base<F>
     {
     public:
-        function_proxy_adapter_args( const char * _name, uint32_t _arity, F _fn, P * _proxy )
+        function_proxy_adapter_args( const char * _name, size_t _arity, F _fn, P * _proxy )
             : function_adapter_base<F>( _name, _arity, _fn )
             , m_proxy( _proxy )
         {
@@ -145,7 +145,7 @@ namespace pybind
         : public function_adapter_base<F>
     {
     public:
-        function_adapter_deprecate( const char * _name, uint32_t _arity, F _fn, const char * _doc )
+        function_adapter_deprecate( const char * _name, size_t _arity, F _fn, const char * _doc )
             : function_adapter_base<F>( _name, _arity, _fn )
             , m_doc( _doc )
         {
@@ -180,7 +180,7 @@ namespace pybind
         : public function_adapter_base<F>
     {
     public:
-        function_kernel_adapter( const char * _name, uint32_t _arity, F _fn )
+        function_kernel_adapter( const char * _name, size_t _arity, F _fn )
             : function_adapter_base<F>( _name, _arity, _fn )
         {
         }
@@ -204,7 +204,7 @@ namespace pybind
         : public function_adapter_base<F>
     {
     public:
-        function_kernel_adapter_args( const char * _name, uint32_t _arity, F _fn )
+        function_kernel_adapter_args( const char * _name, size_t _arity, F _fn )
             : function_adapter_base<F>( _name, _arity, _fn )
         {
         }
@@ -227,7 +227,7 @@ namespace pybind
         : public function_adapter_base<F>
     {
     public:
-        function_adapter_native( const char * _name, uint32_t _arity, F _fn )
+        function_adapter_native( const char * _name, size_t _arity, F _fn )
             : function_adapter_base<F>( _name, _arity, _fn )
         {
         }

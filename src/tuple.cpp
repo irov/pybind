@@ -103,11 +103,11 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     pybind::tuple make_tuple_i( kernel_interface * _kernel, std::initializer_list<detail::import_operator_t> && _t )
     {
-        uint32_t size = (uint32_t)_t.size();
+        size_t size = (size_t)_t.size();
 
         PyObject * py_tuple = _kernel->tuple_new( size );
 
-        uint32_t enumerator = 0;
+        size_t enumerator = 0;
         for( const detail::import_operator_t & p : _t )
         {
             pybind::tuple_setitem_i( _kernel, py_tuple, enumerator++, p );
@@ -123,7 +123,7 @@ namespace pybind
 
         PyObject * py_tuple = _kernel->tuple_new( (tuple::size_type)t_size + args_size );
 
-        uint32_t enumerator = 0;
+        size_t enumerator = 0;
 
         for( const detail::import_operator_t & p : _t )
         {

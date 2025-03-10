@@ -16,7 +16,7 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
-    bool type_cast::type_info_cast( kernel_interface * _kernel, PyObject * _obj, uint32_t _tinfo, uint32_t _tptrinfo, void ** _impl )
+    bool type_cast::type_info_cast( kernel_interface * _kernel, PyObject * _obj, typeid_t _tinfo, typeid_t _tptrinfo, void ** _impl )
     {
         if( _kernel->is_class( _obj ) == false )
         {

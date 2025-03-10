@@ -35,6 +35,8 @@ namespace pybind
 
     const invalid_t invalid;
 
+    typedef uint32_t typeid_t;
+
     class kernel_interface;
 
     typedef void * (*pybind_metacast)(void *);

@@ -160,11 +160,11 @@ namespace pybind
 
             s_write_buffer_t( _buffer, _capacity, type, _offset );
 
-            uint32_t count = _kernel->tuple_size( _obj );
+            size_t count = _kernel->tuple_size( _obj );
 
-            s_write_size_t( _buffer, _capacity, count, _offset );
+            s_write_size_t( _buffer, _capacity, (uint32_t)count, _offset );
 
-            for( uint32_t i = 0; i != count; ++i )
+            for( size_t i = 0; i != count; ++i )
             {
                 PyObject * element = _kernel->tuple_getitem( _obj, i );
 
@@ -177,11 +177,11 @@ namespace pybind
 
             s_write_buffer_t( _buffer, _capacity, type, _offset );
 
-            uint32_t count = _kernel->list_size( _obj );
+            size_t count = _kernel->list_size( _obj );
 
-            s_write_size_t( _buffer, _capacity, count, _offset );
+            s_write_size_t( _buffer, _capacity, (uint32_t)count, _offset );
 
-            for( uint32_t i = 0; i != count; ++i )
+            for( size_t i = 0; i != count; ++i )
             {
                 PyObject * element = _kernel->list_getitem( _obj, i );
 
@@ -194,11 +194,11 @@ namespace pybind
 
             s_write_buffer_t( _buffer, _capacity, type, _offset );
 
-            uint32_t count = _kernel->dict_size( _obj );
+            size_t count = _kernel->dict_size( _obj );
 
-            s_write_size_t( _buffer, _capacity, count, _offset );
+            s_write_size_t( _buffer, _capacity, (uint32_t)count, _offset );
 
-            uint32_t pos = 0;
+            size_t pos = 0;
 
             PyObject * key;
             PyObject * value;
@@ -214,9 +214,9 @@ namespace pybind
 
             s_write_buffer_t( _buffer, _capacity, type, _offset );
 
-            uint32_t type_count = _kernel->list_size( _types );
+            size_t type_count = _kernel->list_size( _types );
 
-            for( uint32_t index = 0; index != type_count; ++index )
+            for( size_t index = 0; index != type_count; ++index )
             {
                 PyObject * element = _kernel->list_getitem( _types, index );
 
@@ -227,7 +227,7 @@ namespace pybind
                     continue;
                 }
 
-                s_write_size_t( _buffer, _capacity, index, _offset );
+                s_write_size_t( _buffer, _capacity, (uint32_t)index, _offset );
 
                 PyObject * obj_value = _kernel->get_attrstring( _obj, "value" );
 
@@ -294,7 +294,7 @@ namespace pybind
     }
     //////////////////////////////////////////////////////////////////////////
     template<class T>
-    static void s_read_buffer_tn( const void * _buffer, size_t _capacity, size_t & _carriage, T * _t, uint32_t _count )
+    static void s_read_buffer_tn( const void * _buffer, size_t _capacity, size_t & _carriage, T * _t, size_t _count )
     {
         size_t size = sizeof( T ) * _count;
 
@@ -478,7 +478,7 @@ namespace pybind
                 uint32_t index;
                 s_read_size_t( _buffer, _capacity, _carriage, index );
 
-                uint32_t types_size = _kernel->list_size( _types );
+                size_t types_size = _kernel->list_size( _types );
 
                 if( index >= types_size )
                 {

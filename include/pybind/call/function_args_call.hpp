@@ -14,8 +14,8 @@ namespace pybind
     template<class F, class Ret>
     struct function_args_call_impl
     {
-        template<uint32_t ... I>
-        static Ret call( kernel_interface * _kernel, F f, PyObject * _arg, std::integer_sequence<uint32_t, I...> )
+        template<size_t ... I>
+        static Ret call( kernel_interface * _kernel, F f, PyObject * _arg, std::integer_sequence<size_t, I...> )
         {
             return (*f)(
                 tuple_getitem_t( _kernel, _arg, I ) ...
@@ -24,23 +24,23 @@ namespace pybind
         }
     };
 
-    template<class F, uint32_t Arity, class Ret>
+    template<class F, size_t Arity, class Ret>
     struct function_args_call_ret_impl
     {
         static PyObject * call( kernel_interface * _kernel, F f, PyObject * _arg )
         {
-            PyObject * result = detail::return_operator_t( _kernel, function_args_call_impl<F, Ret>::call( _kernel, f, _arg, std::make_integer_sequence<uint32_t, Arity>() ) );
+            PyObject * result = detail::return_operator_t( _kernel, function_args_call_impl<F, Ret>::call( _kernel, f, _arg, std::make_integer_sequence<size_t, Arity>() ) );
 
             return result;
         }
     };
 
-    template<class F, uint32_t Arity>
+    template<class F, size_t Arity>
     struct function_args_call_ret_impl<F, Arity, void>
     {
         static PyObject * call( kernel_interface * _kernel, F f, PyObject * _arg )
         {
-            function_args_call_impl<F, void>::call( _kernel, f, _arg, std::make_integer_sequence<uint32_t, Arity>() );
+            function_args_call_impl<F, void>::call( _kernel, f, _arg, std::make_integer_sequence<size_t, Arity>() );
 
             return _kernel->ret_none();
         }
@@ -57,8 +57,8 @@ namespace pybind
             static_assert(std::is_same<typename f_info::template reverse_iterator_param<0>, const pybind::args &>::value == true, "[pybind] add args");
 
 #if defined(PYBIND_DEBUG)
-            uint32_t arg_size = _kernel->tuple_size( _arg );
-            uint32_t fn_arity = f_info::arity;
+            size_t arg_size = _kernel->tuple_size( _arg );
+            size_t fn_arity = f_info::arity;
 
             if( arg_size + 1 < fn_arity )
             {

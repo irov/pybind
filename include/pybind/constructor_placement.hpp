@@ -10,8 +10,8 @@ namespace pybind
     template<class C, class P>
     struct call_constructor_placement_impl
     {
-        template<uint32_t ... I>
-        static C * call( kernel_interface * _kernel, void * _impl, PyObject * _args, std::integer_sequence<uint32_t, I...> )
+        template<size_t ... I>
+        static C * call( kernel_interface * _kernel, void * _impl, PyObject * _args, std::integer_sequence<size_t, I...> )
         {
             return new (_impl)C(
                 tuple_getitem_t( _kernel, _args, I ) ...
@@ -46,7 +46,7 @@ namespace pybind
                 return nullptr;
             }
 
-            C * obj = call_constructor_placement_impl<C, P>::call( _kernel, self, _args, std::make_integer_sequence<uint32_t, P::args_arity>() );
+            C * obj = call_constructor_placement_impl<C, P>::call( _kernel, self, _args, std::make_integer_sequence<size_t, P::args_arity>() );
 
             return obj;
         }

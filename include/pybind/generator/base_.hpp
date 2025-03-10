@@ -38,10 +38,10 @@ namespace pybind
         typedef B bases_type;
 
     public:
-        base_( kernel_interface * _kernel, const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _size, bool _hash, PyObject * _module )
+        base_( kernel_interface * _kernel, const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, size_t _size, bool _hash, PyObject * _module )
             : m_kernel( _kernel )
         {
-            uint32_t pod = 0;
+            size_t pod = 0;
 
             if( _size <= PYBIND_OBJECT_POD_SIZE )
             {
@@ -531,7 +531,7 @@ namespace pybind
 
             compare_adapter_interface_ptr iadapter = allocator->newT<compare_adapter<C, F>>( _fn );
 
-            uint32_t typeId = m_kernel->class_info<C>();
+            typeid_t typeId = m_kernel->class_info<C>();
 
             m_scope->set_compare( typeId, iadapter );
 
@@ -545,7 +545,7 @@ namespace pybind
 
             compare_adapter_interface_ptr iadapter = allocator->newT<compare_adapter<C, F>>( _fn );
 
-            uint32_t typeId = m_kernel->class_info<VC>();
+            typeid_t typeId = m_kernel->class_info<VC>();
 
             m_scope->set_compare( typeId, iadapter );
 
@@ -737,7 +737,7 @@ namespace pybind
 
             number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter<C, F>>( "add", _fn );
 
-            uint32_t typeId = m_kernel->class_info<C>();
+            typeid_t typeId = m_kernel->class_info<C>();
 
             m_scope->set_number_add( typeId, iadapter );
 
@@ -751,7 +751,7 @@ namespace pybind
 
             number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter_proxy_function<C, F>>( "static_add", _fn );
 
-            uint32_t typeId = m_kernel->class_info<C>();
+            typeid_t typeId = m_kernel->class_info<C>();
 
             m_scope->set_number_add( typeId, iadapter );
 
@@ -765,7 +765,7 @@ namespace pybind
 
             number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter_proxy<C, P, F>>( "proxy_static_add", _fn, _proxy );
 
-            uint32_t typeId = m_kernel->class_info<C>();
+            typeid_t typeId = m_kernel->class_info<C>();
 
             m_scope->set_number_add( typeId, iadapter );
 
@@ -779,7 +779,7 @@ namespace pybind
 
             number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter_operator_add<C, V>>( "operator_add" );
 
-            uint32_t typeId = m_kernel->class_info<VC>();
+            typeid_t typeId = m_kernel->class_info<VC>();
 
             m_scope->set_number_add( typeId, iadapter );
 
@@ -798,7 +798,7 @@ namespace pybind
 
             number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter_operator_add<C, C>>( "operator_add" );
 
-            uint32_t typeId = m_kernel->class_info<C>();
+            typeid_t typeId = m_kernel->class_info<C>();
 
             m_scope->set_number_add( typeId, iadapter );
 
@@ -811,7 +811,7 @@ namespace pybind
 
             number_inplace_adapter_interface_ptr iadapter = allocator->newT<number_inplace_adapter_operator_add<C, C>>( "operator_inplace_add" );
 
-            uint32_t typeId = m_kernel->class_info<C>();
+            typeid_t typeId = m_kernel->class_info<C>();
 
             m_scope->set_number_inplace_add( typeId, iadapter );
 
@@ -825,7 +825,7 @@ namespace pybind
 
             number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter<C, F>>( "sub", _fn );
 
-            uint32_t typeId = m_kernel->class_info<C>();
+            typeid_t typeId = m_kernel->class_info<C>();
 
             m_scope->set_number_sub( typeId, iadapter );
 
@@ -839,7 +839,7 @@ namespace pybind
 
             number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter_proxy_function<C, F>>( "static_sub", _fn );
 
-            uint32_t typeId = m_kernel->class_info<C>();
+            typeid_t typeId = m_kernel->class_info<C>();
 
             m_scope->set_number_sub( typeId, iadapter );
 
@@ -853,7 +853,7 @@ namespace pybind
 
             number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter_operator_sub<C, V>>( "operator_sub" );
 
-            uint32_t typeId = m_kernel->class_info<VC>();
+            typeid_t typeId = m_kernel->class_info<VC>();
 
             m_scope->set_number_sub( typeId, iadapter );
 
@@ -872,7 +872,7 @@ namespace pybind
 
             number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter_operator_sub<C, C>>( "operator_sub" );
 
-            uint32_t typeId = m_kernel->class_info<C>();
+            typeid_t typeId = m_kernel->class_info<C>();
 
             m_scope->set_number_sub( typeId, iadapter );
 
@@ -885,7 +885,7 @@ namespace pybind
 
             number_inplace_adapter_interface_ptr iadapter = allocator->newT<number_inplace_adapter_operator_sub<C, C>>( "operator_inplace_sub" );
 
-            uint32_t typeId = m_kernel->class_info<C>();
+            typeid_t typeId = m_kernel->class_info<C>();
 
             m_scope->set_number_inplace_sub( typeId, iadapter );
 
@@ -899,7 +899,7 @@ namespace pybind
 
             number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter_proxy<C, P, F>>( "proxy_static_sub", _fn, _proxy );
 
-            uint32_t typeId = m_kernel->class_info<C>();
+            typeid_t typeId = m_kernel->class_info<C>();
 
             m_scope->set_number_sub( typeId, iadapter );
 
@@ -913,7 +913,7 @@ namespace pybind
 
             number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter<C, F>>( "mul", _fn );
 
-            uint32_t typeId = m_kernel->class_info<C>();
+            typeid_t typeId = m_kernel->class_info<C>();
 
             m_scope->set_number_mul( typeId, iadapter );
 
@@ -927,7 +927,7 @@ namespace pybind
 
             number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter_proxy_function<C, F>>( "static_mul", _fn );
 
-            uint32_t typeId = m_kernel->class_info<C>();
+            typeid_t typeId = m_kernel->class_info<C>();
 
             m_scope->set_number_mul( typeId, iadapter );
 
@@ -941,7 +941,7 @@ namespace pybind
 
             number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter_proxy<C, P, F>>( "proxy_static_mul", _fn, _proxy );
 
-            uint32_t typeId = m_kernel->class_info<C>();
+            typeid_t typeId = m_kernel->class_info<C>();
 
             m_scope->set_number_mul( typeId, iadapter );
 
@@ -955,7 +955,7 @@ namespace pybind
 
             number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter_operator_mul<C, V>>( "operator_mul" );
 
-            uint32_t typeId = m_kernel->class_info<VC>();
+            typeid_t typeId = m_kernel->class_info<VC>();
 
             m_scope->set_number_mul( typeId, iadapter );
 
@@ -974,7 +974,7 @@ namespace pybind
 
             number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter_operator_mul<C, C>>( "operator_mul" );
 
-            uint32_t typeId = m_kernel->class_info<C>();
+            typeid_t typeId = m_kernel->class_info<C>();
 
             m_scope->set_number_mul( typeId, iadapter );
 
@@ -988,7 +988,7 @@ namespace pybind
 
             number_inplace_adapter_interface_ptr iadapter = allocator->newT<number_inplace_adapter_operator_mul<C, V>>( "operator_inplace_mul" );
 
-            uint32_t typeId = m_kernel->class_info<VC>();
+            typeid_t typeId = m_kernel->class_info<VC>();
 
             m_scope->set_number_inplace_mul( typeId, iadapter );
 
@@ -1007,7 +1007,7 @@ namespace pybind
 
             number_inplace_adapter_interface_ptr iadapter = allocator->newT<number_inplace_adapter_operator_mul<C, C>>( "operator_inplace_mul" );
 
-            uint32_t typeId = m_kernel->class_info<C>();
+            typeid_t typeId = m_kernel->class_info<C>();
 
             m_scope->set_number_inplace_mul( typeId, iadapter );
 
@@ -1021,7 +1021,7 @@ namespace pybind
 
             number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter<C, F>>( "div", _fn );
 
-            uint32_t typeId = m_kernel->class_info<C>();
+            typeid_t typeId = m_kernel->class_info<C>();
 
             m_scope->set_number_div( typeId, iadapter );
 
@@ -1035,7 +1035,7 @@ namespace pybind
 
             number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter_proxy_function<C, F>>( "static_div", _fn );
 
-            uint32_t typeId = m_kernel->class_info<C>();
+            typeid_t typeId = m_kernel->class_info<C>();
 
             m_scope->set_number_div( typeId, iadapter );
 
@@ -1049,7 +1049,7 @@ namespace pybind
 
             number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter_proxy<C, P, F>>( "proxy_static_div", _fn, _proxy );
 
-            uint32_t typeId = m_kernel->class_info<C>();
+            typeid_t typeId = m_kernel->class_info<C>();
 
             m_scope->set_number_div( typeId, iadapter );
 
@@ -1063,7 +1063,7 @@ namespace pybind
 
             number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter_operator_div_nr<C, V>>( "operator_div_nr" );
 
-            uint32_t typeId = m_kernel->class_info<VC>();
+            typeid_t typeId = m_kernel->class_info<VC>();
 
             m_scope->set_number_div( typeId, iadapter );
 
@@ -1082,7 +1082,7 @@ namespace pybind
 
             number_binary_adapter_interface_ptr iadapter = allocator->newT<number_binary_adapter_operator_div<C, C>>( "operator_div" );
 
-            uint32_t typeId = m_kernel->class_info<C>();
+            typeid_t typeId = m_kernel->class_info<C>();
 
             m_scope->set_number_div( typeId, iadapter );
 
@@ -1096,7 +1096,7 @@ namespace pybind
 
             number_inplace_adapter_interface_ptr iadapter = allocator->newT<number_inplace_adapter_operator_div<C, V>>( "operator_div" );
 
-            uint32_t typeId = m_kernel->class_info<VC>();
+            typeid_t typeId = m_kernel->class_info<VC>();
 
             m_scope->set_number_inplace_div( typeId, iadapter );
 
@@ -1115,7 +1115,7 @@ namespace pybind
 
             number_inplace_adapter_interface_ptr iadapter = allocator->newT<number_inplace_adapter_operator_div<C, C>>( "operator_inplace_div" );
 
-            uint32_t typeId = m_kernel->class_info<C>();
+            typeid_t typeId = m_kernel->class_info<C>();
 
             m_scope->set_number_inplace_div( typeId, iadapter );
 
@@ -1197,8 +1197,8 @@ namespace pybind
             _scope->add_base_t<T>( &base_::meta_cast<T> );
         }
 
-        template<class bases_tuple, uint32_t ... I>
-        void setup_bases_i( const class_type_scope_interface_ptr & _scope, std::integer_sequence<uint32_t, I...> )
+        template<class bases_tuple, size_t ... I>
+        void setup_bases_i( const class_type_scope_interface_ptr & _scope, std::integer_sequence<size_t, I...> )
         {
             (_scope->add_base_t<typename std::tuple_element<I, bases_tuple>::type>( &base_::meta_cast<typename std::tuple_element<I, bases_tuple>::type> ), ...);
         }
@@ -1207,7 +1207,7 @@ namespace pybind
         {
             typedef typename bases_type::bases_tuple bases_tuple;
 
-            this->setup_bases_i<bases_tuple>( _scope, std::make_integer_sequence<uint32_t, std::tuple_size<bases_tuple>::value>() );
+            this->setup_bases_i<bases_tuple>( _scope, std::make_integer_sequence<size_t, std::tuple_size<bases_tuple>::value>() );
         }
 
     protected:

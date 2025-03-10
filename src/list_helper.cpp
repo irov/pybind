@@ -6,7 +6,7 @@ namespace pybind
     namespace detail
     {
         //////////////////////////////////////////////////////////////////////////
-        set_list_operator_t::set_list_operator_t( kernel_interface * _kernel, PyObject * _list, uint32_t _index )
+        set_list_operator_t::set_list_operator_t( kernel_interface * _kernel, PyObject * _list, size_t _index )
             : m_kernel( _kernel )
             , m_list( _list )
             , m_index( _index )

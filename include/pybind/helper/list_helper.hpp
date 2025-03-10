@@ -11,7 +11,7 @@ namespace pybind
         class PYBIND_API set_list_operator_t
         {
         public:
-            set_list_operator_t( kernel_interface * _kernel, PyObject * _list, uint32_t _index );
+            set_list_operator_t( kernel_interface * _kernel, PyObject * _list, size_t _index );
             set_list_operator_t( const set_list_operator_t & _r );
             ~set_list_operator_t();
 
@@ -44,7 +44,7 @@ namespace pybind
         protected:
             kernel_interface * m_kernel;
             PyObject * m_list;
-            uint32_t m_index;
+            size_t m_index;
         };
     }
 }

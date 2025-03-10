@@ -41,7 +41,7 @@ namespace pybind
         : public class_type_scope_interface
     {
     public:
-        python_class_type_scope( kernel_interface * _kernel, const char * _name, uint32_t _typeId, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash );
+        python_class_type_scope( kernel_interface * _kernel, const char * _name, typeid_t _typeId, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, size_t _pod, bool _hash );
         ~python_class_type_scope();
 
     public:
@@ -53,8 +53,8 @@ namespace pybind
 
     public:
         const char * get_name() const override;
-        uint32_t get_type_id() const override;
-        uint32_t get_pod_size() const override;
+        typeid_t get_type_id() const override;
+        size_t get_pod_size() const override;
         bool get_pod_hash() const override;
 
         void * get_user() const override;
@@ -63,36 +63,36 @@ namespace pybind
 
         void add_method( const method_adapter_interface_ptr & _imethod ) override;
         const method_adapter_interface_ptr & find_method( const char * _name ) const override;
-        uint32_t get_methods_count() const override;
-        const method_adapter_interface_ptr & get_method( uint32_t _index ) const override;
+        size_t get_methods_count() const override;
+        const method_adapter_interface_ptr & get_method( size_t _index ) const override;
 
         void add_member( const member_adapter_interface_ptr & _imember ) override;
         const member_adapter_interface_ptr & find_member( const char * _name ) const override;
-        uint32_t get_members_count() const override;
-        const member_adapter_interface_ptr & get_member( uint32_t _index ) const override;
+        size_t get_members_count() const override;
+        const member_adapter_interface_ptr & get_member( size_t _index ) const override;
 
-        void add_base( uint32_t _info, const class_type_scope_interface_ptr & _scope, pybind_metacast _cast ) override;
+        void add_base( typeid_t _info, const class_type_scope_interface_ptr & _scope, pybind_metacast _cast ) override;
 
         void set_construct( const constructor_adapter_interface_ptr & _iconstruct ) override;
         void set_convert( const convert_adapter_interface_ptr & _iconvert ) override;
         void set_call( const method_adapter_interface_ptr & _icall ) override;
         void set_repr( const repr_adapter_interface_ptr & _irepr ) override;
         void set_hash( const hash_adapter_interface_ptr & _ihash ) override;
-        void set_compare( uint32_t _typeId, const compare_adapter_interface_ptr &  _iadapter ) override;
+        void set_compare( typeid_t _typeId, const compare_adapter_interface_ptr &  _iadapter ) override;
         void set_getattro( const getattro_adapter_interface_ptr & _igetattro ) override;
         void set_mapping( const mapping_adapter_interface_ptr & _imapping ) override;
         void set_sequence_get( const sequence_get_adapter_interface_ptr & _isequence ) override;
         void set_sequence_set( const sequence_set_adapter_interface_ptr & _isequence ) override;
         void set_number_neg( const number_unary_adapter_interface_ptr & _iadapter ) override;
         void set_number_abs( const number_unary_adapter_interface_ptr & _iadapter ) override;
-        void set_number_add( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter ) override;
-        void set_number_sub( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter ) override;
-        void set_number_mul( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter ) override;
-        void set_number_div( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter ) override;
-        void set_number_inplace_add( uint32_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter ) override;
-        void set_number_inplace_sub( uint32_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter ) override;
-        void set_number_inplace_mul( uint32_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter ) override;
-        void set_number_inplace_div( uint32_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter ) override;
+        void set_number_add( typeid_t _typeId, const number_binary_adapter_interface_ptr & _iadapter ) override;
+        void set_number_sub( typeid_t _typeId, const number_binary_adapter_interface_ptr & _iadapter ) override;
+        void set_number_mul( typeid_t _typeId, const number_binary_adapter_interface_ptr & _iadapter ) override;
+        void set_number_div( typeid_t _typeId, const number_binary_adapter_interface_ptr & _iadapter ) override;
+        void set_number_inplace_add( typeid_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter ) override;
+        void set_number_inplace_sub( typeid_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter ) override;
+        void set_number_inplace_mul( typeid_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter ) override;
+        void set_number_inplace_div( typeid_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter ) override;
         void set_smart_pointer( const smart_pointer_adapter_interface_ptr & _iadapter ) override;
         void set_bindable( const bindable_adapter_interface_ptr & _iadapter ) override;
 
@@ -103,7 +103,7 @@ namespace pybind
         PyObject * create_weak( void * _impl ) override;
         PyObject * create_pod( void ** _impl ) override;
 
-        void * meta_cast( uint32_t _info, void * _impl ) override;
+        void * meta_cast( typeid_t _info, void * _impl ) override;
         void type_initialize( PyTypeObject * _type ) override;
 
         bool is_instance( PyTypeObject * _type ) const override;
@@ -116,7 +116,7 @@ namespace pybind
         inline const method_adapter_interface_ptr & get_call() const override;
         inline const repr_adapter_interface_ptr & get_repr() const override;
         inline const hash_adapter_interface_ptr & get_hash() const override;
-        inline const compare_adapter_interface_ptr & get_compare( uint32_t _typeId ) const override;
+        inline const compare_adapter_interface_ptr & get_compare( typeid_t _typeId ) const override;
         inline const getattro_adapter_interface_ptr & get_getattro() const override;
         inline const mapping_adapter_interface_ptr & get_mapping() const override;
         inline const sequence_get_adapter_interface_ptr & get_sequence_get() const override;
@@ -125,15 +125,15 @@ namespace pybind
         inline const number_unary_adapter_interface_ptr & get_number_neg() const override;
         inline const number_unary_adapter_interface_ptr & get_number_abs() const override;
 
-        inline const number_binary_adapter_interface_ptr & get_number_add( uint32_t _typeId ) const override;
-        inline const number_binary_adapter_interface_ptr & get_number_sub( uint32_t _typeId ) const override;
-        inline const number_binary_adapter_interface_ptr & get_number_mul( uint32_t _typeId ) const override;
-        inline const number_binary_adapter_interface_ptr & get_number_div( uint32_t _typeId ) const override;
+        inline const number_binary_adapter_interface_ptr & get_number_add( typeid_t _typeId ) const override;
+        inline const number_binary_adapter_interface_ptr & get_number_sub( typeid_t _typeId ) const override;
+        inline const number_binary_adapter_interface_ptr & get_number_mul( typeid_t _typeId ) const override;
+        inline const number_binary_adapter_interface_ptr & get_number_div( typeid_t _typeId ) const override;
 
-        const number_inplace_adapter_interface_ptr & get_number_inplace_add( uint32_t _typeId ) const override;
-        const number_inplace_adapter_interface_ptr & get_number_inplace_sub( uint32_t _typeId ) const override;
-        const number_inplace_adapter_interface_ptr & get_number_inplace_mul( uint32_t _typeId ) const override;
-        const number_inplace_adapter_interface_ptr & get_number_inplace_div( uint32_t _typeId ) const override;
+        const number_inplace_adapter_interface_ptr & get_number_inplace_add( typeid_t _typeId ) const override;
+        const number_inplace_adapter_interface_ptr & get_number_inplace_sub( typeid_t _typeId ) const override;
+        const number_inplace_adapter_interface_ptr & get_number_inplace_mul( typeid_t _typeId ) const override;
+        const number_inplace_adapter_interface_ptr & get_number_inplace_div( typeid_t _typeId ) const override;
 
         inline const smart_pointer_adapter_interface_ptr & get_smart_pointer() const override;
         inline const bindable_adapter_interface_ptr & get_bindable() const override;
@@ -153,25 +153,25 @@ namespace pybind
         PyObject * m_module;
 
         char m_name[PYBIND_CLASS_TYPE_MAX_NAME];
-        uint32_t m_typeId;
+        typeid_t m_typeId;
 
         struct Metacast
         {
-            uint32_t info;
+            typeid_t info;
             class_type_scope_interface_ptr scope;
             pybind_metacast cast;
         };
 
         Metacast m_bases[PYBIND_BASES_COUNT];
-        uint32_t m_basesCount;
+        size_t m_basesCount;
 
         void * m_user;
 
         method_adapter_interface_ptr m_methods[PYBIND_METHOD_COUNT];
-        uint32_t m_methodCount;
+        size_t m_methodCount;
 
         member_adapter_interface_ptr m_members[PYBIND_MEMBER_COUNT];
-        uint32_t m_memberCount;
+        size_t m_memberCount;
 
         new_adapter_interface_ptr m_new;
         destroy_adapter_interface_ptr m_destructor;
@@ -213,11 +213,11 @@ namespace pybind
         smart_pointer_adapter_interface_ptr m_smart_pointer;
         bindable_adapter_interface_ptr m_bindable;
 
-        uint32_t m_objectCount;
+        size_t m_objectCount;
 
         PyTypeObject * m_pytypeobject;
 
-        uint32_t m_pod_size;
+        size_t m_pod_size;
         bool m_pod_hash;
         bool m_binable_base;
 
@@ -261,7 +261,7 @@ namespace pybind
         return m_hash;
     }
     //////////////////////////////////////////////////////////////////////////
-    inline const compare_adapter_interface_ptr & python_class_type_scope::get_compare( uint32_t _typeId ) const
+    inline const compare_adapter_interface_ptr & python_class_type_scope::get_compare( typeid_t _typeId ) const
     {
         if( m_compare_adapters == nullptr )
         {
@@ -311,7 +311,7 @@ namespace pybind
         return m_number_adapters->abs;
     }
     //////////////////////////////////////////////////////////////////////////
-    inline const number_binary_adapter_interface_ptr & python_class_type_scope::get_number_add( uint32_t _typeId ) const
+    inline const number_binary_adapter_interface_ptr & python_class_type_scope::get_number_add( typeid_t _typeId ) const
     {
         if( m_number_adapters == nullptr )
         {
@@ -321,7 +321,7 @@ namespace pybind
         return m_number_adapters->adds[_typeId];
     }
     //////////////////////////////////////////////////////////////////////////
-    inline const number_binary_adapter_interface_ptr & python_class_type_scope::get_number_sub( uint32_t _typeId ) const
+    inline const number_binary_adapter_interface_ptr & python_class_type_scope::get_number_sub( typeid_t _typeId ) const
     {
         if( m_number_adapters == nullptr )
         {
@@ -331,7 +331,7 @@ namespace pybind
         return m_number_adapters->subs[_typeId];
     }
     //////////////////////////////////////////////////////////////////////////
-    inline const number_binary_adapter_interface_ptr & python_class_type_scope::get_number_mul( uint32_t _typeId ) const
+    inline const number_binary_adapter_interface_ptr & python_class_type_scope::get_number_mul( typeid_t _typeId ) const
     {
         if( m_number_adapters == nullptr )
         {
@@ -341,7 +341,7 @@ namespace pybind
         return m_number_adapters->muls[_typeId];
     }
     //////////////////////////////////////////////////////////////////////////
-    inline const number_binary_adapter_interface_ptr & python_class_type_scope::get_number_div( uint32_t _typeId ) const
+    inline const number_binary_adapter_interface_ptr & python_class_type_scope::get_number_div( typeid_t _typeId ) const
     {
         if( m_number_adapters == nullptr )
         {
@@ -351,7 +351,7 @@ namespace pybind
         return m_number_adapters->divs[_typeId];
     }
     //////////////////////////////////////////////////////////////////////////
-    inline const number_inplace_adapter_interface_ptr & python_class_type_scope::get_number_inplace_add( uint32_t _typeId ) const
+    inline const number_inplace_adapter_interface_ptr & python_class_type_scope::get_number_inplace_add( typeid_t _typeId ) const
     {
         if( m_number_adapters == nullptr )
         {
@@ -361,7 +361,7 @@ namespace pybind
         return m_number_adapters->iadds[_typeId];
     }
     //////////////////////////////////////////////////////////////////////////
-    inline const number_inplace_adapter_interface_ptr & python_class_type_scope::get_number_inplace_sub( uint32_t _typeId ) const
+    inline const number_inplace_adapter_interface_ptr & python_class_type_scope::get_number_inplace_sub( typeid_t _typeId ) const
     {
         if( m_number_adapters == nullptr )
         {
@@ -371,7 +371,7 @@ namespace pybind
         return m_number_adapters->isubs[_typeId];
     }
     //////////////////////////////////////////////////////////////////////////
-    inline const number_inplace_adapter_interface_ptr & python_class_type_scope::get_number_inplace_mul( uint32_t _typeId ) const
+    inline const number_inplace_adapter_interface_ptr & python_class_type_scope::get_number_inplace_mul( typeid_t _typeId ) const
     {
         if( m_number_adapters == nullptr )
         {
@@ -381,7 +381,7 @@ namespace pybind
         return m_number_adapters->imuls[_typeId];
     }
     //////////////////////////////////////////////////////////////////////////
-    inline const number_inplace_adapter_interface_ptr & python_class_type_scope::get_number_inplace_div( uint32_t _typeId ) const
+    inline const number_inplace_adapter_interface_ptr & python_class_type_scope::get_number_inplace_div( typeid_t _typeId ) const
     {
         if( m_number_adapters == nullptr )
         {

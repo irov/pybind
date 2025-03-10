@@ -71,8 +71,8 @@ namespace pybind
                 return true;
             }
 
-            uint32_t tinfo = _kernel->class_info<C>();
-            uint32_t tptrinfo = _kernel->class_info<C *>();
+            typeid_t tinfo = _kernel->class_info<C>();
+            typeid_t tptrinfo = _kernel->class_info<C *>();
 
             void * impl;
             if( this->type_info_cast( _kernel, _obj, tinfo, tptrinfo, &impl ) == false )
@@ -120,8 +120,8 @@ namespace pybind
                 return true;
             }
 
-            uint32_t tinfo = _kernel->class_info<C>();
-            uint32_t tptrinfo = _kernel->class_info<C *>();
+            typeid_t tinfo = _kernel->class_info<C>();
+            typeid_t tptrinfo = _kernel->class_info<C *>();
 
             void * impl;
             if( type_cast::type_info_cast( _kernel, _obj, tinfo, tptrinfo, &impl ) == false )
@@ -160,8 +160,8 @@ namespace pybind
     {
         bool apply( kernel_interface * _kernel, PyObject * _obj, typename type_cast_result<C>::TCastValue _value, bool _nothrow ) override
         {
-            uint32_t tinfo = _kernel->class_info<C>();
-            uint32_t tptrinfo = _kernel->class_info<C *>();
+            typeid_t tinfo = _kernel->class_info<C>();
+            typeid_t tptrinfo = _kernel->class_info<C *>();
 
             void * impl;
             if( type_cast::type_info_cast( _kernel, _obj, tinfo, tptrinfo, &impl ) == false )
@@ -200,7 +200,7 @@ namespace pybind
 
         PyObject * wrap( kernel_interface * _kernel, const C & _class ) override
         {
-            uint32_t tinfo = _kernel->class_info<C>();
+            typeid_t tinfo = _kernel->class_info<C>();
 
             const class_type_scope_interface_ptr & scope = _kernel->get_class_type_scope( tinfo );
 

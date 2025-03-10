@@ -10,7 +10,7 @@ namespace pybind
         : public pybind::object
     {
     public:
-        typedef uint32_t size_type;
+        typedef size_t size_type;
 
     public:
         dict();

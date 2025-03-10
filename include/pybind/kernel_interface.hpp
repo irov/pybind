@@ -61,7 +61,7 @@ namespace pybind
         virtual PyObject * create_method_adapter( const method_adapter_interface_ptr & _ifunc, PyTypeObject * _type ) = 0;
         virtual method_adapter_interface * get_method_adapter( PyObject * _obj ) = 0;
 
-        virtual PyTypeObject * get_pod_type( uint32_t _pod, bool _hash ) = 0;
+        virtual PyTypeObject * get_pod_type( size_t _pod, bool _hash ) = 0;
         virtual bool is_object_bindable( PyObject * _obj ) = 0;
 
     public:
@@ -78,13 +78,13 @@ namespace pybind
         virtual bool is_class( PyObject * _obj ) = 0;
         virtual bool is_type_class( PyTypeObject * _type ) = 0;
 
-        virtual uint32_t get_class_type_id( const std::type_info & _info ) = 0;
-        virtual const char * get_class_type_info( uint32_t _id ) = 0;
+        virtual typeid_t get_class_type_id( const std::type_info & _info ) = 0;
+        virtual const char * get_class_type_info( typeid_t _id ) = 0;
 
         template<class T>
         const char * get_class_type_info_t()
         {
-            uint32_t scope_id = this->class_info<T>();
+            typeid_t scope_id = this->class_info<T>();
 
             const char * type_info = this->get_class_type_info( scope_id );
 
@@ -92,15 +92,15 @@ namespace pybind
         }
 
         template<class T>
-        uint32_t class_info()
+        typeid_t class_info()
         {
-            static uint32_t type_id = 0;
+            static typeid_t type_id = 0;
 
             if( type_id == 0 )
             {
                 const std::type_info & ti = typeid(T);
 
-                uint32_t id = this->get_class_type_id( ti );
+                typeid_t id = this->get_class_type_id( ti );
 
                 type_id = id;
             }
@@ -111,49 +111,49 @@ namespace pybind
         virtual const char * object_type_name( PyObject * _type ) = 0;
         virtual const char * type_name( PyTypeObject * _type ) = 0;
 
-        virtual uint32_t find_class_info_desc_name( const char * _name ) = 0;
+        virtual typeid_t find_class_info_desc_name( const char * _name ) = 0;
 
-        virtual void register_type_info_extract( uint32_t _info, const type_cast_ptr & _cast ) = 0;
+        virtual void register_type_info_extract( typeid_t _info, const type_cast_ptr & _cast ) = 0;
 
         template<class T>
         void register_type_info_extract_t( const type_cast_ptr & _cast )
         {
-            uint32_t id = this->class_info<T>();
+            typeid_t id = this->class_info<T>();
 
             this->register_type_info_extract( id, _cast );
         }
 
-        virtual void unregister_type_info_extract( uint32_t _info ) = 0;
+        virtual void unregister_type_info_extract( typeid_t _info ) = 0;
 
         template<class T>
         void unregister_type_info_extract_t()
         {
-            uint32_t id = this->class_info<T>();
+            typeid_t id = this->class_info<T>();
 
             this->unregister_type_info_extract( id );
         }
 
-        virtual type_cast * find_type_info_extract( uint32_t _info ) = 0;
+        virtual type_cast * find_type_info_extract( typeid_t _info ) = 0;
 
-        virtual class_type_scope_interface_ptr create_new_type_scope( uint32_t _info, const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash ) = 0;
-        virtual void remove_type_scope( uint32_t _info ) = 0;
+        virtual class_type_scope_interface_ptr create_new_type_scope( typeid_t _info, const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, size_t _pod, bool _hash ) = 0;
+        virtual void remove_type_scope( typeid_t _info ) = 0;
 
-        virtual bool has_class_type_scope( uint32_t _info ) = 0;
-        virtual const class_type_scope_interface_ptr & get_class_type_scope( uint32_t _info ) = 0;
+        virtual bool has_class_type_scope( typeid_t _info ) = 0;
+        virtual const class_type_scope_interface_ptr & get_class_type_scope( typeid_t _info ) = 0;
 
         virtual void visit_types_scope( visitor_class_type_scope * _getter ) = 0;
 
         virtual PyTypeObject * get_object_type( PyObject * _type ) = 0;
-        virtual uint32_t get_object_type_id( PyObject * _type ) = 0;
+        virtual typeid_t get_object_type_id( PyObject * _type ) = 0;
 
         virtual const class_type_scope_interface_ptr & get_class_scope( PyTypeObject * _type ) = 0;
         virtual void cache_class_scope_type( const class_type_scope_interface_ptr & _scope ) = 0;
         virtual void remove_class_scope_type( const class_type_scope_interface_ptr & _scope ) = 0;
 
         template<class T>
-        class_type_scope_interface_ptr create_new_scope( const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash )
+        class_type_scope_interface_ptr create_new_scope( const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, size_t _pod, bool _hash )
         {
-            uint32_t ti = this->class_info<T>();
+            typeid_t ti = this->class_info<T>();
 
             class_type_scope_interface_ptr scope = this->create_new_type_scope( ti, _name, _user, _pynew, _pydestructor, _pod, _hash );
 
@@ -163,7 +163,7 @@ namespace pybind
         template<class T>
         const class_type_scope_interface_ptr & get_class_type_scope_t()
         {
-            uint32_t ti = this->class_info<T>();
+            typeid_t ti = this->class_info<T>();
 
             const class_type_scope_interface_ptr & scope = this->get_class_type_scope( ti );
 
@@ -173,7 +173,7 @@ namespace pybind
         template<class T>
         void remove_scope()
         {
-            uint32_t ti = this->class_info<T>();
+            typeid_t ti = this->class_info<T>();
             this->remove_type_scope( ti );
             this->unregister_type_info_extract( ti );
         }
@@ -201,10 +201,10 @@ namespace pybind
             return py_obj;
         }
 
-        virtual void * meta_cast_scope( void * _self, uint32_t _scope_name, uint32_t _class_name, const class_type_scope_interface_ptr & _scope ) = 0;
+        virtual void * meta_cast_scope( void * _self, typeid_t _scope_name, typeid_t _class_name, const class_type_scope_interface_ptr & _scope ) = 0;
 
         template<class T>
-        inline T meta_cast_scope_t( void * _self, uint32_t _scope_name, uint32_t _class_name, const class_type_scope_interface_ptr & _scope )
+        inline T meta_cast_scope_t( void * _self, typeid_t _scope_name, typeid_t _class_name, const class_type_scope_interface_ptr & _scope )
         {
             void * impl = this->meta_cast_scope( _self, _scope_name, _class_name, _scope );
 
@@ -216,8 +216,8 @@ namespace pybind
         template<class C>
         inline C * meta_cast_class_t( void * _self, const class_type_scope_interface_ptr & _scope )
         {
-            uint32_t scope_name = this->class_info<C>();
-            uint32_t class_name = this->class_info<C *>();
+            typeid_t scope_name = this->class_info<C>();
+            typeid_t class_name = this->class_info<C *>();
 
             void * impl = this->meta_cast_scope_t<C *>( _self, scope_name, class_name, _scope );
 
@@ -226,10 +226,10 @@ namespace pybind
             return obj;
         }
 
-        virtual void * check_registred_class( PyObject * _obj, uint32_t _info ) = 0;
+        virtual void * check_registred_class( PyObject * _obj, typeid_t _info ) = 0;
 
-        virtual void error_invalid_extract( PyObject * _obj, uint32_t _tinfo ) = 0;
-        virtual bool instance_of_type( PyObject * _obj, uint32_t _tinfo ) = 0;
+        virtual void error_invalid_extract( PyObject * _obj, typeid_t _tinfo ) = 0;
+        virtual bool instance_of_type( PyObject * _obj, typeid_t _tinfo ) = 0;
 
         template<class C>
         C * get_class_impl_t( PyObject * _obj )
@@ -374,12 +374,17 @@ namespace pybind
         virtual bool float_check( PyObject * _obj ) const = 0;
 
         virtual bool string_check( PyObject * _string ) const = 0;
-        virtual uint32_t string_size( PyObject * _string ) const = 0;
+        virtual size_t string_size( PyObject * _string ) const = 0;
         virtual int64_t string_hash( PyObject * _string ) const = 0;
         virtual const char * string_to_char( PyObject * _string ) = 0;
         virtual const char * string_to_char_and_size( PyObject * _string, size_t * _size ) = 0;
         virtual PyObject * string_from_char( const char * _str ) = 0;
         virtual PyObject * string_from_char_size( const char * _str, size_t _size ) = 0;
+
+        virtual bool bytearray_check( PyObject * _bytearray ) const = 0;
+        virtual size_t bytearray_size( PyObject * _bytearray ) const = 0;
+        virtual const uint8_t * bytearray_to_data( PyObject * _bytearray ) const = 0;
+        virtual PyObject * bytearray_from_data( const uint8_t * _data, size_t _size ) = 0;
 
         virtual bool unicode_check( PyObject * _unicode ) const = 0;
         virtual const wchar_t * unicode_to_wchar( PyObject * _unicode ) = 0;
@@ -391,20 +396,20 @@ namespace pybind
         virtual PyObject * unicode_from_utf8( const char * _utf8 ) = 0;
         virtual PyObject * unicode_from_utf8_size( const char * _utf8, size_t _size ) = 0;
 
-        virtual PyObject * list_new( uint32_t _size ) = 0;
+        virtual PyObject * list_new( size_t _size ) = 0;
         virtual bool list_check( PyObject * _list ) const = 0;
-        virtual uint32_t list_size( PyObject * _list ) const = 0;
-        virtual PyObject * list_getitem( PyObject * _list, uint32_t _it ) = 0;
-        virtual bool list_insert( PyObject * _list, uint32_t _it, PyObject * _item ) = 0;
-        virtual bool list_remove( PyObject * _list, uint32_t _it ) = 0;
-        virtual bool list_setitem( PyObject * _list, uint32_t _it, PyObject * _item ) = 0;
+        virtual size_t list_size( PyObject * _list ) const = 0;
+        virtual PyObject * list_getitem( PyObject * _list, size_t _it ) = 0;
+        virtual bool list_insert( PyObject * _list, size_t _it, PyObject * _item ) = 0;
+        virtual bool list_remove( PyObject * _list, size_t _it ) = 0;
+        virtual bool list_setitem( PyObject * _list, size_t _it, PyObject * _item ) = 0;
         virtual bool list_appenditem( PyObject * _list, PyObject * _item ) = 0;
 
         virtual PyObject * dict_new() = 0;
-        virtual PyObject * dict_new_presized( uint32_t _count ) = 0;
+        virtual PyObject * dict_new_presized( size_t _count ) = 0;
         virtual PyObject * dict_from( PyObject * _obj ) = 0;
         virtual bool dict_check( PyObject * _dict ) const = 0;
-        virtual uint32_t dict_size( PyObject * _obj ) const = 0;
+        virtual size_t dict_size( PyObject * _obj ) const = 0;
         virtual bool dict_set( PyObject * _dict, PyObject * _name, PyObject * _value ) = 0;
         virtual bool dict_setstring( PyObject * _dict, const char * _name, PyObject * _value ) = 0;
         virtual bool dict_remove( PyObject * _dict, PyObject * _name ) = 0;
@@ -413,14 +418,14 @@ namespace pybind
         virtual PyObject * dict_get( PyObject * _dict, PyObject * _name ) = 0;
         virtual bool dict_exist( PyObject * _dict, PyObject * _name ) = 0;
         virtual bool dict_existstring( PyObject * _dict, const char * _name ) = 0;
-        virtual bool dict_next( PyObject * _dict, uint32_t & _pos, PyObject ** _key, PyObject ** _value ) = 0;
+        virtual bool dict_next( PyObject * _dict, size_t & _pos, PyObject ** _key, PyObject ** _value ) = 0;
 
-        virtual PyObject * tuple_new( uint32_t _it ) = 0;
+        virtual PyObject * tuple_new( size_t _it ) = 0;
         virtual bool tuple_check( PyObject * _tuple ) const = 0;
-        virtual uint32_t tuple_size( PyObject * _tuple ) const = 0;
-        virtual PyObject * tuple_getitem( PyObject * _tuple, uint32_t _it ) = 0;
-        virtual PyObject * tuple_slice( PyObject * _tuple, uint32_t _low, uint32_t _high ) = 0;
-        virtual PyObject * tuple_slice_tail( PyObject * _tuple, uint32_t _size ) = 0;
-        virtual bool tuple_setitem( PyObject * _tuple, uint32_t _it, PyObject * _value ) = 0;
+        virtual size_t tuple_size( PyObject * _tuple ) const = 0;
+        virtual PyObject * tuple_getitem( PyObject * _tuple, size_t _it ) = 0;
+        virtual PyObject * tuple_slice( PyObject * _tuple, size_t _low, size_t _high ) = 0;
+        virtual PyObject * tuple_slice_tail( PyObject * _tuple, size_t _size ) = 0;
+        virtual bool tuple_setitem( PyObject * _tuple, size_t _it, PyObject * _value ) = 0;
     };
 }

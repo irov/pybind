@@ -7,7 +7,7 @@ namespace pybind
     class PYBIND_API tuple_const_iterator
     {
     public:
-        typedef uint32_t size_type;
+        typedef size_t size_type;
 
     public:
         tuple_const_iterator( kernel_interface * _kernel, PyObject * _obj, size_type _index );

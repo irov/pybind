@@ -25,7 +25,7 @@ namespace pybind
         void * impl;
     };
     //////////////////////////////////////////////////////////////////////////
-    template<uint32_t I>
+    template<size_t I>
     struct py_pod_object
     {
         PyObject_HEAD
@@ -44,7 +44,7 @@ namespace pybind
         int64_t hash;
     };
     //////////////////////////////////////////////////////////////////////////
-    template<uint32_t I>
+    template<size_t I>
     struct py_pod_hash_object
     {
         PyObject_HEAD
@@ -66,7 +66,7 @@ namespace pybind
             objtype->tp_free( _obj );
         }
         //////////////////////////////////////////////////////////////////////////
-        template<uint32_t I>
+        template<size_t I>
         static void wrap_pod_I( PyObject * _obj, void ** _impl )
         {
             py_pod_object<I> * py_pod = (py_pod_object<I> *)_obj;
@@ -76,7 +76,7 @@ namespace pybind
             *_impl = (void *)py_pod->buff;
         }
         //////////////////////////////////////////////////////////////////////////
-        template<uint32_t I>
+        template<size_t I>
         static void wrap_pod_hash_I( PyObject * _obj, void ** _impl )
         {
             py_pod_hash_object<I> * py_pod_hash = (py_pod_hash_object<I> *)_obj;
@@ -180,7 +180,7 @@ namespace pybind
             }
         }
         //////////////////////////////////////////////////////////////////////////
-        void wrap_pod( PyObject * _obj, void ** _impl, uint32_t _size, bool _hash )
+        void wrap_pod( PyObject * _obj, void ** _impl, size_t _size, bool _hash )
         {
             uint32_t pod_matrix_index = detail::s_pod_type_matrix[_size - 1];
 
@@ -377,7 +377,7 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
     }
     //////////////////////////////////////////////////////////////////////////
-    PyTypeObject * pod_python::get_pod_type( uint32_t _pod, bool _hash )
+    PyTypeObject * pod_python::get_pod_type( size_t _pod, bool _hash )
     {
         PyTypeObject * py_pybind_type;
 
@@ -458,7 +458,7 @@ namespace pybind
         return py_pybind_type;
     }
     //////////////////////////////////////////////////////////////////////////
-    static PyTypeObject __make_pod_type( const char * _name, uint32_t _size )
+    static PyTypeObject __make_pod_type( const char * _name, size_t _size )
     {
         PyTypeObject pod_type =
         {
@@ -531,7 +531,7 @@ namespace pybind
             return false;
         }
 
-        for( uint32_t i = 0; i != 7; ++i )
+        for( size_t i = 0; i != 7; ++i )
         {
             if( PyType_Ready( &m_pod_type[i] ) < 0 )
             {
@@ -539,7 +539,7 @@ namespace pybind
             }
         }
 
-        for( uint32_t i = 0; i != 7; ++i )
+        for( size_t i = 0; i != 7; ++i )
         {
             if( PyType_Ready( &m_pod_hash_type[i] ) < 0 )
             {

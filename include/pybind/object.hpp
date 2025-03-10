@@ -77,8 +77,8 @@ namespace pybind
         }
 
     public:
-        template<class ... T, uint32_t ... I>
-        inline detail::extract_operator_t call_args_ii( args && _args, std::tuple<T ...> && _t, std::integer_sequence<uint32_t, I...> ) const
+        template<class ... T, size_t ... I>
+        inline detail::extract_operator_t call_args_ii( args && _args, std::tuple<T ...> && _t, std::integer_sequence<size_t, I...> ) const
         {
             return this->call_args_i( {detail::import_operator_t( m_kernel, std::get<I>( _t ) ) ...}
                 , _args
@@ -90,7 +90,7 @@ namespace pybind
         {
             return this->call_args_ii( std::get<sizeof ... (T) - 1u>( std::make_tuple( _t... ) )
                 , std::make_tuple( _t... )
-                , std::make_integer_sequence<uint32_t, sizeof ... (T) - 1u>()
+                , std::make_integer_sequence<size_t, sizeof ... (T) - 1u>()
             );
         }
 

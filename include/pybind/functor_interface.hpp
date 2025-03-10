@@ -13,7 +13,7 @@ namespace pybind
         : public base_adapter_interface
     {
     public:
-        functor_adapter_interface( const char * _name, uint32_t _arity )
+        functor_adapter_interface( const char * _name, size_t _arity )
             : base_adapter_interface( _name )
             , m_arity( _arity )
         {
@@ -24,7 +24,7 @@ namespace pybind
         }
 
     public:
-        uint32_t getArity() const
+        size_t getArity() const
         {
             return m_arity;
         }
@@ -33,7 +33,7 @@ namespace pybind
         virtual PyObject * call( kernel_interface * _kernel, PyObject * _args, PyObject * _kwds ) = 0;
 
     protected:
-        uint32_t m_arity;
+        size_t m_arity;
     };
     //////////////////////////////////////////////////////////////////////////
     typedef intrusive_ptr<class functor_adapter_interface> functor_adapter_interface_ptr;

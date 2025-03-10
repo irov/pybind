@@ -45,7 +45,7 @@ namespace pybind
         method_adapter_interface * get_method_adapter( PyObject * _obj ) override;
 
     public:
-        PyTypeObject * get_pod_type( uint32_t _pod, bool _hash ) override;
+        PyTypeObject * get_pod_type( size_t _pod, bool _hash ) override;
         bool is_object_bindable( PyObject * _obj ) override;
 
     public:
@@ -62,25 +62,25 @@ namespace pybind
         bool is_class( PyObject * _obj ) override;
         bool is_type_class( PyTypeObject * _type ) override;
 
-        uint32_t get_class_type_id( const std::type_info & _info ) override;
-        const char * get_class_type_info( uint32_t _id ) override;
+        typeid_t get_class_type_id( const std::type_info & _info ) override;
+        const char * get_class_type_info( typeid_t _id ) override;
 
-        uint32_t find_class_info_desc_name( const char * _name ) override;
+        typeid_t find_class_info_desc_name( const char * _name ) override;
 
-        void register_type_info_extract( uint32_t _info, const type_cast_ptr & _cast ) override;
-        void unregister_type_info_extract( uint32_t _info ) override;
-        type_cast * find_type_info_extract( uint32_t _info ) override;
+        void register_type_info_extract( typeid_t _info, const type_cast_ptr & _cast ) override;
+        void unregister_type_info_extract( typeid_t _info ) override;
+        type_cast * find_type_info_extract( typeid_t _info ) override;
 
-        class_type_scope_interface_ptr create_new_type_scope( uint32_t _info, const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash ) override;
-        void remove_type_scope( uint32_t _info ) override;
+        class_type_scope_interface_ptr create_new_type_scope( typeid_t _info, const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, size_t _pod, bool _hash ) override;
+        void remove_type_scope( typeid_t _info ) override;
 
-        bool has_class_type_scope( uint32_t _info ) override;
-        const class_type_scope_interface_ptr & get_class_type_scope( uint32_t _info ) override;
+        bool has_class_type_scope( typeid_t _info ) override;
+        const class_type_scope_interface_ptr & get_class_type_scope( typeid_t _info ) override;
 
         void visit_types_scope( visitor_class_type_scope * _getter ) override;
 
         PyTypeObject * get_object_type( PyObject * _type ) override;
-        uint32_t get_object_type_id( PyObject * _type ) override;
+        typeid_t get_object_type_id( PyObject * _type ) override;
 
         const char * object_type_name( PyObject * _type ) override;
         const char * type_name( PyTypeObject * _type ) override;
@@ -92,12 +92,12 @@ namespace pybind
         PyObject * scope_create_holder( const class_type_scope_interface_ptr & _scope, void * _ptr ) override;
         PyObject * scope_create_weak( const class_type_scope_interface_ptr & _scope, void * _ptr ) override;
 
-        void * meta_cast_scope( void * _self, uint32_t _scope_name, uint32_t _class_name, const class_type_scope_interface_ptr & _scope ) override;
+        void * meta_cast_scope( void * _self, typeid_t _scope_name, typeid_t _class_name, const class_type_scope_interface_ptr & _scope ) override;
 
-        void * check_registred_class( PyObject * _obj, uint32_t _info ) override;
+        void * check_registred_class( PyObject * _obj, typeid_t _info ) override;
 
-        void error_invalid_extract( PyObject * _obj, uint32_t _tinfo ) override;
-        bool instance_of_type( PyObject * _obj, uint32_t _tinfo ) override;
+        void error_invalid_extract( PyObject * _obj, typeid_t _tinfo ) override;
+        bool instance_of_type( PyObject * _obj, typeid_t _tinfo ) override;
 
         void * get_class_impl( PyObject * _obj ) override;
         bool is_class_weak( PyObject * _obj ) override;
@@ -234,12 +234,17 @@ namespace pybind
         bool float_check( PyObject * _obj ) const override;        
 
         bool string_check( PyObject * _obj ) const override;
-        uint32_t string_size( PyObject * _obj ) const override;
+        size_t string_size( PyObject * _obj ) const override;
         int64_t string_hash( PyObject * _obj ) const override;
         const char * string_to_char( PyObject * _obj ) override;
         const char * string_to_char_and_size( PyObject * _obj, size_t * _size ) override;
         PyObject * string_from_char( const char * _str ) override;
         PyObject * string_from_char_size( const char * _str, size_t _size ) override;
+
+        bool bytearray_check( PyObject * _bytearray ) const override;
+        size_t bytearray_size( PyObject * _bytearray ) const override;
+        const uint8_t * bytearray_to_data( PyObject * _bytearray ) const override;
+        PyObject * bytearray_from_data( const uint8_t * _data, size_t _size ) override;
 
         bool unicode_check( PyObject * _obj ) const override;
         const wchar_t * unicode_to_wchar( PyObject * _obj ) override;
@@ -251,20 +256,20 @@ namespace pybind
         PyObject * unicode_from_utf8( const char * _utf8 ) override;
         PyObject * unicode_from_utf8_size( const char * _utf8, size_t _size ) override;
 
-        PyObject * list_new( uint32_t _size ) override;
+        PyObject * list_new( size_t _size ) override;
         bool list_check( PyObject * _obj ) const override;
-        uint32_t list_size( PyObject * _obj ) const override;
-        PyObject * list_getitem( PyObject * _obj, uint32_t _it ) override;
-        bool list_insert( PyObject * _obj, uint32_t _it, PyObject * _item ) override;
-        bool list_remove( PyObject * _obj, uint32_t _it ) override;
-        bool list_setitem( PyObject * _obj, uint32_t _it, PyObject * _item ) override;
+        size_t list_size( PyObject * _obj ) const override;
+        PyObject * list_getitem( PyObject * _obj, size_t _it ) override;
+        bool list_insert( PyObject * _obj, size_t _it, PyObject * _item ) override;
+        bool list_remove( PyObject * _obj, size_t _it ) override;
+        bool list_setitem( PyObject * _obj, size_t _it, PyObject * _item ) override;
         bool list_appenditem( PyObject * _obj, PyObject * _item ) override;
 
         PyObject * dict_new() override;
-        PyObject * dict_new_presized( uint32_t _count ) override;
+        PyObject * dict_new_presized( size_t _count ) override;
         PyObject * dict_from( PyObject * _obj ) override;
         bool dict_check( PyObject * _obj ) const override;
-        uint32_t dict_size( PyObject * _obj ) const override;
+        size_t dict_size( PyObject * _obj ) const override;
         bool dict_set( PyObject * _obj, PyObject * _name, PyObject * _value ) override;
         bool dict_setstring( PyObject * _obj, const char * _name, PyObject * _value ) override;
         bool dict_remove( PyObject * _obj, PyObject * _name ) override;
@@ -273,15 +278,15 @@ namespace pybind
         PyObject * dict_get( PyObject * _obj, PyObject * _name ) override;
         bool dict_exist( PyObject * _obj, PyObject * _name ) override;
         bool dict_existstring( PyObject * _obj, const char * _name ) override;
-        bool dict_next( PyObject * _obj, uint32_t & _pos, PyObject ** _key, PyObject ** _value ) override;
+        bool dict_next( PyObject * _obj, size_t & _pos, PyObject ** _key, PyObject ** _value ) override;
         
-        PyObject * tuple_new( uint32_t _it ) override;
+        PyObject * tuple_new( size_t _it ) override;
         bool tuple_check( PyObject * _obj ) const override;
-        uint32_t tuple_size( PyObject * _obj ) const override;
-        PyObject * tuple_getitem( PyObject * _obj, uint32_t _it ) override;
-        PyObject * tuple_slice( PyObject * _obj, uint32_t _low, uint32_t _high ) override;
-        PyObject * tuple_slice_tail( PyObject * _obj, uint32_t _size ) override;
-        bool tuple_setitem( PyObject * _obj, uint32_t _it, PyObject * _value ) override;
+        size_t tuple_size( PyObject * _obj ) const override;
+        PyObject * tuple_getitem( PyObject * _obj, size_t _it ) override;
+        PyObject * tuple_slice( PyObject * _obj, size_t _low, size_t _high ) override;
+        PyObject * tuple_slice_tail( PyObject * _obj, size_t _size ) override;
+        bool tuple_setitem( PyObject * _obj, size_t _it, PyObject * _value ) override;
 
     protected:
         allocator_interface * m_allocator;
@@ -306,11 +311,11 @@ namespace pybind
         class_type_scope_interface_ptr m_class_type_dummy;
         class_type_scope_interface_ptr m_class_type_hashes[PYBIND_TYPE_COUNT_HASH];
 
-        uint32_t m_enumerator;
+        typeid_t m_enumerator;
 
     protected:
-        bool set_class_info_desc( uint32_t _typeId, const char * _info );
-        uint32_t get_next_id();
+        bool set_class_info_desc( typeid_t _typeId, const char * _info );
+        typeid_t get_next_id();
     };
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<python_kernel> python_kernel_ptr;

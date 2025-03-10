@@ -136,15 +136,17 @@ if(PYBIND_PYTHON_ERROR_FORMAT_FLAG)
     add_definitions(-DPYBIND_PYTHON_ERROR_FORMAT_FLAG)
 endif()
 
-ADD_LIBRARY(${PROJECT_NAME} STATIC 
-	${files_config_headers} 
-	${files_public_headers} 
-	${files_public_adapter_headers} 
-	${files_public_helper_headers} 
+ADD_LIBRARY(${PROJECT_NAME} STATIC
+	${files_config_headers}
+	${files_public_headers}
+	${files_public_adapter_headers}
+	${files_public_helper_headers}
 	${files_public_call_headers}
     ${files_public_generator_headers}
     ${files_private_generator_sources}
-	${files_private_headers} 
+    ${files_private_python_headers}
+    ${files_private_python_sources}
+	${files_private_headers}
 	${files_private_sources}
     ${files_public_stl_headers}
     ${files_private_stl_sources}

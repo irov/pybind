@@ -234,7 +234,7 @@ namespace pybind
 
             const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
 
-            uint32_t compare_type_id = kernel->get_object_type_id( _compare );
+            typeid_t compare_type_id = kernel->get_object_type_id( _compare );
 
             const compare_adapter_interface_ptr & adapter = scope->get_compare( compare_type_id );
 
@@ -267,7 +267,7 @@ namespace pybind
                 }
             }
 
-            uint32_t base_type_id = kernel->get_object_type_id( _obj );
+            typeid_t base_type_id = kernel->get_object_type_id( _obj );
 
             const compare_adapter_interface_ptr & base_adapter = scope->get_compare( base_type_id );
 
@@ -422,7 +422,7 @@ namespace pybind
             {
                 DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), nullptr, nullptr );
 
-                PyObject * res = adapter->call( kernel, impl, scope, (uint32_t)_index );
+                PyObject * res = adapter->call( kernel, impl, scope, (size_t)_index );
 
                 return res;
             }
@@ -465,7 +465,7 @@ namespace pybind
             {
                 DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), nullptr, nullptr );
 
-                adapter->call( kernel, impl, scope, (uint32_t)_index, _value );                
+                adapter->call( kernel, impl, scope, (size_t)_index, _value );                
 
                 return 0;
             }
@@ -560,7 +560,7 @@ namespace pybind
                 PyObject * py_self = py_alloc_class( _type, _args, _kwds );
 
                 void * buff = nullptr;
-                uint32_t pod_size = scope->get_pod_size();
+                size_t pod_size = scope->get_pod_size();
                 bool pod_hash = scope->get_pod_hash();
 
                 pybind::helper::wrap_pod( py_self, &buff, pod_size, pod_hash );
@@ -775,7 +775,7 @@ namespace pybind
 
             const class_type_scope_interface_ptr & scope = _kernel->get_class_scope( objtype );
 
-            uint32_t value_type_id = _kernel->get_object_type_id( _value );
+            typeid_t value_type_id = _kernel->get_object_type_id( _value );
 
             const number_binary_adapter_interface_ptr & adapter = scope->get_number_add( value_type_id );
 
@@ -798,7 +798,7 @@ namespace pybind
                 }
             }
 
-            uint32_t base_type_id = _kernel->get_object_type_id( _obj );
+            typeid_t base_type_id = _kernel->get_object_type_id( _obj );
 
             const number_binary_adapter_interface_ptr & base_adapter = scope->get_number_add( base_type_id );
 
@@ -842,7 +842,7 @@ namespace pybind
 
             const class_type_scope_interface_ptr & scope = _kernel->get_class_scope( objtype );
 
-            uint32_t value_type_id = _kernel->get_object_type_id( _value );
+            typeid_t value_type_id = _kernel->get_object_type_id( _value );
 
             const number_binary_adapter_interface_ptr & adapter = scope->get_number_sub( value_type_id );
 
@@ -865,7 +865,7 @@ namespace pybind
                 }
             }
 
-            uint32_t base_type_id = _kernel->get_object_type_id( _obj );
+            typeid_t base_type_id = _kernel->get_object_type_id( _obj );
 
             const number_binary_adapter_interface_ptr & base_adapter = scope->get_number_sub( base_type_id );
 
@@ -909,7 +909,7 @@ namespace pybind
 
             const class_type_scope_interface_ptr & scope = _kernel->get_class_scope( objtype );
 
-            uint32_t value_type_id = _kernel->get_object_type_id( _value );
+            typeid_t value_type_id = _kernel->get_object_type_id( _value );
 
             const number_binary_adapter_interface_ptr & adapter = scope->get_number_mul( value_type_id );
 
@@ -932,7 +932,7 @@ namespace pybind
                 }
             }
 
-            uint32_t base_type_id = _kernel->get_object_type_id( _obj );
+            typeid_t base_type_id = _kernel->get_object_type_id( _obj );
 
             const number_binary_adapter_interface_ptr & base_adapter = scope->get_number_mul( base_type_id );
 
@@ -976,7 +976,7 @@ namespace pybind
 
             const class_type_scope_interface_ptr & scope = _kernel->get_class_scope( objtype );
 
-            uint32_t value_type_id = _kernel->get_object_type_id( _value );
+            typeid_t value_type_id = _kernel->get_object_type_id( _value );
 
             const number_binary_adapter_interface_ptr & adapter = scope->get_number_div( value_type_id );
 
@@ -999,7 +999,7 @@ namespace pybind
                 }
             }
 
-            uint32_t base_type_id = _kernel->get_object_type_id( _obj );
+            typeid_t base_type_id = _kernel->get_object_type_id( _obj );
 
             const number_binary_adapter_interface_ptr & base_adapter = scope->get_number_div( base_type_id );
 
@@ -1045,7 +1045,7 @@ namespace pybind
 
             const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
 
-            uint32_t value_type_id = kernel->get_object_type_id( _value );
+            typeid_t value_type_id = kernel->get_object_type_id( _value );
 
             const number_inplace_adapter_interface_ptr & adapter = scope->get_number_inplace_add( value_type_id );
 
@@ -1070,7 +1070,7 @@ namespace pybind
                 }
             }
 
-            uint32_t base_type_id = kernel->get_object_type_id( _obj );
+            typeid_t base_type_id = kernel->get_object_type_id( _obj );
 
             const number_inplace_adapter_interface_ptr & base_adapter = scope->get_number_inplace_add( base_type_id );
 
@@ -1106,7 +1106,7 @@ namespace pybind
 
             const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
 
-            uint32_t value_type_id = kernel->get_object_type_id( _value );
+            typeid_t value_type_id = kernel->get_object_type_id( _value );
 
             const number_inplace_adapter_interface_ptr & adapter = scope->get_number_inplace_sub( value_type_id );
 
@@ -1131,7 +1131,7 @@ namespace pybind
                 }
             }
 
-            uint32_t base_type_id = kernel->get_object_type_id( _obj );
+            typeid_t base_type_id = kernel->get_object_type_id( _obj );
 
             const number_inplace_adapter_interface_ptr & base_adapter = scope->get_number_inplace_sub( base_type_id );
 
@@ -1167,7 +1167,7 @@ namespace pybind
 
             const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
 
-            uint32_t value_type_id = kernel->get_object_type_id( _value );
+            typeid_t value_type_id = kernel->get_object_type_id( _value );
 
             const number_inplace_adapter_interface_ptr & adapter = scope->get_number_inplace_mul( value_type_id );
 
@@ -1192,7 +1192,7 @@ namespace pybind
                 }
             }
 
-            uint32_t base_type_id = kernel->get_object_type_id( _obj );
+            typeid_t base_type_id = kernel->get_object_type_id( _obj );
 
             const number_inplace_adapter_interface_ptr & base_adapter = scope->get_number_inplace_mul( base_type_id );
 
@@ -1228,7 +1228,7 @@ namespace pybind
 
             const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
 
-            uint32_t value_type_id = kernel->get_object_type_id( _value );
+            typeid_t value_type_id = kernel->get_object_type_id( _value );
 
             const number_inplace_adapter_interface_ptr & adapter = scope->get_number_inplace_div( value_type_id );
 
@@ -1253,7 +1253,7 @@ namespace pybind
                 }
             }
 
-            uint32_t base_type_id = kernel->get_object_type_id( _obj );
+            typeid_t base_type_id = kernel->get_object_type_id( _obj );
 
             const number_inplace_adapter_interface_ptr & base_adapter = scope->get_number_inplace_div( base_type_id );
 
@@ -1382,7 +1382,7 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
     }
     //////////////////////////////////////////////////////////////////////////
-    python_class_type_scope::python_class_type_scope( kernel_interface * _kernel, const char * _name, uint32_t _typeId, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash )
+    python_class_type_scope::python_class_type_scope( kernel_interface * _kernel, const char * _name, typeid_t _typeId, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, size_t _pod, bool _hash )
         : m_kernel( _kernel )
         , m_module( nullptr )
         , m_typeId( _typeId )
@@ -1440,9 +1440,9 @@ namespace pybind
         {
             Py_ssize_t py_basesCount = (Py_ssize_t)m_basesCount;
             py_bases = PyTuple_New( py_basesCount );
-            uint32_t index = 0;
+            size_t index = 0;
 
-            for( uint32_t i = 0; i != m_basesCount; ++i )
+            for( size_t i = 0; i != m_basesCount; ++i )
             {
                 Metacast & mc = m_bases[i];
 
@@ -1556,7 +1556,7 @@ namespace pybind
 
         m_kernel->remove_class_scope_type( python_class_type_scope_ptr( this ) );
 
-        for( uint32_t i = 0; i != m_basesCount; ++i )
+        for( size_t i = 0; i != m_basesCount; ++i )
         {
             Metacast & m = m_bases[i];
 
@@ -1565,7 +1565,7 @@ namespace pybind
             m.scope = nullptr;
         }
 
-        for( uint32_t i = 0; i != m_methodCount; ++i )
+        for( size_t i = 0; i != m_methodCount; ++i )
         {
             method_adapter_interface_ptr & adapter = m_methods[i];
 
@@ -1576,7 +1576,7 @@ namespace pybind
             adapter = nullptr;
         }
 
-        for( uint32_t i = 0; i != m_memberCount; ++i )
+        for( size_t i = 0; i != m_memberCount; ++i )
         {
             member_adapter_interface_ptr & adapter = m_members[i];
 
@@ -1603,7 +1603,7 @@ namespace pybind
 
         if( m_compare_adapters != nullptr )
         {
-            for( uint32_t index = 0; index != PYBIND_METHOD_COUNT; ++index )
+            for( size_t index = 0; index != PYBIND_METHOD_COUNT; ++index )
             {
                 m_compare_adapters->compares[index] = nullptr;
             }
@@ -1616,7 +1616,7 @@ namespace pybind
 
         if( m_number_adapters != nullptr )
         {
-            for( uint32_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
+            for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
             {
                 m_number_adapters->adds[index] = nullptr;
                 m_number_adapters->subs[index] = nullptr;
@@ -1664,12 +1664,12 @@ namespace pybind
         return m_name;
     }
     //////////////////////////////////////////////////////////////////////////
-    uint32_t python_class_type_scope::get_type_id() const
+    typeid_t python_class_type_scope::get_type_id() const
     {
         return m_typeId;
     }
     //////////////////////////////////////////////////////////////////////////
-    uint32_t python_class_type_scope::get_pod_size() const
+    size_t python_class_type_scope::get_pod_size() const
     {
         return m_pod_size;
     }
@@ -1724,7 +1724,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     const method_adapter_interface_ptr & python_class_type_scope::find_method( const char * _name ) const
     {
-        for( uint32_t index = 0; index != m_methodCount; ++index )
+        for( size_t index = 0; index != m_methodCount; ++index )
         {
             const method_adapter_interface_ptr & method = m_methods[index];
 
@@ -1746,19 +1746,19 @@ namespace pybind
         return method_adapter_interface_ptr::none();
     }
     //////////////////////////////////////////////////////////////////////////
-    uint32_t python_class_type_scope::get_methods_count() const
+    size_t python_class_type_scope::get_methods_count() const
     {
         return m_methodCount;
     }
     //////////////////////////////////////////////////////////////////////////
-    const method_adapter_interface_ptr & python_class_type_scope::get_method( uint32_t _index ) const
+    const method_adapter_interface_ptr & python_class_type_scope::get_method( size_t _index ) const
     {
         return m_methods[_index];
     }
     //////////////////////////////////////////////////////////////////////////
     const member_adapter_interface_ptr & python_class_type_scope::find_member( const char * _name ) const
     {
-        for( uint32_t index = 0; index != m_memberCount; ++index )
+        for( size_t index = 0; index != m_memberCount; ++index )
         {
             const member_adapter_interface_ptr & method = m_members[index];
 
@@ -1780,12 +1780,12 @@ namespace pybind
         return member_adapter_interface_ptr::none();
     }
     //////////////////////////////////////////////////////////////////////////
-    uint32_t python_class_type_scope::get_members_count() const
+    size_t python_class_type_scope::get_members_count() const
     {
         return m_memberCount;
     }
     //////////////////////////////////////////////////////////////////////////
-    const member_adapter_interface_ptr & python_class_type_scope::get_member( uint32_t _index ) const
+    const member_adapter_interface_ptr & python_class_type_scope::get_member( size_t _index ) const
     {
         return m_members[_index];
     }
@@ -1849,7 +1849,7 @@ namespace pybind
         m_pytypeobject->tp_hash = (hashfunc)&detail::py_hash;
     }
     //////////////////////////////////////////////////////////////////////////
-    void python_class_type_scope::set_compare( uint32_t _typeId, const compare_adapter_interface_ptr & _icompare )
+    void python_class_type_scope::set_compare( typeid_t _typeId, const compare_adapter_interface_ptr & _icompare )
     {
         compare_adapter_t * compare_adapters = this->get_compare_adapters();
         compare_adapters->compares[_typeId] = _icompare;
@@ -1925,7 +1925,7 @@ namespace pybind
         return m_compare_adapters;
     }
     //////////////////////////////////////////////////////////////////////////
-    void python_class_type_scope::set_number_add( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
+    void python_class_type_scope::set_number_add( typeid_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
     {
         number_adapter_t * number_adapters = this->get_number_adapters();
         number_adapters->adds[_typeId] = _iadapter;
@@ -1933,7 +1933,7 @@ namespace pybind
         m_pytypeobject->tp_as_number = &detail::py_as_number;
     }
     //////////////////////////////////////////////////////////////////////////
-    void python_class_type_scope::set_number_sub( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
+    void python_class_type_scope::set_number_sub( typeid_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
     {
         number_adapter_t * number_adapters = this->get_number_adapters();
         number_adapters->subs[_typeId] = _iadapter;
@@ -1941,7 +1941,7 @@ namespace pybind
         m_pytypeobject->tp_as_number = &detail::py_as_number;
     }
     //////////////////////////////////////////////////////////////////////////
-    void python_class_type_scope::set_number_mul( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
+    void python_class_type_scope::set_number_mul( typeid_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
     {
         number_adapter_t * number_adapters = this->get_number_adapters();
         number_adapters->muls[_typeId] = _iadapter;
@@ -1949,7 +1949,7 @@ namespace pybind
         m_pytypeobject->tp_as_number = &detail::py_as_number;
     }
     //////////////////////////////////////////////////////////////////////////
-    void python_class_type_scope::set_number_div( uint32_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
+    void python_class_type_scope::set_number_div( typeid_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
     {
         number_adapter_t * number_adapters = this->get_number_adapters();
         number_adapters->divs[_typeId] = _iadapter;
@@ -1957,7 +1957,7 @@ namespace pybind
         m_pytypeobject->tp_as_number = &detail::py_as_number;
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    void python_class_type_scope::set_number_inplace_add( uint32_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter )
+    void python_class_type_scope::set_number_inplace_add( typeid_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter )
     {
         number_adapter_t * number_adapters = this->get_number_adapters();
         number_adapters->iadds[_typeId] = _iadapter;
@@ -1965,7 +1965,7 @@ namespace pybind
         m_pytypeobject->tp_as_number = &detail::py_as_number;
     }
     //////////////////////////////////////////////////////////////////////////
-    void python_class_type_scope::set_number_inplace_sub( uint32_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter )
+    void python_class_type_scope::set_number_inplace_sub( typeid_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter )
     {
         number_adapter_t * number_adapters = this->get_number_adapters();
         number_adapters->isubs[_typeId] = _iadapter;
@@ -1973,7 +1973,7 @@ namespace pybind
         m_pytypeobject->tp_as_number = &detail::py_as_number;
     }
     //////////////////////////////////////////////////////////////////////////
-    void python_class_type_scope::set_number_inplace_mul( uint32_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter )
+    void python_class_type_scope::set_number_inplace_mul( typeid_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter )
     {
         number_adapter_t * number_adapters = this->get_number_adapters();
         number_adapters->imuls[_typeId] = _iadapter;
@@ -1981,7 +1981,7 @@ namespace pybind
         m_pytypeobject->tp_as_number = &detail::py_as_number;
     }
     //////////////////////////////////////////////////////////////////////////
-    void python_class_type_scope::set_number_inplace_div( uint32_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter )
+    void python_class_type_scope::set_number_inplace_div( typeid_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter )
     {
         number_adapter_t * number_adapters = this->get_number_adapters();
         number_adapters->idivs[_typeId] = _iadapter;
@@ -2010,9 +2010,9 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::add_proxy_interface( const class_type_scope_interface_ptr & _scope, const proxy_adapter_interface_ptr & _iproxy )
     {
-        uint32_t methodCount = _scope->get_methods_count();
+        size_t methodCount = _scope->get_methods_count();
 
-        for( uint32_t index = 0; index != methodCount; ++index )
+        for( size_t index = 0; index != methodCount; ++index )
         {
             const method_adapter_interface_ptr & imethod = _scope->get_method( index );
 
@@ -2050,7 +2050,7 @@ namespace pybind
         m_constructor = _ctr;
     }
     //////////////////////////////////////////////////////////////////////////
-    void python_class_type_scope::add_base( uint32_t _info, const class_type_scope_interface_ptr & _scope, pybind_metacast _cast )
+    void python_class_type_scope::add_base( typeid_t _info, const class_type_scope_interface_ptr & _scope, pybind_metacast _cast )
     {
         if( m_basesCount == PYBIND_BASES_COUNT )
         {
@@ -2067,13 +2067,13 @@ namespace pybind
         mc.scope = _scope;
         mc.cast = _cast;
 
-        uint32_t newId = m_basesCount++;
+        size_t newId = m_basesCount++;
         m_bases[newId] = mc;
     }
     //////////////////////////////////////////////////////////////////////////
-    void * python_class_type_scope::meta_cast( uint32_t _info, void * _impl )
+    void * python_class_type_scope::meta_cast( typeid_t _info, void * _impl )
     {
-        for( uint32_t i = 0; i != m_basesCount; ++i )
+        for( size_t i = 0; i != m_basesCount; ++i )
         {
             Metacast & mc = m_bases[i];
 
@@ -2087,7 +2087,7 @@ namespace pybind
             return obj;
         }
 
-        for( uint32_t i = 0; i != m_basesCount; ++i )
+        for( size_t i = 0; i != m_basesCount; ++i )
         {
             Metacast & mc = m_bases[i];
 

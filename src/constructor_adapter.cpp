@@ -6,7 +6,7 @@
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
-    constructor_adapter_interface::constructor_adapter_interface( uint32_t _arity )
+    constructor_adapter_interface::constructor_adapter_interface( size_t _arity )
         : m_arity( _arity )
     {
     }
@@ -24,7 +24,7 @@ namespace pybind
             return false;
         }
 
-        uint32_t args_arity = _kernel->tuple_size( _args );
+        size_t args_arity = _kernel->tuple_size( _args );
 
         if( m_arity != args_arity )
         {
@@ -41,8 +41,9 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
 #endif
     //////////////////////////////////////////////////////////////////////////
-    uint32_t constructor_adapter_interface::arity() const
+    size_t constructor_adapter_interface::arity() const
     {
         return m_arity;
     }
+    //////////////////////////////////////////////////////////////////////////
 }

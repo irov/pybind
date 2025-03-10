@@ -83,7 +83,7 @@ public:
     }
 };
 
-void test_dict( pybind::kernel_interface * _kernel, uint32_t i )
+void test_dict( pybind::kernel_interface * _kernel, size_t i )
 {
     pybind::dict p( _kernel );
     p["aaa"] = 10040 + i;
@@ -95,7 +95,7 @@ void test_dict( pybind::kernel_interface * _kernel, uint32_t i )
     p["aaa3"] = o;
 }
 
-void test_list( pybind::kernel_interface * _kernel, uint32_t i )
+void test_list( pybind::kernel_interface * _kernel, size_t i )
 {
     pybind::list p( _kernel, 5 );
 
@@ -112,7 +112,7 @@ void test_list( pybind::kernel_interface * _kernel, uint32_t i )
     (void)p1;
 }
 
-void test_tuple( pybind::kernel_interface * _kernel, uint32_t i )
+void test_tuple( pybind::kernel_interface * _kernel, size_t i )
 {
     pybind::tuple pp0 = pybind::make_tuple_t( _kernel );
     pybind::tuple pp1 = pybind::make_tuple_t( _kernel, 4234 + i );
@@ -181,7 +181,7 @@ void test_function_decl( pybind::kernel_interface * _kernel )
     pybind::def_function( _kernel, "test_function_6", &test_function_6 );
 }
 
-void test_function_go1( pybind::kernel_interface * _kernel, PyObject * m, uint32_t i )
+void test_function_go1( pybind::kernel_interface * _kernel, PyObject * m, size_t i )
 {
     _kernel->call_method( m, "go1", "(i)", i );
 }
@@ -313,7 +313,7 @@ void main()
 
     test_function_decl( kernel );
 
-    for( uint32_t i = 0; i != 100000; ++i )
+    for( size_t i = 0; i != 100000; ++i )
     {
         test_dict( kernel, i );
         test_list( kernel, i );
@@ -321,7 +321,7 @@ void main()
         test_function_go1( kernel, m, i );
     }
 
-    for( uint32_t i = 0; i != 100000; ++i )
+    for( size_t i = 0; i != 100000; ++i )
     {
         test_function_go2( kernel, m, v );
     }

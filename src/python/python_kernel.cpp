@@ -62,7 +62,7 @@ namespace pybind
 
         m_enumerator = 4;
 
-        for( uint32_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
+        for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
         {
             class_info_desc_t & desc = m_class_info_desc[index];
 
@@ -90,7 +90,7 @@ namespace pybind
         pybind::finalize_stl_type_cast( this );
 #endif
 
-        for( uint32_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
+        for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
         {
             char * name = m_class_info_desc[index].name;
 
@@ -111,7 +111,7 @@ namespace pybind
             m_allocator->free( name );
         }
 
-        for( uint32_t index = 0; index != PYBIND_TYPE_COUNT_HASH; ++index )
+        for( size_t index = 0; index != PYBIND_TYPE_COUNT_HASH; ++index )
         {
             class_type_scope_interface_ptr & scope = m_class_type_hashes[index];
 
@@ -268,7 +268,7 @@ namespace pybind
         return iadapter;
     }
     //////////////////////////////////////////////////////////////////////////
-    PyTypeObject * python_kernel::get_pod_type( uint32_t _pod, bool _hash )
+    PyTypeObject * python_kernel::get_pod_type( size_t _pod, bool _hash )
     {
         PyTypeObject * py_pod_type = m_pods.get_pod_type( _pod, _hash );
 
@@ -338,9 +338,9 @@ namespace pybind
         return pybind::helper::is_pod_wrap( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
-    void * python_kernel::meta_cast_scope( void * _self, uint32_t _typeId, uint32_t _name, const class_type_scope_interface_ptr & _scope )
+    void * python_kernel::meta_cast_scope( void * _self, typeid_t _typeId, typeid_t _name, const class_type_scope_interface_ptr & _scope )
     {
-        uint32_t class_name = _scope->get_type_id();
+        typeid_t class_name = _scope->get_type_id();
 
         if( class_name == _typeId )
         {
@@ -352,18 +352,18 @@ namespace pybind
         return impl_cast;
     }
     //////////////////////////////////////////////////////////////////////////
-    uint32_t python_kernel::get_next_id()
+    typeid_t python_kernel::get_next_id()
     {
-        uint32_t id = m_enumerator;
+        typeid_t id = m_enumerator;
 
         m_enumerator++;
 
         return id;
     }
     //////////////////////////////////////////////////////////////////////////
-    uint32_t python_kernel::find_class_info_desc_name( const char * _name )
+    typeid_t python_kernel::find_class_info_desc_name( const char * _name )
     {
-        for( uint32_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
+        for( typeid_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
         {
             const class_info_desc_t & desc = m_class_info_desc[index];
 
@@ -383,7 +383,7 @@ namespace pybind
         return 0;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::set_class_info_desc( uint32_t _typeId, const char * _info )
+    bool python_kernel::set_class_info_desc( typeid_t _typeId, const char * _info )
     {
         if( _typeId >= PYBIND_TYPE_COUNT )
         {
@@ -408,18 +408,18 @@ namespace pybind
         return true;
     }
     //////////////////////////////////////////////////////////////////////////
-    uint32_t python_kernel::get_class_type_id( const std::type_info & _info )
+    typeid_t python_kernel::get_class_type_id( const std::type_info & _info )
     {
         const char * info_name = _info.name();
 
-        uint32_t id = this->find_class_info_desc_name( info_name );
+        typeid_t id = this->find_class_info_desc_name( info_name );
 
         if( id != 0 )
         {
             return id;
         }
 
-        uint32_t new_id = this->get_next_id();
+        typeid_t new_id = this->get_next_id();
 
         if( this->set_class_info_desc( new_id, info_name ) == false )
         {
@@ -431,7 +431,7 @@ namespace pybind
         return new_id;
     }
     //////////////////////////////////////////////////////////////////////////
-    const char * python_kernel::get_class_type_info( uint32_t _id )
+    const char * python_kernel::get_class_type_info( typeid_t _id )
     {
         if( _id >= PYBIND_TYPE_COUNT )
         {
@@ -456,17 +456,17 @@ namespace pybind
         return desc.name;
     }
     //////////////////////////////////////////////////////////////////////////
-    void python_kernel::register_type_info_extract( uint32_t _info, const type_cast_ptr & _cast )
+    void python_kernel::register_type_info_extract( typeid_t _info, const type_cast_ptr & _cast )
     {
         m_type_cast[_info] = _cast;
     }
     //////////////////////////////////////////////////////////////////////////
-    void python_kernel::unregister_type_info_extract( uint32_t _info )
+    void python_kernel::unregister_type_info_extract( typeid_t _info )
     {
         m_type_cast[_info] = nullptr;
     }
     //////////////////////////////////////////////////////////////////////////
-    type_cast * python_kernel::find_type_info_extract( uint32_t _info )
+    type_cast * python_kernel::find_type_info_extract( typeid_t _info )
     {
         const type_cast_ptr & cast = m_type_cast[_info];
 
@@ -482,7 +482,7 @@ namespace pybind
         return t;
     }
     //////////////////////////////////////////////////////////////////////////
-    class_type_scope_interface_ptr python_kernel::create_new_type_scope( uint32_t _info, const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, uint32_t _pod, bool _hash )
+    class_type_scope_interface_ptr python_kernel::create_new_type_scope( typeid_t _info, const char * _name, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, size_t _pod, bool _hash )
     {
         class_type_scope_interface_ptr scope = m_allocator->newT<python_class_type_scope>( this, _name, _info, _user, _pynew, _pydestructor, _pod, _hash );
 
@@ -498,7 +498,7 @@ namespace pybind
         return scope;
     }
     //////////////////////////////////////////////////////////////////////////
-    void python_kernel::remove_type_scope( uint32_t _info )
+    void python_kernel::remove_type_scope( typeid_t _info )
     {
         const class_type_scope_interface_ptr & scope = m_class_type_scopes[_info];
 
@@ -514,14 +514,14 @@ namespace pybind
         m_class_type_scopes[_info] = nullptr;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::has_class_type_scope( uint32_t _info )
+    bool python_kernel::has_class_type_scope( typeid_t _info )
     {
         const class_type_scope_interface_ptr & scope = m_class_type_scopes[_info];
 
         return scope != nullptr;
     }
     //////////////////////////////////////////////////////////////////////////
-    const class_type_scope_interface_ptr & python_kernel::get_class_type_scope( uint32_t _info )
+    const class_type_scope_interface_ptr & python_kernel::get_class_type_scope( typeid_t _info )
     {
         const class_type_scope_interface_ptr & scope = m_class_type_scopes[_info];
 
@@ -530,7 +530,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::visit_types_scope( visitor_class_type_scope * _getter )
     {
-        for( uint32_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
+        for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
         {
             const class_type_scope_interface_ptr & scope_ptr = m_class_type_scopes[index];
 
@@ -552,7 +552,7 @@ namespace pybind
         return py_type;
     }
     //////////////////////////////////////////////////////////////////////////
-    uint32_t python_kernel::get_object_type_id( PyObject * _obj )
+    typeid_t python_kernel::get_object_type_id( PyObject * _obj )
     {
         PyTypeObject * objtype = pybind::object_type( _obj );
 
@@ -598,7 +598,7 @@ namespace pybind
             return 0;
         }
 
-        uint32_t type_id = scope->get_type_id();
+        typeid_t type_id = scope->get_type_id();
 
         return type_id;
     }
@@ -749,7 +749,7 @@ namespace pybind
         return false;
     }
     //////////////////////////////////////////////////////////////////////////
-    void * python_kernel::check_registred_class( PyObject * _obj, uint32_t _info )
+    void * python_kernel::check_registred_class( PyObject * _obj, typeid_t _info )
     {
         PyTypeObject * py_type = pybind::object_type( _obj );
 
@@ -765,7 +765,7 @@ namespace pybind
         return impl;
     }
     //////////////////////////////////////////////////////////////////////////
-    void python_kernel::error_invalid_extract( PyObject * _obj, uint32_t _tinfo )
+    void python_kernel::error_invalid_extract( PyObject * _obj, typeid_t _tinfo )
     {
         pybind::check_error();
 
@@ -795,7 +795,7 @@ namespace pybind
         pybind::decref( obj_repr_type );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::instance_of_type( PyObject * _obj, uint32_t _tinfo )
+    bool python_kernel::instance_of_type( PyObject * _obj, typeid_t _tinfo )
     {
         if( this->is_class( _obj ) == false )
         {
@@ -1320,7 +1320,7 @@ namespace pybind
         return pybind::string_check( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
-    uint32_t python_kernel::string_size( PyObject * _obj ) const
+    size_t python_kernel::string_size( PyObject * _obj ) const
     {
         return pybind::string_size( _obj );
     }
@@ -1348,6 +1348,26 @@ namespace pybind
     PyObject * python_kernel::string_from_char_size( const char * _str, size_t _size )
     {
         return pybind::string_from_char_size( _str, _size );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool python_kernel::bytearray_check( PyObject * _bytearray ) const
+    {
+        return pybind::bytearray_check( _bytearray );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    size_t python_kernel::bytearray_size( PyObject * _bytearray ) const
+    {
+        return pybind::bytearray_size( _bytearray );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const uint8_t * python_kernel::bytearray_to_data( PyObject * _bytearray ) const
+    {
+        return pybind::bytearray_to_data( _bytearray );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::bytearray_from_data( const uint8_t * _data, size_t _size )
+    {
+        return pybind::bytearray_from_data( _data, _size );
     }
     //////////////////////////////////////////////////////////////////////////
     bool python_kernel::unicode_check( PyObject * _obj ) const
@@ -1395,7 +1415,7 @@ namespace pybind
         return pybind::unicode_from_utf8_size( _utf8, _size );
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * python_kernel::list_new( uint32_t _size )
+    PyObject * python_kernel::list_new( size_t _size )
     {
         return pybind::list_new( _size );
     }
@@ -1405,27 +1425,27 @@ namespace pybind
         return pybind::list_check( _list );
     }
     //////////////////////////////////////////////////////////////////////////
-    uint32_t python_kernel::list_size( PyObject * _list ) const
+    size_t python_kernel::list_size( PyObject * _list ) const
     {
         return pybind::list_size( _list );
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * python_kernel::list_getitem( PyObject * _list, uint32_t _it )
+    PyObject * python_kernel::list_getitem( PyObject * _list, size_t _it )
     {
         return pybind::list_getitem( _list, _it );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::list_insert( PyObject * _list, uint32_t _it, PyObject * _item )
+    bool python_kernel::list_insert( PyObject * _list, size_t _it, PyObject * _item )
     {
         return pybind::list_insert( _list, _it, _item );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::list_remove( PyObject * _list, uint32_t _it )
+    bool python_kernel::list_remove( PyObject * _list, size_t _it )
     {
         return pybind::list_remove( _list, _it );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::list_setitem( PyObject * _list, uint32_t _it, PyObject * _item )
+    bool python_kernel::list_setitem( PyObject * _list, size_t _it, PyObject * _item )
     {
         return pybind::list_setitem( _list, _it, _item );
     }
@@ -1440,7 +1460,7 @@ namespace pybind
         return pybind::dict_new();
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * python_kernel::dict_new_presized( uint32_t _count )
+    PyObject * python_kernel::dict_new_presized( size_t _count )
     {
         return pybind::dict_new_presized( _count );
     }
@@ -1455,7 +1475,7 @@ namespace pybind
         return pybind::dict_check( _dict );
     }
     //////////////////////////////////////////////////////////////////////////
-    uint32_t python_kernel::dict_size( PyObject * _obj ) const
+    size_t python_kernel::dict_size( PyObject * _obj ) const
     {
         return pybind::dict_size( _obj );
     }
@@ -1500,12 +1520,12 @@ namespace pybind
         return pybind::dict_existstring( _obj, _name );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::dict_next( PyObject * _obj, uint32_t & _pos, PyObject ** _key, PyObject ** _value )
+    bool python_kernel::dict_next( PyObject * _obj, size_t & _pos, PyObject ** _key, PyObject ** _value )
     {
         return pybind::dict_next( _obj, _pos, _key, _value );
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * python_kernel::tuple_new( uint32_t _it )
+    PyObject * python_kernel::tuple_new( size_t _it )
     {
         return pybind::tuple_new( _it );
     }
@@ -1515,27 +1535,27 @@ namespace pybind
         return pybind::tuple_check( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
-    uint32_t python_kernel::tuple_size( PyObject * _obj ) const
+    size_t python_kernel::tuple_size( PyObject * _obj ) const
     {
         return pybind::tuple_size( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::tuple_setitem( PyObject * _obj, uint32_t _it, PyObject * _value )
+    bool python_kernel::tuple_setitem( PyObject * _obj, size_t _it, PyObject * _value )
     {
         return pybind::tuple_setitem( _obj, _it, _value );
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * python_kernel::tuple_getitem( PyObject * _obj, uint32_t _it )
+    PyObject * python_kernel::tuple_getitem( PyObject * _obj, size_t _it )
     {
         return pybind::tuple_getitem( _obj, _it );
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * python_kernel::tuple_slice( PyObject * _obj, uint32_t _low, uint32_t _high )
+    PyObject * python_kernel::tuple_slice( PyObject * _obj, size_t _low, size_t _high )
     {
         return pybind::tuple_slice( _obj, _low, _high );
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * python_kernel::tuple_slice_tail( PyObject * _obj, uint32_t _size )
+    PyObject * python_kernel::tuple_slice_tail( PyObject * _obj, size_t _size )
     {
         return pybind::tuple_slice_tail( _obj, _size );
     }

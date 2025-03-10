@@ -73,14 +73,14 @@ namespace pybind
         return str;
     }
     //////////////////////////////////////////////////////////////////////////
-    uint32_t string_view::size() const
+    size_t string_view::size() const
     {
         if( m_obj == nullptr )
         {
             return 0;
         }
 
-        uint32_t size = m_kernel->string_size( m_obj );
+        size_t size = m_kernel->string_size( m_obj );
 
         return size;
     }

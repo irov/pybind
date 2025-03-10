@@ -15,7 +15,7 @@ namespace pybind
         : public functor_adapter_interface
     {
     public:
-        functor_proxy_adapter( const char * _name, uint32_t _arity, C * _self, M _method )
+        functor_proxy_adapter( const char * _name, size_t _arity, C * _self, M _method )
             : functor_adapter_interface( _name, _arity )
             , m_self( _self )
             , m_method( _method )
@@ -42,7 +42,7 @@ namespace pybind
         : public functor_adapter_interface
     {
     public:
-        functor_proxy_deprecated_adapter( const char * _name, uint32_t _arity, C * _self, M _method, const char * _doc )
+        functor_proxy_deprecated_adapter( const char * _name, size_t _arity, C * _self, M _method, const char * _doc )
             : functor_adapter_interface( _name, _arity )
             , m_self( _self )
             , m_method( _method )
@@ -78,7 +78,7 @@ namespace pybind
         : public functor_adapter_interface
     {
     public:
-        functor_proxy_adapter_ptr( const char * _name, uint32_t _arity, C * _self, FI _incref, FD _decref, M _method )
+        functor_proxy_adapter_ptr( const char * _name, size_t _arity, C * _self, FI _incref, FD _decref, M _method )
             : functor_adapter_interface( _name, _arity )
             , m_self( _self )
             , m_incref( _incref )
@@ -115,7 +115,7 @@ namespace pybind
         : public functor_adapter_interface
     {
     public:
-        functor_proxy_kernel_adapter( const char * _name, uint32_t _arity, C * _self, M _method )
+        functor_proxy_kernel_adapter( const char * _name, size_t _arity, C * _self, M _method )
             : functor_adapter_interface( _name, _arity )
             , m_self( _self )
             , m_method( _method )
@@ -142,7 +142,7 @@ namespace pybind
         : public functor_adapter_interface
     {
     public:
-        functor_proxy_adapter_args( const char * _name, uint32_t _arity, C * _self, M _method )
+        functor_proxy_adapter_args( const char * _name, size_t _arity, C * _self, M _method )
             : functor_adapter_interface( _name, _arity )
             , m_self( _self )
             , m_method( _method )
@@ -169,7 +169,7 @@ namespace pybind
         : public functor_adapter_interface
     {
     public:
-        functor_proxy_kernel_adapter_args( const char * _name, uint32_t _arity, C * _self, M _method )
+        functor_proxy_kernel_adapter_args( const char * _name, size_t _arity, C * _self, M _method )
             : functor_adapter_interface( _name, _arity )
             , m_self( _self )
             , m_method( _method )

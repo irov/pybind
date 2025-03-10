@@ -10,7 +10,7 @@ namespace pybind
     class bases
     {
     public:
-        static constexpr uint32_t base_arity = sizeof ... (Bases);
+        static constexpr size_t base_arity = sizeof ... (Bases);
 
         typedef std::tuple<Bases...> bases_tuple;
     };
@@ -19,7 +19,7 @@ namespace pybind
     class init
     {
     public:
-        static constexpr uint32_t args_arity = sizeof ... (Args);
+        static constexpr size_t args_arity = sizeof ... (Args);
 
         typedef std::tuple<Args...> args_tuple;
     };

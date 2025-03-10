@@ -47,7 +47,7 @@ namespace pybind
                 const std::string::value_type * value_str = _value.c_str();
                 std::string::size_type value_size = _value.size();
 
-                PyObject * py_value = _kernel->string_from_char_size( value_str, (uint32_t)value_size );
+                PyObject * py_value = _kernel->string_from_char_size( value_str, (size_t)value_size );
 
                 return py_value;
             }
@@ -90,7 +90,7 @@ namespace pybind
                 const std::wstring::value_type * value_str = _value.c_str();
                 std::wstring::size_type value_size = _value.size();
 
-                PyObject * py_value = _kernel->unicode_from_wchar_size( value_str, (uint32_t)value_size );
+                PyObject * py_value = _kernel->unicode_from_wchar_size( value_str, (size_t)value_size );
 
                 return py_value;
             }

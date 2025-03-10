@@ -24,7 +24,7 @@ namespace pybind
 
     public:
         const char * c_str() const;
-        uint32_t size() const;
+        size_t size() const;
 
     protected:
         kernel_interface * m_kernel;

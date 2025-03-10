@@ -8,7 +8,7 @@ namespace pybind
     class PYBIND_API dict_pair_value
     {
     public:
-        typedef uint32_t size_type;
+        typedef size_t size_type;
 
     public:
         dict_pair_value( kernel_interface * _kernel, PyObject * _key, PyObject * _value );

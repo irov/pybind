@@ -10,7 +10,7 @@ namespace pybind
         : public pybind::object
     {
     public:
-        typedef uint32_t size_type;
+        typedef size_t size_type;
 
     public:
         tuple();
@@ -64,7 +64,7 @@ namespace pybind
 
         PyObject * py_tuple = _kernel->tuple_new( size );
 
-        uint32_t enumerator = 0;
+        size_t enumerator = 0;
         for( const typename C::value_type & v : _c )
         {
             pybind::tuple_setitem_t( _kernel, py_tuple, enumerator++, v );

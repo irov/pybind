@@ -150,7 +150,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * functor_python::create_functor_adapter( const functor_adapter_interface_ptr & _adapter, bool _native )
     {
-        uint32_t arity = _adapter->getArity();
+        size_t arity = _adapter->getArity();
 
         PyMethodDef * method;
 

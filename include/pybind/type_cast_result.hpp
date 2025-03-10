@@ -15,7 +15,7 @@ namespace pybind
         {
             static type_cast * find( kernel_interface * _kernel )
             {
-                uint32_t id = _kernel->class_info<T>();
+                typeid_t id = _kernel->class_info<T>();
 
                 type_cast * etype = _kernel->find_type_info_extract( id );
 
@@ -98,7 +98,7 @@ namespace pybind
     template<class T>
     bool instance_of( kernel_interface * _kernel, PyObject * _obj )
     {
-        uint32_t id = _kernel->class_info<T>();
+        typeid_t id = _kernel->class_info<T>();
 
         bool result = _kernel->instance_of_type( _obj, id );
 
@@ -108,7 +108,7 @@ namespace pybind
     template<class T>
     void registration_type_cast( kernel_interface * _kernel, const type_cast_ptr & _type )
     {
-        uint32_t id = _kernel->class_info<T>();
+        typeid_t id = _kernel->class_info<T>();
 
         _kernel->register_type_info_extract( id, _type );
     }
@@ -116,7 +116,7 @@ namespace pybind
     template<class T>
     void unregistration_type_cast( kernel_interface * _kernel )
     {
-        uint32_t id = _kernel->class_info<T>();
+        typeid_t id = _kernel->class_info<T>();
 
         _kernel->unregister_type_info_extract( id );
     }

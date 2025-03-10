@@ -11,7 +11,7 @@ namespace pybind
     class args
     {
     public:
-        typedef uint32_t size_type;
+        typedef size_t size_type;
 
     public:
         args();

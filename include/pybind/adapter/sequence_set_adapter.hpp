@@ -24,7 +24,7 @@ namespace pybind
         }
 
     public:
-        virtual void call( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & scope, uint32_t _index, PyObject * _value ) = 0;
+        virtual void call( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & scope, size_t _index, PyObject * _value ) = 0;
     };
     //////////////////////////////////////////////////////////////////////////
     typedef intrusive_ptr<sequence_set_adapter_interface> sequence_set_adapter_interface_ptr;
@@ -45,7 +45,7 @@ namespace pybind
         }
 
     protected:
-        void call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, uint32_t _index, PyObject * _value ) override
+        void call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, size_t _index, PyObject * _value ) override
         {
             C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
@@ -74,7 +74,7 @@ namespace pybind
         }
 
     protected:
-        void call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, uint32_t _index, PyObject * _value ) override
+        void call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, size_t _index, PyObject * _value ) override
         {
             const char * scopeName = _kernel->get_class_type_info_t<C>();
 
@@ -113,7 +113,7 @@ namespace pybind
         }
 
     protected:
-        void call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, uint32_t _index, PyObject * _value ) override
+        void call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, size_t _index, PyObject * _value ) override
         {
             C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
@@ -144,7 +144,7 @@ namespace pybind
         }
 
     protected:
-        void call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, uint32_t _index, PyObject * _value ) override
+        void call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, size_t _index, PyObject * _value ) override
         {
             C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
@@ -173,7 +173,7 @@ namespace pybind
         }
 
     protected:
-        void call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, uint32_t _index, PyObject * _value ) override
+        void call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, size_t _index, PyObject * _value ) override
         {
             C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 

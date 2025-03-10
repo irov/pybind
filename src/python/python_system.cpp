@@ -1196,7 +1196,7 @@ namespace pybind
         return PyLong_FromUnsignedLong( _value );
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * list_new( uint32_t _size )
+    PyObject * list_new( size_t _size )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
@@ -1214,7 +1214,7 @@ namespace pybind
         return res == 1;
     }
     //////////////////////////////////////////////////////////////////////////
-    uint32_t list_size( PyObject * _obj )
+    size_t list_size( PyObject * _obj )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
@@ -1227,10 +1227,10 @@ namespace pybind
             return 0;
         }
 
-        return (uint32_t)size;
+        return (size_t)size;
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * list_getitem( PyObject * _obj, uint32_t _index )
+    PyObject * list_getitem( PyObject * _obj, size_t _index )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
@@ -1246,7 +1246,7 @@ namespace pybind
         return obj;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool list_insert( PyObject * _obj, uint32_t _index, PyObject * _item )
+    bool list_insert( PyObject * _obj, size_t _index, PyObject * _item )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
@@ -1264,7 +1264,7 @@ namespace pybind
         return true;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool list_remove( PyObject * _obj, uint32_t _it )
+    bool list_remove( PyObject * _obj, size_t _it )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
@@ -1280,7 +1280,7 @@ namespace pybind
         return true;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool list_setitem( PyObject * _obj, uint32_t _index, PyObject * _item )
+    bool list_setitem( PyObject * _obj, size_t _index, PyObject * _item )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
@@ -1325,7 +1325,7 @@ namespace pybind
         return obj;
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * dict_new_presized( uint32_t _count )
+    PyObject * dict_new_presized( size_t _count )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
@@ -1371,13 +1371,13 @@ namespace pybind
         return value == 1;
     }
     //////////////////////////////////////////////////////////////////////////
-    uint32_t dict_size( PyObject * _obj )
+    size_t dict_size( PyObject * _obj )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
         Py_ssize_t size = PyDict_Size( _obj );
 
-        return (uint32_t)size;
+        return (size_t)size;
     }
     //////////////////////////////////////////////////////////////////////////
     bool dict_setstring( PyObject * _dict, const char * _name, PyObject * _value )
@@ -1489,7 +1489,7 @@ namespace pybind
         return result;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool dict_next( PyObject * _dict, uint32_t & _pos, PyObject ** _key, PyObject ** _value )
+    bool dict_next( PyObject * _dict, size_t & _pos, PyObject ** _key, PyObject ** _value )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
@@ -1497,7 +1497,7 @@ namespace pybind
 
         int res = PyDict_Next( _dict, &ps, _key, _value );
 
-        _pos = (uint32_t)ps;
+        _pos = (size_t)ps;
 
         return res == 1;
     }
@@ -1511,7 +1511,7 @@ namespace pybind
         return obj;
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * tuple_new( uint32_t _size )
+    PyObject * tuple_new( size_t _size )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
@@ -1521,7 +1521,7 @@ namespace pybind
         return obj;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool tuple_setitem( PyObject * _tuple, uint32_t _index, PyObject * _value )
+    bool tuple_setitem( PyObject * _tuple, size_t _index, PyObject * _value )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
@@ -1553,16 +1553,16 @@ namespace pybind
         return value == 1;
     }
     //////////////////////////////////////////////////////////////////////////
-    uint32_t tuple_size( PyObject * _obj )
+    size_t tuple_size( PyObject * _obj )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
         Py_ssize_t size = PyTuple_Size( _obj );
 
-        return (uint32_t)size;
+        return (size_t)size;
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * tuple_getitem( PyObject * _obj, uint32_t _index )
+    PyObject * tuple_getitem( PyObject * _obj, size_t _index )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
@@ -1572,7 +1572,7 @@ namespace pybind
         return obj;
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * tuple_slice( PyObject * _obj, uint32_t _low, uint32_t _high )
+    PyObject * tuple_slice( PyObject * _obj, size_t _low, size_t _high )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
@@ -1583,11 +1583,11 @@ namespace pybind
         return obj_slice;
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * tuple_slice_tail( PyObject * _obj, uint32_t _size )
+    PyObject * tuple_slice_tail( PyObject * _obj, size_t _size )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        uint32_t size = pybind::tuple_size( _obj );
+        size_t size = pybind::tuple_size( _obj );
 
         PyObject * obj_slice = pybind::tuple_slice( _obj, _size, size );
 
@@ -2045,13 +2045,13 @@ namespace pybind
         return false;
     }
     //////////////////////////////////////////////////////////////////////////
-    uint32_t string_size( PyObject * _string )
+    size_t string_size( PyObject * _string )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
         Py_ssize_t size = PyBytes_Size( _string );
 
-        return (uint32_t)size;
+        return (size_t)size;
     }
     //////////////////////////////////////////////////////////////////////////
     int64_t string_hash( PyObject * _string )
@@ -2113,6 +2113,42 @@ namespace pybind
         PyObject * py_str = PyBytes_FromStringAndSize( _str, py_size );
 
         return py_str;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool bytearray_check( PyObject * _bytearray )
+    {
+        PYBIND_CHECK_MAIN_THREAD();
+
+        bool value = PyByteArray_CheckExact( _bytearray );
+
+        return value;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    size_t bytearray_size( PyObject * _bytearray )
+    {
+        PYBIND_CHECK_MAIN_THREAD();
+
+        Py_ssize_t size = PyByteArray_Size( _bytearray );
+
+        return (size_t)size;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const uint8_t * bytearray_to_data( PyObject * _bytearray )
+    {
+        PYBIND_CHECK_MAIN_THREAD();
+
+        const uint8_t * buff = (const uint8_t *)PyByteArray_AsString( _bytearray );
+
+        return buff;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * bytearray_from_data( const uint8_t * _data, size_t _size )
+    {
+        PYBIND_CHECK_MAIN_THREAD();
+
+        PyObject * py_bytearray = PyByteArray_FromStringAndSize( (const char *)_data, (Py_ssize_t)_size );
+
+        return py_bytearray;
     }
     //////////////////////////////////////////////////////////////////////////
     bool unicode_check( PyObject * _unicode )

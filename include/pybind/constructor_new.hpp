@@ -12,8 +12,8 @@ namespace pybind
     template<class C, class P>
     struct call_constructor_new_impl
     {
-        template<uint32_t ... I>
-        static C * call( kernel_interface * _kernel, PyObject * _args, std::integer_sequence<uint32_t, I...> )
+        template<size_t ... I>
+        static C * call( kernel_interface * _kernel, PyObject * _args, std::integer_sequence<size_t, I...> )
         {
             return new C(
                 tuple_getitem_t( _kernel, _args, I ) ...
@@ -44,7 +44,7 @@ namespace pybind
             }
 #endif
 
-            void * impl = call_constructor_new_impl<C, P>::call( _kernel, _args, std::make_integer_sequence<uint32_t, P::args_arity>() );
+            void * impl = call_constructor_new_impl<C, P>::call( _kernel, _args, std::make_integer_sequence<size_t, P::args_arity>() );
 
             return impl;
         }
