@@ -1709,11 +1709,6 @@ namespace pybind
             return false;
         }
 
-        while( frame->f_back != nullptr )
-        {
-            frame = frame->f_back;
-        }
-
         const char * co_filename = pybind::string_to_char( frame->f_code->co_filename );
         const char * co_name = pybind::string_to_char( frame->f_code->co_name );
 
