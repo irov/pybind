@@ -2278,6 +2278,23 @@ namespace pybind
         return impl;
     }
     //////////////////////////////////////////////////////////////////////////
+    PyObject * exception_new( const char * _msg )
+    {
+        PYBIND_CHECK_MAIN_THREAD();
+
+        PyObject * py_msg = pybind::string_from_char( _msg );
+        
+        PyObject * args = PyTuple_Pack( 1, py_msg );
+
+        Py_DECREF( py_msg );
+
+        PyObject * exc_instance = PyObject_CallObject( PyExc_RuntimeError, args );
+
+        Py_DECREF( args );
+
+        return exc_instance;
+    }
+    //////////////////////////////////////////////////////////////////////////
     long marshal_magic_number()
     {
         PYBIND_CHECK_MAIN_THREAD();

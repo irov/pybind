@@ -287,6 +287,8 @@ namespace pybind
         PyObject * tuple_slice( PyObject * _obj, size_t _low, size_t _high ) override;
         PyObject * tuple_slice_tail( PyObject * _obj, size_t _size ) override;
         bool tuple_setitem( PyObject * _obj, size_t _it, PyObject * _value ) override;
+        
+        PyObject * exception_new( const char * _msg ) override;
 
     protected:
         allocator_interface * m_allocator;

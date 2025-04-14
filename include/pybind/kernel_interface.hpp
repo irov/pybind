@@ -427,5 +427,7 @@ namespace pybind
         virtual PyObject * tuple_slice( PyObject * _tuple, size_t _low, size_t _high ) = 0;
         virtual PyObject * tuple_slice_tail( PyObject * _tuple, size_t _size ) = 0;
         virtual bool tuple_setitem( PyObject * _tuple, size_t _it, PyObject * _value ) = 0;
+
+        virtual PyObject * exception_new( const char * _msg ) = 0;
     };
 }

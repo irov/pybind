@@ -1545,6 +1545,11 @@ namespace pybind
         return pybind::tuple_setitem( _obj, _it, _value );
     }
     //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::exception_new( const char * _msg )
+    {
+        return pybind::exception_new( _msg );
+    }
+    //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::tuple_getitem( PyObject * _obj, size_t _it )
     {
         return pybind::tuple_getitem( _obj, _it );

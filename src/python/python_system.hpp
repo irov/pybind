@@ -221,6 +221,8 @@ namespace pybind
     PYBIND_API PyObject * void_ptr_new( void * _impl );
     PYBIND_API void * void_ptr_get( PyObject * _obj );
 
+    PYBIND_API PyObject * exception_new( const char * _msg );
+
     PYBIND_API long marshal_magic_number();
     PYBIND_API PyObject * marshal_get_object( const void * _buf, size_t _len );
 
