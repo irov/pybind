@@ -158,7 +158,18 @@ namespace pybind
             typedef typename stdex::mpl::remove_cref<T>::type type_value;
 
             type_value value;
-            pybind::extract_value( _kernel, _obj, value, true );
+            if( pybind::extract_value( _kernel, _obj, value, true ) == false )
+            {
+                const std::type_info & tinfo = typeid(type_value);
+
+                const char * type_name = tinfo.name();
+
+                pybind::throw_exception( "extract_specialized<T, void>: extract invalid '%s' type '%s' not cast to '%s'"
+                    , _kernel->object_repr( _obj ).c_str()
+                    , _kernel->object_repr_type( _obj ).c_str()
+                    , type_name
+                );
+            }
 
             return std::move( value );
         }
@@ -172,7 +183,18 @@ namespace pybind
         T operator () ( kernel_interface * _kernel, PyObject * _obj ) const
         {
             uint32_t value;
-            pybind::extract_value( _kernel, _obj, value, true );
+            if( pybind::extract_value( _kernel, _obj, value, true ) == false )
+            {
+                const std::type_info & tinfo = typeid(T);
+
+                const char * type_name = tinfo.name();
+
+                pybind::throw_exception( "extract_specialized<T, enum>: extract invalid '%s' type '%s' not cast to '%s'"
+                    , _kernel->object_repr( _obj ).c_str()
+                    , _kernel->object_repr_type( _obj ).c_str()
+                    , type_name
+                );
+            }
 
             return static_cast<T>(value);
         }
@@ -184,7 +206,18 @@ namespace pybind
         T * operator () ( kernel_interface * _kernel, PyObject * _obj ) const
         {
             T * value = nullptr;
-            pybind::extract_value( _kernel, _obj, value, true );
+            if( pybind::extract_value( _kernel, _obj, value, true ) == false )
+            {
+                const std::type_info & tinfo = typeid(T *);
+
+                const char * type_name = tinfo.name();
+
+                pybind::throw_exception( "extract_specialized<T, *>: extract invalid '%s' type '%s' not cast to '%s'"
+                    , _kernel->object_repr( _obj ).c_str()
+                    , _kernel->object_repr_type( _obj ).c_str()
+                    , type_name
+                );
+            }
 
             return value;
         }
@@ -196,7 +229,18 @@ namespace pybind
         stdex::intrusive_ptr<T, D> operator () ( kernel_interface * _kernel, PyObject * _obj ) const
         {
             T * value = nullptr;
-            pybind::extract_value( _kernel, _obj, value, true );
+            if( pybind::extract_value( _kernel, _obj, value, true ) == false )
+            {
+                const std::type_info & tinfo = typeid(T *);
+
+                const char * type_name = tinfo.name();
+
+                pybind::throw_exception( "extract_specialized<T, intrusive_ptr>: extract invalid '%s' type '%s' not cast to '%s'"
+                    , _kernel->object_repr( _obj ).c_str()
+                    , _kernel->object_repr_type( _obj ).c_str()
+                    , type_name
+                );
+            }
 
             return stdex::intrusive_ptr<T, D>( value );
         }
