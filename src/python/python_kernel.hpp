@@ -303,7 +303,7 @@ namespace pybind
 
         struct class_info_desc_t
         {
-            char * name;
+            const char * name;
         };
 
         class_info_desc_t m_class_info_desc[PYBIND_TYPE_COUNT];

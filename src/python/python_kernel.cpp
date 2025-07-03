@@ -92,7 +92,7 @@ namespace pybind
 
         for( size_t index = 0; index != PYBIND_TYPE_COUNT; ++index )
         {
-            char * name = m_class_info_desc[index].name;
+            const char * name = m_class_info_desc[index].name;
 
             class_type_scope_interface_ptr & scope = m_class_type_scopes[index];
 
@@ -108,7 +108,7 @@ namespace pybind
 
             m_type_cast[index] = nullptr;
 
-            m_allocator->free( name );
+            m_allocator->free( (void *)name );
         }
 
         for( size_t index = 0; index != PYBIND_TYPE_COUNT_HASH; ++index )
@@ -401,9 +401,9 @@ namespace pybind
 
         void * name_memory = m_allocator->malloc( len + 1 );
 
-        desc.name = (char *)name_memory;
+        strcpy( (char *)name_memory, _info );
 
-        strcpy( desc.name, _info );
+        desc.name = (const char *)name_memory;
 
         return true;
     }

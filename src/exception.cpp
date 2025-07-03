@@ -9,7 +9,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     pybind_exception::pybind_exception( const char * _message )
     {
-        strcpy( m_message, _message );
+        strncpy( m_message, _message, 4096 );
+        m_message[4096] = '\0';
     }
     //////////////////////////////////////////////////////////////////////////
     pybind_exception::~pybind_exception() throw()

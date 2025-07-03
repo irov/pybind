@@ -18,7 +18,7 @@ namespace pybind
         const char * what() const throw() override;
 
     protected:
-        char m_message[4096];
+        char m_message[4096 + 1] = {'\0'};
     };
 
     PYBIND_API void throw_exception( const char * _format, ... );

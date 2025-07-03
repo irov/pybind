@@ -1714,8 +1714,8 @@ namespace pybind
 
         strncpy( _filename, co_filename, _maxlenfilename );
         strncpy( _function, co_name, _maxlenfunction );
-
-        *_lineno = frame->f_lineno;
+        
+        *_lineno = PyFrame_GetLineNumber( frame );
 
         return true;
     }
@@ -1757,7 +1757,7 @@ namespace pybind
         {
             const char * co_filename = pybind::string_to_char( frame->f_code->co_filename );
             const char * co_name = pybind::string_to_char( frame->f_code->co_name );
-            int lineno = frame->f_lineno;
+            int lineno = PyFrame_GetLineNumber( frame );
 
             char line[1024 + 1] = {'\0'};
             snprintf( line, 1024, "File \"%s\", line %d, in %s\n", co_filename, lineno, co_name );

@@ -152,7 +152,7 @@ namespace pybind
 
         PyObject * m_module;
 
-        char m_name[PYBIND_CLASS_TYPE_MAX_NAME];
+        char m_name[PYBIND_CLASS_TYPE_MAX_NAME + 1];
         typeid_t m_typeId;
 
         struct Metacast

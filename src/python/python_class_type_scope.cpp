@@ -1400,7 +1400,8 @@ namespace pybind
         , m_pod_hash( _hash )
         , m_binable_base( false )
     {
-        strcpy( m_name, _name );
+        strncpy( m_name, _name, PYBIND_CLASS_TYPE_MAX_NAME );
+        m_name[PYBIND_CLASS_TYPE_MAX_NAME] = '\0';
     }
     //////////////////////////////////////////////////////////////////////////
     python_class_type_scope::~python_class_type_scope()
