@@ -102,9 +102,9 @@ namespace pybind
         return detail::set_dict_operator_t( m_kernel, m_obj, _key );
     }
     //////////////////////////////////////////////////////////////////////////
-    void dict::remove_i( const detail::import_operator_t & _key ) const
+    bool dict::remove_i( const detail::import_operator_t & _key ) const
     {
-        m_kernel->dict_remove( m_obj, _key );
+        return m_kernel->dict_remove( m_obj, _key );
     }
     //////////////////////////////////////////////////////////////////////////
     dict::size_type dict::size() const

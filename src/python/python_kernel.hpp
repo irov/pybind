@@ -278,8 +278,19 @@ namespace pybind
         PyObject * dict_get( PyObject * _obj, PyObject * _name ) override;
         bool dict_exist( PyObject * _obj, PyObject * _name ) override;
         bool dict_existstring( PyObject * _obj, const char * _name ) override;
-        bool dict_next( PyObject * _obj, size_t & _pos, PyObject ** _key, PyObject ** _value ) override;
-        
+        bool dict_next( PyObject * _obj, size_t * const _pos, PyObject ** _key, PyObject ** _value ) override;
+
+        PyObject * set_new() override;
+        bool set_check( PyObject * _dict ) const override;
+        size_t set_size( PyObject * _obj ) const override;
+        bool set_set( PyObject * _dict, PyObject * _value ) override;
+        bool set_remove( PyObject * _dict, PyObject * _value ) override;
+        bool set_exist( PyObject * _dict, PyObject * _value ) override;
+
+        bool iterator_get( PyObject * _collections, PyObject ** _iterator ) override;
+        bool iterator_next( PyObject * _iterator, PyObject ** _value ) override;
+        void iterator_end( PyObject * _iterator ) override;
+
         PyObject * tuple_new( size_t _it ) override;
         bool tuple_check( PyObject * _obj ) const override;
         size_t tuple_size( PyObject * _obj ) const override;

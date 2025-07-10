@@ -113,11 +113,11 @@ namespace pybind
 
             if( _kernel->dict_check( _obj ) == true )
             {
-                size_t dict_pos = 0;
+                size_t pos = 0;
 
                 K key;
                 V value;
-                while( pybind::dict_next_t( _kernel, _obj, dict_pos, key, value ) == true )
+                while( pybind::dict_next_t( _kernel, _obj, &pos, &key, &value ) == true )
                 {
                     _map.insert( typename M::value_type( key, value ) );
                 }

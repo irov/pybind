@@ -13,10 +13,12 @@
 
 namespace pybind
 {
+    //////////////////////////////////////////////////////////////////////////
     class object;
     class list;
     class tuple;
     class dict;
+    class set;
     //////////////////////////////////////////////////////////////////////////
     namespace detail
     {
@@ -127,6 +129,7 @@ namespace pybind
     PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, pybind::list & _value, bool _nothrow );
     PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, pybind::tuple & _value, bool _nothrow );
     PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, pybind::dict & _value, bool _nothrow );
+    PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, pybind::set & _value, bool _nothrow );
     //////////////////////////////////////////////////////////////////////////
     template<class T>
     typename stdex::mpl::remove_cref<T>::type extract_throw( kernel_interface * _kernel, PyObject * _obj )
@@ -311,6 +314,7 @@ namespace pybind
     PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::tuple & _value );
     PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::list & _value );
     PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::dict & _value );
+    PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::set & _value );
     //////////////////////////////////////////////////////////////////////////
     template<class T, class = void>
     struct ptr_throw_specialized2

@@ -1520,9 +1520,54 @@ namespace pybind
         return pybind::dict_existstring( _obj, _name );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::dict_next( PyObject * _obj, size_t & _pos, PyObject ** _key, PyObject ** _value )
+    bool python_kernel::dict_next( PyObject * _obj, size_t * const _pos, PyObject ** _key, PyObject ** _value )
     {
         return pybind::dict_next( _obj, _pos, _key, _value );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::set_new()
+    {
+        return pybind::set_new();
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool python_kernel::set_check( PyObject * _dict ) const
+    {
+        return pybind::set_check( _dict );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    size_t python_kernel::set_size( PyObject * _obj ) const
+    {
+        return pybind::set_size( _obj );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool python_kernel::set_set( PyObject * _obj, PyObject * _value )
+    {
+        return pybind::set_set( _obj, _value );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool python_kernel::set_remove( PyObject * _obj, PyObject * _value )
+    {
+        return pybind::set_remove( _obj, _value );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool python_kernel::set_exist( PyObject * _obj, PyObject * _value )
+    {
+        return pybind::set_exist( _obj, _value );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool python_kernel::iterator_get( PyObject * _collections, PyObject ** _iterator )
+    {
+        return pybind::iterator_get( _collections, _iterator );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool python_kernel::iterator_next( PyObject * _iterator, PyObject ** _value )
+    {
+        return pybind::iterator_next( _iterator, _value );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void python_kernel::iterator_end( PyObject * _iterator )
+    {
+        pybind::iterator_end( _iterator );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::tuple_new( size_t _it )

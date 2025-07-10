@@ -65,6 +65,7 @@ namespace pybind
         bool is_unicode() const;
         bool is_list() const;
         bool is_dict() const;
+        bool is_set() const;
         bool is_callable() const;
 
         template<class T>

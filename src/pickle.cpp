@@ -20,6 +20,7 @@ namespace pybind
     static constexpr uint8_t PICKLE_DICT = 9;
     static constexpr uint8_t PICKLE_OBJECT = 10;
     static constexpr uint8_t PICKLE_LONG = 11;
+    static constexpr uint8_t PICKLE_SET = 12;
     //////////////////////////////////////////////////////////////////////////
     template<class T>
     static void s_write_buffer_t( void * _buffer, size_t _capacity, T _t, size_t & _offset )
@@ -202,11 +203,40 @@ namespace pybind
 
             PyObject * key;
             PyObject * value;
-            while( _kernel->dict_next( _obj, pos, &key, &value ) == true )
+            while( _kernel->dict_next( _obj, &pos, &key, &value ) == true )
             {
                 s_obj_pickle( _kernel, key, _types, _buffer, _capacity, _offset );
                 s_obj_pickle( _kernel, value, _types, _buffer, _capacity, _offset );
             }
+        }
+        else if( _kernel->set_check( _obj ) == true )
+        {
+            uint8_t type = PICKLE_SET;
+
+            s_write_buffer_t( _buffer, _capacity, type, _offset );
+
+            size_t count = _kernel->set_size( _obj );
+
+            s_write_size_t( _buffer, _capacity, (uint32_t)count, _offset );
+
+            PyObject * it;
+            if( _kernel->iterator_get( _obj, &it ) == false )
+            {
+                pybind::throw_exception( "pickle obj '%s' type '%s' has set but iterator get failed!"
+                    , _kernel->object_repr( _obj ).c_str()
+                    , _kernel->object_repr_type( _obj ).c_str()
+                );
+
+                return;
+            }
+
+            PyObject * element;
+            while( _kernel->iterator_next( it, &element ) )
+            {
+                s_obj_pickle( _kernel, element, _types, _buffer, _capacity, _offset );
+            }
+
+            _kernel->iterator_end( it );
         }
         else if( _kernel->has_attrstring( _obj, "value" ) == true )
         {
@@ -469,6 +499,22 @@ namespace pybind
                     PyObject * value = s_obj_unpickle( _kernel, _buffer, _capacity, _carriage, _types );
 
                     _kernel->dict_set( obj, key, value );
+                }
+
+                return obj;
+            }break;
+        case PICKLE_SET:
+            {
+                uint32_t count;
+                s_read_size_t( _buffer, _capacity, _carriage, count );
+
+                PyObject * obj = _kernel->set_new();
+
+                for( uint32_t i = 0; i != count; ++i )
+                {
+                    PyObject * element = s_obj_unpickle( _kernel, _buffer, _capacity, _carriage, _types );
+
+                    _kernel->set_set( obj, element );
                 }
 
                 return obj;

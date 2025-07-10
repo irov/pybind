@@ -278,6 +278,16 @@ namespace pybind
         return m_kernel->dict_check( m_obj );
     }
     //////////////////////////////////////////////////////////////////////////
+    bool base::is_set() const
+    {
+        if( m_kernel == nullptr )
+        {
+            return false;
+        }
+
+        return m_kernel->set_check( m_obj );
+    }
+    //////////////////////////////////////////////////////////////////////////
     bool base::is_callable() const
     {
         if( m_kernel == nullptr )

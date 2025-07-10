@@ -1,0 +1,118 @@
+#include "pybind/set.hpp"
+
+namespace pybind
+{
+    //////////////////////////////////////////////////////////////////////////
+    set::set()
+    {
+    }
+    //////////////////////////////////////////////////////////////////////////
+    set::set( kernel_interface * _kernel )
+        : pybind::object( _kernel, _kernel->set_new(), pybind::borrowed )
+    {
+    }
+    //////////////////////////////////////////////////////////////////////////
+    set::set( const object & _obj )
+        : pybind::object( _obj )
+    {
+    }
+    //////////////////////////////////////////////////////////////////////////
+    set::set( object && _obj )
+        : pybind::object( std::move( _obj ) )
+    {
+    }
+    //////////////////////////////////////////////////////////////////////////
+    set::set( const set & _value )
+        : pybind::object( _value )
+    {
+    }
+    //////////////////////////////////////////////////////////////////////////
+    set::set( set && _value )
+        : pybind::object( std::move( _value ) )
+    {
+    }
+    //////////////////////////////////////////////////////////////////////////
+    set::set( pybind::invalid_t _iv )
+        : object( _iv )
+    {
+    }
+    //////////////////////////////////////////////////////////////////////////
+    set::set( kernel_interface * _kernel, PyObject * _obj, pybind::borrowed_t _br )
+        : pybind::object( _kernel, _obj, _br )
+    {
+    }
+    //////////////////////////////////////////////////////////////////////////
+    set::set( kernel_interface * _kernel, PyObject * _obj )
+        : pybind::object( _kernel, _obj )
+    {
+    }
+    //////////////////////////////////////////////////////////////////////////
+    set::~set()
+    {
+    }
+    //////////////////////////////////////////////////////////////////////////
+    set & set::operator = ( std::nullptr_t )
+    {
+        this->base::operator = ( nullptr );
+
+        return *this;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    set & set::operator = ( const set & _obj )
+    {
+        this->base::operator = ( _obj );
+
+        return *this;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    set & set::operator = ( set && _obj )
+    {
+        this->base::operator = ( std::move( _obj ) );
+
+        return *this;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool set::exist_i( const detail::import_operator_t & _value ) const
+    {
+        return m_kernel->set_exist( m_obj, _value );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool set::add_i( const detail::import_operator_t & _value )
+    {
+        return m_kernel->set_set( m_obj, _value );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool set::remove_i( const detail::import_operator_t & _value ) const
+    {
+        return m_kernel->set_remove( m_obj, _value );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    set::size_type set::size() const
+    {
+        return m_kernel->set_size( m_obj );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool set::empty() const
+    {
+        return this->size() == 0;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    pybind::set make_set_t( pybind::kernel_interface * _kernel )
+    {
+        return pybind::set( _kernel );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    pybind::set make_invalid_set_t()
+    {
+        return pybind::set( pybind::invalid );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    pybind::set extract_specialized<pybind::set>::operator () ( kernel_interface * _kernel, PyObject * _obj ) const
+    {
+        pybind::set value( pybind::invalid );
+        pybind::extract_value( _kernel, _obj, value, true );
+
+        return value;
+    }
+    //////////////////////////////////////////////////////////////////////////
+}

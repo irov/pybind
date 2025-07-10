@@ -39,6 +39,27 @@ namespace pybind
         return result;
     }
     //////////////////////////////////////////////////////////////////////////
+    bool set_set_i( kernel_interface * _kernel, PyObject * _set, const detail::import_operator_t & _value )
+    {
+        bool result = _kernel->set_set( _set, _value );
+
+        return result;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool set_remove_i( kernel_interface * _kernel, PyObject * _set, const detail::import_operator_t & _value )
+    {
+        bool result = _kernel->set_remove( _set, _value );
+
+        return result;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool set_exist_i( kernel_interface * _kernel, PyObject * _set, const detail::import_operator_t & _value )
+    {
+        bool result = _kernel->set_exist( _set, _value );
+
+        return result;
+    }
+    //////////////////////////////////////////////////////////////////////////
     args make_args_t( kernel_interface * _kernel, PyObject * _tuple, size_t _size )
     {
         PyObject * py_args = _kernel->tuple_slice_tail( _tuple, _size );

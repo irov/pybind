@@ -62,7 +62,7 @@ namespace pybind
 
             if( arg_size + 3 != fn_arity )
             {
-                pybind::throw_exception( "invalid proxy function call args is not equal %d != %d (%s)"
+                pybind::throw_exception( "invalid function proxy kernel args call. Args is not equal %d != %d (%s)"
                     , arg_size + 3
                     , fn_arity
                     , _kernel->object_repr( _arg ).c_str()

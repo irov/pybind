@@ -418,7 +418,18 @@ namespace pybind
         virtual PyObject * dict_get( PyObject * _dict, PyObject * _name ) = 0;
         virtual bool dict_exist( PyObject * _dict, PyObject * _name ) = 0;
         virtual bool dict_existstring( PyObject * _dict, const char * _name ) = 0;
-        virtual bool dict_next( PyObject * _dict, size_t & _pos, PyObject ** _key, PyObject ** _value ) = 0;
+        virtual bool dict_next( PyObject * _dict, size_t * const _pos, PyObject ** _key, PyObject ** _value ) = 0;
+
+        virtual PyObject * set_new() = 0;
+        virtual bool set_check( PyObject * _dict ) const = 0;
+        virtual size_t set_size( PyObject * _obj ) const = 0;
+        virtual bool set_set( PyObject * _dict, PyObject * _value ) = 0;
+        virtual bool set_remove( PyObject * _dict, PyObject * _value ) = 0;
+        virtual bool set_exist( PyObject * _dict, PyObject * _value ) = 0;
+
+        virtual bool iterator_get( PyObject * _collections, PyObject ** _iterator ) = 0;
+        virtual bool iterator_next( PyObject * _iterator, PyObject ** _value ) = 0;
+        virtual void iterator_end( PyObject * _iterator ) = 0;
 
         virtual PyObject * tuple_new( size_t _it ) = 0;
         virtual bool tuple_check( PyObject * _tuple ) const = 0;

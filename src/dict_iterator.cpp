@@ -78,7 +78,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////        
     dict_iterator & dict_iterator::operator ++ ()
     {
-        if( m_kernel->dict_next( m_obj, m_pos, &m_key, &m_value ) == false )
+        if( m_kernel->dict_next( m_obj, &m_pos, &m_key, &m_value ) == false )
         {
             m_pos = ~0u;
         }

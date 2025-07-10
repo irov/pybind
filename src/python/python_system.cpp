@@ -1364,18 +1364,18 @@ namespace pybind
         return py_dict;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool dict_check( PyObject * _obj )
+    bool dict_check( PyObject * _dict )
     {
-        int value = PyDict_Check( _obj );
+        int value = PyDict_Check( _dict );
 
         return value == 1;
     }
     //////////////////////////////////////////////////////////////////////////
-    size_t dict_size( PyObject * _obj )
+    size_t dict_size( PyObject * _dict )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        Py_ssize_t size = PyDict_Size( _obj );
+        Py_ssize_t size = PyDict_Size( _dict );
 
         return (size_t)size;
     }
@@ -1489,15 +1489,15 @@ namespace pybind
         return result;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool dict_next( PyObject * _dict, size_t & _pos, PyObject ** _key, PyObject ** _value )
+    bool dict_next( PyObject * _dict, size_t * const _pos, PyObject ** _key, PyObject ** _value )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        Py_ssize_t ps = (Py_ssize_t)(_pos);
+        Py_ssize_t ps = (Py_ssize_t)(*_pos);
 
         int res = PyDict_Next( _dict, &ps, _key, _value );
 
-        _pos = (size_t)ps;
+        *_pos = (size_t)ps;
 
         return res == 1;
     }
@@ -1509,6 +1509,120 @@ namespace pybind
         PyObject * obj = PyDict_Items( _dict );
 
         return obj;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * set_new()
+    {
+        PYBIND_CHECK_MAIN_THREAD();
+
+        PyObject * obj = PySet_New( nullptr );
+
+        return obj;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool set_check( PyObject * _set )
+    {
+        int value = PySet_Check( _set );
+
+        return value == 1;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    size_t set_size( PyObject * _set )
+    {
+        PYBIND_CHECK_MAIN_THREAD();
+
+        Py_ssize_t size = PySet_Size( _set );
+
+        return (size_t)size;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool set_set( PyObject * _set, PyObject * _value )
+    {
+        PYBIND_CHECK_MAIN_THREAD();
+
+        int res = PySet_Add( _set, _value );
+
+        if( res == -1 )
+        {
+            pybind::check_error();
+
+            return false;
+        }
+
+        return true;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool set_remove( PyObject * _set, PyObject * _value )
+    {
+        PYBIND_CHECK_MAIN_THREAD();
+
+        int res = PySet_Discard( _set, _value );
+
+        if( res == -1 )
+        {
+            pybind::check_error();
+
+            return false;
+        }
+
+        return true;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool set_exist( PyObject * _set, PyObject * _value )
+    {
+        PYBIND_CHECK_MAIN_THREAD();
+
+        int contains = PySet_Contains( _set, _value );
+
+        if( contains == 0 )
+        {
+            return false;
+        }
+
+        return true;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool iterator_get( PyObject * _collections, PyObject ** _iterator )
+    {
+        PYBIND_CHECK_MAIN_THREAD();
+        
+        PyObject * iterator = PyObject_GetIter( _collections );
+
+        if( iterator == nullptr )
+        {
+            pybind::check_error();
+
+            return false;
+        }
+
+        *_iterator = iterator;
+
+        return true;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool iterator_next( PyObject * _iterator, PyObject ** _value )
+    {
+        PYBIND_CHECK_MAIN_THREAD();
+
+        PyObject * value = PyIter_Next( _iterator );
+
+        if( value == nullptr )
+        {
+            pybind::check_error();
+            
+            return false;
+        }
+
+        *_value = value;
+
+        return true;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void iterator_end( PyObject * _iterator )
+    {
+        PYBIND_CHECK_MAIN_THREAD();
+        
+        Py_DECREF( _iterator );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * tuple_new( size_t _size )

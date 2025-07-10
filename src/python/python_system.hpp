@@ -137,7 +137,7 @@ namespace pybind
     PYBIND_API PyObject * dict_new_presized( size_t _count );
     PYBIND_API PyObject * dict_from( PyObject * _obj );
     PYBIND_API bool dict_check( PyObject * _dict );
-    PYBIND_API size_t dict_size( PyObject * _obj );
+    PYBIND_API size_t dict_size( PyObject * _dict );
     PYBIND_API bool dict_set( PyObject * _dict, PyObject * _name, PyObject * _value );
     PYBIND_API bool dict_setstring( PyObject * _dict, const char * _name, PyObject * _value );
     PYBIND_API bool dict_remove( PyObject * _dict, PyObject * _name );
@@ -146,9 +146,19 @@ namespace pybind
     PYBIND_API PyObject * dict_get( PyObject * _dict, PyObject * _name );
     PYBIND_API bool dict_exist( PyObject * _dict, PyObject * _name );
     PYBIND_API bool dict_existstring( PyObject * _dict, const char * _name );
-    PYBIND_API bool dict_next( PyObject * _dict, size_t & _pos, PyObject ** _key, PyObject ** _value );
-
+    PYBIND_API bool dict_next( PyObject * _dict, size_t * const _pos, PyObject ** _key, PyObject ** _value );
     PYBIND_API PyObject * dict_items( PyObject * _dict );
+
+    PYBIND_API PyObject * set_new();
+    PYBIND_API bool set_check( PyObject * _set );
+    PYBIND_API size_t set_size( PyObject * _set );
+    PYBIND_API bool set_set( PyObject * _set, PyObject * _value );
+    PYBIND_API bool set_remove( PyObject * _set, PyObject * _value );
+    PYBIND_API bool set_exist( PyObject * _set, PyObject * _value );
+    
+    PYBIND_API bool iterator_get( PyObject * _collections, PyObject ** _iterator );
+    PYBIND_API bool iterator_next( PyObject * _iterator, PyObject ** _value );
+    PYBIND_API void iterator_end( PyObject * _iterator );
 
     PYBIND_API PyObject * tuple_new( size_t _it );
     PYBIND_API bool tuple_check( PyObject * _obj );

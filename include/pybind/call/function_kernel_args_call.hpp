@@ -60,7 +60,7 @@ namespace pybind
 
             if( arg_size + 2 < fn_arity )
             {
-                pybind::throw_exception( "invalid args function call args is not equal %u < %u (%s)"
+                pybind::throw_exception( "invalid function kernel args call. Args is not equal %u < %u (%s)"
                     , arg_size + 2
                     , fn_arity
                     , _kernel->object_repr_type( _arg ).c_str()

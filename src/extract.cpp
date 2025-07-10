@@ -4,6 +4,7 @@
 #include "pybind/list.hpp"
 #include "pybind/tuple.hpp"
 #include "pybind/dict.hpp"
+#include "pybind/set.hpp"
 
 namespace pybind
 {
@@ -273,6 +274,25 @@ namespace pybind
         return true;
     }
     //////////////////////////////////////////////////////////////////////////
+    bool extract_value( kernel_interface * _kernel, PyObject * _obj, pybind::set & _value, bool _nothrow )
+    {
+        (void)_nothrow;
+
+        if( _obj == nullptr )
+        {
+            return false;
+        }
+
+        if( _kernel->set_check( _obj ) == false )
+        {
+            return false;
+        }
+
+        _value = pybind::set( _kernel, _obj );
+
+        return true;
+    }
+    //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_throw_i( kernel_interface * _kernel, bool _value )
     {
         return _kernel->ptr_bool( _value );
@@ -399,6 +419,15 @@ namespace pybind
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::dict & _value )
+    {
+        PyObject * obj = _value.ptr();
+
+        _kernel->incref( obj );
+
+        return obj;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::set & _value )
     {
         PyObject * obj = _value.ptr();
 

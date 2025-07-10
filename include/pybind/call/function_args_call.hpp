@@ -62,7 +62,7 @@ namespace pybind
 
             if( arg_size + 1 < fn_arity )
             {
-                pybind::throw_exception( "invalid args function call args is not equal %d < %d"
+                pybind::throw_exception( "invalid function args call. Args is not equal %d < %d"
                     , arg_size + 1
                     , fn_arity
                 );

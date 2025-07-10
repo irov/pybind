@@ -91,8 +91,12 @@ namespace pybind
         return dict_remove_i( _kernel, _dict, detail::import_operator_t( _kernel, _key ) );
     }
     //////////////////////////////////////////////////////////////////////////
+    PYBIND_API bool set_set_i( kernel_interface * _kernel, PyObject * _set, const detail::import_operator_t & _value );
+    PYBIND_API bool set_remove_i( kernel_interface * _kernel, PyObject * _set, const detail::import_operator_t & _value );
+    PYBIND_API bool set_exist_i( kernel_interface * _kernel, PyObject * _set, const detail::import_operator_t & _value );
+    //////////////////////////////////////////////////////////////////////////
     template<class K, class V>
-    inline bool dict_next_t( kernel_interface * _kernel, PyObject * _dict, size_t & _pos, K & _key, V & _value )
+    inline bool dict_next_t( kernel_interface * _kernel, PyObject * _dict, size_t * const _pos, K * const _key, V * const _value )
     {
         PyObject * py_key;
         PyObject * py_value;
@@ -102,8 +106,8 @@ namespace pybind
             return false;
         }
 
-        _key = pybind::extract<K>( _kernel, py_key );
-        _value = pybind::extract<V>( _kernel, py_value );
+        *_key = pybind::extract<K>( _kernel, py_key );
+        *_value = pybind::extract<V>( _kernel, py_value );
 
         return true;
     }
