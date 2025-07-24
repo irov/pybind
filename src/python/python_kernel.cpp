@@ -566,6 +566,22 @@ namespace pybind
             {
                 return 0;
             }
+            else if( pybind::tuple_check( _obj ) == true )
+            {
+                return 0;
+            }
+            else if( pybind::list_check( _obj ) == true )
+            {
+                return 0;
+            }
+            else if( pybind::dict_check( _obj ) == true )
+            {
+                return 0;
+            }
+            else if( pybind::set_check( _obj ) == true )
+            {
+                return 0;
+            }
 #if PYBIND_PYTHON_VERSION < 300
             else if( pybind::int_check( _obj ) == true )
             {

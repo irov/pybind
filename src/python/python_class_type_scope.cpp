@@ -391,7 +391,7 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         static PyMappingMethods py_as_mapping = {
             (lenfunc)0,		/* mp_length */
-            (binaryfunc)&py_subscript,		/* mp_subscript */
+            (binaryfunc)&detail::py_subscript,		/* mp_subscript */
             (objobjargproc)0,	/* mp_ass_subscript */
         };
         //////////////////////////////////////////////////////////////////////////
@@ -500,7 +500,7 @@ namespace pybind
                     return nullptr;
                 }
 
-                pybind::helper::wrap_pod_ptr( py_self, impl, false );
+                helper::wrap_pod_ptr( py_self, impl, false );
 
                 scope->incref_smart_pointer( impl );
 
@@ -557,13 +557,13 @@ namespace pybind
 
             try
             {
-                PyObject * py_self = py_alloc_class( _type, _args, _kwds );
+                PyObject * py_self = detail::py_alloc_class( _type, _args, _kwds );
 
                 void * buff = nullptr;
                 size_t pod_size = scope->get_pod_size();
                 bool pod_hash = scope->get_pod_hash();
 
-                pybind::helper::wrap_pod( py_self, &buff, pod_size, pod_hash );
+                helper::wrap_pod( py_self, &buff, pod_size, pod_hash );
 
                 void * impl = scope->call_new( py_self, _args, _kwds );
 
@@ -719,7 +719,7 @@ namespace pybind
             {
                 try
                 {
-                    PyObject * result = py_nb_unary_method( kernel, _obj, scope, adapter );
+                    PyObject * result = detail::py_nb_unary_method( kernel, _obj, scope, adapter );
 
                     return result;
                 }
@@ -751,7 +751,7 @@ namespace pybind
             {
                 try
                 {
-                    PyObject * result = py_nb_unary_method( kernel, _obj, scope, adapter );
+                    PyObject * result = detail::py_nb_unary_method( kernel, _obj, scope, adapter );
 
                     return result;
                 }
@@ -783,7 +783,7 @@ namespace pybind
             {
                 try
                 {
-                    PyObject * result = py_nb_binary_method( _kernel, _obj, _value, scope, adapter, _rotate );
+                    PyObject * result = detail::py_nb_binary_method( _kernel, _obj, _value, scope, adapter, _rotate );
 
                     return result;
                 }
@@ -806,7 +806,7 @@ namespace pybind
             {
                 try
                 {
-                    PyObject * result = py_nb_binary_method( _kernel, _obj, _value, scope, base_adapter, _rotate );
+                    PyObject * result = detail::py_nb_binary_method( _kernel, _obj, _value, scope, base_adapter, _rotate );
 
                     return result;
                 }
@@ -830,10 +830,10 @@ namespace pybind
 
             if( kernel->is_class( _obj ) == true )
             {
-                return py_nb_add2( kernel, _obj, _value, false );
+                return detail::py_nb_add2( kernel, _obj, _value, false );
             }
 
-            return py_nb_add2( kernel, _value, _obj, true );
+            return detail::py_nb_add2( kernel, _value, _obj, true );
         }
         //////////////////////////////////////////////////////////////////////////
         static PyObject * py_nb_sub2( kernel_interface * _kernel, PyObject * _obj, PyObject * _value, bool _rotate )
@@ -850,7 +850,7 @@ namespace pybind
             {
                 try
                 {
-                    PyObject * result = py_nb_binary_method( _kernel, _obj, _value, scope, adapter, _rotate );
+                    PyObject * result = detail::py_nb_binary_method( _kernel, _obj, _value, scope, adapter, _rotate );
 
                     return result;
                 }
@@ -873,7 +873,7 @@ namespace pybind
             {
                 try
                 {
-                    PyObject * result = py_nb_binary_method( _kernel, _obj, _value, scope, base_adapter, _rotate );
+                    PyObject * result = detail::py_nb_binary_method( _kernel, _obj, _value, scope, base_adapter, _rotate );
 
                     return result;
                 }
@@ -897,10 +897,10 @@ namespace pybind
 
             if( kernel->is_class( _obj ) == true )
             {
-                return py_nb_sub2( kernel, _obj, _value, false );
+                return detail::py_nb_sub2( kernel, _obj, _value, false );
             }
 
-            return py_nb_sub2( kernel, _value, _obj, true );
+            return detail::py_nb_sub2( kernel, _value, _obj, true );
         }
         //////////////////////////////////////////////////////////////////////////
         static PyObject * py_nb_mul2( kernel_interface * _kernel, PyObject * _obj, PyObject * _value, bool _rotate )
@@ -917,7 +917,7 @@ namespace pybind
             {
                 try
                 {
-                    PyObject * result = py_nb_binary_method( _kernel, _obj, _value, scope, adapter, _rotate );
+                    PyObject * result = detail::py_nb_binary_method( _kernel, _obj, _value, scope, adapter, _rotate );
 
                     return result;
                 }
@@ -940,7 +940,7 @@ namespace pybind
             {
                 try
                 {
-                    PyObject * result = py_nb_binary_method( _kernel, _obj, _value, scope, base_adapter, _rotate );
+                    PyObject * result = detail::py_nb_binary_method( _kernel, _obj, _value, scope, base_adapter, _rotate );
 
                     return result;
                 }
@@ -964,10 +964,10 @@ namespace pybind
 
             if( kernel->is_class( _obj ) == true )
             {
-                return py_nb_mul2( kernel, _obj, _value, false );
+                return detail::py_nb_mul2( kernel, _obj, _value, false );
             }
 
-            return py_nb_mul2( kernel, _value, _obj, true );
+            return detail::py_nb_mul2( kernel, _value, _obj, true );
         }
         //////////////////////////////////////////////////////////////////////////
         static PyObject * py_nb_div2( kernel_interface * _kernel, PyObject * _obj, PyObject * _value, bool _rotate )
@@ -984,7 +984,7 @@ namespace pybind
             {
                 try
                 {
-                    PyObject * result = py_nb_binary_method( _kernel, _obj, _value, scope, adapter, _rotate );
+                    PyObject * result = detail::py_nb_binary_method( _kernel, _obj, _value, scope, adapter, _rotate );
 
                     return result;
                 }
@@ -1007,7 +1007,7 @@ namespace pybind
             {
                 try
                 {
-                    PyObject * result = py_nb_binary_method( _kernel, _obj, _value, scope, base_adapter, _rotate );
+                    PyObject * result = detail::py_nb_binary_method( _kernel, _obj, _value, scope, base_adapter, _rotate );
 
                     return result;
                 }
@@ -1031,10 +1031,10 @@ namespace pybind
 
             if( kernel->is_class( _obj ) == true )
             {
-                return py_nb_div2( kernel, _obj, _value, false );
+                return detail::py_nb_div2( kernel, _obj, _value, false );
             }
 
-            return py_nb_div2( kernel, _value, _obj, true );
+            return detail::py_nb_div2( kernel, _value, _obj, true );
         }
         //////////////////////////////////////////////////////////////////////////
         static PyObject * py_nb_inplace_add( PyObject * _obj, PyObject * _value )
@@ -1053,7 +1053,7 @@ namespace pybind
             {
                 try
                 {
-                    py_nb_inplace_method( kernel, _obj, _value, scope, adapter );
+                    detail::py_nb_inplace_method( kernel, _obj, _value, scope, adapter );
 
                     pybind::incref( _obj );
 
@@ -1078,7 +1078,7 @@ namespace pybind
             {
                 try
                 {
-                    py_nb_inplace_method( kernel, _obj, _value, scope, base_adapter );
+                    detail::py_nb_inplace_method( kernel, _obj, _value, scope, base_adapter );
 
                     pybind::incref( _obj );
 
@@ -1114,7 +1114,7 @@ namespace pybind
             {
                 try
                 {
-                    py_nb_inplace_method( kernel, _obj, _value, scope, adapter );
+                    detail::py_nb_inplace_method( kernel, _obj, _value, scope, adapter );
                     
                     pybind::incref( _obj );
 
@@ -1139,7 +1139,7 @@ namespace pybind
             {
                 try
                 {
-                    py_nb_inplace_method( kernel, _obj, _value, scope, base_adapter );
+                    detail::py_nb_inplace_method( kernel, _obj, _value, scope, base_adapter );
 
                     pybind::incref( _obj );
 
@@ -1175,7 +1175,7 @@ namespace pybind
             {
                 try
                 {
-                    py_nb_inplace_method( kernel, _obj, _value, scope, adapter );
+                    detail::py_nb_inplace_method( kernel, _obj, _value, scope, adapter );
 
                     pybind::incref( _obj );
 
@@ -1200,7 +1200,7 @@ namespace pybind
             {
                 try
                 {
-                    py_nb_inplace_method( kernel, _obj, _value, scope, base_adapter );
+                    detail::py_nb_inplace_method( kernel, _obj, _value, scope, base_adapter );
 
                     pybind::incref( _obj );
 
@@ -1236,7 +1236,7 @@ namespace pybind
             {
                 try
                 {
-                    py_nb_inplace_method( kernel, _obj, _value, scope, adapter );
+                    detail::py_nb_inplace_method( kernel, _obj, _value, scope, adapter );
 
                     pybind::incref( _obj );
 
@@ -1261,7 +1261,7 @@ namespace pybind
             {
                 try
                 {
-                    py_nb_inplace_method( kernel, _obj, _value, scope, base_adapter );
+                    detail::py_nb_inplace_method( kernel, _obj, _value, scope, base_adapter );
 
                     pybind::incref( _obj );
 
