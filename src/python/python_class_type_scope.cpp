@@ -526,6 +526,16 @@ namespace pybind
 
             const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
 
+            if( scope == nullptr )
+            {
+                pybind::error_message( "obj '%s' type '%s' py_del_class scope is null"
+                    , kernel->object_str( _obj ).c_str()
+                    , kernel->type_name( objtype )
+                );
+
+                return;
+            }
+
             try
             {
                 void * impl = kernel->get_class_impl( _obj );
