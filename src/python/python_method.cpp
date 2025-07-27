@@ -84,7 +84,7 @@ namespace pybind
 
             return py_value;
         }
-        catch( const pybind_exception & _ex )
+        catch( const pybind::pybind_exception & _ex )
         {
             pybind::error_message( "descr_call2: obj '%s' method '%s' invalid call pybind exception: %s"
                 , kernel->object_repr( mct->self ).c_str()

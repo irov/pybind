@@ -48,7 +48,7 @@ namespace pybind
 
             return ret;
         }
-        catch( const pybind_exception & _ex )
+        catch( const pybind::pybind_exception & _ex )
         {
             pybind::error_message( "obj '%s' invalid functor call '%s' exception: %s"
                 , kernel->object_str( _obj ).c_str()

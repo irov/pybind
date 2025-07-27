@@ -53,6 +53,16 @@ namespace pybind
 
             const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
 
+            if( scope == nullptr )
+            {
+                pybind::error_message( "obj '%s' type '%s' py_callfunc scope is null"
+                    , kernel->object_str( _obj ).c_str()
+                    , kernel->type_name( objtype )
+                );
+
+                return nullptr;
+            }
+
             const method_adapter_interface_ptr & adapter = scope->get_call();
 
             try
@@ -63,7 +73,7 @@ namespace pybind
 
                 return ret;
             }
-            catch( const pybind_exception & _ex )
+            catch( const pybind::pybind_exception & _ex )
             {
                 pybind::error_message( "obj '%s' py_callfunc invalid call '%s' error: %s"
                     , kernel->object_str( _obj ).c_str()
@@ -111,7 +121,7 @@ namespace pybind
 
                 return ret;
             }
-            catch( const pybind_exception & _ex )
+            catch( const pybind::pybind_exception & _ex )
             {
                 pybind::error_message( "obj '%s' py_reprfunc invalid call exception: %s"
                     , kernel->object_str( _obj ).c_str()
@@ -152,6 +162,16 @@ namespace pybind
 
             const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
 
+            if( scope == nullptr )
+            {
+                pybind::error_message( "obj '%s' type '%s' py_hash scope is null"
+                    , kernel->object_str( _obj ).c_str()
+                    , kernel->type_name( objtype )
+                );
+
+                return 0;
+            }
+
             const hash_adapter_interface_ptr & adapter = scope->get_hash();
 
             try
@@ -164,7 +184,7 @@ namespace pybind
 
                 return py_hash;
             }
-            catch( const pybind_exception & _ex )
+            catch( const pybind::pybind_exception & _ex )
             {
                 pybind::error_message( "obj '%s' py_hash invalid call exception: %s"
                     , kernel->object_str( _obj ).c_str()
@@ -234,6 +254,16 @@ namespace pybind
 
             const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
 
+            if( scope == nullptr )
+            {
+                pybind::error_message( "obj '%s' type '%s' py_richcompare scope is null"
+                    , kernel->object_str( _obj ).c_str()
+                    , kernel->type_name( objtype )
+                );
+
+                return nullptr;
+            }
+
             typeid_t compare_type_id = kernel->get_object_type_id( _compare );
 
             const compare_adapter_interface_ptr & adapter = scope->get_compare( compare_type_id );
@@ -257,7 +287,7 @@ namespace pybind
 
                     return py_result;
                 }
-                catch( const pybind_exception & _ex )
+                catch( const pybind::pybind_exception & _ex )
                 {
                     pybind::error_message( "obj '%s' py_richcompare '%s' invalid compare exception: %s"
                         , kernel->object_str( _obj ).c_str()
@@ -290,7 +320,7 @@ namespace pybind
 
                     return py_result;
                 }
-                catch( const pybind_exception & _ex )
+                catch( const pybind::pybind_exception & _ex )
                 {
                     pybind::error_message( "obj '%s' py_richcompare '%s' invalid base compare exception: %s"
                         , kernel->object_str( _obj ).c_str()
@@ -324,6 +354,16 @@ namespace pybind
 
             const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
 
+            if( scope == nullptr )
+            {
+                pybind::error_message( "obj '%s' type '%s' py_getattro scope is null"
+                    , kernel->object_str( _obj ).c_str()
+                    , kernel->type_name( objtype )
+                );
+
+                return nullptr;
+            }
+
             const getattro_adapter_interface_ptr & adapter = scope->get_getattro();
 
             try
@@ -334,7 +374,7 @@ namespace pybind
 
                 return res;
             }
-            catch( const pybind_exception & _ex )
+            catch( const pybind::pybind_exception & _ex )
             {
                 pybind::error_message( "obj '%s' py_getattro invalid call '%s' exception: %s"
                     , kernel->object_str( _obj ).c_str()
@@ -367,6 +407,16 @@ namespace pybind
 
             const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
 
+            if( scope == nullptr )
+            {
+                pybind::error_message( "obj '%s' type '%s' py_subscript scope is null"
+                    , kernel->object_str( _obj ).c_str()
+                    , kernel->type_name( objtype )
+                );
+
+                return nullptr;
+            }
+
             const mapping_adapter_interface_ptr & adapter = scope->get_mapping();
 
             try
@@ -377,7 +427,7 @@ namespace pybind
 
                 return res;
             }
-            catch( const pybind_exception & _ex )
+            catch( const pybind::pybind_exception & _ex )
             {
                 pybind::error_message( "obj '%s' py_subscript invalid call '%s' exception: %s"
                     , kernel->object_str( _obj ).c_str()
@@ -416,6 +466,16 @@ namespace pybind
 
             const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
 
+            if( scope == nullptr )
+            {
+                pybind::error_message( "obj '%s' type '%s' py_item_get scope is null"
+                    , kernel->object_str( _obj ).c_str()
+                    , kernel->type_name( objtype )
+                );
+
+                return nullptr;
+            }
+
             const sequence_get_adapter_interface_ptr & adapter = scope->get_sequence_get();
 
             try
@@ -426,7 +486,7 @@ namespace pybind
 
                 return res;
             }
-            catch( const pybind_exception & _ex )
+            catch( const pybind::pybind_exception & _ex )
             {
                 pybind::error_message( "obj '%s' py_item_get invalid call '%s' exception: %s"
                     , kernel->object_str( _obj ).c_str()
@@ -459,6 +519,16 @@ namespace pybind
 
             const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
 
+            if( scope == nullptr )
+            {
+                pybind::error_message( "obj '%s' type '%s' py_item_set scope is null"
+                    , kernel->object_str( _obj ).c_str()
+                    , kernel->type_name( objtype )
+                );
+
+                return -1;
+            }
+
             const sequence_set_adapter_interface_ptr & adapter = scope->get_sequence_set();
 
             try
@@ -469,7 +539,7 @@ namespace pybind
 
                 return 0;
             }
-            catch( const pybind_exception & _ex )
+            catch( const pybind::pybind_exception & _ex )
             {
                 pybind::error_message( "obj '%s' py_item_set invalid call '%s' exception: %s"
                     , kernel->object_str( _obj ).c_str()
@@ -486,6 +556,16 @@ namespace pybind
             kernel_interface * kernel = pybind::get_kernel();
 
             const class_type_scope_interface_ptr & scope = kernel->get_class_scope( _type );
+
+            if( scope == nullptr )
+            {
+                pybind::error_message( "obj '%s' type '%s' py_new_class scope is null"
+                    , kernel->object_str( (PyObject *)_type ).c_str()
+                    , kernel->type_name( _type )
+                );
+
+                return nullptr;
+            }
 
             try
             {
@@ -506,7 +586,7 @@ namespace pybind
 
                 return py_self;
             }
-            catch( const pybind_exception & _ex )
+            catch( const pybind::pybind_exception & _ex )
             {
                 pybind::error_message( "obj '%s' py_new_class scope '%s' exception: %s"
                     , kernel->object_str( (PyObject *)_type ).c_str()
@@ -549,7 +629,7 @@ namespace pybind
                     scope->decref_smart_pointer( impl );
                 }
             }
-            catch( const pybind_exception & _ex )
+            catch( const pybind::pybind_exception & _ex )
             {
                 pybind::error_message( "obj '%s' py_del_class scope %s exception: %s"
                     , kernel->object_str( _obj ).c_str()
@@ -581,7 +661,7 @@ namespace pybind
 
                 return py_self;
             }
-            catch( const pybind_exception & _ex )
+            catch( const pybind::pybind_exception & _ex )
             {
                 pybind::error_message( "obj '%s' py_new_class scope '%s' exception: %s"
                     , kernel->object_str( (PyObject *)_type ).c_str()
@@ -625,7 +705,7 @@ namespace pybind
                     scope->decref_smart_pointer( impl );
                 }
             }
-            catch( const pybind_exception & _ex )
+            catch( const pybind::pybind_exception & _ex )
             {
                 pybind::error_message( "obj '%s' py_del_pod scope '%s' exception: %s"
                     , kernel->object_str( _obj ).c_str()
