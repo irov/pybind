@@ -42,7 +42,7 @@ namespace pybind
             if( impl == nullptr )
             {
                 pybind::error_message( "callfunc unbind object '%s'"
-                    , kernel->object_str( _obj ).c_str() 
+                    , kernel->object_str( _obj ).c_str()
                 );
 
                 return nullptr;
@@ -66,7 +66,7 @@ namespace pybind
             const method_adapter_interface_ptr & adapter = scope->get_call();
 
             try
-            {                
+            {
                 DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), _args, _kwds );
 
                 PyObject * ret = adapter->call( kernel, impl, scope, _args, _kwds );
@@ -95,7 +95,7 @@ namespace pybind
             if( impl == nullptr )
             {
                 pybind::error_message( "reprfunc unbind object '%s'"
-                    , kernel->object_str( _obj ).c_str() 
+                    , kernel->object_str( _obj ).c_str()
                 );
 
                 return nullptr;
@@ -151,7 +151,7 @@ namespace pybind
             if( impl == nullptr )
             {
                 pybind::error_message( "reprfunc unbind object '%s'"
-                    , kernel->object_str( _obj ).c_str() 
+                    , kernel->object_str( _obj ).c_str()
                 );
 
                 return 0;
@@ -198,7 +198,7 @@ namespace pybind
         static PyObject * py_richcompare( PyObject * _obj, PyObject * _compare, int _op )
         {
             kernel_interface * kernel = pybind::get_kernel();
-            
+
             void * impl = kernel->get_class_impl( _obj );
 
 #if defined(PYBIND_DEBUG)
@@ -370,7 +370,7 @@ namespace pybind
             {
                 DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), _key, nullptr );
 
-                PyObject * res = adapter->call( kernel, impl, scope, _key );                
+                PyObject * res = adapter->call( kernel, impl, scope, _key );
 
                 return res;
             }
@@ -423,7 +423,7 @@ namespace pybind
             {
                 DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), _key, nullptr );
 
-                PyObject * res = adapter->call( kernel, impl, scope, _key );                
+                PyObject * res = adapter->call( kernel, impl, scope, _key );
 
                 return res;
             }
@@ -455,7 +455,7 @@ namespace pybind
             if( impl == nullptr )
             {
                 pybind::error_message( "item get unbind object '%s"
-                    , kernel->object_str( _obj ).c_str() 
+                    , kernel->object_str( _obj ).c_str()
                 );
 
                 return nullptr;
@@ -508,7 +508,7 @@ namespace pybind
             if( impl == nullptr )
             {
                 pybind::error_message( "item set unbind object '%s'"
-                    , kernel->object_str( _obj ).c_str() 
+                    , kernel->object_str( _obj ).c_str()
                 );
 
                 return -1;
@@ -535,7 +535,7 @@ namespace pybind
             {
                 DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), nullptr, nullptr );
 
-                adapter->call( kernel, impl, scope, (size_t)_index, _value );                
+                adapter->call( kernel, impl, scope, (size_t)_index, _value );
 
                 return 0;
             }
@@ -726,7 +726,7 @@ namespace pybind
             (objobjproc)0,                  /* sq_contains */
             (binaryfunc)0,            /* sq_inplace_concat */
             (ssizeargfunc)0,          /* sq_inplace_repeat */
-        };        
+        };
         //////////////////////////////////////////////////////////////////////////
         static PyObject * py_nb_unary_method( kernel_interface * _kernel, PyObject * _obj, const class_type_scope_interface_ptr & _scope, const number_unary_adapter_interface_ptr & _adapter )
         {
@@ -1205,7 +1205,7 @@ namespace pybind
                 try
                 {
                     detail::py_nb_inplace_method( kernel, _obj, _value, scope, adapter );
-                    
+
                     pybind::incref( _obj );
 
                     return _obj;
@@ -1722,7 +1722,7 @@ namespace pybind
 
             allocator_interface * allocator = m_kernel->get_allocator();
             allocator->deleteT( m_number_adapters );
-            
+
             m_number_adapters = nullptr;
         }
 
