@@ -88,6 +88,41 @@ namespace pybind
         FG m_get;
         FS m_set;
     };
+
+    //////////////////////////////////////////////////////////////////////////
+    template<class C, class FG>
+    class member_adapter_property_readonly
+        : public member_adapter_interface
+    {
+    public:
+        member_adapter_property_readonly( const char * _name, FG _get )
+            : member_adapter_interface( _name )
+            , m_get( _get )
+        {
+        }
+
+        ~member_adapter_property_readonly() override
+        {
+        }
+
+    public:
+        PyObject * get( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope ) override
+        {
+            C * obj = _kernel->meta_cast_class_t<C>( _self, _scope );
+
+            PyObject * py_value = detail::return_operator_t( _kernel, (*m_get)(obj) );
+
+            return py_value;
+        }
+
+        int set( kernel_interface * _kernel, void * _self, PyObject * _args, const class_type_scope_interface_ptr & _scope ) override
+        {
+            return 1;
+        }
+
+    protected:
+        FG m_get;
+    };
     //////////////////////////////////////////////////////////////////////////
     template<class C, class FG, class FS>
     class member_adapter_property_static
