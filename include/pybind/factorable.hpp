@@ -22,9 +22,9 @@ namespace pybind
         allocator_interface * get_allocator() const;
 
     public:
-        uint32_t incref() noexcept override;
-        void decref() noexcept override;
-        uint32_t getrefcount() const noexcept override;
+        uint32_t incref() override;
+        void decref() override;
+        uint32_t getrefcount() const override;
 
     protected:
         allocator_interface * m_allocator;

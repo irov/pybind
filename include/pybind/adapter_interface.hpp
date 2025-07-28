@@ -8,7 +8,7 @@ namespace pybind
         : public factorable
     {
     public:
-        adapter_interface() noexcept;
+        adapter_interface();
         ~adapter_interface() override;
     };
     //////////////////////////////////////////////////////////////////////////
