@@ -464,18 +464,6 @@ namespace pybind
             return *this;
         }
 
-        template<class FG>
-        base_ & def_property_readonly( const char * _name, FG _get )
-        {
-            allocator_interface * allocator = m_kernel->get_allocator();
-
-            member_adapter_interface_ptr iadapter = allocator->newT<member_adapter_property_readonly<C, FG>>( _name, _get );
-
-            m_scope->add_member( iadapter );
-
-            return *this;
-        }
-
         template<class FG, class FS>
         base_ & def_property_static( const char * _name, FG _get, FS _set )
         {

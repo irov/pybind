@@ -91,17 +91,17 @@ namespace pybind
 
     //////////////////////////////////////////////////////////////////////////
     template<class C, class FG>
-    class member_adapter_property_readonly
+    class member_adapter_property<C, FG, std::nullptr_t>
         : public member_adapter_interface
     {
     public:
-        member_adapter_property_readonly( const char * _name, FG _get )
+        member_adapter_property( const char * _name, FG _get, std::nullptr_t )
             : member_adapter_interface( _name )
             , m_get( _get )
         {
         }
 
-        ~member_adapter_property_readonly() override
+        ~member_adapter_property() override
         {
         }
 
@@ -117,7 +117,12 @@ namespace pybind
 
         int set( kernel_interface * _kernel, void * _self, PyObject * _args, const class_type_scope_interface_ptr & _scope ) override
         {
-            return 1;
+            (void)_kernel;
+            (void)_self;
+            (void)_args;
+            (void)_scope;
+
+            return 0;
         }
 
     protected:
