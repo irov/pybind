@@ -73,7 +73,7 @@ namespace pybind
             {
                 PyObject * py_cb = _kernel->tuple_getitem( _arg, fn_arity - 3 );
 
-                if( _kernel->is_callable( py_cb ) == false && _kernel->is_none( py_cb ) == false )
+                if( _kernel->is_callable( py_cb ) == false && _kernel->is_none( py_cb ) == false && _kernel->dict_check( py_cb ) == false )
                 {
                     pybind::throw_exception( "invalid args function call cb is not callable '%s' type '%s'"
                         , _kernel->object_repr( py_cb ).c_str()
