@@ -84,7 +84,6 @@ namespace pybind
 #if PYBIND_PYTHON_VERSION < 300
         PyImport_Cleanup();
 #endif
-        PyGC_Collect();
 
 #ifdef PYBIND_STL_SUPPORT
         pybind::finalize_stl_type_cast( this );
@@ -119,7 +118,7 @@ namespace pybind
         }
 
         m_class_type_dummy = nullptr;
-        
+
         m_functions.finalize();
         m_functors.finalize();
         m_members.finalize();
