@@ -238,7 +238,7 @@ namespace pybind
 
                 const char * type_name = tinfo.name();
 
-                pybind::throw_exception( "extract_specialized<T, intrusive_ptr>: extract invalid '%s' type '%s' not cast to '%s'"
+                pybind::throw_exception( "extract_specialized<T, intrusive_ptr<T, D>>: extract invalid '%s' type '%s' not cast to '%s'"
                     , _kernel->object_repr( _obj ).c_str()
                     , _kernel->object_repr_type( _obj ).c_str()
                     , type_name

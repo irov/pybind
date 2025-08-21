@@ -23,54 +23,58 @@ namespace pybind
     static constexpr uint8_t PICKLE_SET = 12;
     //////////////////////////////////////////////////////////////////////////
     template<class T>
-    static void s_write_buffer_t( void * _buffer, size_t _capacity, T _t, size_t & _offset )
+    static void s_write_buffer_t( void * _buffer, size_t _capacity, T _t, size_t * const _offset )
     {
         size_t size = sizeof( T );
 
         if( _buffer != nullptr )
         {
-            if( _offset + size > _capacity )
+            if( *_offset + size > _capacity )
             {
-                pybind::throw_exception( "pickle buffer out of capacity %d + %d > %d"
-                    , _offset
+                pybind::throw_exception( "pickle buffer out of capacity %zu + %zu > %zu"
+                    , *_offset
                     , size
                     , _capacity
                 );
+
+                return;
             }
 
             uint8_t * write_buffer = static_cast<uint8_t *>(_buffer);
 
-            stdex::memorycopy( write_buffer, _offset, &_t, size );
+            stdex::memorycopy( write_buffer, *_offset, &_t, size );
         }
 
-        _offset += size;
+        *_offset += size;
     }
     //////////////////////////////////////////////////////////////////////////
     template<class T>
-    static void s_write_buffer_tn( void * _buffer, size_t _capacity, const T * _t, size_t _count, size_t & _offset )
+    static void s_write_buffer_tn( void * _buffer, size_t _capacity, const T * _t, size_t _count, size_t * const _offset )
     {
         size_t size = sizeof( T ) * _count;
 
         if( _buffer != nullptr )
         {
-            if( _offset + size > _capacity )
+            if( *_offset + size > _capacity )
             {
-                pybind::throw_exception( "pickle buffer out of capacity %d + %d > %d"
-                    , _offset
+                pybind::throw_exception( "pickle buffer out of capacity %zu + %zu > %zu"
+                    , *_offset
                     , size
                     , _capacity
                 );
+
+                return;
             }
 
             uint8_t * write_buffer = static_cast<uint8_t *>(_buffer);
 
-            stdex::memorycopy( write_buffer, _offset, _t, size );
+            stdex::memorycopy( write_buffer, *_offset, _t, size );
         }
 
-        _offset += size;
+        *_offset += size;
     }
     //////////////////////////////////////////////////////////////////////////
-    static void s_write_size_t( void * _buffer, size_t _capacity, uint32_t _t, size_t & _offset )
+    static void s_write_size_t( void * _buffer, size_t _capacity, size_t _t, size_t * const _offset )
     {
         if( _t < 255 )
         {
@@ -82,12 +86,12 @@ namespace pybind
             uint8_t write_dummy = 255;
             s_write_buffer_t( _buffer, _capacity, write_dummy, _offset );
 
-            uint32_t write_t = _t;
+            uint32_t write_t = (uint32_t)_t;
             s_write_buffer_t( _buffer, _capacity, write_t, _offset );
         }
     }
     //////////////////////////////////////////////////////////////////////////
-    static void s_obj_pickle( kernel_interface * _kernel, PyObject * _obj, PyObject * _types, void * _buffer, size_t _capacity, size_t & _offset )
+    static void s_obj_pickle( kernel_interface * _kernel, PyObject * _obj, PyObject * _types, void * _buffer, size_t _capacity, size_t * const _offset )
     {
         if( _kernel->is_none( _obj ) == true )
         {
@@ -140,7 +144,7 @@ namespace pybind
             size_t str_size;
             const char * str = _kernel->string_to_char_and_size( _obj, &str_size );
 
-            s_write_size_t( _buffer, _capacity, (uint32_t)str_size, _offset );
+            s_write_size_t( _buffer, _capacity, str_size, _offset );
             s_write_buffer_tn( _buffer, _capacity, str, str_size, _offset );
         }
         else if( _kernel->unicode_check( _obj ) == true )
@@ -152,7 +156,7 @@ namespace pybind
             size_t str_size;
             const char * str = _kernel->unicode_to_utf8_and_size( _obj, &str_size );
 
-            s_write_size_t( _buffer, _capacity, (uint32_t)str_size, _offset );
+            s_write_size_t( _buffer, _capacity, str_size, _offset );
             s_write_buffer_tn( _buffer, _capacity, str, str_size, _offset );
         }
         else if( _kernel->tuple_check( _obj ) == true )
@@ -163,7 +167,7 @@ namespace pybind
 
             size_t count = _kernel->tuple_size( _obj );
 
-            s_write_size_t( _buffer, _capacity, (uint32_t)count, _offset );
+            s_write_size_t( _buffer, _capacity, count, _offset );
 
             for( size_t i = 0; i != count; ++i )
             {
@@ -180,7 +184,7 @@ namespace pybind
 
             size_t count = _kernel->list_size( _obj );
 
-            s_write_size_t( _buffer, _capacity, (uint32_t)count, _offset );
+            s_write_size_t( _buffer, _capacity, count, _offset );
 
             for( size_t i = 0; i != count; ++i )
             {
@@ -197,7 +201,7 @@ namespace pybind
 
             size_t count = _kernel->dict_size( _obj );
 
-            s_write_size_t( _buffer, _capacity, (uint32_t)count, _offset );
+            s_write_size_t( _buffer, _capacity, count, _offset );
 
             size_t pos = 0;
 
@@ -217,7 +221,7 @@ namespace pybind
 
             size_t count = _kernel->set_size( _obj );
 
-            s_write_size_t( _buffer, _capacity, (uint32_t)count, _offset );
+            s_write_size_t( _buffer, _capacity, count, _offset );
 
             PyObject * it;
             if( _kernel->iterator_get( _obj, &it ) == false )
@@ -257,7 +261,7 @@ namespace pybind
                     continue;
                 }
 
-                s_write_size_t( _buffer, _capacity, (uint32_t)index, _offset );
+                s_write_size_t( _buffer, _capacity, index, _offset );
 
                 PyObject * obj_value = _kernel->get_attrstring( _obj, "value" );
 
@@ -282,7 +286,7 @@ namespace pybind
         }
     }
     //////////////////////////////////////////////////////////////////////////
-    bool pickle( kernel_interface * _kernel, PyObject * _obj, PyObject * _types, void * _buffer, size_t _capacity, size_t & _size )
+    bool pickle( kernel_interface * _kernel, PyObject * _obj, PyObject * _types, void * _buffer, size_t _capacity, size_t * const _size )
     {
         if( _kernel->list_check( _types ) == false )
         {
@@ -291,7 +295,8 @@ namespace pybind
 
         try
         {
-            _size = 0;
+            *_size = 0;
+
             s_obj_pickle( _kernel, _obj, _types, _buffer, _capacity, _size );
         }
         catch( const pybind::pybind_exception & _ex )
@@ -307,58 +312,70 @@ namespace pybind
     }
     //////////////////////////////////////////////////////////////////////////
     template<class T>
-    static void s_read_buffer_t( const void * _buffer, size_t _capacity, size_t & _carriage, T & _t )
+    static void s_read_buffer_t( const void * _buffer, size_t _capacity, size_t * const _carriage, T & _t )
     {
         size_t size = sizeof( T );
 
-        if( _carriage + size > _capacity )
+        if( *_carriage + size > _capacity )
         {
-            pybind::throw_exception( "unpickle out of buffer capacity"
+            pybind::throw_exception( "unpickle out of buffer capacity %zu + %zu > %zu"
+                , *_carriage
+                , size
+                , _capacity
             );
+
+            return;
         }
 
-        const void * src_buffer = (static_cast<const uint8_t *>(_buffer) + _carriage);
+        const void * src_buffer = (static_cast<const uint8_t *>(_buffer) + *_carriage);
+
         stdex::memorycopy( &_t, 0, src_buffer, size );
 
-        _carriage += size;
+        *_carriage += size;
     }
     //////////////////////////////////////////////////////////////////////////
     template<class T>
-    static void s_read_buffer_tn( const void * _buffer, size_t _capacity, size_t & _carriage, T * _t, size_t _count )
+    static void s_read_buffer_tn( const void * _buffer, size_t _capacity, size_t * const _carriage, T * _t, size_t _count )
     {
         size_t size = sizeof( T ) * _count;
 
-        if( _carriage + size > _capacity )
+        if( *_carriage + size > _capacity )
         {
-            pybind::throw_exception( "unpickle out of buffer capacity"
+            pybind::throw_exception( "unpickle out of buffer capacity %zu + %zu > %zu"
+                , *_carriage
+                , size
+                , _capacity
             );
+
+            return;
         }
 
-        const void * src_buffer = static_cast<const uint8_t *>(_buffer) + _carriage;
+        const void * src_buffer = static_cast<const uint8_t *>(_buffer) + *_carriage;
+
         stdex::memorycopy( _t, 0, src_buffer, size );
 
-        _carriage += size;
+        *_carriage += size;
     }
     //////////////////////////////////////////////////////////////////////////
-    static void s_read_size_t( const void * _buffer, size_t _capacity, size_t & _carriage, uint32_t & _t )
+    static void s_read_size_t( const void * _buffer, size_t _capacity, size_t * const _carriage, size_t * const _t )
     {
         uint8_t size_base;
         s_read_buffer_t( _buffer, _capacity, _carriage, size_base );
 
         if( size_base < 255 )
         {
-            _t = (uint32_t)size_base;
+            *_t = (size_t)size_base;
         }
         else
         {
             uint32_t size_full;
             s_read_buffer_t( _buffer, _capacity, _carriage, size_full );
 
-            _t = size_full;
+            *_t = (size_t)size_full;
         }
     }
     //////////////////////////////////////////////////////////////////////////
-    static PyObject * s_obj_unpickle( kernel_interface * _kernel, const void * _buffer, size_t _capacity, size_t & _carriage, PyObject * _types )
+    static PyObject * s_obj_unpickle( kernel_interface * _kernel, const void * _buffer, size_t _capacity, size_t * const _carriage, PyObject * _types )
     {
         uint8_t type;
         s_read_buffer_t( _buffer, _capacity, _carriage, type );
@@ -412,21 +429,23 @@ namespace pybind
             }break;
         case PICKLE_STRING:
             {
-                uint32_t str_size;
-                s_read_size_t( _buffer, _capacity, _carriage, str_size );
+                size_t str_size;
+                s_read_size_t( _buffer, _capacity, _carriage, &str_size );
 
-                if( _carriage + str_size > _capacity )
+                if( *_carriage + str_size > _capacity )
                 {
-                    pybind::throw_exception( "unpickle object string out of buffer %d + %d > %d"
-                        , _carriage
+                    pybind::throw_exception( "unpickle object string out of buffer %zu + %zu > %zu"
+                        , *_carriage
                         , str_size
                         , _capacity
                     );
+
+                    return nullptr;
                 }
 
-                const char * str_buffer = (const char *)(static_cast<const uint8_t *>(_buffer) + _carriage);
+                const char * str_buffer = (const char *)(static_cast<const uint8_t *>(_buffer) + *_carriage);
 
-                _carriage += str_size;
+                *_carriage += str_size;
 
                 PyObject * obj = _kernel->string_from_char_size( str_buffer, str_size );
 
@@ -434,21 +453,23 @@ namespace pybind
             }break;
         case PICKLE_UNICODE:
             {
-                uint32_t utf8_size;
-                s_read_size_t( _buffer, _capacity, _carriage, utf8_size );
+                size_t utf8_size;
+                s_read_size_t( _buffer, _capacity, _carriage, &utf8_size );
 
-                if( _carriage + utf8_size > _capacity )
+                if( *_carriage + utf8_size > _capacity )
                 {
-                    pybind::throw_exception( "unpickle object unicode out of buffer %d + %d > %d"
+                    pybind::throw_exception( "unpickle object unicode out of buffer %zu + %zu > %zu"
                         , _carriage
                         , utf8_size
                         , _capacity
                     );
+
+                    return nullptr;
                 }
 
-                const char * utf8_buffer = (const char *)(static_cast<const uint8_t *>(_buffer) + _carriage);
+                const char * utf8_buffer = (const char *)(static_cast<const uint8_t *>(_buffer) + *_carriage);
 
-                _carriage += utf8_size;
+                *_carriage += utf8_size;
 
                 PyObject * obj = _kernel->unicode_from_utf8_size( utf8_buffer, utf8_size );
 
@@ -456,12 +477,12 @@ namespace pybind
             }break;
         case PICKLE_TUPLE:
             {
-                uint32_t count;
-                s_read_size_t( _buffer, _capacity, _carriage, count );
+                size_t count;
+                s_read_size_t( _buffer, _capacity, _carriage, &count );
 
                 PyObject * obj = _kernel->tuple_new( count );
 
-                for( uint32_t i = 0; i != count; ++i )
+                for( size_t i = 0; i != count; ++i )
                 {
                     PyObject * element = s_obj_unpickle( _kernel, _buffer, _capacity, _carriage, _types );
 
@@ -472,12 +493,12 @@ namespace pybind
             }break;
         case PICKLE_LIST:
             {
-                uint32_t count;
-                s_read_size_t( _buffer, _capacity, _carriage, count );
+                size_t count;
+                s_read_size_t( _buffer, _capacity, _carriage, &count );
 
                 PyObject * obj = _kernel->list_new( count );
 
-                for( uint32_t i = 0; i != count; ++i )
+                for( size_t i = 0; i != count; ++i )
                 {
                     PyObject * element = s_obj_unpickle( _kernel, _buffer, _capacity, _carriage, _types );
 
@@ -488,8 +509,8 @@ namespace pybind
             }break;
         case PICKLE_DICT:
             {
-                uint32_t count;
-                s_read_size_t( _buffer, _capacity, _carriage, count );
+                size_t count;
+                s_read_size_t( _buffer, _capacity, _carriage, &count );
 
                 PyObject * obj = _kernel->dict_new_presized( count );
 
@@ -505,8 +526,8 @@ namespace pybind
             }break;
         case PICKLE_SET:
             {
-                uint32_t count;
-                s_read_size_t( _buffer, _capacity, _carriage, count );
+                size_t count;
+                s_read_size_t( _buffer, _capacity, _carriage, &count );
 
                 PyObject * obj = _kernel->set_new();
 
@@ -521,14 +542,14 @@ namespace pybind
             }break;
         case PICKLE_OBJECT:
             {
-                uint32_t index;
-                s_read_size_t( _buffer, _capacity, _carriage, index );
+                size_t index;
+                s_read_size_t( _buffer, _capacity, _carriage, &index );
 
                 size_t types_size = _kernel->list_size( _types );
 
                 if( index >= types_size )
                 {
-                    pybind::throw_exception( "unpickle object has type index %d more of size types %d"
+                    pybind::throw_exception( "unpickle object has type index %zu more of size types %zu"
                         , index
                         , types_size
                     );
@@ -547,7 +568,7 @@ namespace pybind
 
                 if( obj == nullptr )
                 {
-                    pybind::throw_exception( "unpickle invalid create object '%s' type index %u"
+                    pybind::throw_exception( "unpickle invalid create object '%s' type index %zu"
                         , _kernel->object_repr_type( object_type ).c_str()
                         , index
                     );
@@ -557,7 +578,7 @@ namespace pybind
             }break;
         default:
             {
-                pybind::throw_exception( "unpickle invalid type %d"
+                pybind::throw_exception( "unpickle invalid type %u"
                     , type
                 );
             }
@@ -572,7 +593,7 @@ namespace pybind
 
         try
         {
-            PyObject * obj = s_obj_unpickle( _kernel, _buffer, _capacity, carriage, _types );
+            PyObject * obj = s_obj_unpickle( _kernel, _buffer, _capacity, &carriage, _types );
 
             return obj;
         }

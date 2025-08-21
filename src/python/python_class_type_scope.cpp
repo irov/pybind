@@ -1564,7 +1564,7 @@ namespace pybind
 
             if( py_pybind_type == nullptr )
             {
-                pybind::throw_exception( "scope '%s' initialize not pod %d (hash %d)"
+                pybind::throw_exception( "scope '%s' initialize not pod %zu (hash %d)"
                     , m_name
                     , m_pod_size
                     , m_pod_hash
@@ -1619,7 +1619,7 @@ namespace pybind
 #if defined(PYBIND_DEBUG)
         if( pybind::module_hasobject( m_module, m_pytypeobject->tp_name ) == true )
         {
-            pybind::throw_exception( "python_class_type_scope module '%s' overriding object '%s'"
+            pybind::throw_exception( "scope '%s' module overriding object '%s'"
                 , m_name
                 , m_pytypeobject->tp_name
             );
@@ -1782,26 +1782,40 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::add_method( const method_adapter_interface_ptr & _imethod )
     {
+#if defined(PYBIND_DEBUG)
         if( m_methodCount == PYBIND_METHOD_COUNT )
         {
             pybind::throw_exception( "scope '%s' add_method '%s' max count"
-                , this->m_name
+                , this->get_name()
                 , _imethod->getName()
             );
 
             return;
         }
-
-        PyObject * py_type_method = m_kernel->create_method_adapter( _imethod, m_pytypeobject );
+#endif
 
         const char * name = _imethod->getName();
+
+#if defined(PYBIND_DEBUG)
+        if( pybind::dict_existstring( m_pytypeobject->tp_dict, name ) == true )
+        {
+            pybind::throw_exception( "scope '%s' add_method '%s' already exist"
+                , this->get_name()
+                , name
+            );
+
+            return;
+        }
+#endif
+
+        PyObject * py_type_method = m_kernel->create_method_adapter( _imethod, m_pytypeobject );
 
         if( pybind::dict_setstring( m_pytypeobject->tp_dict, name, py_type_method ) == false )
         {
             pybind::decref( py_type_method );
 
             pybind::throw_exception( "scope '%s' add_method '%s' python error"
-                , this->m_name
+                , this->get_name()
                 , name
             );
 
@@ -1830,7 +1844,7 @@ namespace pybind
         }
 
         pybind::throw_exception( "scope '%s' find_method '%s' python error"
-            , this->m_name
+            , this->get_name()
             , _name
         );
 
@@ -1864,7 +1878,7 @@ namespace pybind
         }
 
         pybind::throw_exception( "scope '%s' find_member '%s' python error"
-            , this->m_name
+            , this->get_name()
             , _name
         );
 
@@ -1883,26 +1897,40 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::add_member( const member_adapter_interface_ptr & _imember )
     {
+#if defined(PYBIND_DEBUG)
         if( m_memberCount == PYBIND_MEMBER_COUNT )
         {
             pybind::throw_exception( "scope '%s' add_member '%s' max count"
-                , this->m_name
+                , this->get_name()
                 , _imember->getName()
             );
 
             return;
         }
-
-        PyObject * py_member = m_kernel->create_member_adapter( _imember );
+#endif
 
         const char * name = _imember->getName();
+
+#if defined(PYBIND_DEBUG)
+        if( pybind::dict_existstring( m_pytypeobject->tp_dict, name ) == true )
+        {
+            pybind::throw_exception( "scope '%s' add_member '%s' already exist"
+                , this->get_name()
+                , name
+            );
+
+            return;
+        }
+#endif
+
+        PyObject * py_member = m_kernel->create_member_adapter( _imember );
 
         if( pybind::dict_setstring( m_pytypeobject->tp_dict, name, py_member ) == false )
         {
             pybind::decref( py_member );
 
             pybind::throw_exception( "scope '%s' add_member '%s' python error"
-                , this->m_name
+                , this->get_name()
                 , name
             );
 
@@ -2143,15 +2171,17 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::add_base( typeid_t _info, const class_type_scope_interface_ptr & _scope, pybind_metacast _cast )
     {
+#if defined(PYBIND_DEBUG)
         if( m_basesCount == PYBIND_BASES_COUNT )
         {
-            pybind::throw_exception( "pybind scope '%s' maximize bases count PYBIND_BASES_COUNT is %u"
-                , this->m_name
+            pybind::throw_exception( "scope '%s' maximize bases count PYBIND_BASES_COUNT is %u"
+                , this->get_name()
                 , PYBIND_BASES_COUNT
             );
 
             return;
         }
+#endif
 
         Metacast mc;
         mc.info = _info;

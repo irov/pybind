@@ -93,11 +93,6 @@ namespace pybind
     {
         PyObject * py_tuple = _kernel->tuple_new( 0 );
 
-        if( py_tuple == nullptr )
-        {
-            pybind::throw_exception( "make_tuple_t 0" );
-        }
-
         return pybind::tuple( _kernel, py_tuple, pybind::borrowed );
     }
     //////////////////////////////////////////////////////////////////////////

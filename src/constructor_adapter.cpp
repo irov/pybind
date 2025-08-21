@@ -15,7 +15,7 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
-#ifndef NDEBUG
+#if defined(PYBIND_DEBUG)
     //////////////////////////////////////////////////////////////////////////
     bool constructor_adapter_interface::valid( kernel_interface * _kernel, PyObject * _args ) const
     {
@@ -28,7 +28,7 @@ namespace pybind
 
         if( m_arity != args_arity )
         {
-            pybind::throw_exception( "construct have %d args, but you call %d params"
+            pybind::throw_exception( "construct have %zu args, but you call %zu params"
                 , m_arity
                 , args_arity
             );

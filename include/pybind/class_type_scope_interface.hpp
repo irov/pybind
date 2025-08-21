@@ -79,6 +79,7 @@ namespace pybind
             typeid_t tptrinfo = kernel->class_info<B *>();
             typeid_t tinfo = kernel->class_info<B>();
 
+#if defined(PYBIND_DEBUG)
             if( kernel->has_class_type_scope( tinfo ) == false )
             {
                 pybind::throw_exception( "class_type_scope_interface::add_base_t '%s' not bind base type '%s'"
@@ -88,6 +89,7 @@ namespace pybind
 
                 return;
             }
+#endif
 
             const class_type_scope_interface_ptr & basescope = kernel->get_class_type_scope( tinfo );
 

@@ -154,7 +154,8 @@ namespace pybind
 
             if( _module == nullptr )
             {
-                pybind::throw_exception( "remove_from_module not setup module!"
+                pybind::throw_exception( "remove_from_module '%s' not setup module!"
+                    , _name
                 );
 
                 return;
@@ -174,8 +175,7 @@ namespace pybind
 
             if( _module == nullptr )
             {
-                pybind::throw_exception( "def_function_adapter not setup module!"
-                );
+                pybind::throw_exception( "def_function_adapter not setup module!" );
 
                 return;
             }
@@ -434,7 +434,7 @@ namespace pybind
     {
         if( _id >= PYBIND_TYPE_COUNT )
         {
-            pybind::throw_exception( "invalid get class info %d"
+            pybind::throw_exception( "invalid get class info %u"
                 , _id
             );
 
@@ -445,7 +445,7 @@ namespace pybind
 
         if( desc.name == nullptr )
         {
-            pybind::throw_exception( "invalid get class info %d"
+            pybind::throw_exception( "invalid get class info %u"
                 , _id
             );
 
