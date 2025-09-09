@@ -918,13 +918,25 @@ namespace pybind
         pybind::remove_module_finder();
     }
     //////////////////////////////////////////////////////////////////////////
-    void python_kernel::set_sys_excepthook( pybind_excepthook_handler_f _excepthook, void * _ud )
+    PyObject * python_kernel::get_sys_excepthook()
+    {
+        PyObject * py_excepthook = PySys_GetObject( (char *)"excepthook" );
+
+        return py_excepthook;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void python_kernel::set_sys_excepthook( PyObject * _excepthook )
+    {
+        PySys_SetObject( (char *)"excepthook", _excepthook );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void python_kernel::set_sys_excepthook_f( pybind_excepthook_handler_f _excepthook, void * _ud )
     {
         function_adapter_interface_ptr adapter = pybind::make_function_proxy( this, "excepthook", _excepthook, _ud );
 
         PyObject * py_excepthook = this->create_function_adapter( adapter, false );
 
-        PySys_SetObject( (char *)"excepthook", py_excepthook );
+        this->set_sys_excepthook( py_excepthook );
 
         Py_DECREF( py_excepthook );
     }

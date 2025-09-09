@@ -119,7 +119,9 @@ namespace pybind
         void set_module_finder( PyObject * _finder ) override;
         void remove_module_finder() override;
 
-        void set_sys_excepthook( pybind_excepthook_handler_f _excepthook, void * _ud ) override;
+        PyObject * get_sys_excepthook() override;
+        void set_sys_excepthook( PyObject * _excepthook ) override;
+        void set_sys_excepthook_f( pybind_excepthook_handler_f _excepthook, void * _ud ) override;
 
         void call_native( PyObject * _obj, PyObject * _args ) override;
         void call_method( PyObject * _obj, const char * _method, const char * _format, ... ) override;

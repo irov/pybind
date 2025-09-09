@@ -260,7 +260,9 @@ namespace pybind
         virtual void set_module_finder( PyObject * _finder ) = 0;
         virtual void remove_module_finder() = 0;
 
-        virtual void set_sys_excepthook( pybind_excepthook_handler_f _excepthook, void * _ud ) = 0;
+        virtual PyObject * get_sys_excepthook() = 0;
+        virtual void set_sys_excepthook( PyObject * _excepthook ) = 0;
+        virtual void set_sys_excepthook_f( pybind_excepthook_handler_f _excepthook, void * _ud ) = 0;
 
         virtual void call_native( PyObject * _obj, PyObject * _args ) = 0;
         virtual void call_method( PyObject * _obj, const char * _method, const char * _format, ... ) = 0;
