@@ -2324,4 +2324,179 @@ namespace pybind
         }
     }
     //////////////////////////////////////////////////////////////////////////
+    const new_adapter_interface_ptr & python_class_type_scope::get_new() const
+    {
+        return m_new;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const destroy_adapter_interface_ptr & python_class_type_scope::get_destroy() const
+    {
+        return m_destructor;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const constructor_adapter_interface_ptr & python_class_type_scope::get_constructor() const
+    {
+        return m_constructor;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const convert_adapter_interface_ptr & python_class_type_scope::get_convert() const
+    {
+        return m_convert;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const method_adapter_interface_ptr & python_class_type_scope::get_call() const
+    {
+        return m_call;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const repr_adapter_interface_ptr & python_class_type_scope::get_repr() const
+    {
+        return m_repr;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const hash_adapter_interface_ptr & python_class_type_scope::get_hash() const
+    {
+        return m_hash;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const compare_adapter_interface_ptr & python_class_type_scope::get_compare( typeid_t _typeId ) const
+    {
+        if( m_compare_adapters == nullptr )
+        {
+            return compare_adapter_interface_ptr::none();
+        }
+
+        return m_compare_adapters->compares[_typeId];
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const getattro_adapter_interface_ptr & python_class_type_scope::get_getattro() const
+    {
+        return m_getattro;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const mapping_adapter_interface_ptr & python_class_type_scope::get_mapping() const
+    {
+        return m_mapping;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const sequence_get_adapter_interface_ptr & python_class_type_scope::get_sequence_get() const
+    {
+        return m_sequence_get;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const sequence_set_adapter_interface_ptr & python_class_type_scope::get_sequence_set() const
+    {
+        return m_sequence_set;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const number_unary_adapter_interface_ptr & python_class_type_scope::get_number_neg() const
+    {
+        if( m_number_adapters == nullptr )
+        {
+            return number_unary_adapter_interface_ptr::none();
+        }
+
+        return m_number_adapters->neg;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const number_unary_adapter_interface_ptr & python_class_type_scope::get_number_abs() const
+    {
+        if( m_number_adapters == nullptr )
+        {
+            return number_unary_adapter_interface_ptr::none();
+        }
+
+        return m_number_adapters->abs;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const number_binary_adapter_interface_ptr & python_class_type_scope::get_number_add( typeid_t _typeId ) const
+    {
+        if( m_number_adapters == nullptr )
+        {
+            return number_binary_adapter_interface_ptr::none();
+        }
+
+        return m_number_adapters->adds[_typeId];
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const number_binary_adapter_interface_ptr & python_class_type_scope::get_number_sub( typeid_t _typeId ) const
+    {
+        if( m_number_adapters == nullptr )
+        {
+            return number_binary_adapter_interface_ptr::none();
+        }
+
+        return m_number_adapters->subs[_typeId];
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const number_binary_adapter_interface_ptr & python_class_type_scope::get_number_mul( typeid_t _typeId ) const
+    {
+        if( m_number_adapters == nullptr )
+        {
+            return number_binary_adapter_interface_ptr::none();
+        }
+
+        return m_number_adapters->muls[_typeId];
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const number_binary_adapter_interface_ptr & python_class_type_scope::get_number_div( typeid_t _typeId ) const
+    {
+        if( m_number_adapters == nullptr )
+        {
+            return number_binary_adapter_interface_ptr::none();
+        }
+
+        return m_number_adapters->divs[_typeId];
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const number_inplace_adapter_interface_ptr & python_class_type_scope::get_number_inplace_add( typeid_t _typeId ) const
+    {
+        if( m_number_adapters == nullptr )
+        {
+            return number_inplace_adapter_interface_ptr::none();
+        }
+
+        return m_number_adapters->iadds[_typeId];
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const number_inplace_adapter_interface_ptr & python_class_type_scope::get_number_inplace_sub( typeid_t _typeId ) const
+    {
+        if( m_number_adapters == nullptr )
+        {
+            return number_inplace_adapter_interface_ptr::none();
+        }
+
+        return m_number_adapters->isubs[_typeId];
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const number_inplace_adapter_interface_ptr & python_class_type_scope::get_number_inplace_mul( typeid_t _typeId ) const
+    {
+        if( m_number_adapters == nullptr )
+        {
+            return number_inplace_adapter_interface_ptr::none();
+        }
+
+        return m_number_adapters->imuls[_typeId];
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const number_inplace_adapter_interface_ptr & python_class_type_scope::get_number_inplace_div( typeid_t _typeId ) const
+    {
+        if( m_number_adapters == nullptr )
+        {
+            return number_inplace_adapter_interface_ptr::none();
+        }
+
+        return m_number_adapters->idivs[_typeId];
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const smart_pointer_adapter_interface_ptr & python_class_type_scope::get_smart_pointer() const
+    {
+        return m_smart_pointer;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const bindable_adapter_interface_ptr & python_class_type_scope::get_bindable() const
+    {
+        return m_bindable;
+    }
+    //////////////////////////////////////////////////////////////////////////
 }

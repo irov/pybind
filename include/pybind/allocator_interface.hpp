@@ -22,7 +22,7 @@ namespace pybind
         {
             void * p = this->malloc( sizeof( T ) );
 
-            new (p) T( std::forward<Args &&>( _args )... );
+            new (p) T( std::forward<Args>( _args )... );
 
             T * t = static_cast<T *>(p);
 
@@ -34,7 +34,7 @@ namespace pybind
         {
             void * p = this->malloc( sizeof( T ) );
 
-            new (p) T( std::forward<Args &&>( _args )... );
+            new (p) T( std::forward<Args>( _args )... );
 
             T * t = static_cast<T *>(p);
 

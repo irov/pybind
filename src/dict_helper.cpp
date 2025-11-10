@@ -46,7 +46,7 @@ namespace pybind
             }
         }
         //////////////////////////////////////////////////////////////////////////
-        set_dict_operator_t & set_dict_operator_t::operator = ( const set_dict_operator_t & _op )
+        set_dict_operator_t & set_dict_operator_t::operator = ( set_dict_operator_t && _op )
         {
             this->m_kernel = _op.m_kernel;
             this->m_dict = _op.m_dict;
@@ -60,9 +60,9 @@ namespace pybind
             return *this;
         }
         //////////////////////////////////////////////////////////////////////////
-        set_dict_operator_t & set_dict_operator_t::operator = ( const import_operator_t & _op )
+        set_dict_operator_t & set_dict_operator_t::operator = ( import_operator_t && _op )
         {
-            pybind::dict_setobject_i( m_kernel, m_dict, m_key, _op );
+            pybind::dict_setobject_i( m_kernel, m_dict, m_key, std::forward<import_operator_t>( _op ) );
 
             return *this;
         }
@@ -73,5 +73,6 @@ namespace pybind
 
             return py_object;
         }
+        //////////////////////////////////////////////////////////////////////////
     }
 }

@@ -44,7 +44,7 @@ namespace pybind
         {
             DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, "", adapter->getName(), adapter->getCallDebugSilent(), _args, _kwds );
 
-            PyObject * ret = adapter->call( kernel, _args, _kwds );            
+            PyObject * ret = adapter->call( kernel, _args, _kwds );
 
             return ret;
         }

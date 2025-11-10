@@ -216,10 +216,12 @@ namespace pybind
 
         PyObject * err = PyErr_Occurred();
 
-        if( err != nullptr )
+        if( err == nullptr )
         {
-            PyErr_Print();
+            return;            
         }
+
+        PyErr_Print();
     }
     //////////////////////////////////////////////////////////////////////////
     uint32_t get_python_version()
@@ -233,21 +235,21 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        PySys_SetObject( (char *)"stderr", _handle );
+        PySys_SetObject( const_cast<char *>("stderr"), _handle );
     }
     //////////////////////////////////////////////////////////////////////////
     void setStdOutHandle( PyObject * _handle )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        PySys_SetObject( (char *)"stdout", _handle );
+        PySys_SetObject( const_cast<char *>("stdout"), _handle );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * getStdErrorHandle()
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        PyObject * stderr_handle = PySys_GetObject( (char *)"stderr" );
+        PyObject * stderr_handle = PySys_GetObject( const_cast<char *>("stderr") );
 
         return stderr_handle;
     }
@@ -256,7 +258,7 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        PyObject * stdout_handle = PySys_GetObject( (char *)"stdout" );
+        PyObject * stdout_handle = PySys_GetObject( const_cast<char *>("stdout") );
 
         return stdout_handle;
     }
@@ -388,6 +390,7 @@ namespace pybind
         PYBIND_CHECK_MAIN_THREAD();
 
         char * unconst_name = const_cast<char *>(_name);
+
         PyObject * module = PyImport_ExecCodeModule( unconst_name, _code );
 
         pybind::check_error();
@@ -418,6 +421,8 @@ namespace pybind
         PYBIND_CHECK_MAIN_THREAD();
 
         PyObject * code = Py_CompileString( (const char *)_buf, _module, Py_file_input );
+
+        pybind::check_error();
 
         return code;
     }
@@ -481,6 +486,8 @@ namespace pybind
 
         if( method == nullptr )
         {
+            pybind::check_error();
+
             return pybind::ret_none();
         }
 
@@ -497,6 +504,8 @@ namespace pybind
 
         if( method == nullptr )
         {
+            pybind::check_error();
+
             return pybind::ret_none();
         }
 
@@ -513,6 +522,8 @@ namespace pybind
 
         if( res == nullptr )
         {
+            pybind::check_error();
+
             return;
         }
 
@@ -545,6 +556,8 @@ namespace pybind
 
         if( res == nullptr )
         {
+            pybind::check_error();
+
             return;
         }
 
@@ -557,6 +570,8 @@ namespace pybind
 
         if( res == nullptr )
         {
+            pybind::check_error();
+
             return;
         }
 
@@ -569,6 +584,8 @@ namespace pybind
 
         if( res == nullptr )
         {
+            pybind::check_error();
+
             return;
         }
 
@@ -624,7 +641,7 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        PySys_SetObject( (char *)"path", _value );
+        PySys_SetObject( const_cast<char *>("path"), _value );
 
         pybind::check_error();
     }
@@ -757,10 +774,14 @@ namespace pybind
 
         if( _value == true )
         {
-            return pybind::get_true();
+            PyObject * py_true = pybind::get_true();
+
+            return py_true;
         }
 
-        return pybind::get_false();
+        PyObject * py_false = pybind::get_false();
+
+        return py_false;
     }
     //////////////////////////////////////////////////////////////////////////
     bool has_attr( PyObject * _obj, PyObject * _attr )
@@ -777,6 +798,13 @@ namespace pybind
         PYBIND_CHECK_MAIN_THREAD();
 
         PyObject * obj = PyObject_GetAttr( _obj, _attr );
+
+        if( obj == nullptr )
+        {
+            pybind::check_error();
+
+            return nullptr;
+        }
 
         return obj;
     }
@@ -796,6 +824,13 @@ namespace pybind
 
         PyObject * obj = PyObject_GetAttrString( _obj, _attr );
 
+        if( obj == nullptr )
+        {
+            pybind::check_error();
+
+            return nullptr;
+        }
+
         return obj;
     }
     //////////////////////////////////////////////////////////////////////////
@@ -805,7 +840,7 @@ namespace pybind
 
         int res = PyObject_SetAttr( _obj, _attr, _value );
 
-        if( res != 0 )
+        if( res == -1 )
         {
             pybind::check_error();
 
@@ -821,7 +856,7 @@ namespace pybind
 
         int res = PyObject_SetAttrString( _obj, _attr, _value );
 
-        if( res != 0 )
+        if( res == -1 )
         {
             pybind::check_error();
 
@@ -1241,6 +1276,8 @@ namespace pybind
         if( obj == nullptr )
         {
             pybind::check_error();
+
+            return nullptr;
         }
 
         return obj;
@@ -1254,7 +1291,7 @@ namespace pybind
 
         int res = PyList_Insert( _obj, py_index, _item );
 
-        if( res != 0 )
+        if( res == -1 )
         {
             pybind::check_error();
 
@@ -1270,7 +1307,7 @@ namespace pybind
 
         int res = PyList_SetSlice( _obj, _it, _it + 1, nullptr );
 
-        if( res != 0 )
+        if( res == -1  )
         {
             pybind::check_error();
 
@@ -1290,7 +1327,7 @@ namespace pybind
 
         int res = PyList_SetItem( _obj, py_index, _item );
 
-        if( res != 0 )
+        if( res == -1 )
         {
             pybind::check_error();
 
@@ -1450,6 +1487,13 @@ namespace pybind
 
         PyObject * obj = PyDict_GetItemString( _dict, _key );
 
+        if( obj == nullptr )
+        {
+            pybind::check_error();
+
+            return nullptr;
+        }
+
         return obj;
     }
     //////////////////////////////////////////////////////////////////////////
@@ -1458,6 +1502,13 @@ namespace pybind
         PYBIND_CHECK_MAIN_THREAD();
 
         PyObject * obj = PyDict_GetItem( _dict, _key );
+
+        if( obj == nullptr )
+        {
+            pybind::check_error();
+
+            return nullptr;
+        }
 
         return obj;
     }
@@ -1650,7 +1701,7 @@ namespace pybind
 
         int res = PyTuple_SetItem( _tuple, py_index, _value );
 
-        if( res != 0 )
+        if( res == -1 )
         {
             pybind::check_error();
 
@@ -1681,7 +1732,15 @@ namespace pybind
         PYBIND_CHECK_MAIN_THREAD();
 
         Py_ssize_t py_index = (Py_ssize_t)_index;
+
         PyObject * obj = PyTuple_GetItem( _obj, py_index );
+
+        if( obj == nullptr )
+        {
+            pybind::check_error();
+
+            return nullptr;
+        }
 
         return obj;
     }
@@ -1692,9 +1751,17 @@ namespace pybind
 
         Py_ssize_t py_low = (Py_ssize_t)_low;
         Py_ssize_t py_high = (Py_ssize_t)_high;
-        PyObject * obj_slice = PyTuple_GetSlice( _obj, py_low, py_high );
 
-        return obj_slice;
+        PyObject * obj = PyTuple_GetSlice( _obj, py_low, py_high );
+
+        if( obj == nullptr )
+        {
+            pybind::check_error();
+
+            return nullptr;
+        }
+
+        return obj;
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * tuple_slice_tail( PyObject * _obj, size_t _size )
@@ -1703,9 +1770,16 @@ namespace pybind
 
         size_t size = pybind::tuple_size( _obj );
 
-        PyObject * obj_slice = pybind::tuple_slice( _obj, _size, size );
+        PyObject * obj = pybind::tuple_slice( _obj, _size, size );
 
-        return obj_slice;
+        if( obj == nullptr )
+        {
+            pybind::check_error();
+
+            return nullptr;
+        }
+
+        return obj;
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * object_dir( PyObject * _obj )
@@ -2437,7 +2511,7 @@ namespace pybind
         PYBIND_CHECK_MAIN_THREAD();
 
 #if PYBIND_PYTHON_VERSION < 300
-        PyObject * py_meta_path = PySys_GetObject( (char *)"meta_path" );
+        PyObject * py_meta_path = PySys_GetObject( const_cast<char *>("meta_path") );
 
         pybind::list_insert( py_meta_path, 0, _finder );
 #endif
@@ -2454,7 +2528,7 @@ namespace pybind
         PYBIND_CHECK_MAIN_THREAD();
 
 #if PYBIND_PYTHON_VERSION < 300
-        PyObject * py_meta_path = PySys_GetObject( (char *)"meta_path" );
+        PyObject * py_meta_path = PySys_GetObject( const_cast<char *>("meta_path") );
 
         pybind::list_remove( py_meta_path, 0 );
 #endif

@@ -27,10 +27,6 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
-    python_kernel::~python_kernel()
-    {
-    }
-    //////////////////////////////////////////////////////////////////////////
     bool python_kernel::initialize( allocator_interface * _allocator )
     {
         m_allocator = _allocator;
@@ -310,6 +306,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     observer_bind_call * python_kernel::set_observer_bind_call( observer_bind_call * _observer )
     {
+        (void)_observer;
+
         return DEBUG_PYBIND_SET_OBSERVER_BIND_CALL( _observer );
     }
     //////////////////////////////////////////////////////////////////////////
@@ -1095,6 +1093,13 @@ namespace pybind
     PyObject * python_kernel::get_attrstring( PyObject * _obj, const char * _attr )
     {
         return pybind::get_attrstring( _obj, _attr );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::object_dir( PyObject * _obj )
+    {
+        PyObject * py_dir = pybind::object_dir( _obj );
+
+        return py_dir;
     }
     //////////////////////////////////////////////////////////////////////////
     string_view python_kernel::object_str( PyObject * _obj )

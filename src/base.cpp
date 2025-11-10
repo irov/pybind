@@ -151,6 +151,11 @@ namespace pybind
         return ref;
     }
     //////////////////////////////////////////////////////////////////////////
+    bool base::is( const base & _obj ) const
+    {
+        return m_obj == _obj.m_obj;
+    }
+    //////////////////////////////////////////////////////////////////////////
     bool base::is_invalid() const
     {
         return m_obj == nullptr;

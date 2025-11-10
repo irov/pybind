@@ -18,7 +18,7 @@ namespace pybind
         static Ret call( kernel_interface * _kernel, C * _obj, F f, PyObject * _arg, std::integer_sequence<size_t, I...> )
         {
             return (_obj->*f)(_kernel
-                , tuple_getitem_t( _kernel, _arg, I ) ...
+                , pybind::tuple_getitem_t( _kernel, _arg, I ) ...
                 );
         }
     };

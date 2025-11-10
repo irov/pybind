@@ -44,11 +44,21 @@ namespace pybind
         kernel_interface * kernel() const;
 
     public:
+        template<class T>
+        typename stdex::mpl::remove_cref<T>::type extract() const
+        {
+            return pybind::extract_specialized<T>()(m_kernel, m_obj);
+        }
+
+    public:
         PyObject * ptr() const;
         PyObject * ret() const;
 
         void reset();
         uint32_t get_ref() const;
+
+    public:
+        bool is( const base & _obj ) const;
 
     public:
         bool is_invalid() const;

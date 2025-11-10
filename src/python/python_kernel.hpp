@@ -17,7 +17,6 @@ namespace pybind
     {
     public:
         python_kernel();
-        ~python_kernel() override;
 
     public:
         bool initialize( allocator_interface * _allocator );
@@ -189,6 +188,7 @@ namespace pybind
         bool has_attrstring( PyObject * _obj, const char * _attr ) override;
         PyObject * get_attrstring( PyObject * _obj, const char * _attr ) override;
 
+        PyObject * object_dir( PyObject * _obj ) override;
         string_view object_str( PyObject * _obj ) override;
         string_view object_repr( PyObject * _obj ) override;
         string_view object_repr_type( PyObject * _obj ) override;

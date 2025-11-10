@@ -98,14 +98,17 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     pybind::tuple make_tuple_i( kernel_interface * _kernel, std::initializer_list<detail::import_operator_t> && _t )
     {
-        size_t size = (size_t)_t.size();
+        std::initializer_list<detail::import_operator_t>::size_type size = (size_t)_t.size();
 
-        PyObject * py_tuple = _kernel->tuple_new( size );
+        PyObject * py_tuple = _kernel->tuple_new( (tuple::size_type)size );
 
         size_t enumerator = 0;
+
         for( const detail::import_operator_t & p : _t )
         {
-            pybind::tuple_setitem_i( _kernel, py_tuple, enumerator++, p );
+            size_t index = enumerator++;
+
+            pybind::tuple_setitem_i( _kernel, py_tuple, index, p );
         }
 
         return pybind::tuple( _kernel, py_tuple, pybind::borrowed );
@@ -122,12 +125,42 @@ namespace pybind
 
         for( const detail::import_operator_t & p : _t )
         {
-            pybind::tuple_setitem_i( _kernel, py_tuple, enumerator++, p );
+            size_t index = enumerator++;
+
+            pybind::tuple_setitem_i( _kernel, py_tuple, index, p );
         }
 
         for( const detail::extract_operator_t & a : _args )
         {
-            pybind::tuple_setitem_i( _kernel, py_tuple, enumerator++, a );
+            size_t index = enumerator++;
+
+            pybind::tuple_setitem_i( _kernel, py_tuple, index, a );
+        }
+
+        return pybind::tuple( _kernel, py_tuple, pybind::borrowed );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    pybind::tuple make_tuple_args_i( kernel_interface * _kernel, std::initializer_list<detail::import_operator_t> && _t, args && _args )
+    {
+        std::initializer_list<detail::import_operator_t>::size_type t_size = _t.size();
+        args::size_type args_size = _args.size();
+
+        PyObject * py_tuple = _kernel->tuple_new( (tuple::size_type)t_size + args_size );
+
+        size_t enumerator = 0;
+
+        for( const detail::import_operator_t & p : _t )
+        {
+            size_t index = enumerator++;
+
+            pybind::tuple_setitem_i( _kernel, py_tuple, index, p );
+        }
+
+        for( detail::extract_operator_t && a : _args )
+        {
+            size_t index = enumerator++;
+
+            pybind::tuple_setitem_i( _kernel, py_tuple, index, std::forward<detail::extract_operator_t>( a ) );
         }
 
         return pybind::tuple( _kernel, py_tuple, pybind::borrowed );

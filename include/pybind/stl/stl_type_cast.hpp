@@ -151,37 +151,37 @@ namespace pybind
     };
 
     template<class T>
-    inline void registration_stl_optional_type_cast( kernel_interface * _kernel )
+    void registration_stl_optional_type_cast( kernel_interface * _kernel )
     {
         _kernel->register_type_info_extract_t<T>( pybind::make_type_cast<extract_stl_optional_type<typename T::value_type, T>>(_kernel) );
     }
 
     template<class T>
-    inline void unregistration_stl_optional_type_cast( kernel_interface * _kernel )
+    void unregistration_stl_optional_type_cast( kernel_interface * _kernel )
     {
         _kernel->unregister_type_info_extract_t<T>();
     }
 
     template<class T>
-    inline void registration_stl_vector_type_cast( kernel_interface * _kernel )
+    void registration_stl_vector_type_cast( kernel_interface * _kernel )
     {
         _kernel->register_type_info_extract_t<T>( pybind::make_type_cast<extract_stl_vector_type<typename T::value_type, T>>(_kernel) );
     }
 
     template<class T>
-    inline void unregistration_stl_vector_type_cast( kernel_interface * _kernel )
+    void unregistration_stl_vector_type_cast( kernel_interface * _kernel )
     {
         _kernel->unregister_type_info_extract_t<T>();
     }
 
     template<class T>
-    inline void registration_stl_map_type_cast( kernel_interface * _kernel )
+    void registration_stl_map_type_cast( kernel_interface * _kernel )
     {
         _kernel->register_type_info_extract_t<T>( pybind::make_type_cast<extract_stl_map_type<typename T::key_type, typename T::mapped_type, T>>(_kernel) );
     }
 
     template<class T>
-    inline void unregistration_stl_map_type_cast( kernel_interface * _kernel )
+    void unregistration_stl_map_type_cast( kernel_interface * _kernel )
     {
         _kernel->unregister_type_info_extract_t<T>();
     }

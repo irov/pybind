@@ -48,17 +48,18 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////	
     PYBIND_API pybind::tuple make_tuple_i( kernel_interface * _kernel, std::initializer_list<detail::import_operator_t> && _t );
     PYBIND_API pybind::tuple make_tuple_args_i( kernel_interface * _kernel, std::initializer_list<detail::import_operator_t> && _t, const args & _args );
+    PYBIND_API pybind::tuple make_tuple_args_i( kernel_interface * _kernel, std::initializer_list<detail::import_operator_t> && _t, args && _args );
     //////////////////////////////////////////////////////////////////////////	
     template<class ... T>
-    pybind::tuple make_tuple_t( kernel_interface * _kernel, const T & ... _t )
+    pybind::tuple make_tuple_t( kernel_interface * _kernel, T && ... _t )
     {
         return make_tuple_i( _kernel
-            , {detail::import_operator_t( _kernel, _t ) ...}
+            , {detail::import_operator_t( _kernel, std::forward<T>( _t ) ) ...}
         );
     }
     //////////////////////////////////////////////////////////////////////////
     template<class C>
-    inline pybind::tuple make_tuple_container_t( kernel_interface * _kernel, const C & _c )
+    pybind::tuple make_tuple_container_t( kernel_interface * _kernel, C && _c )
     {
         typename C::size_type size = _c.size();
 

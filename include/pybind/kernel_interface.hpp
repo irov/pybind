@@ -33,14 +33,6 @@ namespace pybind
     class kernel_interface
     {
     public:
-        kernel_interface()
-        {
-        };
-        virtual ~kernel_interface()
-        {
-        };
-
-    public:
         virtual allocator_interface * get_allocator() const = 0;
 
     public:
@@ -204,7 +196,7 @@ namespace pybind
         virtual void * meta_cast_scope( void * _self, typeid_t _scope_name, typeid_t _class_name, const class_type_scope_interface_ptr & _scope ) = 0;
 
         template<class T>
-        inline T meta_cast_scope_t( void * _self, typeid_t _scope_name, typeid_t _class_name, const class_type_scope_interface_ptr & _scope )
+        T meta_cast_scope_t( void * _self, typeid_t _scope_name, typeid_t _class_name, const class_type_scope_interface_ptr & _scope )
         {
             void * impl = this->meta_cast_scope( _self, _scope_name, _class_name, _scope );
 
@@ -214,7 +206,7 @@ namespace pybind
         }
 
         template<class C>
-        inline C * meta_cast_class_t( void * _self, const class_type_scope_interface_ptr & _scope )
+        C * meta_cast_class_t( void * _self, const class_type_scope_interface_ptr & _scope )
         {
             typeid_t scope_name = this->class_info<C>();
             typeid_t class_name = this->class_info<C *>();
@@ -329,6 +321,7 @@ namespace pybind
         virtual bool has_attrstring( PyObject * _obj, const char * _attr ) = 0;
         virtual PyObject * get_attrstring( PyObject * _obj, const char * _attr ) = 0;
 
+        virtual PyObject * object_dir( PyObject * _obj ) = 0;
         virtual string_view object_str( PyObject * _obj ) = 0;
         virtual string_view object_repr( PyObject * _obj ) = 0;
         virtual string_view object_repr_type( PyObject * _obj ) = 0;

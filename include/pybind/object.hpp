@@ -40,19 +40,26 @@ namespace pybind
         template<class T>
         bool has_attr( const T & _name ) const
         {
-            return this->has_attr_i( detail::import_operator_t( m_kernel, _name ) );
+            return this->has_attr_i( 
+                detail::import_operator_t( m_kernel, _name )
+            );
         }
 
         template<class T>
         pybind::object get_attr( const T & _name ) const
         {
-            return this->get_attr_i( detail::import_operator_t( m_kernel, _name ) );
+            return this->get_attr_i( 
+                detail::import_operator_t( m_kernel, _name ) 
+            );
         }
 
         template<class K, class V>
-        void set_attr( const K & _name, const V & _value )
+        void set_attr( K && _name, V && _value )
         {
-            this->set_attr_i( detail::import_operator_t( m_kernel, _name ), detail::import_operator_t( m_kernel, _value ) );
+            this->set_attr_i( 
+                detail::import_operator_t( m_kernel, std::forward<K>( _name ) ),
+                detail::import_operator_t( m_kernel, std::forward<V>( _value ) )
+            );
         }
 
     public:
@@ -66,35 +73,66 @@ namespace pybind
     public:
         detail::extract_operator_t call_i( std::initializer_list<detail::import_operator_t> && _t ) const;
         detail::extract_operator_t call_args_i( std::initializer_list<detail::import_operator_t> && _t, const args & _args ) const;
+        detail::extract_operator_t call_args_i( std::initializer_list<detail::import_operator_t> && _t, args && _args ) const;
 
     public:
         template<class ... T>
-        detail::extract_operator_t call( const T & ... _t ) const
+        detail::extract_operator_t call( T && ... _t ) const
         {
             return this->call_i(
-                {detail::import_operator_t( m_kernel, _t ) ...}
+                {detail::import_operator_t( m_kernel, std::forward<T>( _t ) ) ...}
             );
         }
 
     public:
         template<class ... T, size_t ... I>
-        inline detail::extract_operator_t call_args_ii( args && _args, std::tuple<T ...> && _t, std::integer_sequence<size_t, I...> ) const
+        detail::extract_operator_t call_args_ii( std::tuple<T ...> && _t, const args & _args, std::integer_sequence<size_t, I ...> ) const
         {
             return this->call_args_i( {detail::import_operator_t( m_kernel, std::get<I>( _t ) ) ...}
                 , _args
             );
         }
 
-        template<class ... T>
-        inline detail::extract_operator_t call_args( T && ... _t ) const
+        template<class ... T, size_t ... I>
+        detail::extract_operator_t call_args_ii( std::tuple<T ...> && _t, args && _args, std::integer_sequence<size_t, I ...> ) const
         {
-            return this->call_args_ii( std::get<sizeof ... (T) - 1u>( std::make_tuple( _t... ) )
-                , std::make_tuple( _t... )
+            return this->call_args_i( {detail::import_operator_t( m_kernel, std::get<I>( _t ) ) ...}
+                , std::forward<args>( _args )
+            );
+        }
+
+        template<class ... T>
+        detail::extract_operator_t call_args( T && ... _t ) const
+        {
+            return this->call_args_ii( std::forward_as_tuple( std::forward<T>( _t ) ... )
+                , std::get<sizeof ... (T) - 1u>( std::forward_as_tuple( std::forward<T>( _t ) ... ) )
                 , std::make_integer_sequence<size_t, sizeof ... (T) - 1u>()
             );
         }
 
-        detail::extract_operator_t call_native( const pybind::tuple & _args ) const;
+    public:
+        template<class N, class ... T>
+        detail::extract_operator_t call_method( const N & _name, T && ... _t ) const
+        {
+            pybind::object method = this->get_attr_i(
+                detail::import_operator_t( m_kernel, _name )
+            );
+
+            return method.call( std::forward<T>( _t ) ... );
+        }
+
+        template<class N, class ... T>
+        detail::extract_operator_t call_method_args( const N & _name, T && ... _t ) const
+        {
+            pybind::object method = this->get_attr_i(
+                detail::import_operator_t( m_kernel, _name )
+            );
+
+            return this->call_args( _name, std::forward<T>( _t ) ... );
+        }
+
+    public:
+        detail::extract_operator_t call_native( pybind::tuple && _args ) const;
     };
     //////////////////////////////////////////////////////////////////////////
     template<class It>
@@ -119,9 +157,9 @@ namespace pybind
     PYBIND_API pybind::object make_object_i( kernel_interface * _kernel, const detail::import_operator_t & _t0 );
     //////////////////////////////////////////////////////////////////////////
     template<class T>
-    pybind::object make_object_t( kernel_interface * _kernel, const T & _t0 )
+    pybind::object make_object_t( kernel_interface * _kernel, T && _t0 )
     {
-        return make_object_i( _kernel, detail::import_operator_t( _kernel, _t0 ) );
+        return make_object_i( _kernel, detail::import_operator_t( _kernel, std::forward<T>( _t0 ) ) );
     }
     //////////////////////////////////////////////////////////////////////////
     PYBIND_API pybind::object make_invalid_object_t();

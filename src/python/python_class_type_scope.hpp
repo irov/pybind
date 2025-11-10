@@ -109,34 +109,34 @@ namespace pybind
         bool is_instance( PyTypeObject * _type ) const override;
 
     public:
-        inline const new_adapter_interface_ptr & get_new() const override;
-        inline const destroy_adapter_interface_ptr & get_destroy() const override;
-        inline const constructor_adapter_interface_ptr & get_constructor() const override;
-        inline const convert_adapter_interface_ptr & get_convert() const override;
-        inline const method_adapter_interface_ptr & get_call() const override;
-        inline const repr_adapter_interface_ptr & get_repr() const override;
-        inline const hash_adapter_interface_ptr & get_hash() const override;
-        inline const compare_adapter_interface_ptr & get_compare( typeid_t _typeId ) const override;
-        inline const getattro_adapter_interface_ptr & get_getattro() const override;
-        inline const mapping_adapter_interface_ptr & get_mapping() const override;
-        inline const sequence_get_adapter_interface_ptr & get_sequence_get() const override;
-        inline const sequence_set_adapter_interface_ptr & get_sequence_set() const override;
+        const new_adapter_interface_ptr & get_new() const override;
+        const destroy_adapter_interface_ptr & get_destroy() const override;
+        const constructor_adapter_interface_ptr & get_constructor() const override;
+        const convert_adapter_interface_ptr & get_convert() const override;
+        const method_adapter_interface_ptr & get_call() const override;
+        const repr_adapter_interface_ptr & get_repr() const override;
+        const hash_adapter_interface_ptr & get_hash() const override;
+        const compare_adapter_interface_ptr & get_compare( typeid_t _typeId ) const override;
+        const getattro_adapter_interface_ptr & get_getattro() const override;
+        const mapping_adapter_interface_ptr & get_mapping() const override;
+        const sequence_get_adapter_interface_ptr & get_sequence_get() const override;
+        const sequence_set_adapter_interface_ptr & get_sequence_set() const override;
 
-        inline const number_unary_adapter_interface_ptr & get_number_neg() const override;
-        inline const number_unary_adapter_interface_ptr & get_number_abs() const override;
+        const number_unary_adapter_interface_ptr & get_number_neg() const override;
+        const number_unary_adapter_interface_ptr & get_number_abs() const override;
 
-        inline const number_binary_adapter_interface_ptr & get_number_add( typeid_t _typeId ) const override;
-        inline const number_binary_adapter_interface_ptr & get_number_sub( typeid_t _typeId ) const override;
-        inline const number_binary_adapter_interface_ptr & get_number_mul( typeid_t _typeId ) const override;
-        inline const number_binary_adapter_interface_ptr & get_number_div( typeid_t _typeId ) const override;
+        const number_binary_adapter_interface_ptr & get_number_add( typeid_t _typeId ) const override;
+        const number_binary_adapter_interface_ptr & get_number_sub( typeid_t _typeId ) const override;
+        const number_binary_adapter_interface_ptr & get_number_mul( typeid_t _typeId ) const override;
+        const number_binary_adapter_interface_ptr & get_number_div( typeid_t _typeId ) const override;
 
         const number_inplace_adapter_interface_ptr & get_number_inplace_add( typeid_t _typeId ) const override;
         const number_inplace_adapter_interface_ptr & get_number_inplace_sub( typeid_t _typeId ) const override;
         const number_inplace_adapter_interface_ptr & get_number_inplace_mul( typeid_t _typeId ) const override;
         const number_inplace_adapter_interface_ptr & get_number_inplace_div( typeid_t _typeId ) const override;
 
-        inline const smart_pointer_adapter_interface_ptr & get_smart_pointer() const override;
-        inline const bindable_adapter_interface_ptr & get_bindable() const override;
+        const smart_pointer_adapter_interface_ptr & get_smart_pointer() const override;
+        const bindable_adapter_interface_ptr & get_bindable() const override;
 
     public:
         void incref_smart_pointer( void * _impl ) override;
@@ -225,181 +225,6 @@ namespace pybind
         number_adapter_t * get_number_adapters();
         compare_adapter_t * get_compare_adapters();
     };
-    //////////////////////////////////////////////////////////////////////////
-    inline const new_adapter_interface_ptr & python_class_type_scope::get_new() const
-    {
-        return m_new;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    inline const destroy_adapter_interface_ptr & python_class_type_scope::get_destroy() const
-    {
-        return m_destructor;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    inline const constructor_adapter_interface_ptr & python_class_type_scope::get_constructor() const
-    {
-        return m_constructor;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    inline const convert_adapter_interface_ptr & python_class_type_scope::get_convert() const
-    {
-        return m_convert;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    inline const method_adapter_interface_ptr & python_class_type_scope::get_call() const
-    {
-        return m_call;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    inline const repr_adapter_interface_ptr & python_class_type_scope::get_repr() const
-    {
-        return m_repr;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    inline const hash_adapter_interface_ptr & python_class_type_scope::get_hash() const
-    {
-        return m_hash;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    inline const compare_adapter_interface_ptr & python_class_type_scope::get_compare( typeid_t _typeId ) const
-    {
-        if( m_compare_adapters == nullptr )
-        {
-            return compare_adapter_interface_ptr::none();
-        }
-
-        return m_compare_adapters->compares[_typeId];
-    }
-    //////////////////////////////////////////////////////////////////////////
-    inline const getattro_adapter_interface_ptr & python_class_type_scope::get_getattro() const
-    {
-        return m_getattro;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    inline const mapping_adapter_interface_ptr & python_class_type_scope::get_mapping() const
-    {
-        return m_mapping;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    inline const sequence_get_adapter_interface_ptr & python_class_type_scope::get_sequence_get() const
-    {
-        return m_sequence_get;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    inline const sequence_set_adapter_interface_ptr & python_class_type_scope::get_sequence_set() const
-    {
-        return m_sequence_set;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    inline const number_unary_adapter_interface_ptr & python_class_type_scope::get_number_neg() const
-    {
-        if( m_number_adapters == nullptr )
-        {
-            return number_unary_adapter_interface_ptr::none();
-        }
-
-        return m_number_adapters->neg;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    inline const number_unary_adapter_interface_ptr & python_class_type_scope::get_number_abs() const
-    {
-        if( m_number_adapters == nullptr )
-        {
-            return number_unary_adapter_interface_ptr::none();
-        }
-
-        return m_number_adapters->abs;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    inline const number_binary_adapter_interface_ptr & python_class_type_scope::get_number_add( typeid_t _typeId ) const
-    {
-        if( m_number_adapters == nullptr )
-        {
-            return number_binary_adapter_interface_ptr::none();
-        }
-
-        return m_number_adapters->adds[_typeId];
-    }
-    //////////////////////////////////////////////////////////////////////////
-    inline const number_binary_adapter_interface_ptr & python_class_type_scope::get_number_sub( typeid_t _typeId ) const
-    {
-        if( m_number_adapters == nullptr )
-        {
-            return number_binary_adapter_interface_ptr::none();
-        }
-
-        return m_number_adapters->subs[_typeId];
-    }
-    //////////////////////////////////////////////////////////////////////////
-    inline const number_binary_adapter_interface_ptr & python_class_type_scope::get_number_mul( typeid_t _typeId ) const
-    {
-        if( m_number_adapters == nullptr )
-        {
-            return number_binary_adapter_interface_ptr::none();
-        }
-
-        return m_number_adapters->muls[_typeId];
-    }
-    //////////////////////////////////////////////////////////////////////////
-    inline const number_binary_adapter_interface_ptr & python_class_type_scope::get_number_div( typeid_t _typeId ) const
-    {
-        if( m_number_adapters == nullptr )
-        {
-            return number_binary_adapter_interface_ptr::none();
-        }
-
-        return m_number_adapters->divs[_typeId];
-    }
-    //////////////////////////////////////////////////////////////////////////
-    inline const number_inplace_adapter_interface_ptr & python_class_type_scope::get_number_inplace_add( typeid_t _typeId ) const
-    {
-        if( m_number_adapters == nullptr )
-        {
-            return number_inplace_adapter_interface_ptr::none();
-        }
-
-        return m_number_adapters->iadds[_typeId];
-    }
-    //////////////////////////////////////////////////////////////////////////
-    inline const number_inplace_adapter_interface_ptr & python_class_type_scope::get_number_inplace_sub( typeid_t _typeId ) const
-    {
-        if( m_number_adapters == nullptr )
-        {
-            return number_inplace_adapter_interface_ptr::none();
-        }
-
-        return m_number_adapters->isubs[_typeId];
-    }
-    //////////////////////////////////////////////////////////////////////////
-    inline const number_inplace_adapter_interface_ptr & python_class_type_scope::get_number_inplace_mul( typeid_t _typeId ) const
-    {
-        if( m_number_adapters == nullptr )
-        {
-            return number_inplace_adapter_interface_ptr::none();
-        }
-
-        return m_number_adapters->imuls[_typeId];
-    }
-    //////////////////////////////////////////////////////////////////////////
-    inline const number_inplace_adapter_interface_ptr & python_class_type_scope::get_number_inplace_div( typeid_t _typeId ) const
-    {
-        if( m_number_adapters == nullptr )
-        {
-            return number_inplace_adapter_interface_ptr::none();
-        }
-
-        return m_number_adapters->idivs[_typeId];
-    }
-    //////////////////////////////////////////////////////////////////////////
-    inline const smart_pointer_adapter_interface_ptr & python_class_type_scope::get_smart_pointer() const
-    {
-        return m_smart_pointer;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    inline const bindable_adapter_interface_ptr & python_class_type_scope::get_bindable() const
-    {
-        return m_bindable;
-    }
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<python_class_type_scope> python_class_type_scope_ptr;
     //////////////////////////////////////////////////////////////////////////

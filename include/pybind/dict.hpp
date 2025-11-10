@@ -95,8 +95,8 @@ namespace pybind
 
     public:
         bool exist_i( const detail::import_operator_t & _key ) const;
-        detail::extract_operator_t get_i( const detail::import_operator_t & _key ) const;
-        detail::set_dict_operator_t set_i( const detail::import_operator_t & _key );
+        detail::extract_operator_t get_i( detail::import_operator_t && _key ) const;
+        detail::set_dict_operator_t set_i( detail::import_operator_t && _key );
         bool remove_i( const detail::import_operator_t & _key ) const;
 
     public:
