@@ -5,6 +5,8 @@
 #include "pybind/string_view.hpp"
 #include "pybind/kernel_interface.hpp"
 
+#include "stdex/mpl.h"
+
 namespace pybind
 {
     class PYBIND_API base
