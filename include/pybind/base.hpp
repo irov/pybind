@@ -2,6 +2,7 @@
 
 #include "pybind/types.hpp"
 #include "pybind/exports.hpp"
+#include "pybind/extract.hpp"
 #include "pybind/string_view.hpp"
 #include "pybind/kernel_interface.hpp"
 
