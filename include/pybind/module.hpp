@@ -40,8 +40,8 @@ namespace pybind
         }
 
     public:
-        bool has_attr_i( const detail::import_operator_t & _name ) const;
-        detail::extract_operator_t get_attr_i( const detail::import_operator_t & _name ) const;
+        bool has_attr_i( detail::import_operator_t && _name ) const;
+        detail::extract_operator_t get_attr_i( detail::import_operator_t && _name ) const;
 
     public:
         pybind::dict get_dict() const;

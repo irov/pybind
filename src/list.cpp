@@ -82,7 +82,7 @@ namespace pybind
         return detail::set_list_operator_t( m_kernel, m_obj, _index );
     }
     //////////////////////////////////////////////////////////////////////////
-    list & list::append( const pybind::object & _item )
+    list & list::append( pybind::object && _item )
     {
         PyObject * py_item = _item.ptr();
 
@@ -91,9 +91,9 @@ namespace pybind
         return *this;
     }
     //////////////////////////////////////////////////////////////////////////
-    list & list::append_i( const detail::import_operator_t & _t )
+    list & list::append_i( detail::import_operator_t && _t )
     {
-        pybind::list_appenditem_i( m_kernel, m_obj, _t );
+        pybind::list_appenditem_i( m_kernel, m_obj, std::forward<detail::import_operator_t>( _t ) );
 
         return *this;
     }

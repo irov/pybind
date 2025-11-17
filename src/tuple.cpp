@@ -104,7 +104,7 @@ namespace pybind
 
         size_t enumerator = 0;
 
-        for( const detail::import_operator_t & p : _t )
+        for( auto && p : _t )
         {
             size_t index = enumerator++;
 
@@ -123,18 +123,18 @@ namespace pybind
 
         size_t enumerator = 0;
 
-        for( const detail::import_operator_t & p : _t )
+        for( auto && p : _t )
         {
             size_t index = enumerator++;
 
             pybind::tuple_setitem_i( _kernel, py_tuple, index, p );
         }
 
-        for( const detail::extract_operator_t & a : _args )
+        for( detail::extract_operator_t && a : _args )
         {
             size_t index = enumerator++;
 
-            pybind::tuple_setitem_i( _kernel, py_tuple, index, a );
+            pybind::tuple_setitem_i( _kernel, py_tuple, index, std::forward<detail::extract_operator_t>( a ) );
         }
 
         return pybind::tuple( _kernel, py_tuple, pybind::borrowed );
@@ -149,7 +149,7 @@ namespace pybind
 
         size_t enumerator = 0;
 
-        for( const detail::import_operator_t & p : _t )
+        for( auto && p : _t )
         {
             size_t index = enumerator++;
 

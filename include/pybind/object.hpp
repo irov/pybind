@@ -63,9 +63,9 @@ namespace pybind
         }
 
     public:
-        bool has_attr_i( const detail::import_operator_t & _name ) const;
-        pybind::object get_attr_i( const detail::import_operator_t & _name ) const;
-        void set_attr_i( const detail::import_operator_t & _name, const detail::import_operator_t & _value );
+        bool has_attr_i( detail::import_operator_t && _name ) const;
+        pybind::object get_attr_i( detail::import_operator_t && _name ) const;
+        void set_attr_i( detail::import_operator_t && _name, detail::import_operator_t && _value );
 
     public:
         detail::extract_operator_t extract() const;
@@ -154,12 +154,12 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PYBIND_API pybind::object make_borrowed_t( kernel_interface * _kernel, PyObject * _obj );
     //////////////////////////////////////////////////////////////////////////
-    PYBIND_API pybind::object make_object_i( kernel_interface * _kernel, const detail::import_operator_t & _t0 );
+    PYBIND_API pybind::object make_object_i( kernel_interface * _kernel, detail::import_operator_t && _t0 );
     //////////////////////////////////////////////////////////////////////////
     template<class T>
     pybind::object make_object_t( kernel_interface * _kernel, T && _t0 )
     {
-        return make_object_i( _kernel, detail::import_operator_t( _kernel, std::forward<T>( _t0 ) ) );
+        return pybind::make_object_i( _kernel, detail::import_operator_t( _kernel, std::forward<T>( _t0 ) ) );
     }
     //////////////////////////////////////////////////////////////////////////
     PYBIND_API pybind::object make_invalid_object_t();

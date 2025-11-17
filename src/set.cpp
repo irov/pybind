@@ -72,19 +72,19 @@ namespace pybind
         return *this;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool set::exist_i( const detail::import_operator_t & _value ) const
+    bool set::exist_i( detail::import_operator_t && _value ) const
     {
-        return m_kernel->set_exist( m_obj, _value );
+        return m_kernel->set_exist( m_obj, std::forward<detail::import_operator_t>( _value ) );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool set::add_i( const detail::import_operator_t & _value )
+    bool set::add_i( detail::import_operator_t && _value )
     {
-        return m_kernel->set_set( m_obj, _value );
+        return m_kernel->set_set( m_obj, std::forward<detail::import_operator_t>( _value ) );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool set::remove_i( const detail::import_operator_t & _value ) const
+    bool set::remove_i( detail::import_operator_t && _value ) const
     {
-        return m_kernel->set_remove( m_obj, _value );
+        return m_kernel->set_remove( m_obj, std::forward<detail::import_operator_t>( _value ) );
     }
     //////////////////////////////////////////////////////////////////////////
     set::size_type set::size() const

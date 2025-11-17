@@ -50,16 +50,16 @@ namespace pybind
         }
 
     public:
-        list & append( const pybind::object & _t );
+        list & append( pybind::object && _t );
 
         template<class T>
-        list & append( const T & _t )
+        list & append( T && _t )
         {
-            return this->append_i( detail::import_operator_t( m_kernel, _t ) );
+            return this->append_i( detail::import_operator_t( m_kernel, std::forward<T>( _t ) ) );
         }
 
     public:
-        list & append_i( const detail::import_operator_t & _t );
+        list & append_i( detail::import_operator_t && _t );
 
     public:
         template<class It>

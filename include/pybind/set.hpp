@@ -52,9 +52,9 @@ namespace pybind
         }
 
     public:
-        bool exist_i( const detail::import_operator_t & _value ) const;
-        bool add_i( const detail::import_operator_t & _value );
-        bool remove_i( const detail::import_operator_t & _value ) const;
+        bool exist_i( detail::import_operator_t && _value ) const;
+        bool add_i( detail::import_operator_t && _value );
+        bool remove_i( detail::import_operator_t && _value ) const;
 
     public:
         size_type size() const;

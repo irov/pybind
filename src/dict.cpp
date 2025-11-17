@@ -87,9 +87,9 @@ namespace pybind
         return dict::iterator( m_kernel, m_obj, t_dict_iterator_end_tag() );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool dict::exist_i( const detail::import_operator_t & _key ) const
+    bool dict::exist_i( detail::import_operator_t && _key ) const
     {
-        return m_kernel->dict_exist( m_obj, _key );
+        return m_kernel->dict_exist( m_obj, std::forward<detail::import_operator_t>( _key ) );
     }
     //////////////////////////////////////////////////////////////////////////
     detail::extract_operator_t dict::get_i( detail::import_operator_t && _key ) const
@@ -99,12 +99,12 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     detail::set_dict_operator_t dict::set_i( detail::import_operator_t && _key )
     {
-        return detail::set_dict_operator_t( m_kernel, m_obj, _key );
+        return detail::set_dict_operator_t( m_kernel, m_obj, std::forward<detail::import_operator_t>( _key ) );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool dict::remove_i( const detail::import_operator_t & _key ) const
+    bool dict::remove_i( detail::import_operator_t && _key ) const
     {
-        return m_kernel->dict_remove( m_obj, _key );
+        return m_kernel->dict_remove( m_obj, std::forward<detail::import_operator_t>( _key ) );
     }
     //////////////////////////////////////////////////////////////////////////
     dict::size_type dict::size() const

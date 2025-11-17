@@ -74,21 +74,21 @@ namespace pybind
         return *this;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool object::has_attr_i( const detail::import_operator_t & _name ) const
+    bool object::has_attr_i( detail::import_operator_t && _name ) const
     {
         return m_kernel->has_attr( m_obj, _name );
     }
     //////////////////////////////////////////////////////////////////////////
-    pybind::object object::get_attr_i( const detail::import_operator_t & _name ) const
+    pybind::object object::get_attr_i( detail::import_operator_t && _name ) const
     {
         PyObject * py_attr = m_kernel->get_attr( m_obj, _name );
 
         return pybind::object( m_kernel, py_attr );
     }
     //////////////////////////////////////////////////////////////////////////
-    void object::set_attr_i( const detail::import_operator_t & _name, const detail::import_operator_t & _value )
+    void object::set_attr_i( detail::import_operator_t && _name, detail::import_operator_t && _value )
     {
-        m_kernel->set_attr( m_obj, _name, _value );
+        m_kernel->set_attr( m_obj, std::forward<detail::import_operator_t>( _name ), std::forward<detail::import_operator_t>( _value ) );
     }
     //////////////////////////////////////////////////////////////////////////
     detail::extract_operator_t object::extract() const
@@ -142,7 +142,7 @@ namespace pybind
         return pybind::object( _kernel, _obj, pybind::borrowed );
     }
     //////////////////////////////////////////////////////////////////////////
-    pybind::object make_object_i( kernel_interface * _kernel, const detail::import_operator_t & _t )
+    pybind::object make_object_i( kernel_interface * _kernel, detail::import_operator_t && _t )
     {
         return pybind::object( _kernel, _t );
     }
@@ -151,4 +151,5 @@ namespace pybind
     {
         return pybind::object( pybind::invalid );
     }
+    //////////////////////////////////////////////////////////////////////////
 }

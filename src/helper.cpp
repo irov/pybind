@@ -11,14 +11,14 @@ namespace pybind
         return detail::extract_operator_t( _kernel, py_item );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool list_setitem_i( kernel_interface * _kernel, PyObject * _list, size_t _it, const detail::import_operator_t & _item )
+    bool list_setitem_i( kernel_interface * _kernel, PyObject * _list, size_t _it, detail::import_operator_t && _item )
     {
         bool result = _kernel->list_setitem( _list, _it, _item );
 
         return result;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool list_appenditem_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _item )
+    bool list_appenditem_i( kernel_interface * _kernel, PyObject * _obj, detail::import_operator_t && _item )
     {
         bool result = _kernel->list_appenditem( _obj, _item );
 
@@ -39,21 +39,21 @@ namespace pybind
         return result;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool set_set_i( kernel_interface * _kernel, PyObject * _set, const detail::import_operator_t & _value )
+    bool set_set_i( kernel_interface * _kernel, PyObject * _set, detail::import_operator_t && _value )
     {
         bool result = _kernel->set_set( _set, _value );
 
         return result;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool set_remove_i( kernel_interface * _kernel, PyObject * _set, const detail::import_operator_t & _value )
+    bool set_remove_i( kernel_interface * _kernel, PyObject * _set, detail::import_operator_t && _value )
     {
         bool result = _kernel->set_remove( _set, _value );
 
         return result;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool set_exist_i( kernel_interface * _kernel, PyObject * _set, const detail::import_operator_t & _value )
+    bool set_exist_i( kernel_interface * _kernel, PyObject * _set, detail::import_operator_t && _value )
     {
         bool result = _kernel->set_exist( _set, _value );
 
@@ -74,14 +74,14 @@ namespace pybind
         return detail::extract_operator_t( _kernel, py_item );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool tuple_setitem_i( kernel_interface * _kernel, PyObject * _tuple, size_t _it, const detail::extract_operator_t & _item )
+    bool tuple_setitem_i( kernel_interface * _kernel, PyObject * _tuple, size_t _it, const detail::import_operator_t & _item )
     {
         bool result = _kernel->tuple_setitem( _tuple, _it, _item );
 
         return result;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool tuple_setitem_i( kernel_interface * _kernel, PyObject * _tuple, size_t _it, const detail::import_operator_t & _item )
+    bool tuple_setitem_i( kernel_interface * _kernel, PyObject * _tuple, size_t _it, detail::import_operator_t && _item )
     {
         bool result = _kernel->tuple_setitem( _tuple, _it, _item );
 
@@ -109,7 +109,7 @@ namespace pybind
         return detail::extract_operator_t( _kernel, py_item );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool dict_remove_i( kernel_interface * _kernel, PyObject * _dict, const detail::import_operator_t & _key )
+    bool dict_remove_i( kernel_interface * _kernel, PyObject * _dict, detail::import_operator_t && _key )
     {
         bool successful = _kernel->dict_remove( _dict, _key );
 

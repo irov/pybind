@@ -52,7 +52,7 @@ namespace pybind
         return *this;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool module::has_attr_i( const detail::import_operator_t & _name ) const
+    bool module::has_attr_i( detail::import_operator_t && _name ) const
     {
         PyObject * module_dict = m_kernel->module_dict( m_obj );
 
@@ -61,7 +61,7 @@ namespace pybind
         return result;
     }
     //////////////////////////////////////////////////////////////////////////
-    detail::extract_operator_t module::get_attr_i( const detail::import_operator_t & _name ) const
+    detail::extract_operator_t module::get_attr_i( detail::import_operator_t && _name ) const
     {
         PyObject * module_dict = m_kernel->module_dict( m_obj );
 

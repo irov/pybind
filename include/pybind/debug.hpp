@@ -1,7 +1,7 @@
 #pragma once
 
-#include "exports.hpp"
-#include "types.hpp"
+#include "pybind/exports.hpp"
+#include "pybind/types.hpp"
 
 #ifdef PYBIND_CALL_DEBUG
 

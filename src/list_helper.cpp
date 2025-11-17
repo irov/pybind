@@ -13,7 +13,7 @@ namespace pybind
         {
         }
         //////////////////////////////////////////////////////////////////////////
-        set_list_operator_t::set_list_operator_t( const set_list_operator_t & _r )
+        set_list_operator_t::set_list_operator_t( set_list_operator_t && _r )
             : m_kernel( _r.m_kernel )
             , m_list( _r.m_list )
             , m_index( _r.m_index )
@@ -24,18 +24,18 @@ namespace pybind
         {
         }
         //////////////////////////////////////////////////////////////////////////
-        set_list_operator_t & set_list_operator_t::operator = ( const set_list_operator_t & _op )
+        set_list_operator_t & set_list_operator_t::operator = ( set_list_operator_t && _op )
         {
-            this->m_kernel = _op.m_kernel;
-            this->m_list = _op.m_list;
-            this->m_index = _op.m_index;
+            m_kernel = _op.m_kernel;
+            m_list = _op.m_list;
+            m_index = _op.m_index;
 
             return *this;
         }
         //////////////////////////////////////////////////////////////////////////
-        set_list_operator_t & set_list_operator_t::operator = ( const import_operator_t & _imp )
+        set_list_operator_t & set_list_operator_t::operator = ( detail::import_operator_t && _imp )
         {
-            pybind::list_setitem_i( m_kernel, m_list, m_index, _imp );
+            pybind::list_setitem_i( m_kernel, m_list, m_index, std::forward<detail::import_operator_t>( _imp ) );
 
             return *this;
         }

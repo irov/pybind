@@ -18,8 +18,8 @@ namespace pybind
     PYBIND_API args make_args_t( kernel_interface * _kernel, PyObject * _tuple, size_t _size );
     //////////////////////////////////////////////////////////////////////////
     PYBIND_API detail::extract_operator_t list_getitem_t( kernel_interface * _kernel, PyObject * _list, size_t _it );
-    PYBIND_API bool list_setitem_i( kernel_interface * _kernel, PyObject * _list, size_t _it, const detail::import_operator_t & _item );
-    PYBIND_API bool list_appenditem_i( kernel_interface * _kernel, PyObject * _obj, const detail::import_operator_t & _item );
+    PYBIND_API bool list_setitem_i( kernel_interface * _kernel, PyObject * _list, size_t _it, detail::import_operator_t && _item );
+    PYBIND_API bool list_appenditem_i( kernel_interface * _kernel, PyObject * _obj, detail::import_operator_t && _item );
     //////////////////////////////////////////////////////////////////////////
     template<class T>
     bool list_setitem_t( kernel_interface * _kernel, PyObject * _list, size_t _it, T && _item )
@@ -48,8 +48,8 @@ namespace pybind
     }
     //////////////////////////////////////////////////////////////////////////
     PYBIND_API detail::extract_operator_t tuple_getitem_t( kernel_interface * _kernel, PyObject * _tuple, size_t _it );
-    PYBIND_API bool tuple_setitem_i( kernel_interface * _kernel, PyObject * _tuple, size_t _it, const detail::extract_operator_t & _item );
     PYBIND_API bool tuple_setitem_i( kernel_interface * _kernel, PyObject * _tuple, size_t _it, const detail::import_operator_t & _item );
+    PYBIND_API bool tuple_setitem_i( kernel_interface * _kernel, PyObject * _tuple, size_t _it, detail::import_operator_t && _item );
     //////////////////////////////////////////////////////////////////////////	
     template<class T>
     bool tuple_setitem_t( kernel_interface * _kernel, PyObject * _tuple, size_t _it, T && _item )
@@ -61,7 +61,7 @@ namespace pybind
     PYBIND_API bool dict_setobject_i( kernel_interface * _kernel, PyObject * _dict, PyObject * _key, detail::import_operator_t && _value );
     PYBIND_API detail::extract_operator_t dict_get_i( kernel_interface * _kernel, PyObject * _dict, detail::import_operator_t && _key );
     PYBIND_API bool dict_set_i( kernel_interface * _kernel, PyObject * _dict, detail::import_operator_t && _name, detail::import_operator_t && _value );
-    PYBIND_API bool dict_remove_i( kernel_interface * _kernel, PyObject * _dict, const detail::import_operator_t & _key );
+    PYBIND_API bool dict_remove_i( kernel_interface * _kernel, PyObject * _dict, detail::import_operator_t && _key );
     //////////////////////////////////////////////////////////////////////////
     template<class V>
     bool dict_setstring_t( kernel_interface * _kernel, PyObject * _dict, const char * _name, V && _value )
@@ -122,8 +122,8 @@ namespace pybind
     }
     //////////////////////////////////////////////////////////////////////////
     PYBIND_API bool set_set_i( kernel_interface * _kernel, PyObject * _set, detail::import_operator_t && _value );
-    PYBIND_API bool set_remove_i( kernel_interface * _kernel, PyObject * _set, const detail::import_operator_t & _value );
-    PYBIND_API bool set_exist_i( kernel_interface * _kernel, PyObject * _set, const detail::import_operator_t & _value );
+    PYBIND_API bool set_remove_i( kernel_interface * _kernel, PyObject * _set, detail::import_operator_t && _value );
+    PYBIND_API bool set_exist_i( kernel_interface * _kernel, PyObject * _set, detail::import_operator_t && _value );
     //////////////////////////////////////////////////////////////////////////
     template<class V>
     bool set_set_t( kernel_interface * _kernel, PyObject * _set, V && _value )
