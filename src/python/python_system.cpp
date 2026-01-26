@@ -1879,6 +1879,56 @@ namespace pybind
         return py_hash;
     }
     //////////////////////////////////////////////////////////////////////////
+    bool object_hasattr( PyObject * _obj, PyObject * _name )
+    {
+        PYBIND_CHECK_MAIN_THREAD();
+
+        int value = PyObject_HasAttr( _obj, _name );
+
+        return value == 1;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool object_hasattrstring( PyObject * _obj, const char * _name )
+    {
+        PYBIND_CHECK_MAIN_THREAD();
+        
+        int value = PyObject_HasAttrString( _obj, _name );
+
+        return value == 1;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * object_getattr( PyObject * _obj, PyObject * _name )
+    {
+        PYBIND_CHECK_MAIN_THREAD();
+        
+        PyObject * obj = PyObject_GetAttr( _obj, _name );
+
+        if( obj == nullptr )
+        {
+            pybind::check_error();
+
+            return nullptr;
+        }
+
+        return obj;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * object_getattrstring( PyObject * _obj, const char * _name )
+    {
+        PYBIND_CHECK_MAIN_THREAD();
+
+        PyObject * obj = PyObject_GetAttrString( _obj, _name );
+
+        if( obj == nullptr )
+        {
+            pybind::check_error();
+
+            return nullptr;
+        }
+
+        return obj;
+    }
+    //////////////////////////////////////////////////////////////////////////
     bool get_statetrace_top( char * const _filename, size_t _maxlenfilename, char * const _function, size_t _maxlenfunction, uint32_t * const _lineno )
     {
         PYBIND_CHECK_MAIN_THREAD();

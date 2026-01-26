@@ -175,6 +175,10 @@ namespace pybind
     PYBIND_API PyObject * object_repr( PyObject * _obj );
     PYBIND_API PyObject * object_str( PyObject * _obj );
     PYBIND_API int64_t object_hash( PyObject * _obj );
+    PYBIND_API bool object_hasattr( PyObject * _obj, PyObject * _name );
+    PYBIND_API bool object_hasattrstring( PyObject * _obj, const char * _name );
+    PYBIND_API PyObject * object_getattr( PyObject * _obj, PyObject * _name );
+    PYBIND_API PyObject * object_getattrstring( PyObject * _obj, const char * _name );
 
     PYBIND_API bool get_statetrace_top( char * const _filename, size_t _maxlenfilename, char * const _function, size_t _maxlenfunction, uint32_t * const _lineno );
     PYBIND_API bool get_statetrace( char * const _buffer, size_t _maxlen, bool _append );

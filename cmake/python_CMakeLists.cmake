@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.4.5 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 
 configure_file(${PYBIND_DIR}/cmake/python_config.c ${CMAKE_CURRENT_SOURCE_DIR}/config.c COPYONLY)
 configure_file(${PYBIND_DIR}/cmake/python_config.h  ${CMAKE_CURRENT_SOURCE_DIR}/PC/pyconfig.h COPYONLY)

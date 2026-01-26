@@ -1797,7 +1797,7 @@ namespace pybind
         const char * name = _imethod->getName();
 
 #if defined(PYBIND_DEBUG)
-        if( pybind::dict_existstring( m_pytypeobject->tp_dict, name ) == true )
+        if( pybind::object_hasattrstring( (PyObject *)m_pytypeobject, name ) == true )
         {
             pybind::throw_exception( "scope '%s' add_method '%s' already exist"
                 , this->get_name()
@@ -1912,7 +1912,7 @@ namespace pybind
         const char * name = _imember->getName();
 
 #if defined(PYBIND_DEBUG)
-        if( pybind::dict_existstring( m_pytypeobject->tp_dict, name ) == true )
+        if( pybind::object_hasattrstring( (PyObject *)m_pytypeobject, name ) == true )
         {
             pybind::throw_exception( "scope '%s' add_member '%s' already exist"
                 , this->get_name()
