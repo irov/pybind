@@ -9,7 +9,7 @@ namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
     template<class T>
-    void const_( kernel_interface * _kernel, const char * _name, const T & _value, PyObject * _module = nullptr )
+    void def_const( kernel_interface * _kernel, const char * _name, const T & _value, PyObject * _module = nullptr )
     {
         PyObject * py_module = _module;
 
