@@ -1958,6 +1958,20 @@ namespace pybind
         return true;
     }
     //////////////////////////////////////////////////////////////////////////
+    static void __strcat_safe( char * const _buffer, size_t _maxlen, const char * _str )
+    {
+        size_t len = strlen( _buffer );
+
+        if( len >= _maxlen )
+        {
+            return;
+        }
+
+        size_t remain = _maxlen - len;
+
+        strncat( _buffer, _str, remain );
+    }
+    //////////////////////////////////////////////////////////////////////////
     bool get_statetrace( char * const _buffer, size_t _maxlen, bool _append )
     {
         PYBIND_CHECK_MAIN_THREAD();
@@ -1988,7 +2002,7 @@ namespace pybind
 
         if( _append == true )
         {
-            strncat( _buffer, "\n", _maxlen );
+            __strcat_safe( _buffer, _maxlen, "\n" );
         }
 
         while( frame != nullptr )
@@ -2000,7 +2014,7 @@ namespace pybind
             char line[1024 + 1] = {'\0'};
             snprintf( line, 1024, "File \"%s\", line %d, in %s\n", co_filename, lineno, co_name );
 
-            strncat( _buffer, line, _maxlen );
+            __strcat_safe( _buffer, _maxlen, line );
 
             frame = frame->f_back;
         }

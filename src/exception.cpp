@@ -9,8 +9,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     pybind_exception::pybind_exception( const char * _message )
     {
-        strncpy( m_message, _message, 4096 );
-        m_message[4096] = '\0';
+        ::strncpy( m_message, _message, PYBIND_EXCEPTION_MESSAGE_SIZE );
+        m_message[PYBIND_EXCEPTION_MESSAGE_SIZE] = '\0';
     }
     //////////////////////////////////////////////////////////////////////////
     pybind_exception::~pybind_exception() throw()
@@ -27,8 +27,8 @@ namespace pybind
         va_list valist;
         va_start( valist, _format );
 
-        char message[4096 + 1] = {'\0'};
-        vsnprintf( message, 4096, _format, valist );
+        char message[PYBIND_EXCEPTION_MESSAGE_SIZE + 1] = {'\0'};
+        vsnprintf( message, PYBIND_EXCEPTION_MESSAGE_SIZE, _format, valist );
 
         va_end( valist );
 
@@ -37,8 +37,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void throw_exception_va( const char * _format, va_list _va )
     {
-        char message[4096 + 1] = {'\0'};
-        vsnprintf( message, 4096, _format, _va );
+        char message[PYBIND_EXCEPTION_MESSAGE_SIZE + 1] = {'\0'};
+        vsnprintf( message, PYBIND_EXCEPTION_MESSAGE_SIZE, _format, _va );
 
         throw pybind_exception( message );
     }

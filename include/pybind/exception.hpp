@@ -5,6 +5,10 @@
 #include <exception>
 #include <cstdarg>
 
+#ifndef PYBIND_EXCEPTION_MESSAGE_SIZE
+#define PYBIND_EXCEPTION_MESSAGE_SIZE 4096
+#endif
+
 namespace pybind
 {
     class pybind_exception
@@ -18,7 +22,7 @@ namespace pybind
         const char * what() const throw() override;
 
     protected:
-        char m_message[4096 + 1] = {'\0'};
+        char m_message[PYBIND_EXCEPTION_MESSAGE_SIZE + 1] = {'\0'};
     };
 
     PYBIND_API void throw_exception( const char * _format, ... );
