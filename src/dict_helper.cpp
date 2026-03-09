@@ -48,14 +48,18 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         set_dict_operator_t & set_dict_operator_t::operator = ( set_dict_operator_t && _op )
         {
+            if( m_key != nullptr )
+            {
+                m_kernel->decref( m_key );
+            }
+
             this->m_kernel = _op.m_kernel;
             this->m_dict = _op.m_dict;
             this->m_key = _op.m_key;
 
-            if( m_key != nullptr )
-            {
-                m_kernel->incref( m_key );
-            }
+            _op.m_kernel = nullptr;
+            _op.m_dict = nullptr;
+            _op.m_key = nullptr;
 
             return *this;
         }

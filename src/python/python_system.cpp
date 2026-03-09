@@ -303,6 +303,7 @@ namespace pybind
             }
 
             PyErr_Print();
+            PyErr_Clear();
         }
 
         _exsist = true;
@@ -1390,6 +1391,8 @@ namespace pybind
 
             if( PyDict_SetItem( py_dict, py_key, py_value ) < 0 )
             {
+                pybind::decref( py_value );
+
                 continue;
             }
 

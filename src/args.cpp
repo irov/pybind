@@ -72,6 +72,11 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     args & args::operator = ( args && _args )
     {
+        if( m_args != nullptr )
+        {
+            m_kernel->decref( m_args );
+        }
+
         m_kernel = _args.m_kernel;
         m_args = _args.m_args;
 
@@ -83,6 +88,11 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     args & args::operator = ( std::nullptr_t )
     {
+        if( m_args != nullptr )
+        {
+            m_kernel->decref( m_args );
+        }
+
         m_kernel = nullptr;
         m_args = nullptr;
 
