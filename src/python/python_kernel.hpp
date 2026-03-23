@@ -141,8 +141,8 @@ namespace pybind
         PyObject * getStdErrorHandle() override;
 
     public:
-        bool get_statetrace_top( char * const _filename, size_t _maxlenfilename, char * const _function, size_t _maxlenfunction, uint32_t * _lineno ) override;
-        bool get_statetrace( char * _buffer, size_t _maxlen, bool _append ) override;
+        bool get_traceback_top( char * const _filename, size_t _maxlenfilename, char * const _function, size_t _maxlenfunction, uint32_t * _lineno ) override;
+        bool get_traceback( char * _buffer, size_t _maxlen, bool _append ) override;
         void error_traceback( const char * _format, ... ) override;
         void error_traceback_va( const char * _format, va_list _va ) override;
         void error_message( const char * _format, ... ) override;

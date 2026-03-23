@@ -1642,14 +1642,16 @@ namespace pybind
         return pybind::tuple_slice_tail( _obj, _size );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::get_statetrace_top( char * const _filename, size_t _maxlenfilename, char * const _function, size_t _maxlenfunction, uint32_t * _lineno )
+    bool python_kernel::get_traceback_top( char * const _filename, size_t _maxlenfilename, char * const _function, size_t _maxlenfunction, uint32_t * _lineno )
     {
-        return pybind::get_statetrace_top( _filename, _maxlenfilename, _function, _maxlenfunction, _lineno );
+        bool successful = pybind::get_traceback_top( _filename, _maxlenfilename, _function, _maxlenfunction, _lineno );
+
+        return successful;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool python_kernel::get_statetrace( char * _buffer, size_t _maxlen, bool _append )
+    bool python_kernel::get_traceback( char * _buffer, size_t _maxlen, bool _append )
     {
-        bool successful = pybind::get_statetrace( _buffer, _maxlen, _append );
+        bool successful = pybind::get_traceback( _buffer, _maxlen, _append );
 
         return successful;
     }

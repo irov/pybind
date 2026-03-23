@@ -1932,7 +1932,7 @@ namespace pybind
         return obj;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool get_statetrace_top( char * const _filename, size_t _maxlenfilename, char * const _function, size_t _maxlenfunction, uint32_t * const _lineno )
+    bool get_traceback_top( char * const _filename, size_t _maxlenfilename, char * const _function, size_t _maxlenfunction, uint32_t * const _lineno )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
@@ -1953,8 +1953,11 @@ namespace pybind
         const char * co_filename = pybind::string_to_char( frame->f_code->co_filename );
         const char * co_name = pybind::string_to_char( frame->f_code->co_name );
 
-        strncpy( _filename, co_filename, _maxlenfilename );
-        strncpy( _function, co_name, _maxlenfunction );
+        ::strncpy( _filename, co_filename, _maxlenfilename );
+        _filename[_maxlenfilename] = '\0';
+
+        ::strncpy( _function, co_name, _maxlenfunction );
+        _function[_maxlenfunction] = '\0';
         
         *_lineno = PyFrame_GetLineNumber( frame );
 
@@ -1975,7 +1978,7 @@ namespace pybind
         strncat( _buffer, _str, remain );
     }
     //////////////////////////////////////////////////////////////////////////
-    bool get_statetrace( char * const _buffer, size_t _maxlen, bool _append )
+    bool get_traceback( char * const _buffer, size_t _maxlen, bool _append )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
@@ -1995,7 +1998,7 @@ namespace pybind
 
         if( _append == false )
         {
-            strncpy( _buffer, "", _maxlen );
+            ::strncpy( _buffer, "", _maxlen );
         }
 
         if( _maxlen == 0 )
@@ -2043,7 +2046,7 @@ namespace pybind
 
         pybind::check_error();
 
-        char buffer[4096] = {'\0'};
+        char buffer[4096 + 1] = {'\0'};
         vsnprintf( buffer, 4096, _format, _va );
 
         PyThreadState * thread_state = PyThreadState_GET();
@@ -2086,12 +2089,12 @@ namespace pybind
 
         pybind::check_error();
 
-        char buffer[4096 + 1] = {'\0'};
-        vsnprintf( buffer, 4096, _format, _va );
+        char traceback[4096 + 1] = {'\0'};
+        vsnprintf( traceback, 4096, _format, _va );
 
-        pybind::get_statetrace( buffer, 4096, true );
+        pybind::get_traceback( traceback, 4096, true );
 
-        PyErr_SetString( PyExc_RuntimeError, buffer );
+        PyErr_SetString( PyExc_RuntimeError, traceback );
     }
     //////////////////////////////////////////////////////////////////////////
     void throw_message( const char * _format, ... )
@@ -2128,8 +2131,8 @@ namespace pybind
 
         pybind::check_error();
 
-        char buffer[4096] = {'\0'};
-        vsprintf( buffer, _format, _va );
+        char buffer[4096 + 1] = {'\0'};
+        vsnprintf( buffer, 4096, _format, _va );
 
         PyThreadState * thread_state = PyThreadState_GET();
 
@@ -2143,8 +2146,8 @@ namespace pybind
 
         const char * str_filename = pybind::string_to_char( py_filename );
 
-        char trace_buffer[4096 + 256] = {'\0'};
-        sprintf( trace_buffer, "%s[%d]: %s"
+        char trace_buffer[4096 + 256 + 1] = {'\0'};
+        snprintf( trace_buffer, 4096 + 256, "%s[%d]: %s"
             , str_filename
             , fileline
             , buffer
