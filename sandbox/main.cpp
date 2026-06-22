@@ -1,5 +1,11 @@
 #include "pybind/pybind.hpp"
 
+#if defined(_WIN32)
+#   include <malloc.h>
+#elif defined(__APPLE__)
+#   include <malloc/malloc.h>
+#endif
+
 #include <cstdio>
 
 class Bar
@@ -83,7 +89,7 @@ public:
     }
 };
 
-void test_dict( pybind::kernel_interface * _kernel, size_t i )
+void test_dict( pybind::kernel_interface * _kernel, int i )
 {
     pybind::dict p( _kernel );
     p["aaa"] = 10040 + i;
@@ -95,7 +101,7 @@ void test_dict( pybind::kernel_interface * _kernel, size_t i )
     p["aaa3"] = o;
 }
 
-void test_list( pybind::kernel_interface * _kernel, size_t i )
+void test_list( pybind::kernel_interface * _kernel, int i )
 {
     pybind::list p( _kernel, 5 );
 
@@ -112,7 +118,7 @@ void test_list( pybind::kernel_interface * _kernel, size_t i )
     (void)p1;
 }
 
-void test_tuple( pybind::kernel_interface * _kernel, size_t i )
+void test_tuple( pybind::kernel_interface * _kernel, int i )
 {
     pybind::tuple pp0 = pybind::make_tuple_t( _kernel );
     pybind::tuple pp1 = pybind::make_tuple_t( _kernel, 4234 + i );
@@ -181,7 +187,7 @@ void test_function_decl( pybind::kernel_interface * _kernel )
     pybind::def_function( _kernel, "test_function_6", &test_function_6 );
 }
 
-void test_function_go1( pybind::kernel_interface * _kernel, PyObject * m, size_t i )
+void test_function_go1( pybind::kernel_interface * _kernel, PyObject * m, int i )
 {
     _kernel->call_method( m, "go1", "(i)", i );
 }
@@ -204,36 +210,49 @@ public:
 public:
     void * malloc( size_t _size ) override
     {
-        m_count += _size;
+        void * ptr = ::malloc( _size );
 
-        return ::malloc( _size );
+        m_count += this->getPtrSize_( ptr );
+
+        return ptr;
     }
 
     void * calloc( size_t _num, size_t _size ) override
     {
-        m_count += _num * _size;
+        void * ptr = ::calloc( _num, _size );
 
-        return ::calloc( _num, _size );
+        m_count += this->getPtrSize_( ptr );
+
+        return ptr;
     }
 
     void * realloc( void * _ptr, size_t _size ) override
     {
+        size_t old_size = 0;
+
         if( _ptr != nullptr )
         {
-            size_t ptr_size = ::_msize( (_ptr) );
-            m_count -= ptr_size;
+            old_size = this->getPtrSize_( _ptr );
         }
 
-        m_count += _size;
+        void * ptr = ::realloc( _ptr, _size );
 
-        return ::realloc( _ptr, _size );
+        if( ptr == nullptr )
+        {
+            return nullptr;
+        }
+
+        m_count -= old_size;
+        m_count += this->getPtrSize_( ptr );
+
+        return ptr;
     }
 
     void free( void * _ptr ) override
     {
         if( _ptr != nullptr )
         {
-            size_t ptr_size = ::_msize( (_ptr) );
+            size_t ptr_size = this->getPtrSize_( _ptr );
             m_count -= ptr_size;
         }
 
@@ -247,10 +266,29 @@ public:
     }
 
 protected:
+    size_t getPtrSize_( void * _ptr ) const
+    {
+        if( _ptr == nullptr )
+        {
+            return 0;
+        }
+
+#if defined(_WIN32)
+        return ::_msize( _ptr );
+#elif defined(__APPLE__)
+        return ::malloc_size( _ptr );
+#else
+        (void)_ptr;
+
+        return 0;
+#endif
+    }
+
+protected:
     size_t m_count;
 };
 
-void main()
+int main()
 {
     malloc_allocator * a = new malloc_allocator;
 
@@ -266,7 +304,7 @@ void main()
 
     if( gc == nullptr )
     {
-        return;
+        return 1;
     }
 
     kernel->call_method( gc, "disable", "()" );
@@ -275,7 +313,7 @@ void main()
 
     if( module == nullptr )
     {
-        return;
+        return 1;
     }
 
     kernel->set_current_module( module );
@@ -308,17 +346,19 @@ void main()
 
     if( m == nullptr )
     {
-        return;
+        return 1;
     }
 
     test_function_decl( kernel );
 
     for( size_t i = 0; i != 100000; ++i )
     {
-        test_dict( kernel, i );
-        test_list( kernel, i );
-        test_tuple( kernel, i );
-        test_function_go1( kernel, m, i );
+        int index = static_cast<int>(i);
+
+        test_dict( kernel, index );
+        test_list( kernel, index );
+        test_tuple( kernel, index );
+        test_function_go1( kernel, m, index );
     }
 
     for( size_t i = 0; i != 100000; ++i )
@@ -335,4 +375,6 @@ void main()
     size_t c = a->getCount();
 
     printf( "done: %zu", c );
+
+    return 0;
 }

@@ -160,14 +160,30 @@ namespace pybind
 
         PyObject * new_mct = PyType_GenericAlloc( _descr->method_caller_type, 0 );
 
+        if( new_mct == nullptr )
+        {
+            return nullptr;
+        }
+
         py_method_caller_type * mct = (py_method_caller_type *)new_mct;
         factorable::intrusive_ptr_setup( mct->iadapter, _descr->iadapter );
 
         mct->self = PyTuple_GetItem( _args, 0 );
+        pybind::incref( mct->self );
 
         PyObject * new_args = PyTuple_GetSlice( _args, 1, argc );
 
+        if( new_args == nullptr )
+        {
+            pybind::decref( new_mct );
+
+            return nullptr;
+        }
+
         PyObject * py_method = PyEval_CallObjectWithKeywords( new_mct, new_args, _kwds );
+
+        pybind::decref( new_args );
+        pybind::decref( new_mct );
 
         return py_method;
     }

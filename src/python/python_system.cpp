@@ -9,6 +9,7 @@
 
 #include <stdexcept>
 #include <cstdio>
+#include <string>
 
 #if defined(PYBIND_DEBUG)
 #   include <thread>
@@ -29,10 +30,6 @@ extern "C" {
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
-#if PYBIND_PYTHON_VERSION < 300 && defined(WITH_THREAD)
-    static PyThreadState * gtstate;
-#endif
-    //////////////////////////////////////////////////////////////////////////
 #if defined(PYBIND_DEBUG)
     std::thread::id g_main_thread_id;
 
@@ -50,6 +47,65 @@ namespace pybind
 #else
 #   define PYBIND_CHECK_MAIN_THREAD()
 #endif
+    //////////////////////////////////////////////////////////////////////////
+    static Py_ssize_t unicode_size_( PyObject * _unicode )
+    {
+#if PYBIND_PYTHON_VERSION < 300
+        return PyUnicode_GET_SIZE( _unicode );
+#else
+        return PyUnicode_GET_LENGTH( _unicode );
+#endif
+    }
+    //////////////////////////////////////////////////////////////////////////
+    static const wchar_t * unicode_to_wchar_buffer_( PyObject * _unicode, size_t * _size )
+    {
+        Py_UNICODE * py_unicode = PyUnicode_AsUnicode( _unicode );
+
+        if( py_unicode == nullptr )
+        {
+            return nullptr;
+        }
+
+        Py_ssize_t py_size = pybind::unicode_size_( _unicode );
+
+        if( py_size < 0 )
+        {
+            return nullptr;
+        }
+
+        if( _size != nullptr )
+        {
+            *_size = (size_t)py_size;
+        }
+
+        if( sizeof( Py_UNICODE ) == sizeof( wchar_t ) )
+        {
+            return reinterpret_cast<const wchar_t *>( py_unicode );
+        }
+
+        thread_local std::wstring unicode_cache;
+        unicode_cache.resize( (size_t)py_size );
+
+        if( py_size != 0 )
+        {
+#if PYBIND_PYTHON_VERSION < 300
+            Py_ssize_t copied = PyUnicode_AsWideChar( (PyUnicodeObject *)_unicode, &unicode_cache[0], py_size );
+#else
+            Py_ssize_t copied = PyUnicode_AsWideChar( _unicode, &unicode_cache[0], py_size );
+#endif
+
+            if( copied < 0 )
+            {
+                return nullptr;
+            }
+
+            unicode_cache.resize( (size_t)copied );
+        }
+
+        unicode_cache.push_back( L'\0' );
+
+        return unicode_cache.c_str();
+    }
     //////////////////////////////////////////////////////////////////////////
     kernel_interface * initialize( allocator_interface * _allocator, const wchar_t * _path, bool _debug, bool install_sigs, bool _nosite )
     {
@@ -185,7 +241,6 @@ namespace pybind
 
 #if PYBIND_PYTHON_VERSION < 300 && defined(WITH_THREAD)
             PyEval_InitThreads();
-            gtstate = PyEval_SaveThread();
 #endif
         }
 
@@ -1110,20 +1165,15 @@ namespace pybind
 
         if( PyUnicode_CheckExact( _obj ) == 1 )
         {
-            const wchar_t * ch_buff = PyUnicode_AsUnicode( _obj );
+            size_t size = 0;
+            const wchar_t * ch_buff = pybind::unicode_to_wchar_buffer_( _obj, &size );
 
             if( ch_buff == nullptr )
             {
                 return false;
             }
 
-#if PYBIND_PYTHON_VERSION < 300
-            Py_ssize_t sz = PyUnicode_GET_SIZE( _obj );
-#else
-            Py_ssize_t sz = PyUnicode_GET_LENGTH( _obj );
-#endif
-
-            if( sz != 1 )
+            if( size != 1 )
             {
                 return false;
             }
@@ -1639,7 +1689,7 @@ namespace pybind
     bool iterator_get( PyObject * _collections, PyObject ** _iterator )
     {
         PYBIND_CHECK_MAIN_THREAD();
-        
+
         PyObject * iterator = PyObject_GetIter( _collections );
 
         if( iterator == nullptr )
@@ -1953,11 +2003,17 @@ namespace pybind
         const char * co_filename = pybind::string_to_char( frame->f_code->co_filename );
         const char * co_name = pybind::string_to_char( frame->f_code->co_name );
 
-        ::strncpy( _filename, co_filename, _maxlenfilename );
-        _filename[_maxlenfilename] = '\0';
+        if( _maxlenfilename != 0 )
+        {
+            ::strncpy( _filename, co_filename, _maxlenfilename - 1 );
+            _filename[_maxlenfilename - 1] = '\0';
+        }
 
-        ::strncpy( _function, co_name, _maxlenfunction );
-        _function[_maxlenfunction] = '\0';
+        if( _maxlenfunction != 0 )
+        {
+            ::strncpy( _function, co_name, _maxlenfunction - 1 );
+            _function[_maxlenfunction - 1] = '\0';
+        }
         
         *_lineno = PyFrame_GetLineNumber( frame );
 
@@ -2111,8 +2167,16 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        pybind::error_message_va( _format, _va );
-        pybind::throw_exception_va( _format, _va );
+        char message[PYBIND_EXCEPTION_MESSAGE_SIZE + 1] = {'\0'};
+
+        va_list throw_va;
+        va_copy( throw_va, _va );
+        vsnprintf( message, PYBIND_EXCEPTION_MESSAGE_SIZE, _format, throw_va );
+        va_end( throw_va );
+
+        pybind::error_message( message );
+
+        throw pybind_exception( message );
     }
     //////////////////////////////////////////////////////////////////////////
     void warning_traceback( const char * _format, ... )
@@ -2417,7 +2481,7 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        const wchar_t * wstr = PyUnicode_AsUnicode( _unicode );
+        const wchar_t * wstr = pybind::unicode_to_wchar_buffer_( _unicode, nullptr );
 
         return wstr;
     }
@@ -2426,15 +2490,7 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        const wchar_t * wstr = PyUnicode_AsUnicode( _unicode );
-
-#if PYBIND_PYTHON_VERSION < 300
-        Py_ssize_t py_size = PyUnicode_GET_SIZE( _unicode );
-#else
-        Py_ssize_t py_size = PyUnicode_GET_LENGTH( _unicode );
-#endif
-
-        * _size = (size_t)py_size;
+        const wchar_t * wstr = pybind::unicode_to_wchar_buffer_( _unicode, _size );
 
         return wstr;
     }
@@ -2611,4 +2667,3 @@ namespace pybind
     }
     //////////////////////////////////////////////////////////////////////////
 }
-

@@ -1,7 +1,18 @@
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
+if(POLICY CMP0177)
+    cmake_policy(SET CMP0177 NEW)
+endif()
+
 configure_file(${PYBIND_DIR}/cmake/python_config.c ${CMAKE_CURRENT_SOURCE_DIR}/config.c COPYONLY)
-configure_file(${PYBIND_DIR}/cmake/python_config.h  ${CMAKE_CURRENT_SOURCE_DIR}/PC/pyconfig.h COPYONLY)
+
+if(APPLE)
+    configure_file(${PYBIND_DIR}/cmake/python_config_macos.h ${CMAKE_CURRENT_SOURCE_DIR}/Include/pyconfig.h COPYONLY)
+elseif(WIN32)
+    configure_file(${PYBIND_DIR}/cmake/python_config.h ${CMAKE_CURRENT_SOURCE_DIR}/PC/pyconfig.h COPYONLY)
+else()
+    message(FATAL_ERROR "python_CMakeLists.cmake is supported only for Windows and Apple builds")
+endif()
 
 project(python)
 
@@ -43,7 +54,7 @@ add_python_module(binascii MOD_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/Modules/binascii
 add_python_module(unicodedata MOD_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/Modules/unicodedata.c)
 add_python_module(cPickle MOD_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/Modules/cPickle.c)
 add_python_module(cStringIO MOD_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/Modules/cStringIO.c)
-add_python_module(cStringIO MOD_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/Modules/_weakref.c)
+add_python_module(_weakref MOD_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/Modules/_weakref.c)
 
 
 set( HAVE_CHROOT 0 )
@@ -179,7 +190,7 @@ endif()
 set( MODULE_SRCS ${MODULE_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/config.c )
 
 set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/Python/getplatform.c PROPERTIES COMPILE_FLAGS -DPLATFORM=\\"${PY_PLATFORM}\\")
-set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/Modules/getpath.c PROPERTIES COMPILE_FLAGS  "-DPREFIX=\\\"\\\" -DEXEC_PREFIX=\\\"\\\" -DVERSION=\\\"2.7.14\\\" -DVPATH=\\\"..\\\"  -DPYTHONPATH=\\\"\\\" " )
+set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/Modules/getpath.c PROPERTIES COMPILE_FLAGS  "-DPREFIX=\\\"\\\" -DEXEC_PREFIX=\\\"\\\" -DVERSION=\\\"2.7.15\\\" -DVPATH=\\\"..\\\"  -DPYTHONPATH=\\\"\\\" " )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include ${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Python)
@@ -204,11 +215,11 @@ add_library(${PROJECT_NAME} STATIC
               ${MODULE_SRCS})
 
 install(DIRECTORY Include
-    DESTINATION ./include
+    DESTINATION include
     FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h")
     
 install(DIRECTORY PC
-    DESTINATION ./include
+    DESTINATION include
     FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h")
     
 install(TARGETS ${PROJECT_NAME}

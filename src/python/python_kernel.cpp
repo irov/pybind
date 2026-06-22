@@ -77,9 +77,6 @@ namespace pybind
     void python_kernel::finalize()
     {
         PyType_ClearCache();
-#if PYBIND_PYTHON_VERSION < 300
-        PyImport_Cleanup();
-#endif
 
 #ifdef PYBIND_STL_SUPPORT
         pybind::finalize_stl_type_cast( this );

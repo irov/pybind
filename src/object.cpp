@@ -83,7 +83,7 @@ namespace pybind
     {
         PyObject * py_attr = m_kernel->get_attr( m_obj, _name );
 
-        return pybind::object( m_kernel, py_attr );
+        return pybind::object( m_kernel, py_attr, pybind::borrowed );
     }
     //////////////////////////////////////////////////////////////////////////
     void object::set_attr_i( detail::import_operator_t && _name, detail::import_operator_t && _value )

@@ -83,6 +83,11 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     base & base::operator = ( const base & _obj )
     {
+        if( this == &_obj )
+        {
+            return *this;
+        }
+
         if( m_obj != nullptr )
         {
             m_kernel->decref( m_obj );
@@ -101,6 +106,11 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     base & base::operator = ( base && _obj )
     {
+        if( this == &_obj )
+        {
+            return *this;
+        }
+
         if( m_obj != nullptr )
         {
             m_kernel->decref( m_obj );
