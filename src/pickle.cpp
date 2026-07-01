@@ -3,8 +3,6 @@
 #include "pybind/extract.hpp"
 #include "pybind/helper.hpp"
 
-#include "stdex/memorycopy.h"
-
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
@@ -42,7 +40,7 @@ namespace pybind
 
             uint8_t * write_buffer = static_cast<uint8_t *>(_buffer);
 
-            stdex::memorycopy( write_buffer, *_offset, &_t, size );
+            PYBIND_MEMCPY( write_buffer + *_offset, &_t, size );
         }
 
         *_offset += size;
@@ -68,7 +66,7 @@ namespace pybind
 
             uint8_t * write_buffer = static_cast<uint8_t *>(_buffer);
 
-            stdex::memorycopy( write_buffer, *_offset, _t, size );
+            PYBIND_MEMCPY( write_buffer + *_offset, _t, size );
         }
 
         *_offset += size;
@@ -329,7 +327,7 @@ namespace pybind
 
         const void * src_buffer = (static_cast<const uint8_t *>(_buffer) + *_carriage);
 
-        stdex::memorycopy( &_t, 0, src_buffer, size );
+        PYBIND_MEMCPY( &_t, src_buffer, size );
 
         *_carriage += size;
     }
@@ -352,7 +350,7 @@ namespace pybind
 
         const void * src_buffer = static_cast<const uint8_t *>(_buffer) + *_carriage;
 
-        stdex::memorycopy( _t, 0, src_buffer, size );
+        PYBIND_MEMCPY( _t, src_buffer, size );
 
         *_carriage += size;
     }

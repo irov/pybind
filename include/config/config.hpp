@@ -47,6 +47,6 @@
 #endif
 
 #ifndef PYBIND_MEMCPY
-#   include "stdex/memorycopy.h"
-#	define PYBIND_MEMCPY(Dest, Src, Size) stdex::memorycopy(Dest, Src, Size)
+#   include <cstring>
+#	define PYBIND_MEMCPY(Dest, Src, Size) std::memcpy(Dest, Src, Size)
 #endif
