@@ -1614,8 +1614,6 @@ namespace pybind
 
         PyType_Modified( m_pytypeobject );
 
-        pybind::incref( (PyObject *)m_pytypeobject );
-
 #if defined(PYBIND_DEBUG)
         if( pybind::module_hasobject( m_module, m_pytypeobject->tp_name ) == true )
         {
@@ -1627,6 +1625,8 @@ namespace pybind
             return false;
         }
 #endif
+
+        pybind::incref( (PyObject *)m_pytypeobject );
 
         pybind::module_addobject( m_module, m_pytypeobject->tp_name, (PyObject *)m_pytypeobject );
 

@@ -279,6 +279,34 @@ namespace pybind
         PyErr_Print();
     }
     //////////////////////////////////////////////////////////////////////////
+    void set_error( error_type_e _type, const char * _message )
+    {
+        PYBIND_CHECK_MAIN_THREAD();
+
+        PyObject * exception_type;
+
+        switch( _type )
+        {
+        case error_type_e::Runtime:
+            exception_type = PyExc_RuntimeError;
+            break;
+        case error_type_e::Type:
+            exception_type = PyExc_TypeError;
+            break;
+        case error_type_e::Value:
+            exception_type = PyExc_ValueError;
+            break;
+        case error_type_e::Overflow:
+            exception_type = PyExc_OverflowError;
+            break;
+        default:
+            exception_type = PyExc_RuntimeError;
+            break;
+        }
+
+        PyErr_SetString( exception_type, _message );
+    }
+    //////////////////////////////////////////////////////////////////////////
     uint32_t get_python_version()
     {
         uint32_t version = PYBIND_PYTHON_VERSION;
@@ -418,7 +446,11 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        PyModule_AddObject( _module, _name, _obj );
+        if( PyModule_AddObject( _module, _name, _obj ) == -1 )
+        {
+            pybind::xdecref( _obj );
+            pybind::check_error();
+        }
     }
     //////////////////////////////////////////////////////////////////////////
     void module_removeobject( PyObject * _module, const char * _name )
@@ -427,7 +459,7 @@ namespace pybind
 
         PyObject * py_none = pybind::ret_none();
 
-        PyModule_AddObject( _module, _name, py_none );
+        pybind::module_addobject( _module, _name, py_none );
     }
     //////////////////////////////////////////////////////////////////////////
     bool module_hasobject( PyObject * _module, const char * _name )
@@ -1007,7 +1039,14 @@ namespace pybind
 #	endif
         else if( PyLong_Check( _obj ) )
         {
-            _value = (T)PyLong_AsLongLong( _obj );
+            PY_LONG_LONG value = PyLong_AsLongLong( _obj );
+
+            if( value == -1 && PyErr_Occurred() != nullptr )
+            {
+                return false;
+            }
+
+            _value = (T)value;
         }
         else if( PyFloat_Check( _obj ) )
         {
@@ -1266,6 +1305,20 @@ namespace pybind
         PYBIND_CHECK_MAIN_THREAD();
 
         return PyFloat_FromDouble( _value );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * ptr_integer( int64_t _value )
+    {
+        PYBIND_CHECK_MAIN_THREAD();
+
+#   if PYBIND_PYTHON_VERSION < 300
+        if( _value >= (int64_t)LONG_MIN && _value <= (int64_t)LONG_MAX )
+        {
+            return PyInt_FromLong( (long)_value );
+        }
+#   endif
+
+        return PyLong_FromLongLong( _value );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_long( long _value )
@@ -2517,26 +2570,13 @@ namespace pybind
         return py_unicode;
     }
     //////////////////////////////////////////////////////////////////////////
-    const char * unicode_to_utf8( PyObject * _unicode )
-    {
-        PYBIND_CHECK_MAIN_THREAD();
-
-        PyObject * py_utf8 = _unicode_to_utf8_obj( _unicode );
-
-        const char * ch_buff = pybind::string_to_char( py_utf8 );
-
-        return ch_buff;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    const char * unicode_to_utf8_and_size( PyObject * _unicode, size_t * _size )
+    PyObject * unicode_encode_utf8( PyObject * _unicode )
     {
         PYBIND_CHECK_MAIN_THREAD();
 
         PyObject * py_utf8 = PyUnicode_AsUTF8String( _unicode );
 
-        const char * ch_buff = pybind::string_to_char_and_size( py_utf8, _size );
-
-        return ch_buff;
+        return py_utf8;
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * unicode_from_utf8( const char * _utf8 )
@@ -2556,15 +2596,6 @@ namespace pybind
         PyObject * unicode = PyUnicode_FromStringAndSize( _utf8, py_size );
 
         return unicode;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    PyObject * _unicode_to_utf8_obj( PyObject * _unicode )
-    {
-        PYBIND_CHECK_MAIN_THREAD();
-
-        PyObject * py_utf8 = PyUnicode_AsUTF8String( _unicode );
-
-        return py_utf8;
     }
     //////////////////////////////////////////////////////////////////////////
     bool void_ptr_check( PyObject * _obj )

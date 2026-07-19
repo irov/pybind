@@ -21,6 +21,14 @@ extern "C"
 
 namespace pybind
 {
+    enum class error_type_e
+    {
+        Runtime,
+        Type,
+        Value,
+        Overflow
+    };
+
     typedef intrusive_ptr<class class_type_scope_interface> class_type_scope_interface_ptr;
 
     class borrowed_t

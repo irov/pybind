@@ -10,6 +10,7 @@ namespace pybind
     PYBIND_API uint32_t get_python_version();
 
     PYBIND_API void check_error();
+    PYBIND_API void set_error( error_type_e _type, const char * _message );
 
     PYBIND_API void setStdErrorHandle( PyObject * _handle );    
     PYBIND_API void setStdOutHandle( PyObject * _handle );
@@ -121,6 +122,7 @@ namespace pybind
     PYBIND_API PyObject * ptr_uint64( uint64_t _value );
     PYBIND_API PyObject * ptr_float( float _value );
     PYBIND_API PyObject * ptr_double( double _value );
+    PYBIND_API PyObject * ptr_integer( int64_t _value );
     PYBIND_API PyObject * ptr_long( long _value );
     PYBIND_API PyObject * ptr_ulong( unsigned long _value );
 
@@ -225,12 +227,10 @@ namespace pybind
     PYBIND_API PyObject * unicode_from_wchar( const wchar_t * _value );
     PYBIND_API PyObject * unicode_from_wchar_size( const wchar_t * _value, size_t _size );
 
-    PYBIND_API const char * unicode_to_utf8( PyObject * _unicode );
-    PYBIND_API const char * unicode_to_utf8_and_size( PyObject * _unicode, size_t * _size );
+    PYBIND_API PyObject * unicode_encode_utf8( PyObject * _unicode );
     PYBIND_API PyObject * unicode_from_utf8( const char * _utf8 );
     PYBIND_API PyObject * unicode_from_utf8_size( const char * _utf8, size_t _size );
 
-    PYBIND_API PyObject * _unicode_to_utf8_obj( PyObject * _unicode );
 
     PYBIND_API bool void_ptr_check( PyObject * _obj );
     PYBIND_API PyObject * void_ptr_new( void * _impl );
@@ -244,4 +244,3 @@ namespace pybind
     PYBIND_API void set_module_finder( PyObject * _finder );
     PYBIND_API void remove_module_finder();
 }
-

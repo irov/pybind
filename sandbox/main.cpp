@@ -7,6 +7,10 @@
 #endif
 
 #include <cstdio>
+#include <climits>
+#include <cstring>
+#include <limits>
+#include <vector>
 
 class Bar
 {
@@ -139,6 +143,208 @@ void test_tuple( pybind::kernel_interface * _kernel, int i )
     (void)p4;
     (void)p5;
     (void)p6;
+}
+
+bool test_pickle_refcounts( pybind::kernel_interface * _kernel )
+{
+    pybind::list types( _kernel );
+
+    PyObject * py_tuple_value = _kernel->unicode_from_utf8( "tuple unicode value" );
+    pybind::object tuple_value( _kernel, py_tuple_value, pybind::borrowed );
+    PyObject * py_tuple = _kernel->tuple_new( 1 );
+    pybind::object tuple( _kernel, py_tuple, pybind::borrowed );
+    _kernel->tuple_setitem( py_tuple, 0, py_tuple_value );
+
+    PyObject * py_list_value = _kernel->unicode_from_utf8( "list unicode value" );
+    pybind::object list_value( _kernel, py_list_value, pybind::borrowed );
+    PyObject * py_list = _kernel->list_new( 1 );
+    pybind::object list( _kernel, py_list, pybind::borrowed );
+    _kernel->list_setitem( py_list, 0, py_list_value );
+
+    PyObject * py_dict_key = _kernel->unicode_from_utf8( "dict unicode key" );
+    pybind::object dict_key( _kernel, py_dict_key, pybind::borrowed );
+    PyObject * py_dict_value = _kernel->unicode_from_utf8( "dict unicode value" );
+    pybind::object dict_value( _kernel, py_dict_value, pybind::borrowed );
+    PyObject * py_dict = _kernel->dict_new();
+    pybind::object dict( _kernel, py_dict, pybind::borrowed );
+    _kernel->dict_set( py_dict, py_dict_key, py_dict_value );
+
+    PyObject * py_set_value = _kernel->unicode_from_utf8( "set unicode value" );
+    pybind::object set_value( _kernel, py_set_value, pybind::borrowed );
+    PyObject * py_set = _kernel->set_new();
+    pybind::object set( _kernel, py_set, pybind::borrowed );
+    _kernel->set_set( py_set, py_set_value );
+
+    PyObject * py_source = _kernel->list_new( 4 );
+    pybind::object source( _kernel, py_source, pybind::borrowed );
+    _kernel->list_setitem( py_source, 0, py_tuple );
+    _kernel->list_setitem( py_source, 1, py_list );
+    _kernel->list_setitem( py_source, 2, py_dict );
+    _kernel->list_setitem( py_source, 3, py_set );
+
+    PyObject * source_objects[] = {
+        py_tuple_value,
+        py_tuple,
+        py_list_value,
+        py_list,
+        py_dict_key,
+        py_dict_value,
+        py_dict,
+        py_set_value,
+        py_set
+    };
+    uint32_t source_refcounts[sizeof( source_objects ) / sizeof( source_objects[0] )];
+
+    for( size_t i = 0; i != sizeof( source_objects ) / sizeof( source_objects[0] ); ++i )
+    {
+        source_refcounts[i] = _kernel->refcount( source_objects[i] );
+    }
+
+    size_t pickle_size;
+    if( pybind::pickle( _kernel, py_source, types.ptr(), nullptr, 0, &pickle_size ) == false )
+    {
+        return false;
+    }
+
+    std::vector<uint8_t> buffer( pickle_size );
+
+    for( uint32_t i = 0; i != 32; ++i )
+    {
+        size_t write_size;
+        if( pybind::pickle( _kernel, py_source, types.ptr(), buffer.data(), buffer.size(), &write_size ) == false || write_size != pickle_size )
+        {
+            return false;
+        }
+    }
+
+    for( size_t i = 0; i != sizeof( source_objects ) / sizeof( source_objects[0] ); ++i )
+    {
+        if( _kernel->refcount( source_objects[i] ) != source_refcounts[i] )
+        {
+            return false;
+        }
+    }
+
+    PyObject * py_unpickled = pybind::unpickle( _kernel, buffer.data(), buffer.size(), types.ptr() );
+    pybind::object unpickled( _kernel, py_unpickled, pybind::borrowed );
+
+    if( py_unpickled == nullptr || _kernel->refcount( py_unpickled ) != 1 )
+    {
+        return false;
+    }
+
+    PyObject * py_unpickled_tuple = _kernel->list_getitem( py_unpickled, 0 );
+    PyObject * py_unpickled_list = _kernel->list_getitem( py_unpickled, 1 );
+    PyObject * py_unpickled_dict = _kernel->list_getitem( py_unpickled, 2 );
+    PyObject * py_unpickled_set = _kernel->list_getitem( py_unpickled, 3 );
+
+    if( _kernel->refcount( py_unpickled_tuple ) != 1 ||
+        _kernel->refcount( py_unpickled_list ) != 1 ||
+        _kernel->refcount( py_unpickled_dict ) != 1 ||
+        _kernel->refcount( py_unpickled_set ) != 1 )
+    {
+        return false;
+    }
+
+    PyObject * py_unpickled_tuple_value = _kernel->tuple_getitem( py_unpickled_tuple, 0 );
+    PyObject * py_unpickled_list_value = _kernel->list_getitem( py_unpickled_list, 0 );
+
+    size_t dict_position = 0;
+    PyObject * py_unpickled_dict_key;
+    PyObject * py_unpickled_dict_value;
+
+    if( _kernel->dict_next( py_unpickled_dict, &dict_position, &py_unpickled_dict_key, &py_unpickled_dict_value ) == false )
+    {
+        return false;
+    }
+
+    if( _kernel->refcount( py_unpickled_tuple_value ) != 1 ||
+        _kernel->refcount( py_unpickled_list_value ) != 1 ||
+        _kernel->refcount( py_unpickled_dict_key ) != 1 ||
+        _kernel->refcount( py_unpickled_dict_value ) != 1 )
+    {
+        return false;
+    }
+
+    PyObject * py_set_iterator;
+    if( _kernel->iterator_get( py_unpickled_set, &py_set_iterator ) == false )
+    {
+        return false;
+    }
+
+    pybind::object set_iterator( _kernel, py_set_iterator, pybind::borrowed );
+
+    PyObject * py_unpickled_set_value;
+    if( _kernel->iterator_next( py_set_iterator, &py_unpickled_set_value ) == false )
+    {
+        return false;
+    }
+
+    pybind::object unpickled_set_value( _kernel, py_unpickled_set_value, pybind::borrowed );
+
+    if( _kernel->refcount( py_unpickled_set_value ) != 2 )
+    {
+        return false;
+    }
+
+    PyObject * py_utf8 = _kernel->unicode_encode_utf8( py_unpickled_tuple_value );
+    pybind::object utf8( _kernel, py_utf8, pybind::borrowed );
+
+    if( py_utf8 == nullptr || _kernel->refcount( py_utf8 ) != 1 )
+    {
+        return false;
+    }
+
+    size_t utf8_size;
+    const char * utf8_value = _kernel->string_to_char_and_size( py_utf8, &utf8_size );
+
+    return utf8_size == 19 && std::memcmp( utf8_value, "tuple unicode value", utf8_size ) == 0;
+}
+
+bool test_integer_construction( pybind::kernel_interface * _kernel )
+{
+    const int64_t values[] = {
+        std::numeric_limits<int64_t>::min(),
+        -1,
+        0,
+        1,
+        std::numeric_limits<int64_t>::max()
+    };
+
+    for( int64_t value : values )
+    {
+        PyObject * py_value = _kernel->ptr_integer( value );
+        pybind::object value_owner( _kernel, py_value, pybind::borrowed );
+
+        if( py_value == nullptr )
+        {
+            return false;
+        }
+
+        int64_t extracted_value;
+
+        if( _kernel->extract_int64( py_value, extracted_value ) == false || extracted_value != value )
+        {
+            return false;
+        }
+
+        if( _kernel->get_python_version() < 300 )
+        {
+            bool fits_python_int = value >= static_cast<int64_t>(LONG_MIN) && value <= static_cast<int64_t>(LONG_MAX);
+
+            if( fits_python_int == true && _kernel->int_check( py_value ) == false )
+            {
+                return false;
+            }
+
+            if( fits_python_int == false && _kernel->long_check( py_value ) == false )
+            {
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
 
 int test_function_1( pybind::kernel_interface * _kernel, PyObject * _obj, float j )
@@ -317,6 +523,20 @@ int main()
     }
 
     kernel->set_current_module( module );
+
+    if( test_pickle_refcounts( kernel ) == false )
+    {
+        printf( "pickle refcount test failed\n" );
+
+        return 1;
+    }
+
+    if( test_integer_construction( kernel ) == false )
+    {
+        printf( "integer construction test failed\n" );
+
+        return 1;
+    }
 
     Helper * helper = new Helper;
 

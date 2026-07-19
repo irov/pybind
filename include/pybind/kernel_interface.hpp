@@ -281,6 +281,7 @@ namespace pybind
         virtual void error_traceback_va( const char * _format, va_list _va ) = 0;
         virtual void error_message( const char * _format, ... ) = 0;
         virtual void error_message_va( const char * _format, va_list _va ) = 0;
+        virtual void set_error( error_type_e _type, const char * _message ) = 0;
         virtual void throw_message( const char * _format, ... ) = 0;
         virtual void throw_message_va( const char * _format, va_list _va ) = 0;
         virtual void warning_traceback( const char * _format, ... ) = 0;
@@ -351,6 +352,7 @@ namespace pybind
         virtual PyObject * ptr_uint64( uint64_t _value ) = 0;
         virtual PyObject * ptr_float( float _value ) = 0;
         virtual PyObject * ptr_double( double _value ) = 0;
+        virtual PyObject * ptr_integer( int64_t _value ) = 0;
         virtual PyObject * ptr_long( long _value ) = 0;
         virtual PyObject * ptr_ulong( unsigned long _value ) = 0;
         virtual PyObject * ptr_string( const char * _str ) = 0;
@@ -387,8 +389,7 @@ namespace pybind
         virtual const wchar_t * unicode_to_wchar_and_size( PyObject * _unicode, size_t * _size ) = 0;
         virtual PyObject * unicode_from_wchar( const wchar_t * _value ) = 0;
         virtual PyObject * unicode_from_wchar_size( const wchar_t * _value, size_t _size ) = 0;
-        virtual const char * unicode_to_utf8( PyObject * _unicode ) = 0;
-        virtual const char * unicode_to_utf8_and_size( PyObject * _unicode, size_t * _size ) = 0;
+        virtual PyObject * unicode_encode_utf8( PyObject * _unicode ) = 0;
         virtual PyObject * unicode_from_utf8( const char * _utf8 ) = 0;
         virtual PyObject * unicode_from_utf8_size( const char * _utf8, size_t _size ) = 0;
 

@@ -160,8 +160,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::def_function_adapter( const function_adapter_interface_ptr & _adapter, bool _native, PyObject * _module )
     {
-        PyObject * py_func = m_functions.create_function_adapter( _adapter, _native );
-
         if( _module == nullptr )
         {
             _module = this->get_current_module();
@@ -188,13 +186,13 @@ namespace pybind
         }
 #endif
 
+        PyObject * py_func = m_functions.create_function_adapter( _adapter, _native );
+
         pybind::module_addobject( _module, name, py_func );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::def_functor_adapter( const functor_adapter_interface_ptr & _adapter, bool _native, PyObject * _module )
     {
-        PyObject * py_func = m_functors.create_functor_adapter( _adapter, _native );
-
         if( _module == nullptr )
         {
             _module = this->get_current_module();
@@ -221,6 +219,8 @@ namespace pybind
             return;
         }
 #endif
+
+        PyObject * py_func = m_functors.create_functor_adapter( _adapter, _native );
 
         pybind::module_addobject( _module, name, py_func );
     }
@@ -1309,6 +1309,11 @@ namespace pybind
         return pybind::ptr_double( _value );
     }
     //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::ptr_integer( int64_t _value )
+    {
+        return pybind::ptr_integer( _value );
+    }
+    //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::ptr_long( long _value )
     {
         return pybind::ptr_long( _value );
@@ -1424,14 +1429,9 @@ namespace pybind
         return pybind::unicode_from_wchar_size( _value, _size );
     }
     //////////////////////////////////////////////////////////////////////////
-    const char * python_kernel::unicode_to_utf8( PyObject * _obj )
+    PyObject * python_kernel::unicode_encode_utf8( PyObject * _obj )
     {
-        return pybind::unicode_to_utf8( _obj );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    const char * python_kernel::unicode_to_utf8_and_size( PyObject * _obj, size_t * _size )
-    {
-        return pybind::unicode_to_utf8_and_size( _obj, _size );
+        return pybind::unicode_encode_utf8( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::unicode_from_utf8( const char * _utf8 )
@@ -1677,6 +1677,11 @@ namespace pybind
     void python_kernel::error_message_va( const char * _format, va_list _va )
     {
         pybind::error_message_va( _format, _va );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void python_kernel::set_error( error_type_e _type, const char * _message )
+    {
+        pybind::set_error( _type, _message );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::throw_message( const char * _format, ... )
