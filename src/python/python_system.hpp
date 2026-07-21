@@ -7,6 +7,8 @@
 
 namespace pybind
 {
+    PYBIND_API void update_python_main_thread();
+
     PYBIND_API uint32_t get_python_version();
 
     PYBIND_API void check_error();

@@ -16,17 +16,26 @@
 
 namespace pybind
 {
+    struct kernel_config_t
+    {
+        const wchar_t * path = nullptr;
+        bool debug = false;
+        bool install_signals = false;
+        bool no_site = true;
+        size_t max_heap_bytes = 0;
+        uint64_t feature_flags = 0;
+        int32_t optimize_level = 0;
+    };
+
     typedef intrusive_ptr<class type_cast> type_cast_ptr;
     typedef intrusive_ptr<class class_type_scope_interface> class_type_scope_interface_ptr;
 
     typedef intrusive_ptr<class new_adapter_interface> new_adapter_interface_ptr;
     typedef intrusive_ptr<class destroy_adapter_interface> destroy_adapter_interface_ptr;
 
-    PYBIND_API kernel_interface * initialize( allocator_interface * _allocator, const wchar_t * _path, bool _debug, bool install_sigs, bool _nosite );
-    PYBIND_API class kernel_interface * get_kernel();
-    PYBIND_API void set_kernel( class kernel_interface * _kernel );
-
-    PYBIND_API void update_main_thread();
+    PYBIND_API kernel_interface * initialize( allocator_interface * _allocator, const kernel_config_t & _config );
+    PYBIND_API kernel_interface * get_kernel();
+    PYBIND_API void set_kernel( kernel_interface * _kernel );
 
     typedef void (*pybind_excepthook_handler_f)(void * _ud, PyTypeObject * _exctype, PyObject * _value, PyObject * _traceback);
 
@@ -37,6 +46,7 @@ namespace pybind
 
     public:
         virtual void collect() = 0;
+        virtual void update_main_thread() = 0;
         virtual void destroy() = 0;
 
     public:

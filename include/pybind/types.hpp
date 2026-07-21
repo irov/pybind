@@ -7,6 +7,10 @@
 #include <cstdint>
 #include <cstddef>
 
+#ifndef PYBIND_CLASS_TYPE_MAX_NAME
+#define PYBIND_CLASS_TYPE_MAX_NAME 128
+#endif
+
 extern "C"
 {
     struct _object;

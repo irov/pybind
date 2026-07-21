@@ -132,9 +132,19 @@ namespace pybind
         PyGC_Collect();
     }
     //////////////////////////////////////////////////////////////////////////
+    void python_kernel::update_main_thread()
+    {
+        pybind::update_python_main_thread();
+    }
+    //////////////////////////////////////////////////////////////////////////
     void python_kernel::destroy()
     {
         this->finalize();
+
+        if( pybind::get_kernel() == this )
+        {
+            pybind::set_kernel( nullptr );
+        }
 
         m_allocator->deleteT( this );
     }
@@ -680,10 +690,9 @@ namespace pybind
         }
     }
     //////////////////////////////////////////////////////////////////////////
-    const class_type_scope_interface_ptr & python_kernel::get_class_scope( PyTypeObject * _type )
+    const class_type_scope_interface_ptr & python_kernel::get_class_scope_exact( PyTypeObject * _type )
     {
         uint64_t py_hash = pybind::type_hash( _type );
-
         uint32_t slot = py_hash % PYBIND_TYPE_COUNT_HASH;
 
         for( uint32_t probe = slot; probe != PYBIND_TYPE_COUNT_HASH; probe = (probe + 17) % PYBIND_TYPE_COUNT_HASH )
@@ -703,6 +712,31 @@ namespace pybind
             }
 
             return scope;
+        }
+
+        return class_type_scope_interface_ptr::none();
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const class_type_scope_interface_ptr & python_kernel::get_class_scope( PyTypeObject * _type )
+    {
+        PyObject * py_mro = _type->tp_mro;
+
+        if( py_mro == nullptr )
+        {
+            return this->get_class_scope_exact( _type );
+        }
+
+        Py_ssize_t mro_count = PyTuple_GET_SIZE( py_mro );
+
+        for( Py_ssize_t mro_index = 0; mro_index != mro_count; ++mro_index )
+        {
+            PyTypeObject * py_type = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM( py_mro, mro_index ));
+            const class_type_scope_interface_ptr & scope = this->get_class_scope_exact( py_type );
+
+            if( scope != nullptr )
+            {
+                return scope;
+            }
         }
 
         return class_type_scope_interface_ptr::none();

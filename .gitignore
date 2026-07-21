@@ -2,3 +2,4 @@ bin/
 dependencies/
 solutions/
 build_temp/
+.temp/

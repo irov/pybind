@@ -7,6 +7,7 @@
 
 #include "python_kernel.hpp"
 
+#include <cassert>
 #include <stdexcept>
 #include <cstdio>
 #include <string>
@@ -107,8 +108,15 @@ namespace pybind
         return unicode_cache.c_str();
     }
     //////////////////////////////////////////////////////////////////////////
-    kernel_interface * initialize( allocator_interface * _allocator, const wchar_t * _path, bool _debug, bool install_sigs, bool _nosite )
+    kernel_interface * initialize( allocator_interface * _allocator, const kernel_config_t & _config )
     {
+        assert(pybind::get_kernel() == nullptr);
+
+        const wchar_t * _path = _config.path;
+        bool _debug = _config.debug;
+        bool install_sigs = _config.install_signals;
+        bool _nosite = _config.no_site;
+
         (void)_allocator;
         (void)_path;
         (void)_debug;
@@ -258,7 +266,7 @@ namespace pybind
         return kernel;
     }
     //////////////////////////////////////////////////////////////////////////
-    void update_main_thread()
+    void update_python_main_thread()
     {        
 #if defined(PYBIND_DEBUG)
         g_main_thread_id = std::this_thread::get_id();

@@ -498,7 +498,13 @@ int main()
 {
     malloc_allocator * a = new malloc_allocator;
 
-    pybind::kernel_interface * kernel = pybind::initialize( a, L"", false, false, true );
+    pybind::kernel_config_t config;
+    config.path = L"";
+    config.debug = false;
+    config.install_signals = false;
+    config.no_site = true;
+
+    pybind::kernel_interface * kernel = pybind::initialize( a, config );
 
     pybind::list syspath( kernel );
     syspath.append( PYBIND_SANDBOX_SCRIPTS_PATH );

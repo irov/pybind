@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.16)
 
 if(POLICY CMP0025)
   cmake_policy(SET CMP0025 NEW)
@@ -13,12 +13,19 @@ OPTION(PYBIND_STL_NOT_SUPPORT "PYBIND_STL_NOT_SUPPORT" OFF)
 OPTION(PYBIND_PYTHON_ERROR_FORMAT_FLAG "PYBIND_PYTHON_ERROR_FORMAT" OFF)
 OPTION(PYBIND_SANDBOX "PYBIND_SANDBOX" ON)
 OPTION(PYBIND_INSTALL "PYBIND_INSTALL" ON)
+SET(PYBIND_BACKEND "python" CACHE STRING "PYBIND_BACKEND")
+SET_PROPERTY(CACHE PYBIND_BACKEND PROPERTY STRINGS python tinypy)
+
+IF(NOT PYBIND_BACKEND STREQUAL "python" AND NOT PYBIND_BACKEND STREQUAL "tinypy")
+    MESSAGE(FATAL_ERROR "PYBIND_BACKEND must be python or tinypy")
+ENDIF()
 
 set(PYBIND_PROJECT_NAME "pybind" CACHE STRING "PYBIND_PROJECT_NAME")
 set(PYBIND_PYTHON_VERSION "278" CACHE STRING "PYBIND_PYTHON_VERSION")
 set(PYBIND_PYTHON_INCLUDE_PATH "" CACHE STRING "PYBIND_PYTHON_INCLUDE_PATH")
 set(PYBIND_PYTHON_CONFIG_INCLUDE_PATH "" CACHE STRING "PYBIND_PYTHON_CONFIG_INCLUDE_PATH")
 set(PYBIND_STDEX_INCLUDE_PATH "" CACHE STRING "PYBIND_STDEX_INCLUDE_PATH")
+set(PYBIND_TINYPY_SOURCE_DIR "" CACHE PATH "PYBIND_TINYPY_SOURCE_DIR")
 
 PROJECT(${PYBIND_PROJECT_NAME})
 
@@ -66,21 +73,38 @@ ENDIF()
 IF(NOT PYBIND_EXTERNAL_BUILD)
     set(DEPENDENCIES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dependencies")
    
-    include(cmake/python_download.cmake)
-    
-    set(PYBIND_PYTHON_INCLUDE_PATH ${PYTHON_INCLUDE_DIR} CACHE STRING "PYBIND_PYTHON_INCLUDE_PATH" FORCE)
-    message(${PYBIND_PYTHON_INCLUDE_PATH})
-    
-    IF(WIN32)
-        set(PYBIND_PYTHON_CONFIG_INCLUDE_PATH ${PYTHON_INCLUDE_DIR}/PC CACHE STRING "PYBIND_PYTHON_CONFIG_INCLUDE_PATH" FORCE)
-    ENDIF()
-    
-    IF(WIN32)
-        add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    IF(PYBIND_BACKEND STREQUAL "python")
+        include(cmake/python_download.cmake)
+
+        set(PYBIND_PYTHON_INCLUDE_PATH ${PYTHON_INCLUDE_DIR} CACHE STRING "PYBIND_PYTHON_INCLUDE_PATH" FORCE)
+        message(${PYBIND_PYTHON_INCLUDE_PATH})
+
+        IF(WIN32)
+            set(PYBIND_PYTHON_CONFIG_INCLUDE_PATH ${PYTHON_INCLUDE_DIR}/PC CACHE STRING "PYBIND_PYTHON_CONFIG_INCLUDE_PATH" FORCE)
+        ENDIF()
+
+        IF(WIN32)
+            add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+        ENDIF()
     ENDIF()
     
     include(cmake/stdex_download.cmake)
     set(PYBIND_STDEX_INCLUDE_PATH ${STDEX_INCLUDE_DIR} CACHE STRING "PYBIND_STDEX_INCLUDE_PATH" FORCE)
+ENDIF()
+
+IF(PYBIND_BACKEND STREQUAL "tinypy" AND NOT TARGET tinypy::tinypy)
+    IF(PYBIND_TINYPY_SOURCE_DIR)
+        SET(PYBIND_BUILD_TESTING ${BUILD_TESTING})
+        SET(BUILD_TESTING OFF)
+        ADD_SUBDIRECTORY(${PYBIND_TINYPY_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/tinypy EXCLUDE_FROM_ALL)
+        SET(BUILD_TESTING ${PYBIND_BUILD_TESTING})
+    ELSEIF(PYBIND_EXTERNAL_BUILD)
+        MESSAGE(FATAL_ERROR "tinypy::tinypy or PYBIND_TINYPY_SOURCE_DIR is required")
+    ELSE()
+        INCLUDE(FetchContent)
+        FetchContent_Declare(tinypy GIT_REPOSITORY https://github.com/irov/tinypy.git GIT_TAG master)
+        FetchContent_MakeAvailable(tinypy)
+    ENDIF()
 ENDIF()
 
 set(CONFIG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/config)
@@ -98,6 +122,8 @@ file(GLOB files_private_headers ${PRIVATE_DIR}/*.hpp)
 file(GLOB files_private_sources ${PRIVATE_DIR}/*.cpp)
 file(GLOB files_private_python_headers ${PRIVATE_DIR}/python/*.hpp)
 file(GLOB files_private_python_sources ${PRIVATE_DIR}/python/*.cpp)
+file(GLOB files_private_tinypy_headers ${PRIVATE_DIR}/tinypy/*.hpp)
+file(GLOB files_private_tinypy_sources ${PRIVATE_DIR}/tinypy/*.cpp)
 file(GLOB files_public_stl_headers ${PUBLIC_DIR}/stl/*.hpp)
 file(GLOB files_private_stl_sources ${PRIVATE_DIR}/stl/*.cpp)
 file(GLOB files_public_mutex_headers ${PUBLIC_DIR}/mutex/*.hpp)
@@ -108,6 +134,7 @@ SOURCE_GROUP(helper FILES ${files_public_helper_headers})
 SOURCE_GROUP(call FILES ${files_public_call_headers})
 SOURCE_GROUP(generator FILES ${files_public_generator_headers} ${files_private_generator_sources})
 SOURCE_GROUP(python FILES ${files_private_python_headers} ${files_private_python_sources})
+SOURCE_GROUP(tinypy FILES ${files_private_tinypy_headers} ${files_private_tinypy_sources})
 SOURCE_GROUP(stl FILES ${files_public_stl_headers} ${files_private_stl_sources})
 
 SOURCE_GROUP(mutex FILES ${files_public_mutex_headers})
@@ -140,6 +167,16 @@ if(PYBIND_PYTHON_ERROR_FORMAT_FLAG)
     add_definitions(-DPYBIND_PYTHON_ERROR_FORMAT_FLAG)
 endif()
 
+IF(PYBIND_BACKEND STREQUAL "python")
+    SET(files_private_backend_headers ${files_private_python_headers})
+    SET(files_private_backend_sources ${files_private_python_sources})
+    add_definitions(-DPYBIND_BACKEND_PYTHON)
+ELSE()
+    SET(files_private_backend_headers ${files_private_tinypy_headers})
+    SET(files_private_backend_sources ${files_private_tinypy_sources})
+    add_definitions(-DPYBIND_BACKEND_TINYPY)
+ENDIF()
+
 ADD_LIBRARY(${PROJECT_NAME} STATIC
 	${files_config_headers}
 	${files_public_headers}
@@ -148,8 +185,8 @@ ADD_LIBRARY(${PROJECT_NAME} STATIC
 	${files_public_call_headers}
     ${files_public_generator_headers}
     ${files_private_generator_sources}
-    ${files_private_python_headers}
-    ${files_private_python_sources}
+    ${files_private_backend_headers}
+    ${files_private_backend_sources}
 	${files_private_headers}
 	${files_private_sources}
     ${files_public_stl_headers}
@@ -157,25 +194,30 @@ ADD_LIBRARY(${PROJECT_NAME} STATIC
     ${files_public_mutex_headers}
 	)
     
+IF(PYBIND_BACKEND STREQUAL "python")
 add_definitions(-DMS_NO_COREDLL)
 add_definitions(-DPy_NO_ENABLE_SHARED)
-    
-ADD_LIBRARY(${PROJECT_NAME}_python STATIC 
-    ${files_private_python_sources}
-    )
+ELSE()
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} tinypy::tinypy)
+ENDIF()
     
 IF(NOT PYBIND_EXTERNAL_BUILD)
     add_dependencies(${PROJECT_NAME} stdex_download)
+    IF(PYBIND_BACKEND STREQUAL "python")
     add_dependencies(${PROJECT_NAME} python_download)
-    
-    add_dependencies(${PROJECT_NAME}_python stdex_download)
-    add_dependencies(${PROJECT_NAME}_python python_download)
+    ENDIF()
 ENDIF()
 
 if(PYBIND_SANDBOX)
     add_definitions(-DPYBIND_SANDBOX_SCRIPTS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/sandbox")
-    
-    file(GLOB files_private_sandbox_sources ${CMAKE_CURRENT_SOURCE_DIR}/sandbox/*.cpp)
+
+    IF(PYBIND_BACKEND STREQUAL "python")
+        SET(files_private_sandbox_sources ${CMAKE_CURRENT_SOURCE_DIR}/sandbox/main.cpp)
+        SET(PYBIND_SANDBOX_NAME sandbox)
+    ELSE()
+        SET(files_private_sandbox_sources ${CMAKE_CURRENT_SOURCE_DIR}/sandbox/tinypy_main.cpp)
+        SET(PYBIND_SANDBOX_NAME sandbox_tinypy)
+    ENDIF()
 
     SOURCE_GROUP(sandbox FILES ${files_private_sandbox_sources})
 
@@ -187,18 +229,20 @@ if(PYBIND_SANDBOX)
         include_directories(${PYBIND_STDEX_INCLUDE_PATH})
     endif()
 
-    ADD_EXECUTABLE(sandbox 
+    ADD_EXECUTABLE(${PYBIND_SANDBOX_NAME}
         ${files_private_sandbox_sources}
         )
         
-    TARGET_LINK_LIBRARIES(sandbox ${PROJECT_NAME} ${PROJECT_NAME}_python)
-    add_dependencies(sandbox ${PROJECT_NAME} ${PROJECT_NAME}_python)
+    TARGET_LINK_LIBRARIES(${PYBIND_SANDBOX_NAME} ${PROJECT_NAME})
+    add_dependencies(${PYBIND_SANDBOX_NAME} ${PROJECT_NAME})
 
-    TARGET_LINK_LIBRARIES(sandbox python)
-    add_dependencies(sandbox python_download)
+    IF(PYBIND_BACKEND STREQUAL "python")
+        TARGET_LINK_LIBRARIES(${PYBIND_SANDBOX_NAME} python)
+        add_dependencies(${PYBIND_SANDBOX_NAME} python_download)
+    ENDIF()
 
-    TARGET_LINK_LIBRARIES(sandbox stdex)
-    add_dependencies(sandbox stdex_download)
+    TARGET_LINK_LIBRARIES(${PYBIND_SANDBOX_NAME} stdex)
+    add_dependencies(${PYBIND_SANDBOX_NAME} stdex_download)
 endif()
 
 if(PYBIND_INSTALL)
