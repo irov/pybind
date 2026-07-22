@@ -60,22 +60,32 @@ namespace pybind
     public:
         bool initialize( PyObject * _module ) override;
         void finalize() override;
+
+    public:
         kernel_interface * get_kernel() const override;
+
+    public:
         const char * get_name() const override;
         typeid_t get_type_id() const override;
         size_t get_pod_size() const override;
         bool get_pod_hash() const override;
+
         void * get_user() const override;
+
         PyTypeObject * get_typeobject() const override;
+
         void add_method( const method_adapter_interface_ptr & _imethod ) override;
         const method_adapter_interface_ptr & find_method( const char * _name ) const override;
         size_t get_methods_count() const override;
         const method_adapter_interface_ptr & get_method( size_t _index ) const override;
+
         void add_member( const member_adapter_interface_ptr & _imember ) override;
         const member_adapter_interface_ptr & find_member( const char * _name ) const override;
         size_t get_members_count() const override;
         const member_adapter_interface_ptr & get_member( size_t _index ) const override;
+
         void add_base( typeid_t _info, const class_type_scope_interface_ptr & _scope, pybind_metacast _cast ) override;
+
         void set_construct( const constructor_adapter_interface_ptr & _iconstruct ) override;
         void set_convert( const convert_adapter_interface_ptr & _iconvert ) override;
         void set_call( const method_adapter_interface_ptr & _icall ) override;
@@ -98,14 +108,20 @@ namespace pybind
         void set_number_inplace_div( typeid_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter ) override;
         void set_smart_pointer( const smart_pointer_adapter_interface_ptr & _iadapter ) override;
         void set_bindable( const bindable_adapter_interface_ptr & _iadapter ) override;
+
         void add_proxy_interface( const class_type_scope_interface_ptr & _scope, const proxy_adapter_interface_ptr & _iproxy ) override;
+
         PyObject * create_class( void * _impl ) override;
         PyObject * create_holder( void * _impl ) override;
         PyObject * create_weak( void * _impl ) override;
         PyObject * create_pod( void ** _impl ) override;
+
         void * meta_cast( typeid_t _typeId, void * _impl ) override;
         void type_initialize( PyTypeObject * _type ) override;
+
         bool is_instance( PyTypeObject * _type ) const override;
+
+    public:
         const new_adapter_interface_ptr & get_new() const override;
         const destroy_adapter_interface_ptr & get_destroy() const override;
         const constructor_adapter_interface_ptr & get_constructor() const override;
@@ -118,20 +134,28 @@ namespace pybind
         const mapping_adapter_interface_ptr & get_mapping() const override;
         const sequence_get_adapter_interface_ptr & get_sequence_get() const override;
         const sequence_set_adapter_interface_ptr & get_sequence_set() const override;
+
         const number_unary_adapter_interface_ptr & get_number_neg() const override;
         const number_unary_adapter_interface_ptr & get_number_abs() const override;
+
         const number_binary_adapter_interface_ptr & get_number_add( typeid_t _typeId ) const override;
         const number_binary_adapter_interface_ptr & get_number_sub( typeid_t _typeId ) const override;
         const number_binary_adapter_interface_ptr & get_number_mul( typeid_t _typeId ) const override;
         const number_binary_adapter_interface_ptr & get_number_div( typeid_t _typeId ) const override;
+
         const number_inplace_adapter_interface_ptr & get_number_inplace_add( typeid_t _typeId ) const override;
         const number_inplace_adapter_interface_ptr & get_number_inplace_sub( typeid_t _typeId ) const override;
         const number_inplace_adapter_interface_ptr & get_number_inplace_mul( typeid_t _typeId ) const override;
         const number_inplace_adapter_interface_ptr & get_number_inplace_div( typeid_t _typeId ) const override;
+
         const smart_pointer_adapter_interface_ptr & get_smart_pointer() const override;
         const bindable_adapter_interface_ptr & get_bindable() const override;
+
+    public:
         void incref_smart_pointer( void * _impl ) override;
         void decref_smart_pointer( void * _impl ) override;
+
+    public:
         void * call_new( PyObject * _obj, PyObject * _args, PyObject * _kwds ) override;
         void call_destructor( PyObject * _obj, void * _impl ) override;
         void clear_bindable( void * _impl ) override;
@@ -158,6 +182,7 @@ namespace pybind
             number_binary_adapter_interface_ptr subs[PYBIND_TYPE_COUNT];
             number_binary_adapter_interface_ptr muls[PYBIND_TYPE_COUNT];
             number_binary_adapter_interface_ptr divs[PYBIND_TYPE_COUNT];
+
             number_inplace_adapter_interface_ptr iadds[PYBIND_TYPE_COUNT];
             number_inplace_adapter_interface_ptr isubs[PYBIND_TYPE_COUNT];
             number_inplace_adapter_interface_ptr imuls[PYBIND_TYPE_COUNT];
@@ -171,21 +196,29 @@ namespace pybind
 
     private:
         tinypy_kernel * m_kernel;
+
         char m_name[PYBIND_CLASS_TYPE_MAX_NAME + 1];
         typeid_t m_typeId;
+
         void * m_user;
-        size_t m_podSize;
-        bool m_podHash;
+
+        size_t m_pod_size;
+        bool m_pod_hash;
+
         PyObject * m_module;
         tinypy_type_t * m_type;
+
         base_t m_bases[PYBIND_BASES_COUNT];
-        size_t m_baseCount;
+        size_t m_basesCount;
+
         method_adapter_interface_ptr m_methods[PYBIND_METHOD_COUNT];
         size_t m_methodCount;
+
         member_adapter_interface_ptr m_members[PYBIND_MEMBER_COUNT];
         size_t m_memberCount;
+
         new_adapter_interface_ptr m_new;
-        destroy_adapter_interface_ptr m_destroy;
+        destroy_adapter_interface_ptr m_destructor;
         constructor_adapter_interface_ptr m_constructor;
         convert_adapter_interface_ptr m_convert;
         method_adapter_interface_ptr m_call;
@@ -193,13 +226,16 @@ namespace pybind
         hash_adapter_interface_ptr m_hash;
         getattro_adapter_interface_ptr m_getattro;
         mapping_adapter_interface_ptr m_mapping;
-        sequence_get_adapter_interface_ptr m_sequenceGet;
-        sequence_set_adapter_interface_ptr m_sequenceSet;
-        number_unary_adapter_interface_ptr m_numberNeg;
-        number_unary_adapter_interface_ptr m_numberAbs;
-        compare_adapter_t * m_compareAdapters;
-        number_adapter_t * m_numberAdapters;
-        smart_pointer_adapter_interface_ptr m_smartPointer;
+        sequence_get_adapter_interface_ptr m_sequence_get;
+        sequence_set_adapter_interface_ptr m_sequence_set;
+
+        number_unary_adapter_interface_ptr m_number_neg;
+        number_unary_adapter_interface_ptr m_number_abs;
+
+        compare_adapter_t * m_compare_adapters;
+        number_adapter_t * m_number_adapters;
+
+        smart_pointer_adapter_interface_ptr m_smart_pointer;
         bindable_adapter_interface_ptr m_bindable;
     };
     //////////////////////////////////////////////////////////////////////////
