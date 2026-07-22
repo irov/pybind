@@ -3,6 +3,7 @@
 #include "pybind/function_interface.hpp"
 #include "pybind/adapter/new_adapter.hpp"
 #include "pybind/adapter/destroy_adapter.hpp"
+#include "pybind/adapter/smart_pointer_adapter.hpp"
 #include "pybind/class_type_scope_interface.hpp"
 #include "pybind/object.hpp"
 #include "pybind/dict.hpp"
@@ -214,6 +215,27 @@ namespace detail
         }
     };
 
+    class counting_destroy_adapter
+        : public pybind::destroy_adapter_interface
+    {
+    public:
+        explicit counting_destroy_adapter( size_t * _calls )
+            : m_calls( _calls )
+        {
+        }
+
+        void call( pybind::kernel_interface * _kernel, const pybind::class_type_scope_interface_ptr & _scope, void * _impl ) override
+        {
+            (void)_kernel;
+            (void)_scope;
+            (void)_impl;
+            ++*m_calls;
+        }
+
+    private:
+        size_t * m_calls;
+    };
+
     class smart_pointer_base_t
         : public stdex::intrusive_ptr_base
     {
@@ -292,6 +314,11 @@ namespace detail
 
     private:
         int32_t m_value = 0;
+    };
+
+    class smart_pointer_holder_t
+        : public smart_pointer_base_t
+    {
     };
 
     struct cast_primary_t
@@ -578,6 +605,32 @@ int main()
     kernel->decref( getValue );
     kernel->decref( smartObject );
     assert( detail::smart_pointer_base_t::alive() == 0 );
+
+    size_t holderDestroyCalls = 0;
+    pybind::typeid_t holderTypeId = kernel->get_class_type_id( typeid(detail::smart_pointer_holder_t) );
+    pybind::new_adapter_interface_ptr holderNew;
+    pybind::destroy_adapter_interface_ptr holderDestroy = allocator.newT<detail::counting_destroy_adapter>( &holderDestroyCalls );
+    pybind::class_type_scope_interface_ptr holderScope = kernel->create_new_type_scope( holderTypeId, "SmartPointerHolder", nullptr, holderNew, holderDestroy, 0, false );
+    typedef decltype(&detail::smart_pointer_holder_t::intrusive_ptr_add_ref) holder_incref_t;
+    typedef decltype(&detail::smart_pointer_holder_t::intrusive_ptr_dec_ref) holder_decref_t;
+    typedef pybind::smart_pointer_adapter_proxy_function<detail::smart_pointer_holder_t, holder_incref_t, holder_decref_t> holder_smart_pointer_adapter_t;
+    pybind::smart_pointer_adapter_interface_ptr holderSmartPointer = allocator.newT<holder_smart_pointer_adapter_t>( "smart_pointer"
+        , &detail::smart_pointer_holder_t::intrusive_ptr_add_ref
+        , &detail::smart_pointer_holder_t::intrusive_ptr_dec_ref
+    );
+    holderScope->set_smart_pointer( holderSmartPointer );
+    bool holderScopeInitialized = holderScope->initialize( module );
+    assert( holderScopeInitialized == true );
+    stdex::intrusive_ptr<detail::smart_pointer_holder_t> holderValue( new detail::smart_pointer_holder_t );
+    PyObject * holderObject = holderScope->create_holder( holderValue.get() );
+    holderValue = nullptr;
+    kernel->decref( holderObject );
+    assert( holderDestroyCalls == 0 );
+    assert( detail::smart_pointer_base_t::alive() == 0 );
+    kernel->remove_type_scope( holderTypeId );
+    holderScope = nullptr;
+    holderSmartPointer = nullptr;
+    holderDestroy = nullptr;
 
     pybind::interface_<detail::cast_primary_t>( kernel, "CastPrimary", true, module );
     pybind::interface_<detail::cast_secondary_t>( kernel, "CastSecondary", true, module )

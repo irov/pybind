@@ -238,7 +238,12 @@ namespace pybind
             try
             {
                 PyObject * instance = detail::cast_object( _instance );
-                payload->scope->call_destructor( instance, payload->impl );
+
+                if( ( payload->flags & tinypy_class_type_scope::PayloadHolder ) == 0 )
+                {
+                    payload->scope->call_destructor( instance, payload->impl );
+                }
+
                 payload->scope->clear_bindable( payload->impl );
                 payload->scope->decref_smart_pointer( payload->impl );
             }
