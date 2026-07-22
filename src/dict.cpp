@@ -92,6 +92,11 @@ namespace pybind
         return m_kernel->dict_exist( m_obj, std::forward<detail::import_operator_t>( _key ) );
     }
     //////////////////////////////////////////////////////////////////////////
+    detail::extract_operator_t dict::getstring_i( const char * _key ) const
+    {
+        return pybind::dict_getstring_i( m_kernel, m_obj, _key );
+    }
+    //////////////////////////////////////////////////////////////////////////
     detail::extract_operator_t dict::get_i( detail::import_operator_t && _key ) const
     {
         return pybind::dict_get_i( m_kernel, m_obj, std::forward<detail::import_operator_t>( _key ) );

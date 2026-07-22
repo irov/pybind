@@ -93,6 +93,61 @@ public:
     }
 };
 
+struct string_like_name
+{
+    const char * c_str() const
+    {
+        return value;
+    }
+
+    const char * value;
+};
+
+bool test_string_like_names( pybind::kernel_interface * _kernel, PyObject * _module )
+{
+    const string_like_name key = {"string_like_key"};
+    const string_like_name missing = {"string_like_missing"};
+    pybind::dict values( _kernel );
+    values.set( key, 41 );
+
+    const pybind::dict & const_values = values;
+    int32_t value = const_values[key];
+
+    if( value != 41 || values.exist( key ) == false || values.get_default( missing, int32_t( -1 ) ) != -1 )
+    {
+        return false;
+    }
+
+    values.remove( key );
+
+    if( values.exist( key ) == true || pybind::dict_set_t( _kernel, values.ptr(), key, 42 ) == false )
+    {
+        return false;
+    }
+
+    int32_t helper_value = pybind::dict_get_t( _kernel, values.ptr(), key );
+
+    if( helper_value != 42 || pybind::dict_remove_t( _kernel, values.ptr(), key ) == false )
+    {
+        return false;
+    }
+
+    const string_like_name attribute = {"string_like_attribute"};
+    pybind::object module_object( _kernel, _module );
+    module_object.set_attr( attribute, 43 );
+
+    if( module_object.has_attr( attribute ) == false )
+    {
+        return false;
+    }
+
+    int32_t object_attribute = module_object.get_attr( attribute ).extract();
+    pybind::module module( _kernel, _module );
+    int32_t module_attribute = module.get_attr( attribute );
+
+    return object_attribute == 43 && module.has_attr( attribute ) == true && module_attribute == 43;
+}
+
 void test_dict( pybind::kernel_interface * _kernel, int i )
 {
     pybind::dict p( _kernel );
@@ -529,6 +584,13 @@ int main()
     }
 
     kernel->set_current_module( module );
+
+    if( test_string_like_names( kernel, module ) == false )
+    {
+        printf( "string-like name test failed\n" );
+
+        return 1;
+    }
 
     if( test_pickle_refcounts( kernel ) == false )
     {

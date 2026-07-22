@@ -5,6 +5,8 @@
 #include "pybind/adapter/destroy_adapter.hpp"
 #include "pybind/class_type_scope_interface.hpp"
 #include "pybind/object.hpp"
+#include "pybind/dict.hpp"
+#include "pybind/module.hpp"
 #include "pybind/generator/interface_.hpp"
 #include "pybind/generator/struct_.hpp"
 
@@ -160,6 +162,16 @@ namespace detail
     struct native_value_t
     {
         int32_t value;
+    };
+
+    struct string_like_name_t
+    {
+        const char * c_str() const
+        {
+            return value;
+        }
+
+        const char * value;
     };
 
     class native_new_adapter
@@ -432,6 +444,35 @@ int main()
     assert( kernel->object_repr_type( nullptr ).is_invalid() == true );
     PyObject * module = kernel->module_init( "contract" );
     kernel->set_current_module( module );
+
+    {
+        const detail::string_like_name_t key = {"string_like_key"};
+        const detail::string_like_name_t missing = {"string_like_missing"};
+        pybind::dict values( kernel );
+        values.set( key, 41 );
+        const pybind::dict & constValues = values;
+        int32_t value = constValues[key];
+        assert( value == 41 );
+        assert( values.exist( key ) == true );
+        assert( values.get_default( missing, int32_t( -1 ) ) == -1 );
+        values.remove( key );
+        assert( values.exist( key ) == false );
+        assert( pybind::dict_set_t( kernel, values.ptr(), key, 42 ) == true );
+        int32_t helperValue = pybind::dict_get_t( kernel, values.ptr(), key );
+        assert( helperValue == 42 );
+        assert( pybind::dict_remove_t( kernel, values.ptr(), key ) == true );
+
+        const detail::string_like_name_t attribute = {"string_like_attribute"};
+        pybind::object moduleObject( kernel, module );
+        moduleObject.set_attr( attribute, 43 );
+        assert( moduleObject.has_attr( attribute ) == true );
+        int32_t objectAttribute = moduleObject.get_attr( attribute ).extract();
+        pybind::module moduleWrapper( kernel, module );
+        int32_t moduleAttribute = moduleWrapper.get_attr( attribute );
+        assert( objectAttribute == 43 );
+        assert( moduleWrapper.has_attr( attribute ) == true );
+        assert( moduleAttribute == 43 );
+    }
 
     PyObject * unicodeValue = kernel->unicode_from_wchar( L"caf\u00e9" );
     PyObject * unicodeUtf8 = kernel->unicode_encode_utf8( unicodeValue );
