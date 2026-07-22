@@ -445,7 +445,22 @@ namespace pybind
 
     const class_type_scope_interface_ptr & tinypy_kernel::get_class_scope( PyTypeObject * _type )
     {
-        for( class_type_scope_interface_ptr & scope : m_scopes ) if( scope != nullptr && scope->is_instance( _type ) == true ) return scope;
+        const tinypy_type_t * type = detail::tinypy_type_cast( _type );
+        size_t mroCount = tinypy_type_mro_size( type );
+
+        for( size_t mroIndex = 0; mroIndex != mroCount; ++mroIndex )
+        {
+            const tinypy_type_t * mroType = tinypy_type_mro_at( type, mroIndex );
+
+            for( class_type_scope_interface_ptr & scope : m_scopes )
+            {
+                if( scope != nullptr && reinterpret_cast<const tinypy_type_t *>(scope->get_typeobject()) == mroType )
+                {
+                    return scope;
+                }
+            }
+        }
+
         return m_dummyScope;
     }
 
@@ -769,11 +784,11 @@ namespace pybind
     bool tinypy_kernel::is_instanceof( PyObject * _object, PyTypeObject * _type ) const { return tinypy_type_is_subtype( tinypy_object_type( detail::value_cast( _object ) ), detail::tinypy_type_cast( _type ) ) != 0; }
     bool tinypy_kernel::test_equal( PyObject * _left, PyObject * _right ) { return tinypy_equal( detail::value_cast( _left ), detail::value_cast( _right ) ) != 0; }
 
-    bool tinypy_kernel::has_attr( PyObject * _object, PyObject * _attribute ) { PyObject * value = this->get_attr( _object, _attribute ); if( value == nullptr ) { tinypy_vm_clear_error( m_vm ); return false; } this->decref( value ); return true; }
+    bool tinypy_kernel::has_attr( PyObject * _object, PyObject * _attribute ) { size_t size; const char * name = static_cast<const char *>(tinypy_string_view( detail::value_cast( _attribute ), &size )); tinypy_error_t * error = nullptr; tinypy_value_t * value = tinypy_object_get_attr( detail::value_cast( _object ), name, size, &error ); if( value == nullptr ) { if( error != nullptr ) tinypy_error_release( error ); tinypy_vm_clear_error( m_vm ); return false; } tinypy_release( value ); return true; }
     PyObject * tinypy_kernel::get_attr( PyObject * _object, PyObject * _attribute ) { size_t size; const char * name = static_cast<const char *>(tinypy_string_view( detail::value_cast( _attribute ), &size )); tinypy_error_t * error = nullptr; tinypy_value_t * result = tinypy_object_get_attr( detail::value_cast( _object ), name, size, &error ); if( result == nullptr ) this->report_error_( error ); return detail::object_cast( result ); }
     bool tinypy_kernel::set_attr( PyObject * _object, PyObject * _attribute, PyObject * _value ) { size_t size; const char * name = static_cast<const char *>(tinypy_string_view( detail::value_cast( _attribute ), &size )); tinypy_error_t * error = nullptr; int32_t result = tinypy_object_set_attr( detail::value_cast( _object ), name, size, detail::value_cast( _value ), &error ); if( result == 0 ) this->report_error_( error ); return result != 0; }
     bool tinypy_kernel::set_attrstring( PyObject * _object, const char * _attribute, PyObject * _value ) { tinypy_error_t * error = nullptr; int32_t result = tinypy_object_set_attr( detail::value_cast( _object ), _attribute, std::strlen( _attribute ), detail::value_cast( _value ), &error ); if( result == 0 ) this->report_error_( error ); return result != 0; }
-    bool tinypy_kernel::has_attrstring( PyObject * _object, const char * _attribute ) { PyObject * value = this->get_attrstring( _object, _attribute ); if( value == nullptr ) { tinypy_vm_clear_error( m_vm ); return false; } this->decref( value ); return true; }
+    bool tinypy_kernel::has_attrstring( PyObject * _object, const char * _attribute ) { tinypy_error_t * error = nullptr; tinypy_value_t * value = tinypy_object_get_attr( detail::value_cast( _object ), _attribute, std::strlen( _attribute ), &error ); if( value == nullptr ) { if( error != nullptr ) tinypy_error_release( error ); tinypy_vm_clear_error( m_vm ); return false; } tinypy_release( value ); return true; }
     PyObject * tinypy_kernel::get_attrstring( PyObject * _object, const char * _attribute ) { tinypy_error_t * error = nullptr; tinypy_value_t * result = tinypy_object_get_attr( detail::value_cast( _object ), _attribute, std::strlen( _attribute ), &error ); if( result == nullptr ) this->report_error_( error ); return detail::object_cast( result ); }
 
     PyObject * tinypy_kernel::object_dir( PyObject * _object ) { tinypy_value_t * key = tinypy_string_from_bytes( m_vm, "dir", 3 ); tinypy_value_t * function = tinypy_dict_get( tinypy_vm_builtins( m_vm ), key ); tinypy_release( key ); if( function == nullptr ) return nullptr; tinypy_value_t * args = tinypy_tuple_new( m_vm, 1 ); tinypy_tuple_set( args, 0, detail::value_cast( _object ) ); tinypy_error_t * error = nullptr; tinypy_value_t * result = tinypy_call( function, args, nullptr, &error ); tinypy_release( args ); if( result == nullptr ) this->report_error_( error ); return detail::object_cast( result ); }
@@ -836,10 +851,10 @@ namespace pybind
     bool tinypy_kernel::unicode_check( PyObject * _object ) const { return tinypy_typeof( detail::value_cast( _object ) ) == TINYPY_VALUE_UNICODE; }
 
     const wchar_t * tinypy_kernel::unicode_to_wchar( PyObject * _object ) { size_t size; return this->unicode_to_wchar_and_size( _object, &size ); }
-    const wchar_t * tinypy_kernel::unicode_to_wchar_and_size( PyObject * _object, size_t * _size ) { size_t bytes; const char * utf8 = tinypy_unicode_utf8_view( detail::value_cast( _object ), &bytes, nullptr ); assert( bytes != SIZE_MAX ); size_t capacity = bytes + 1; if( m_unicodeCacheCapacity < capacity ) { size_t bufferSize = capacity * sizeof( wchar_t ); if( m_unicodeCache == nullptr ) m_unicodeCache = static_cast<wchar_t *>( m_allocator->malloc( bufferSize ) ); else m_unicodeCache = static_cast<wchar_t *>( m_allocator->realloc( m_unicodeCache, bufferSize ) ); assert( m_unicodeCache != nullptr ); m_unicodeCacheCapacity = capacity; } if( detail::decode_utf8( utf8, bytes, m_unicodeCache, m_unicodeCacheCapacity, &m_unicodeCacheSize ) == false ) return nullptr; *_size = m_unicodeCacheSize; return m_unicodeCache; }
+    const wchar_t * tinypy_kernel::unicode_to_wchar_and_size( PyObject * _object, size_t * _size ) { size_t bytes; size_t codePointCount; const char * utf8 = tinypy_unicode_utf8_view( detail::value_cast( _object ), &bytes, &codePointCount ); assert( bytes != SIZE_MAX ); size_t capacity = bytes + 1; if( m_unicodeCacheCapacity < capacity ) { size_t bufferSize = capacity * sizeof( wchar_t ); if( m_unicodeCache == nullptr ) m_unicodeCache = static_cast<wchar_t *>( m_allocator->malloc( bufferSize ) ); else m_unicodeCache = static_cast<wchar_t *>( m_allocator->realloc( m_unicodeCache, bufferSize ) ); assert( m_unicodeCache != nullptr ); m_unicodeCacheCapacity = capacity; } if( detail::decode_utf8( utf8, bytes, m_unicodeCache, m_unicodeCacheCapacity, &m_unicodeCacheSize ) == false ) return nullptr; *_size = m_unicodeCacheSize; return m_unicodeCache; }
     PyObject * tinypy_kernel::unicode_from_wchar( const wchar_t * _value ) { return this->unicode_from_wchar_size( _value, std::wcslen( _value ) ); }
     PyObject * tinypy_kernel::unicode_from_wchar_size( const wchar_t * _value, size_t _size ) { assert( _size <= ( SIZE_MAX - 1 ) / 4 ); size_t capacity = _size * 4 + 1; char * utf8 = static_cast<char *>( m_allocator->malloc( capacity ) ); assert( utf8 != nullptr ); size_t utf8Size = detail::encode_utf8( _value, _size, utf8, capacity ); tinypy_value_t * unicode = tinypy_unicode_from_utf8( m_vm, utf8, utf8Size ); m_allocator->free( utf8 ); return detail::object_cast( unicode ); }
-    PyObject * tinypy_kernel::unicode_encode_utf8( PyObject * _object ) { size_t size; const char * data = tinypy_unicode_utf8_view( detail::value_cast( _object ), &size, nullptr ); return this->string_from_char_size( data, size ); }
+    PyObject * tinypy_kernel::unicode_encode_utf8( PyObject * _object ) { size_t size; size_t codePointCount; const char * data = tinypy_unicode_utf8_view( detail::value_cast( _object ), &size, &codePointCount ); return this->string_from_char_size( data, size ); }
     PyObject * tinypy_kernel::unicode_from_utf8( const char * _value ) { return this->unicode_from_utf8_size( _value, std::strlen( _value ) ); }
     PyObject * tinypy_kernel::unicode_from_utf8_size( const char * _value, size_t _size ) { return detail::object_cast( tinypy_unicode_from_utf8( m_vm, _value, _size ) ); }
 
@@ -902,8 +917,54 @@ namespace pybind
 
     void tinypy_kernel::report_error_( tinypy_error_t * _error )
     {
-        if( _error == nullptr ) return;
-        tinypy_error_release( _error );
+        if( _error != nullptr )
+        {
+            tinypy_error_release( _error );
+        }
+
+        if( tinypy_vm_has_error( m_vm ) == 0 )
+        {
+            return;
+        }
+
+        tinypy_value_t * exceptionType = tinypy_vm_raised_exception_type( m_vm );
+        tinypy_value_t * exceptionValue = tinypy_vm_raised_exception( m_vm );
+        tinypy_value_t * traceback = tinypy_vm_raised_traceback( m_vm );
+
+        if( m_excepthook != nullptr && tinypy_is_callable( detail::value_cast( m_excepthook ) ) != 0 && exceptionType != nullptr && exceptionValue != nullptr )
+        {
+            tinypy_value_t * none = nullptr;
+
+            if( traceback == nullptr )
+            {
+                none = tinypy_none_get( m_vm );
+                traceback = none;
+            }
+
+            tinypy_value_t * items[] = {exceptionType, exceptionValue, traceback};
+            tinypy_value_t * args = tinypy_tuple_from_items( m_vm, items, 3 );
+            tinypy_error_t * hookError = nullptr;
+            tinypy_value_t * result = tinypy_call( detail::value_cast( m_excepthook ), args, nullptr, &hookError );
+
+            tinypy_release( args );
+
+            if( none != nullptr )
+            {
+                tinypy_release( none );
+            }
+
+            if( result != nullptr )
+            {
+                tinypy_release( result );
+            }
+
+            if( hookError != nullptr )
+            {
+                tinypy_error_release( hookError );
+            }
+        }
+
+        tinypy_vm_clear_error( m_vm );
     }
 
     kernel_interface * initialize( allocator_interface * _allocator, const kernel_config_t & _config )

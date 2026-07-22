@@ -85,6 +85,16 @@ namespace pybind
 
                 if( holder->constructor == true )
                 {
+                    payload->scope = scope;
+                    payload->flags = 0;
+                    payload->hash = 0;
+
+                    if( scope->get_pod_size() != 0 )
+                    {
+                        payload->impl = payload->pod;
+                        payload->flags |= tinypy_class_type_scope::PayloadPod;
+                    }
+
                     tinypy_value_t * callArgs = detail::tail_arguments( kernel, _args );
                     PyObject * callArgsObject = detail::cast_object( callArgs );
                     void * impl = scope->call_new( self, callArgsObject, kwargsObject );
@@ -109,7 +119,7 @@ namespace pybind
                     return nullptr;
                 }
 
-                class_type_scope_interface_ptr scopePtr = class_type_scope_interface_ptr::from( scope );
+                class_type_scope_interface_ptr scopePtr = class_type_scope_interface_ptr::from( payload->scope );
 
                 if( holder->member != nullptr )
                 {
@@ -176,6 +186,15 @@ namespace pybind
             try
             {
                 payload->scope = scope;
+                payload->flags = 0;
+                payload->hash = 0;
+
+                if( scope->get_pod_size() != 0 )
+                {
+                    payload->impl = payload->pod;
+                    payload->flags |= tinypy_class_type_scope::PayloadPod;
+                }
+
                 PyObject * instance = detail::cast_object( _instance );
                 PyObject * args = detail::cast_object( _args );
                 PyObject * kwargs = detail::cast_object( _kwargs );
@@ -187,8 +206,7 @@ namespace pybind
                 }
 
                 payload->impl = impl;
-                payload->flags = tinypy_class_type_scope::PayloadConstructed;
-                payload->hash = 0;
+                payload->flags |= tinypy_class_type_scope::PayloadConstructed;
                 scope->incref_smart_pointer( impl );
                 return 1;
             }
@@ -210,7 +228,7 @@ namespace pybind
 
             tinypy_class_type_scope::payload_t * payload = static_cast<tinypy_class_type_scope::payload_t *>(_payload);
 
-            if( payload->scope == nullptr || payload->impl == nullptr || (payload->flags & tinypy_class_type_scope::PayloadWeak) != 0 || (payload->flags & tinypy_class_type_scope::PayloadUnwrapped) != 0 )
+            if( payload->scope == nullptr || payload->impl == nullptr || (payload->flags & tinypy_class_type_scope::PayloadConstructed) == 0 || (payload->flags & tinypy_class_type_scope::PayloadWeak) != 0 || (payload->flags & tinypy_class_type_scope::PayloadUnwrapped) != 0 )
             {
                 return;
             }
@@ -633,6 +651,9 @@ namespace pybind
         , m_compareAdapters( nullptr )
         , m_numberAdapters( nullptr )
     {
+        ::strncpy( m_name, _name, PYBIND_CLASS_TYPE_MAX_NAME );
+        m_name[PYBIND_CLASS_TYPE_MAX_NAME] = '\0';
+
         if( m_podSize > sizeof(static_cast<payload_t *>(nullptr)->pod) )
         {
             pybind::throw_exception( "tinypy native POD '%s' is too large: %zu", _name, _pod );
@@ -656,7 +677,18 @@ namespace pybind
 
     bool tinypy_class_type_scope::initialize( PyObject * _module )
     {
-        m_module = _module;
+        PyObject * moduleObject = _module != nullptr ? _module : m_kernel->get_current_module();
+
+        if( moduleObject == nullptr )
+        {
+            pybind::throw_exception( "scope '%s' initialize not setup python module"
+                , m_name
+            );
+
+            return false;
+        }
+
+        m_module = moduleObject;
         tinypy_vm_t * vm = m_kernel->vm();
         tinypy_value_t * namespaceDict = tinypy_dict_new( vm );
 
@@ -701,6 +733,20 @@ namespace pybind
         {
             const base_t & base = m_bases[index];
             bases[baseCount++] = reinterpret_cast<const tinypy_type_t *>(base.scope->get_typeobject());
+
+            const smart_pointer_adapter_interface_ptr & baseSmartPointer = base.scope->get_smart_pointer();
+
+            if( m_smartPointer == nullptr && baseSmartPointer != nullptr )
+            {
+                m_smartPointer = baseSmartPointer;
+            }
+
+            const bindable_adapter_interface_ptr & baseBindable = base.scope->get_bindable();
+
+            if( m_bindable == nullptr && baseBindable != nullptr )
+            {
+                m_bindable = baseBindable;
+            }
         }
 
         tinypy_native_type_spec_t spec;
@@ -744,12 +790,9 @@ namespace pybind
             return false;
         }
 
-        if( _module != nullptr )
-        {
-            tinypy_value_t * module = detail::cast_value( _module );
-            tinypy_value_t * typeValue = tinypy_type_as_value( m_type );
-            tinypy_module_add_value( module, m_name, nameSize, typeValue );
-        }
+        tinypy_value_t * module = detail::cast_value( moduleObject );
+        tinypy_value_t * typeValue = tinypy_type_as_value( m_type );
+        tinypy_module_add_value( module, m_name, nameSize, typeValue );
 
         class_type_scope_interface_ptr scope = class_type_scope_interface_ptr::from( this );
         m_kernel->cache_class_scope_type( scope );
@@ -875,10 +918,17 @@ namespace pybind
         tinypy_value_t * object = tinypy_native_instance_new( m_type );
         payload_t * value = static_cast<payload_t *>(tinypy_native_instance_payload( object ));
         value->scope = this;
-        value->impl = _impl;
+        value->impl = (_flags & PayloadPod) != 0 ? value->pod : _impl;
         value->flags = _flags | PayloadConstructed;
         value->hash = 0;
-        if( (_flags & PayloadWeak) == 0 ) this->incref_smart_pointer( _impl );
+
+        if( (_flags & (PayloadWeak | PayloadPod)) == 0 )
+        {
+            assert( _impl != nullptr );
+
+            this->incref_smart_pointer( _impl );
+        }
+
         return detail::cast_object( object );
     }
 
@@ -890,15 +940,36 @@ namespace pybind
     {
         PyObject * object = this->create_object_( nullptr, PayloadPod );
         payload_t * value = this->payload( object );
-        value->impl = value->pod;
-        *_impl = value->pod;
+        *_impl = value->impl;
         return object;
     }
 
     void * tinypy_class_type_scope::meta_cast( typeid_t _typeId, void * _impl )
     {
         if( _typeId == m_typeId ) return _impl;
-        for( size_t index = 0; index != m_baseCount; ++index ) if( m_bases[index].info == _typeId ) return m_bases[index].cast( _impl );
+
+        for( size_t index = 0; index != m_baseCount; ++index )
+        {
+            const base_t & base = m_bases[index];
+
+            if( base.info == _typeId )
+            {
+                return base.cast( _impl );
+            }
+        }
+
+        for( size_t index = 0; index != m_baseCount; ++index )
+        {
+            const base_t & base = m_bases[index];
+            void * baseImpl = base.cast( _impl );
+            void * castImpl = base.scope->meta_cast( _typeId, baseImpl );
+
+            if( castImpl != nullptr )
+            {
+                return castImpl;
+            }
+        }
+
         return nullptr;
     }
 
@@ -948,8 +1019,8 @@ namespace pybind
         return m_numberAdapters;
     }
 
-    void tinypy_class_type_scope::incref_smart_pointer( void * _impl ) { if( m_smartPointer != nullptr && _impl != nullptr ) m_smartPointer->incref_smart_pointer( m_kernel, _impl, class_type_scope_interface_ptr::from( this ) ); }
-    void tinypy_class_type_scope::decref_smart_pointer( void * _impl ) { if( m_smartPointer != nullptr && _impl != nullptr ) m_smartPointer->decref_smart_pointer( m_kernel, _impl, class_type_scope_interface_ptr::from( this ) ); }
+    void tinypy_class_type_scope::incref_smart_pointer( void * _impl ) { if( m_smartPointer != nullptr ) m_smartPointer->incref_smart_pointer( m_kernel, _impl, class_type_scope_interface_ptr::from( this ) ); }
+    void tinypy_class_type_scope::decref_smart_pointer( void * _impl ) { if( m_smartPointer != nullptr ) m_smartPointer->decref_smart_pointer( m_kernel, _impl, class_type_scope_interface_ptr::from( this ) ); }
 
     void * tinypy_class_type_scope::call_new( PyObject * _obj, PyObject * _args, PyObject * _kwds )
     {

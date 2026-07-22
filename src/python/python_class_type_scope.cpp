@@ -657,6 +657,15 @@ namespace pybind
 
                 void * impl = scope->call_new( py_self, _args, _kwds );
 
+                if( impl == nullptr )
+                {
+                    helper::unwrap_pod( py_self );
+
+                    pybind::decref( py_self );
+
+                    return nullptr;
+                }
+
                 scope->incref_smart_pointer( impl );
 
                 return py_self;

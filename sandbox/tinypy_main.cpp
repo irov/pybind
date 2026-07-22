@@ -6,10 +6,12 @@
 #include "pybind/class_type_scope_interface.hpp"
 #include "pybind/object.hpp"
 #include "pybind/generator/interface_.hpp"
+#include "pybind/generator/struct_.hpp"
 
 #include <cassert>
 #include <cstdlib>
 #include <cstring>
+#include <cwchar>
 
 namespace detail
 {
@@ -135,6 +137,26 @@ namespace detail
         }
     };
 
+    struct exception_capture_t
+    {
+        pybind::kernel_interface * kernel = nullptr;
+        bool called = false;
+        uint32_t line = 0;
+    };
+
+    static void capture_exception( void * _userData, PyTypeObject * _type, PyObject * _value, PyObject * _traceback )
+    {
+        exception_capture_t * capture = static_cast<exception_capture_t *>( _userData );
+
+        assert( _type != nullptr );
+        assert( _value != nullptr );
+        assert( _traceback != nullptr );
+        assert( capture->kernel->traceback_check( _traceback ) == true );
+
+        capture->called = true;
+        capture->line = capture->kernel->traceback_lineno( _traceback );
+    }
+
     struct native_value_t
     {
         int32_t value;
@@ -179,6 +201,122 @@ namespace detail
             allocator->deleteT( impl );
         }
     };
+
+    class smart_pointer_base_t
+        : public stdex::intrusive_ptr_base
+    {
+    public:
+        smart_pointer_base_t()
+            : m_refcount( 0 )
+        {
+            ++s_alive;
+        }
+
+        ~smart_pointer_base_t() override
+        {
+            --s_alive;
+        }
+
+    public:
+        uint32_t incref() override
+        {
+            return ++m_refcount;
+        }
+
+        void decref() override
+        {
+            assert( m_refcount != 0 );
+
+            if( --m_refcount == 0 )
+            {
+                delete this;
+            }
+        }
+
+        uint32_t getrefcount() const override
+        {
+            return m_refcount;
+        }
+
+        static void intrusive_ptr_add_ref( smart_pointer_base_t * _self )
+        {
+            _self->incref();
+        }
+
+        static void intrusive_ptr_dec_ref( smart_pointer_base_t * _self )
+        {
+            _self->decref();
+        }
+
+        static size_t alive()
+        {
+            return s_alive;
+        }
+
+        void clearEmbed()
+        {
+        }
+
+    private:
+        uint32_t m_refcount;
+        static size_t s_alive;
+    };
+
+    size_t smart_pointer_base_t::s_alive = 0;
+
+    class smart_pointer_derived_t
+        : public smart_pointer_base_t
+    {
+    public:
+        void set_value( int32_t _value )
+        {
+            m_value = _value;
+        }
+
+        int32_t get_value() const
+        {
+            return m_value;
+        }
+
+    private:
+        int32_t m_value = 0;
+    };
+
+    struct cast_primary_t
+    {
+        int32_t marker = 17;
+    };
+
+    struct cast_secondary_t
+    {
+        void set_secondary( int32_t _value )
+        {
+            value = _value;
+        }
+
+        int32_t value = 0;
+    };
+
+    struct cast_middle_t
+        : public cast_primary_t
+        , public cast_secondary_t
+    {
+    };
+
+    struct cast_leaf_t
+        : public cast_middle_t
+    {
+    };
+
+    struct pod_value_t
+    {
+        pod_value_t()
+            : value( 37 )
+        {
+        }
+
+        int32_t value;
+    };
 }
 int main()
 {
@@ -199,11 +337,45 @@ int main()
     PyObject * module = kernel->module_init( "contract" );
     kernel->set_current_module( module );
 
+    PyObject * unicodeValue = kernel->unicode_from_wchar( L"caf\u00e9" );
+    PyObject * unicodeUtf8 = kernel->unicode_encode_utf8( unicodeValue );
+    size_t unicodeUtf8Size;
+    const char * unicodeUtf8Data = kernel->string_to_char_and_size( unicodeUtf8, &unicodeUtf8Size );
+    assert( unicodeUtf8Size == 5 );
+    assert( std::memcmp( unicodeUtf8Data, "caf\xc3\xa9", unicodeUtf8Size ) == 0 );
+    size_t unicodeWcharSize;
+    const wchar_t * unicodeWcharData = kernel->unicode_to_wchar_and_size( unicodeValue, &unicodeWcharSize );
+    assert( unicodeWcharSize == 4 );
+    assert( std::wmemcmp( unicodeWcharData, L"caf\u00e9", unicodeWcharSize ) == 0 );
+    kernel->decref( unicodeUtf8 );
+    kernel->decref( unicodeValue );
+
+    PyObject * oldExcepthook = kernel->get_sys_excepthook();
+    kernel->incref( oldExcepthook );
+    detail::exception_capture_t exceptionCapture;
+    exceptionCapture.kernel = kernel;
+    kernel->set_sys_excepthook_f( &detail::capture_exception, &exceptionCapture );
+    PyObject * moduleDict = kernel->module_dict( module );
+    const char exceptionSource[] = "def fail():\n    return 1 + 'invalid'\n";
+    PyObject * exceptionModuleResult = kernel->exec_file( exceptionSource, moduleDict, moduleDict );
+    assert( exceptionModuleResult != nullptr );
+    kernel->decref( exceptionModuleResult );
+    PyObject * fail = kernel->get_attrstring( module, "fail" );
+    PyObject * failArgs = kernel->tuple_new( 0 );
+    PyObject * failResult = kernel->ask_native( fail, failArgs );
+    assert( failResult == nullptr );
+    assert( exceptionCapture.called == true );
+    assert( exceptionCapture.line == 2 );
+    kernel->decref( failArgs );
+    kernel->decref( fail );
+    kernel->set_sys_excepthook( oldExcepthook );
+    kernel->decref( oldExcepthook );
 #if defined(PYBIND_CONTRACT_TINYPY)
     pybind::interface_<detail::test_module_finder>( kernel, "TestModuleFinder", true )
         .def_kernel( "find_module", &detail::test_module_finder::find_module )
         .def_kernel( "load_module", &detail::test_module_finder::load_module )
         ;
+    assert( kernel->has_attrstring( module, "TestModuleFinder" ) == true );
     detail::test_module_finder finder;
     pybind::object finderObject = pybind::make_object_t( kernel, &finder );
     finder.set_embed( finderObject );
@@ -229,6 +401,94 @@ int main()
     kernel->decref( right );
     kernel->decref( left );
     kernel->decref( add );
+
+    pybind::interface_<detail::smart_pointer_base_t>( kernel, "SmartPointerBase", true, module )
+        .def_smart_pointer()
+        .def_bindable()
+        ;
+    pybind::interface_<detail::smart_pointer_derived_t, pybind::bases<detail::smart_pointer_base_t>>( kernel, "SmartPointerDerived", true, module )
+        .def( "set_value", &detail::smart_pointer_derived_t::set_value )
+        .def( "get_value", &detail::smart_pointer_derived_t::get_value )
+        ;
+    const pybind::class_type_scope_interface_ptr & smartDerivedScope = kernel->get_class_type_scope_t<detail::smart_pointer_derived_t>();
+    assert( smartDerivedScope->get_bindable() != nullptr );
+    stdex::intrusive_ptr<detail::smart_pointer_derived_t> smartPointer( new detail::smart_pointer_derived_t );
+    assert( detail::smart_pointer_base_t::alive() == 1 );
+    PyObject * smartObject = pybind::ptr_throw( kernel, smartPointer );
+    assert( smartObject != nullptr );
+    const pybind::class_type_scope_interface_ptr & smartObjectScope = kernel->get_class_scope( kernel->get_object_type( smartObject ) );
+    assert( smartObjectScope.get() == smartDerivedScope.get() );
+    smartPointer = nullptr;
+    assert( detail::smart_pointer_base_t::alive() == 1 );
+    PyObject * setValue = kernel->get_attrstring( smartObject, "set_value" );
+    PyObject * setValueArgs = kernel->tuple_new( 1 );
+    PyObject * setValueArgument = kernel->ptr_int32( 91 );
+    kernel->tuple_setitem( setValueArgs, 0, setValueArgument );
+    PyObject * setValueResult = kernel->ask_native( setValue, setValueArgs );
+    assert( setValueResult != nullptr );
+    kernel->decref( setValueResult );
+    kernel->decref( setValueArgument );
+    kernel->decref( setValueArgs );
+    kernel->decref( setValue );
+    PyObject * getValue = kernel->get_attrstring( smartObject, "get_value" );
+    PyObject * getValueArgs = kernel->tuple_new( 0 );
+    PyObject * getValueResult = kernel->ask_native( getValue, getValueArgs );
+    int32_t smartValue;
+    bool smartResult = kernel->extract_int32( getValueResult, smartValue );
+    assert( smartResult == true && smartValue == 91 );
+    kernel->decref( getValueResult );
+    kernel->decref( getValueArgs );
+    kernel->decref( getValue );
+    kernel->decref( smartObject );
+    assert( detail::smart_pointer_base_t::alive() == 0 );
+
+    pybind::interface_<detail::cast_primary_t>( kernel, "CastPrimary", true, module );
+    pybind::interface_<detail::cast_secondary_t>( kernel, "CastSecondary", true, module )
+        .def( "set_secondary", &detail::cast_secondary_t::set_secondary )
+        ;
+    pybind::interface_<detail::cast_middle_t, pybind::bases<detail::cast_primary_t, detail::cast_secondary_t>>( kernel, "CastMiddle", true, module );
+    pybind::interface_<detail::cast_leaf_t, pybind::bases<detail::cast_middle_t>>( kernel, "CastLeaf", true, module );
+    detail::cast_leaf_t castLeaf;
+    detail::cast_secondary_t * castSecondary = static_cast<detail::cast_secondary_t *>( &castLeaf );
+    assert( static_cast<void *>( &castLeaf ) != static_cast<void *>( castSecondary ) );
+    PyObject * castObject = pybind::ptr_throw( kernel, &castLeaf );
+    PyObject * setSecondary = kernel->get_attrstring( castObject, "set_secondary" );
+    PyObject * setSecondaryArgs = kernel->tuple_new( 1 );
+    PyObject * setSecondaryArgument = kernel->ptr_int32( 83 );
+    kernel->tuple_setitem( setSecondaryArgs, 0, setSecondaryArgument );
+    PyObject * setSecondaryResult = kernel->ask_native( setSecondary, setSecondaryArgs );
+    assert( setSecondaryResult != nullptr );
+    assert( castLeaf.marker == 17 );
+    assert( castLeaf.value == 83 );
+    detail::cast_secondary_t * extractedSecondary = pybind::extract<detail::cast_secondary_t *>( kernel, castObject );
+    assert( extractedSecondary == castSecondary );
+    kernel->decref( setSecondaryResult );
+    kernel->decref( setSecondaryArgument );
+    kernel->decref( setSecondaryArgs );
+    kernel->decref( setSecondary );
+    kernel->decref( castObject );
+
+    pybind::struct_<detail::pod_value_t>( kernel, "PodValue", true, module )
+        .def_constructor( pybind::init<>() )
+        ;
+    PyObject * podType = kernel->get_attrstring( module, "PodValue" );
+    PyObject * podArgs = kernel->tuple_new( 0 );
+    PyObject * podObject = kernel->ask_native( podType, podArgs );
+    assert( podObject != nullptr );
+    detail::pod_value_t * podValue = static_cast<detail::pod_value_t *>( kernel->get_class_impl( podObject ) );
+    assert( podValue != nullptr && podValue->value == 37 );
+    kernel->decref( podObject );
+
+    const pybind::class_type_scope_interface_ptr & podScope = kernel->get_class_type_scope_t<detail::pod_value_t>();
+    void * podStorage = nullptr;
+    PyObject * wrappedPodObject = podScope->create_pod( &podStorage );
+    assert( wrappedPodObject != nullptr );
+    assert( podStorage != nullptr );
+    new (podStorage) detail::pod_value_t();
+    kernel->decref( wrappedPodObject );
+
+    kernel->decref( podArgs );
+    kernel->decref( podType );
 
     PyObject * globals = kernel->dict_new();
     PyObject * result = kernel->eval_string( "6 * 7", globals, globals );
@@ -261,6 +521,7 @@ int main()
     pybind::class_type_scope_interface_ptr scope = kernel->create_new_type_scope( typeId, "NativeValue", nullptr, nativeNew, nativeDestroy, 0, false );
     bool scopeInitialized = scope->initialize( module );
     assert( scopeInitialized == true );
+    assert( kernel->has_attrstring( module, "NativeValue" ) == true );
     PyObject * constructorValue = kernel->ptr_int32( 73 );
     PyObject * constructorArgs = kernel->tuple_new( 1 );
     kernel->tuple_setitem( constructorArgs, 0, constructorValue );
@@ -273,7 +534,6 @@ int main()
     assert( native != nullptr && native->value == 73 );
     kernel->decref( instance );
 
-    PyObject * moduleDict = kernel->module_dict( module );
     kernel->remove_from_module( "missing_contract_name", module );
     kernel->remove_from_module( "missing_contract_name", module );
     PyObject * builtins = kernel->get_builtins();
@@ -307,6 +567,13 @@ int main()
     nativeDestroy = nullptr;
     nativeNew = nullptr;
     adapter = nullptr;
+    kernel->remove_scope<detail::smart_pointer_derived_t>();
+    kernel->remove_scope<detail::smart_pointer_base_t>();
+    kernel->remove_scope<detail::cast_leaf_t>();
+    kernel->remove_scope<detail::cast_middle_t>();
+    kernel->remove_scope<detail::cast_secondary_t>();
+    kernel->remove_scope<detail::cast_primary_t>();
+    kernel->remove_scope<detail::pod_value_t>();
 #if defined(PYBIND_CONTRACT_TINYPY)
     kernel->remove_module_finder();
     finder.clear();
