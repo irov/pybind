@@ -191,6 +191,11 @@ int main()
     pybind::kernel_interface * kernel = pybind::initialize( &allocator, config );
     assert( kernel != nullptr );
 
+    pybind::object invalidObject = pybind::detail::extract_operator_t( kernel, nullptr, pybind::borrowed );
+    assert( invalidObject.is_invalid() == true );
+    assert( kernel->object_str( nullptr ).is_invalid() == true );
+    assert( kernel->object_repr( nullptr ).is_invalid() == true );
+    assert( kernel->object_repr_type( nullptr ).is_invalid() == true );
     PyObject * module = kernel->module_init( "contract" );
     kernel->set_current_module( module );
 

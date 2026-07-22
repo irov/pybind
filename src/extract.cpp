@@ -207,11 +207,6 @@ namespace pybind
     {
         (void)_nothrow;
 
-        if( _obj == nullptr )
-        {
-            return false;
-        }
-
         _value = pybind::object( _kernel, _obj );
 
         return true;
