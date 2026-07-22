@@ -360,11 +360,17 @@ namespace pybind
             tinypy_vm_t * vm = kernel->vm();
             PyObject * other = detail::cast_object( _other );
             typeid_t typeId = kernel->get_object_type_id( other );
-            const compare_adapter_interface_ptr & adapter = scope->get_compare( typeId );
+            compare_adapter_interface_ptr adapter = scope->get_compare( typeId );
 
             if( adapter == nullptr )
             {
-                return tinypy_not_implemented_get( vm );
+                PyObject * instance = detail::cast_object( _instance );
+                typeid_t baseTypeId = kernel->get_object_type_id( instance );
+                adapter = scope->get_compare( baseTypeId );
+                if( adapter == nullptr )
+                {
+                    return tinypy_not_implemented_get( vm );
+                }
             }
 
             bool result = false;
@@ -571,7 +577,7 @@ namespace pybind
             BinaryInplaceDivide
         };
         //////////////////////////////////////////////////////////////////////////
-        static tinypy_value_t * native_binary( tinypy_value_t * _instance, void * _payload, tinypy_value_t * _other, void * _userData, tinypy_error_t ** _outError, binary_operation_e _operation )
+        static tinypy_value_t * native_binary( tinypy_value_t * _instance, void * _payload, tinypy_value_t * _other, void * _userData, tinypy_error_t ** _outError, binary_operation_e _operation, bool _rotate )
         {
             tinypy_class_type_scope * scope = static_cast<tinypy_class_type_scope *>(_userData);
             tinypy_class_type_scope::payload_t * payload = static_cast<tinypy_class_type_scope::payload_t *>(_payload);
@@ -612,9 +618,42 @@ namespace pybind
                     break;
                 }
 
+                if( ( binary != nullptr && *binary == nullptr ) || ( inplace != nullptr && *inplace == nullptr ) )
+                {
+                    typeid_t baseTypeId = kernel->get_object_type_id( detail::cast_object( _instance ) );
+
+                    switch( _operation )
+                    {
+                    case BinaryAdd:
+                        binary = &scope->get_number_add( baseTypeId );
+                        break;
+                    case BinarySubtract:
+                        binary = &scope->get_number_sub( baseTypeId );
+                        break;
+                    case BinaryMultiply:
+                        binary = &scope->get_number_mul( baseTypeId );
+                        break;
+                    case BinaryDivide:
+                        binary = &scope->get_number_div( baseTypeId );
+                        break;
+                    case BinaryInplaceAdd:
+                        inplace = &scope->get_number_inplace_add( baseTypeId );
+                        break;
+                    case BinaryInplaceSubtract:
+                        inplace = &scope->get_number_inplace_sub( baseTypeId );
+                        break;
+                    case BinaryInplaceMultiply:
+                        inplace = &scope->get_number_inplace_mul( baseTypeId );
+                        break;
+                    case BinaryInplaceDivide:
+                        inplace = &scope->get_number_inplace_div( baseTypeId );
+                        break;
+                    }
+                }
+
                 if( binary != nullptr && *binary != nullptr )
                 {
-                    return detail::cast_value( ( *binary )->call( kernel, payload->impl, class_type_scope_interface_ptr::from( scope ), detail::cast_object( _other ), false ) );
+                    return detail::cast_value( ( *binary )->call( kernel, payload->impl, class_type_scope_interface_ptr::from( scope ), detail::cast_object( _other ), _rotate ) );
                 }
 
                 if( inplace != nullptr && *inplace != nullptr )
@@ -639,27 +678,35 @@ namespace pybind
             }
         }
         //////////////////////////////////////////////////////////////////////////
-#define PYBIND_TINYPY_BINARY_CALLBACK(Name, Operation) \
+#define PYBIND_TINYPY_BINARY_CALLBACK(Name, Operation, Rotate) \
         static tinypy_value_t * Name( tinypy_value_t * instance, void * payload, tinypy_value_t * other, void * userData, tinypy_error_t ** outError ) \
         { \
-            return detail::native_binary( instance, payload, other, userData, outError, Operation ); \
+            return detail::native_binary( instance, payload, other, userData, outError, Operation, Rotate ); \
     }
         //////////////////////////////////////////////////////////////////////////
-        PYBIND_TINYPY_BINARY_CALLBACK( native_add, BinaryAdd )
+        PYBIND_TINYPY_BINARY_CALLBACK( native_add, BinaryAdd, false )
         //////////////////////////////////////////////////////////////////////////
-        PYBIND_TINYPY_BINARY_CALLBACK( native_subtract, BinarySubtract )
+        PYBIND_TINYPY_BINARY_CALLBACK( native_subtract, BinarySubtract, false )
         //////////////////////////////////////////////////////////////////////////
-        PYBIND_TINYPY_BINARY_CALLBACK( native_multiply, BinaryMultiply )
+        PYBIND_TINYPY_BINARY_CALLBACK( native_multiply, BinaryMultiply, false )
         //////////////////////////////////////////////////////////////////////////
-        PYBIND_TINYPY_BINARY_CALLBACK( native_divide, BinaryDivide )
+        PYBIND_TINYPY_BINARY_CALLBACK( native_divide, BinaryDivide, false )
         //////////////////////////////////////////////////////////////////////////
-        PYBIND_TINYPY_BINARY_CALLBACK( native_inplace_add, BinaryInplaceAdd )
+        PYBIND_TINYPY_BINARY_CALLBACK( native_inplace_add, BinaryInplaceAdd, false )
         //////////////////////////////////////////////////////////////////////////
-        PYBIND_TINYPY_BINARY_CALLBACK( native_inplace_subtract, BinaryInplaceSubtract )
+        PYBIND_TINYPY_BINARY_CALLBACK( native_inplace_subtract, BinaryInplaceSubtract, false )
         //////////////////////////////////////////////////////////////////////////
-        PYBIND_TINYPY_BINARY_CALLBACK( native_inplace_multiply, BinaryInplaceMultiply )
+        PYBIND_TINYPY_BINARY_CALLBACK( native_inplace_multiply, BinaryInplaceMultiply, false )
         //////////////////////////////////////////////////////////////////////////
-        PYBIND_TINYPY_BINARY_CALLBACK( native_inplace_divide, BinaryInplaceDivide )
+        PYBIND_TINYPY_BINARY_CALLBACK( native_inplace_divide, BinaryInplaceDivide, false )
+        //////////////////////////////////////////////////////////////////////////
+        PYBIND_TINYPY_BINARY_CALLBACK( native_reflected_add, BinaryAdd, true )
+        //////////////////////////////////////////////////////////////////////////
+        PYBIND_TINYPY_BINARY_CALLBACK( native_reflected_subtract, BinarySubtract, true )
+        //////////////////////////////////////////////////////////////////////////
+        PYBIND_TINYPY_BINARY_CALLBACK( native_reflected_multiply, BinaryMultiply, true )
+        //////////////////////////////////////////////////////////////////////////
+        PYBIND_TINYPY_BINARY_CALLBACK( native_reflected_divide, BinaryDivide, true )
         //////////////////////////////////////////////////////////////////////////
 #undef PYBIND_TINYPY_BINARY_CALLBACK
         //////////////////////////////////////////////////////////////////////////
@@ -702,6 +749,60 @@ namespace pybind
         if( m_number_adapters != nullptr )
         {
             m_kernel->get_allocator()->deleteT( m_number_adapters );
+        }
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void tinypy_class_type_scope::make_native_type_spec_( tinypy_native_type_spec_t * _spec ) const
+    {
+        tinypy_native_type_spec_init( _spec );
+        _spec->payload_size = sizeof( payload_t );
+        _spec->payload_alignment = alignof( payload_t );
+        _spec->user_data = const_cast<tinypy_class_type_scope *>(this);
+        _spec->construct = &detail::native_construct;
+        _spec->finalize = &detail::native_finalize;
+        _spec->call = m_call != nullptr ? &detail::native_call : nullptr;
+        _spec->repr = m_repr != nullptr ? &detail::native_repr : nullptr;
+        _spec->hash = m_hash != nullptr ? &detail::native_hash : nullptr;
+        _spec->compare = m_compare_adapters != nullptr ? &detail::native_compare : nullptr;
+        _spec->get_attribute = m_getattro != nullptr ? &detail::native_get_attribute : nullptr;
+        _spec->mapping_get = m_mapping != nullptr ? &detail::native_mapping_get : nullptr;
+        _spec->sequence_get = m_sequence_get != nullptr ? &detail::native_sequence_get : nullptr;
+        _spec->sequence_set = m_sequence_set != nullptr ? &detail::native_sequence_set : nullptr;
+        _spec->negative = m_number_neg != nullptr ? &detail::native_negative : nullptr;
+        _spec->absolute = m_number_abs != nullptr ? &detail::native_absolute : nullptr;
+        _spec->add = m_number_adapters != nullptr ? &detail::native_add : nullptr;
+        _spec->subtract = m_number_adapters != nullptr ? &detail::native_subtract : nullptr;
+        _spec->multiply = m_number_adapters != nullptr ? &detail::native_multiply : nullptr;
+        _spec->divide = m_number_adapters != nullptr ? &detail::native_divide : nullptr;
+        _spec->inplace_add = m_number_adapters != nullptr ? &detail::native_inplace_add : nullptr;
+        _spec->inplace_subtract = m_number_adapters != nullptr ? &detail::native_inplace_subtract : nullptr;
+        _spec->inplace_multiply = m_number_adapters != nullptr ? &detail::native_inplace_multiply : nullptr;
+        _spec->inplace_divide = m_number_adapters != nullptr ? &detail::native_inplace_divide : nullptr;
+        _spec->reflected_add = m_number_adapters != nullptr ? &detail::native_reflected_add : nullptr;
+        _spec->reflected_subtract = m_number_adapters != nullptr ? &detail::native_reflected_subtract : nullptr;
+        _spec->reflected_multiply = m_number_adapters != nullptr ? &detail::native_reflected_multiply : nullptr;
+        _spec->reflected_divide = m_number_adapters != nullptr ? &detail::native_reflected_divide : nullptr;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void tinypy_class_type_scope::update_native_type_spec_()
+    {
+        if( m_type == nullptr )
+        {
+            return;
+        }
+
+        tinypy_native_type_spec_t spec;
+        this->make_native_type_spec_( &spec );
+
+        tinypy_error_t * error = nullptr;
+        if( tinypy_native_type_update_spec( m_type, &spec, &error ) == 0 )
+        {
+            if( error != nullptr )
+            {
+                tinypy_error_release( error );
+            }
+
+            pybind::throw_exception( "scope '%s' failed to update native type slots", m_name );
         }
     }
     //////////////////////////////////////////////////////////////////////////
@@ -778,30 +879,7 @@ namespace pybind
         }
 
         tinypy_native_type_spec_t spec;
-        tinypy_native_type_spec_init( &spec );
-        spec.payload_size = sizeof( payload_t );
-        spec.payload_alignment = alignof( payload_t );
-        spec.user_data = this;
-        spec.construct = &detail::native_construct;
-        spec.finalize = &detail::native_finalize;
-        spec.call = m_call != nullptr ? &detail::native_call : nullptr;
-        spec.repr = m_repr != nullptr ? &detail::native_repr : nullptr;
-        spec.hash = m_hash != nullptr ? &detail::native_hash : nullptr;
-        spec.compare = m_compare_adapters != nullptr ? &detail::native_compare : nullptr;
-        spec.get_attribute = m_getattro != nullptr ? &detail::native_get_attribute : nullptr;
-        spec.mapping_get = m_mapping != nullptr ? &detail::native_mapping_get : nullptr;
-        spec.sequence_get = m_sequence_get != nullptr ? &detail::native_sequence_get : nullptr;
-        spec.sequence_set = m_sequence_set != nullptr ? &detail::native_sequence_set : nullptr;
-        spec.negative = m_number_neg != nullptr ? &detail::native_negative : nullptr;
-        spec.absolute = m_number_abs != nullptr ? &detail::native_absolute : nullptr;
-        spec.add = m_number_adapters != nullptr ? &detail::native_add : nullptr;
-        spec.subtract = m_number_adapters != nullptr ? &detail::native_subtract : nullptr;
-        spec.multiply = m_number_adapters != nullptr ? &detail::native_multiply : nullptr;
-        spec.divide = m_number_adapters != nullptr ? &detail::native_divide : nullptr;
-        spec.inplace_add = m_number_adapters != nullptr ? &detail::native_inplace_add : nullptr;
-        spec.inplace_subtract = m_number_adapters != nullptr ? &detail::native_inplace_subtract : nullptr;
-        spec.inplace_multiply = m_number_adapters != nullptr ? &detail::native_inplace_multiply : nullptr;
-        spec.inplace_divide = m_number_adapters != nullptr ? &detail::native_inplace_divide : nullptr;
+        this->make_native_type_spec_( &spec );
 
         tinypy_error_t * error = nullptr;
         size_t nameSize = ::strlen( m_name );
@@ -980,100 +1058,118 @@ namespace pybind
     void tinypy_class_type_scope::set_call( const method_adapter_interface_ptr & _icall )
     {
         m_call = _icall;
+        this->update_native_type_spec_();
     }
     //////////////////////////////////////////////////////////////////////////
     void tinypy_class_type_scope::set_repr( const repr_adapter_interface_ptr & _irepr )
     {
         m_repr = _irepr;
+        this->update_native_type_spec_();
     }
     //////////////////////////////////////////////////////////////////////////
     void tinypy_class_type_scope::set_hash( const hash_adapter_interface_ptr & _ihash )
     {
         m_hash = _ihash;
+        this->update_native_type_spec_();
     }
     //////////////////////////////////////////////////////////////////////////
     void tinypy_class_type_scope::set_compare( typeid_t _typeId, const compare_adapter_interface_ptr & _iadapter )
     {
         assert( _typeId < PYBIND_TYPE_COUNT );
         this->get_compare_adapters_()->compares[_typeId] = _iadapter;
+        this->update_native_type_spec_();
     }
     //////////////////////////////////////////////////////////////////////////
     void tinypy_class_type_scope::set_getattro( const getattro_adapter_interface_ptr & _igetattro )
     {
         m_getattro = _igetattro;
+        this->update_native_type_spec_();
     }
     //////////////////////////////////////////////////////////////////////////
     void tinypy_class_type_scope::set_mapping( const mapping_adapter_interface_ptr & _imapping )
     {
         m_mapping = _imapping;
+        this->update_native_type_spec_();
     }
     //////////////////////////////////////////////////////////////////////////
     void tinypy_class_type_scope::set_sequence_get( const sequence_get_adapter_interface_ptr & _isequence )
     {
         m_sequence_get = _isequence;
+        this->update_native_type_spec_();
     }
     //////////////////////////////////////////////////////////////////////////
     void tinypy_class_type_scope::set_sequence_set( const sequence_set_adapter_interface_ptr & _isequence )
     {
         m_sequence_set = _isequence;
+        this->update_native_type_spec_();
     }
     //////////////////////////////////////////////////////////////////////////
     void tinypy_class_type_scope::set_number_neg( const number_unary_adapter_interface_ptr & _iadapter )
     {
         m_number_neg = _iadapter;
+        this->update_native_type_spec_();
     }
     //////////////////////////////////////////////////////////////////////////
     void tinypy_class_type_scope::set_number_abs( const number_unary_adapter_interface_ptr & _iadapter )
     {
         m_number_abs = _iadapter;
+        this->update_native_type_spec_();
     }
     //////////////////////////////////////////////////////////////////////////
     void tinypy_class_type_scope::set_number_add( typeid_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
     {
         assert( _typeId < PYBIND_TYPE_COUNT );
         this->get_number_adapters_()->adds[_typeId] = _iadapter;
+        this->update_native_type_spec_();
     }
     //////////////////////////////////////////////////////////////////////////
     void tinypy_class_type_scope::set_number_sub( typeid_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
     {
         assert( _typeId < PYBIND_TYPE_COUNT );
         this->get_number_adapters_()->subs[_typeId] = _iadapter;
+        this->update_native_type_spec_();
     }
     //////////////////////////////////////////////////////////////////////////
     void tinypy_class_type_scope::set_number_mul( typeid_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
     {
         assert( _typeId < PYBIND_TYPE_COUNT );
         this->get_number_adapters_()->muls[_typeId] = _iadapter;
+        this->update_native_type_spec_();
     }
     //////////////////////////////////////////////////////////////////////////
     void tinypy_class_type_scope::set_number_div( typeid_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
     {
         assert( _typeId < PYBIND_TYPE_COUNT );
         this->get_number_adapters_()->divs[_typeId] = _iadapter;
+        this->update_native_type_spec_();
     }
     //////////////////////////////////////////////////////////////////////////
     void tinypy_class_type_scope::set_number_inplace_add( typeid_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter )
     {
         assert( _typeId < PYBIND_TYPE_COUNT );
         this->get_number_adapters_()->iadds[_typeId] = _iadapter;
+        this->update_native_type_spec_();
     }
     //////////////////////////////////////////////////////////////////////////
     void tinypy_class_type_scope::set_number_inplace_sub( typeid_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter )
     {
         assert( _typeId < PYBIND_TYPE_COUNT );
         this->get_number_adapters_()->isubs[_typeId] = _iadapter;
+        this->update_native_type_spec_();
     }
     //////////////////////////////////////////////////////////////////////////
     void tinypy_class_type_scope::set_number_inplace_mul( typeid_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter )
     {
         assert( _typeId < PYBIND_TYPE_COUNT );
         this->get_number_adapters_()->imuls[_typeId] = _iadapter;
+        this->update_native_type_spec_();
     }
     //////////////////////////////////////////////////////////////////////////
     void tinypy_class_type_scope::set_number_inplace_div( typeid_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter )
     {
         assert( _typeId < PYBIND_TYPE_COUNT );
         this->get_number_adapters_()->idivs[_typeId] = _iadapter;
+        this->update_native_type_spec_();
     }
     //////////////////////////////////////////////////////////////////////////
     void tinypy_class_type_scope::set_smart_pointer( const smart_pointer_adapter_interface_ptr & _iadapter )

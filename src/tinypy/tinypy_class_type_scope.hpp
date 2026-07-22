@@ -191,6 +191,8 @@ namespace pybind
 
     private:
         PyObject * create_object_( void * _impl, uint32_t _flags );
+        void make_native_type_spec_( tinypy_native_type_spec_t * _spec ) const;
+        void update_native_type_spec_();
         compare_adapter_t * get_compare_adapters_();
         number_adapter_t * get_number_adapters_();
 

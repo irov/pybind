@@ -315,8 +315,104 @@ namespace detail
         {
         }
 
+        explicit pod_value_t( int32_t _value )
+            : value( _value )
+        {
+        }
+
+        bool operator == ( const pod_value_t & _other ) const
+        {
+            return value == _other.value;
+        }
+
+        bool operator != ( const pod_value_t & _other ) const
+        {
+            return value != _other.value;
+        }
+
+        pod_value_t operator + ( const pod_value_t & _other ) const
+        {
+            return pod_value_t( value + _other.value );
+        }
+
+        pod_value_t operator - ( const pod_value_t & _other ) const
+        {
+            return pod_value_t( value - _other.value );
+        }
+
+        pod_value_t operator * ( const pod_value_t & _other ) const
+        {
+            return pod_value_t( value * _other.value );
+        }
+
+        pod_value_t operator / ( const pod_value_t & _other ) const
+        {
+            return pod_value_t( value / _other.value );
+        }
+
+        pod_value_t & operator += ( const pod_value_t & _other )
+        {
+            value += _other.value;
+            return *this;
+        }
+
+        pod_value_t & operator -= ( const pod_value_t & _other )
+        {
+            value -= _other.value;
+            return *this;
+        }
+
+        pod_value_t & operator *= ( const pod_value_t & _other )
+        {
+            value *= _other.value;
+            return *this;
+        }
+
+        pod_value_t & operator /= ( const pod_value_t & _other )
+        {
+            value /= _other.value;
+            return *this;
+        }
+
+        pod_value_t operator - () const
+        {
+            return pod_value_t( -value );
+        }
+
+        int32_t absolute() const
+        {
+            return value < 0 ? -value : value;
+        }
+
+        int32_t call( int32_t _value ) const
+        {
+            return value + _value;
+        }
+
+        int32_t & operator [] ( size_t _index )
+        {
+            assert( _index == 0 );
+            return value;
+        }
+
         int32_t value;
     };
+
+    static bool convert_pod_value( pybind::kernel_interface * _kernel, PyObject * _object, pod_value_t * const _value )
+    {
+        return _kernel->extract_int32( _object, _value->value );
+    }
+
+    static const char * repr_pod_value( pod_value_t * _value )
+    {
+        (void)_value;
+        return "pod-37";
+    }
+
+    static int64_t hash_pod_value( pod_value_t * _value )
+    {
+        return _value->value;
+    }
 }
 int main()
 {
@@ -470,6 +566,22 @@ int main()
 
     pybind::struct_<detail::pod_value_t>( kernel, "PodValue", true, module )
         .def_constructor( pybind::init<>() )
+        .def_call( &detail::pod_value_t::call )
+        .def_repr( &detail::repr_pod_value )
+        .def_hash( &detail::hash_pod_value )
+        .def_compare_equal()
+        .def_convert( &detail::convert_pod_value )
+        .def_operator_getset()
+        .def_operator_neg()
+        .def_abs( &detail::pod_value_t::absolute )
+        .def_operator_add()
+        .def_operator_sub()
+        .def_operator_mul()
+        .def_operator_div()
+        .def_operator_inplace_add()
+        .def_operator_inplace_sub()
+        .def_operator_inplace_mul()
+        .def_operator_inplace_div()
         ;
     PyObject * podType = kernel->get_attrstring( module, "PodValue" );
     PyObject * podArgs = kernel->tuple_new( 0 );
@@ -477,6 +589,50 @@ int main()
     assert( podObject != nullptr );
     detail::pod_value_t * podValue = static_cast<detail::pod_value_t *>( kernel->get_class_impl( podObject ) );
     assert( podValue != nullptr && podValue->value == 37 );
+    kernel->dict_setstring( moduleDict, "pod_object", podObject );
+
+    PyObject * podReprExec = kernel->exec_file( "pod_repr_ok = repr(pod_object) == 'pod-37'\n", moduleDict, moduleDict );
+    assert( podReprExec != nullptr );
+    kernel->decref( podReprExec );
+    PyObject * podHashExec = kernel->exec_file( "pod_hash_ok = hash(pod_object) == 37\n", moduleDict, moduleDict );
+    assert( podHashExec != nullptr );
+    kernel->decref( podHashExec );
+    PyObject * podCallExec = kernel->exec_file( "pod_call_ok = pod_object(5) == 42\n", moduleDict, moduleDict );
+    assert( podCallExec != nullptr );
+    kernel->decref( podCallExec );
+    const char podSequenceSource[] =
+        "pod_sequence_get_ok = pod_object[0] == 37\n"
+        "pod_object[0] = 41\n"
+        "pod_sequence_set_ok = pod_object == 41\n"
+        "pod_object[0] = 37\n";
+    PyObject * podSequenceExec = kernel->exec_file( podSequenceSource, moduleDict, moduleDict );
+    assert( podSequenceExec != nullptr );
+    kernel->decref( podSequenceExec );
+    const char podNumberSource[] =
+        "pod_compare_ok = pod_object == 37 and 37 == pod_object and pod_object != 38 and 38 != pod_object\n"
+        "pod_number_ok = pod_object + 5 == 42 and 5 + pod_object == 42 and pod_object - 5 == 32 and 5 - pod_object == -32 and pod_object * 2 == 74 and 2 * pod_object == 74 and pod_object / 2 == 18 and 74 / pod_object == 2\n"
+        "pod_unary_ok = -pod_object == -37 and abs(pod_object) == 37\n";
+    PyObject * podNumberExec = kernel->exec_file( podNumberSource, moduleDict, moduleDict );
+    assert( podNumberExec != nullptr );
+    kernel->decref( podNumberExec );
+    const char podInplaceSource[] =
+        "pod_inplace = PodValue()\n"
+        "pod_inplace_identity = pod_inplace\n"
+        "pod_inplace += 5\n"
+        "pod_inplace -= 2\n"
+        "pod_inplace *= 2\n"
+        "pod_inplace /= 4\n"
+        "pod_inplace_ok = pod_inplace is pod_inplace_identity and pod_inplace == 20\n"
+        "pod_contract_ok = pod_repr_ok and pod_hash_ok and pod_call_ok and pod_sequence_get_ok and pod_sequence_set_ok and pod_compare_ok and pod_number_ok and pod_unary_ok and pod_inplace_ok\n";
+    PyObject * podInplaceExec = kernel->exec_file( podInplaceSource, moduleDict, moduleDict );
+    assert( podInplaceExec != nullptr );
+    kernel->decref( podInplaceExec );
+    PyObject * podContract = kernel->get_attrstring( module, "pod_contract_ok" );
+    bool podContractValue;
+    bool podContractResult = kernel->extract_bool( podContract, podContractValue );
+    assert( podContractResult == true && podContractValue == true );
+    kernel->decref( podContract );
+    kernel->dict_removestring( moduleDict, "pod_object" );
     kernel->decref( podObject );
 
     const pybind::class_type_scope_interface_ptr & podScope = kernel->get_class_type_scope_t<detail::pod_value_t>();
