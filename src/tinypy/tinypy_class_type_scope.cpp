@@ -319,7 +319,6 @@ namespace pybind
         static tinypy_hash_t native_hash( tinypy_value_t * _instance, void * _payload, void * _userData, tinypy_error_t ** _outError )
         {
             (void)_instance;
-            (void)_outError;
             tinypy_class_type_scope * scope = static_cast<tinypy_class_type_scope *>(_userData);
             tinypy_class_type_scope::payload_t * payload = static_cast<tinypy_class_type_scope::payload_t *>(_payload);
         //////////////////////////////////////////////////////////////////////////
@@ -331,10 +330,31 @@ namespace pybind
             const hash_adapter_interface_ptr & adapter = scope->get_hash();
             kernel_interface * kernel = pybind::get_kernel();
             class_type_scope_interface_ptr scopePtr = class_type_scope_interface_ptr::from( scope );
-            int64_t hash = adapter->hash( kernel, payload->impl, scopePtr );
-            payload->hash = hash;
-            payload->flags |= tinypy_class_type_scope::PayloadHashValid;
-            return hash;
+
+            try
+            {
+                int64_t hash = adapter->hash( kernel, payload->impl, scopePtr );
+
+                if( hash == -1 )
+                {
+                    hash = -2;
+                }
+
+                payload->hash = hash;
+                payload->flags |= tinypy_class_type_scope::PayloadHashValid;
+                return hash;
+            }
+            catch( const pybind_exception & exception )
+            {
+                tinypy_kernel * tinypyKernel = static_cast<tinypy_kernel *>(kernel);
+                tinypy_vm_raise_error( tinypyKernel->vm(), TINYPY_ERROR_RUNTIME, exception.what() );
+                if( _outError != nullptr )
+                {
+                    *_outError = nullptr;
+                }
+
+                return 0;
+            }
         }
         //////////////////////////////////////////////////////////////////////////
         static PybindOperatorCompare convert_compare( tinypy_compare_operation_e _operation )
@@ -658,7 +678,14 @@ namespace pybind
 
                 if( binary != nullptr && *binary != nullptr )
                 {
-                    return detail::cast_value( ( *binary )->call( kernel, payload->impl, class_type_scope_interface_ptr::from( scope ), detail::cast_object( _other ), _rotate ) );
+                    PyObject * result = ( *binary )->call( kernel, payload->impl, class_type_scope_interface_ptr::from( scope ), detail::cast_object( _other ), _rotate );
+
+                    if( result == nullptr )
+                    {
+                        return tinypy_not_implemented_get( vm );
+                    }
+
+                    return detail::cast_value( result );
                 }
 
                 if( inplace != nullptr && *inplace != nullptr )
@@ -822,7 +849,6 @@ namespace pybind
             return false;
         }
 
-        m_module = moduleObject;
         tinypy_vm_t * vm = m_kernel->vm();
         tinypy_value_t * namespaceDict = tinypy_dict_new( vm );
 
@@ -903,6 +929,8 @@ namespace pybind
         }
 
         tinypy_value_t * module = detail::cast_value( moduleObject );
+        tinypy_retain( module );
+        m_module = moduleObject;
         tinypy_value_t * typeValue = tinypy_type_as_value( m_type );
         tinypy_module_add_value( module, m_name, nameSize, typeValue );
 
@@ -913,6 +941,13 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void tinypy_class_type_scope::finalize()
     {
+        if( m_module != nullptr )
+        {
+            m_kernel->remove_from_module( m_name, m_module );
+            m_kernel->decref( m_module );
+            m_module = nullptr;
+        }
+
         if( m_type != nullptr )
         {
             class_type_scope_interface_ptr scope = class_type_scope_interface_ptr::from( this );
@@ -922,8 +957,6 @@ namespace pybind
             tinypy_release( typeValue );
             m_type = nullptr;
         }
-
-        m_module = nullptr;
     }
     //////////////////////////////////////////////////////////////////////////
     kernel_interface * tinypy_class_type_scope::get_kernel() const

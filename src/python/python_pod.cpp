@@ -151,6 +151,13 @@ namespace pybind
             return false;
         }
         //////////////////////////////////////////////////////////////////////////
+        bool has_pod_hash( PyObject * _obj )
+        {
+            py_base_object * py_base = (py_base_object *)_obj;
+
+            return (py_base->flag & PY_OBJECT_HASH) != 0;
+        }
+        //////////////////////////////////////////////////////////////////////////
         void wrap_pod_ptr( PyObject * _obj, void * _impl, bool _holder )
         {
             py_ptr_object * py_ptr = (py_ptr_object *)_obj;

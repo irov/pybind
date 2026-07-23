@@ -191,6 +191,8 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         static bool decode_utf8( const char * _bytes, size_t _size, wchar_t * const _result, size_t _capacity, size_t * const _resultSize )
         {
+            (void)_capacity;
+
             assert( _capacity >= _size + 1 );
 
             size_t resultSize = 0;
@@ -262,6 +264,8 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         static size_t encode_utf8( const wchar_t * _value, size_t _size, char * const _result, size_t _capacity )
         {
+            (void)_capacity;
+
             assert( _capacity >= _size * 4 + 1 );
 
             size_t resultSize = 0;
@@ -458,6 +462,7 @@ namespace pybind
         PyObject * module = _module != nullptr ? _module : m_current_module;
         if( module == nullptr )
         {
+            pybind::throw_exception( "remove_from_module '%s' not setup module!", _name );
             return;
         }
 
@@ -488,16 +493,30 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void tinypy_kernel::def_function_adapter( const function_adapter_interface_ptr & _adapter, bool _native, PyObject * _module )
     {
-        PyObject * function = this->create_function_adapter( _adapter, _native );
         PyObject * module = _module != nullptr ? _module : m_current_module;
+
+        if( module == nullptr )
+        {
+            pybind::throw_exception( "def_function_adapter not setup module!" );
+            return;
+        }
+
+        PyObject * function = this->create_function_adapter( _adapter, _native );
         const char * name = _adapter->getName();
         this->module_addobject( module, name, function );
     }
     //////////////////////////////////////////////////////////////////////////
     void tinypy_kernel::def_functor_adapter( const functor_adapter_interface_ptr & _adapter, bool _native, PyObject * _module )
     {
-        PyObject * function = this->create_functor_adapter( _adapter, _native );
         PyObject * module = _module != nullptr ? _module : m_current_module;
+
+        if( module == nullptr )
+        {
+            pybind::throw_exception( "def_functor_adapter not setup module!" );
+            return;
+        }
+
+        PyObject * function = this->create_functor_adapter( _adapter, _native );
         const char * name = _adapter->getName();
         this->module_addobject( module, name, function );
     }
@@ -725,7 +744,42 @@ namespace pybind
     {
         PyTypeObject * type = this->get_object_type( _object );
         const class_type_scope_interface_ptr & scope = this->get_class_scope( type );
-        return scope != nullptr ? scope->get_type_id() : 0;
+
+        if( scope->get_type_id() != 0 )
+        {
+            return scope->get_type_id();
+        }
+
+        if( this->is_none( _object ) == true
+            || this->tuple_check( _object ) == true
+            || this->list_check( _object ) == true
+            || this->dict_check( _object ) == true
+            || this->set_check( _object ) == true )
+        {
+            return 0;
+        }
+
+        if( this->int_check( _object ) == true || this->long_check( _object ) == true )
+        {
+            return this->class_info<int>();
+        }
+
+        if( this->float_check( _object ) == true )
+        {
+            return this->class_info<float>();
+        }
+
+        if( this->string_check( _object ) == true )
+        {
+            return this->class_info<const char *>();
+        }
+
+        if( this->unicode_check( _object ) == true )
+        {
+            return this->class_info<const wchar_t *>();
+        }
+
+        return 0;
     }
     //////////////////////////////////////////////////////////////////////////
     const class_type_scope_interface_ptr & tinypy_kernel::get_class_scope( PyTypeObject * _type )
@@ -967,14 +1021,18 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * tinypy_kernel::ask_method_native( PyObject * _object, const char * _method, PyObject * _args )
     {
-        PyObject * method = this->get_attrstring( _object, _method );
+        tinypy_error_t * error = nullptr;
+        tinypy_value_t * method = tinypy_object_get_attr( detail::value_cast( _object ), _method, std::strlen( _method ), &error );
+
         if( method == nullptr )
         {
+            this->report_error_( error );
+
             return nullptr;
         }
 
-        PyObject * result = this->ask_native( method, _args );
-        this->decref( method );
+        PyObject * result = this->ask_native( detail::object_cast( method ), _args );
+        tinypy_release( method );
         return result;
     }
     //////////////////////////////////////////////////////////////////////////
@@ -1325,11 +1383,6 @@ namespace pybind
     PyObject * tinypy_kernel::traceback_next( PyObject * _traceback )
     {
         tinypy_value_t * next = tinypy_traceback_next( detail::value_cast( _traceback ) );
-        if( next != nullptr )
-        {
-            tinypy_retain( next );
-        }
-
         return detail::object_cast( next );
     }
     //////////////////////////////////////////////////////////////////////////
@@ -1359,7 +1412,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void tinypy_kernel::module_fini( PyObject * _module )
     {
-        (void)_module;
+        tinypy_dict_clear( tinypy_module_dict( detail::value_cast( _module ) ) );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * tinypy_kernel::module_dict( PyObject * _module )

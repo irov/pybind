@@ -611,10 +611,6 @@ namespace pybind
                 return this->class_info<const wchar_t *>();
             }
 
-            pybind::throw_exception( "obj '%s' not wrap pybind (scope)"
-                , this->object_str( (PyObject *)objtype ).c_str()
-            );
-
             return 0;
         }
 

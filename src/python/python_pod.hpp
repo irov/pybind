@@ -26,6 +26,7 @@ namespace pybind
     {
         bool is_pod_holder( PyObject * _obj );
         bool is_pod_weak( PyObject * _obj );
+        bool has_pod_hash( PyObject * _obj );
         void wrap_pod_ptr( PyObject * _obj, void * _impl, bool _holder );
         void wrap_pod_weak( PyObject * _obj, void * _impl, bool _holder );
         void wrap_pod( PyObject * _obj, void ** _impl, size_t _size, bool _hash );

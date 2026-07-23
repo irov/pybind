@@ -359,14 +359,11 @@ namespace pybind
         PYBIND_CHECK_MAIN_THREAD();
 
 #if PYBIND_PYTHON_VERSION < 300
-        PyObject * builtins = PyImport_ImportModuleLevel( const_cast<char *>("__builtin__"),
-            nullptr, nullptr, nullptr, 0 );
+        PyObject * builtins = PyImport_AddModule( const_cast<char *>("__builtin__") );
 #endif
 
-
 #if PYBIND_PYTHON_VERSION >= 300
-        PyObject * builtins = PyImport_ImportModuleLevel( "builtins",
-            nullptr, nullptr, nullptr, 0 );
+        PyObject * builtins = PyImport_AddModule( "builtins" );
 #endif
 
         return builtins;
@@ -437,8 +434,6 @@ namespace pybind
         PYBIND_CHECK_MAIN_THREAD();
 
         _PyModule_Clear( _module );
-
-        pybind::decref( _module );
     }
     //////////////////////////////////////////////////////////////////////////
 #endif
@@ -465,9 +460,16 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        PyObject * py_none = pybind::ret_none();
+        if( PyObject_DelAttrString( _module, _name ) == -1 )
+        {
+            if( PyErr_ExceptionMatches( PyExc_AttributeError ) == 1 )
+            {
+                PyErr_Clear();
+                return;
+            }
 
-        pybind::module_addobject( _module, _name, py_none );
+            pybind::check_error();
+        }
     }
     //////////////////////////////////////////////////////////////////////////
     bool module_hasobject( PyObject * _module, const char * _name )
@@ -584,7 +586,7 @@ namespace pybind
         {
             pybind::check_error();
 
-            return pybind::ret_none();
+            return nullptr;
         }
 
         PyObject * result = pybind::ask_va( method, _format, _va );
@@ -602,7 +604,7 @@ namespace pybind
         {
             pybind::check_error();
 
-            return pybind::ret_none();
+            return nullptr;
         }
 
         PyObject * result = pybind::ask_native( method, _args );

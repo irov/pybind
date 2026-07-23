@@ -134,13 +134,23 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         static long py_hash( PyObject * _obj )
         {
-            int64_t pod_hash = helper::get_pod_hash( _obj );
+            const bool has_pod_hash = helper::has_pod_hash( _obj );
 
-            if( pod_hash != -1 )
+            if( has_pod_hash == true )
             {
-                long py_pod_hash = (long)pod_hash;
+                int64_t pod_hash = helper::get_pod_hash( _obj );
 
-                return py_pod_hash;
+                if( pod_hash != -1 )
+                {
+                    long py_pod_hash = (long)pod_hash;
+
+                    if( py_pod_hash == -1 )
+                    {
+                        py_pod_hash = -2;
+                    }
+
+                    return py_pod_hash;
+                }
             }
 
             kernel_interface * kernel = pybind::get_kernel();
@@ -177,10 +187,17 @@ namespace pybind
             try
             {
                 int64_t hash = adapter->hash( kernel, impl, scope );
-
-                helper::set_pod_hash( _obj, hash );
-
                 long py_hash = (long)hash;
+
+                if( py_hash == -1 )
+                {
+                    py_hash = -2;
+                }
+
+                if( has_pod_hash == true )
+                {
+                    helper::set_pod_hash( _obj, (int64_t)py_hash );
+                }
 
                 return py_hash;
             }
@@ -192,7 +209,7 @@ namespace pybind
                 );
             }
 
-            return 0;
+            return -1;
         }
         //////////////////////////////////////////////////////////////////////////
         static PyObject * py_richcompare( PyObject * _obj, PyObject * _compare, int _op )
@@ -275,12 +292,7 @@ namespace pybind
                     bool test_result;
                     if( adapter->compare( kernel, _obj, impl, scope, _compare, pybind_op, &test_result ) == false )
                     {
-                        pybind::error_message( "obj '%s' py_richcompare '%s' invalid compare adapter"
-                            , kernel->object_str( _obj ).c_str()
-                            , kernel->object_str( _compare ).c_str()
-                        );
-
-                        return nullptr;
+                        return kernel->ret_not_implemented();
                     }
 
                     PyObject * py_result = pybind::ret_bool( test_result );
@@ -294,6 +306,8 @@ namespace pybind
                         , kernel->object_str( _compare ).c_str()
                         , _ex.what()
                     );
+
+                    return nullptr;
                 }
             }
 
@@ -308,12 +322,7 @@ namespace pybind
                     bool test_result;
                     if( base_adapter->compare( kernel, _obj, impl, scope, _compare, pybind_op, &test_result ) == false )
                     {
-                        pybind::error_message( "obj '%s' py_richcompare '%s' invalid base compare adapter"
-                            , kernel->object_str( _obj ).c_str()
-                            , kernel->object_str( _compare ).c_str()
-                        );
-
-                        return nullptr;
+                        return kernel->ret_not_implemented();
                     }
 
                     PyObject * py_result = pybind::ret_bool( test_result );
@@ -327,6 +336,8 @@ namespace pybind
                         , kernel->object_str( _compare ).c_str()
                         , _ex.what()
                     );
+
+                    return nullptr;
                 }
             }
 
@@ -829,7 +840,7 @@ namespace pybind
                         , adapter->getName()
                     );
 
-                    return kernel->ret_not_implemented();
+                    return nullptr;
                 }
             }
 
@@ -861,7 +872,7 @@ namespace pybind
                         , adapter->getName()
                     );
 
-                    return kernel->ret_not_implemented();
+                    return nullptr;
                 }
             }
 
@@ -884,6 +895,11 @@ namespace pybind
                 {
                     PyObject * result = detail::py_nb_binary_method( _kernel, _obj, _value, scope, adapter, _rotate );
 
+                    if( result == nullptr )
+                    {
+                        return _kernel->ret_not_implemented();
+                    }
+
                     return result;
                 }
                 catch( const pybind_exception & )
@@ -893,7 +909,7 @@ namespace pybind
                         , adapter->getName()
                     );
 
-                    return _kernel->ret_not_implemented();
+                    return nullptr;
                 }
             }
 
@@ -907,6 +923,11 @@ namespace pybind
                 {
                     PyObject * result = detail::py_nb_binary_method( _kernel, _obj, _value, scope, base_adapter, _rotate );
 
+                    if( result == nullptr )
+                    {
+                        return _kernel->ret_not_implemented();
+                    }
+
                     return result;
                 }
                 catch( const pybind_exception & )
@@ -916,7 +937,7 @@ namespace pybind
                         , base_adapter->getName()
                     );
 
-                    return _kernel->ret_not_implemented();
+                    return nullptr;
                 }
             }
 
@@ -951,6 +972,11 @@ namespace pybind
                 {
                     PyObject * result = detail::py_nb_binary_method( _kernel, _obj, _value, scope, adapter, _rotate );
 
+                    if( result == nullptr )
+                    {
+                        return _kernel->ret_not_implemented();
+                    }
+
                     return result;
                 }
                 catch( const pybind_exception & )
@@ -960,7 +986,7 @@ namespace pybind
                         , adapter->getName()
                     );
 
-                    return _kernel->ret_not_implemented();
+                    return nullptr;
                 }
             }
 
@@ -974,6 +1000,11 @@ namespace pybind
                 {
                     PyObject * result = detail::py_nb_binary_method( _kernel, _obj, _value, scope, base_adapter, _rotate );
 
+                    if( result == nullptr )
+                    {
+                        return _kernel->ret_not_implemented();
+                    }
+
                     return result;
                 }
                 catch( const pybind_exception & )
@@ -983,7 +1014,7 @@ namespace pybind
                         , base_adapter->getName()
                     );
 
-                    return _kernel->ret_not_implemented();
+                    return nullptr;
                 }
             }
 
@@ -1018,6 +1049,11 @@ namespace pybind
                 {
                     PyObject * result = detail::py_nb_binary_method( _kernel, _obj, _value, scope, adapter, _rotate );
 
+                    if( result == nullptr )
+                    {
+                        return _kernel->ret_not_implemented();
+                    }
+
                     return result;
                 }
                 catch( const pybind_exception & )
@@ -1027,7 +1063,7 @@ namespace pybind
                         , adapter->getName()
                     );
 
-                    return _kernel->ret_not_implemented();
+                    return nullptr;
                 }
             }
 
@@ -1041,6 +1077,11 @@ namespace pybind
                 {
                     PyObject * result = detail::py_nb_binary_method( _kernel, _obj, _value, scope, base_adapter, _rotate );
 
+                    if( result == nullptr )
+                    {
+                        return _kernel->ret_not_implemented();
+                    }
+
                     return result;
                 }
                 catch( const pybind_exception & )
@@ -1050,7 +1091,7 @@ namespace pybind
                         , base_adapter->getName()
                     );
 
-                    return _kernel->ret_not_implemented();
+                    return nullptr;
                 }
             }
 
@@ -1085,6 +1126,11 @@ namespace pybind
                 {
                     PyObject * result = detail::py_nb_binary_method( _kernel, _obj, _value, scope, adapter, _rotate );
 
+                    if( result == nullptr )
+                    {
+                        return _kernel->ret_not_implemented();
+                    }
+
                     return result;
                 }
                 catch( const pybind_exception & )
@@ -1094,7 +1140,7 @@ namespace pybind
                         , adapter->getName()
                     );
 
-                    return _kernel->ret_not_implemented();
+                    return nullptr;
                 }
             }
 
@@ -1108,6 +1154,11 @@ namespace pybind
                 {
                     PyObject * result = detail::py_nb_binary_method( _kernel, _obj, _value, scope, base_adapter, _rotate );
 
+                    if( result == nullptr )
+                    {
+                        return _kernel->ret_not_implemented();
+                    }
+
                     return result;
                 }
                 catch( const pybind_exception & )
@@ -1117,7 +1168,7 @@ namespace pybind
                         , base_adapter->getName()
                     );
 
-                    return _kernel->ret_not_implemented();
+                    return nullptr;
                 }
             }
 
@@ -1165,7 +1216,7 @@ namespace pybind
                         , adapter->getName()
                     );
 
-                    return kernel->ret_not_implemented();
+                    return nullptr;
                 }
             }
 
@@ -1190,7 +1241,7 @@ namespace pybind
                         , base_adapter->getName()
                     );
 
-                    return kernel->ret_not_implemented();
+                    return nullptr;
                 }
             }
 
@@ -1226,7 +1277,7 @@ namespace pybind
                         , adapter->getName()
                     );
 
-                    return kernel->ret_not_implemented();
+                    return nullptr;
                 }
             }
 
@@ -1251,7 +1302,7 @@ namespace pybind
                         , base_adapter->getName()
                     );
 
-                    return kernel->ret_not_implemented();
+                    return nullptr;
                 }
             }
 
@@ -1287,7 +1338,7 @@ namespace pybind
                         , adapter->getName()
                     );
 
-                    return kernel->ret_not_implemented();
+                    return nullptr;
                 }
             }
 
@@ -1312,7 +1363,7 @@ namespace pybind
                         , base_adapter->getName()
                     );
 
-                    return kernel->ret_not_implemented();
+                    return nullptr;
                 }
             }
 
@@ -1348,7 +1399,7 @@ namespace pybind
                         , adapter->getName()
                     );
 
-                    return kernel->ret_not_implemented();
+                    return nullptr;
                 }
             }
 
@@ -1373,7 +1424,7 @@ namespace pybind
                         , base_adapter->getName()
                     );
 
-                    return kernel->ret_not_implemented();
+                    return nullptr;
                 }
             }
 
@@ -1834,6 +1885,7 @@ namespace pybind
         pybind::decref( py_type_method );
 
         m_methods[m_methodCount++] = _imethod;
+        PyType_Modified( m_pytypeobject );
     }
     //////////////////////////////////////////////////////////////////////////
     const method_adapter_interface_ptr & python_class_type_scope::find_method( const char * _name ) const
@@ -1949,6 +2001,7 @@ namespace pybind
         pybind::decref( py_member );
 
         m_members[m_memberCount++] = _imember;
+        PyType_Modified( m_pytypeobject );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_convert( const convert_adapter_interface_ptr & _iconvert )
@@ -1961,6 +2014,7 @@ namespace pybind
         m_call = _icall;
 
         m_pytypeobject->tp_call = &detail::py_callfunc;
+        PyType_Modified( m_pytypeobject );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_repr( const repr_adapter_interface_ptr & _irepr )
@@ -1968,6 +2022,7 @@ namespace pybind
         m_repr = _irepr;
 
         m_pytypeobject->tp_repr = &detail::py_reprfunc;
+        PyType_Modified( m_pytypeobject );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_hash( const hash_adapter_interface_ptr & _ihash )
@@ -1975,6 +2030,7 @@ namespace pybind
         m_hash = _ihash;
 
         m_pytypeobject->tp_hash = (hashfunc)&detail::py_hash;
+        PyType_Modified( m_pytypeobject );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_compare( typeid_t _typeId, const compare_adapter_interface_ptr & _icompare )
@@ -1983,6 +2039,7 @@ namespace pybind
         compare_adapters->compares[_typeId] = _icompare;
 
         m_pytypeobject->tp_richcompare = &detail::py_richcompare;
+        PyType_Modified( m_pytypeobject );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_getattro( const getattro_adapter_interface_ptr & _igetattro )
@@ -1990,6 +2047,7 @@ namespace pybind
         m_getattro = _igetattro;
 
         m_pytypeobject->tp_getattro = &detail::py_getattro;
+        PyType_Modified( m_pytypeobject );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_mapping( const mapping_adapter_interface_ptr & _imapping )
@@ -1997,6 +2055,7 @@ namespace pybind
         m_mapping = _imapping;
 
         m_pytypeobject->tp_as_mapping = &detail::py_as_mapping;
+        PyType_Modified( m_pytypeobject );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_sequence_get( const sequence_get_adapter_interface_ptr & _isequence )
@@ -2004,6 +2063,7 @@ namespace pybind
         m_sequence_get = _isequence;
 
         m_pytypeobject->tp_as_sequence = &detail::py_as_sequence;
+        PyType_Modified( m_pytypeobject );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_sequence_set( const sequence_set_adapter_interface_ptr & _isequence )
@@ -2011,6 +2071,7 @@ namespace pybind
         m_sequence_set = _isequence;
 
         m_pytypeobject->tp_as_sequence = &detail::py_as_sequence;
+        PyType_Modified( m_pytypeobject );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_number_neg( const number_unary_adapter_interface_ptr & _iadapter )
@@ -2019,6 +2080,7 @@ namespace pybind
         number_adapters->neg = _iadapter;
 
         m_pytypeobject->tp_as_number = &detail::py_as_number;
+        PyType_Modified( m_pytypeobject );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_number_abs( const number_unary_adapter_interface_ptr & _iadapter )
@@ -2027,6 +2089,7 @@ namespace pybind
         number_adapters->abs = _iadapter;
 
         m_pytypeobject->tp_as_number = &detail::py_as_number;
+        PyType_Modified( m_pytypeobject );
     }
     //////////////////////////////////////////////////////////////////////////
     python_class_type_scope::number_adapter_t * python_class_type_scope::get_number_adapters()
@@ -2059,6 +2122,7 @@ namespace pybind
         number_adapters->adds[_typeId] = _iadapter;
 
         m_pytypeobject->tp_as_number = &detail::py_as_number;
+        PyType_Modified( m_pytypeobject );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_number_sub( typeid_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
@@ -2067,6 +2131,7 @@ namespace pybind
         number_adapters->subs[_typeId] = _iadapter;
 
         m_pytypeobject->tp_as_number = &detail::py_as_number;
+        PyType_Modified( m_pytypeobject );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_number_mul( typeid_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
@@ -2075,6 +2140,7 @@ namespace pybind
         number_adapters->muls[_typeId] = _iadapter;
 
         m_pytypeobject->tp_as_number = &detail::py_as_number;
+        PyType_Modified( m_pytypeobject );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_number_div( typeid_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
@@ -2083,6 +2149,7 @@ namespace pybind
         number_adapters->divs[_typeId] = _iadapter;
 
         m_pytypeobject->tp_as_number = &detail::py_as_number;
+        PyType_Modified( m_pytypeobject );
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_number_inplace_add( typeid_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter )
@@ -2091,6 +2158,7 @@ namespace pybind
         number_adapters->iadds[_typeId] = _iadapter;
 
         m_pytypeobject->tp_as_number = &detail::py_as_number;
+        PyType_Modified( m_pytypeobject );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_number_inplace_sub( typeid_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter )
@@ -2099,6 +2167,7 @@ namespace pybind
         number_adapters->isubs[_typeId] = _iadapter;
 
         m_pytypeobject->tp_as_number = &detail::py_as_number;
+        PyType_Modified( m_pytypeobject );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_number_inplace_mul( typeid_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter )
@@ -2107,6 +2176,7 @@ namespace pybind
         number_adapters->imuls[_typeId] = _iadapter;
 
         m_pytypeobject->tp_as_number = &detail::py_as_number;
+        PyType_Modified( m_pytypeobject );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_number_inplace_div( typeid_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter )
@@ -2115,6 +2185,7 @@ namespace pybind
         number_adapters->idivs[_typeId] = _iadapter;
 
         m_pytypeobject->tp_as_number = &detail::py_as_number;
+        PyType_Modified( m_pytypeobject );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_smart_pointer( const smart_pointer_adapter_interface_ptr & _iadapter )
@@ -2246,6 +2317,8 @@ namespace pybind
         PyObject * py_self = detail::py_alloc_class( m_pytypeobject, nullptr, nullptr );
 
         pybind::helper::wrap_pod_ptr( py_self, _impl, false );
+
+        this->incref_smart_pointer( _impl );
 
         return py_self;
     }

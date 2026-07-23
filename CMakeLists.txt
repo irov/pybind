@@ -211,16 +211,6 @@ ENDIF()
 if(PYBIND_SANDBOX)
     add_definitions(-DPYBIND_SANDBOX_SCRIPTS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/sandbox")
 
-    IF(PYBIND_BACKEND STREQUAL "python")
-        SET(files_private_sandbox_sources ${CMAKE_CURRENT_SOURCE_DIR}/sandbox/main.cpp)
-        SET(PYBIND_SANDBOX_NAME sandbox)
-    ELSE()
-        SET(files_private_sandbox_sources ${CMAKE_CURRENT_SOURCE_DIR}/sandbox/tinypy_main.cpp)
-        SET(PYBIND_SANDBOX_NAME sandbox_tinypy)
-    ENDIF()
-
-    SOURCE_GROUP(sandbox FILES ${files_private_sandbox_sources})
-
     if(PYBIND_PYTHON_INCLUDE_PATH)
         include_directories(${PYBIND_PYTHON_INCLUDE_PATH})
     endif()
@@ -229,20 +219,32 @@ if(PYBIND_SANDBOX)
         include_directories(${PYBIND_STDEX_INCLUDE_PATH})
     endif()
 
-    ADD_EXECUTABLE(${PYBIND_SANDBOX_NAME}
-        ${files_private_sandbox_sources}
-        )
-        
-    TARGET_LINK_LIBRARIES(${PYBIND_SANDBOX_NAME} ${PROJECT_NAME})
-    add_dependencies(${PYBIND_SANDBOX_NAME} ${PROJECT_NAME})
-
     IF(PYBIND_BACKEND STREQUAL "python")
-        TARGET_LINK_LIBRARIES(${PYBIND_SANDBOX_NAME} python)
-        add_dependencies(${PYBIND_SANDBOX_NAME} python_download)
+        ADD_EXECUTABLE(sandbox
+            ${CMAKE_CURRENT_SOURCE_DIR}/sandbox/main.cpp
+            )
+
+        TARGET_LINK_LIBRARIES(sandbox ${PROJECT_NAME})
+        TARGET_LINK_LIBRARIES(sandbox python)
+        TARGET_LINK_LIBRARIES(sandbox stdex)
+        add_dependencies(sandbox ${PROJECT_NAME})
+        add_dependencies(sandbox python_download)
+        add_dependencies(sandbox stdex_download)
     ENDIF()
 
-    TARGET_LINK_LIBRARIES(${PYBIND_SANDBOX_NAME} stdex)
-    add_dependencies(${PYBIND_SANDBOX_NAME} stdex_download)
+    ADD_EXECUTABLE(sandbox_contract
+        ${CMAKE_CURRENT_SOURCE_DIR}/sandbox/contract_main.cpp
+        )
+
+    TARGET_LINK_LIBRARIES(sandbox_contract ${PROJECT_NAME})
+    TARGET_LINK_LIBRARIES(sandbox_contract stdex)
+    add_dependencies(sandbox_contract ${PROJECT_NAME})
+    add_dependencies(sandbox_contract stdex_download)
+
+    IF(PYBIND_BACKEND STREQUAL "python")
+        TARGET_LINK_LIBRARIES(sandbox_contract python)
+        add_dependencies(sandbox_contract python_download)
+    ENDIF()
 endif()
 
 if(PYBIND_INSTALL)
