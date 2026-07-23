@@ -45,27 +45,13 @@ namespace pybind
         template<class T>
         bool exist( const T & _key ) const
         {
-            if constexpr( mpl::is_string_like<T>::value == true )
-            {
-                return m_kernel->dict_existstring( m_obj, mpl::string_like_c_str( _key ) );
-            }
-            else
-            {
-                return this->exist_i( detail::import_operator_t( m_kernel, _key ) );
-            }
+            return this->exist_i( detail::import_operator_t( m_kernel, _key ) );
         }
 
         template<class T>
         detail::extract_operator_t get( const T & _key ) const
         {
-            if constexpr( mpl::is_string_like<T>::value == true )
-            {
-                return this->getstring_i( mpl::string_like_c_str( _key ) );
-            }
-            else
-            {
-                return this->get_i( detail::import_operator_t( m_kernel, _key ) );
-            }
+            return this->get_i( detail::import_operator_t( m_kernel, _key ) );
         }
 
         template<class K, class T>
@@ -84,14 +70,7 @@ namespace pybind
         template<class K, class V>
         void set( const K & _key, const V & _value )
         {
-            if constexpr( mpl::is_string_like<K>::value == true )
-            {
-                pybind::dict_setstring_t( m_kernel, m_obj, mpl::string_like_c_str( _key ), _value );
-            }
-            else
-            {
-                this->set_i( detail::import_operator_t( m_kernel, _key ) ) = _value;
-            }
+            this->set_i( detail::import_operator_t( m_kernel, _key ) ) = _value;
         }
 
     public:
@@ -111,19 +90,11 @@ namespace pybind
         template<class T>
         void remove( const T & _key ) const
         {
-            if constexpr( mpl::is_string_like<T>::value == true )
-            {
-                m_kernel->dict_removestring( m_obj, mpl::string_like_c_str( _key ) );
-            }
-            else
-            {
-                this->remove_i( detail::import_operator_t( m_kernel, _key ) );
-            }
+            this->remove_i( detail::import_operator_t( m_kernel, _key ) );
         }
 
     public:
         bool exist_i( detail::import_operator_t && _key ) const;
-        detail::extract_operator_t getstring_i( const char * _key ) const;
         detail::extract_operator_t get_i( detail::import_operator_t && _key ) const;
         detail::set_dict_operator_t set_i( detail::import_operator_t && _key );
         bool remove_i( detail::import_operator_t && _key ) const;

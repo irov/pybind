@@ -40,58 +40,31 @@ namespace pybind
         template<class T>
         bool has_attr( const T & _name ) const
         {
-            if constexpr( mpl::is_string_like<T>::value == true )
-            {
-                return m_kernel->has_attrstring( m_obj, mpl::string_like_c_str( _name ) );
-            }
-            else
-            {
-                return this->has_attr_i(
-                    detail::import_operator_t( m_kernel, _name )
-                );
-            }
+            return this->has_attr_i(
+                detail::import_operator_t( m_kernel, _name )
+            );
         }
 
         template<class T>
         pybind::object get_attr( const T & _name ) const
         {
-            if constexpr( mpl::is_string_like<T>::value == true )
-            {
-                return this->get_attrstring_i( mpl::string_like_c_str( _name ) );
-            }
-            else
-            {
-                return this->get_attr_i(
-                    detail::import_operator_t( m_kernel, _name )
-                );
-            }
+            return this->get_attr_i(
+                detail::import_operator_t( m_kernel, _name )
+            );
         }
 
         template<class K, class V>
         void set_attr( K && _name, V && _value )
         {
-            typedef typename std::remove_reference<K>::type name_type;
-
-            if constexpr( mpl::is_string_like<name_type>::value == true )
-            {
-                this->set_attrstring_i( mpl::string_like_c_str( _name )
-                    , detail::import_operator_t( m_kernel, std::forward<V>( _value ) )
-                );
-            }
-            else
-            {
-                this->set_attr_i(
-                    detail::import_operator_t( m_kernel, std::forward<K>( _name ) ),
-                    detail::import_operator_t( m_kernel, std::forward<V>( _value ) )
-                );
-            }
+            this->set_attr_i(
+                detail::import_operator_t( m_kernel, std::forward<K>( _name ) ),
+                detail::import_operator_t( m_kernel, std::forward<V>( _value ) )
+            );
         }
 
     public:
         bool has_attr_i( detail::import_operator_t && _name ) const;
-        pybind::object get_attrstring_i( const char * _name ) const;
         pybind::object get_attr_i( detail::import_operator_t && _name ) const;
-        void set_attrstring_i( const char * _name, detail::import_operator_t && _value );
         void set_attr_i( detail::import_operator_t && _name, detail::import_operator_t && _value );
 
     public:

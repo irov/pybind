@@ -196,16 +196,6 @@ namespace detail
         int32_t value;
     };
 
-    struct string_like_name_t
-    {
-        const char * c_str() const
-        {
-            return value;
-        }
-
-        const char * value;
-    };
-
     class native_new_adapter
         : public pybind::new_adapter_interface
     {
@@ -548,35 +538,6 @@ int main()
     PYBIND_CONTRACT_ASSERT( kernel->object_repr_type( nullptr ).is_invalid() == true );
     PyObject * module = kernel->module_init( "contract" );
     kernel->set_current_module( module );
-
-    {
-        const detail::string_like_name_t key = {"string_like_key"};
-        const detail::string_like_name_t missing = {"string_like_missing"};
-        pybind::dict values( kernel );
-        values.set( key, 41 );
-        const pybind::dict & constValues = values;
-        int32_t value = constValues[key];
-        PYBIND_CONTRACT_ASSERT( value == 41 );
-        PYBIND_CONTRACT_ASSERT( values.exist( key ) == true );
-        PYBIND_CONTRACT_ASSERT( values.get_default( missing, int32_t( -1 ) ) == -1 );
-        values.remove( key );
-        PYBIND_CONTRACT_ASSERT( values.exist( key ) == false );
-        PYBIND_CONTRACT_ASSERT( pybind::dict_set_t( kernel, values.ptr(), key, 42 ) == true );
-        int32_t helperValue = pybind::dict_get_t( kernel, values.ptr(), key );
-        PYBIND_CONTRACT_ASSERT( helperValue == 42 );
-        PYBIND_CONTRACT_ASSERT( pybind::dict_remove_t( kernel, values.ptr(), key ) == true );
-
-        const detail::string_like_name_t attribute = {"string_like_attribute"};
-        pybind::object moduleObject( kernel, module );
-        moduleObject.set_attr( attribute, 43 );
-        PYBIND_CONTRACT_ASSERT( moduleObject.has_attr( attribute ) == true );
-        int32_t objectAttribute = moduleObject.get_attr( attribute ).extract();
-        pybind::module moduleWrapper( kernel, module );
-        int32_t moduleAttribute = moduleWrapper.get_attr( attribute );
-        PYBIND_CONTRACT_ASSERT( objectAttribute == 43 );
-        PYBIND_CONTRACT_ASSERT( moduleWrapper.has_attr( attribute ) == true );
-        PYBIND_CONTRACT_ASSERT( moduleAttribute == 43 );
-    }
 
     PyObject * unicodeValue = kernel->unicode_from_wchar( L"caf\u00e9" );
     PyObject * unicodeUtf8 = kernel->unicode_encode_utf8( unicodeValue );

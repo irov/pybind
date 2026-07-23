@@ -4,7 +4,6 @@
 #include "pybind/import_operator.hpp"
 #include "pybind/extract_operator.hpp"
 #include "pybind/args.hpp"
-#include "pybind/mpl.hpp"
 
 #include <tuple>
 #include <initializer_list>
@@ -60,7 +59,6 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PYBIND_API bool dict_setstring_i( kernel_interface * _kernel, PyObject * _dict, const char * _key, detail::import_operator_t && _value );
     PYBIND_API bool dict_setobject_i( kernel_interface * _kernel, PyObject * _dict, PyObject * _key, detail::import_operator_t && _value );
-    PYBIND_API detail::extract_operator_t dict_getstring_i( kernel_interface * _kernel, PyObject * _dict, const char * _key );
     PYBIND_API detail::extract_operator_t dict_get_i( kernel_interface * _kernel, PyObject * _dict, detail::import_operator_t && _key );
     PYBIND_API bool dict_set_i( kernel_interface * _kernel, PyObject * _dict, detail::import_operator_t && _name, detail::import_operator_t && _value );
     PYBIND_API bool dict_remove_i( kernel_interface * _kernel, PyObject * _dict, detail::import_operator_t && _key );
@@ -84,56 +82,26 @@ namespace pybind
     template<class K, class V>
     bool dict_set_t( kernel_interface * _kernel, PyObject * _dict, K && _name, V && _value )
     {
-        typedef typename std::remove_reference<K>::type key_type;
-
-        if constexpr( mpl::is_string_like<key_type>::value == true )
-        {
-            return dict_setstring_i( _kernel, _dict
-                , mpl::string_like_c_str( _name )
-                , detail::import_operator_t( _kernel, std::forward<V>( _value ) )
-            );
-        }
-        else
-        {
-            return dict_set_i( _kernel, _dict
-                , detail::import_operator_t( _kernel, std::forward<K>( _name ) )
-                , detail::import_operator_t( _kernel, std::forward<V>( _value ) )
-            );
-        }
+        return dict_set_i( _kernel, _dict
+            , detail::import_operator_t( _kernel, std::forward<K>( _name ) )
+            , detail::import_operator_t( _kernel, std::forward<V>( _value ) )
+        );
     }
     //////////////////////////////////////////////////////////////////////////
     template<class K>
     detail::extract_operator_t dict_get_t( kernel_interface * _kernel, PyObject * _dict, K && _key )
     {
-        typedef typename std::remove_reference<K>::type key_type;
-
-        if constexpr( mpl::is_string_like<key_type>::value == true )
-        {
-            return dict_getstring_i( _kernel, _dict, mpl::string_like_c_str( _key ) );
-        }
-        else
-        {
-            return dict_get_i( _kernel, _dict
-                , detail::import_operator_t( _kernel, std::forward<K>( _key ) )
-            );
-        }
+        return dict_get_i( _kernel, _dict
+            , detail::import_operator_t( _kernel, std::forward<K>( _key ) )
+        );
     }
     //////////////////////////////////////////////////////////////////////////
     template<class K>
     bool dict_remove_t( kernel_interface * _kernel, PyObject * _dict, K && _key )
     {
-        typedef typename std::remove_reference<K>::type key_type;
-
-        if constexpr( mpl::is_string_like<key_type>::value == true )
-        {
-            return _kernel->dict_removestring( _dict, mpl::string_like_c_str( _key ) );
-        }
-        else
-        {
-            return dict_remove_i( _kernel, _dict
-                , detail::import_operator_t( _kernel, std::forward<K>( _key ) )
-            );
-        }
+        return dict_remove_i( _kernel, _dict
+            , detail::import_operator_t( _kernel, std::forward<K>( _key ) )
+        );
     }
     //////////////////////////////////////////////////////////////////////////
     template<class K, class V>

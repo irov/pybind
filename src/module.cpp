@@ -61,24 +61,6 @@ namespace pybind
         return result;
     }
     //////////////////////////////////////////////////////////////////////////
-    bool module::has_attrstring_i( const char * _name ) const
-    {
-        PyObject * module_dict = m_kernel->module_dict( m_obj );
-
-        bool result = m_kernel->dict_existstring( module_dict, _name );
-
-        return result;
-    }
-    //////////////////////////////////////////////////////////////////////////
-    detail::extract_operator_t module::get_attrstring_i( const char * _name ) const
-    {
-        PyObject * module_dict = m_kernel->module_dict( m_obj );
-
-        PyObject * py_attr = m_kernel->dict_getstring( module_dict, _name );
-
-        return detail::extract_operator_t( m_kernel, py_attr );
-    }
-    //////////////////////////////////////////////////////////////////////////
     detail::extract_operator_t module::get_attr_i( detail::import_operator_t && _name ) const
     {
         PyObject * module_dict = m_kernel->module_dict( m_obj );

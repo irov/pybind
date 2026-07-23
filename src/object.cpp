@@ -79,23 +79,11 @@ namespace pybind
         return m_kernel->has_attr( m_obj, _name );
     }
     //////////////////////////////////////////////////////////////////////////
-    pybind::object object::get_attrstring_i( const char * _name ) const
-    {
-        PyObject * py_attr = m_kernel->get_attrstring( m_obj, _name );
-
-        return pybind::object( m_kernel, py_attr, pybind::borrowed );
-    }
-    //////////////////////////////////////////////////////////////////////////
     pybind::object object::get_attr_i( detail::import_operator_t && _name ) const
     {
         PyObject * py_attr = m_kernel->get_attr( m_obj, _name );
 
         return pybind::object( m_kernel, py_attr, pybind::borrowed );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    void object::set_attrstring_i( const char * _name, detail::import_operator_t && _value )
-    {
-        m_kernel->set_attrstring( m_obj, _name, _value );
     }
     //////////////////////////////////////////////////////////////////////////
     void object::set_attr_i( detail::import_operator_t && _name, detail::import_operator_t && _value )

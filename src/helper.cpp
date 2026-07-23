@@ -88,20 +88,6 @@ namespace pybind
         return result;
     }
     //////////////////////////////////////////////////////////////////////////
-    detail::extract_operator_t dict_getstring_i( kernel_interface * _kernel, PyObject * _dict, const char * _key )
-    {
-        PyObject * py_item = _kernel->dict_getstring( _dict, _key );
-
-        if( py_item == nullptr )
-        {
-            PyObject * py_none = _kernel->ret_none();
-
-            return detail::extract_operator_t( _kernel, py_none, pybind::borrowed );
-        }
-
-        return detail::extract_operator_t( _kernel, py_item );
-    }
-    //////////////////////////////////////////////////////////////////////////
     bool dict_set_i( kernel_interface * _kernel, PyObject * _dict, detail::import_operator_t && _name, detail::import_operator_t && _value )
     {
         bool result = _kernel->dict_set( _dict, _name, _value );
