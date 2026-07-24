@@ -740,6 +740,15 @@ int main()
     PYBIND_CONTRACT_ASSERT( podObject != nullptr );
     detail::pod_value_t * podValue = static_cast<detail::pod_value_t *>( kernel->get_class_impl( podObject ) );
     PYBIND_CONTRACT_ASSERT( podValue != nullptr && podValue->value == 37 );
+
+    {
+        pybind::dict podDictionary( kernel );
+        podDictionary.set( 37, 91 );
+        PYBIND_CONTRACT_ASSERT( podDictionary.exist( *podValue ) == true );
+        int32_t podDictionaryValue = podDictionary.get( *podValue );
+        PYBIND_CONTRACT_ASSERT( podDictionaryValue == 91 );
+    }
+
     kernel->dict_setstring( moduleDict, "pod_object", podObject );
 
     PyObject * podReprExec = kernel->exec_file( "pod_repr_ok = repr(pod_object) == 'pod-37'\n", moduleDict, moduleDict );
