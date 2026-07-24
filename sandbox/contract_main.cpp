@@ -749,6 +749,16 @@ int main()
         PYBIND_CONTRACT_ASSERT( podDictionaryValue == 91 );
     }
 
+#if defined(PYBIND_BACKEND_TINYPY)
+    {
+        pybind::object moduleObject( kernel, module );
+        moduleObject.set_attr( 37, 92 );
+        PYBIND_CONTRACT_ASSERT( moduleObject.has_attr( *podValue ) == true );
+        int32_t podAttributeValue = moduleObject.get_attr( *podValue ).extract();
+        PYBIND_CONTRACT_ASSERT( podAttributeValue == 92 );
+    }
+#endif
+
     kernel->dict_setstring( moduleDict, "pod_object", podObject );
 
     PyObject * podReprExec = kernel->exec_file( "pod_repr_ok = repr(pod_object) == 'pod-37'\n", moduleDict, moduleDict );

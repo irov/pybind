@@ -1566,31 +1566,13 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::has_attr( PyObject * _object, PyObject * _attribute )
     {
-        size_t size;
-        const char * name = static_cast<const char *>(tinypy_string_view( detail::value_cast( _attribute ), &size));
-        tinypy_error_t * error = nullptr;
-        tinypy_value_t * value = tinypy_object_get_attr( detail::value_cast( _object ), name, size, &error );
-        if( value == nullptr )
-        {
-            if( error != nullptr )
-            {
-                tinypy_error_release( error );
-            }
-
-            tinypy_vm_clear_error( m_vm );
-            return false;
-        }
-
-        tinypy_release( value );
-        return true;
+        return tinypy_object_has_attr_value( detail::value_cast( _object ), detail::value_cast( _attribute ) ) != 0;
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * tinypy_kernel::get_attr( PyObject * _object, PyObject * _attribute )
     {
-        size_t size;
-        const char * name = static_cast<const char *>(tinypy_string_view( detail::value_cast( _attribute ), &size));
         tinypy_error_t * error = nullptr;
-        tinypy_value_t * result = tinypy_object_get_attr( detail::value_cast( _object ), name, size, &error );
+        tinypy_value_t * result = tinypy_object_get_attr_value( detail::value_cast( _object ), detail::value_cast( _attribute ), &error );
         if( result == nullptr )
         {
             this->report_error_( error );
@@ -1601,10 +1583,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::set_attr( PyObject * _object, PyObject * _attribute, PyObject * _value )
     {
-        size_t size;
-        const char * name = static_cast<const char *>(tinypy_string_view( detail::value_cast( _attribute ), &size));
         tinypy_error_t * error = nullptr;
-        int32_t result = tinypy_object_set_attr( detail::value_cast( _object ), name, size, detail::value_cast( _value ), &error );
+        int32_t result = tinypy_object_set_attr_value( detail::value_cast( _object ), detail::value_cast( _attribute ), detail::value_cast( _value ), &error );
         if( result == 0 )
         {
             this->report_error_( error );
