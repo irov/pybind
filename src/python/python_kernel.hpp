@@ -28,6 +28,7 @@ namespace pybind
     public:
         void collect() override;
         void update_main_thread() override;
+        bool is_cycle_diagnostics_enabled() const override;
         size_t cycle_diagnostics( pybind_cycle_diagnostic_handler_f _handler, void * _userData ) override;
         void destroy() override;
 

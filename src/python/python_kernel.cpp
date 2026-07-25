@@ -137,6 +137,11 @@ namespace pybind
         pybind::update_python_main_thread();
     }
     //////////////////////////////////////////////////////////////////////////
+    bool python_kernel::is_cycle_diagnostics_enabled() const
+    {
+        return false;
+    }
+    //////////////////////////////////////////////////////////////////////////
     size_t python_kernel::cycle_diagnostics( pybind_cycle_diagnostic_handler_f _handler, void * _userData )
     {
         (void)_handler;

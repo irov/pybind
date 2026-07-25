@@ -529,8 +529,16 @@ int main()
     config.debug = false;
     config.install_signals = false;
     config.no_site = true;
+#if defined(PYBIND_BACKEND_TINYPY) && defined(TINYPY_CYCLE_DIAGNOSTICS)
+    config.cycle_diagnostics = true;
+#endif
     pybind::kernel_interface * kernel = pybind::initialize( &allocator, config );
     PYBIND_CONTRACT_ASSERT( kernel != nullptr );
+#if defined(PYBIND_BACKEND_TINYPY) && defined(TINYPY_CYCLE_DIAGNOSTICS)
+    PYBIND_CONTRACT_ASSERT( kernel->is_cycle_diagnostics_enabled() == true );
+#else
+    PYBIND_CONTRACT_ASSERT( kernel->is_cycle_diagnostics_enabled() == false );
+#endif
 
     pybind::object invalidObject = pybind::detail::extract_operator_t( kernel, nullptr, pybind::borrowed );
     PYBIND_CONTRACT_ASSERT( invalidObject.is_invalid() == true );

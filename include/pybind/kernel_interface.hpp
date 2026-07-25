@@ -50,6 +50,7 @@ namespace pybind
     public:
         virtual void collect() = 0;
         virtual void update_main_thread() = 0;
+        virtual bool is_cycle_diagnostics_enabled() const = 0;
         virtual size_t cycle_diagnostics( pybind_cycle_diagnostic_handler_f _handler, void * _userData ) = 0;
         virtual void destroy() = 0;
 

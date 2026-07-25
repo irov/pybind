@@ -22,6 +22,7 @@ namespace pybind
 
         void collect() override;
         void update_main_thread() override;
+        bool is_cycle_diagnostics_enabled() const override;
         size_t cycle_diagnostics( pybind_cycle_diagnostic_handler_f _handler, void * _userData ) override;
         void destroy() override;
 
@@ -313,6 +314,7 @@ namespace pybind
         allocator_interface * m_allocator;
 
         int32_t m_optimize_level;
+        bool m_cycleDiagnostics;
         tinypy_vm_t * m_vm;
 
         PyObject * m_current_module;

@@ -324,6 +324,7 @@ namespace pybind
     tinypy_kernel::tinypy_kernel()
         : m_allocator( nullptr )
         , m_optimize_level( 0 )
+        , m_cycleDiagnostics( false )
         , m_vm( nullptr )
         , m_current_module( nullptr )
         , m_excepthook( nullptr )
@@ -358,6 +359,10 @@ namespace pybind
         m_allocator = _allocator;
         m_optimize_level = _config.optimize_level;
 
+#if defined(TINYPY_CYCLE_DIAGNOSTICS)
+        m_cycleDiagnostics = _config.cycle_diagnostics;
+#endif
+
         tinypy_allocator_t allocator{};
         allocator.abi_version = TINYPY_ABI_VERSION;
         allocator.struct_size = sizeof( allocator );
@@ -374,7 +379,7 @@ namespace pybind
         config.max_heap_bytes = _config.max_heap_bytes;
         config.feature_flags = _config.feature_flags;
         config.optimize_level = _config.optimize_level;
-        config.cycle_diagnostics = _config.cycle_diagnostics == true ? 1 : 0;
+        config.cycle_diagnostics = m_cycleDiagnostics == true ? 1 : 0;
         m_vm = tinypy_vm_create( &config );
 
         if( m_vm == nullptr )
@@ -420,10 +425,15 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
+    bool tinypy_kernel::is_cycle_diagnostics_enabled() const
+    {
+        return m_cycleDiagnostics;
+    }
+    //////////////////////////////////////////////////////////////////////////
     size_t tinypy_kernel::cycle_diagnostics( pybind_cycle_diagnostic_handler_f _handler, void * _userData )
     {
 #if defined(TINYPY_CYCLE_DIAGNOSTICS)
-        if( _handler == nullptr )
+        if( m_cycleDiagnostics == false || _handler == nullptr )
         {
             return 0;
         }
