@@ -3,7 +3,7 @@
 #ifndef NDEBUG
 #   define PYBIND_DEBUG
 #   ifndef TINYPY_CYCLE_DIAGNOSTICS
-#       define TINYPY_CYCLE_DIAGNOSTICS 1
+#       define TINYPY_CYCLE_DIAGNOSTICS
 #   endif
 #else
 #   define PYBIND_RELEASE
