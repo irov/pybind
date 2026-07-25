@@ -28,8 +28,6 @@ namespace pybind
         uint64_t feature_flags = 0;
         int32_t optimize_level = 0;
         bool cycle_diagnostics = false;
-        void * cycle_diagnostic_user_data = nullptr;
-        pybind_cycle_diagnostic_handler_f cycle_diagnostic_handler = nullptr;
     };
 
     typedef intrusive_ptr<class type_cast> type_cast_ptr;
@@ -52,6 +50,7 @@ namespace pybind
     public:
         virtual void collect() = 0;
         virtual void update_main_thread() = 0;
+        virtual size_t cycle_diagnostics( pybind_cycle_diagnostic_handler_f _handler, void * _userData ) = 0;
         virtual void destroy() = 0;
 
     public:

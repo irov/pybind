@@ -70,6 +70,12 @@ namespace pybind
             pybind_excepthook_handler_f handler;
             void * userData;
         };
+
+        struct cycle_diagnostic_holder_t
+        {
+            pybind_cycle_diagnostic_handler_f handler;
+            void * userData;
+        };
         //////////////////////////////////////////////////////////////////////////
         static void * allocator_allocate( void * _userData, size_t _size, size_t _alignment, uint32_t _tag )
         {
@@ -319,10 +325,6 @@ namespace pybind
         : m_allocator( nullptr )
         , m_optimize_level( 0 )
         , m_vm( nullptr )
-#if defined(TINYPY_CYCLE_DIAGNOSTICS)
-        , m_cycleDiagnosticUserData( nullptr )
-        , m_cycleDiagnosticHandler( nullptr )
-#endif
         , m_current_module( nullptr )
         , m_excepthook( nullptr )
         , m_stdout( nullptr )
@@ -336,23 +338,21 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
-#if defined(TINYPY_CYCLE_DIAGNOSTICS)
     void tinypy_kernel::cycle_diagnostic_( void * _userData, const tinypy_diagnostic_t * _diagnostic )
     {
-        tinypy_kernel * kernel = static_cast<tinypy_kernel *>(_userData);
+        detail::cycle_diagnostic_holder_t * holder = static_cast<detail::cycle_diagnostic_holder_t *>(_userData);
 
-        if( kernel->m_cycleDiagnosticHandler == nullptr || _diagnostic == nullptr )
+        if( holder->handler == nullptr || _diagnostic == nullptr )
         {
             return;
         }
 
-        kernel->m_cycleDiagnosticHandler(
-            kernel->m_cycleDiagnosticUserData,
+        holder->handler(
+            holder->userData,
             _diagnostic->message,
             _diagnostic->message_size );
     }
     //////////////////////////////////////////////////////////////////////////
-#endif
     bool tinypy_kernel::initialize( allocator_interface * _allocator, const kernel_config_t & _config )
     {
         m_allocator = _allocator;
@@ -366,28 +366,11 @@ namespace pybind
         allocator.reallocate = &detail::allocator_reallocate;
         allocator.deallocate = &detail::allocator_deallocate;
 
-#if defined(TINYPY_CYCLE_DIAGNOSTICS)
-        m_cycleDiagnosticUserData = _config.cycle_diagnostic_user_data;
-        m_cycleDiagnosticHandler = _config.cycle_diagnostic_handler;
-
-        tinypy_host_t host{};
-        host.abi_version = TINYPY_ABI_VERSION;
-        host.struct_size = sizeof( host );
-        host.user_data = this;
-        host.diagnostic = &tinypy_kernel::cycle_diagnostic_;
-#endif
-
         tinypy_vm_config_t config{};
         config.abi_version = TINYPY_ABI_VERSION;
         config.struct_size = sizeof( config );
         config.allocator = &allocator;
-#if defined(TINYPY_CYCLE_DIAGNOSTICS)
-        config.host = _config.cycle_diagnostics == true && _config.cycle_diagnostic_handler != nullptr
-            ? &host
-            : nullptr;
-#else
         config.host = nullptr;
-#endif
         config.max_heap_bytes = _config.max_heap_bytes;
         config.feature_flags = _config.feature_flags;
         config.optimize_level = _config.optimize_level;
@@ -435,6 +418,27 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void tinypy_kernel::update_main_thread()
     {
+    }
+    //////////////////////////////////////////////////////////////////////////
+    size_t tinypy_kernel::cycle_diagnostics( pybind_cycle_diagnostic_handler_f _handler, void * _userData )
+    {
+#if defined(TINYPY_CYCLE_DIAGNOSTICS)
+        if( _handler == nullptr )
+        {
+            return 0;
+        }
+
+        detail::cycle_diagnostic_holder_t holder;
+        holder.handler = _handler;
+        holder.userData = _userData;
+
+        return tinypy_vm_report_cycles( m_vm, &tinypy_kernel::cycle_diagnostic_, &holder );
+#else
+        (void)_handler;
+        (void)_userData;
+
+        return 0;
+#endif
     }
     //////////////////////////////////////////////////////////////////////////
     void tinypy_kernel::destroy()
