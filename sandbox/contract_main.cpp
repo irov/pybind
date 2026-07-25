@@ -524,6 +524,7 @@ int main()
 {
     detail::test_allocator allocator;
     pybind::kernel_config_t config;
+    PYBIND_CONTRACT_ASSERT( config.cycle_diagnostics == false );
     config.path = L"";
     config.debug = false;
     config.install_signals = false;

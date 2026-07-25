@@ -27,6 +27,7 @@ namespace pybind
         size_t max_heap_bytes = 0;
         uint64_t feature_flags = 0;
         int32_t optimize_level = 0;
+        bool cycle_diagnostics = false;
         void * cycle_diagnostic_user_data = nullptr;
         pybind_cycle_diagnostic_handler_f cycle_diagnostic_handler = nullptr;
     };

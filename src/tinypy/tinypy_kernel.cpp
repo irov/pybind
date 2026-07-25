@@ -382,13 +382,16 @@ namespace pybind
         config.struct_size = sizeof( config );
         config.allocator = &allocator;
 #if defined(TINYPY_CYCLE_DIAGNOSTICS)
-        config.host = &host;
+        config.host = _config.cycle_diagnostics == true && _config.cycle_diagnostic_handler != nullptr
+            ? &host
+            : nullptr;
 #else
         config.host = nullptr;
 #endif
         config.max_heap_bytes = _config.max_heap_bytes;
         config.feature_flags = _config.feature_flags;
         config.optimize_level = _config.optimize_level;
+        config.cycle_diagnostics = _config.cycle_diagnostics == true ? 1 : 0;
         m_vm = tinypy_vm_create( &config );
 
         if( m_vm == nullptr )
