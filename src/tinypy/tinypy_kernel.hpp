@@ -306,12 +306,19 @@ namespace pybind
         bool set_class_info_desc_( typeid_t _id, const char * _name );
         typeid_t next_type_id_();
         void report_error_( tinypy_error_t * _error );
+#if defined(TINYPY_CYCLE_DIAGNOSTICS)
+        static void cycle_diagnostic_( void * _userData, const tinypy_diagnostic_t * _diagnostic );
+#endif
 
     private:
         allocator_interface * m_allocator;
 
         int32_t m_optimize_level;
         tinypy_vm_t * m_vm;
+#if defined(TINYPY_CYCLE_DIAGNOSTICS)
+        void * m_cycleDiagnosticUserData;
+        pybind_cycle_diagnostic_handler_f m_cycleDiagnosticHandler;
+#endif
 
         PyObject * m_current_module;
         PyObject * m_excepthook;

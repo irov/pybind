@@ -2,8 +2,14 @@
 
 #ifndef NDEBUG
 #   define PYBIND_DEBUG
+#   ifndef TINYPY_CYCLE_DIAGNOSTICS
+#       define TINYPY_CYCLE_DIAGNOSTICS 1
+#   endif
 #else
 #   define PYBIND_RELEASE
+#   ifdef TINYPY_CYCLE_DIAGNOSTICS
+#       error "TINYPY_CYCLE_DIAGNOSTICS is Debug-only"
+#   endif
 #endif
 
 #ifndef PYBIND_PYTHON_VERSION

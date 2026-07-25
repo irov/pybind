@@ -16,6 +16,8 @@
 
 namespace pybind
 {
+    typedef void (*pybind_cycle_diagnostic_handler_f)(void * _userData, const char * _message, size_t _messageSize);
+
     struct kernel_config_t
     {
         const wchar_t * path = nullptr;
@@ -25,6 +27,8 @@ namespace pybind
         size_t max_heap_bytes = 0;
         uint64_t feature_flags = 0;
         int32_t optimize_level = 0;
+        void * cycle_diagnostic_user_data = nullptr;
+        pybind_cycle_diagnostic_handler_f cycle_diagnostic_handler = nullptr;
     };
 
     typedef intrusive_ptr<class type_cast> type_cast_ptr;

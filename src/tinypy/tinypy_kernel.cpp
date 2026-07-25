@@ -319,6 +319,10 @@ namespace pybind
         : m_allocator( nullptr )
         , m_optimize_level( 0 )
         , m_vm( nullptr )
+#if defined(TINYPY_CYCLE_DIAGNOSTICS)
+        , m_cycleDiagnosticUserData( nullptr )
+        , m_cycleDiagnosticHandler( nullptr )
+#endif
         , m_current_module( nullptr )
         , m_excepthook( nullptr )
         , m_stdout( nullptr )
@@ -332,6 +336,23 @@ namespace pybind
     {
     }
     //////////////////////////////////////////////////////////////////////////
+#if defined(TINYPY_CYCLE_DIAGNOSTICS)
+    void tinypy_kernel::cycle_diagnostic_( void * _userData, const tinypy_diagnostic_t * _diagnostic )
+    {
+        tinypy_kernel * kernel = static_cast<tinypy_kernel *>(_userData);
+
+        if( kernel->m_cycleDiagnosticHandler == nullptr || _diagnostic == nullptr )
+        {
+            return;
+        }
+
+        kernel->m_cycleDiagnosticHandler(
+            kernel->m_cycleDiagnosticUserData,
+            _diagnostic->message,
+            _diagnostic->message_size );
+    }
+    //////////////////////////////////////////////////////////////////////////
+#endif
     bool tinypy_kernel::initialize( allocator_interface * _allocator, const kernel_config_t & _config )
     {
         m_allocator = _allocator;
@@ -345,11 +366,26 @@ namespace pybind
         allocator.reallocate = &detail::allocator_reallocate;
         allocator.deallocate = &detail::allocator_deallocate;
 
+#if defined(TINYPY_CYCLE_DIAGNOSTICS)
+        m_cycleDiagnosticUserData = _config.cycle_diagnostic_user_data;
+        m_cycleDiagnosticHandler = _config.cycle_diagnostic_handler;
+
+        tinypy_host_t host{};
+        host.abi_version = TINYPY_ABI_VERSION;
+        host.struct_size = sizeof( host );
+        host.user_data = this;
+        host.diagnostic = &tinypy_kernel::cycle_diagnostic_;
+#endif
+
         tinypy_vm_config_t config{};
         config.abi_version = TINYPY_ABI_VERSION;
         config.struct_size = sizeof( config );
         config.allocator = &allocator;
+#if defined(TINYPY_CYCLE_DIAGNOSTICS)
+        config.host = &host;
+#else
         config.host = nullptr;
+#endif
         config.max_heap_bytes = _config.max_heap_bytes;
         config.feature_flags = _config.feature_flags;
         config.optimize_level = _config.optimize_level;
