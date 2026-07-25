@@ -125,8 +125,11 @@ file(GLOB files_private_python_sources ${PRIVATE_DIR}/python/*.cpp)
 file(GLOB files_private_tinypy_headers ${PRIVATE_DIR}/tinypy/*.hpp)
 file(GLOB files_private_tinypy_sources ${PRIVATE_DIR}/tinypy/*.cpp)
 file(GLOB files_public_stl_headers ${PUBLIC_DIR}/stl/*.hpp)
-file(GLOB files_private_stl_sources ${PRIVATE_DIR}/stl/*.cpp)
 file(GLOB files_public_mutex_headers ${PUBLIC_DIR}/mutex/*.hpp)
+
+if(NOT PYBIND_STL_NOT_SUPPORT)
+    file(GLOB files_private_stl_sources ${PRIVATE_DIR}/stl/*.cpp)
+endif()
 
 SOURCE_GROUP(config FILES ${files_config_headers})
 SOURCE_GROUP(adapter FILES ${files_public_adapter_headers})
