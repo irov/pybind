@@ -36,7 +36,7 @@ namespace pybind
     public:
         PyObject * repr( kernel_interface * _kernel, void * _self, const class_type_scope_interface_ptr & _scope ) override
         {
-            C * c = _kernel->meta_cast_class_t<C>( _self, _scope );
+            const C * c = _kernel->meta_cast_class_t<C>( _self, _scope );
 
             PyObject * py_result = detail::return_operator_t( _kernel, (*m_repr)(c) );
 

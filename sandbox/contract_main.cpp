@@ -502,9 +502,9 @@ namespace detail
         return _kernel->extract_int32( _object, _value->value );
     }
 
-    static const char * repr_pod_value( pod_value_t * _value )
+    static const char * repr_pod_value( const pod_value_t * _t )
     {
-        (void)_value;
+        (void)_t;
         return "pod-37";
     }
 
