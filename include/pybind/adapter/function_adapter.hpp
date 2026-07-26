@@ -3,6 +3,7 @@
 #include "pybind/function_interface.hpp"
 
 #include "pybind/call/function_call.hpp"
+#include "pybind/call/function_out_call.hpp"
 #include "pybind/call/function_args_call.hpp"
 #include "pybind/call/function_proxy_call.hpp"
 #include "pybind/call/function_proxy_args_call.hpp"
@@ -11,6 +12,10 @@
 #include "pybind/call/function_proxy_kernel_args_call.hpp"
 
 #include "pybind/types.hpp"
+
+#include "stdex/function_traits.h"
+
+#include <type_traits>
 
 namespace pybind
 {
@@ -55,6 +60,29 @@ namespace pybind
             F fn = this->getFn();
 
             PyObject * ret = function_call<F>::call( _kernel, fn, _args );
+
+            return ret;
+        }
+    };
+    //////////////////////////////////////////////////////////////////////////
+    template<class F>
+    class function_out_adapter
+        : public function_adapter_base<F>
+    {
+    public:
+        function_out_adapter( const char * _name, size_t _arity, F _fn )
+            : function_adapter_base<F>( _name, _arity, _fn )
+        {
+        }
+
+    protected:
+        PyObject * call( kernel_interface * _kernel, PyObject * _args, PyObject * _kwds ) override
+        {
+            (void)_kwds;
+
+            F fn = this->getFn();
+
+            PyObject * ret = function_out_call<F>::call( _kernel, fn, _args );
 
             return ret;
         }
@@ -226,6 +254,16 @@ namespace pybind
     class function_adapter_native
         : public function_adapter_base<F>
     {
+    private:
+        typedef typename stdex::function_traits<F>::result f_info;
+
+        static_assert(f_info::method == false, "[pybind] native function bind requires a function");
+        static_assert(f_info::arity == 3, "[pybind] native function must have kernel, args and kwds arguments");
+        static_assert(std::is_same<typename f_info::template iterator_param<0>, pybind::kernel_interface *>::value == true, "[pybind] native function first argument must be kernel_interface *");
+        static_assert(std::is_same<typename f_info::template iterator_param<1>, PyObject *>::value == true, "[pybind] native function second argument must be PyObject * args");
+        static_assert(std::is_same<typename f_info::template iterator_param<2>, PyObject *>::value == true, "[pybind] native function third argument must be PyObject * kwds");
+        static_assert(std::is_same<typename f_info::ret_type, PyObject *>::value == true, "[pybind] native function must return PyObject *");
+
     public:
         function_adapter_native( const char * _name, size_t _arity, F _fn )
             : function_adapter_base<F>( _name, _arity, _fn )

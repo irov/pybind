@@ -1,6 +1,7 @@
 #include "pybind/kernel_interface.hpp"
 #include "pybind/extract.hpp"
 #include "pybind/function_interface.hpp"
+#include "pybind/function.hpp"
 #include "pybind/adapter/new_adapter.hpp"
 #include "pybind/adapter/destroy_adapter.hpp"
 #include "pybind/adapter/smart_pointer_adapter.hpp"
@@ -460,6 +461,18 @@ namespace detail
         int32_t value;
     };
 
+    class pod_proxy_t
+    {
+    public:
+        int32_t add( pybind::kernel_interface * _kernel, pod_value_t * _value, int32_t _add, const pybind::args & _args ) const
+        {
+            (void)_kernel;
+            (void)_args;
+
+            return _value->value + _add;
+        }
+    };
+
     struct scalar_value_t
     {
         scalar_value_t()
@@ -518,6 +531,11 @@ namespace detail
         (void)_value;
         pybind::throw_exception( "scalar hash failure" );
         return 0;
+    }
+
+    static void multiply_out( int32_t * const _out, int32_t _value )
+    {
+        *_out = _value * 2;
     }
 }
 int main()
@@ -597,6 +615,7 @@ int main()
 
     pybind::function_adapter_interface_ptr adapter = allocator.newT<detail::add_adapter>();
     kernel->def_function_adapter( adapter, true, module );
+    pybind::def_function_out( kernel, "multiply_out", &detail::multiply_out, module );
     PyObject * add = kernel->get_attrstring( module, "add" );
     PyObject * left = kernel->ptr_int32( 19 );
     PyObject * right = kernel->ptr_int32( 23 );
@@ -613,6 +632,20 @@ int main()
     kernel->decref( right );
     kernel->decref( left );
     kernel->decref( add );
+
+    PyObject * multiplyOut = kernel->get_attrstring( module, "multiply_out" );
+    PyObject * multiplyOutArgument = kernel->ptr_int32( 21 );
+    PyObject * multiplyOutArgs = kernel->tuple_new( 1 );
+    kernel->tuple_setitem( multiplyOutArgs, 0, multiplyOutArgument );
+    PyObject * multiplyOutResult = kernel->ask_native( multiplyOut, multiplyOutArgs );
+    int32_t multiplyOutValue;
+    bool multiplyOutExtracted = kernel->extract_int32( multiplyOutResult, multiplyOutValue );
+    PYBIND_CONTRACT_ASSERT( multiplyOutExtracted == true );
+    PYBIND_CONTRACT_ASSERT( multiplyOutValue == 42 );
+    kernel->decref( multiplyOutResult );
+    kernel->decref( multiplyOutArgs );
+    kernel->decref( multiplyOutArgument );
+    kernel->decref( multiplyOut );
 
     bool missingMethodExceptionCalled = false;
     kernel->set_sys_excepthook_f( &detail::suppress_exception, &missingMethodExceptionCalled );
@@ -724,9 +757,11 @@ int main()
     kernel->decref( setSecondary );
     kernel->decref( castObject );
 
+    detail::pod_proxy_t podProxy;
     pybind::struct_<detail::pod_value_t>( kernel, "PodValue", true, module )
         .def_constructor( pybind::init<>() )
         .def_call( &detail::pod_value_t::call )
+        .def_proxy_static_kernel_args( "proxy_kernel_args", &podProxy, &detail::pod_proxy_t::add )
         .def_repr( &detail::repr_pod_value )
         .def_hash( &detail::hash_pod_value )
         .def_compare_equal()
@@ -779,6 +814,9 @@ int main()
     PyObject * podCallExec = kernel->exec_file( "pod_call_ok = pod_object(5) == 42\n", moduleDict, moduleDict );
     PYBIND_CONTRACT_ASSERT( podCallExec != nullptr );
     kernel->decref( podCallExec );
+    PyObject * podProxyKernelArgsExec = kernel->exec_file( "pod_proxy_kernel_args_ok = pod_object.proxy_kernel_args(5) == 42\n", moduleDict, moduleDict );
+    PYBIND_CONTRACT_ASSERT( podProxyKernelArgsExec != nullptr );
+    kernel->decref( podProxyKernelArgsExec );
     const char podSequenceSource[] =
         "pod_sequence_get_ok = pod_object[0] == 37\n"
         "pod_object[0] = 41\n"
@@ -805,7 +843,7 @@ int main()
         "pod_inplace *= 2\n"
         "pod_inplace /= 4\n"
         "pod_inplace_ok = pod_inplace is pod_inplace_identity and pod_inplace == 20\n"
-        "pod_contract_ok = pod_repr_ok and pod_hash_ok and pod_call_ok and pod_sequence_get_ok and pod_sequence_set_ok and pod_compare_ok and pod_unknown_compare_ok and pod_number_ok and pod_unknown_number_ok and pod_unary_ok and pod_inplace_ok\n";
+        "pod_contract_ok = pod_repr_ok and pod_hash_ok and pod_call_ok and pod_proxy_kernel_args_ok and pod_sequence_get_ok and pod_sequence_set_ok and pod_compare_ok and pod_unknown_compare_ok and pod_number_ok and pod_unknown_number_ok and pod_unary_ok and pod_inplace_ok\n";
     PyObject * podInplaceExec = kernel->exec_file( podInplaceSource, moduleDict, moduleDict );
     PYBIND_CONTRACT_ASSERT( podInplaceExec != nullptr );
     kernel->decref( podInplaceExec );
@@ -817,6 +855,7 @@ int main()
     PYBIND_CONTRACT_ASSERT( pybind::extract<bool>( kernel, kernel->dict_getstring( moduleDict, "pod_repr_ok" ) ) == true );
     PYBIND_CONTRACT_ASSERT( pybind::extract<bool>( kernel, kernel->dict_getstring( moduleDict, "pod_hash_ok" ) ) == true );
     PYBIND_CONTRACT_ASSERT( pybind::extract<bool>( kernel, kernel->dict_getstring( moduleDict, "pod_call_ok" ) ) == true );
+    PYBIND_CONTRACT_ASSERT( pybind::extract<bool>( kernel, kernel->dict_getstring( moduleDict, "pod_proxy_kernel_args_ok" ) ) == true );
     PYBIND_CONTRACT_ASSERT( pybind::extract<bool>( kernel, kernel->dict_getstring( moduleDict, "pod_sequence_get_ok" ) ) == true );
     PYBIND_CONTRACT_ASSERT( pybind::extract<bool>( kernel, kernel->dict_getstring( moduleDict, "pod_sequence_set_ok" ) ) == true );
     PYBIND_CONTRACT_ASSERT( pybind::extract<bool>( kernel, kernel->dict_getstring( moduleDict, "pod_compare_ok" ) ) == true );

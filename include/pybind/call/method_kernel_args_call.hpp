@@ -53,6 +53,9 @@ namespace pybind
         {
             typedef typename stdex::function_traits<F>::result f_info;
 
+            static_assert(f_info::method == true, "[pybind] method kernel args bind requires a method");
+            static_assert(std::is_convertible<C *, typename f_info::class_type *>::value == true, "[pybind] method class type is incompatible");
+            static_assert(f_info::arity >= 2, "[pybind] method kernel args bind requires kernel and args arguments");
             static_assert(std::is_same<typename f_info::template iterator_param<0>, pybind::kernel_interface *>::value == true, "[pybind] use kernel bind");
             static_assert(std::is_same<typename f_info::template reverse_iterator_param<0>, const pybind::args &>::value == true, "[pybind] add args");
 
@@ -93,4 +96,3 @@ namespace pybind
         }
     };
 }
-

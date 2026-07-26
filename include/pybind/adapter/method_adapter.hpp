@@ -15,6 +15,10 @@
 #include "pybind/call/function_proxy_args_call.hpp"
 #include "pybind/call/function_proxy_kernel_args_call.hpp"
 
+#include "stdex/function_traits.h"
+
+#include <type_traits>
+
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
@@ -326,6 +330,17 @@ namespace pybind
     class method_adapter_proxy_native
         : public method_adapter_interface
     {
+    private:
+        typedef typename stdex::function_traits<F>::result f_info;
+
+        static_assert(f_info::method == true, "[pybind] native method proxy bind requires a method");
+        static_assert(std::is_convertible<P *, typename f_info::class_type *>::value == true, "[pybind] native method proxy class type is incompatible");
+        static_assert(f_info::arity == 3, "[pybind] native method proxy must have object, args and kwds arguments");
+        static_assert(std::is_convertible<C *, typename f_info::template iterator_param<0>>::value == true, "[pybind] native method proxy object argument type is incompatible");
+        static_assert(std::is_same<typename f_info::template iterator_param<1>, PyObject *>::value == true, "[pybind] native method proxy second argument must be PyObject * args");
+        static_assert(std::is_same<typename f_info::template iterator_param<2>, PyObject *>::value == true, "[pybind] native method proxy third argument must be PyObject * kwds");
+        static_assert(std::is_same<typename f_info::ret_type, PyObject *>::value == true, "[pybind] native method proxy must return PyObject *");
+
     public:
         method_adapter_proxy_native( const char * _name, F _fn, P * _proxy )
             : method_adapter_interface( _name )
@@ -357,6 +372,18 @@ namespace pybind
     class method_adapter_proxy_native_kernel
         : public method_adapter_interface
     {
+    private:
+        typedef typename stdex::function_traits<F>::result f_info;
+
+        static_assert(f_info::method == true, "[pybind] native method proxy kernel bind requires a method");
+        static_assert(std::is_convertible<P *, typename f_info::class_type *>::value == true, "[pybind] native method proxy class type is incompatible");
+        static_assert(f_info::arity == 4, "[pybind] native method proxy kernel must have kernel, object, args and kwds arguments");
+        static_assert(std::is_same<typename f_info::template iterator_param<0>, pybind::kernel_interface *>::value == true, "[pybind] native method proxy kernel first argument must be kernel_interface *");
+        static_assert(std::is_convertible<C *, typename f_info::template iterator_param<1>>::value == true, "[pybind] native method proxy object argument type is incompatible");
+        static_assert(std::is_same<typename f_info::template iterator_param<2>, PyObject *>::value == true, "[pybind] native method proxy kernel third argument must be PyObject * args");
+        static_assert(std::is_same<typename f_info::template iterator_param<3>, PyObject *>::value == true, "[pybind] native method proxy kernel fourth argument must be PyObject * kwds");
+        static_assert(std::is_same<typename f_info::ret_type, PyObject *>::value == true, "[pybind] native method proxy kernel must return PyObject *");
+
     public:
         method_adapter_proxy_native_kernel( const char * _name, F _fn, P * _proxy )
             : method_adapter_interface( _name )
@@ -556,6 +583,16 @@ namespace pybind
     class method_adapter_native
         : public method_adapter_interface
     {
+    private:
+        typedef typename stdex::function_traits<F>::result f_info;
+
+        static_assert(f_info::method == true, "[pybind] native method bind requires a method");
+        static_assert(std::is_convertible<C *, typename f_info::class_type *>::value == true, "[pybind] native method class type is incompatible");
+        static_assert(f_info::arity == 2, "[pybind] native method must have args and kwds arguments");
+        static_assert(std::is_same<typename f_info::template iterator_param<0>, PyObject *>::value == true, "[pybind] native method first argument must be PyObject * args");
+        static_assert(std::is_same<typename f_info::template iterator_param<1>, PyObject *>::value == true, "[pybind] native method second argument must be PyObject * kwds");
+        static_assert(std::is_same<typename f_info::ret_type, PyObject *>::value == true, "[pybind] native method must return PyObject *");
+
     public:
         method_adapter_native( const char * _name, F _fn )
             : method_adapter_interface( _name )
@@ -585,6 +622,17 @@ namespace pybind
     class method_adapter_native_kernel
         : public method_adapter_interface
     {
+    private:
+        typedef typename stdex::function_traits<F>::result f_info;
+
+        static_assert(f_info::method == true, "[pybind] native method kernel bind requires a method");
+        static_assert(std::is_convertible<C *, typename f_info::class_type *>::value == true, "[pybind] native method class type is incompatible");
+        static_assert(f_info::arity == 3, "[pybind] native method kernel must have kernel, args and kwds arguments");
+        static_assert(std::is_same<typename f_info::template iterator_param<0>, pybind::kernel_interface *>::value == true, "[pybind] native method kernel first argument must be kernel_interface *");
+        static_assert(std::is_same<typename f_info::template iterator_param<1>, PyObject *>::value == true, "[pybind] native method kernel second argument must be PyObject * args");
+        static_assert(std::is_same<typename f_info::template iterator_param<2>, PyObject *>::value == true, "[pybind] native method kernel third argument must be PyObject * kwds");
+        static_assert(std::is_same<typename f_info::ret_type, PyObject *>::value == true, "[pybind] native method kernel must return PyObject *");
+
     public:
         method_adapter_native_kernel( const char * _name, F _fn )
             : method_adapter_interface( _name )
@@ -614,6 +662,16 @@ namespace pybind
     class method_adapter_static_native
         : public method_adapter_interface
     {
+    private:
+        typedef typename stdex::function_traits<F>::result f_info;
+
+        static_assert(f_info::method == false, "[pybind] static native method bind requires a function");
+        static_assert(f_info::arity == 3, "[pybind] static native method must have object, args and kwds arguments");
+        static_assert(std::is_convertible<C *, typename f_info::template iterator_param<0>>::value == true, "[pybind] static native method object argument type is incompatible");
+        static_assert(std::is_same<typename f_info::template iterator_param<1>, PyObject *>::value == true, "[pybind] static native method second argument must be PyObject * args");
+        static_assert(std::is_same<typename f_info::template iterator_param<2>, PyObject *>::value == true, "[pybind] static native method third argument must be PyObject * kwds");
+        static_assert(std::is_same<typename f_info::ret_type, PyObject *>::value == true, "[pybind] static native method must return PyObject *");
+
     public:
         method_adapter_static_native( const char * _name, F _fn )
             : method_adapter_interface( _name )
@@ -643,6 +701,17 @@ namespace pybind
     class method_adapter_static_native_kernel
         : public method_adapter_interface
     {
+    private:
+        typedef typename stdex::function_traits<F>::result f_info;
+
+        static_assert(f_info::method == false, "[pybind] static native method kernel bind requires a function");
+        static_assert(f_info::arity == 4, "[pybind] static native method kernel must have kernel, object, args and kwds arguments");
+        static_assert(std::is_same<typename f_info::template iterator_param<0>, pybind::kernel_interface *>::value == true, "[pybind] static native method kernel first argument must be kernel_interface *");
+        static_assert(std::is_convertible<C *, typename f_info::template iterator_param<1>>::value == true, "[pybind] static native method object argument type is incompatible");
+        static_assert(std::is_same<typename f_info::template iterator_param<2>, PyObject *>::value == true, "[pybind] static native method kernel third argument must be PyObject * args");
+        static_assert(std::is_same<typename f_info::template iterator_param<3>, PyObject *>::value == true, "[pybind] static native method kernel fourth argument must be PyObject * kwds");
+        static_assert(std::is_same<typename f_info::ret_type, PyObject *>::value == true, "[pybind] static native method kernel must return PyObject *");
+
     public:
         method_adapter_static_native_kernel( const char * _name, F _fn )
             : method_adapter_interface( _name )

@@ -30,6 +30,28 @@ namespace pybind
     }
     //////////////////////////////////////////////////////////////////////////
     template<class F>
+    function_adapter_interface_ptr make_function_out( kernel_interface * _kernel, const char * _name, F _function )
+    {
+        typedef typename stdex::function_traits<F>::result t_info;
+
+        static_assert(t_info::arity > 0, "[pybind] out function must have an output argument");
+
+        allocator_interface * allocator = _kernel->get_allocator();
+
+        function_adapter_interface_ptr adapter = allocator->newT<function_out_adapter<F>>( _name, t_info::arity > 0 ? t_info::arity - 1 : 0, _function );
+
+        return adapter;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    template<class F>
+    void def_function_out( kernel_interface * _kernel, const char * _name, F _function, PyObject * _module = 0 )
+    {
+        function_adapter_interface_ptr adapter = pybind::make_function_out<F>( _kernel, _name, _function );
+
+        _kernel->def_function_adapter( adapter, false, _module );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    template<class F>
     void def_function_args( kernel_interface * _kernel, const char * _name, F _function, PyObject * _module = 0 )
     {
         typedef typename stdex::function_traits<F>::result t_info;

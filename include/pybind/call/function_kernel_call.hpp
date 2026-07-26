@@ -50,6 +50,8 @@ namespace pybind
         {
             typedef typename stdex::function_traits<F>::result f_info;
 
+            static_assert(f_info::method == false, "[pybind] function kernel bind requires a function");
+            static_assert(f_info::arity >= 1, "[pybind] function kernel bind requires a kernel argument");
             static_assert(std::is_same<typename f_info::template iterator_param<0>, pybind::kernel_interface *>::value == true, "[pybind] add kernel");
             static_assert(std::is_same<typename f_info::template reverse_iterator_param<0>, const pybind::args &>::value == false, "[pybind] use args bind");
 
@@ -75,4 +77,3 @@ namespace pybind
         }
     };
 }
-

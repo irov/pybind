@@ -52,6 +52,10 @@ namespace pybind
         {
             typedef typename stdex::function_traits<F>::result f_info;
 
+            static_assert(f_info::method == true, "[pybind] method proxy bind requires a method");
+            static_assert(std::is_convertible<P *, typename f_info::class_type *>::value == true, "[pybind] method proxy class type is incompatible");
+            static_assert(f_info::arity >= 1, "[pybind] method proxy bind requires an object argument");
+            static_assert(std::is_convertible<C *, typename f_info::template iterator_param<0>>::value == true, "[pybind] method proxy object argument type is incompatible");
             static_assert(std::is_same<typename f_info::template iterator_param<0>, pybind::kernel_interface *>::value == false, "[pybind] use kernel bind");
             static_assert(std::is_same<typename f_info::template reverse_iterator_param<0>, const pybind::args &>::value == false, "[pybind] use args bind");
 
@@ -77,4 +81,3 @@ namespace pybind
         }
     };
 }
-
