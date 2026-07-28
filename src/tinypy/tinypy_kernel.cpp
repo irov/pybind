@@ -77,7 +77,7 @@ namespace pybind
             void * userData;
         };
         //////////////////////////////////////////////////////////////////////////
-        static void * allocator_allocate( void * _userData, size_t _size, size_t _alignment, uint32_t _tag )
+        static void * allocator_allocate( void * _userData, size_t _size, size_t _alignment, tinypy_allocation_tag_e _tag )
         {
             (void)_alignment;
             (void)_tag;
@@ -86,7 +86,7 @@ namespace pybind
             return allocator->malloc( _size );
         }
         //////////////////////////////////////////////////////////////////////////
-        static void * allocator_reallocate( void * _userData, void * _memory, size_t _oldSize, size_t _newSize, size_t _alignment, uint32_t _tag )
+        static void * allocator_reallocate( void * _userData, void * _memory, size_t _oldSize, size_t _newSize, size_t _alignment, tinypy_allocation_tag_e _tag )
         {
             (void)_oldSize;
             (void)_alignment;
@@ -96,7 +96,7 @@ namespace pybind
             return allocator->realloc( _memory, _newSize );
         }
         //////////////////////////////////////////////////////////////////////////
-        static void allocator_deallocate( void * _userData, void * _memory, size_t _size, size_t _alignment, uint32_t _tag )
+        static void allocator_deallocate( void * _userData, void * _memory, size_t _size, size_t _alignment, tinypy_allocation_tag_e _tag )
         {
             (void)_size;
             (void)_alignment;

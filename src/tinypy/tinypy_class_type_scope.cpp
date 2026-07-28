@@ -176,7 +176,7 @@ namespace pybind
             return tinypy_native_function_new( vm, _name, nameSize, &call_method_holder, holder, &finalize_method_holder );
         }
         //////////////////////////////////////////////////////////////////////////
-        static int32_t native_construct( tinypy_value_t * _instance, void * _payload, tinypy_value_t * _args, tinypy_value_t * _kwargs, void * _userData, tinypy_error_t ** _outError )
+        static tinypy_bool_t native_construct( tinypy_value_t * _instance, void * _payload, tinypy_value_t * _args, tinypy_value_t * _kwargs, void * _userData, tinypy_error_t ** _outError )
         {
             tinypy_class_type_scope * scope = static_cast<tinypy_class_type_scope *>(_userData);
             kernel_interface * kernelInterface = pybind::get_kernel();
@@ -203,13 +203,13 @@ namespace pybind
 
                 if( impl == nullptr )
                 {
-                    return 0;
+                    return TINYPY_FALSE;
                 }
 
                 payload->impl = impl;
                 payload->flags |= tinypy_class_type_scope::PayloadConstructed;
                 scope->incref_smart_pointer( impl );
-                return 1;
+                return TINYPY_TRUE;
             }
             catch( const pybind_exception & exception )
             {
@@ -220,7 +220,7 @@ namespace pybind
                     *_outError = nullptr;
                 }
 
-                return 0;
+                return TINYPY_FALSE;
             }
         }
         //////////////////////////////////////////////////////////////////////////
@@ -519,7 +519,7 @@ namespace pybind
             }
         }
         //////////////////////////////////////////////////////////////////////////
-        static int32_t native_sequence_set( tinypy_value_t * _instance, void * _payload, tinypy_value_t * _key, tinypy_value_t * _value, void * _userData, tinypy_error_t ** _outError )
+        static tinypy_bool_t native_sequence_set( tinypy_value_t * _instance, void * _payload, tinypy_value_t * _key, tinypy_value_t * _value, void * _userData, tinypy_error_t ** _outError )
         {
             (void)_instance;
             tinypy_class_type_scope * scope = static_cast<tinypy_class_type_scope *>(_userData);
@@ -531,13 +531,13 @@ namespace pybind
             if( kernel->extract_int64( detail::cast_object( _key ), index ) == false || index < 0 )
             {
                 tinypy_vm_raise_error( kernel->vm(), TINYPY_ERROR_TYPE, "native sequence index must be a non-negative integer" );
-                return 0;
+                return TINYPY_FALSE;
             }
 
             try
             {
                 scope->get_sequence_set()->call( kernel, payload->impl, class_type_scope_interface_ptr::from( scope ), static_cast<size_t>(index), detail::cast_object( _value ) );
-                return 1;
+                return TINYPY_TRUE;
             }
             catch( const pybind_exception & exception )
             {
@@ -548,7 +548,7 @@ namespace pybind
                     *_outError = nullptr;
                 }
 
-                return 0;
+                return TINYPY_FALSE;
             }
         }
         //////////////////////////////////////////////////////////////////////////
