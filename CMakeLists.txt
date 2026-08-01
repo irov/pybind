@@ -229,7 +229,6 @@ if(PYBIND_SANDBOX)
 
         TARGET_LINK_LIBRARIES(sandbox ${PROJECT_NAME})
         TARGET_LINK_LIBRARIES(sandbox python)
-        TARGET_LINK_LIBRARIES(sandbox stdex)
         add_dependencies(sandbox ${PROJECT_NAME})
         add_dependencies(sandbox python_download)
         add_dependencies(sandbox stdex_download)
@@ -240,13 +239,18 @@ if(PYBIND_SANDBOX)
         )
 
     TARGET_LINK_LIBRARIES(sandbox_contract ${PROJECT_NAME})
-    TARGET_LINK_LIBRARIES(sandbox_contract stdex)
     add_dependencies(sandbox_contract ${PROJECT_NAME})
-    add_dependencies(sandbox_contract stdex_download)
+
+    if(TARGET stdex_download)
+        add_dependencies(sandbox_contract stdex_download)
+    endif()
 
     IF(PYBIND_BACKEND STREQUAL "python")
         TARGET_LINK_LIBRARIES(sandbox_contract python)
-        add_dependencies(sandbox_contract python_download)
+
+        if(TARGET python_download)
+            add_dependencies(sandbox_contract python_download)
+        endif()
     ENDIF()
 endif()
 

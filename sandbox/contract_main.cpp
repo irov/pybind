@@ -159,6 +159,51 @@ namespace detail
         uint32_t line = 0;
     };
 
+    struct debugger_capture_t
+    {
+        pybind::kernel_interface * kernel = nullptr;
+        size_t calls = 0;
+        size_t lines = 0;
+        size_t returns = 0;
+        bool evaluatedFrame = false;
+        bool changedLocal = false;
+    };
+
+    static void capture_debugger( void * _userData, const pybind::debugger_event_t & _event )
+    {
+        debugger_capture_t * capture = static_cast<debugger_capture_t *>(_userData);
+
+        if( _event.event == pybind::debugger_event_e::call )
+        {
+            ++capture->calls;
+        }
+        else if( _event.event == pybind::debugger_event_e::line )
+        {
+            ++capture->lines;
+
+            uint32_t line = capture->kernel->debugger_frame_line( _event.frame );
+            if( line == 2 && capture->evaluatedFrame == false )
+            {
+                PyObject * globals = capture->kernel->debugger_frame_globals( _event.frame );
+                PyObject * locals = capture->kernel->debugger_frame_locals( _event.frame );
+                PyObject * evaluated = capture->kernel->eval_string( "value", globals, locals );
+                PYBIND_CONTRACT_ASSERT( evaluated != nullptr );
+                capture->kernel->decref( evaluated );
+                capture->evaluatedFrame = true;
+            }
+            else if( line == 3 )
+            {
+                PyObject * replacement = capture->kernel->ptr_int32( 41 );
+                capture->changedLocal = capture->kernel->debugger_frame_set( _event.frame, pybind::debugger_scope_e::locals, "value", replacement );
+                capture->kernel->decref( replacement );
+            }
+        }
+        else if( _event.event == pybind::debugger_event_e::return_ )
+        {
+            ++capture->returns;
+        }
+    }
+
     static void capture_exception( void * _userData, PyTypeObject * _type, PyObject * _value, PyObject * _traceback )
     {
         (void)_type;
@@ -565,6 +610,59 @@ int main()
     PYBIND_CONTRACT_ASSERT( kernel->object_repr_type( nullptr ).is_invalid() == true );
     PyObject * module = kernel->module_init( "contract" );
     kernel->set_current_module( module );
+
+    const char reloadSource[] = "value = 17\ndef get_value():\n    return value\n";
+    PyObject * reloadedModule = kernel->module_reload_source( module, reloadSource, "contract.py" );
+    PYBIND_CONTRACT_ASSERT( reloadedModule == module );
+    kernel->decref( reloadedModule );
+    PyObject * reloadedValue = kernel->get_attrstring( module, "value" );
+    int32_t reloadedInteger;
+    PYBIND_CONTRACT_ASSERT( kernel->extract_int32( reloadedValue, reloadedInteger ) == true );
+    PYBIND_CONTRACT_ASSERT( reloadedInteger == 17 );
+    kernel->decref( reloadedValue );
+
+    const char failedReloadSource[] = "value = 99\nmissing_reload_function()\n";
+    PyObject * failedReloadModule = kernel->module_reload_source( module, failedReloadSource, "contract.py" );
+    PYBIND_CONTRACT_ASSERT( failedReloadModule == nullptr );
+    PyObject * lastGoodValue = kernel->get_attrstring( module, "value" );
+    int32_t lastGoodInteger;
+    PYBIND_CONTRACT_ASSERT( kernel->extract_int32( lastGoodValue, lastGoodInteger ) == true );
+    PYBIND_CONTRACT_ASSERT( lastGoodInteger == 17 );
+    kernel->decref( lastGoodValue );
+
+    const char syntaxErrorReloadSource[] = "value =\n";
+    PyObject * syntaxErrorReloadModule = kernel->module_reload_source( module, syntaxErrorReloadSource, "contract.py" );
+    PYBIND_CONTRACT_ASSERT( syntaxErrorReloadModule == nullptr );
+    PyObject * syntaxLastGoodValue = kernel->get_attrstring( module, "value" );
+    int32_t syntaxLastGoodInteger;
+    PYBIND_CONTRACT_ASSERT( kernel->extract_int32( syntaxLastGoodValue, syntaxLastGoodInteger ) == true );
+    PYBIND_CONTRACT_ASSERT( syntaxLastGoodInteger == 17 );
+    kernel->decref( syntaxLastGoodValue );
+
+#if !defined(PYBIND_BACKEND_TINYPY) || defined(TINYPY_DEBUGGER)
+    detail::debugger_capture_t debuggerCapture;
+    debuggerCapture.kernel = kernel;
+    PYBIND_CONTRACT_ASSERT( kernel->debugger_set_trace( &detail::capture_debugger, &debuggerCapture ) == true );
+    const char debuggerSource[] = "def debug_target():\n    value = 1\n    value = value + 1\n    return value\n";
+    PyObject * debuggerCodeResult = kernel->exec_file( debuggerSource, kernel->module_dict( module ), kernel->module_dict( module ) );
+    PYBIND_CONTRACT_ASSERT( debuggerCodeResult != nullptr );
+    kernel->decref( debuggerCodeResult );
+    PyObject * debugTarget = kernel->get_attrstring( module, "debug_target" );
+    PyObject * debugArgs = kernel->tuple_new( 0 );
+    PyObject * debugResult = kernel->ask_native( debugTarget, debugArgs );
+    int32_t debugValue;
+    PYBIND_CONTRACT_ASSERT( kernel->extract_int32( debugResult, debugValue ) == true );
+    PYBIND_CONTRACT_ASSERT( debugValue == 42 );
+    PYBIND_CONTRACT_ASSERT( debuggerCapture.calls != 0 );
+    PYBIND_CONTRACT_ASSERT( debuggerCapture.lines != 0 );
+    PYBIND_CONTRACT_ASSERT( debuggerCapture.returns != 0 );
+    PYBIND_CONTRACT_ASSERT( debuggerCapture.evaluatedFrame == true );
+    PYBIND_CONTRACT_ASSERT( debuggerCapture.changedLocal == true );
+    kernel->decref( debugResult );
+    kernel->decref( debugArgs );
+    kernel->decref( debugTarget );
+    PYBIND_CONTRACT_ASSERT( kernel->debugger_set_trace( nullptr, nullptr ) == true );
+#endif
 
     PyObject * unicodeValue = kernel->unicode_from_wchar( L"caf\u00e9" );
     PyObject * unicodeUtf8 = kernel->unicode_encode_utf8( unicodeValue );

@@ -33,6 +33,18 @@ namespace pybind
         void destroy() override;
 
     public:
+        bool debugger_set_trace( pybind_debugger_handler_f _handler, void * _userData ) override;
+        PyObject * debugger_frame_back( PyObject * _frame ) override;
+        PyObject * debugger_frame_code( PyObject * _frame ) override;
+        PyObject * debugger_frame_locals( PyObject * _frame ) override;
+        PyObject * debugger_frame_globals( PyObject * _frame ) override;
+        uint32_t debugger_frame_line( PyObject * _frame ) override;
+        PyObject * debugger_frame_get( PyObject * _frame, debugger_scope_e _scope, const char * _name ) override;
+        bool debugger_frame_set( PyObject * _frame, debugger_scope_e _scope, const char * _name, PyObject * _value ) override;
+        bool debugger_frame_delete( PyObject * _frame, debugger_scope_e _scope, const char * _name ) override;
+        void debugger_frame_sync_locals( PyObject * _frame ) override;
+
+    public:
         void remove_from_module( const char * _name, PyObject * _module ) override;
 
     public:
@@ -130,6 +142,7 @@ namespace pybind
         void call_method_native( PyObject * _obj, const char * _method, PyObject * _args ) override;
 
         PyObject * ask_native( PyObject * _obj, PyObject * _args ) override;
+        PyObject * ask_native_kw( PyObject * _obj, PyObject * _args, PyObject * _kwargs ) override;
         PyObject * ask_method( PyObject * _obj, const char * _method, const char * _format, ... ) override;
         PyObject * ask_method_native( PyObject * _obj, const char * _method, PyObject * _args ) override;
         PyObject * ask_adapter( void * _self, const class_type_scope_interface_ptr & _scope, const char * _name, PyObject * _args ) override;
@@ -137,6 +150,7 @@ namespace pybind
         PyObject * compile_string( const char * _string, const char * _file ) override;
         PyObject * eval_string( const char * _string, PyObject * _globals, PyObject * _locals ) override;
         PyObject * exec_file( const char * _code, PyObject * _globals, PyObject * _locals ) override;
+        PyObject * exec_source( const char * _code, const char * _filename, PyObject * _globals, PyObject * _locals ) override;
 
         void setStdOutHandle( PyObject * _obj ) override;
         void setStdErrorHandle( PyObject * _obj ) override;
@@ -171,6 +185,7 @@ namespace pybind
         void module_addobject( PyObject * _module, const char * _name, PyObject * _obj ) override;
         PyObject * module_execcode( const char * _name, PyObject * _code ) override;
         PyObject * module_reload( PyObject * _module ) override;
+        PyObject * module_reload_source( PyObject * _module, const char * _source, const char * _filename ) override;
 
         void incref( PyObject * _obj ) override;
         void decref( PyObject * _obj ) override;
@@ -331,8 +346,11 @@ namespace pybind
         class_type_scope_interface_ptr m_class_type_hashes[PYBIND_TYPE_COUNT_HASH];
 
         typeid_t m_enumerator;
+        pybind_debugger_handler_f m_debuggerHandler;
+        void * m_debuggerUserData;
 
     protected:
+        static int debugger_trace_( PyObject * _object, PyFrameObject * _frame, int _what, PyObject * _argument );
         const class_type_scope_interface_ptr & get_class_scope_exact( PyTypeObject * _type );
         bool set_class_info_desc( typeid_t _typeId, const char * _info );
         typeid_t get_next_id();

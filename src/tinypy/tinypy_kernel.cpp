@@ -330,7 +330,145 @@ namespace pybind
         , m_unicode_cache( nullptr )
         , m_unicode_cache_size( 0 )
         , m_unicode_cache_capacity( 0 )
+#if defined(TINYPY_DEBUGGER)
+        , m_debuggerHandler( nullptr )
+        , m_debuggerUserData( nullptr )
+#endif
     {
+    }
+    //////////////////////////////////////////////////////////////////////////
+#if defined(TINYPY_DEBUGGER)
+    void tinypy_kernel::debugger_trace_( void * _userData, const tinypy_debugger_event_t * _event )
+    {
+        tinypy_kernel * kernel = static_cast<tinypy_kernel *>(_userData);
+        if( kernel->m_debuggerHandler == nullptr )
+        {
+            return;
+        }
+
+        debugger_event_t event;
+        event.frame = detail::object_cast( _event->frame );
+        event.argument = detail::object_cast( _event->exception );
+
+        switch( _event->event )
+        {
+        case TINYPY_DEBUGGER_EVENT_LINE:
+            event.event = debugger_event_e::line;
+            break;
+        case TINYPY_DEBUGGER_EVENT_CALL:
+            event.event = debugger_event_e::call;
+            break;
+        case TINYPY_DEBUGGER_EVENT_RETURN:
+            event.event = debugger_event_e::return_;
+            break;
+        case TINYPY_DEBUGGER_EVENT_EXCEPTION:
+            event.event = debugger_event_e::exception;
+            break;
+        default:
+            return;
+        }
+
+        kernel->m_debuggerHandler( kernel->m_debuggerUserData, event );
+    }
+#endif
+    //////////////////////////////////////////////////////////////////////////
+    bool tinypy_kernel::debugger_set_trace( pybind_debugger_handler_f _handler, void * _userData )
+    {
+#if defined(TINYPY_DEBUGGER)
+        m_debuggerHandler = _handler;
+        m_debuggerUserData = _userData;
+
+        if( _handler == nullptr )
+        {
+            return tinypy_debugger_set( m_vm, nullptr ) != 0;
+        }
+
+        tinypy_debugger_t debugger;
+        debugger.abi_version = TINYPY_ABI_VERSION;
+        debugger.struct_size = static_cast<uint32_t>(sizeof(debugger));
+        debugger.user_data = this;
+        debugger.callback = &tinypy_kernel::debugger_trace_;
+
+        return tinypy_debugger_set( m_vm, &debugger ) != 0;
+#else
+        (void)_userData;
+        return _handler == nullptr;
+#endif
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * tinypy_kernel::debugger_frame_back( PyObject * _frame )
+    {
+        return detail::object_cast( tinypy_frame_back( detail::value_cast( _frame ) ) );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * tinypy_kernel::debugger_frame_code( PyObject * _frame )
+    {
+        return detail::object_cast( tinypy_frame_code( detail::value_cast( _frame ) ) );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * tinypy_kernel::debugger_frame_locals( PyObject * _frame )
+    {
+        return detail::object_cast( tinypy_frame_locals( detail::value_cast( _frame ) ) );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * tinypy_kernel::debugger_frame_globals( PyObject * _frame )
+    {
+        return detail::object_cast( tinypy_frame_globals( detail::value_cast( _frame ) ) );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    uint32_t tinypy_kernel::debugger_frame_line( PyObject * _frame )
+    {
+        int32_t line = tinypy_frame_line_number( detail::value_cast( _frame ) );
+        return line > 0 ? static_cast<uint32_t>(line) : 0U;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * tinypy_kernel::debugger_frame_get( PyObject * _frame, debugger_scope_e _scope, const char * _name )
+    {
+#if defined(TINYPY_DEBUGGER)
+        tinypy_debugger_scope_e scope = _scope == debugger_scope_e::locals ? TINYPY_DEBUGGER_SCOPE_LOCALS : TINYPY_DEBUGGER_SCOPE_GLOBALS;
+        return detail::object_cast( tinypy_debugger_frame_get( detail::value_cast( _frame ), scope, _name, std::strlen( _name ) ) );
+#else
+        (void)_frame;
+        (void)_scope;
+        (void)_name;
+        return nullptr;
+#endif
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool tinypy_kernel::debugger_frame_set( PyObject * _frame, debugger_scope_e _scope, const char * _name, PyObject * _value )
+    {
+#if defined(TINYPY_DEBUGGER)
+        tinypy_debugger_scope_e scope = _scope == debugger_scope_e::locals ? TINYPY_DEBUGGER_SCOPE_LOCALS : TINYPY_DEBUGGER_SCOPE_GLOBALS;
+        return tinypy_debugger_frame_set( detail::value_cast( _frame ), scope, _name, std::strlen( _name ), detail::value_cast( _value ) ) != 0;
+#else
+        (void)_frame;
+        (void)_scope;
+        (void)_name;
+        (void)_value;
+        return false;
+#endif
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool tinypy_kernel::debugger_frame_delete( PyObject * _frame, debugger_scope_e _scope, const char * _name )
+    {
+#if defined(TINYPY_DEBUGGER)
+        tinypy_debugger_scope_e scope = _scope == debugger_scope_e::locals ? TINYPY_DEBUGGER_SCOPE_LOCALS : TINYPY_DEBUGGER_SCOPE_GLOBALS;
+        return tinypy_debugger_frame_delete( detail::value_cast( _frame ), scope, _name, std::strlen( _name ) ) != 0;
+#else
+        (void)_frame;
+        (void)_scope;
+        (void)_name;
+        return false;
+#endif
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void tinypy_kernel::debugger_frame_sync_locals( PyObject * _frame )
+    {
+#if defined(TINYPY_DEBUGGER)
+        tinypy_debugger_frame_sync( detail::value_cast( _frame ) );
+#else
+        (void)_frame;
+#endif
     }
     //////////////////////////////////////////////////////////////////////////
     void tinypy_kernel::cycle_diagnostic_( void * _userData, const tinypy_diagnostic_t * _diagnostic )
@@ -1066,6 +1204,18 @@ namespace pybind
         return detail::object_cast( result );
     }
     //////////////////////////////////////////////////////////////////////////
+    PyObject * tinypy_kernel::ask_native_kw( PyObject * _object, PyObject * _args, PyObject * _kwargs )
+    {
+        tinypy_error_t * error = nullptr;
+        tinypy_value_t * result = tinypy_call( detail::value_cast( _object ), detail::value_cast( _args ), detail::value_cast( _kwargs ), &error );
+        if( result == nullptr )
+        {
+            this->report_error_( error );
+        }
+
+        return detail::object_cast( result );
+    }
+    //////////////////////////////////////////////////////////////////////////
     PyObject * tinypy_kernel::ask_method_native( PyObject * _object, const char * _method, PyObject * _args )
     {
         tinypy_error_t * error = nullptr;
@@ -1161,6 +1311,33 @@ namespace pybind
         if( result == nullptr )
         {
             this->report_error_( error );
+        }
+
+        return detail::object_cast( result );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * tinypy_kernel::exec_source( const char * _source, const char * _filename, PyObject * _globals, PyObject * _locals )
+    {
+        tinypy_compile_options_t options;
+        tinypy_compile_options_init( &options, TINYPY_COMPILE_EXEC );
+        options.optimize_level = m_optimize_level;
+
+        tinypy_error_t * error = nullptr;
+        tinypy_value_t * code = tinypy_compile_source( m_vm, _source, std::strlen( _source ), _filename, std::strlen( _filename ), &options, &error );
+        if( code == nullptr )
+        {
+            this->report_error_( error );
+
+            return nullptr;
+        }
+
+        tinypy_value_t * result = tinypy_exec_code( code, detail::value_cast( _globals ), detail::value_cast( _locals ), &error );
+        tinypy_release( code );
+        if( result == nullptr )
+        {
+            this->report_error_( error );
+
+            return nullptr;
         }
 
         return detail::object_cast( result );
@@ -1547,6 +1724,61 @@ namespace pybind
         tinypy_dict_set( modules, name, module );
         tinypy_release( reloaded );
         tinypy_release( name );
+
+        return _module;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * tinypy_kernel::module_reload_source( PyObject * _module, const char * _source, const char * _filename )
+    {
+        tinypy_compile_options_t options;
+        tinypy_compile_options_init( &options, TINYPY_COMPILE_EXEC );
+
+        tinypy_error_t * error = nullptr;
+        tinypy_value_t * code = tinypy_compile_source( m_vm, _source, std::strlen( _source ), _filename, std::strlen( _filename ), &options, &error );
+        if( code == nullptr )
+        {
+            this->report_error_( error );
+
+            return nullptr;
+        }
+
+        tinypy_value_t * module = detail::value_cast( _module );
+        tinypy_value_t * module_name = tinypy_module_name( module );
+        size_t module_name_size = 0;
+        const char * module_name_string = static_cast<const char *>(tinypy_string_view( module_name, &module_name_size ));
+
+        tinypy_value_t * candidate = tinypy_module_new( m_vm, module_name_string, module_name_size );
+        tinypy_module_add_value( candidate, "__name__", 8, module_name );
+        tinypy_module_add_value( candidate, "__builtins__", 12, tinypy_vm_builtins( m_vm ) );
+
+        tinypy_value_t * candidate_dict = tinypy_module_dict( candidate );
+        tinypy_value_t * execution_result = tinypy_exec_code( code, candidate_dict, candidate_dict, &error );
+        tinypy_release( code );
+
+        if( execution_result == nullptr )
+        {
+            tinypy_release( candidate );
+            this->report_error_( error );
+
+            return nullptr;
+        }
+
+        tinypy_release( execution_result );
+
+        size_t position = 0;
+        tinypy_value_t * key = nullptr;
+        tinypy_value_t * value = nullptr;
+        while( tinypy_dict_next( candidate_dict, &position, &key, &value ) != 0 )
+        {
+            if( value == candidate )
+            {
+                tinypy_dict_set( candidate_dict, key, module );
+            }
+        }
+
+        tinypy_module_swap_dict( module, candidate );
+        tinypy_release( candidate );
+        tinypy_retain( module );
 
         return _module;
     }

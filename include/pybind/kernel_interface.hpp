@@ -42,6 +42,29 @@ namespace pybind
 
     typedef void (*pybind_excepthook_handler_f)(void * _ud, PyTypeObject * _exctype, PyObject * _value, PyObject * _traceback);
 
+    enum class debugger_event_e
+    {
+        line,
+        call,
+        return_,
+        exception
+    };
+
+    enum class debugger_scope_e
+    {
+        locals,
+        globals
+    };
+
+    struct debugger_event_t
+    {
+        debugger_event_e event;
+        PyObject * frame;
+        PyObject * argument;
+    };
+
+    typedef void (*pybind_debugger_handler_f)(void * _userData, const debugger_event_t & _event);
+
     class kernel_interface
     {
     public:
@@ -53,6 +76,18 @@ namespace pybind
         virtual bool is_cycle_diagnostics_enabled() const = 0;
         virtual size_t cycle_diagnostics( pybind_cycle_diagnostic_handler_f _handler, void * _userData ) = 0;
         virtual void destroy() = 0;
+
+    public:
+        virtual bool debugger_set_trace( pybind_debugger_handler_f _handler, void * _userData ) = 0;
+        virtual PyObject * debugger_frame_back( PyObject * _frame ) = 0;
+        virtual PyObject * debugger_frame_code( PyObject * _frame ) = 0;
+        virtual PyObject * debugger_frame_locals( PyObject * _frame ) = 0;
+        virtual PyObject * debugger_frame_globals( PyObject * _frame ) = 0;
+        virtual uint32_t debugger_frame_line( PyObject * _frame ) = 0;
+        virtual PyObject * debugger_frame_get( PyObject * _frame, debugger_scope_e _scope, const char * _name ) = 0;
+        virtual bool debugger_frame_set( PyObject * _frame, debugger_scope_e _scope, const char * _name, PyObject * _value ) = 0;
+        virtual bool debugger_frame_delete( PyObject * _frame, debugger_scope_e _scope, const char * _name ) = 0;
+        virtual void debugger_frame_sync_locals( PyObject * _frame ) = 0;
 
     public:
         virtual void remove_from_module( const char * _name, PyObject * _module ) = 0;
@@ -276,6 +311,7 @@ namespace pybind
         virtual void call_method_native( PyObject * _obj, const char * _method, PyObject * _args ) = 0;
 
         virtual PyObject * ask_native( PyObject * _obj, PyObject * _args ) = 0;
+        virtual PyObject * ask_native_kw( PyObject * _obj, PyObject * _args, PyObject * _kwargs ) = 0;
         virtual PyObject * ask_method( PyObject * _obj, const char * _method, const char * _format, ... ) = 0;
         virtual PyObject * ask_method_native( PyObject * _obj, const char * _method, PyObject * _args ) = 0;
         virtual PyObject * ask_adapter( void * _self, const class_type_scope_interface_ptr & _scope, const char * _name, PyObject * _args ) = 0;
@@ -283,6 +319,7 @@ namespace pybind
         virtual PyObject * compile_string( const char * _string, const char * _file ) = 0;
         virtual PyObject * eval_string( const char * _string, PyObject * _globals, PyObject * _locals ) = 0;
         virtual PyObject * exec_file( const char * _code, PyObject * _globals, PyObject * _locals ) = 0;
+        virtual PyObject * exec_source( const char * _code, const char * _filename, PyObject * _globals, PyObject * _locals ) = 0;
 
         virtual void setStdOutHandle( PyObject * _obj ) = 0;
         virtual void setStdErrorHandle( PyObject * _obj ) = 0;
@@ -317,6 +354,7 @@ namespace pybind
         virtual void module_addobject( PyObject * _module, const char * _name, PyObject * _obj ) = 0;
         virtual PyObject * module_execcode( const char * _name, PyObject * _code ) = 0;
         virtual PyObject * module_reload( PyObject * _module ) = 0;
+        virtual PyObject * module_reload_source( PyObject * _module, const char * _source, const char * _filename ) = 0;
 
         virtual void incref( PyObject * _obj ) = 0;
         virtual void decref( PyObject * _obj ) = 0;

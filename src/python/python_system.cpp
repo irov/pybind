@@ -507,6 +507,104 @@ namespace pybind
         return reload_module;
     }
     //////////////////////////////////////////////////////////////////////////
+    PyObject * module_reload_source( PyObject * _module, const char * _source, const char * _filename )
+    {
+        PYBIND_CHECK_MAIN_THREAD();
+
+        PyObject * code = Py_CompileString( _source, _filename, Py_file_input );
+        if( code == nullptr )
+        {
+            pybind::check_error();
+
+            return nullptr;
+        }
+
+        const char * module_name = PyModule_GetName( _module );
+        if( module_name == nullptr )
+        {
+            Py_DECREF( code );
+            pybind::check_error();
+
+            return nullptr;
+        }
+
+        PyObject * candidate = PyModule_New( module_name );
+        if( candidate == nullptr )
+        {
+            Py_DECREF( code );
+            pybind::check_error();
+
+            return nullptr;
+        }
+
+        PyObject * candidate_dict = PyModule_GetDict( candidate );
+        PyObject * execution_result = PyEval_EvalCode( (PyCodeObject *)code, candidate_dict, candidate_dict );
+        Py_DECREF( code );
+
+        if( execution_result == nullptr )
+        {
+            Py_DECREF( candidate );
+            pybind::check_error();
+
+            return nullptr;
+        }
+
+        Py_DECREF( execution_result );
+
+        // Replace candidate self-references before the dictionary becomes the
+        // live module dictionary.
+        PyObject * keys = PyDict_Keys( candidate_dict );
+        if( keys == nullptr )
+        {
+            Py_DECREF( candidate );
+            pybind::check_error();
+
+            return nullptr;
+        }
+
+        Py_ssize_t key_count = PyList_Size( keys );
+        for( Py_ssize_t index = 0; index != key_count; ++index )
+        {
+            PyObject * key = PyList_GetItem( keys, index );
+            PyObject * value = PyDict_GetItem( candidate_dict, key );
+
+            if( value == candidate )
+            {
+                if( PyDict_SetItem( candidate_dict, key, _module ) == -1 )
+                {
+                    Py_DECREF( keys );
+                    Py_DECREF( candidate );
+                    pybind::check_error();
+
+                    return nullptr;
+                }
+            }
+        }
+
+        Py_DECREF( keys );
+
+        // md_dict is the first field after PyObject_HEAD in both Python 2.7
+        // and supported CPython 3 module objects. Swapping ownership keeps the
+        // module identity and makes newly-created functions reference the live
+        // dictionary, while candidate destruction releases the last-good dict.
+        struct module_object_prefix
+        {
+            PyObject_HEAD
+            PyObject * md_dict;
+        };
+
+        module_object_prefix * live_prefix = reinterpret_cast<module_object_prefix *>(_module);
+        module_object_prefix * candidate_prefix = reinterpret_cast<module_object_prefix *>(candidate);
+        PyObject * previous_dict = live_prefix->md_dict;
+        live_prefix->md_dict = candidate_prefix->md_dict;
+        candidate_prefix->md_dict = previous_dict;
+
+        Py_DECREF( candidate );
+        Py_INCREF( _module );
+
+        return _module;
+    }
+    //////////////////////////////////////////////////////////////////////////
     bool code_check( PyObject * _code )
     {
         PYBIND_CHECK_MAIN_THREAD();

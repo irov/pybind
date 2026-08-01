@@ -20,11 +20,156 @@
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
+    namespace
+    {
+        //////////////////////////////////////////////////////////////////////////
+        static const char * s_pythonKernelDebuggerCapsule = "pybind.python_kernel.debugger";
+        //////////////////////////////////////////////////////////////////////////
+    }
+    //////////////////////////////////////////////////////////////////////////
     python_kernel::python_kernel()
         : m_allocator( nullptr )
         , m_current_module( nullptr )
         , m_enumerator( 0 )
+        , m_debuggerHandler( nullptr )
+        , m_debuggerUserData( nullptr )
     {
+    }
+    //////////////////////////////////////////////////////////////////////////
+    int python_kernel::debugger_trace_( PyObject * _object, PyFrameObject * _frame, int _what, PyObject * _argument )
+    {
+        python_kernel * kernel = static_cast<python_kernel *>(PyCapsule_GetPointer( _object, s_pythonKernelDebuggerCapsule ));
+        if( kernel == nullptr )
+        {
+            PyErr_Clear();
+
+            return 0;
+        }
+        if( kernel->m_debuggerHandler == nullptr )
+        {
+            return 0;
+        }
+
+        debugger_event_t event;
+        event.frame = reinterpret_cast<PyObject *>(_frame);
+        event.argument = _argument;
+
+        switch( _what )
+        {
+        case PyTrace_LINE:
+            event.event = debugger_event_e::line;
+            break;
+        case PyTrace_CALL:
+            event.event = debugger_event_e::call;
+            break;
+        case PyTrace_RETURN:
+            event.event = debugger_event_e::return_;
+            break;
+        case PyTrace_EXCEPTION:
+            event.event = debugger_event_e::exception;
+            break;
+        default:
+            return 0;
+        }
+
+        kernel->m_debuggerHandler( kernel->m_debuggerUserData, event );
+
+        return 0;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool python_kernel::debugger_set_trace( pybind_debugger_handler_f _handler, void * _userData )
+    {
+        m_debuggerHandler = _handler;
+        m_debuggerUserData = _userData;
+
+        if( _handler == nullptr )
+        {
+            PyEval_SetTrace( nullptr, nullptr );
+
+            return true;
+        }
+
+        PyObject * capsule = PyCapsule_New( this, s_pythonKernelDebuggerCapsule, nullptr );
+        if( capsule == nullptr )
+        {
+            m_debuggerHandler = nullptr;
+            m_debuggerUserData = nullptr;
+
+            return false;
+        }
+
+        PyEval_SetTrace( &python_kernel::debugger_trace_, capsule );
+        Py_DECREF( capsule );
+
+        return true;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::debugger_frame_back( PyObject * _frame )
+    {
+        return reinterpret_cast<PyObject *>(reinterpret_cast<PyFrameObject *>(_frame)->f_back);
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::debugger_frame_code( PyObject * _frame )
+    {
+        return reinterpret_cast<PyObject *>(reinterpret_cast<PyFrameObject *>(_frame)->f_code);
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::debugger_frame_locals( PyObject * _frame )
+    {
+        PyFrameObject * frame = reinterpret_cast<PyFrameObject *>(_frame);
+        PyFrame_FastToLocals( frame );
+        return frame->f_locals;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::debugger_frame_globals( PyObject * _frame )
+    {
+        return reinterpret_cast<PyFrameObject *>(_frame)->f_globals;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    uint32_t python_kernel::debugger_frame_line( PyObject * _frame )
+    {
+        int line = PyFrame_GetLineNumber( reinterpret_cast<PyFrameObject *>(_frame) );
+        return line > 0 ? static_cast<uint32_t>(line) : 0U;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::debugger_frame_get( PyObject * _frame, debugger_scope_e _scope, const char * _name )
+    {
+        PyObject * dictionary = _scope == debugger_scope_e::locals ? this->debugger_frame_locals( _frame ) : this->debugger_frame_globals( _frame );
+        return PyDict_GetItemString( dictionary, _name );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool python_kernel::debugger_frame_set( PyObject * _frame, debugger_scope_e _scope, const char * _name, PyObject * _value )
+    {
+        PyObject * dictionary = _scope == debugger_scope_e::locals ? this->debugger_frame_locals( _frame ) : this->debugger_frame_globals( _frame );
+        if( PyDict_SetItemString( dictionary, _name, _value ) == -1 )
+        {
+            return false;
+        }
+        if( _scope == debugger_scope_e::locals )
+        {
+            PyFrame_LocalsToFast( reinterpret_cast<PyFrameObject *>(_frame), 0 );
+        }
+        return true;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool python_kernel::debugger_frame_delete( PyObject * _frame, debugger_scope_e _scope, const char * _name )
+    {
+        PyObject * dictionary = _scope == debugger_scope_e::locals ? this->debugger_frame_locals( _frame ) : this->debugger_frame_globals( _frame );
+        if( PyDict_DelItemString( dictionary, _name ) == -1 )
+        {
+            PyErr_Clear();
+            return false;
+        }
+        if( _scope == debugger_scope_e::locals )
+        {
+            PyFrame_LocalsToFast( reinterpret_cast<PyFrameObject *>(_frame), 1 );
+        }
+        return true;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void python_kernel::debugger_frame_sync_locals( PyObject * _frame )
+    {
+        PyFrame_LocalsToFast( reinterpret_cast<PyFrameObject *>(_frame), 0 );
     }
     //////////////////////////////////////////////////////////////////////////
     bool python_kernel::initialize( allocator_interface * _allocator )
@@ -76,6 +221,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::finalize()
     {
+        this->debugger_set_trace( nullptr, nullptr );
+
         PyType_ClearCache();
 
 #ifdef PYBIND_STL_SUPPORT
@@ -1004,6 +1151,13 @@ namespace pybind
         return py_result;
     }
     //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::ask_native_kw( PyObject * _obj, PyObject * _args, PyObject * _kwargs )
+    {
+        PyObject * py_result = PyObject_Call( _obj, _args, _kwargs );
+
+        return py_result;
+    }
+    //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::ask_method( PyObject * _obj, const char * _method, const char * _format, ... )
     {
         va_list valist;
@@ -1043,6 +1197,20 @@ namespace pybind
     PyObject * python_kernel::exec_file( const char * _code, PyObject * _globals, PyObject * _locals )
     {
         return pybind::exec_file( _code, _globals, _locals );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::exec_source( const char * _code, const char * _filename, PyObject * _globals, PyObject * _locals )
+    {
+        PyObject * compiled = Py_CompileString( _code, _filename, Py_file_input );
+        if( compiled == nullptr )
+        {
+            return nullptr;
+        }
+
+        PyObject * result = PyEval_EvalCode( (PyCodeObject *)compiled, _globals, _locals );
+        Py_DECREF( compiled );
+
+        return result;
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::setStdOutHandle( PyObject * _obj )
@@ -1836,6 +2004,11 @@ namespace pybind
     PyObject * python_kernel::module_reload( PyObject * _module )
     {
         return pybind::module_reload( _module );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * python_kernel::module_reload_source( PyObject * _module, const char * _source, const char * _filename )
+    {
+        return pybind::module_reload_source( _module, _source, _filename );
     }
     //////////////////////////////////////////////////////////////////////////
 }
