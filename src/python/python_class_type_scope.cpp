@@ -1722,7 +1722,7 @@ namespace pybind
 
             const char * name = adapter->getName();
 
-            pybind::dict_removestring( m_pytypeobject->tp_dict, name );
+            pybind::module_removeobject( reinterpret_cast<PyObject *>(m_pytypeobject), name );
 
             adapter = nullptr;
         }
@@ -1733,7 +1733,7 @@ namespace pybind
 
             const char * name = adapter->getName();
 
-            pybind::dict_removestring( m_pytypeobject->tp_dict, name );
+            pybind::module_removeobject( reinterpret_cast<PyObject *>(m_pytypeobject), name );
 
             adapter = nullptr;
         }
@@ -1870,7 +1870,7 @@ namespace pybind
 
         PyObject * py_type_method = m_kernel->create_method_adapter( _imethod, m_pytypeobject );
 
-        if( pybind::dict_setstring( m_pytypeobject->tp_dict, name, py_type_method ) == false )
+        if( PyObject_SetAttrString( reinterpret_cast<PyObject *>(m_pytypeobject), name, py_type_method ) < 0 )
         {
             pybind::decref( py_type_method );
 
@@ -1986,7 +1986,7 @@ namespace pybind
 
         PyObject * py_member = m_kernel->create_member_adapter( _imember );
 
-        if( pybind::dict_setstring( m_pytypeobject->tp_dict, name, py_member ) == false )
+        if( PyObject_SetAttrString( reinterpret_cast<PyObject *>(m_pytypeobject), name, py_member ) < 0 )
         {
             pybind::decref( py_member );
 

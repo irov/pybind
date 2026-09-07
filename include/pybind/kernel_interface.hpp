@@ -348,6 +348,8 @@ namespace pybind
         virtual PyObject * traceback_next( PyObject * _traceback ) = 0;
 
         virtual PyObject * module_import( const char * _name, bool & _exsist ) = 0;
+        // Returns a borrowed reference to the module registered in sys.modules.
+        // Repeated initialization preserves the existing module and its contents.
         virtual PyObject * module_init( const char * _name ) = 0;
         virtual void module_fini( PyObject * _module ) = 0;
         virtual PyObject * module_dict( PyObject * _module ) = 0;
@@ -381,6 +383,11 @@ namespace pybind
         virtual string_view object_repr( PyObject * _obj ) = 0;
         virtual string_view object_repr_type( PyObject * _obj ) = 0;
 
+        // Boolean extraction follows Python truth testing. Integer extraction
+        // accepts bool/int/long/float; float inputs use C++ casts.
+        // A false result leaves the output unchanged. Unsupported numeric types
+        // return false without setting an exception; conversion errors remain
+        // pending in the runtime.
         virtual bool extract_bool( PyObject * _obj, bool & _value ) = 0;
         virtual bool extract_int8( PyObject * _obj, int8_t & _value ) = 0;
         virtual bool extract_int16( PyObject * _obj, int16_t & _value ) = 0;
@@ -390,6 +397,7 @@ namespace pybind
         virtual bool extract_uint16( PyObject * _obj, uint16_t & _value ) = 0;
         virtual bool extract_uint32( PyObject * _obj, uint32_t & _value ) = 0;
         virtual bool extract_uint64( PyObject * _obj, uint64_t & _value ) = 0;
+        // Floating-point extraction accepts int/long/float and rejects bool.
         virtual bool extract_float( PyObject * _obj, float & _value ) = 0;
         virtual bool extract_double( PyObject * _obj, double & _value ) = 0;
         virtual bool extract_wchar( PyObject * _obj, wchar_t & _value ) = 0;

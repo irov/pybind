@@ -142,7 +142,8 @@ namespace pybind
             }
             catch( const pybind_exception & exception )
             {
-                tinypy_vm_raise_error( holder->kernel->vm(), TINYPY_ERROR_RUNTIME, exception.what() );
+                const char * message = exception.what();
+                holder->kernel->set_error( error_type_e::Runtime, message );
                 if( _outError != nullptr )
                 {
                     *_outError = nullptr;
@@ -1239,11 +1240,14 @@ namespace pybind
         va_start( args, _format );
         PyObject * values = this->build_value_va( _format, args );
         va_end( args );
-        if( values != nullptr )
+        if( values == nullptr )
         {
-            this->call_method_native( _object, _method, values );
-            this->decref( values );
+            this->report_error_( nullptr );
+            return;
         }
+
+        this->call_method_native( _object, _method, values );
+        this->decref( values );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * tinypy_kernel::ask_method( PyObject * _object, const char * _method, const char * _format, ... )
@@ -1254,6 +1258,7 @@ namespace pybind
         va_end( args );
         if( values == nullptr )
         {
+            this->report_error_( nullptr );
             return nullptr;
         }
 
@@ -1519,67 +1524,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * tinypy_kernel::build_value_va( const char * _format, va_list _args )
     {
-        if( _format == nullptr || _format[0] == '\0' )
-        {
-            return this->tuple_new( 0 );
-        }
-
-        size_t count = 0;
-        for( const char * cursor = _format; *cursor != '\0'; ++cursor )
-        {
-            if( *cursor != '(' && *cursor != ')' && *cursor != ',' && *cursor != ' ' )
-            {
-                count += 1;
-            }
-        }
-
-        PyObject * result = this->tuple_new( count );
-        size_t index = 0;
-        for( const char * cursor = _format; *cursor != '\0'; ++cursor )
-        {
-            if( *cursor == '(' || *cursor == ')' || *cursor == ',' || *cursor == ' ' )
-            {
-                continue;
-            }
-
-            PyObject * value = nullptr;
-            switch( *cursor )
-            {
-            case 'O':
-                value = va_arg( _args, PyObject * );
-                this->incref( value );
-                break;
-            case 's':
-                value = this->ptr_string( va_arg( _args, const char * ) );
-                break;
-            case 'i':
-                value = this->ptr_int32( va_arg( _args, int ) );
-                break;
-            case 'l':
-                value = this->ptr_long( va_arg( _args, long ) );
-                break;
-            case 'L':
-                value = this->ptr_int64( va_arg( _args, int64_t ) );
-                break;
-            case 'd':
-                value = this->ptr_double( va_arg( _args, double ) );
-                break;
-            default:
-                this->set_error( error_type_e::Type, "unsupported build_value format" );
-                break;
-            }
-
-            if( value == nullptr )
-            {
-                this->decref( result );
-                return nullptr;
-            }
-
-            this->tuple_setitem( result, index++, value );
-            this->decref( value );
-        }
-
-        return result;
+        tinypy_value_t * value = tinypy_build_value_va( m_vm, _format, _args, nullptr );
+        return detail::object_cast( value );
     }
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::traceback_check( PyObject * _traceback )
@@ -1625,12 +1571,23 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * tinypy_kernel::module_init( const char * _name )
     {
-        tinypy_value_t * module = tinypy_module_new( m_vm, _name, std::strlen( _name ) );
-        tinypy_value_t * key = tinypy_string_from_bytes( m_vm, _name, std::strlen( _name ) );
+        size_t nameSize = std::strlen( _name );
+        tinypy_value_t * key = tinypy_string_from_bytes( m_vm, _name, nameSize );
+        tinypy_value_t * modules = tinypy_vm_modules( m_vm );
+        tinypy_value_t * module = tinypy_dict_get( modules, key );
+
+        if( module != nullptr && tinypy_typeof( module ) == TINYPY_VALUE_MODULE )
+        {
+            tinypy_release( key );
+            return detail::object_cast( module );
+        }
+
+        module = tinypy_module_new( m_vm, _name, nameSize );
         tinypy_module_add_value( module, "__name__", 8, key );
         tinypy_module_add_value( module, "__builtins__", 12, tinypy_vm_builtins( m_vm ) );
-        tinypy_dict_set( tinypy_vm_modules( m_vm ), key, module );
+        tinypy_dict_set( modules, key, module );
         tinypy_release( key );
+        tinypy_release( module );
         return detail::object_cast( module );
     }
     //////////////////////////////////////////////////////////////////////////
@@ -1659,10 +1616,7 @@ namespace pybind
         {
             module = detail::value_cast( this->module_init( _name ) );
         }
-        else
-        {
-            tinypy_retain( module );
-        }
+        tinypy_retain( module );
 
         tinypy_error_t * error = nullptr;
         tinypy_value_t * none = tinypy_exec_code( detail::value_cast( _code ), tinypy_module_dict( module ), tinypy_module_dict( module ), &error );
@@ -1984,11 +1938,19 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::extract_bool( PyObject * _object, bool & _value )
     {
+        if( _object == nullptr )
+        {
+            return false;
+        }
+
         tinypy_error_t * error = nullptr;
         int32_t result = tinypy_truth( detail::value_cast( _object ), &error );
         if( result < 0 )
         {
-            this->report_error_( error );
+            if( error != nullptr )
+            {
+                tinypy_error_release( error );
+            }
             return false;
         }
 
@@ -1998,6 +1960,11 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::extract_int64( PyObject * _object, int64_t & _value )
     {
+        if( _object == nullptr )
+        {
+            return false;
+        }
+
         tinypy_value_type_e kind = tinypy_typeof( detail::value_cast( _object ) );
         if( kind == TINYPY_VALUE_BOOL || kind == TINYPY_VALUE_INTEGER )
         {
@@ -2038,7 +2005,13 @@ namespace pybind
             return true;
         }
 
-        this->set_error( error_type_e::Type, "value is not an integer" );
+        if( kind == TINYPY_VALUE_FLOAT )
+        {
+            double value = tinypy_float_as_double( detail::value_cast( _object ) );
+            _value = static_cast<int64_t>(value);
+            return true;
+        }
+
         return false;
     }
     //////////////////////////////////////////////////////////////////////////
@@ -2080,10 +2053,22 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::extract_uint64( PyObject * _object, uint64_t & _value )
     {
+        if( _object == nullptr )
+        {
+            return false;
+        }
+
         tinypy_value_type_e kind = tinypy_typeof( detail::value_cast( _object ) );
         if( kind == TINYPY_VALUE_LONG )
         {
             return detail::long_to_u64( detail::value_cast( _object ), &_value );
+        }
+
+        if( kind == TINYPY_VALUE_FLOAT )
+        {
+            double value = tinypy_float_as_double( detail::value_cast( _object ) );
+            _value = static_cast<uint64_t>(value);
+            return true;
         }
 
         int64_t value;
@@ -2134,21 +2119,35 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::extract_double( PyObject * _object, double & _value )
     {
-        tinypy_value_type_e kind = tinypy_typeof( detail::value_cast( _object ) );
-        if( kind == TINYPY_VALUE_FLOAT )
-        {
-            _value = tinypy_float_as_double( detail::value_cast( _object ) );
-            return true;
-        }
-
-        int64_t integer;
-        if( this->extract_int64( _object, integer ) == false )
+        if( _object == nullptr )
         {
             return false;
         }
 
-        _value = static_cast<double>(integer);
-        return true;
+        tinypy_value_t * object = detail::value_cast( _object );
+        tinypy_value_type_e kind = tinypy_typeof( object );
+
+        switch( kind )
+        {
+        case TINYPY_VALUE_FLOAT:
+            {
+                _value = tinypy_float_as_double( object );
+                return true;
+            }
+        case TINYPY_VALUE_LONG:
+            {
+                tinypy_bool_t result = tinypy_long_as_double( object, &_value, nullptr );
+                return result != 0;
+            }
+        case TINYPY_VALUE_INTEGER:
+            {
+                int64_t integer = tinypy_integer_as_i64( object );
+                _value = static_cast<double>(integer);
+                return true;
+            }
+        default:
+            return false;
+        }
     }
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::extract_float( PyObject * _object, float & _value )

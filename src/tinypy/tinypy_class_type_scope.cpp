@@ -150,7 +150,7 @@ namespace pybind
             catch( const pybind_exception & exception )
             {
                 const char * message = exception.what();
-                tinypy_vm_raise_error( vm, TINYPY_ERROR_RUNTIME, message );
+                kernel->set_error( error_type_e::Runtime, message );
                 if( _outError != nullptr )
                 {
                     *_outError = nullptr;
@@ -214,7 +214,7 @@ namespace pybind
             catch( const pybind_exception & exception )
             {
                 const char * message = exception.what();
-                tinypy_vm_raise_error( vm, TINYPY_ERROR_RUNTIME, message );
+                kernel->set_error( error_type_e::Runtime, message );
                 if( _outError != nullptr )
                 {
                     *_outError = nullptr;
@@ -276,7 +276,7 @@ namespace pybind
             catch( const pybind_exception & exception )
             {
                 const char * message = exception.what();
-                tinypy_vm_raise_error( vm, TINYPY_ERROR_RUNTIME, message );
+                kernel->set_error( error_type_e::Runtime, message );
                 if( _outError != nullptr )
                 {
                     *_outError = nullptr;
@@ -306,7 +306,7 @@ namespace pybind
             catch( const pybind_exception & exception )
             {
                 const char * message = exception.what();
-                tinypy_vm_raise_error( vm, TINYPY_ERROR_RUNTIME, message );
+                kernel->set_error( error_type_e::Runtime, message );
                 if( _outError != nullptr )
                 {
                     *_outError = nullptr;
@@ -346,8 +346,8 @@ namespace pybind
             }
             catch( const pybind_exception & exception )
             {
-                tinypy_kernel * tinypyKernel = static_cast<tinypy_kernel *>(kernel);
-                tinypy_vm_raise_error( tinypyKernel->vm(), TINYPY_ERROR_RUNTIME, exception.what() );
+                const char * message = exception.what();
+                kernel->set_error( error_type_e::Runtime, message );
                 if( _outError != nullptr )
                 {
                     *_outError = nullptr;
@@ -417,7 +417,7 @@ namespace pybind
             catch( const pybind_exception & exception )
             {
                 const char * message = exception.what();
-                tinypy_vm_raise_error( vm, TINYPY_ERROR_RUNTIME, message );
+                kernel->set_error( error_type_e::Runtime, message );
                 if( _outError != nullptr )
                 {
                     *_outError = nullptr;
@@ -447,7 +447,7 @@ namespace pybind
             catch( const pybind_exception & exception )
             {
                 const char * message = exception.what();
-                tinypy_vm_raise_error( vm, TINYPY_ERROR_RUNTIME, message );
+                kernel->set_error( error_type_e::Runtime, message );
                 if( _outError != nullptr )
                 {
                     *_outError = nullptr;
@@ -477,7 +477,7 @@ namespace pybind
             catch( const pybind_exception & exception )
             {
                 const char * message = exception.what();
-                tinypy_vm_raise_error( vm, TINYPY_ERROR_RUNTIME, message );
+                kernel->set_error( error_type_e::Runtime, message );
                 if( _outError != nullptr )
                 {
                     *_outError = nullptr;
@@ -509,7 +509,7 @@ namespace pybind
             catch( const pybind_exception & exception )
             {
                 const char * message = exception.what();
-                tinypy_vm_raise_error( vm, TINYPY_ERROR_RUNTIME, message );
+                kernel->set_error( error_type_e::Runtime, message );
                 if( _outError != nullptr )
                 {
                     *_outError = nullptr;
@@ -542,7 +542,7 @@ namespace pybind
             catch( const pybind_exception & exception )
             {
                 const char * message = exception.what();
-                tinypy_vm_raise_error( vm, TINYPY_ERROR_RUNTIME, message );
+                kernel->set_error( error_type_e::Runtime, message );
                 if( _outError != nullptr )
                 {
                     *_outError = nullptr;
@@ -570,7 +570,7 @@ namespace pybind
             catch( const pybind_exception & exception )
             {
                 const char * message = exception.what();
-                tinypy_vm_raise_error( vm, TINYPY_ERROR_RUNTIME, message );
+                kernel->set_error( error_type_e::Runtime, message );
                 if( _outError != nullptr )
                 {
                     *_outError = nullptr;
@@ -700,7 +700,7 @@ namespace pybind
             catch( const pybind_exception & exception )
             {
                 const char * message = exception.what();
-                tinypy_vm_raise_error( vm, TINYPY_ERROR_RUNTIME, message );
+                kernel->set_error( error_type_e::Runtime, message );
                 if( _outError != nullptr )
                 {
                     *_outError = nullptr;

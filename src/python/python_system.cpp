@@ -291,6 +291,11 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
+        if( PyErr_Occurred() != nullptr )
+        {
+            return;
+        }
+
         PyObject * exception_type;
 
         switch( _type )
@@ -383,15 +388,13 @@ namespace pybind
             {
                 _exsist = false;
 
-                PyErr_Print();
-                PyErr_Clear();
+                pybind::check_error();
 
                 return nullptr;
 
             }
 
-            PyErr_Print();
-            PyErr_Clear();
+            pybind::check_error();
         }
 
         _exsist = true;
@@ -1103,29 +1106,14 @@ namespace pybind
             return false;
         }
 
-        if( PyBool_Check( _obj ) )
-        {
-            _value = (_obj == Py_True);
-        }
-#   if PYBIND_PYTHON_VERSION < 300
-        else if( PyInt_Check( _obj ) )
-        {
-            _value = (PyInt_AS_LONG( _obj ) != 0);
-        }
-#	endif
-        else if( PyFloat_Check( _obj ) )
-        {
-            _value = (PyFloat_AS_DOUBLE( _obj ) != 0.0);
-        }
-        else if( PyLong_Check( _obj ) )
-        {
-            _value = (PyLong_AsLong( _obj ) != 0);
-        }
-        else
+        int truth = PyObject_IsTrue( _obj );
+
+        if( truth < 0 )
         {
             return false;
         }
 
+        _value = truth != 0;
         return true;
     }
     //////////////////////////////////////////////////////////////////////////
@@ -1215,6 +1203,11 @@ namespace pybind
             {
                 unsigned PY_LONG_LONG value = PyLong_AsUnsignedLongLong( _obj );
 
+                if( value == static_cast<unsigned PY_LONG_LONG>(-1) && PyErr_Occurred() != nullptr )
+                {
+                    return false;
+                }
+
                 _value = (T)value;
             }
             else if( PyFloat_Check( _obj ) )
@@ -1269,6 +1262,10 @@ namespace pybind
         {
             _value = (T)PyFloat_AS_DOUBLE( _obj );
         }
+        else if( PyBool_Check( _obj ) )
+        {
+            return false;
+        }
 #   if PYBIND_PYTHON_VERSION < 300
         else if( PyInt_Check( _obj ) )
         {
@@ -1277,11 +1274,14 @@ namespace pybind
 #	endif
         else if( PyLong_Check( _obj ) )
         {
-            _value = (T)PyLong_AsDouble( _obj );
-        }
-        else if( PyBool_Check( _obj ) )
-        {
-            _value = (T)(_obj == Py_True);
+            double value = PyLong_AsDouble( _obj );
+
+            if( value == -1.0 && PyErr_Occurred() != nullptr )
+            {
+                return false;
+            }
+
+            _value = (T)value;
         }
         else
         {
@@ -2261,7 +2261,10 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        pybind::check_error();
+        if( PyErr_Occurred() != nullptr )
+        {
+            return;
+        }
 
         char buffer[4096 + 1] = {'\0'};
         vsnprintf( buffer, 4096, _format, _va );
@@ -2304,7 +2307,10 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        pybind::check_error();
+        if( PyErr_Occurred() != nullptr )
+        {
+            return;
+        }
 
         char traceback[4096 + 1] = {'\0'};
         vsnprintf( traceback, 4096, _format, _va );
@@ -2354,7 +2360,10 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        pybind::check_error();
+        if( PyErr_Occurred() != nullptr )
+        {
+            return;
+        }
 
         char buffer[4096 + 1] = {'\0'};
         vsnprintf( buffer, 4096, _format, _va );

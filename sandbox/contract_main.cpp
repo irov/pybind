@@ -58,9 +58,8 @@ namespace detail
             PyObject * code = _kernel->compile_string( source, "finder/sample.py" );
 
             if( code == nullptr ) return nullptr;
-            PyObject * initialized = _kernel->module_init( name );
+            _kernel->module_init( name );
             PyObject * loaded = _kernel->module_execcode( name, code );
-            _kernel->decref( initialized );
             _kernel->decref( code );
             ++m_loads;
             return loaded;
@@ -609,6 +608,7 @@ int main()
     PYBIND_CONTRACT_ASSERT( kernel->object_repr( nullptr ).is_invalid() == true );
     PYBIND_CONTRACT_ASSERT( kernel->object_repr_type( nullptr ).is_invalid() == true );
     PyObject * module = kernel->module_init( "contract" );
+    kernel->incref( module );
     kernel->set_current_module( module );
 
     const char reloadSource[] = "value = 17\ndef get_value():\n    return value\n";
