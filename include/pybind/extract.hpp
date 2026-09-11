@@ -23,6 +23,16 @@ namespace pybind
     namespace detail
     {
         template<class T>
+        struct enum_integer_type
+        {
+            typedef std::conditional_t<sizeof(T) == 1, int8_t,
+                std::conditional_t<sizeof(T) == 2, int16_t,
+                    std::conditional_t<sizeof(T) == 4, int32_t, int64_t>>> signed_type;
+            typedef std::conditional_t<std::is_signed_v<std::underlying_type_t<T>>,
+                signed_type, std::make_unsigned_t<signed_type>> type;
+        };
+        //////////////////////////////////////////////////////////////////////////
+        template<class T>
         struct extract_check
         {
             typedef typename stdex::mpl::remove_cref<T>::type T_WOCR;
@@ -185,7 +195,9 @@ namespace pybind
     {
         T operator () ( kernel_interface * _kernel, PyObject * _obj ) const
         {
-            uint32_t value;
+            typedef typename detail::enum_integer_type<T>::type integer_type;
+
+            integer_type value;
             if( pybind::extract_value( _kernel, _obj, value, true ) == false )
             {
                 const std::type_info & tinfo = typeid(T);
@@ -332,7 +344,12 @@ namespace pybind
     {
         PyObject * operator () ( kernel_interface * _kernel, T _t ) const
         {
-            return pybind::ptr_throw_i( _kernel, static_cast<uint32_t>(_t) );
+            typedef typename detail::enum_integer_type<T>::type integer_type;
+
+            integer_type value = static_cast<integer_type>(_t);
+            PyObject * py_value = pybind::ptr_throw_i( _kernel, value );
+
+            return py_value;
         }
     };
     //////////////////////////////////////////////////////////////////////////

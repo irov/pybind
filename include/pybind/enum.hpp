@@ -2,6 +2,7 @@
 
 #include "pybind/exports.hpp"
 #include "pybind/types.hpp"
+#include "pybind/const.hpp"
 
 namespace pybind
 {
@@ -24,7 +25,7 @@ namespace pybind
     public:
         enum_ & def( const char * _id, T _value )
         {
-            detail::add_module_enum( m_kernel, m_module, _id, (uint32_t)_value );
+            pybind::def_const<T>( m_kernel, _id, _value, m_module );
 
             return *this;
         }
