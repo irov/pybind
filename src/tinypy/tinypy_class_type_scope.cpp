@@ -849,43 +849,6 @@ namespace pybind
             return false;
         }
 
-        tinypy_vm_t * vm = m_kernel->vm();
-        tinypy_value_t * namespaceDict = tinypy_dict_new( vm );
-
-        tinypy_value_t * initializer = detail::make_method( this, "__init__", nullptr, nullptr, true, false );
-        tinypy_value_t * initializerKey = tinypy_string_from_bytes( vm, "__init__", 8 );
-        tinypy_dict_set( namespaceDict, initializerKey, initializer );
-        tinypy_release( initializerKey );
-        tinypy_release( initializer );
-
-        for( size_t index = 0; index != m_methodCount; ++index )
-        {
-            const method_adapter_interface_ptr & method = m_methods[index];
-            const char * methodName = method->getName();
-            size_t methodNameSize = ::strlen( methodName );
-            tinypy_value_t * function = detail::make_method( this, methodName, method, nullptr, false, false );
-            tinypy_value_t * key = tinypy_string_from_bytes( vm, methodName, methodNameSize );
-            tinypy_dict_set( namespaceDict, key, function );
-            tinypy_release( key );
-            tinypy_release( function );
-        }
-
-        for( size_t index = 0; index != m_memberCount; ++index )
-        {
-            const member_adapter_interface_ptr & member = m_members[index];
-            const char * memberName = member->getName();
-            size_t memberNameSize = ::strlen( memberName );
-            tinypy_value_t * getter = detail::make_method( this, memberName, nullptr, member, false, false );
-            tinypy_value_t * setter = detail::make_method( this, memberName, nullptr, member, false, true );
-            tinypy_value_t * property = tinypy_property_new( vm, getter, setter, nullptr, nullptr );
-            tinypy_value_t * key = tinypy_string_from_bytes( vm, memberName, memberNameSize );
-            tinypy_dict_set( namespaceDict, key, property );
-            tinypy_release( key );
-            tinypy_release( property );
-            tinypy_release( setter );
-            tinypy_release( getter );
-        }
-
         const tinypy_type_t * bases[PYBIND_BASES_COUNT];
         size_t baseCount = 0;
 
@@ -912,11 +875,11 @@ namespace pybind
         tinypy_native_type_spec_t spec;
         this->make_native_type_spec_( &spec );
 
-        tinypy_error_t * error = nullptr;
+        tinypy_vm_t * vm = m_kernel->vm();
         size_t nameSize = ::strlen( m_name );
         const tinypy_type_t * const * typeBases = baseCount == 0 ? nullptr : bases;
-        m_type = tinypy_native_type_new( vm, m_name, nameSize, typeBases, baseCount, namespaceDict, &spec, &error );
-        tinypy_release( namespaceDict );
+        tinypy_error_t * error = nullptr;
+        m_type = tinypy_native_type_new( vm, m_name, nameSize, typeBases, baseCount, nullptr, &spec, &error );
 
         if( m_type == nullptr )
         {
@@ -926,6 +889,36 @@ namespace pybind
             }
 
             return false;
+        }
+
+        constexpr char initializerName[] = "__init__";
+        constexpr size_t initializerNameSize = sizeof( initializerName ) - 1;
+        tinypy_value_t * initializer = detail::make_method( this, initializerName, nullptr, nullptr, true, false );
+        tinypy_type_set_attr( m_type, initializerName, initializerNameSize, initializer );
+        tinypy_release( initializer );
+
+        for( size_t index = 0; index != m_methodCount; ++index )
+        {
+            const method_adapter_interface_ptr & method = m_methods[index];
+            const char * methodName = method->getName();
+            size_t methodNameSize = ::strlen( methodName );
+            tinypy_value_t * function = detail::make_method( this, methodName, method, nullptr, false, false );
+            tinypy_type_set_attr( m_type, methodName, methodNameSize, function );
+            tinypy_release( function );
+        }
+
+        for( size_t index = 0; index != m_memberCount; ++index )
+        {
+            const member_adapter_interface_ptr & member = m_members[index];
+            const char * memberName = member->getName();
+            size_t memberNameSize = ::strlen( memberName );
+            tinypy_value_t * getter = detail::make_method( this, memberName, nullptr, member, false, false );
+            tinypy_value_t * setter = detail::make_method( this, memberName, nullptr, member, false, true );
+            tinypy_value_t * property = tinypy_property_new( vm, getter, setter, nullptr, nullptr );
+            tinypy_type_set_attr( m_type, memberName, memberNameSize, property );
+            tinypy_release( property );
+            tinypy_release( setter );
+            tinypy_release( getter );
         }
 
         tinypy_value_t * module = detail::cast_value( moduleObject );
