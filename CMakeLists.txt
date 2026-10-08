@@ -252,6 +252,25 @@ if(PYBIND_SANDBOX)
             add_dependencies(sandbox_contract python_download)
         endif()
     ENDIF()
+
+    ADD_EXECUTABLE(sandbox_benchmark
+        ${CMAKE_CURRENT_SOURCE_DIR}/sandbox/benchmark_main.cpp
+        )
+
+    TARGET_LINK_LIBRARIES(sandbox_benchmark ${PROJECT_NAME})
+    add_dependencies(sandbox_benchmark ${PROJECT_NAME})
+
+    if(TARGET stdex_download)
+        add_dependencies(sandbox_benchmark stdex_download)
+    endif()
+
+    IF(PYBIND_BACKEND STREQUAL "python")
+        TARGET_LINK_LIBRARIES(sandbox_benchmark python)
+
+        if(TARGET python_download)
+            add_dependencies(sandbox_benchmark python_download)
+        endif()
+    ENDIF()
 endif()
 
 if(PYBIND_INSTALL)

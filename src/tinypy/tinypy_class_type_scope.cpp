@@ -32,26 +32,31 @@ namespace pybind
             return reinterpret_cast<tinypy_value_t *>(_value);
         }
         //////////////////////////////////////////////////////////////////////////
-        static tinypy_value_t * tail_arguments( tinypy_kernel * _kernel, tinypy_value_t * _args )
+        class arguments_scope
         {
-            size_t count = tinypy_tuple_size( _args );
-            tinypy_vm_t * vm = _kernel->vm();
-
-            if( count <= 1 )
+        public:
+            arguments_scope( tinypy_vm_t * _vm, tinypy_value_t * const * _items, size_t _count )
+                : m_args( tinypy_native_arguments_acquire( _vm, nullptr, _items, _count, nullptr ) )
             {
-                return tinypy_tuple_new( vm, 0 );
             }
 
-            tinypy_value_t * result = tinypy_tuple_new( vm, count - 1 );
-
-            for( size_t index = 1; index != count; ++index )
+            ~arguments_scope()
             {
-                tinypy_value_t * item = tinypy_tuple_get( _args, index );
-                tinypy_tuple_set( result, index - 1, item );
+                tinypy_native_arguments_release( m_args );
             }
 
-            return result;
-        }
+            arguments_scope( const arguments_scope & ) = delete;
+            arguments_scope & operator = ( const arguments_scope & ) = delete;
+
+        public:
+            PyObject * get() const
+            {
+                return cast_object( m_args );
+            }
+
+        protected:
+            tinypy_value_t * m_args;
+        };
         //////////////////////////////////////////////////////////////////////////
         static void finalize_method_holder( void * _userData )
         {
@@ -59,27 +64,34 @@ namespace pybind
             holder->allocator->deleteT( holder );
         }
         //////////////////////////////////////////////////////////////////////////
-        static tinypy_value_t * call_method_holder( tinypy_value_t * _function, tinypy_value_t * _args, tinypy_value_t * _kwargs, void * _userData, tinypy_error_t ** _outError )
+        static tinypy_value_t * call_method_holder( tinypy_value_t * _function, tinypy_value_t * _self, tinypy_value_t * const * _items, size_t _count, tinypy_value_t * _kwargs, tinypy_error_t ** _outError )
         {
-            (void)_function;
-
-            method_holder_t * holder = static_cast<method_holder_t *>(_userData);
+            method_holder_t * holder = static_cast<method_holder_t *>(tinypy_native_function_user_data( _function ));
             tinypy_class_type_scope * scope = holder->scope;
             kernel_interface * kernelInterface = pybind::get_kernel();
             tinypy_kernel * kernel = static_cast<tinypy_kernel *>(kernelInterface);
             tinypy_vm_t * vm = kernel->vm();
-            size_t argumentCount = tinypy_tuple_size( _args );
             PyObject * kwargsObject = detail::cast_object( _kwargs );
 
             try
             {
-                if( argumentCount == 0 )
+                tinypy_value_t * selfValue = _self;
+                tinypy_value_t * const * arguments = _items;
+                size_t argumentCount = _count;
+
+                if( selfValue == nullptr )
                 {
-                    tinypy_vm_raise_error( vm, TINYPY_ERROR_TYPE, "native descriptor requires an instance" );
-                    return nullptr;
+                    if( argumentCount == 0 )
+                    {
+                        tinypy_vm_raise_error( vm, TINYPY_ERROR_TYPE, "native descriptor requires an instance" );
+                        return nullptr;
+                    }
+
+                    selfValue = arguments[0];
+                    arguments += 1;
+                    argumentCount -= 1;
                 }
 
-                tinypy_value_t * selfValue = tinypy_tuple_get( _args, 0 );
                 PyObject * self = detail::cast_object( selfValue );
                 tinypy_class_type_scope::payload_t * payload = scope->payload( self );
 
@@ -95,10 +107,8 @@ namespace pybind
                         payload->flags |= tinypy_class_type_scope::PayloadPod;
                     }
 
-                    tinypy_value_t * callArgs = detail::tail_arguments( kernel, _args );
-                    PyObject * callArgsObject = detail::cast_object( callArgs );
-                    void * impl = scope->call_new( self, callArgsObject, kwargsObject );
-                    tinypy_release( callArgs );
+                    detail::arguments_scope callArgs( vm, arguments, argumentCount );
+                    void * impl = scope->call_new( self, callArgs.get(), kwargsObject );
 
                     if( impl == nullptr )
                     {
@@ -129,22 +139,19 @@ namespace pybind
                         return detail::cast_value( result );
                     }
 
-                    if( argumentCount != 2 )
+                    if( argumentCount != 1 )
                     {
                         tinypy_vm_raise_error( vm, TINYPY_ERROR_TYPE, "native property setter expects one value" );
                         return nullptr;
                     }
 
-                    tinypy_value_t * item = tinypy_tuple_get( _args, 1 );
-                    PyObject * value = detail::cast_object( item );
+                    PyObject * value = detail::cast_object( arguments[0] );
                     holder->member->set( kernel, payload->impl, value, scopePtr );
                     return tinypy_none_get( vm );
                 }
 
-                tinypy_value_t * callArgs = detail::tail_arguments( kernel, _args );
-                PyObject * callArgsObject = detail::cast_object( callArgs );
-                PyObject * result = holder->adapter->call( kernel, payload->impl, scopePtr, callArgsObject, kwargsObject );
-                tinypy_release( callArgs );
+                detail::arguments_scope callArgs( vm, arguments, argumentCount );
+                PyObject * result = holder->adapter->call( kernel, payload->impl, scopePtr, callArgs.get(), kwargsObject );
                 return detail::cast_value( result );
             }
             catch( const pybind_exception & exception )
@@ -173,7 +180,7 @@ namespace pybind
 
             tinypy_vm_t * vm = kernel->vm();
             size_t nameSize = ::strlen( _name );
-            return tinypy_native_function_new( vm, _name, nameSize, &call_method_holder, holder, &finalize_method_holder );
+            return tinypy_native_function_new_items_keywords( vm, _name, nameSize, &call_method_holder, holder, &finalize_method_holder );
         }
         //////////////////////////////////////////////////////////////////////////
         static tinypy_bool_t native_construct( tinypy_value_t * _instance, void * _payload, tinypy_value_t * _args, tinypy_value_t * _kwargs, void * _userData, tinypy_error_t ** _outError )
