@@ -1,5 +1,6 @@
 #include "tinypy_class_type_scope.hpp"
 
+#include "tinypy_arguments_scope.hpp"
 #include "tinypy_kernel.hpp"
 
 #include "pybind/exception.hpp"
@@ -31,32 +32,6 @@ namespace pybind
         {
             return reinterpret_cast<tinypy_value_t *>(_value);
         }
-        //////////////////////////////////////////////////////////////////////////
-        class arguments_scope
-        {
-        public:
-            arguments_scope( tinypy_vm_t * _vm, tinypy_value_t * const * _items, size_t _count )
-                : m_args( tinypy_native_arguments_acquire( _vm, nullptr, _items, _count, nullptr ) )
-            {
-            }
-
-            ~arguments_scope()
-            {
-                tinypy_native_arguments_release( m_args );
-            }
-
-            arguments_scope( const arguments_scope & ) = delete;
-            arguments_scope & operator = ( const arguments_scope & ) = delete;
-
-        public:
-            PyObject * get() const
-            {
-                return cast_object( m_args );
-            }
-
-        protected:
-            tinypy_value_t * m_args;
-        };
         //////////////////////////////////////////////////////////////////////////
         static void finalize_method_holder( void * _userData )
         {
@@ -107,7 +82,7 @@ namespace pybind
                         payload->flags |= tinypy_class_type_scope::PayloadPod;
                     }
 
-                    detail::arguments_scope callArgs( vm, arguments, argumentCount );
+                    tinypy_arguments_scope callArgs( vm, arguments, argumentCount );
                     void * impl = scope->call_new( self, callArgs.get(), kwargsObject );
 
                     if( impl == nullptr )
@@ -150,7 +125,7 @@ namespace pybind
                     return tinypy_none_get( vm );
                 }
 
-                detail::arguments_scope callArgs( vm, arguments, argumentCount );
+                tinypy_arguments_scope callArgs( vm, arguments, argumentCount );
                 PyObject * result = holder->adapter->call( kernel, payload->impl, scopePtr, callArgs.get(), kwargsObject );
                 return detail::cast_value( result );
             }
