@@ -19,7 +19,6 @@ namespace pybind
             tinypy_class_type_scope * scope;
             method_adapter_interface_ptr adapter;
             member_adapter_interface_ptr member;
-            bool constructor;
             bool setter;
         };
         //////////////////////////////////////////////////////////////////////////
@@ -70,34 +69,6 @@ namespace pybind
                 PyObject * self = detail::cast_object( selfValue );
                 tinypy_class_type_scope::payload_t * payload = scope->payload( self );
 
-                if( holder->constructor == true )
-                {
-                    payload->scope = scope;
-                    payload->flags = 0;
-                    payload->hash = 0;
-
-                    if( scope->get_pod_size() != 0 )
-                    {
-                        payload->impl = payload->pod;
-                        payload->flags |= tinypy_class_type_scope::PayloadPod;
-                    }
-
-                    tinypy_arguments_scope callArgs( vm, arguments, argumentCount );
-                    void * impl = scope->call_new( self, callArgs.get(), kwargsObject );
-
-                    if( impl == nullptr )
-                    {
-                        return nullptr;
-                    }
-
-                    payload->scope = scope;
-                    payload->impl = impl;
-                    payload->flags |= tinypy_class_type_scope::PayloadConstructed;
-                    scope->incref_smart_pointer( impl );
-
-                    return tinypy_none_get( vm );
-                }
-
                 if( payload->impl == nullptr )
                 {
                     tinypy_vm_raise_error( vm, TINYPY_ERROR_RUNTIME, "native object is no longer bound" );
@@ -142,7 +113,7 @@ namespace pybind
             }
         }
         //////////////////////////////////////////////////////////////////////////
-        static tinypy_value_t * make_method( tinypy_class_type_scope * _scope, const char * _name, const method_adapter_interface_ptr & _adapter, const member_adapter_interface_ptr & _member, bool _constructor, bool _setter )
+        static tinypy_value_t * make_method( tinypy_class_type_scope * _scope, const char * _name, const method_adapter_interface_ptr & _adapter, const member_adapter_interface_ptr & _member, bool _setter )
         {
             tinypy_kernel * kernel = static_cast<tinypy_kernel *>(pybind::get_kernel());
             method_holder_t * holder = kernel->get_allocator()->newP<method_holder_t>();
@@ -150,7 +121,6 @@ namespace pybind
             holder->scope = _scope;
             holder->adapter = _adapter;
             holder->member = _member;
-            holder->constructor = _constructor;
             holder->setter = _setter;
 
             tinypy_vm_t * vm = kernel->vm();
@@ -873,18 +843,12 @@ namespace pybind
             return false;
         }
 
-        constexpr char initializerName[] = "__init__";
-        constexpr size_t initializerNameSize = sizeof( initializerName ) - 1;
-        tinypy_value_t * initializer = detail::make_method( this, initializerName, nullptr, nullptr, true, false );
-        tinypy_type_set_attr( m_type, initializerName, initializerNameSize, initializer );
-        tinypy_release( initializer );
-
         for( size_t index = 0; index != m_methodCount; ++index )
         {
             const method_adapter_interface_ptr & method = m_methods[index];
             const char * methodName = method->getName();
             size_t methodNameSize = ::strlen( methodName );
-            tinypy_value_t * function = detail::make_method( this, methodName, method, nullptr, false, false );
+            tinypy_value_t * function = detail::make_method( this, methodName, method, nullptr, false );
             tinypy_type_set_attr( m_type, methodName, methodNameSize, function );
             tinypy_release( function );
         }
@@ -894,8 +858,8 @@ namespace pybind
             const member_adapter_interface_ptr & member = m_members[index];
             const char * memberName = member->getName();
             size_t memberNameSize = ::strlen( memberName );
-            tinypy_value_t * getter = detail::make_method( this, memberName, nullptr, member, false, false );
-            tinypy_value_t * setter = detail::make_method( this, memberName, nullptr, member, false, true );
+            tinypy_value_t * getter = detail::make_method( this, memberName, nullptr, member, false );
+            tinypy_value_t * setter = detail::make_method( this, memberName, nullptr, member, true );
             tinypy_value_t * property = tinypy_property_new( vm, getter, setter, nullptr, nullptr );
             tinypy_type_set_attr( m_type, memberName, memberNameSize, property );
             tinypy_release( property );
@@ -978,7 +942,7 @@ namespace pybind
         {
             const char * name = _imethod->getName();
             size_t nameSize = ::strlen( name );
-            tinypy_value_t * function = detail::make_method( this, name, _imethod, nullptr, false, false );
+            tinypy_value_t * function = detail::make_method( this, name, _imethod, nullptr, false );
             tinypy_type_set_attr( m_type, name, nameSize, function );
             tinypy_release( function );
         }
@@ -994,8 +958,8 @@ namespace pybind
             const char * name = _imember->getName();
             size_t nameSize = ::strlen( name );
             tinypy_vm_t * vm = m_kernel->vm();
-            tinypy_value_t * getter = detail::make_method( this, name, nullptr, _imember, false, false );
-            tinypy_value_t * setter = detail::make_method( this, name, nullptr, _imember, false, true );
+            tinypy_value_t * getter = detail::make_method( this, name, nullptr, _imember, false );
+            tinypy_value_t * setter = detail::make_method( this, name, nullptr, _imember, true );
             tinypy_value_t * property = tinypy_property_new( vm, getter, setter, nullptr, nullptr );
             tinypy_type_set_attr( m_type, name, nameSize, property );
             tinypy_release( property );
