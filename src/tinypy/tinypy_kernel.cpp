@@ -2793,9 +2793,29 @@ namespace pybind
             return;
         }
 
+        // As PyErr_PrintEx: normalize the pending exception (the raised value may
+        // be unnormalized, e.g. after sys.exit or `raise E, v`), then fetch it so
+        // the hook runs without an exception pending.
+        tinypy_vm_normalize_error( m_vm, nullptr );
+
         tinypy_value_t * exceptionType = tinypy_vm_raised_exception_type( m_vm );
         tinypy_value_t * exceptionValue = tinypy_vm_raised_exception( m_vm );
         tinypy_value_t * traceback = tinypy_vm_raised_traceback( m_vm );
+
+        if( exceptionType != nullptr )
+        {
+            tinypy_retain( exceptionType );
+        }
+        if( exceptionValue != nullptr )
+        {
+            tinypy_retain( exceptionValue );
+        }
+        if( traceback != nullptr )
+        {
+            tinypy_retain( traceback );
+        }
+
+        tinypy_vm_clear_error( m_vm );
 
         if( m_excepthook != nullptr && tinypy_is_callable( detail::value_cast( m_excepthook ) ) != 0 && exceptionType != nullptr && exceptionValue != nullptr )
         {
@@ -2828,6 +2848,19 @@ namespace pybind
             {
                 tinypy_error_release( hookError );
             }
+        }
+
+        if( exceptionType != nullptr )
+        {
+            tinypy_release( exceptionType );
+        }
+        if( exceptionValue != nullptr )
+        {
+            tinypy_release( exceptionValue );
+        }
+        if( traceback != nullptr )
+        {
+            tinypy_release( traceback );
         }
 
         tinypy_vm_clear_error( m_vm );
