@@ -2820,14 +2820,15 @@ namespace pybind
         if( m_excepthook != nullptr && tinypy_is_callable( detail::value_cast( m_excepthook ) ) != 0 && exceptionType != nullptr && exceptionValue != nullptr )
         {
             tinypy_value_t * none = nullptr;
+            tinypy_value_t * hookTraceback = traceback;
 
-            if( traceback == nullptr )
+            if( hookTraceback == nullptr )
             {
                 none = tinypy_none_get( m_vm );
-                traceback = none;
+                hookTraceback = none;
             }
 
-            tinypy_value_t * items[] = { exceptionType, exceptionValue, traceback };
+            tinypy_value_t * items[] = { exceptionType, exceptionValue, hookTraceback };
             tinypy_value_t * args = tinypy_tuple_from_items( m_vm, items, 3 );
             tinypy_error_t * hookError = nullptr;
             tinypy_value_t * result = tinypy_call( detail::value_cast( m_excepthook ), args, nullptr, &hookError );
