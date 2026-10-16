@@ -220,6 +220,11 @@ namespace pybind
     protected:
         number_adapter_t * get_number_adapters();
         compare_adapter_t * get_compare_adapters();
+
+    protected:
+        void setup_number_slots_();
+        void setup_sequence_slots_();
+        void setup_mapping_slots_();
     };
     //////////////////////////////////////////////////////////////////////////
     typedef stdex::intrusive_ptr<python_class_type_scope> python_class_type_scope_ptr;

@@ -9,6 +9,19 @@
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
+    namespace detail
+    {
+        inline void raise_read_only( kernel_interface * _kernel, const char * _name )
+        {
+            // As a property without a setter; the slot keeps this AttributeError.
+            _kernel->set_error( error_type_e::Attribute, "can't set attribute" );
+
+            pybind::throw_exception( "member '%s' is read-only"
+                , _name
+            );
+        }
+    }
+    //////////////////////////////////////////////////////////////////////////
     template<class C, class A>
     class member_adapter
         : public member_adapter_interface
@@ -38,7 +51,7 @@ namespace pybind
         {
             C * obj = _kernel->meta_cast_class_t<C>( _self, _scope );
 
-            obj->*m_member = pybind::extract_throw<A>( _kernel, _args );
+            obj->*m_member = pybind::extract<A>( _kernel, _args );
 
             return 1;
         }
@@ -110,17 +123,18 @@ namespace pybind
         {
             C * obj = _kernel->meta_cast_class_t<C>( _self, _scope );
 
-            PyObject * py_value = detail::return_operator_t( _kernel, (*m_get)(obj) );
+            PyObject * py_value = detail::return_operator_t( _kernel, (obj->*m_get)() );
 
             return py_value;
         }
 
         int set( kernel_interface * _kernel, void * _self, PyObject * _args, const class_type_scope_interface_ptr & _scope ) override
         {
-            (void)_kernel;
             (void)_self;
             (void)_args;
             (void)_scope;
+
+            detail::raise_read_only( _kernel, this->getName() );
 
             return 0;
         }
@@ -198,10 +212,11 @@ namespace pybind
 
         int set( kernel_interface * _kernel, void * _self, PyObject * _args, const class_type_scope_interface_ptr & _scope ) override
         {
-            (void)_kernel;
             (void)_self;
             (void)_args;
             (void)_scope;
+
+            detail::raise_read_only( _kernel, this->getName() );
 
             return 0;
         }

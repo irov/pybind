@@ -8,6 +8,10 @@
 #include "pybind/adapter/new_adapter.hpp"
 #include "pybind/adapter/destroy_adapter.hpp"
 
+#ifdef PYBIND_STL_SUPPORT
+#   include "pybind/stl/stl_type_cast.hpp"
+#endif
+
 #include <cassert>
 #include <climits>
 #include <cstdio>
@@ -25,11 +29,6 @@ namespace pybind
             return reinterpret_cast<tinypy_value_t *>(_object);
         }
         //////////////////////////////////////////////////////////////////////////
-        static const tinypy_value_t * value_cast( const PyObject * _object )
-        {
-            return reinterpret_cast<const tinypy_value_t *>(_object);
-        }
-        //////////////////////////////////////////////////////////////////////////
         static PyObject * object_cast( tinypy_value_t * _value )
         {
             return reinterpret_cast<PyObject *>(_value);
@@ -38,11 +37,6 @@ namespace pybind
         static tinypy_type_t * tinypy_type_cast( PyTypeObject * _type )
         {
             return reinterpret_cast<tinypy_type_t *>(_type);
-        }
-        //////////////////////////////////////////////////////////////////////////
-        static const tinypy_type_t * tinypy_type_cast( const PyTypeObject * _type )
-        {
-            return reinterpret_cast<const tinypy_type_t *>(_type);
         }
         //////////////////////////////////////////////////////////////////////////
         static PyTypeObject * tinypy_type_cast( const tinypy_type_t * _type )
@@ -114,16 +108,16 @@ namespace pybind
             allocator->deleteT( holder );
         }
         //////////////////////////////////////////////////////////////////////////
-        static tinypy_value_t * call_excepthook( tinypy_value_t * _function, tinypy_value_t * _args, tinypy_value_t * _kwargs, void * _userData, tinypy_error_t ** _outError )
+        static tinypy_value_t * call_excepthook( tinypy_value_t * _function, tinypy_value_t * _self, tinypy_value_t * const * _items, size_t _count, tinypy_value_t * _kwargs, tinypy_error_t ** _outError )
         {
-            (void)_function;
+            (void)_self;
+            (void)_count;
             (void)_kwargs;
             (void)_outError;
-            excepthook_holder_t * holder = static_cast<excepthook_holder_t *>(_userData);
-            assert( tinypy_tuple_size( _args ) == 3 );
-            PyObject * type = object_cast( tinypy_tuple_get( _args, 0 ) );
-            PyObject * value = object_cast( tinypy_tuple_get( _args, 1 ) );
-            PyObject * traceback = object_cast( tinypy_tuple_get( _args, 2 ) );
+            excepthook_holder_t * holder = static_cast<excepthook_holder_t *>(tinypy_native_function_user_data( _function ));
+            PyObject * type = object_cast( _items[0] );
+            PyObject * value = object_cast( _items[1] );
+            PyObject * traceback = object_cast( _items[2] );
             holder->handler( holder->userData, reinterpret_cast<PyTypeObject *>(type), value, traceback );
             return tinypy_none_get( holder->kernel->vm() );
         }
@@ -132,12 +126,22 @@ namespace pybind
         {
             (void)_function;
             callable_holder_t * holder = static_cast<callable_holder_t *>(_userData);
+            PyObject * args = object_cast( _args );
+            PyObject * kwargs = object_cast( _kwargs );
 
             try
             {
-                PyObject * result = holder->kind == CallableFunction
-                    ? holder->function->call( holder->kernel, object_cast( _args ), object_cast( _kwargs ) )
-                    : holder->functor->call( holder->kernel, object_cast( _args ), object_cast( _kwargs ) );
+                if( holder->kind == CallableFunction )
+                {
+                    DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( holder->kernel, "", holder->function->getName(), holder->function->getCallDebugSilent(), args, kwargs );
+
+                    PyObject * result = holder->function->call( holder->kernel, args, kwargs );
+                    return value_cast( result );
+                }
+
+                DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( holder->kernel, "", holder->functor->getName(), holder->functor->getCallDebugSilent(), args, kwargs );
+
+                PyObject * result = holder->functor->call( holder->kernel, args, kwargs );
                 return value_cast( result );
             }
             catch( const pybind_exception & exception )
@@ -190,77 +194,43 @@ namespace pybind
             return tinypy_long_from_base15_digits( _vm, count == 0 ? 0 : 1, digits, count );
         }
         //////////////////////////////////////////////////////////////////////////
-        static bool decode_utf8( const char * _bytes, size_t _size, wchar_t * const _result, size_t _capacity, size_t * const _resultSize )
+        static const char * code_text( const tinypy_value_t * _value )
         {
-            (void)_capacity;
-
-            assert( _capacity >= _size + 1 );
-
-            size_t resultSize = 0;
-
-            for( size_t index = 0; index != _size; )
+            if( _value == nullptr || tinypy_typeof( _value ) != TINYPY_VALUE_STRING )
             {
-                uint32_t code;
-                unsigned char first = static_cast<unsigned char>(_bytes[index++]);
-                size_t continuation;
-                if( first < 0x80 )
-                {
-                    code = first;
-                    continuation = 0;
-                }
-                else if( ( first & 0xe0 ) == 0xc0 )
-                {
-                    code = first & 0x1f;
-                    continuation = 1;
-                }
-                else if( ( first & 0xf0 ) == 0xe0 )
-                {
-                    code = first & 0x0f;
-                    continuation = 2;
-                }
-                else if( ( first & 0xf8 ) == 0xf0 )
-                {
-                    code = first & 0x07;
-                    continuation = 3;
-                }
-                else
-                {
-                    return false;
-                }
-
-                if( continuation > _size - index )
-                {
-                    return false;
-                }
-
-                for( size_t part = 0; part != continuation; ++part )
-                {
-                    unsigned char byte = static_cast<unsigned char>(_bytes[index++]);
-                    if( ( byte & 0xc0 ) != 0x80 )
-                    {
-                        return false;
-                    }
-
-                    code = ( code << 6 ) | ( byte & 0x3f );
-                }
-#if WCHAR_MAX <= 0xffff
-                if( code > 0xffff )
-                {
-                    code -= 0x10000;
-                    _result[resultSize++] = static_cast<wchar_t>(0xd800 + ( code >> 10));
-                    _result[resultSize++] = static_cast<wchar_t>(0xdc00 + ( code & 0x3ff));
-                }
-                else
-#endif
-                {
-                    _result[resultSize++] = static_cast<wchar_t>(code);
-                }
+                return "";
             }
 
-            _result[resultSize] = L'\0';
-            *_resultSize = resultSize;
+            size_t size;
+            const char * text = static_cast<const char *>(tinypy_string_view( _value, &size ));
 
-            return true;
+            return text;
+        }
+        //////////////////////////////////////////////////////////////////////////
+        static size_t append_text( char * const _buffer, size_t _capacity, size_t _length, const char * _text )
+        {
+            if( _length + 1 >= _capacity )
+            {
+                return _length;
+            }
+
+            size_t size = std::strlen( _text );
+            size_t room = _capacity - _length - 1;
+            size_t count = size < room ? size : room;
+            std::memcpy( _buffer + _length, _text, count );
+            _buffer[_length + count] = '\0';
+
+            return _length + count;
+        }
+        //////////////////////////////////////////////////////////////////////////
+        static uint32_t type_hash_index( const tinypy_type_t * _type, uint32_t _probe )
+        {
+            // As _Py_HashPointer: the low bits of an aligned address are zero.
+            uint64_t address = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(_type));
+            uint64_t hash = ( address >> 4 ) | ( address << 60 );
+            uint32_t index = static_cast<uint32_t>(( hash + static_cast<uint64_t>(_probe) * 17 ) % PYBIND_TYPE_COUNT_HASH);
+
+            return index;
         }
         //////////////////////////////////////////////////////////////////////////
         static size_t encode_utf8( const wchar_t * _value, size_t _size, char * const _result, size_t _capacity )
@@ -328,9 +298,6 @@ namespace pybind
         , m_observer( nullptr )
         , m_enumerator( 4 )
         , m_retired_scope_count( 0 )
-        , m_unicode_cache( nullptr )
-        , m_unicode_cache_size( 0 )
-        , m_unicode_cache_capacity( 0 )
 #if defined(TINYPY_DEBUGGER)
         , m_debuggerHandler( nullptr )
         , m_debuggerUserData( nullptr )
@@ -522,7 +489,7 @@ namespace pybind
 
         for( typeid_t id = 0; id != PYBIND_TYPE_COUNT; ++id )
         {
-            m_class_names[id][0] = '\0';
+            m_class_names[id] = nullptr;
             m_type_casts[id] = nullptr;
             m_scopes[id] = nullptr;
             m_retired_scopes[id] = nullptr;
@@ -537,6 +504,11 @@ namespace pybind
         m_stdout = this->get_attrstring( sys, "stdout" );
         m_stderr = this->get_attrstring( sys, "stderr" );
         this->decref( sys );
+
+#ifdef PYBIND_STL_SUPPORT
+        pybind::initialize_stl_type_cast( this );
+#endif
+
         return true;
     }
     //////////////////////////////////////////////////////////////////////////
@@ -586,6 +558,10 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void tinypy_kernel::destroy()
     {
+#ifdef PYBIND_STL_SUPPORT
+        pybind::finalize_stl_type_cast( this );
+#endif
+
         for( class_type_scope_interface_ptr & scope : m_scopes )
         {
             if( scope != nullptr )
@@ -628,17 +604,20 @@ namespace pybind
         {
             m_scopes[id] = nullptr;
             m_retired_scopes[id] = nullptr;
+
+            if( m_class_names[id] != nullptr )
+            {
+                m_allocator->free( m_class_names[id] );
+                m_class_names[id] = nullptr;
+            }
+        }
+
+        for( class_type_scope_interface_ptr & scope : m_class_type_hashes )
+        {
+            scope = nullptr;
         }
 
         m_dummy_scope = nullptr;
-
-        if( m_unicode_cache != nullptr )
-        {
-            m_allocator->free( m_unicode_cache );
-            m_unicode_cache = nullptr;
-            m_unicode_cache_size = 0;
-            m_unicode_cache_capacity = 0;
-        }
 
         m_allocator->deleteT( this );
     }
@@ -707,9 +686,10 @@ namespace pybind
         this->module_addobject( module, name, function );
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * tinypy_kernel::create_member_adapter( const member_adapter_interface_ptr & _adapter )
+    PyObject * tinypy_kernel::create_member_adapter( const member_adapter_interface_ptr & _adapter, PyTypeObject * _type )
     {
         (void)_adapter;
+        (void)_type;
         this->set_error( error_type_e::Runtime, "standalone member descriptors require a class scope" );
         return nullptr;
     }
@@ -789,12 +769,23 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::is_wrap( PyObject * _object )
     {
-        return tinypy_typeof( detail::value_cast( _object ) ) == TINYPY_VALUE_NATIVE_INSTANCE;
+        const class_type_scope_interface_ptr & scope = this->get_class_scope( this->get_object_type( _object ) );
+
+        if( scope->get_type_id() == 0 )
+        {
+            return false;
+        }
+
+        const tinypy_class_type_scope::payload_t * payload = static_cast<tinypy_class_type_scope *>(scope.get())->payload( _object );
+
+        return ( payload->flags & tinypy_class_type_scope::PayloadUnwrapped ) == 0;
     }
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::is_class( PyObject * _object )
     {
-        return this->is_wrap( _object );
+        PyTypeObject * type = this->get_object_type( _object );
+
+        return this->is_type_class( type );
     }
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::is_type_class( PyTypeObject * _type )
@@ -804,18 +795,31 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::set_class_info_desc_( typeid_t _id, const char * _name )
     {
-        if( _id >= PYBIND_TYPE_COUNT )
+        if( _id == 0 || _id >= PYBIND_TYPE_COUNT || m_class_names[_id] != nullptr )
         {
             return false;
         }
-        ::strncpy( m_class_names[_id], _name, PYBIND_CLASS_TYPE_MAX_NAME );
-        m_class_names[_id][PYBIND_CLASS_TYPE_MAX_NAME] = '\0';
+
+        size_t size = ::strlen( _name );
+        char * name = static_cast<char *>(m_allocator->malloc( size + 1 ));
+
+        if( name == nullptr )
+        {
+            return false;
+        }
+
+        ::memcpy( name, _name, size + 1 );
+        m_class_names[_id] = name;
         return true;
     }
     //////////////////////////////////////////////////////////////////////////
     typeid_t tinypy_kernel::next_type_id_()
     {
-        assert( m_enumerator < PYBIND_TYPE_COUNT );
+        if( m_enumerator == PYBIND_TYPE_COUNT )
+        {
+            return 0;
+        }
+
         return m_enumerator++;
     }
     //////////////////////////////////////////////////////////////////////////
@@ -829,13 +833,25 @@ namespace pybind
         }
 
         typeid_t id = this->next_type_id_();
-        this->set_class_info_desc_( id, name );
+
+        if( this->set_class_info_desc_( id, name ) == false )
+        {
+            pybind::throw_exception( "invalid create new type info '%s'", name );
+
+            return 0;
+        }
+
         return id;
     }
     //////////////////////////////////////////////////////////////////////////
     const char * tinypy_kernel::get_class_type_info( typeid_t _id )
     {
-        return _id < PYBIND_TYPE_COUNT ? m_class_names[_id] : "";
+        if( _id >= PYBIND_TYPE_COUNT || m_class_names[_id] == nullptr )
+        {
+            return "";
+        }
+
+        return m_class_names[_id];
     }
     //////////////////////////////////////////////////////////////////////////
     const char * tinypy_kernel::object_type_name( PyObject * _object )
@@ -853,10 +869,14 @@ namespace pybind
     {
         for( typeid_t id = 1; id != m_enumerator; ++id )
         {
-            if( ::strcmp( m_class_names[id], _name ) == 0 )
+            const char * name = m_class_names[id];
+
+            if( name == nullptr || ::strcmp( name, _name ) != 0 )
             {
-                return id;
+                continue;
             }
+
+            return id;
         }
 
         return 0;
@@ -893,10 +913,18 @@ namespace pybind
             return;
         }
 
+        // Instances outlive their scope until the VM finalizes them, so the
+        // scope is retired instead of released.
+        if( m_retired_scope_count == PYBIND_TYPE_COUNT )
+        {
+            pybind::throw_exception( "remove_type_scope '%s' retired scope count overflow", m_scopes[_info]->get_name() );
+
+            return;
+        }
+
         class_type_scope_interface_ptr scope = m_scopes[_info];
         scope->finalize();
         m_scopes[_info] = nullptr;
-        assert( m_retired_scope_count != PYBIND_TYPE_COUNT );
         m_retired_scopes[m_retired_scope_count++] = scope;
     }
     //////////////////////////////////////////////////////////////////////////
@@ -976,14 +1004,35 @@ namespace pybind
         for( size_t mroIndex = 0; mroIndex != mroCount; ++mroIndex )
         {
             const tinypy_type_t * mroType = tinypy_type_mro_at( type, mroIndex );
+            const class_type_scope_interface_ptr & scope = this->get_class_scope_exact_( mroType );
 
-            for( class_type_scope_interface_ptr & scope : m_scopes )
+            if( scope != m_dummy_scope )
             {
-                if( scope != nullptr && reinterpret_cast<const tinypy_type_t *>(scope->get_typeobject()) == mroType )
-                {
-                    return scope;
-                }
+                return scope;
             }
+        }
+
+        return m_dummy_scope;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    const class_type_scope_interface_ptr & tinypy_kernel::get_class_scope_exact_( const tinypy_type_t * _type ) const
+    {
+        for( uint32_t probe = 0; probe != PYBIND_TYPE_COUNT_HASH; ++probe )
+        {
+            uint32_t index = detail::type_hash_index( _type, probe );
+            const class_type_scope_interface_ptr & scope = m_class_type_hashes[index];
+
+            if( scope == nullptr )
+            {
+                break;
+            }
+
+            if( detail::tinypy_type_cast( scope->get_typeobject() ) != _type )
+            {
+                continue;
+            }
+
+            return scope;
         }
 
         return m_dummy_scope;
@@ -991,12 +1040,55 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void tinypy_kernel::cache_class_scope_type( const class_type_scope_interface_ptr & _scope )
     {
-        (void)_scope;
+        const tinypy_type_t * type = detail::tinypy_type_cast( _scope->get_typeobject() );
+
+        for( uint32_t probe = 0; probe != PYBIND_TYPE_COUNT_HASH; ++probe )
+        {
+            uint32_t index = detail::type_hash_index( type, probe );
+            class_type_scope_interface_ptr & scope = m_class_type_hashes[index];
+
+            // The dummy scope marks a removed entry and matches no type.
+            if( scope != nullptr && scope != m_dummy_scope )
+            {
+                continue;
+            }
+
+            scope = _scope;
+
+            return;
+        }
+
+        pybind::throw_exception( "scope '%s' type hash table overflow", _scope->get_name() );
     }
     //////////////////////////////////////////////////////////////////////////
     void tinypy_kernel::remove_class_scope_type( const class_type_scope_interface_ptr & _scope )
     {
-        (void)_scope;
+        const tinypy_type_t * type = detail::tinypy_type_cast( _scope->get_typeobject() );
+
+        if( type == nullptr )
+        {
+            return;
+        }
+
+        for( uint32_t probe = 0; probe != PYBIND_TYPE_COUNT_HASH; ++probe )
+        {
+            uint32_t index = detail::type_hash_index( type, probe );
+            class_type_scope_interface_ptr & scope = m_class_type_hashes[index];
+
+            if( scope == nullptr )
+            {
+                return;
+            }
+
+            if( detail::tinypy_type_cast( scope->get_typeobject() ) != type )
+            {
+                continue;
+            }
+
+            scope = m_dummy_scope;
+
+            return;
+        }
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * tinypy_kernel::scope_create_holder( const class_type_scope_interface_ptr & _scope, void * _ptr )
@@ -1035,45 +1127,53 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::instance_of_type( PyObject * _object, typeid_t _info )
     {
-        return _info < PYBIND_TYPE_COUNT && m_scopes[_info] != nullptr && m_scopes[_info]->is_instance( this->get_object_type( _object ) );
+        if( _info >= PYBIND_TYPE_COUNT || m_scopes[_info] == nullptr || m_scopes[_info]->is_instance( this->get_object_type( _object ) ) == false )
+        {
+            return false;
+        }
+
+        return this->is_wrap( _object );
     }
     //////////////////////////////////////////////////////////////////////////
     void * tinypy_kernel::get_class_impl( PyObject * _object )
     {
-        if( this->is_wrap( _object ) == false )
-        {
-            return nullptr;
-        }
-
         const class_type_scope_interface_ptr & scope = this->get_class_scope( this->get_object_type( _object ) );
-        if( scope == nullptr || scope->get_type_id() == 0 )
+
+        if( scope->get_type_id() == 0 )
         {
             return nullptr;
         }
 
-        return static_cast<tinypy_class_type_scope *>(scope.get())->payload( _object )->impl;
+        const tinypy_class_type_scope::payload_t * payload = static_cast<tinypy_class_type_scope *>(scope.get())->payload( _object );
+
+        return payload->impl;
     }
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::is_class_weak( PyObject * _object )
     {
-        if( this->is_wrap( _object ) == false )
+        const class_type_scope_interface_ptr & scope = this->get_class_scope( this->get_object_type( _object ) );
+
+        if( scope->get_type_id() == 0 )
         {
             return false;
         }
 
-        const class_type_scope_interface_ptr & scope = this->get_class_scope( this->get_object_type( _object ) );
-        return scope != nullptr && scope->get_type_id() != 0 && ( static_cast<tinypy_class_type_scope *>(scope.get())->payload( _object )->flags & tinypy_class_type_scope::PayloadWeak ) != 0;
+        const tinypy_class_type_scope::payload_t * payload = static_cast<tinypy_class_type_scope *>(scope.get())->payload( _object );
+
+        return ( payload->flags & tinypy_class_type_scope::PayloadWeak ) != 0;
     }
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::type_initialize( PyObject * _object )
     {
-        const class_type_scope_interface_ptr & scope = this->get_class_scope( this->get_object_type( _object ) );
-        if( scope == nullptr )
+        PyTypeObject * type = reinterpret_cast<PyTypeObject *>(_object);
+        const class_type_scope_interface_ptr & scope = this->get_class_scope( type );
+
+        if( scope->get_type_id() == 0 )
         {
             return false;
         }
 
-        scope->type_initialize( this->get_object_type( _object ) );
+        scope->type_initialize( type );
         return true;
     }
     //////////////////////////////////////////////////////////////////////////
@@ -1170,7 +1270,7 @@ namespace pybind
     void tinypy_kernel::set_sys_excepthook_f( pybind_excepthook_handler_f _handler, void * _ud )
     {
         detail::excepthook_holder_t * holder = m_allocator->newP<detail::excepthook_holder_t>( detail::excepthook_holder_t{ this, _handler, _ud } );
-        PyObject * hook = detail::object_cast( tinypy_native_function_new( m_vm, "excepthook", 10, &detail::call_excepthook, holder, &detail::finalize_excepthook ) );
+        PyObject * hook = detail::object_cast( tinypy_native_function_new_items( m_vm, "excepthook", 10, &detail::call_excepthook, 3, 3, holder, &detail::finalize_excepthook ) );
         this->set_sys_excepthook( hook );
         this->decref( hook );
     }
@@ -1404,32 +1504,61 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::get_traceback_top( char * const _filename, size_t _filenameSize, char * const _function, size_t _functionSize, uint32_t * _line )
     {
-        tinypy_value_t * traceback = tinypy_vm_raised_traceback( m_vm );
-        if( traceback == nullptr )
+        tinypy_value_t * frame = tinypy_vm_current_frame( m_vm );
+
+        if( frame == nullptr )
         {
             return false;
         }
 
-        string_view filename = this->traceback_filename( detail::object_cast( traceback ) );
-        string_view function = this->traceback_function( detail::object_cast( traceback ) );
-        std::snprintf( _filename, _filenameSize, "%s", filename.c_str() );
-        std::snprintf( _function, _functionSize, "%s", function.c_str() );
-        *_line = this->traceback_lineno( detail::object_cast( traceback ) );
+        tinypy_value_t * code = tinypy_frame_code( frame );
+        const char * filename = detail::code_text( tinypy_code_filename( code ) );
+        const char * function = detail::code_text( tinypy_code_name( code ) );
+        std::snprintf( _filename, _filenameSize, "%s", filename );
+        std::snprintf( _function, _functionSize, "%s", function );
+        *_line = this->debugger_frame_line( detail::object_cast( frame ) );
         return true;
     }
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::get_traceback( char * _buffer, size_t _size, bool _append )
     {
-        char filename[512];
-        char function[256];
-        uint32_t line;
-        if( this->get_traceback_top( filename, sizeof( filename ), function, sizeof( function ), &line ) == false )
+        tinypy_value_t * frame = tinypy_vm_current_frame( m_vm );
+
+        if( frame == nullptr )
         {
             return false;
         }
 
-        size_t offset = _append == true ? std::strlen( _buffer ) : 0;
-        std::snprintf( _buffer + offset, _size > offset ? _size - offset : 0, "%s:%u in %s", filename, line, function );
+        if( _size == 0 )
+        {
+            return true;
+        }
+
+        if( _append == false )
+        {
+            _buffer[0] = '\0';
+        }
+
+        size_t length = std::strlen( _buffer );
+
+        if( _append == true )
+        {
+            length = detail::append_text( _buffer, _size, length, "\n" );
+        }
+
+        for( ; frame != nullptr; frame = tinypy_frame_back( frame ) )
+        {
+            tinypy_value_t * code = tinypy_frame_code( frame );
+            const char * filename = detail::code_text( tinypy_code_filename( code ) );
+            const char * function = detail::code_text( tinypy_code_name( code ) );
+            uint32_t line = this->debugger_frame_line( detail::object_cast( frame ) );
+
+            char text[1024 + 1];
+            std::snprintf( text, sizeof( text ), "File \"%s\", line %u, in %s\n", filename, line, function );
+
+            length = detail::append_text( _buffer, _size, length, text );
+        }
+
         return true;
     }
     //////////////////////////////////////////////////////////////////////////
@@ -1443,7 +1572,37 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void tinypy_kernel::error_traceback_va( const char * _format, va_list _args )
     {
-        this->error_message_va( _format, _args );
+        this->report_traceback_( _format, _args );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void tinypy_kernel::report_traceback_( const char * _format, va_list _args )
+    {
+        // As the CPython backend: the message names the current frame and is
+        // reported at once, leaving no error pending.
+        if( tinypy_vm_has_error( m_vm ) != 0 )
+        {
+            return;
+        }
+
+        tinypy_value_t * frame = tinypy_vm_current_frame( m_vm );
+
+        if( frame == nullptr )
+        {
+            return;
+        }
+
+        char message[PYBIND_EXCEPTION_MESSAGE_SIZE + 1];
+        std::vsnprintf( message, sizeof( message ), _format, _args );
+
+        tinypy_value_t * code = tinypy_frame_code( frame );
+        const char * filename = detail::code_text( tinypy_code_filename( code ) );
+        uint32_t line = this->debugger_frame_line( detail::object_cast( frame ) );
+
+        char text[PYBIND_EXCEPTION_MESSAGE_SIZE + 256 + 1];
+        std::snprintf( text, sizeof( text ), "%s[%u]: %s", filename, line, message );
+
+        this->set_error( error_type_e::Runtime, text );
+        this->report_error_( nullptr );
     }
     //////////////////////////////////////////////////////////////////////////
     void tinypy_kernel::error_message( const char * _format, ... )
@@ -1481,6 +1640,14 @@ namespace pybind
         {
             kind = TINYPY_ERROR_OVERFLOW;
         }
+        else if( _type == error_type_e::Index )
+        {
+            kind = TINYPY_ERROR_INDEX;
+        }
+        else if( _type == error_type_e::Attribute )
+        {
+            kind = TINYPY_ERROR_ATTRIBUTE;
+        }
 
         tinypy_vm_raise_error( m_vm, kind, _message );
     }
@@ -1508,9 +1675,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void tinypy_kernel::warning_traceback_va( const char * _format, va_list _args )
     {
-        char message[PYBIND_EXCEPTION_MESSAGE_SIZE + 1];
-        std::vsnprintf( message, sizeof( message ), _format, _args );
-        this->set_error( error_type_e::Runtime, message );
+        this->report_traceback_( _format, _args );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * tinypy_kernel::build_value( const char * _format, ... )
@@ -1661,18 +1826,21 @@ namespace pybind
             return nullptr;
         }
 
-        tinypy_value_t * destination = tinypy_module_dict( module );
-        tinypy_value_t * source = tinypy_module_dict( reloaded );
+        // As module_reload_source: the module takes the reloaded dictionary, which
+        // the reloaded functions use as their globals.
+        tinypy_module_swap_dict( module, reloaded );
+
+        tinypy_value_t * dict = tinypy_module_dict( module );
         size_t position = 0;
         tinypy_value_t * key;
         tinypy_value_t * value;
 
-        tinypy_dict_clear( destination );
-
-        while( tinypy_dict_next( source, &position, &key, &value ) != 0 )
+        while( tinypy_dict_next( dict, &position, &key, &value ) != 0 )
         {
-            tinypy_value_t * destinationValue = value == reloaded ? module : value;
-            tinypy_dict_set( destination, key, destinationValue );
+            if( value == reloaded )
+            {
+                tinypy_dict_set( dict, key, module );
+            }
         }
 
         tinypy_dict_set( modules, name, module );
@@ -1686,6 +1854,7 @@ namespace pybind
     {
         tinypy_compile_options_t options;
         tinypy_compile_options_init( &options, TINYPY_COMPILE_EXEC );
+        options.optimize_level = m_optimize_level;
 
         tinypy_error_t * error = nullptr;
         tinypy_value_t * code = tinypy_compile_source( m_vm, _source, std::strlen( _source ), _filename, std::strlen( _filename ), &options, &error );
@@ -1986,6 +2155,11 @@ namespace pybind
             raw = 0;
             for( size_t i = count; i != 0; --i )
             {
+                if( raw > ( UINT64_MAX >> 15 ) )
+                {
+                    return false;
+                }
+
                 raw = ( raw << 15 ) | digits[i - 1];
             }
 
@@ -2008,6 +2182,13 @@ namespace pybind
         if( kind == TINYPY_VALUE_FLOAT )
         {
             double value = tinypy_float_as_double( detail::value_cast( _object ) );
+
+            // NaN fails both comparisons.
+            if( ( value >= -9223372036854775808.0 && value < 9223372036854775808.0 ) == false )
+            {
+                return false;
+            }
+
             _value = static_cast<int64_t>(value);
             return true;
         }
@@ -2067,6 +2248,13 @@ namespace pybind
         if( kind == TINYPY_VALUE_FLOAT )
         {
             double value = tinypy_float_as_double( detail::value_cast( _object ) );
+
+            // NaN fails both comparisons.
+            if( ( value > -1.0 && value < 18446744073709551616.0 ) == false )
+            {
+                return false;
+            }
+
             _value = static_cast<uint64_t>(value);
             return true;
         }
@@ -2164,6 +2352,16 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::extract_wchar( PyObject * _object, wchar_t & _value )
     {
+        if( _object == nullptr )
+        {
+            return false;
+        }
+
+        if( this->unicode_check( _object ) == false )
+        {
+            return false;
+        }
+
         size_t size;
         const wchar_t * value = this->unicode_to_wchar_and_size( _object, &size );
         if( value == nullptr || size != 1 )
@@ -2322,6 +2520,11 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     size_t tinypy_kernel::string_size( PyObject * _object ) const
     {
+        if( this->string_check( _object ) == false )
+        {
+            return 0;
+        }
+
         size_t size;
         tinypy_string_view( detail::value_cast( _object ), &size );
         return size;
@@ -2335,11 +2538,17 @@ namespace pybind
     const char * tinypy_kernel::string_to_char( PyObject * _object )
     {
         size_t size;
-        return static_cast<const char *>(tinypy_string_view( detail::value_cast( _object ), &size));
+        return this->string_to_char_and_size( _object, &size );
     }
     //////////////////////////////////////////////////////////////////////////
     const char * tinypy_kernel::string_to_char_and_size( PyObject * _object, size_t * _size )
     {
+        if( this->string_check( _object ) == false )
+        {
+            this->set_error( error_type_e::Type, "bad argument type for built-in operation" );
+            return nullptr;
+        }
+
         return static_cast<const char *>(tinypy_string_view( detail::value_cast( _object ), _size));
     }
     //////////////////////////////////////////////////////////////////////////
@@ -2360,11 +2569,15 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     size_t tinypy_kernel::bytearray_size( PyObject * _object ) const
     {
+        assert( this->bytearray_check( _object ) == true );
+
         return tinypy_bytearray_size( detail::value_cast( _object ) );
     }
     //////////////////////////////////////////////////////////////////////////
     const uint8_t * tinypy_kernel::bytearray_to_data( PyObject * _object ) const
     {
+        assert( this->bytearray_check( _object ) == true );
+
         size_t size;
         return static_cast<const uint8_t *>(tinypy_bytearray_view( detail::value_cast( _object ), &size));
     }
@@ -2387,33 +2600,20 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     const wchar_t * tinypy_kernel::unicode_to_wchar_and_size( PyObject * _object, size_t * _size )
     {
-        size_t bytes;
-        size_t codePointCount;
-        const char * utf8 = tinypy_unicode_utf8_view( detail::value_cast( _object ), &bytes, &codePointCount );
-        assert( bytes != SIZE_MAX );
-        size_t capacity = bytes + 1;
-        if( m_unicode_cache_capacity < capacity )
+        if( this->unicode_check( _object ) == false )
         {
-            size_t bufferSize = capacity * sizeof( wchar_t );
-            if( m_unicode_cache == nullptr )
-            {
-                m_unicode_cache = static_cast<wchar_t *>(m_allocator->malloc( bufferSize));
-            }
-            else
-            {
-                m_unicode_cache = static_cast<wchar_t *>(m_allocator->realloc( m_unicode_cache, bufferSize));
-            }
-
-            assert( m_unicode_cache != nullptr );
-            m_unicode_cache_capacity = capacity;
-        }
-
-        if( detail::decode_utf8( utf8, bytes, m_unicode_cache, m_unicode_cache_capacity, &m_unicode_cache_size ) == false )
-        {
+            this->set_error( error_type_e::Type, "bad argument type for built-in operation" );
             return nullptr;
         }
-        *_size = m_unicode_cache_size;
-        return m_unicode_cache;
+
+        tinypy_error_t * error = nullptr;
+        const wchar_t * value = tinypy_unicode_wchar_view( detail::value_cast( _object ), _size, &error );
+        if( value == nullptr )
+        {
+            this->report_error_( error );
+        }
+
+        return value;
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * tinypy_kernel::unicode_from_wchar( const wchar_t * _value )
@@ -2435,6 +2635,12 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * tinypy_kernel::unicode_encode_utf8( PyObject * _object )
     {
+        if( this->unicode_check( _object ) == false )
+        {
+            this->set_error( error_type_e::Type, "bad argument type for built-in operation" );
+            return nullptr;
+        }
+
         size_t size;
         size_t codePointCount;
         const char * data = tinypy_unicode_utf8_view( detail::value_cast( _object ), &size, &codePointCount );
@@ -2448,17 +2654,45 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * tinypy_kernel::unicode_from_utf8_size( const char * _value, size_t _size )
     {
-        return detail::object_cast( tinypy_unicode_from_utf8( m_vm, _value, _size ) );
+        tinypy_error_t * error = nullptr;
+        tinypy_value_t * unicode = tinypy_unicode_decode_utf8( m_vm, _value, _size, &error );
+        if( unicode == nullptr )
+        {
+            this->report_error_( error );
+        }
+
+        return detail::object_cast( unicode );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * tinypy_kernel::list_new( size_t _size )
     {
         tinypy_value_t * result = tinypy_list_from_items( m_vm, nullptr, 0 );
+        tinypy_value_t * none = tinypy_none_get( m_vm );
+
         for( size_t index = 0; index != _size; ++index )
         {
-            tinypy_value_t * item = tinypy_none_get( m_vm );
-            tinypy_list_append( result, item );
-            tinypy_release( item );
+            tinypy_list_append( result, none );
+
+            if( tinypy_list_size( result ) != index + 1 )
+            {
+                break;
+            }
+        }
+
+        tinypy_release( none );
+
+        if( tinypy_list_size( result ) != _size )
+        {
+            tinypy_release( result );
+
+            if( tinypy_vm_has_error( m_vm ) == 0 )
+            {
+                tinypy_vm_raise_error( m_vm, TINYPY_ERROR_MEMORY, "list is too large" );
+            }
+
+            this->report_error_( nullptr );
+
+            return nullptr;
         }
 
         return detail::object_cast( result );
@@ -2476,23 +2710,55 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * tinypy_kernel::list_getitem( PyObject * _object, size_t _index )
     {
+#if defined(PYBIND_DEBUG)
+        if( _index >= tinypy_list_size( detail::value_cast( _object ) ) )
+        {
+            this->set_error( error_type_e::Index, "list index out of range" );
+            return nullptr;
+        }
+#endif
+
         return detail::object_cast( tinypy_list_get( detail::value_cast( _object ), _index ) );
     }
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::list_insert( PyObject * _object, size_t _index, PyObject * _item )
     {
+#if defined(PYBIND_DEBUG)
+        if( _index > tinypy_list_size( detail::value_cast( _object ) ) )
+        {
+            this->set_error( error_type_e::Index, "list index out of range" );
+            return false;
+        }
+#endif
+
         tinypy_list_insert( detail::value_cast( _object ), _index, detail::value_cast( _item ) );
         return true;
     }
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::list_remove( PyObject * _object, size_t _index )
     {
+#if defined(PYBIND_DEBUG)
+        if( _index >= tinypy_list_size( detail::value_cast( _object ) ) )
+        {
+            this->set_error( error_type_e::Index, "list index out of range" );
+            return false;
+        }
+#endif
+
         tinypy_list_delete( detail::value_cast( _object ), _index );
         return true;
     }
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::list_setitem( PyObject * _object, size_t _index, PyObject * _item )
     {
+#if defined(PYBIND_DEBUG)
+        if( _index >= tinypy_list_size( detail::value_cast( _object ) ) )
+        {
+            this->set_error( error_type_e::Index, "list assignment index out of range" );
+            return false;
+        }
+#endif
+
         tinypy_list_set( detail::value_cast( _object ), _index, detail::value_cast( _item ) );
         return true;
     }
@@ -2516,20 +2782,40 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * tinypy_kernel::dict_from( PyObject * _object )
     {
-        if( this->dict_check( _object ) == false )
+        // As the CPython backend: the attributes dir() lists, but those that raise.
+        PyObject * dir = this->object_dir( _object );
+
+        if( dir == nullptr )
         {
-            this->set_error( error_type_e::Type, "value is not a dict" );
             return nullptr;
         }
 
-        PyObject * result = this->dict_new_presized( this->dict_size( _object ) );
-        size_t pos = 0;
-        PyObject * key;
-        PyObject * value;
-        while( this->dict_next( _object, &pos, &key, &value ) == true )
+        PyObject * result = this->dict_new();
+        size_t count = this->list_size( dir );
+
+        for( size_t index = 0; index != count; ++index )
         {
-            this->dict_set( result, key, value );
+            tinypy_value_t * key = tinypy_list_get( detail::value_cast( dir ), index );
+            tinypy_error_t * error = nullptr;
+            tinypy_value_t * value = tinypy_object_get_attr_value( detail::value_cast( _object ), key, &error );
+
+            if( value == nullptr )
+            {
+                if( error != nullptr )
+                {
+                    tinypy_error_release( error );
+                }
+
+                tinypy_vm_clear_error( m_vm );
+
+                continue;
+            }
+
+            tinypy_dict_set( detail::value_cast( result ), key, value );
+            tinypy_release( value );
         }
+
+        this->decref( dir );
 
         return result;
     }
@@ -2546,7 +2832,14 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::dict_set( PyObject * _dict, PyObject * _key, PyObject * _value )
     {
-        tinypy_dict_set( detail::value_cast( _dict ), detail::value_cast( _key ), detail::value_cast( _value ) );
+        // Unlike tinypy_dict_set, reports an unhashable key as PyDict_SetItem does.
+        tinypy_error_t * error = nullptr;
+        if( tinypy_set_item( detail::value_cast( _dict ), detail::value_cast( _key ), detail::value_cast( _value ), &error ) == 0 )
+        {
+            this->report_error_( error );
+            return false;
+        }
+
         return true;
     }
     //////////////////////////////////////////////////////////////////////////
@@ -2719,6 +3012,14 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * tinypy_kernel::tuple_getitem( PyObject * _object, size_t _index )
     {
+#if defined(PYBIND_DEBUG)
+        if( _index >= tinypy_tuple_size( detail::value_cast( _object ) ) )
+        {
+            this->set_error( error_type_e::Index, "tuple index out of range" );
+            return nullptr;
+        }
+#endif
+
         return detail::object_cast( tinypy_tuple_get( detail::value_cast( _object ), _index ) );
     }
     //////////////////////////////////////////////////////////////////////////
@@ -2751,6 +3052,14 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::tuple_setitem( PyObject * _object, size_t _index, PyObject * _value )
     {
+#if defined(PYBIND_DEBUG)
+        if( _index >= tinypy_tuple_size( detail::value_cast( _object ) ) )
+        {
+            this->set_error( error_type_e::Index, "tuple assignment index out of range" );
+            return false;
+        }
+#endif
+
         tinypy_tuple_set( detail::value_cast( _object ), _index, detail::value_cast( _value ) );
         return true;
     }
@@ -2817,37 +3126,79 @@ namespace pybind
 
         tinypy_vm_clear_error( m_vm );
 
-        if( m_excepthook != nullptr && tinypy_is_callable( detail::value_cast( m_excepthook ) ) != 0 && exceptionType != nullptr && exceptionValue != nullptr )
+        if( exceptionType != nullptr && exceptionValue != nullptr )
         {
-            tinypy_value_t * none = nullptr;
-            tinypy_value_t * hookTraceback = traceback;
-
-            if( hookTraceback == nullptr )
+            if( m_excepthook != nullptr && tinypy_is_callable( detail::value_cast( m_excepthook ) ) != 0 )
             {
-                none = tinypy_none_get( m_vm );
-                hookTraceback = none;
+                tinypy_value_t * none = nullptr;
+                tinypy_value_t * hookTraceback = traceback;
+
+                if( hookTraceback == nullptr )
+                {
+                    none = tinypy_none_get( m_vm );
+                    hookTraceback = none;
+                }
+
+                tinypy_value_t * items[] = { exceptionType, exceptionValue, hookTraceback };
+                tinypy_value_t * args = tinypy_tuple_from_items( m_vm, items, 3 );
+                tinypy_error_t * hookError = nullptr;
+                tinypy_value_t * result = tinypy_call( detail::value_cast( m_excepthook ), args, nullptr, &hookError );
+
+                tinypy_release( args );
+
+                if( none != nullptr )
+                {
+                    tinypy_release( none );
+                }
+
+                if( hookError != nullptr )
+                {
+                    tinypy_error_release( hookError );
+                }
+
+                if( result != nullptr )
+                {
+                    tinypy_release( result );
+                }
+                else
+                {
+                    // As PyErr_PrintEx: both the failure of the hook and the
+                    // original exception are displayed.
+                    tinypy_vm_normalize_error( m_vm, nullptr );
+                    tinypy_value_t * hookItems[] = { tinypy_vm_raised_exception_type( m_vm ), tinypy_vm_raised_exception( m_vm ), tinypy_vm_raised_traceback( m_vm ) };
+
+                    for( tinypy_value_t * hookItem : hookItems )
+                    {
+                        if( hookItem != nullptr )
+                        {
+                            tinypy_retain( hookItem );
+                        }
+                    }
+
+                    tinypy_vm_clear_error( m_vm );
+
+                    this->write_stderr_( "Error in sys.excepthook:\n" );
+
+                    if( hookItems[0] != nullptr && hookItems[1] != nullptr )
+                    {
+                        this->display_error_( hookItems[0], hookItems[1], hookItems[2] );
+                    }
+
+                    this->write_stderr_( "\nOriginal exception was:\n" );
+                    this->display_error_( exceptionType, exceptionValue, traceback );
+
+                    for( tinypy_value_t * hookItem : hookItems )
+                    {
+                        if( hookItem != nullptr )
+                        {
+                            tinypy_release( hookItem );
+                        }
+                    }
+                }
             }
-
-            tinypy_value_t * items[] = { exceptionType, exceptionValue, hookTraceback };
-            tinypy_value_t * args = tinypy_tuple_from_items( m_vm, items, 3 );
-            tinypy_error_t * hookError = nullptr;
-            tinypy_value_t * result = tinypy_call( detail::value_cast( m_excepthook ), args, nullptr, &hookError );
-
-            tinypy_release( args );
-
-            if( none != nullptr )
+            else
             {
-                tinypy_release( none );
-            }
-
-            if( result != nullptr )
-            {
-                tinypy_release( result );
-            }
-
-            if( hookError != nullptr )
-            {
-                tinypy_error_release( hookError );
+                this->display_error_( exceptionType, exceptionValue, traceback );
             }
         }
 
@@ -2865,6 +3216,109 @@ namespace pybind
         }
 
         tinypy_vm_clear_error( m_vm );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void tinypy_kernel::display_error_( tinypy_value_t * _type, tinypy_value_t * _value, tinypy_value_t * _traceback )
+    {
+        // As PyErr_Display: the traceback, then the exception type and its str().
+        char text[PYBIND_EXCEPTION_MESSAGE_SIZE + 1] = {'\0'};
+        size_t length = 0;
+
+        if( _traceback != nullptr && tinypy_typeof( _traceback ) == TINYPY_VALUE_TRACEBACK )
+        {
+            length = detail::append_text( text, sizeof( text ), length, "Traceback (most recent call last):\n" );
+
+            for( tinypy_value_t * entry = _traceback; entry != nullptr; entry = tinypy_traceback_next( entry ) )
+            {
+                tinypy_value_t * code = tinypy_frame_code( tinypy_traceback_frame( entry ) );
+                const char * filename = detail::code_text( tinypy_code_filename( code ) );
+                const char * function = detail::code_text( tinypy_code_name( code ) );
+                int32_t line = tinypy_traceback_line_number( entry );
+
+                char entryText[1024 + 1];
+                std::snprintf( entryText, sizeof( entryText ), "  File \"%s\", line %d, in %s\n", filename, line, function );
+
+                length = detail::append_text( text, sizeof( text ), length, entryText );
+            }
+        }
+
+        size_t typeNameSize;
+        const char * typeName = tinypy_type_name( tinypy_value_as_const_type( _type ), &typeNameSize );
+
+        if( std::strncmp( typeName, "exceptions.", 11 ) == 0 )
+        {
+            typeName += 11;
+        }
+
+        length = detail::append_text( text, sizeof( text ), length, typeName );
+
+        tinypy_error_t * error = nullptr;
+        tinypy_value_t * rendered = tinypy_object_str( _value, &error );
+
+        if( rendered != nullptr )
+        {
+            size_t renderedSize = 0;
+            size_t renderedCount = 0;
+            const char * renderedText = tinypy_typeof( rendered ) == TINYPY_VALUE_UNICODE ? tinypy_unicode_utf8_view( rendered, &renderedSize, &renderedCount ) : detail::code_text( rendered );
+
+            if( renderedText[0] != '\0' )
+            {
+                length = detail::append_text( text, sizeof( text ), length, ": " );
+                length = detail::append_text( text, sizeof( text ), length, renderedText );
+            }
+
+            tinypy_release( rendered );
+        }
+        else
+        {
+            if( error != nullptr )
+            {
+                tinypy_error_release( error );
+            }
+
+            tinypy_vm_clear_error( m_vm );
+        }
+
+        detail::append_text( text, sizeof( text ), length, "\n" );
+
+        this->write_stderr_( text );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void tinypy_kernel::write_stderr_( const char * _text )
+    {
+        if( m_stderr != nullptr )
+        {
+            tinypy_error_t * error = nullptr;
+            tinypy_value_t * write = tinypy_object_get_attr( detail::value_cast( m_stderr ), "write", 5, &error );
+
+            if( write != nullptr )
+            {
+                tinypy_value_t * text = tinypy_string_from_bytes( m_vm, _text, std::strlen( _text ) );
+                tinypy_value_t * args = tinypy_tuple_from_items( m_vm, &text, 1 );
+                tinypy_value_t * result = tinypy_call( write, args, nullptr, &error );
+
+                tinypy_release( args );
+                tinypy_release( text );
+                tinypy_release( write );
+
+                if( result != nullptr )
+                {
+                    tinypy_release( result );
+
+                    return;
+                }
+            }
+
+            if( error != nullptr )
+            {
+                tinypy_error_release( error );
+            }
+
+            tinypy_vm_clear_error( m_vm );
+        }
+
+        std::fputs( _text, stderr );
+        std::fflush( stderr );
     }
     //////////////////////////////////////////////////////////////////////////
     kernel_interface * initialize( allocator_interface * _allocator, const kernel_config_t & _config )

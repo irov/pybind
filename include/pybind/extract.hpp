@@ -23,13 +23,34 @@ namespace pybind
     namespace detail
     {
         template<class T>
-        struct enum_integer_type
+        struct fixed_integer_type
         {
             typedef std::conditional_t<sizeof(T) == 1, int8_t,
                 std::conditional_t<sizeof(T) == 2, int16_t,
                     std::conditional_t<sizeof(T) == 4, int32_t, int64_t>>> signed_type;
-            typedef std::conditional_t<std::is_signed_v<std::underlying_type_t<T>>,
+            typedef std::conditional_t<std::is_signed_v<T>,
                 signed_type, std::make_unsigned_t<signed_type>> type;
+        };
+        //////////////////////////////////////////////////////////////////////////
+        template<class T>
+        struct enum_integer_type
+        {
+            typedef typename fixed_integer_type<std::underlying_type_t<T>>::type type;
+        };
+        //////////////////////////////////////////////////////////////////////////
+        // An integer type no fixed-width type names, such as long and size_t on
+        // Apple platforms or long long on Linux, converts as the fixed-width type
+        // of its size and signedness.
+        template<class T>
+        struct is_other_integer
+            : std::bool_constant<std::is_integral_v<T>
+                && std::is_same_v<T, bool> == false
+                && std::is_same_v<T, char> == false
+                && std::is_same_v<T, wchar_t> == false
+                && std::is_same_v<T, char16_t> == false
+                && std::is_same_v<T, char32_t> == false
+                && std::is_same_v<T, typename fixed_integer_type<T>::type> == false>
+        {
         };
         //////////////////////////////////////////////////////////////////////////
         template<class T>
@@ -55,9 +76,9 @@ namespace pybind
                     return false;
                 }
 
-                type_cast * etype = type_down_cast<T_WOCR>::find( _kernel );
+                type_cast_result<T_WOCR> * etype_impl = detail::find_type_cast_result<T_WOCR>( _kernel );
 
-                if( etype == nullptr )
+                if( etype_impl == nullptr )
                 {
                     if( _nothrow == false )
                     {
@@ -72,10 +93,6 @@ namespace pybind
 
                     return false;
                 }
-
-                typedef type_cast_result<T_WOCR> type_cast_result_T_WOCR;
-
-                type_cast_result_T_WOCR * etype_impl = static_cast<type_cast_result_T_WOCR *>(etype);
 
                 if( etype_impl->apply( _kernel, _obj, _value, _nothrow ) == false )
                 {
@@ -215,6 +232,33 @@ namespace pybind
         }
     };
     //////////////////////////////////////////////////////////////////////////
+    template<class T>
+    struct extract_specialized<T
+        , std::enable_if_t<detail::is_other_integer<T>::value>
+    >
+    {
+        T operator () ( kernel_interface * _kernel, PyObject * _obj ) const
+        {
+            typedef typename detail::fixed_integer_type<T>::type integer_type;
+
+            integer_type value;
+            if( pybind::extract_value( _kernel, _obj, value, true ) == false )
+            {
+                const std::type_info & tinfo = typeid(T);
+
+                const char * type_name = tinfo.name();
+
+                pybind::throw_exception( "extract_specialized<T, integer>: extract invalid '%s' type '%s' not cast to '%s'"
+                    , _kernel->object_repr( _obj ).c_str()
+                    , _kernel->object_repr_type( _obj ).c_str()
+                    , type_name
+                );
+            }
+
+            return static_cast<T>(value);
+        }
+    };
+    //////////////////////////////////////////////////////////////////////////
     template<typename T>
     struct extract_specialized<T *>
     {
@@ -272,9 +316,9 @@ namespace pybind
     {
         typedef typename stdex::mpl::remove_cref<T>::type T_WOCR;
 
-        type_cast * etype = detail::type_down_cast<T_WOCR>::find( _kernel );
+        type_cast_result<T_WOCR> * etype_impl = detail::find_type_cast_result<T_WOCR>( _kernel );
 
-        if( etype == nullptr )
+        if( etype_impl == nullptr )
         {
             const std::type_info & tinfo = typeid(T_WOCR);
             const char * type_name = tinfo.name();
@@ -282,11 +326,9 @@ namespace pybind
             pybind::throw_exception( "ptr invalid find cast for '%.256s'"
                 , type_name
             );
+
+            return nullptr;
         }
-
-        typedef type_cast_result<T_WOCR> type_cast_result_T_WOCR;
-
-        type_cast_result_T_WOCR * etype_impl = static_cast<type_cast_result_T_WOCR *>(etype);
 
         PyObject * result = etype_impl->wrap( _kernel, _value );
 
@@ -345,6 +387,22 @@ namespace pybind
         PyObject * operator () ( kernel_interface * _kernel, T _t ) const
         {
             typedef typename detail::enum_integer_type<T>::type integer_type;
+
+            integer_type value = static_cast<integer_type>(_t);
+            PyObject * py_value = pybind::ptr_throw_i( _kernel, value );
+
+            return py_value;
+        }
+    };
+    //////////////////////////////////////////////////////////////////////////
+    template<class T>
+    struct ptr_throw_specialized2<T
+        , std::enable_if_t<detail::is_other_integer<T>::value>
+    >
+    {
+        PyObject * operator () ( kernel_interface * _kernel, T _t ) const
+        {
+            typedef typename detail::fixed_integer_type<T>::type integer_type;
 
             integer_type value = static_cast<integer_type>(_t);
             PyObject * py_value = pybind::ptr_throw_i( _kernel, value );

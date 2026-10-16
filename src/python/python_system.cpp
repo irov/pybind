@@ -8,6 +8,7 @@
 #include "python_kernel.hpp"
 
 #include <cassert>
+#include <limits>
 #include <stdexcept>
 #include <cstdio>
 #include <string>
@@ -281,10 +282,72 @@ namespace pybind
 
         if( err == nullptr )
         {
-            return;            
+            return;
         }
 
-        PyErr_Print();
+        // As PyErr_PrintEx( 0 ) and the tinypy backend, without the SystemExit
+        // handling that would exit the process and without sys.last_traceback,
+        // which would keep the frames of the error alive.
+        PyObject * exception;
+        PyObject * value;
+        PyObject * traceback;
+        PyErr_Fetch( &exception, &value, &traceback );
+        PyErr_NormalizeException( &exception, &value, &traceback );
+
+        if( exception == nullptr )
+        {
+            Py_XDECREF( value );
+            Py_XDECREF( traceback );
+
+            return;
+        }
+
+        if( value == nullptr )
+        {
+            Py_INCREF( Py_None );
+            value = Py_None;
+        }
+
+        PyObject * hook = PySys_GetObject( const_cast<char *>("excepthook") );
+
+        if( hook == nullptr || hook == Py_None )
+        {
+            PySys_WriteStderr( "sys.excepthook is missing\n" );
+            PyErr_Display( exception, value, traceback );
+        }
+        else
+        {
+            PyObject * result = PyObject_CallFunctionObjArgs( hook, exception, value, traceback != nullptr ? traceback : Py_None, nullptr );
+
+            if( result == nullptr )
+            {
+                PyObject * hookException;
+                PyObject * hookValue;
+                PyObject * hookTraceback;
+                PyErr_Fetch( &hookException, &hookValue, &hookTraceback );
+                PyErr_NormalizeException( &hookException, &hookValue, &hookTraceback );
+
+                PySys_WriteStderr( "Error in sys.excepthook:\n" );
+
+                if( hookException != nullptr && hookValue != nullptr )
+                {
+                    PyErr_Display( hookException, hookValue, hookTraceback );
+                }
+
+                PySys_WriteStderr( "\nOriginal exception was:\n" );
+                PyErr_Display( exception, value, traceback );
+
+                Py_XDECREF( hookException );
+                Py_XDECREF( hookValue );
+                Py_XDECREF( hookTraceback );
+            }
+
+            Py_XDECREF( result );
+        }
+
+        Py_DECREF( exception );
+        Py_DECREF( value );
+        Py_XDECREF( traceback );
     }
     //////////////////////////////////////////////////////////////////////////
     void set_error( error_type_e _type, const char * _message )
@@ -311,6 +374,12 @@ namespace pybind
             break;
         case error_type_e::Overflow:
             exception_type = PyExc_OverflowError;
+            break;
+        case error_type_e::Index:
+            exception_type = PyExc_IndexError;
+            break;
+        case error_type_e::Attribute:
+            exception_type = PyExc_AttributeError;
             break;
         default:
             exception_type = PyExc_RuntimeError;
@@ -402,6 +471,21 @@ namespace pybind
         return module;
     }
     //////////////////////////////////////////////////////////////////////////
+    static void module_set_builtins_( PyObject * _module )
+    {
+        // As the tinypy backend: code run in the module dictionary sees the builtins.
+        PyObject * dict = PyModule_GetDict( _module );
+
+        if( PyDict_GetItemString( dict, "__builtins__" ) != nullptr )
+        {
+            return;
+        }
+
+        PyObject * builtins = PyEval_GetBuiltins();
+
+        PyDict_SetItemString( dict, "__builtins__", builtins );
+    }
+    //////////////////////////////////////////////////////////////////////////
 #if PYBIND_PYTHON_VERSION < 300
     //////////////////////////////////////////////////////////////////////////
     PyObject * module_init( const char * _name )
@@ -409,6 +493,11 @@ namespace pybind
         PYBIND_CHECK_MAIN_THREAD();
 
         PyObject * module = PyImport_AddModule( _name );
+
+        if( module != nullptr )
+        {
+            pybind::module_set_builtins_( module );
+        }
 
         return module;
     }
@@ -428,6 +517,11 @@ namespace pybind
 
         //PyImport_AppendInittab( _name, &initfunc );
         PyObject * module = PyImport_AddModule( _name );
+
+        if( module != nullptr )
+        {
+            pybind::module_set_builtins_( module );
+        }
 
         return module;
     }
@@ -539,6 +633,8 @@ namespace pybind
 
             return nullptr;
         }
+
+        pybind::module_set_builtins_( candidate );
 
         PyObject * candidate_dict = PyModule_GetDict( candidate );
         PyObject * execution_result = PyEval_EvalCode( (PyCodeObject *)code, candidate_dict, candidate_dict );
@@ -1127,35 +1223,56 @@ namespace pybind
             return false;
         }
 
-#   if PYBIND_PYTHON_VERSION < 300
-        else if( PyInt_Check( _obj ) )
-        {
-            _value = (T)PyInt_AS_LONG( _obj );
-        }
-#	endif
-        else if( PyLong_Check( _obj ) )
-        {
-            PY_LONG_LONG value = PyLong_AsLongLong( _obj );
+        // As the tinypy backend: a value out of the range of T is not extracted.
+        int64_t value;
 
-            if( value == -1 && PyErr_Occurred() != nullptr )
+#   if PYBIND_PYTHON_VERSION < 300
+        if( PyInt_Check( _obj ) )
+        {
+            value = (int64_t)PyInt_AS_LONG( _obj );
+        }
+        else
+#	endif
+            if( PyLong_Check( _obj ) )
+            {
+                PY_LONG_LONG longValue = PyLong_AsLongLong( _obj );
+
+                if( longValue == -1 && PyErr_Occurred() != nullptr )
+                {
+                    PyErr_Clear();
+
+                    return false;
+                }
+
+                value = (int64_t)longValue;
+            }
+            else if( PyFloat_Check( _obj ) )
+            {
+                double floatValue = PyFloat_AS_DOUBLE( _obj );
+
+                // NaN fails both comparisons.
+                if( (floatValue >= -9223372036854775808.0 && floatValue < 9223372036854775808.0) == false )
+                {
+                    return false;
+                }
+
+                value = (int64_t)floatValue;
+            }
+            else if( PyBool_Check( _obj ) )
+            {
+                value = _obj == Py_True ? 1 : 0;
+            }
+            else
             {
                 return false;
             }
 
-            _value = (T)value;
-        }
-        else if( PyFloat_Check( _obj ) )
-        {
-            _value = (T)PyFloat_AS_DOUBLE( _obj );
-        }
-        else if( PyBool_Check( _obj ) )
-        {
-            _value = (T)(_obj == Py_True);
-        }
-        else
+        if( value < (int64_t)std::numeric_limits<T>::min() || value > (int64_t)std::numeric_limits<T>::max() )
         {
             return false;
         }
+
+        _value = (T)value;
 
         return true;
     }
@@ -1190,40 +1307,64 @@ namespace pybind
             return false;
         }
 
+        // As the tinypy backend: a negative value or one out of the range of T
+        // is not extracted.
+        uint64_t value;
+
 #   if PYBIND_PYTHON_VERSION < 300
         if( PyInt_Check( _obj ) )
         {
-            long value = PyInt_AS_LONG( _obj );
+            long intValue = PyInt_AS_LONG( _obj );
 
-            _value = (T)value;
+            if( intValue < 0 )
+            {
+                return false;
+            }
+
+            value = (uint64_t)intValue;
         }
         else
 #	endif
             if( PyLong_Check( _obj ) )
             {
-                unsigned PY_LONG_LONG value = PyLong_AsUnsignedLongLong( _obj );
+                unsigned PY_LONG_LONG longValue = PyLong_AsUnsignedLongLong( _obj );
 
-                if( value == static_cast<unsigned PY_LONG_LONG>(-1) && PyErr_Occurred() != nullptr )
+                if( longValue == static_cast<unsigned PY_LONG_LONG>(-1) && PyErr_Occurred() != nullptr )
+                {
+                    PyErr_Clear();
+
+                    return false;
+                }
+
+                value = (uint64_t)longValue;
+            }
+            else if( PyFloat_Check( _obj ) )
+            {
+                double floatValue = PyFloat_AS_DOUBLE( _obj );
+
+                // NaN fails both comparisons.
+                if( (floatValue > -1.0 && floatValue < 18446744073709551616.0) == false )
                 {
                     return false;
                 }
 
-                _value = (T)value;
-            }
-            else if( PyFloat_Check( _obj ) )
-            {
-                double value = PyFloat_AS_DOUBLE( _obj );
-
-                _value = (T)value;
+                value = (uint64_t)floatValue;
             }
             else if( PyBool_Check( _obj ) )
             {
-                _value = (T)(_obj == Py_True);
+                value = _obj == Py_True ? 1 : 0;
             }
             else
             {
                 return false;
             }
+
+        if( value > (uint64_t)std::numeric_limits<T>::max() )
+        {
+            return false;
+        }
+
+        _value = (T)value;
 
         return true;
     }
@@ -1278,6 +1419,8 @@ namespace pybind
 
             if( value == -1.0 && PyErr_Occurred() != nullptr )
             {
+                PyErr_Clear();
+
                 return false;
             }
 
@@ -1391,6 +1534,16 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_uint32( uint32_t _value )
     {
+#   if PYBIND_PYTHON_VERSION < 300
+        // A 32-bit long cannot hold every uint32_t.
+        if( _value > (uint32_t)LONG_MAX )
+        {
+            PYBIND_CHECK_MAIN_THREAD();
+
+            return PyLong_FromUnsignedLong( _value );
+        }
+#	endif
+
         return pybind::ptr_int_t<uint32_t>( _value );
     }
     //////////////////////////////////////////////////////////////////////////
@@ -1587,9 +1740,16 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        PyObject * py_dict = pybind::dict_new();
-
         PyObject * py_dir = PyObject_Dir( _obj );
+
+        if( py_dir == nullptr )
+        {
+            pybind::check_error();
+
+            return nullptr;
+        }
+
+        PyObject * py_dict = pybind::dict_new();
 
         for( Py_ssize_t
             it = 0,
@@ -1599,6 +1759,14 @@ namespace pybind
         {
             PyObject * py_key = PyList_GetItem( py_dir, it );
             PyObject * py_value = PyObject_GetAttr( _obj, py_key );
+
+            // An attribute that raises is left out.
+            if( py_value == nullptr )
+            {
+                PyErr_Clear();
+
+                continue;
+            }
 
             if( PyDict_SetItem( py_dict, py_key, py_value ) < 0 )
             {
@@ -1671,6 +1839,14 @@ namespace pybind
 
         if( res == -1 )
         {
+            // As the tinypy backend, a missing key is not an error.
+            if( PyErr_ExceptionMatches( PyExc_KeyError ) == 1 )
+            {
+                PyErr_Clear();
+
+                return false;
+            }
+
             pybind::check_error();
 
             return false;
@@ -1687,6 +1863,14 @@ namespace pybind
 
         if( res == -1 )
         {
+            // As the tinypy backend, a missing key is not an error.
+            if( PyErr_ExceptionMatches( PyExc_KeyError ) == 1 )
+            {
+                PyErr_Clear();
+
+                return false;
+            }
+
             pybind::check_error();
 
             return false;
@@ -1733,12 +1917,14 @@ namespace pybind
 
         int contains = PyDict_Contains( _dict, _key );
 
-        if( contains == 1 )
+        if( contains == -1 )
         {
-            return true;
+            pybind::check_error();
+
+            return false;
         }
 
-        return false;
+        return contains == 1;
     }
     //////////////////////////////////////////////////////////////////////////
     bool dict_existstring( PyObject * _dict, const char * _key )
@@ -1839,12 +2025,14 @@ namespace pybind
 
         int contains = PySet_Contains( _set, _value );
 
-        if( contains == 0 )
+        if( contains == -1 )
         {
+            pybind::check_error();
+
             return false;
         }
 
-        return true;
+        return contains == 1;
     }
     //////////////////////////////////////////////////////////////////////////
     bool iterator_get( PyObject * _collections, PyObject ** _iterator )
@@ -2059,6 +2247,8 @@ namespace pybind
 
         if( py_repr == nullptr )
         {
+            pybind::check_error();
+
             return nullptr;
         }
 
@@ -2078,6 +2268,8 @@ namespace pybind
 
         if( py_str == nullptr )
         {
+            pybind::check_error();
+
             return nullptr;
         }
 
@@ -2185,12 +2377,13 @@ namespace pybind
     {
         size_t len = strlen( _buffer );
 
-        if( len >= _maxlen )
+        // strncat writes the terminator after the characters it appends.
+        if( len + 1 >= _maxlen )
         {
             return;
         }
 
-        size_t remain = _maxlen - len;
+        size_t remain = _maxlen - len - 1;
 
         strncat( _buffer, _str, remain );
     }
@@ -2277,7 +2470,7 @@ namespace pybind
         }
 
         PyObject * py_filename = thread_state->frame->f_code->co_filename;
-        int fileline = thread_state->frame->f_lineno;
+        int fileline = PyFrame_GetLineNumber( thread_state->frame );
 
         const char * str_filename = pybind::string_to_char( py_filename );
 
@@ -2341,8 +2534,6 @@ namespace pybind
         vsnprintf( message, PYBIND_EXCEPTION_MESSAGE_SIZE, _format, throw_va );
         va_end( throw_va );
 
-        pybind::error_message( message );
-
         throw pybind_exception( message );
     }
     //////////////////////////////////////////////////////////////////////////
@@ -2376,7 +2567,7 @@ namespace pybind
         }
 
         PyObject * py_filename = thread_state->frame->f_code->co_filename;
-        int fileline = thread_state->frame->f_lineno;
+        int fileline = PyFrame_GetLineNumber( thread_state->frame );
 
         const char * str_filename = pybind::string_to_char( py_filename );
 
@@ -2544,7 +2735,20 @@ namespace pybind
     int64_t string_hash( PyObject * _string )
     {
 #   if PYBIND_PYTHON_VERSION < 300
-        int64_t hash = (int64_t)((PyStringObject *)_string)->ob_shash;
+        // As the tinypy backend, the 64-bit CPython 2.7 string hash that Mengine
+        // computes too; a host with a 32-bit long hashes otherwise, so its hash
+        // reads as unknown (-1).
+        if( sizeof( long ) != sizeof( int64_t ) )
+        {
+            return -1;
+        }
+
+        int64_t hash = (int64_t)PyObject_Hash( _string );
+
+        if( hash == -1 )
+        {
+            PyErr_Clear();
+        }
 #	else
         int64_t hash = (int64_t)((PyUnicodeObject *)_string)->_base._base.hash;
 #	endif                

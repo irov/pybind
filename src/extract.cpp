@@ -354,21 +354,45 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_throw_i( kernel_interface * _kernel, char * _value )
     {
+        // As Py_BuildValue: a null string reads as None.
+        if( _value == nullptr )
+        {
+            return _kernel->ret_none();
+        }
+
         return _kernel->ptr_string( _value );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_throw_i( kernel_interface * _kernel, wchar_t * _value )
     {
+        // As Py_BuildValue: a null string reads as None.
+        if( _value == nullptr )
+        {
+            return _kernel->ret_none();
+        }
+
         return _kernel->ptr_unicode( _value );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_throw_i( kernel_interface * _kernel, const char * _value )
     {
+        // As Py_BuildValue: a null string reads as None.
+        if( _value == nullptr )
+        {
+            return _kernel->ret_none();
+        }
+
         return _kernel->ptr_string( _value );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_throw_i( kernel_interface * _kernel, const wchar_t * _value )
     {
+        // As Py_BuildValue: a null string reads as None.
+        if( _value == nullptr )
+        {
+            return _kernel->ret_none();
+        }
+
         return _kernel->ptr_unicode( _value );
     }
     //////////////////////////////////////////////////////////////////////////

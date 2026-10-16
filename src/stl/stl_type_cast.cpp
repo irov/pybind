@@ -112,6 +112,9 @@ namespace pybind
     {
         pybind::unregistration_stl_vector_type_cast<std::vector<std::string>>(_kernel);
         pybind::unregistration_stl_vector_type_cast<std::vector<std::wstring>>(_kernel);
+
+        pybind::unregistration_type_cast<std::string>(_kernel);
+        pybind::unregistration_type_cast<std::wstring>(_kernel);
     }
     //////////////////////////////////////////////////////////////////////////
 }

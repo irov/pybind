@@ -124,7 +124,7 @@ namespace pybind
         {
             pybind::object method = this->get_attr( _name );
 
-            return this->call_args( _name, std::forward<T>( _t ) ... );
+            return method.call_args( std::forward<T>( _t ) ... );
         }
 
     public:

@@ -59,18 +59,23 @@ namespace pybind
             return *this;
         }
 
+        // The source may live in memory the current object owns, so it is
+        // taken before the current object is released.
+        kernel_interface * kernel = _args.m_kernel;
+        PyObject * obj = _args.ptr();
+
+        if( obj != nullptr )
+        {
+            kernel->incref( obj );
+        }
+
         if( m_args != nullptr )
         {
             m_kernel->decref( m_args );
         }
 
-        m_kernel = _args.m_kernel;
-        m_args = _args.ptr();
-
-        if( m_args != nullptr )
-        {
-            m_kernel->incref( m_args );
-        }
+        m_kernel = kernel;
+        m_args = obj;
 
         return *this;
     }
@@ -82,16 +87,19 @@ namespace pybind
             return *this;
         }
 
+        kernel_interface * kernel = _args.m_kernel;
+        PyObject * obj = _args.m_args;
+
+        _args.m_kernel = nullptr;
+        _args.m_args = nullptr;
+
         if( m_args != nullptr )
         {
             m_kernel->decref( m_args );
         }
 
-        m_kernel = _args.m_kernel;
-        m_args = _args.m_args;
-
-        _args.m_kernel = nullptr;
-        _args.m_args = nullptr;
+        m_kernel = kernel;
+        m_args = obj;
 
         return *this;
     }

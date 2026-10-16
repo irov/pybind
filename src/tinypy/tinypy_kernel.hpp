@@ -48,7 +48,7 @@ namespace pybind
         PyObject * create_function_adapter( const function_adapter_interface_ptr & _adapter, bool _native ) override;
         PyObject * create_functor_adapter( const functor_adapter_interface_ptr & _adapter, bool _native ) override;
 
-        PyObject * create_member_adapter( const member_adapter_interface_ptr & _iadapter ) override;
+        PyObject * create_member_adapter( const member_adapter_interface_ptr & _iadapter, PyTypeObject * _type ) override;
         PyObject * create_method_adapter( const method_adapter_interface_ptr & _ifunc, PyTypeObject * _type ) override;
         method_adapter_interface * get_method_adapter( PyObject * _obj ) override;
 
@@ -322,7 +322,11 @@ namespace pybind
     private:
         bool set_class_info_desc_( typeid_t _id, const char * _name );
         typeid_t next_type_id_();
+        const class_type_scope_interface_ptr & get_class_scope_exact_( const tinypy_type_t * _type ) const;
+        void report_traceback_( const char * _format, va_list _args );
         void report_error_( tinypy_error_t * _error );
+        void display_error_( tinypy_value_t * _type, tinypy_value_t * _value, tinypy_value_t * _traceback );
+        void write_stderr_( const char * _text );
         static void cycle_diagnostic_( void * _userData, const tinypy_diagnostic_t * _diagnostic );
 
     private:
@@ -340,17 +344,14 @@ namespace pybind
         observer_bind_call * m_observer;
         typeid_t m_enumerator;
 
-        char m_class_names[PYBIND_TYPE_COUNT][PYBIND_CLASS_TYPE_MAX_NAME + 1];
+        char * m_class_names[PYBIND_TYPE_COUNT];
         type_cast_ptr m_type_casts[PYBIND_TYPE_COUNT];
         class_type_scope_interface_ptr m_scopes[PYBIND_TYPE_COUNT];
         class_type_scope_interface_ptr m_retired_scopes[PYBIND_TYPE_COUNT];
         size_t m_retired_scope_count;
 
         class_type_scope_interface_ptr m_dummy_scope;
-
-        wchar_t * m_unicode_cache;
-        size_t m_unicode_cache_size;
-        size_t m_unicode_cache_capacity;
+        class_type_scope_interface_ptr m_class_type_hashes[PYBIND_TYPE_COUNT_HASH];
 #if defined(TINYPY_DEBUGGER)
         pybind_debugger_handler_f m_debuggerHandler;
         void * m_debuggerUserData;

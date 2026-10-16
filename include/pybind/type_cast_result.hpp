@@ -8,6 +8,18 @@ namespace pybind
 {
     namespace detail
     {
+        template<class T>
+        struct type_cast_identity
+        {
+            typedef T type;
+        };
+
+        template<class T>
+        struct type_cast_identity<const T *>
+        {
+            typedef T * type;
+        };
+
         template<class T> struct type_down_cast;
 
         template<class T, class B>
@@ -132,7 +144,33 @@ namespace pybind
         typedef const value_type & TCastRef;
 
     public:
+        const std::type_info & get_value_type() const override
+        {
+            return typeid(typename detail::type_cast_identity<T>::type);
+        }
+
+    public:
         virtual bool apply( kernel_interface * _kernel, PyObject * _obj, TCastValue _value, bool _nothrow ) = 0;
         virtual PyObject * wrap( kernel_interface * _kernel, TCastRef t ) = 0;
     };
+
+    namespace detail
+    {
+        template<class T>
+        type_cast_result<T> * find_type_cast_result( kernel_interface * _kernel )
+        {
+            type_cast * etype = type_down_cast<T>::find( _kernel );
+
+            // The lookup falls back from a pointer to its value type, and a class
+            // and a struct register casts of different value types under one id.
+            if( etype == nullptr || etype->get_value_type() != typeid(typename type_cast_identity<T>::type) )
+            {
+                return nullptr;
+            }
+
+            type_cast_result<T> * etype_impl = static_cast<type_cast_result<T> *>(etype);
+
+            return etype_impl;
+        }
+    }
 }

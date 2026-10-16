@@ -159,7 +159,7 @@ namespace pybind
 
             F fn = this->getFn();
 
-            PyObject * ret = function_proxy_args_call<F, P>::call( _kernel, fn, _args, m_proxy );
+            PyObject * ret = function_proxy_args_call<F, P>::call( _kernel, m_proxy, fn, _args );
 
             return ret;
         }

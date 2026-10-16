@@ -2,6 +2,7 @@
 #include "pybind/extract.hpp"
 #include "pybind/function_interface.hpp"
 #include "pybind/function.hpp"
+#include "pybind/enum.hpp"
 #include "pybind/adapter/new_adapter.hpp"
 #include "pybind/adapter/destroy_adapter.hpp"
 #include "pybind/adapter/smart_pointer_adapter.hpp"
@@ -9,13 +10,18 @@
 #include "pybind/object.hpp"
 #include "pybind/dict.hpp"
 #include "pybind/module.hpp"
+#include "pybind/generator/class_.hpp"
 #include "pybind/generator/interface_.hpp"
 #include "pybind/generator/struct_.hpp"
+#include "pybind/pickle.hpp"
 
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cwchar>
+#include <fstream>
+#include <iterator>
+#include <string>
 
 #define PYBIND_CONTRACT_ASSERT( Expression ) \
     do \
@@ -29,6 +35,43 @@
 
 namespace detail
 {
+    enum class signed_native_enum : long
+    {
+        Unknown = -1,
+        Ready = 1
+    };
+
+    enum class unsigned_native_enum : unsigned long
+    {
+        High = 0x80000000UL
+    };
+
+    enum class signed_wide_enum : int64_t
+    {
+        Low = -1099511627776LL
+    };
+
+    enum class unsigned_wide_enum : uint64_t
+    {
+        High = 18446744073709551615ULL
+    };
+
+    template<class T>
+    static T roundtrip_enum( T _value )
+    {
+        return _value;
+    }
+
+    static bool wide_pair_matches( const wchar_t * _first, const wchar_t * _second )
+    {
+        return std::wcscmp( _first, L"alpha" ) == 0 && std::wcscmp( _second, L"beta with a longer tail" ) == 0;
+    }
+
+    static int32_t wide_char_code( wchar_t _value )
+    {
+        return static_cast<int32_t>(_value);
+    }
+
     class test_module_finder
     {
     public:
@@ -53,7 +96,7 @@ namespace detail
 
         PyObject * load_module( pybind::kernel_interface * _kernel, PyObject * _module )
         {
-            static const char source[] = "value = 42\n";
+            static const char source[] = "value = 42\ndef get_value():\n    return value\n";
             const char * name = _kernel->string_to_char( _module );
             PyObject * code = _kernel->compile_string( source, "finder/sample.py" );
 
@@ -581,6 +624,246 @@ namespace detail
     {
         *_out = _value * 2;
     }
+    //////////////////////////////////////////////////////////////////////////
+    static int32_t s_regression_node_alive = 0;
+    static int32_t s_regression_counted_alive = 0;
+
+    class regression_node_t
+    {
+    public:
+        regression_node_t()
+        {
+            ++s_regression_node_alive;
+        }
+
+        ~regression_node_t()
+        {
+            --s_regression_node_alive;
+        }
+
+        int32_t getValue() const
+        {
+            return 7;
+        }
+    };
+
+    class regression_other_t
+    {
+    public:
+        int32_t getOther() const
+        {
+            return 3;
+        }
+    };
+
+    struct regression_counted_t
+    {
+        regression_counted_t()
+        {
+            ++s_regression_counted_alive;
+        }
+
+        regression_counted_t( const regression_counted_t & )
+        {
+            ++s_regression_counted_alive;
+        }
+
+        ~regression_counted_t()
+        {
+            --s_regression_counted_alive;
+        }
+
+        float value = 1.f;
+    };
+
+    static const char * repr_regression_node( const regression_node_t * _node )
+    {
+        (void)_node;
+        return "regression-node";
+    }
+
+    static int32_t take_regression_node( regression_node_t * _node )
+    {
+        return _node != nullptr ? _node->getValue() : -1;
+    }
+
+    static size_t regression_size( size_t _value )
+    {
+        return _value + 1;
+    }
+
+    static const char * regression_null_string()
+    {
+        return nullptr;
+    }
+
+    static pybind::object regression_unpickle( pybind::kernel_interface * _kernel, PyObject * _data )
+    {
+        size_t size;
+        const char * data = _kernel->string_to_char_and_size( _data, &size );
+        PyObject * types = _kernel->list_new( 0 );
+        PyObject * value = pybind::unpickle( _kernel, data, size, types );
+        _kernel->decref( types );
+
+        if( value == nullptr )
+        {
+            pybind::throw_exception( "regression unpickle rejected the data" );
+        }
+
+        return pybind::object( _kernel, value, pybind::borrowed );
+    }
+
+    static pybind::object regression_roundtrip( pybind::kernel_interface * _kernel, PyObject * _value )
+    {
+        PyObject * types = _kernel->list_new( 0 );
+        size_t size = 0;
+        bool measured = pybind::pickle( _kernel, _value, types, nullptr, 0, &size );
+
+        if( measured == false )
+        {
+            _kernel->decref( types );
+
+            pybind::throw_exception( "regression pickle rejected the value" );
+        }
+
+        void * buffer = std::malloc( size );
+        size_t written = 0;
+        bool result = pybind::pickle( _kernel, _value, types, buffer, size, &written );
+        PYBIND_CONTRACT_ASSERT( result == true );
+        PYBIND_CONTRACT_ASSERT( written == size );
+        PyObject * value = pybind::unpickle( _kernel, buffer, size, types );
+        std::free( buffer );
+        _kernel->decref( types );
+        PYBIND_CONTRACT_ASSERT( value != nullptr );
+
+        return pybind::object( _kernel, value, pybind::borrowed );
+    }
+
+    static void check_review_regressions( pybind::kernel_interface * _kernel, PyObject * _module )
+    {
+        pybind::class_<regression_node_t>( _kernel, "RegressionNode", true, _module )
+            .def_constructor( pybind::init<>() )
+            .def( "getValue", &regression_node_t::getValue )
+            .def_property( "readonly", &regression_node_t::getValue, nullptr )
+            .def_repr( &repr_regression_node )
+            ;
+
+        pybind::class_<regression_other_t>( _kernel, "RegressionOther", true, _module )
+            .def_constructor( pybind::init<>() )
+            .def( "getOther", &regression_other_t::getOther )
+            ;
+
+        pybind::struct_<regression_counted_t>( _kernel, "RegressionCounted", true, _module )
+            .def_constructor( pybind::init<>() )
+            ;
+
+        pybind::def_function( _kernel, "take_regression_node", &take_regression_node );
+        pybind::def_function( _kernel, "regression_size", &regression_size );
+        pybind::def_function( _kernel, "regression_null_string", &regression_null_string );
+        pybind::def_function_kernel( _kernel, "regression_unpickle", &regression_unpickle );
+        pybind::def_function_kernel( _kernel, "regression_roundtrip", &regression_roundtrip );
+
+        PyObject * dict = _kernel->module_dict( _module );
+        PyObject * builtins = _kernel->get_builtins();
+        _kernel->dict_setstring( dict, "__builtins__", builtins );
+
+        const char source[] = R"PY(
+class SubNode(RegressionNode):
+    pass
+
+sub = SubNode()
+regression_subclass_ok = take_regression_node(sub) == 7 and sub.getValue() == 7 and repr(sub) == 'regression-node'
+del sub
+
+try:
+    RegressionNode().readonly = 5
+    regression_readonly_ok = False
+except AttributeError:
+    regression_readonly_ok = True
+
+try:
+    RegressionNode.getValue(RegressionOther())
+    regression_receiver_ok = False
+except TypeError:
+    regression_receiver_ok = True
+
+regression_size_ok = regression_size(41) == 42
+regression_null_string_ok = regression_null_string() is None
+
+counted = RegressionCounted()
+del counted
+
+regression_values = [2 ** 40, 1760000000.5, u'caf\xe9', (1, {2: 3}), [True, None]]
+regression_pickle_ok = regression_roundtrip(regression_values) == regression_values
+
+regression_unpickle_rejects = 0
+for regression_data in ('\x08\x01' * 20000, '\x07\xff\xfe\xff\xff\xff', '\x06\x01\xf4', '\x09\x01\x08\x00\x00'):
+    try:
+        regression_unpickle(regression_data)
+    except Exception:
+        regression_unpickle_rejects += 1
+
+regression_cycle = [1]
+regression_cycle.append(regression_cycle)
+try:
+    regression_roundtrip(regression_cycle)
+    regression_cycle_ok = False
+except Exception:
+    regression_cycle_ok = True
+regression_cycle.pop()
+)PY";
+
+        PyObject * result = _kernel->exec_file( source, dict, dict );
+        PYBIND_CONTRACT_ASSERT( result != nullptr );
+        _kernel->decref( result );
+
+        const char * flags[] = {"regression_subclass_ok", "regression_readonly_ok", "regression_receiver_ok", "regression_size_ok", "regression_null_string_ok", "regression_pickle_ok", "regression_cycle_ok"};
+
+        for( const char * flag : flags )
+        {
+            PyObject * value = _kernel->dict_getstring( dict, flag );
+            bool flagValue = false;
+            bool flagResult = _kernel->extract_bool( value, flagValue );
+
+            if( flagResult == false || flagValue == false )
+            {
+                std::fprintf( stderr, "regression flag '%s' failed\n", flag );
+            }
+
+            PYBIND_CONTRACT_ASSERT( flagResult == true && flagValue == true );
+        }
+
+        PYBIND_CONTRACT_ASSERT( pybind::extract<int32_t>( _kernel, _kernel->dict_getstring( dict, "regression_unpickle_rejects" ) ) == 4 );
+        PYBIND_CONTRACT_ASSERT( s_regression_counted_alive == 0 );
+        PYBIND_CONTRACT_ASSERT( s_regression_node_alive == 0 );
+
+#if defined(PYBIND_BACKEND_PYTHON)
+        // CPython collects a bound object in a reference cycle; tinypy has no cyclic collector.
+        const char cycleSource[] = "import gc\nregression_cycle_node = RegressionNode()\nregression_cycle_node.me = regression_cycle_node\ndel regression_cycle_node\ngc.collect()\n";
+        PyObject * cycleResult = _kernel->exec_file( cycleSource, dict, dict );
+        PYBIND_CONTRACT_ASSERT( cycleResult != nullptr );
+        _kernel->decref( cycleResult );
+        PYBIND_CONTRACT_ASSERT( s_regression_node_alive == 0 );
+#endif
+
+        regression_node_t * held = new regression_node_t;
+        PyObject * holder = _kernel->scope_create_holder_t( held );
+        PYBIND_CONTRACT_ASSERT( _kernel->is_class( holder ) == true );
+        PYBIND_CONTRACT_ASSERT( _kernel->is_wrap( holder ) == true );
+        _kernel->unwrap( holder );
+        PYBIND_CONTRACT_ASSERT( _kernel->is_wrap( holder ) == false );
+        _kernel->decref( holder );
+        delete held;
+
+        PyObject * exception = _kernel->exception_new( "regression" );
+        PYBIND_CONTRACT_ASSERT( exception != nullptr );
+        PYBIND_CONTRACT_ASSERT( _kernel->is_class( exception ) == false );
+        _kernel->decref( exception );
+
+        _kernel->remove_scope<regression_counted_t>();
+        _kernel->remove_scope<regression_other_t>();
+        _kernel->remove_scope<regression_node_t>();
+    }
 }
 int main()
 {
@@ -610,6 +893,33 @@ int main()
     PyObject * module = kernel->module_init( "contract" );
     kernel->incref( module );
     kernel->set_current_module( module );
+
+    pybind::enum_<detail::signed_native_enum>( kernel, "signed_native_enum" )
+        .def( "SIGNED_NATIVE_UNKNOWN", detail::signed_native_enum::Unknown )
+        .def( "SIGNED_NATIVE_READY", detail::signed_native_enum::Ready );
+    pybind::enum_<detail::unsigned_native_enum>( kernel, "unsigned_native_enum" )
+        .def( "UNSIGNED_NATIVE_HIGH", detail::unsigned_native_enum::High );
+    pybind::enum_<detail::signed_wide_enum>( kernel, "signed_wide_enum" )
+        .def( "SIGNED_WIDE_LOW", detail::signed_wide_enum::Low );
+    pybind::enum_<detail::unsigned_wide_enum>( kernel, "unsigned_wide_enum" )
+        .def( "UNSIGNED_WIDE_HIGH", detail::unsigned_wide_enum::High );
+
+    pybind::def_function( kernel, "roundtrip_signed_native", &detail::roundtrip_enum<detail::signed_native_enum> );
+    pybind::def_function( kernel, "roundtrip_unsigned_native", &detail::roundtrip_enum<detail::unsigned_native_enum> );
+    pybind::def_function( kernel, "roundtrip_signed_wide", &detail::roundtrip_enum<detail::signed_wide_enum> );
+    pybind::def_function( kernel, "roundtrip_unsigned_wide", &detail::roundtrip_enum<detail::unsigned_wide_enum> );
+
+    std::ifstream enumScript( PYBIND_SANDBOX_SCRIPTS_PATH "/enum_contract.py" );
+    PYBIND_CONTRACT_ASSERT( enumScript.is_open() == true );
+    std::string enumSource( (std::istreambuf_iterator<char>( enumScript )), std::istreambuf_iterator<char>() );
+    PyObject * enumDict = kernel->module_dict( module );
+    kernel->dict_setstring( enumDict, "__builtins__", kernel->get_builtins() );
+    PyObject * enumResult = kernel->exec_file( enumSource.c_str(), enumDict, enumDict );
+    PYBIND_CONTRACT_ASSERT( enumResult != nullptr );
+    kernel->decref( enumResult );
+    PYBIND_CONTRACT_ASSERT( pybind::extract<bool>( kernel, kernel->dict_getstring( enumDict, "enum_value_ok" ) ) == true );
+    PYBIND_CONTRACT_ASSERT( pybind::extract<bool>( kernel, kernel->dict_getstring( enumDict, "enum_roundtrip_ok" ) ) == true );
+    PYBIND_CONTRACT_ASSERT( pybind::extract<bool>( kernel, kernel->dict_getstring( enumDict, "enum_overflow_ok" ) ) == true );
 
     const char reloadSource[] = "value = 17\ndef get_value():\n    return value\n";
     PyObject * reloadedModule = kernel->module_reload_source( module, reloadSource, "contract.py" );
@@ -676,6 +986,29 @@ int main()
     PYBIND_CONTRACT_ASSERT( std::wmemcmp( unicodeWcharData, L"caf\u00e9", unicodeWcharSize ) == 0 );
     kernel->decref( unicodeUtf8 );
     kernel->decref( unicodeValue );
+
+    pybind::def_function( kernel, "wide_pair_matches", &detail::wide_pair_matches );
+    PyObject * widePairDict = kernel->module_dict( module );
+    PyObject * widePairExec = kernel->exec_file( "wide_pair_ok = wide_pair_matches(u'alpha', u'beta with a longer tail')\n", widePairDict, widePairDict );
+    PYBIND_CONTRACT_ASSERT( widePairExec != nullptr );
+    kernel->decref( widePairExec );
+    PYBIND_CONTRACT_ASSERT( pybind::extract<bool>( kernel, kernel->dict_getstring( widePairDict, "wide_pair_ok" ) ) == true );
+
+    pybind::def_function( kernel, "wide_char_code", &detail::wide_char_code );
+    PyObject * wideCharBuiltins = kernel->get_builtins();
+    kernel->dict_setstring( widePairDict, "__builtins__", wideCharBuiltins );
+    const char wideCharSource[] =
+        "wide_char_ok = wide_char_code(u'z') == 122\n"
+        "for wide_char_value in ('abcdefgh', 12345, [1, 2, 3]):\n"
+        "    try:\n"
+        "        wide_char_code(wide_char_value)\n"
+        "        wide_char_ok = False\n"
+        "    except Exception:\n"
+        "        pass\n";
+    PyObject * wideCharExec = kernel->exec_file( wideCharSource, widePairDict, widePairDict );
+    PYBIND_CONTRACT_ASSERT( wideCharExec != nullptr );
+    kernel->decref( wideCharExec );
+    PYBIND_CONTRACT_ASSERT( pybind::extract<bool>( kernel, kernel->dict_getstring( widePairDict, "wide_char_ok" ) ) == true );
 
     PyObject * oldExcepthook = kernel->get_sys_excepthook();
     kernel->incref( oldExcepthook );
@@ -864,7 +1197,7 @@ int main()
         .def_hash( &detail::hash_pod_value )
         .def_compare_equal()
         .def_convert( &detail::convert_pod_value )
-        .def_operator_getset()
+        .def_operator_getset( 1 )
         .def_operator_neg()
         .def_abs( &detail::pod_value_t::absolute )
         .def_operator_add()
@@ -919,7 +1252,19 @@ int main()
         "pod_sequence_get_ok = pod_object[0] == 37\n"
         "pod_object[0] = 41\n"
         "pod_sequence_set_ok = pod_object == 41\n"
-        "pod_object[0] = 37\n";
+        "pod_object[0] = 37\n"
+        "pod_sequence_bounds_ok = list(pod_object) == [37]\n"
+        "for pod_index in (1, -1):\n"
+        "    try:\n"
+        "        pod_object[pod_index]\n"
+        "        pod_sequence_bounds_ok = False\n"
+        "    except IndexError:\n"
+        "        pass\n"
+        "    try:\n"
+        "        pod_object[pod_index] = 5\n"
+        "        pod_sequence_bounds_ok = False\n"
+        "    except IndexError:\n"
+        "        pass\n";
     PyObject * podSequenceExec = kernel->exec_file( podSequenceSource, moduleDict, moduleDict );
     PYBIND_CONTRACT_ASSERT( podSequenceExec != nullptr );
     kernel->decref( podSequenceExec );
@@ -956,6 +1301,7 @@ int main()
     PYBIND_CONTRACT_ASSERT( pybind::extract<bool>( kernel, kernel->dict_getstring( moduleDict, "pod_proxy_kernel_args_ok" ) ) == true );
     PYBIND_CONTRACT_ASSERT( pybind::extract<bool>( kernel, kernel->dict_getstring( moduleDict, "pod_sequence_get_ok" ) ) == true );
     PYBIND_CONTRACT_ASSERT( pybind::extract<bool>( kernel, kernel->dict_getstring( moduleDict, "pod_sequence_set_ok" ) ) == true );
+    PYBIND_CONTRACT_ASSERT( pybind::extract<bool>( kernel, kernel->dict_getstring( moduleDict, "pod_sequence_bounds_ok" ) ) == true );
     PYBIND_CONTRACT_ASSERT( pybind::extract<bool>( kernel, kernel->dict_getstring( moduleDict, "pod_compare_ok" ) ) == true );
     PYBIND_CONTRACT_ASSERT( pybind::extract<bool>( kernel, kernel->dict_getstring( moduleDict, "pod_unknown_compare_ok" ) ) == true );
     PYBIND_CONTRACT_ASSERT( pybind::extract<bool>( kernel, kernel->dict_getstring( moduleDict, "pod_number_ok" ) ) == true );
@@ -999,10 +1345,20 @@ int main()
         "scalar_div_int = scalar_value / 3\n"
         "scalar_value *= 2.5\n"
         "scalar_value /= 3\n"
-        "scalar_contract_ok = scalar_mul_float.value == 30.0 and scalar_mul_int.value == 24.0 and scalar_div_float.value == 8.0 and scalar_div_int.value == 4.0 and scalar_value.value == 10.0\n";
+        "scalar_contract_ok = scalar_mul_float.value == 30.0 and scalar_mul_int.value == 24.0 and scalar_div_float.value == 8.0 and scalar_div_int.value == 4.0 and scalar_value.value == 10.0\n"
+        "def scalar_rejects(function, *args):\n"
+        "    try:\n"
+        "        function(*args)\n"
+        "    except TypeError:\n"
+        "        return True\n"
+        "    return False\n"
+        "scalar_member_receiver_ok = ScalarValue.value.fget(scalar_value) == 10.0 and scalar_rejects(ScalarValue.value.fget, 12345) and scalar_rejects(ScalarValue.value.fset, 'text', 1.0)\n"
+        "scalar_neg_ok = scalar_rejects(lambda: -scalar_value)\n";
     PyObject * scalarExec = kernel->exec_file( scalarSource, moduleDict, moduleDict );
     PYBIND_CONTRACT_ASSERT( scalarExec != nullptr );
     kernel->decref( scalarExec );
+    PYBIND_CONTRACT_ASSERT( pybind::extract<bool>( kernel, kernel->dict_getstring( moduleDict, "scalar_member_receiver_ok" ) ) == true );
+    PYBIND_CONTRACT_ASSERT( pybind::extract<bool>( kernel, kernel->dict_getstring( moduleDict, "scalar_neg_ok" ) ) == true );
     PyObject * scalarContract = kernel->get_attrstring( module, "scalar_contract_ok" );
     bool scalarContractValue;
     bool scalarContractResult = kernel->extract_bool( scalarContract, scalarContractValue );
@@ -1101,6 +1457,9 @@ int main()
     nativeDestroy = nullptr;
     nativeNew = nullptr;
     adapter = nullptr;
+
+    detail::check_review_regressions( kernel, module );
+
     kernel->set_current_module( nullptr );
     kernel->module_fini( module );
     kernel->remove_scope<detail::smart_pointer_derived_t>();

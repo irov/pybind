@@ -3,9 +3,11 @@
 #include "tinypy_arguments_scope.hpp"
 #include "tinypy_kernel.hpp"
 
+#include "pybind/debug.hpp"
 #include "pybind/exception.hpp"
 
 #include <cassert>
+#include <cstdio>
 #include <cstring>
 
 namespace pybind
@@ -21,6 +23,23 @@ namespace pybind
             member_adapter_interface_ptr member;
             bool setter;
         };
+        //////////////////////////////////////////////////////////////////////////
+        static bool is_bound( tinypy_vm_t * _vm, const tinypy_class_type_scope::payload_t * _payload )
+        {
+#if defined(PYBIND_DEBUG)
+            // As the CPython backend, the slots check for an unwrapped object in debug builds.
+            if( _payload->impl == nullptr )
+            {
+                tinypy_vm_raise_error( _vm, TINYPY_ERROR_RUNTIME, "native object is no longer bound" );
+                return false;
+            }
+#else
+            (void)_vm;
+            (void)_payload;
+#endif
+
+            return true;
+        }
         //////////////////////////////////////////////////////////////////////////
         static PyObject * cast_object( tinypy_value_t * _value )
         {
@@ -64,6 +83,17 @@ namespace pybind
                     selfValue = arguments[0];
                     arguments += 1;
                     argumentCount -= 1;
+
+                    // Only property accessors take self from the arguments: tinypy checks
+                    // the receiver of the methods registered on the type itself.
+                    PyObject * instance = detail::cast_object( selfValue );
+                    PyTypeObject * instanceType = kernel->get_object_type( instance );
+
+                    if( scope->is_instance( instanceType ) == false )
+                    {
+                        tinypy_vm_raise_error( vm, TINYPY_ERROR_TYPE, "native descriptor requires an instance of its type" );
+                        return nullptr;
+                    }
                 }
 
                 PyObject * self = detail::cast_object( selfValue );
@@ -97,7 +127,16 @@ namespace pybind
                 }
 
                 tinypy_arguments_scope callArgs( vm, arguments, argumentCount );
-                PyObject * result = holder->adapter->call( kernel, payload->impl, scopePtr, callArgs.get(), kwargsObject );
+                PyObject * args = callArgs.get();
+
+                if( args == nullptr )
+                {
+                    return nullptr;
+                }
+
+                DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), holder->adapter->getName(), holder->adapter->getCallDebugSilent(), args, kwargsObject );
+
+                PyObject * result = holder->adapter->call( kernel, payload->impl, scopePtr, args, kwargsObject );
                 return detail::cast_value( result );
             }
             catch( const pybind_exception & exception )
@@ -133,7 +172,6 @@ namespace pybind
             tinypy_class_type_scope * scope = static_cast<tinypy_class_type_scope *>(_userData);
             kernel_interface * kernelInterface = pybind::get_kernel();
             tinypy_kernel * kernel = static_cast<tinypy_kernel *>(kernelInterface);
-            tinypy_vm_t * vm = kernel->vm();
             tinypy_class_type_scope::payload_t * payload = static_cast<tinypy_class_type_scope::payload_t *>(_payload);
 
             try
@@ -155,6 +193,9 @@ namespace pybind
 
                 if( impl == nullptr )
                 {
+                    char message[256];
+                    std::snprintf( message, sizeof( message ), "cannot create '%s' instances", scope->get_name() );
+                    kernel->set_error( error_type_e::Type, message );
                     return TINYPY_FALSE;
                 }
 
@@ -187,23 +228,33 @@ namespace pybind
                 return;
             }
 
+            tinypy_class_type_scope * scope = payload->scope;
+            void * impl = payload->impl;
+            payload->impl = nullptr;
+
             try
             {
                 PyObject * instance = detail::cast_object( _instance );
 
-                if( ( payload->flags & tinypy_class_type_scope::PayloadHolder ) == 0 )
+                scope->clear_bindable( impl );
+
+                // A counted object belongs to its smart pointer, so only the
+                // destroy adapter of an uncounted owned object releases it.
+                if( scope->get_smart_pointer() != nullptr )
                 {
-                    payload->scope->call_destructor( instance, payload->impl );
+                    scope->decref_smart_pointer( impl );
                 }
-
-                payload->scope->clear_bindable( payload->impl );
-                payload->scope->decref_smart_pointer( payload->impl );
+                else if( ( payload->flags & tinypy_class_type_scope::PayloadHolder ) == 0 )
+                {
+                    scope->call_destructor( instance, impl );
+                }
             }
-            catch( const pybind_exception & )
+            catch( const pybind_exception & exception )
             {
+                // tinypy reports the error a finalizer leaves raised.
+                kernel_interface * kernel = pybind::get_kernel();
+                kernel->set_error( error_type_e::Runtime, exception.what() );
             }
-
-            payload->impl = nullptr;
         }
         //////////////////////////////////////////////////////////////////////////
         static tinypy_value_t * native_call( tinypy_value_t * _instance, void * _payload, tinypy_value_t * _args, tinypy_value_t * _kwargs, void * _userData, tinypy_error_t ** _outError )
@@ -215,12 +266,20 @@ namespace pybind
             tinypy_kernel * kernel = static_cast<tinypy_kernel *>(kernelInterface);
             tinypy_vm_t * vm = kernel->vm();
 
+            if( detail::is_bound( vm, payload ) == false )
+            {
+                return nullptr;
+            }
+
             try
             {
                 const method_adapter_interface_ptr & adapter = scope->get_call();
                 class_type_scope_interface_ptr scopePtr = class_type_scope_interface_ptr::from( scope );
                 PyObject * args = detail::cast_object( _args );
                 PyObject * kwargs = detail::cast_object( _kwargs );
+
+                DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), args, kwargs );
+
                 PyObject * result = adapter->call( kernel, payload->impl, scopePtr, args, kwargs );
 
                 return detail::cast_value( result );
@@ -246,6 +305,11 @@ namespace pybind
             kernel_interface * kernelInterface = pybind::get_kernel();
             tinypy_kernel * kernel = static_cast<tinypy_kernel *>(kernelInterface);
             tinypy_vm_t * vm = kernel->vm();
+
+            if( detail::is_bound( vm, payload ) == false )
+            {
+                return nullptr;
+            }
 
             try
             {
@@ -273,14 +337,23 @@ namespace pybind
             (void)_instance;
             tinypy_class_type_scope * scope = static_cast<tinypy_class_type_scope *>(_userData);
             tinypy_class_type_scope::payload_t * payload = static_cast<tinypy_class_type_scope::payload_t *>(_payload);
-        //////////////////////////////////////////////////////////////////////////
-            if( ( payload->flags & tinypy_class_type_scope::PayloadHashValid ) != 0 )
+            tinypy_kernel * kernel = static_cast<tinypy_kernel *>(pybind::get_kernel());
+            tinypy_vm_t * vm = kernel->vm();
+
+            // As the CPython backend, only a hashable pod keeps its first hash.
+            bool cached = scope->get_pod_hash();
+
+            if( cached == true && ( payload->flags & tinypy_class_type_scope::PayloadHashValid ) != 0 )
             {
                 return payload->hash;
             }
 
+            if( detail::is_bound( vm, payload ) == false )
+            {
+                return 0;
+            }
+
             const hash_adapter_interface_ptr & adapter = scope->get_hash();
-            kernel_interface * kernel = pybind::get_kernel();
             class_type_scope_interface_ptr scopePtr = class_type_scope_interface_ptr::from( scope );
 
             try
@@ -292,8 +365,12 @@ namespace pybind
                     hash = -2;
                 }
 
-                payload->hash = hash;
-                payload->flags |= tinypy_class_type_scope::PayloadHashValid;
+                if( cached == true )
+                {
+                    payload->hash = hash;
+                    payload->flags |= tinypy_class_type_scope::PayloadHashValid;
+                }
+
                 return hash;
             }
             catch( const pybind_exception & exception )
@@ -350,6 +427,11 @@ namespace pybind
                 }
             }
 
+            if( detail::is_bound( vm, payload ) == false )
+            {
+                return nullptr;
+            }
+
             bool result = false;
 
             try
@@ -387,11 +469,19 @@ namespace pybind
             tinypy_kernel * kernel = static_cast<tinypy_kernel *>(pybind::get_kernel());
             tinypy_vm_t * vm = kernel->vm();
 
+            if( detail::is_bound( vm, payload ) == false )
+            {
+                return nullptr;
+            }
+
             try
             {
                 const getattro_adapter_interface_ptr & adapter = scope->get_getattro();
                 class_type_scope_interface_ptr scopePtr = class_type_scope_interface_ptr::from( scope );
                 PyObject * name = detail::cast_object( _name );
+
+                DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), name, nullptr );
+
                 PyObject * result = adapter->call( kernel, payload->impl, scopePtr, name );
 
                 return detail::cast_value( result );
@@ -417,11 +507,19 @@ namespace pybind
             tinypy_kernel * kernel = static_cast<tinypy_kernel *>(pybind::get_kernel());
             tinypy_vm_t * vm = kernel->vm();
 
+            if( detail::is_bound( vm, payload ) == false )
+            {
+                return nullptr;
+            }
+
             try
             {
                 const mapping_adapter_interface_ptr & adapter = scope->get_mapping();
                 class_type_scope_interface_ptr scopePtr = class_type_scope_interface_ptr::from( scope );
                 PyObject * key = detail::cast_object( _key );
+
+                DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), key, nullptr );
+
                 PyObject * result = adapter->call( kernel, payload->impl, scopePtr, key );
 
                 return detail::cast_value( result );
@@ -448,15 +546,32 @@ namespace pybind
             tinypy_vm_t * vm = kernel->vm();
             int64_t index;
 
-            if( kernel->extract_int64( detail::cast_object( _key ), index ) == false || index < 0 )
+            if( kernel->extract_int64( detail::cast_object( _key ), index ) == false )
             {
-                tinypy_vm_raise_error( kernel->vm(), TINYPY_ERROR_TYPE, "native sequence index must be a non-negative integer" );
+                tinypy_vm_raise_error( vm, TINYPY_ERROR_TYPE, "native sequence index must be an integer" );
+                return nullptr;
+            }
+
+            // Without a length the index is not normalized, as sq_item receives it.
+            if( index < 0 )
+            {
+                tinypy_vm_raise_error( vm, TINYPY_ERROR_INDEX, "index out of range" );
+                return nullptr;
+            }
+
+            if( detail::is_bound( vm, payload ) == false )
+            {
                 return nullptr;
             }
 
             try
             {
-                return detail::cast_value( scope->get_sequence_get()->call( kernel, payload->impl, class_type_scope_interface_ptr::from( scope ), static_cast<size_t>(index) ) );
+                const sequence_get_adapter_interface_ptr & adapter = scope->get_sequence_get();
+
+                DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), nullptr, nullptr );
+
+                PyObject * result = adapter->call( kernel, payload->impl, class_type_scope_interface_ptr::from( scope ), static_cast<size_t>(index) );
+                return detail::cast_value( result );
             }
             catch( const pybind_exception & exception )
             {
@@ -480,15 +595,30 @@ namespace pybind
             tinypy_vm_t * vm = kernel->vm();
             int64_t index;
 
-            if( kernel->extract_int64( detail::cast_object( _key ), index ) == false || index < 0 )
+            if( kernel->extract_int64( detail::cast_object( _key ), index ) == false )
             {
-                tinypy_vm_raise_error( kernel->vm(), TINYPY_ERROR_TYPE, "native sequence index must be a non-negative integer" );
+                tinypy_vm_raise_error( vm, TINYPY_ERROR_TYPE, "native sequence index must be an integer" );
+                return TINYPY_FALSE;
+            }
+
+            if( index < 0 )
+            {
+                tinypy_vm_raise_error( vm, TINYPY_ERROR_INDEX, "index out of range" );
+                return TINYPY_FALSE;
+            }
+
+            if( detail::is_bound( vm, payload ) == false )
+            {
                 return TINYPY_FALSE;
             }
 
             try
             {
-                scope->get_sequence_set()->call( kernel, payload->impl, class_type_scope_interface_ptr::from( scope ), static_cast<size_t>(index), detail::cast_object( _value ) );
+                const sequence_set_adapter_interface_ptr & adapter = scope->get_sequence_set();
+
+                DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), nullptr, nullptr );
+
+                adapter->call( kernel, payload->impl, class_type_scope_interface_ptr::from( scope ), static_cast<size_t>(index), detail::cast_object( _value ) );
                 return TINYPY_TRUE;
             }
             catch( const pybind_exception & exception )
@@ -513,9 +643,17 @@ namespace pybind
             tinypy_vm_t * vm = kernel->vm();
             const number_unary_adapter_interface_ptr & adapter = _absolute == true ? scope->get_number_abs() : scope->get_number_neg();
 
+            if( detail::is_bound( vm, payload ) == false )
+            {
+                return nullptr;
+            }
+
             try
             {
                 class_type_scope_interface_ptr scopePtr = class_type_scope_interface_ptr::from( scope );
+
+                DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), nullptr, nullptr );
+
                 PyObject * result = adapter->call( kernel, payload->impl, scopePtr );
                 return detail::cast_value( result );
             }
@@ -561,6 +699,11 @@ namespace pybind
             tinypy_kernel * kernel = static_cast<tinypy_kernel *>(pybind::get_kernel());
             tinypy_vm_t * vm = kernel->vm();
             typeid_t typeId = kernel->get_object_type_id( detail::cast_object( _other ) );
+
+            if( detail::is_bound( vm, payload ) == false )
+            {
+                return nullptr;
+            }
 
             try
             {
@@ -630,6 +773,8 @@ namespace pybind
 
                 if( binary != nullptr && *binary != nullptr )
                 {
+                    DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), ( *binary )->getName(), ( *binary )->getCallDebugSilent(), nullptr, nullptr );
+
                     PyObject * result = ( *binary )->call( kernel, payload->impl, class_type_scope_interface_ptr::from( scope ), detail::cast_object( _other ), _rotate );
 
                     if( result == nullptr )
@@ -642,6 +787,8 @@ namespace pybind
 
                 if( inplace != nullptr && *inplace != nullptr )
                 {
+                    DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), ( *inplace )->getName(), ( *inplace )->getCallDebugSilent(), nullptr, nullptr );
+
                     ( *inplace )->call( kernel, payload->impl, class_type_scope_interface_ptr::from( scope ), detail::cast_object( _other ) );
                     tinypy_retain( _instance );
                     return _instance;
@@ -704,6 +851,7 @@ namespace pybind
         , m_pod_hash( _hash )
         , m_module( nullptr )
         , m_type( nullptr )
+        , m_instanceType( nullptr )
         , m_basesCount( 0 )
         , m_methodCount( 0 )
         , m_memberCount( 0 )
@@ -835,13 +983,25 @@ namespace pybind
 
         if( m_type == nullptr )
         {
+            char message[PYBIND_EXCEPTION_MESSAGE_SIZE + 1] = {'\0'};
+
             if( error != nullptr )
             {
+                std::snprintf( message, sizeof( message ), "%s", tinypy_error_message( error, nullptr ) );
                 tinypy_error_release( error );
             }
 
+            tinypy_vm_clear_error( vm );
+
+            pybind::throw_exception( "scope '%s' initialize invalide not create type: %s"
+                , m_name
+                , message
+            );
+
             return false;
         }
+
+        m_instanceType = m_type;
 
         for( size_t index = 0; index != m_methodCount; ++index )
         {
@@ -998,8 +1158,12 @@ namespace pybind
             }
         }
 
-        static method_adapter_interface_ptr none;
-        return none;
+        pybind::throw_exception( "scope '%s' find_method '%s' not found"
+            , m_name
+            , _name
+        );
+
+        return method_adapter_interface_ptr::none();
     }
     //////////////////////////////////////////////////////////////////////////
     const member_adapter_interface_ptr & tinypy_class_type_scope::find_member( const char * _name ) const
@@ -1255,7 +1419,14 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_class_type_scope::is_instance( PyTypeObject * _type ) const
     {
-        return tinypy_type_is_subtype( reinterpret_cast<const tinypy_type_t *>(_type), m_type ) != 0;
+        // Instances keep their type alive after finalize released the scope's
+        // reference, so the check compares with the type the scope created.
+        if( m_instanceType == nullptr )
+        {
+            return false;
+        }
+
+        return tinypy_type_is_subtype( reinterpret_cast<const tinypy_type_t *>(_type), m_instanceType ) != 0;
     }
     //////////////////////////////////////////////////////////////////////////
     const new_adapter_interface_ptr & tinypy_class_type_scope::get_new() const

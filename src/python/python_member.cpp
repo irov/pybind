@@ -11,6 +11,7 @@ namespace pybind
         PyObject_HEAD
 
             member_adapter_interface * iadapter;
+        PyTypeObject * classtype;
     };
     //////////////////////////////////////////////////////////////////////////
     static void py_member_dealloc( PyObject * _obj )
@@ -18,6 +19,8 @@ namespace pybind
         py_member_type * mt = (py_member_type *)_obj;
 
         factorable::intrusive_ptr_release( mt->iadapter );
+
+        pybind::xdecref( (PyObject *)mt->classtype );
 
         PyObject_Free( _obj );
     }
@@ -29,6 +32,18 @@ namespace pybind
         py_member_type * mt = (py_member_type *)_member;
 
         PyObject * py_self = PyTuple_GetItem( _args, 0 );
+
+        if( py_self == nullptr )
+        {
+            return nullptr;
+        }
+
+        if( PyObject_TypeCheck( py_self, mt->classtype ) == 0 )
+        {
+            pybind::set_error( error_type_e::Type, "py_getmethod: descriptor requires an instance of its type" );
+
+            return nullptr;
+        }
 
         try
         {
@@ -42,6 +57,13 @@ namespace pybind
             }
 
             const class_type_scope_interface_ptr & scope = kernel->get_class_scope( py_self->ob_type );
+
+            if( scope == nullptr )
+            {
+                error_message( "py_getmethod: removed scope" );
+
+                return nullptr;
+            }
 
             PyObject * py_method = mt->iadapter->get( kernel, impl, scope );
 
@@ -66,6 +88,19 @@ namespace pybind
         py_member_type * mt = (py_member_type *)_member;
 
         PyObject * py_self = PyTuple_GetItem( _args, 0 );
+
+        if( py_self == nullptr )
+        {
+            return nullptr;
+        }
+
+        if( PyObject_TypeCheck( py_self, mt->classtype ) == 0 )
+        {
+            pybind::set_error( error_type_e::Type, "py_setmethod: descriptor requires an instance of its type" );
+
+            return nullptr;
+        }
+
         PyObject * py_value = PyTuple_GetItem( _args, 1 );
 
         try
@@ -80,6 +115,13 @@ namespace pybind
             }
 
             const class_type_scope_interface_ptr & scope = kernel->get_class_scope( py_self->ob_type );
+
+            if( scope == nullptr )
+            {
+                error_message( "py_setmethod: removed scope" );
+
+                return nullptr;
+            }
 
             mt->iadapter->set( kernel, impl, py_value, scope );
 
@@ -167,13 +209,16 @@ namespace pybind
 
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * member_python::create_member_adapter( const member_adapter_interface_ptr & _iadapter )
+    PyObject * member_python::create_member_adapter( const member_adapter_interface_ptr & _iadapter, PyTypeObject * _type )
     {
         PyObject * new_py_member = PyType_GenericAlloc( &m_member_type, 0 );
 
         py_member_type * py_member = (py_member_type *)new_py_member;
 
         factorable::intrusive_ptr_setup( py_member->iadapter, _iadapter.get() );
+
+        py_member->classtype = _type;
+        pybind::incref( (PyObject *)py_member->classtype );
 
         PyObject * py_get = PyCFunction_New( &m_getmethod, new_py_member );
         PyObject * py_set = PyCFunction_New( &m_setmethod, new_py_member );

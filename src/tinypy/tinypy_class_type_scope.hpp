@@ -209,6 +209,7 @@ namespace pybind
 
         PyObject * m_module;
         tinypy_type_t * m_type;
+        const tinypy_type_t * m_instanceType;
 
         base_t m_bases[PYBIND_BASES_COUNT];
         size_t m_basesCount;

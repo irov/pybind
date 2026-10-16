@@ -230,8 +230,14 @@ if(PYBIND_SANDBOX)
         TARGET_LINK_LIBRARIES(sandbox ${PROJECT_NAME})
         TARGET_LINK_LIBRARIES(sandbox python)
         add_dependencies(sandbox ${PROJECT_NAME})
-        add_dependencies(sandbox python_download)
-        add_dependencies(sandbox stdex_download)
+
+        if(TARGET python_download)
+            add_dependencies(sandbox python_download)
+        endif()
+
+        if(TARGET stdex_download)
+            add_dependencies(sandbox stdex_download)
+        endif()
     ENDIF()
 
     ADD_EXECUTABLE(sandbox_contract

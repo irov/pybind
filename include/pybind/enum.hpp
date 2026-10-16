@@ -6,11 +6,6 @@
 
 namespace pybind
 {
-    namespace detail
-    {
-        PYBIND_API void add_module_enum( kernel_interface * _kernel, PyObject * _module, const char * _id, uint32_t _value );
-    }
-
     template<class T>
     class enum_
     {

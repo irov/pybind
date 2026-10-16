@@ -10,6 +10,11 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     tinypy_arguments_scope::~tinypy_arguments_scope()
     {
+        if( m_args == nullptr )
+        {
+            return;
+        }
+
         tinypy_native_arguments_release( m_args );
     }
     //////////////////////////////////////////////////////////////////////////

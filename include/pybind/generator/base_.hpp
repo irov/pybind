@@ -52,8 +52,13 @@ namespace pybind
 
             this->setup_bases( scope );
 
+            // The definitions that follow need the scope.
             if( scope->initialize( _module ) == false )
             {
+                pybind::throw_exception( "scope '%s' initialize failed"
+                    , _name
+                );
+
                 return;
             }
 
@@ -634,14 +639,14 @@ namespace pybind
             return *this;
         }
 
-        base_ & def_operator_getset()
+        base_ & def_operator_getset( size_t _count )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            sequence_set_adapter_interface_ptr iadapter_set = allocator->newT<sequence_set_adapter_operator<C>>( "operator_set" );
+            sequence_set_adapter_interface_ptr iadapter_set = allocator->newT<sequence_set_adapter_operator<C>>( "operator_set", _count );
             m_scope->set_sequence_set( iadapter_set );
 
-            sequence_get_adapter_interface_ptr iadapter_get = allocator->newT<sequence_get_adapter_operator<C>>( "operator_get" );
+            sequence_get_adapter_interface_ptr iadapter_get = allocator->newT<sequence_get_adapter_operator<C>>( "operator_get", _count );
             m_scope->set_sequence_get( iadapter_get );
 
             return *this;

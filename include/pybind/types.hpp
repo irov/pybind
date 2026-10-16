@@ -30,7 +30,9 @@ namespace pybind
         Runtime,
         Type,
         Value,
-        Overflow
+        Overflow,
+        Index,
+        Attribute
     };
 
     typedef intrusive_ptr<class class_type_scope_interface> class_type_scope_interface_ptr;

@@ -175,26 +175,13 @@ namespace pybind
     }
     //////////////////////////////////////////////////////////////////////////
     template<class ... T>
-    detail::extract_operator_t call_args_t( kernel_interface * _kernel, PyObject * _obj, T && ... _t, const args & _args )
+    detail::extract_operator_t call_args_t( kernel_interface * _kernel, PyObject * _obj, T && ... _t )
     {
-        auto t = std::forward_as_tuple( std::forward<T>( _t ) ... );
-
+        // As object::call_args: the last argument is the args the call extends with.
         return call_args_t_i( _kernel, _obj
-            , std::forward<std::tuple<T ...>>( t )
+            , std::forward_as_tuple( std::forward<T>( _t ) ... )
             , std::make_integer_sequence<size_t, sizeof ... (T) - 1u>()
-            , _args
-        );
-    }
-    //////////////////////////////////////////////////////////////////////////
-    template<class ... T>
-    detail::extract_operator_t call_args_t( kernel_interface * _kernel, PyObject * _obj, T && ... _t, args && _args )
-    {
-        auto t = std::forward_as_tuple( std::forward<T>( _t ) ... );
-
-        return call_args_t_i( _kernel, _obj
-            , std::forward<std::tuple<T ...>>( t )
-            , std::make_integer_sequence<size_t, sizeof ... (T) - 1u>()
-            , std::forward<args>( _args )
+            , std::get<sizeof ... (T) - 1u>( std::forward_as_tuple( std::forward<T>( _t ) ... ) )
         );
     }
     //////////////////////////////////////////////////////////////////////////

@@ -86,7 +86,7 @@ namespace pybind
                 , m_doc
             );
 
-            sequence_get_adapter<C, F>::call( _kernel, _impl, _scope
+            sequence_set_adapter<C, F>::call( _kernel, _impl, _scope
                 , _index
                 , _value
             );
@@ -163,8 +163,9 @@ namespace pybind
         : public sequence_set_adapter_interface
     {
     public:
-        sequence_set_adapter_operator( const char * _name )
+        sequence_set_adapter_operator( const char * _name, size_t _count )
             : sequence_set_adapter_interface( _name )
+            , m_count( _count )
         {
         }
 
@@ -175,10 +176,26 @@ namespace pybind
     protected:
         void call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, size_t _index, PyObject * _value ) override
         {
+            // The slot keeps the IndexError the sequence protocol expects.
+            if( _index >= m_count )
+            {
+                _kernel->set_error( error_type_e::Index, "index out of range" );
+
+                pybind::throw_exception( "index %zu out of range %zu"
+                    , _index
+                    , m_count
+                );
+
+                return;
+            }
+
             C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
             self->operator [] ( _index ) = detail::extract_operator_t( _kernel, _value );
         }
+
+    protected:
+        size_t m_count;
     };
 }
 

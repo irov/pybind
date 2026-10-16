@@ -16,7 +16,7 @@ namespace pybind
 
     public:
         structhash_( kernel_interface * _kernel, const char * _name, bool external_extract = true, PyObject * _module = 0 )
-            : base_<C, B>( _kernel, _name, 0, nullptr, nullptr, sizeof( C ), true, _module )
+            : base_<C, B>( _kernel, _name, 0, nullptr, _kernel->get_allocator()->newT<class_destroy_destructor<C>>(), sizeof( C ), true, _module )
         {
             if( external_extract == true )
             {

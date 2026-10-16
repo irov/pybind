@@ -108,12 +108,12 @@ namespace pybind
 
         if( !PyObject_TypeCheck( _obj, _descr->classtype ) )
         {
-            //PyErr_Format(PyExc_TypeError,
-            //	"descriptor '%s' for '%s' objects "
-            //	"doesn't apply to '%s' object",
-            //	descr_name((PyDescrObject *)descr),
-            //	descr->d_type->tp_name,
-            //	obj->ob_type->tp_name);
+            PyErr_Format( PyExc_TypeError, "descriptor '%s' for '%s' objects doesn't apply to '%s' object"
+                , _descr->iadapter->getName()
+                , _descr->classtype->tp_name
+                , _obj->ob_type->tp_name
+            );
+
             *_pres = nullptr;
 
             return 1;
@@ -134,6 +134,11 @@ namespace pybind
         }
 
         PyObject * new_mct = PyType_GenericAlloc( _descr->method_caller_type, 0 );
+
+        if( new_mct == nullptr )
+        {
+            return nullptr;
+        }
 
         py_method_caller_type * mct = (py_method_caller_type *)new_mct;
 
@@ -158,6 +163,20 @@ namespace pybind
             return nullptr;
         }
 
+        PyObject * self = PyTuple_GET_ITEM( _args, 0 );
+
+        // As a method descriptor of CPython and the tinypy backend.
+        if( _descr->classtype != nullptr && PyObject_TypeCheck( self, _descr->classtype ) == 0 )
+        {
+            PyErr_Format( PyExc_TypeError, "descriptor '%s' requires a '%s' object but received a '%s'"
+                , _descr->iadapter->getName()
+                , _descr->classtype->tp_name
+                , self->ob_type->tp_name
+            );
+
+            return nullptr;
+        }
+
         PyObject * new_mct = PyType_GenericAlloc( _descr->method_caller_type, 0 );
 
         if( new_mct == nullptr )
@@ -168,7 +187,7 @@ namespace pybind
         py_method_caller_type * mct = (py_method_caller_type *)new_mct;
         factorable::intrusive_ptr_setup( mct->iadapter, _descr->iadapter );
 
-        mct->self = PyTuple_GetItem( _args, 0 );
+        mct->self = self;
         pybind::incref( mct->self );
 
         PyObject * new_args = PyTuple_GetSlice( _args, 1, argc );

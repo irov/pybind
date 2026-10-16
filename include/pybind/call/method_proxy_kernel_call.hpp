@@ -67,7 +67,7 @@ namespace pybind
             {
                 pybind::throw_exception( "invalid method proxy kernel call. Args is not equal %zu + addition %zu != %zu (%s)"
                     , arg_size
-                    , 2
+                    , (size_t)2
                     , fn_arity
                     , _kernel->object_repr( _arg ).c_str()
                 );

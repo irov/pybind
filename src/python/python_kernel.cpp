@@ -409,9 +409,9 @@ namespace pybind
         return py_func;
     }
     //////////////////////////////////////////////////////////////////////////
-    PyObject * python_kernel::create_member_adapter( const member_adapter_interface_ptr & _iadapter )
+    PyObject * python_kernel::create_member_adapter( const member_adapter_interface_ptr & _iadapter, PyTypeObject * _type )
     {
-        PyObject * py_member = m_members.create_member_adapter( _iadapter );
+        PyObject * py_member = m_members.create_member_adapter( _iadapter, _type );
 
         return py_member;
     }
@@ -801,7 +801,7 @@ namespace pybind
 
         uint32_t slot = py_hash % PYBIND_TYPE_COUNT_HASH;
 
-        for( uint32_t probe = slot; probe != PYBIND_TYPE_COUNT_HASH; probe = (probe + 17) % PYBIND_TYPE_COUNT_HASH )
+        for( uint32_t count = 0, probe = slot; count != PYBIND_TYPE_COUNT_HASH; ++count, probe = (probe + 17) % PYBIND_TYPE_COUNT_HASH )
         {
             class_type_scope_interface_ptr & scope = m_class_type_hashes[probe];
 
@@ -812,19 +812,28 @@ namespace pybind
 
             scope = _scope;
 
-            break;
+            return;
         }
+
+        pybind::throw_exception( "scope '%s' type hash table overflow"
+            , _scope->get_name()
+        );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::remove_class_scope_type( const class_type_scope_interface_ptr & _scope )
     {
         PyTypeObject * py_type = _scope->get_typeobject();
 
+        if( py_type == nullptr )
+        {
+            return;
+        }
+
         uint64_t py_hash = pybind::type_hash( py_type );
 
         uint32_t slot = py_hash % PYBIND_TYPE_COUNT_HASH;
 
-        for( uint32_t probe = slot; probe != PYBIND_TYPE_COUNT_HASH; probe = (probe + 17) % PYBIND_TYPE_COUNT_HASH )
+        for( uint32_t count = 0, probe = slot; count != PYBIND_TYPE_COUNT_HASH; ++count, probe = (probe + 17) % PYBIND_TYPE_COUNT_HASH )
         {
             class_type_scope_interface_ptr & scope = m_class_type_hashes[probe];
 
@@ -851,7 +860,7 @@ namespace pybind
         uint64_t py_hash = pybind::type_hash( _type );
         uint32_t slot = py_hash % PYBIND_TYPE_COUNT_HASH;
 
-        for( uint32_t probe = slot; probe != PYBIND_TYPE_COUNT_HASH; probe = (probe + 17) % PYBIND_TYPE_COUNT_HASH )
+        for( uint32_t count = 0, probe = slot; count != PYBIND_TYPE_COUNT_HASH; ++count, probe = (probe + 17) % PYBIND_TYPE_COUNT_HASH )
         {
             const class_type_scope_interface_ptr & scope = m_class_type_hashes[probe];
 
@@ -923,30 +932,11 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool python_kernel::is_type_class( PyTypeObject * _type )
     {
-        uint64_t py_hash = pybind::type_hash( _type );
+        // As get_class_scope and the tinypy backend, a Python subclass of a bound
+        // type is a class too.
+        const class_type_scope_interface_ptr & scope = this->get_class_scope( _type );
 
-        uint32_t slot = py_hash % PYBIND_TYPE_COUNT_HASH;
-
-        for( uint32_t probe = slot; probe != PYBIND_TYPE_COUNT_HASH; probe = (probe + 17) % PYBIND_TYPE_COUNT_HASH )
-        {
-            const class_type_scope_interface_ptr & scope = m_class_type_hashes[probe];
-
-            if( scope == nullptr )
-            {
-                return false;
-            }
-
-            PyTypeObject * py_typeobject = scope->get_typeobject();
-
-            if( py_typeobject != _type )
-            {
-                continue;
-            }
-
-            return true;
-        }
-
-        return false;
+        return scope != nullptr;
     }
     //////////////////////////////////////////////////////////////////////////
     void * python_kernel::check_registred_class( PyObject * _obj, typeid_t _info )
@@ -997,22 +987,16 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool python_kernel::instance_of_type( PyObject * _obj, typeid_t _tinfo )
     {
-        if( this->is_class( _obj ) == false )
+        // A predicate: as isinstance and the tinypy backend, an instance of a
+        // subtype matches, and no error is raised.
+        const class_type_scope_interface_ptr & scope = this->get_class_type_scope( _tinfo );
+
+        if( scope == nullptr || scope->is_instance( _obj->ob_type ) == false )
         {
             return false;
         }
 
         if( this->is_wrap( _obj ) == false )
-        {
-            pybind::error_message( "instance_of_type: unbind object" );
-
-            return false;
-        }
-
-        const class_type_scope_interface_ptr & scope = this->get_class_scope( _obj->ob_type );
-        const class_type_scope_interface_ptr & cur_scope = this->get_class_type_scope( _tinfo );
-
-        if( scope != cur_scope )
         {
             return false;
         }
@@ -1155,6 +1139,8 @@ namespace pybind
     {
         PyObject * py_result = PyObject_Call( _obj, _args, _kwargs );
 
+        pybind::check_error();
+
         return py_result;
     }
     //////////////////////////////////////////////////////////////////////////
@@ -1204,11 +1190,15 @@ namespace pybind
         PyObject * compiled = Py_CompileString( _code, _filename, Py_file_input );
         if( compiled == nullptr )
         {
+            pybind::check_error();
+
             return nullptr;
         }
 
         PyObject * result = PyEval_EvalCode( (PyCodeObject *)compiled, _globals, _locals );
         Py_DECREF( compiled );
+
+        pybind::check_error();
 
         return result;
     }

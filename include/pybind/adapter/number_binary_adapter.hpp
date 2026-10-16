@@ -5,10 +5,40 @@
 #include "pybind/call/method_call.hpp"
 #include "pybind/call/method_proxy_call.hpp"
 
+#include <type_traits>
+#include <utility>
+
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
     typedef intrusive_ptr<class class_type_scope_interface> class_type_scope_interface_ptr;
+    //////////////////////////////////////////////////////////////////////////
+    namespace detail
+    {
+        template<class L, class R, class = void>
+        struct has_operator_add
+            : std::false_type
+        {
+        };
+
+        template<class L, class R>
+        struct has_operator_add<L, R, std::void_t<decltype(std::declval<const L &>() + std::declval<const R &>())>>
+            : std::true_type
+        {
+        };
+
+        template<class L, class R, class = void>
+        struct has_operator_mul
+            : std::false_type
+        {
+        };
+
+        template<class L, class R>
+        struct has_operator_mul<L, R, std::void_t<decltype(std::declval<const L &>() * std::declval<const R &>())>>
+            : std::true_type
+        {
+        };
+    }
     //////////////////////////////////////////////////////////////////////////
     class number_binary_adapter_interface
         : public base_adapter_interface
@@ -128,14 +158,28 @@ namespace pybind
     protected:
         PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _value, bool _rotate ) override
         {
-            (void)_rotate;
-
             C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
             V value;
             if( pybind::extract_value( _kernel, _value, value, true ) == false )
             {
                 return nullptr;
+            }
+
+            // A reflected call computes value + self where V defines it, and
+            // otherwise takes the operation as commutative.
+            if constexpr( detail::has_operator_add<V, C>::value == true )
+            {
+                if( _rotate == true )
+                {
+                    PyObject * py_rotated = detail::return_operator_t( _kernel, (value + *self) );
+
+                    return py_rotated;
+                }
+            }
+            else
+            {
+                (void)_rotate;
             }
 
             PyObject * py_result = detail::return_operator_t( _kernel, (*self + value) );
@@ -184,14 +228,28 @@ namespace pybind
     protected:
         PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, PyObject * _value, bool _rotate ) override
         {
-            (void)_rotate;
-
             C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
             V value;
             if( pybind::extract_value( _kernel, _value, value, true ) == false )
             {
                 return nullptr;
+            }
+
+            // A reflected call computes value * self where V defines it, and
+            // otherwise takes the operation as commutative.
+            if constexpr( detail::has_operator_mul<V, C>::value == true )
+            {
+                if( _rotate == true )
+                {
+                    PyObject * py_rotated = detail::return_operator_t( _kernel, (value * *self) );
+
+                    return py_rotated;
+                }
+            }
+            else
+            {
+                (void)_rotate;
             }
 
             PyObject * py_result = detail::return_operator_t( _kernel, (*self * value) );

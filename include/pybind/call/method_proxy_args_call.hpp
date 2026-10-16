@@ -66,7 +66,7 @@ namespace pybind
 
             if( arg_size + 2 < fn_arity )
             {
-                pybind::throw_exception( "invalid method proxy args call. Args is not equal %zu != %zu (%s)"
+                pybind::throw_exception( "invalid method proxy args call. Args is not equal %zu < %zu (%s)"
                     , arg_size + 2
                     , fn_arity
                     , _kernel->object_repr_type( _arg ).c_str()
@@ -75,7 +75,8 @@ namespace pybind
                 return nullptr;
             }
 
-            if constexpr( std::is_same<typename f_info::template reverse_iterator_param<2>, const pybind::object &>::value == true )
+            // The callback is the argument before the args.
+            if constexpr( std::is_same<typename f_info::template reverse_iterator_param<1>, const pybind::object &>::value == true )
             {
                 PyObject * py_cb = _kernel->tuple_getitem( _arg, fn_arity - 3 );
 

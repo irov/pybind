@@ -9,6 +9,8 @@
 
 #include "pybind/debug.hpp"
 
+#include <initializer_list>
+
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
@@ -160,11 +162,11 @@ namespace pybind
 #if defined(PYBIND_DEBUG)
             if( impl == nullptr )
             {
-                pybind::error_message( "reprfunc unbind object '%s'"
+                pybind::error_message( "hash unbind object '%s'"
                     , kernel->object_str( _obj ).c_str()
                 );
 
-                return 0;
+                return -1;
             }
 #endif
 
@@ -179,7 +181,7 @@ namespace pybind
                     , kernel->type_name( objtype )
                 );
 
-                return 0;
+                return -1;
             }
 
             const hash_adapter_interface_ptr & adapter = scope->get_hash();
@@ -487,6 +489,14 @@ namespace pybind
                 return nullptr;
             }
 
+            // Without sq_length the index arrives unnormalized; as the tinypy backend.
+            if( _index < 0 )
+            {
+                PyErr_SetString( PyExc_IndexError, "index out of range" );
+
+                return nullptr;
+            }
+
             const sequence_get_adapter_interface_ptr & adapter = scope->get_sequence_get();
 
             try
@@ -540,6 +550,13 @@ namespace pybind
                 return -1;
             }
 
+            if( _index < 0 )
+            {
+                PyErr_SetString( PyExc_IndexError, "index out of range" );
+
+                return -1;
+            }
+
             const sequence_set_adapter_interface_ptr & adapter = scope->get_sequence_set();
 
             try
@@ -562,6 +579,20 @@ namespace pybind
             return -1;
         }
         //////////////////////////////////////////////////////////////////////////
+        static void raise_cannot_create( const class_type_scope_interface_ptr & _scope )
+        {
+            // As a type without tp_new and the tinypy backend; an error a
+            // constructor raised stays.
+            if( PyErr_Occurred() != nullptr )
+            {
+                return;
+            }
+
+            PyErr_Format( PyExc_TypeError, "cannot create '%s' instances"
+                , _scope->get_name()
+            );
+        }
+        //////////////////////////////////////////////////////////////////////////
         static PyObject * py_new_class( PyTypeObject * _type, PyObject * _args, PyObject * _kwds )
         {
             kernel_interface * kernel = pybind::get_kernel();
@@ -578,15 +609,22 @@ namespace pybind
                 return nullptr;
             }
 
+            PyObject * py_self = py_alloc_class( _type, _args, _kwds );
+
+            if( py_self == nullptr )
+            {
+                return nullptr;
+            }
+
             try
             {
-                PyObject * py_self = py_alloc_class( _type, _args, _kwds );
-
                 void * impl = scope->call_new( py_self, _args, _kwds );
 
                 if( impl == nullptr )
                 {
                     pybind::decref( py_self );
+
+                    detail::raise_cannot_create( scope );
 
                     return nullptr;
                 }
@@ -599,6 +637,8 @@ namespace pybind
             }
             catch( const pybind::pybind_exception & _ex )
             {
+                pybind::decref( py_self );
+
                 pybind::error_message( "obj '%s' py_new_class scope '%s' exception: %s"
                     , kernel->object_str( (PyObject *)_type ).c_str()
                     , scope->get_name()
@@ -609,63 +649,37 @@ namespace pybind
             return nullptr;
         }
         //////////////////////////////////////////////////////////////////////////
-        static void py_del_class( PyObject * _obj )
-        {
-            kernel_interface * kernel = pybind::get_kernel();
-
-            PyTypeObject * objtype = pybind::object_type( _obj );
-
-            const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
-
-            if( scope == nullptr )
-            {
-                pybind::error_message( "obj '%s' type '%s' py_del_class scope is null"
-                    , kernel->object_str( _obj ).c_str()
-                    , kernel->type_name( objtype )
-                );
-
-                return;
-            }
-
-            try
-            {
-                void * impl = kernel->get_class_impl( _obj );
-
-                if( impl != nullptr && kernel->is_class_weak( _obj ) == false )
-                {
-                    scope->call_destructor( _obj, impl );
-
-                    scope->clear_bindable( impl );
-
-                    scope->decref_smart_pointer( impl );
-                }
-            }
-            catch( const pybind::pybind_exception & _ex )
-            {
-                pybind::error_message( "obj '%s' py_del_class scope %s exception: %s"
-                    , kernel->object_str( _obj ).c_str()
-                    , scope->get_name()
-                    , _ex.what()
-                );
-            }
-        }
-        //////////////////////////////////////////////////////////////////////////
         static PyObject * py_new_pod( PyTypeObject * _type, PyObject * _args, PyObject * _kwds )
         {
             kernel_interface * kernel = pybind::get_kernel();
 
             const class_type_scope_interface_ptr & scope = kernel->get_class_scope( _type );
 
+            if( scope == nullptr )
+            {
+                pybind::error_message( "obj '%s' type '%s' py_new_pod scope is null"
+                    , kernel->object_str( (PyObject *)_type ).c_str()
+                    , kernel->type_name( _type )
+                );
+
+                return nullptr;
+            }
+
+            PyObject * py_self = detail::py_alloc_class( _type, _args, _kwds );
+
+            if( py_self == nullptr )
+            {
+                return nullptr;
+            }
+
+            void * buff = nullptr;
+            size_t pod_size = scope->get_pod_size();
+            bool pod_hash = scope->get_pod_hash();
+
+            helper::wrap_pod( py_self, &buff, pod_size, pod_hash );
+
             try
             {
-                PyObject * py_self = detail::py_alloc_class( _type, _args, _kwds );
-
-                void * buff = nullptr;
-                size_t pod_size = scope->get_pod_size();
-                bool pod_hash = scope->get_pod_hash();
-
-                helper::wrap_pod( py_self, &buff, pod_size, pod_hash );
-
                 void * impl = scope->call_new( py_self, _args, _kwds );
 
                 if( impl == nullptr )
@@ -673,6 +687,8 @@ namespace pybind
                     helper::unwrap_pod( py_self );
 
                     pybind::decref( py_self );
+
+                    detail::raise_cannot_create( scope );
 
                     return nullptr;
                 }
@@ -683,7 +699,11 @@ namespace pybind
             }
             catch( const pybind::pybind_exception & _ex )
             {
-                pybind::error_message( "obj '%s' py_new_class scope '%s' exception: %s"
+                helper::unwrap_pod( py_self );
+
+                pybind::decref( py_self );
+
+                pybind::error_message( "obj '%s' py_new_pod scope '%s' exception: %s"
                     , kernel->object_str( (PyObject *)_type ).c_str()
                     , scope->get_name()
                     , _ex.what()
@@ -691,48 +711,6 @@ namespace pybind
             }
 
             return nullptr;
-        }
-        //////////////////////////////////////////////////////////////////////////
-        static void py_del_pod( PyObject * _obj )
-        {
-            kernel_interface * kernel = pybind::get_kernel();
-
-            PyTypeObject * objtype = pybind::object_type( _obj );
-
-            const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
-
-#if defined(PYBIND_DEBUG)
-            if( scope == nullptr )
-            {
-                pybind::error_message( "obj '%s' py_del_pod scope is null"
-                    , kernel->object_str( _obj ).c_str()
-                );
-
-                return;
-            }
-#endif
-
-            try
-            {
-                void * impl = kernel->get_class_impl( _obj );
-
-                if( impl != nullptr && kernel->is_class_weak( _obj ) == false )
-                {
-                    scope->call_destructor( _obj, impl );
-
-                    scope->clear_bindable( impl );
-
-                    scope->decref_smart_pointer( impl );
-                }
-            }
-            catch( const pybind::pybind_exception & _ex )
-            {
-                pybind::error_message( "obj '%s' py_del_pod scope '%s' exception: %s"
-                    , kernel->object_str( _obj ).c_str()
-                    , scope->get_name()
-                    , _ex.what()
-                );
-            }
         }
         //////////////////////////////////////////////////////////////////////////
         static PySequenceMethods py_as_sequence = {
@@ -794,7 +772,7 @@ namespace pybind
             return res;
         }
         //////////////////////////////////////////////////////////////////////////
-        static void py_nb_inplace_method( kernel_interface * _kernel, PyObject * _obj, PyObject * _value, const class_type_scope_interface_ptr & _scope, const number_inplace_adapter_interface_ptr & _adapter )
+        static bool py_nb_inplace_method( kernel_interface * _kernel, PyObject * _obj, PyObject * _value, const class_type_scope_interface_ptr & _scope, const number_inplace_adapter_interface_ptr & _adapter )
         {
             void * impl = _kernel->get_class_impl( _obj );
 
@@ -806,13 +784,15 @@ namespace pybind
                     , _scope->get_name()
                 );
 
-                return;
+                return false;
             }
 #endif
 
             DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( _kernel, _scope->get_name(), _adapter->getName(), _adapter->getCallDebugSilent(), nullptr, nullptr );
 
             _adapter->call( _kernel, impl, _scope, _value );
+
+            return true;
         }
         //////////////////////////////////////////////////////////////////////////
         static PyObject * py_nb_neg( PyObject * _obj )
@@ -844,7 +824,12 @@ namespace pybind
                 }
             }
 
-            return kernel->ret_not_implemented();
+            // A unary operator has no reflected operand to fall back to.
+            PyErr_Format( PyExc_TypeError, "bad operand type for unary -: '%s'"
+                , objtype->tp_name
+            );
+
+            return nullptr;
         }
         //////////////////////////////////////////////////////////////////////////
         static PyObject * py_nb_abs( PyObject * _obj )
@@ -876,7 +861,12 @@ namespace pybind
                 }
             }
 
-            return kernel->ret_not_implemented();
+            // A unary operator has no reflected operand to fall back to.
+            PyErr_Format( PyExc_TypeError, "bad operand type for abs(): '%s'"
+                , objtype->tp_name
+            );
+
+            return nullptr;
         }
         //////////////////////////////////////////////////////////////////////////
         static PyObject * py_nb_add2( kernel_interface * _kernel, PyObject * _obj, PyObject * _value, bool _rotate )
@@ -948,10 +938,21 @@ namespace pybind
         {
             kernel_interface * kernel = pybind::get_kernel();
 
-            if( kernel->is_class( _obj ) == true )
+            if( kernel->is_class( _obj ) == false )
             {
-                return detail::py_nb_add2( kernel, _obj, _value, false );
+                return detail::py_nb_add2( kernel, _value, _obj, true );
             }
+
+            PyObject * result = detail::py_nb_add2( kernel, _obj, _value, false );
+
+            // Bound types share this slot, so CPython does not try the right
+            // operand itself; as the tinypy backend, its reflected adapter does.
+            if( result != Py_NotImplemented || kernel->is_class( _value ) == false )
+            {
+                return result;
+            }
+
+            Py_DECREF( result );
 
             return detail::py_nb_add2( kernel, _value, _obj, true );
         }
@@ -1025,10 +1026,21 @@ namespace pybind
         {
             kernel_interface * kernel = pybind::get_kernel();
 
-            if( kernel->is_class( _obj ) == true )
+            if( kernel->is_class( _obj ) == false )
             {
-                return detail::py_nb_sub2( kernel, _obj, _value, false );
+                return detail::py_nb_sub2( kernel, _value, _obj, true );
             }
+
+            PyObject * result = detail::py_nb_sub2( kernel, _obj, _value, false );
+
+            // Bound types share this slot, so CPython does not try the right
+            // operand itself; as the tinypy backend, its reflected adapter does.
+            if( result != Py_NotImplemented || kernel->is_class( _value ) == false )
+            {
+                return result;
+            }
+
+            Py_DECREF( result );
 
             return detail::py_nb_sub2( kernel, _value, _obj, true );
         }
@@ -1102,10 +1114,21 @@ namespace pybind
         {
             kernel_interface * kernel = pybind::get_kernel();
 
-            if( kernel->is_class( _obj ) == true )
+            if( kernel->is_class( _obj ) == false )
             {
-                return detail::py_nb_mul2( kernel, _obj, _value, false );
+                return detail::py_nb_mul2( kernel, _value, _obj, true );
             }
+
+            PyObject * result = detail::py_nb_mul2( kernel, _obj, _value, false );
+
+            // Bound types share this slot, so CPython does not try the right
+            // operand itself; as the tinypy backend, its reflected adapter does.
+            if( result != Py_NotImplemented || kernel->is_class( _value ) == false )
+            {
+                return result;
+            }
+
+            Py_DECREF( result );
 
             return detail::py_nb_mul2( kernel, _value, _obj, true );
         }
@@ -1179,10 +1202,21 @@ namespace pybind
         {
             kernel_interface * kernel = pybind::get_kernel();
 
-            if( kernel->is_class( _obj ) == true )
+            if( kernel->is_class( _obj ) == false )
             {
-                return detail::py_nb_div2( kernel, _obj, _value, false );
+                return detail::py_nb_div2( kernel, _value, _obj, true );
             }
+
+            PyObject * result = detail::py_nb_div2( kernel, _obj, _value, false );
+
+            // Bound types share this slot, so CPython does not try the right
+            // operand itself; as the tinypy backend, its reflected adapter does.
+            if( result != Py_NotImplemented || kernel->is_class( _value ) == false )
+            {
+                return result;
+            }
+
+            Py_DECREF( result );
 
             return detail::py_nb_div2( kernel, _value, _obj, true );
         }
@@ -1203,7 +1237,10 @@ namespace pybind
             {
                 try
                 {
-                    detail::py_nb_inplace_method( kernel, _obj, _value, scope, adapter );
+                    if( detail::py_nb_inplace_method( kernel, _obj, _value, scope, adapter ) == false )
+                    {
+                        return nullptr;
+                    }
 
                     pybind::incref( _obj );
 
@@ -1228,7 +1265,10 @@ namespace pybind
             {
                 try
                 {
-                    detail::py_nb_inplace_method( kernel, _obj, _value, scope, base_adapter );
+                    if( detail::py_nb_inplace_method( kernel, _obj, _value, scope, base_adapter ) == false )
+                    {
+                        return nullptr;
+                    }
 
                     pybind::incref( _obj );
 
@@ -1264,7 +1304,10 @@ namespace pybind
             {
                 try
                 {
-                    detail::py_nb_inplace_method( kernel, _obj, _value, scope, adapter );
+                    if( detail::py_nb_inplace_method( kernel, _obj, _value, scope, adapter ) == false )
+                    {
+                        return nullptr;
+                    }
 
                     pybind::incref( _obj );
 
@@ -1289,7 +1332,10 @@ namespace pybind
             {
                 try
                 {
-                    detail::py_nb_inplace_method( kernel, _obj, _value, scope, base_adapter );
+                    if( detail::py_nb_inplace_method( kernel, _obj, _value, scope, base_adapter ) == false )
+                    {
+                        return nullptr;
+                    }
 
                     pybind::incref( _obj );
 
@@ -1325,7 +1371,10 @@ namespace pybind
             {
                 try
                 {
-                    detail::py_nb_inplace_method( kernel, _obj, _value, scope, adapter );
+                    if( detail::py_nb_inplace_method( kernel, _obj, _value, scope, adapter ) == false )
+                    {
+                        return nullptr;
+                    }
 
                     pybind::incref( _obj );
 
@@ -1350,7 +1399,10 @@ namespace pybind
             {
                 try
                 {
-                    detail::py_nb_inplace_method( kernel, _obj, _value, scope, base_adapter );
+                    if( detail::py_nb_inplace_method( kernel, _obj, _value, scope, base_adapter ) == false )
+                    {
+                        return nullptr;
+                    }
 
                     pybind::incref( _obj );
 
@@ -1386,7 +1438,10 @@ namespace pybind
             {
                 try
                 {
-                    detail::py_nb_inplace_method( kernel, _obj, _value, scope, adapter );
+                    if( detail::py_nb_inplace_method( kernel, _obj, _value, scope, adapter ) == false )
+                    {
+                        return nullptr;
+                    }
 
                     pybind::incref( _obj );
 
@@ -1411,7 +1466,10 @@ namespace pybind
             {
                 try
                 {
-                    detail::py_nb_inplace_method( kernel, _obj, _value, scope, base_adapter );
+                    if( detail::py_nb_inplace_method( kernel, _obj, _value, scope, base_adapter ) == false )
+                    {
+                        return nullptr;
+                    }
 
                     pybind::incref( _obj );
 
@@ -1530,6 +1588,154 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
 #	endif
         //////////////////////////////////////////////////////////////////////////
+        static bool defines_special( PyTypeObject * _type, PyTypeObject * _base, std::initializer_list<const char *> _names )
+        {
+            PyObject * py_mro = _type->tp_mro;
+            Py_ssize_t mro_count = PyTuple_GET_SIZE( py_mro );
+
+            for( Py_ssize_t mro_index = 0; mro_index != mro_count; ++mro_index )
+            {
+                PyTypeObject * py_mro_type = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM( py_mro, mro_index ));
+
+                if( py_mro_type == _base )
+                {
+                    return false;
+                }
+
+                for( const char * name : _names )
+                {
+                    if( PyDict_GetItemString( py_mro_type->tp_dict, name ) != nullptr )
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+        //////////////////////////////////////////////////////////////////////////
+        template<class T>
+        static void inherit_bound_slot( PyTypeObject * _type, PyTypeObject * _base, T * _slot, T _baseSlot, std::initializer_list<const char *> _names )
+        {
+            if( _baseSlot == nullptr || detail::defines_special( _type, _base, _names ) == true )
+            {
+                return;
+            }
+
+            *_slot = _baseSlot;
+        }
+        //////////////////////////////////////////////////////////////////////////
+        static void inherit_bound_slots( PyTypeObject * _type, PyTypeObject * _base )
+        {
+            // type_new resets a slot that no special method of the MRO names, and
+            // a bound type sets its slots once created, so a Python subclass would
+            // lose them.
+            detail::inherit_bound_slot( _type, _base, &_type->tp_call, _base->tp_call, {"__call__"} );
+            detail::inherit_bound_slot( _type, _base, &_type->tp_repr, _base->tp_repr, {"__repr__"} );
+            detail::inherit_bound_slot( _type, _base, &_type->tp_hash, _base->tp_hash, {"__hash__"} );
+            detail::inherit_bound_slot( _type, _base, &_type->tp_richcompare, _base->tp_richcompare, {"__eq__", "__ne__", "__lt__", "__le__", "__gt__", "__ge__"} );
+            detail::inherit_bound_slot( _type, _base, &_type->tp_getattro, _base->tp_getattro, {"__getattribute__", "__getattr__"} );
+
+            PyMappingMethods * mapping = _type->tp_as_mapping;
+            const PyMappingMethods * base_mapping = _base->tp_as_mapping;
+
+            if( mapping != nullptr && base_mapping != nullptr )
+            {
+                detail::inherit_bound_slot( _type, _base, &mapping->mp_subscript, base_mapping->mp_subscript, {"__getitem__"} );
+            }
+
+            PySequenceMethods * sequence = _type->tp_as_sequence;
+            const PySequenceMethods * base_sequence = _base->tp_as_sequence;
+
+            if( sequence != nullptr && base_sequence != nullptr )
+            {
+                detail::inherit_bound_slot( _type, _base, &sequence->sq_item, base_sequence->sq_item, {"__getitem__"} );
+                detail::inherit_bound_slot( _type, _base, &sequence->sq_ass_item, base_sequence->sq_ass_item, {"__setitem__", "__delitem__"} );
+            }
+
+            PyNumberMethods * number = _type->tp_as_number;
+            const PyNumberMethods * base_number = _base->tp_as_number;
+
+            if( number != nullptr && base_number != nullptr )
+            {
+                detail::inherit_bound_slot( _type, _base, &number->nb_add, base_number->nb_add, {"__add__", "__radd__"} );
+                detail::inherit_bound_slot( _type, _base, &number->nb_subtract, base_number->nb_subtract, {"__sub__", "__rsub__"} );
+                detail::inherit_bound_slot( _type, _base, &number->nb_multiply, base_number->nb_multiply, {"__mul__", "__rmul__"} );
+                detail::inherit_bound_slot( _type, _base, &number->nb_true_divide, base_number->nb_true_divide, {"__truediv__", "__rtruediv__"} );
+                detail::inherit_bound_slot( _type, _base, &number->nb_negative, base_number->nb_negative, {"__neg__"} );
+                detail::inherit_bound_slot( _type, _base, &number->nb_absolute, base_number->nb_absolute, {"__abs__"} );
+                detail::inherit_bound_slot( _type, _base, &number->nb_inplace_add, base_number->nb_inplace_add, {"__iadd__"} );
+                detail::inherit_bound_slot( _type, _base, &number->nb_inplace_subtract, base_number->nb_inplace_subtract, {"__isub__"} );
+                detail::inherit_bound_slot( _type, _base, &number->nb_inplace_multiply, base_number->nb_inplace_multiply, {"__imul__"} );
+                detail::inherit_bound_slot( _type, _base, &number->nb_inplace_true_divide, base_number->nb_inplace_true_divide, {"__itruediv__"} );
+#if PYBIND_PYTHON_VERSION < 300
+                detail::inherit_bound_slot( _type, _base, &number->nb_divide, base_number->nb_divide, {"__div__", "__rdiv__"} );
+                detail::inherit_bound_slot( _type, _base, &number->nb_inplace_divide, base_number->nb_inplace_divide, {"__idiv__"} );
+#endif
+            }
+
+            PyType_Modified( _type );
+        }
+        //////////////////////////////////////////////////////////////////////////
+        static bool s_bound_type_creating = false;
+        //////////////////////////////////////////////////////////////////////////
+        static PyObject * py_bound_type_new( PyTypeObject * _metatype, PyObject * _args, PyObject * _kwds )
+        {
+            PyObject * py_type = PyType_Type.tp_new( _metatype, _args, _kwds );
+
+            // A bound type keeps the slots its own scope sets, as a host native
+            // subtype of tinypy does.
+            if( py_type == nullptr || s_bound_type_creating == true )
+            {
+                return py_type;
+            }
+
+            kernel_interface * kernel = pybind::get_kernel();
+
+            if( kernel == nullptr )
+            {
+                return py_type;
+            }
+
+            PyTypeObject * type = reinterpret_cast<PyTypeObject *>(py_type);
+            const class_type_scope_interface_ptr & scope = kernel->get_class_scope( type );
+
+            if( scope != nullptr )
+            {
+                detail::inherit_bound_slots( type, scope->get_typeobject() );
+            }
+
+            return py_type;
+        }
+        //////////////////////////////////////////////////////////////////////////
+        static PyTypeObject * get_bound_metatype()
+        {
+            // The metatype of bound types and of their Python subclasses.
+            static PyTypeObject s_metatype;
+
+            if( s_metatype.tp_new != nullptr )
+            {
+                return &s_metatype;
+            }
+
+            reinterpret_cast<PyObject *>(&s_metatype)->ob_refcnt = 1;
+            s_metatype.tp_name = "pybind_type";
+            s_metatype.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
+            s_metatype.tp_base = &PyType_Type;
+            s_metatype.tp_new = &detail::py_bound_type_new;
+
+            if( PyType_Ready( &s_metatype ) < 0 )
+            {
+                pybind::check_error();
+
+                s_metatype.tp_new = nullptr;
+
+                return &PyType_Type;
+            }
+
+            return &s_metatype;
+        }
+        //////////////////////////////////////////////////////////////////////////
     }
     //////////////////////////////////////////////////////////////////////////
     python_class_type_scope::python_class_type_scope( kernel_interface * _kernel, const char * _name, typeid_t _typeId, void * _user, const new_adapter_interface_ptr & _pynew, const destroy_adapter_interface_ptr & _pydestructor, size_t _pod, bool _hash )
@@ -1599,6 +1805,28 @@ namespace pybind
 
                 PyTypeObject * py_base = mc.scope->get_typeobject();
 
+                // A pod keeps the storage of the layout its base inherits.
+                if( m_pod_size != 0 )
+                {
+                    PyTypeObject * py_pod_type = m_kernel->get_pod_type( m_pod_size, m_pod_hash );
+                    int fits = py_pod_type != nullptr ? PyType_IsSubtype( py_base, py_pod_type ) : 0;
+                    pybind::xdecref( (PyObject *)py_pod_type );
+
+                    if( fits == 0 )
+                    {
+                        pybind::decref( py_bases );
+                        pybind::decref( py_name );
+
+                        pybind::throw_exception( "scope '%s' pod %zu does not fit the layout of base '%s'"
+                            , m_name
+                            , m_pod_size
+                            , mc.scope->get_name()
+                        );
+
+                        return false;
+                    }
+                }
+
                 pybind::tuple_setitem( py_bases, index++, (PyObject *)py_base );
 
                 const smart_pointer_adapter_interface_ptr & base_smart_pointer = mc.scope->get_smart_pointer();
@@ -1644,7 +1872,11 @@ namespace pybind
         pybind::decref( py_bases );
         pybind::decref( py_dict );
 
-        PyObject * new_pytypeobject = PyType_Type.tp_call( (PyObject *)&PyType_Type, py_args, 0 );
+        PyTypeObject * py_metatype = detail::get_bound_metatype();
+
+        detail::s_bound_type_creating = true;
+        PyObject * new_pytypeobject = PyObject_Call( (PyObject *)py_metatype, py_args, nullptr );
+        detail::s_bound_type_creating = false;
 
         m_pytypeobject = (PyTypeObject *)new_pytypeobject;
 
@@ -1661,15 +1893,14 @@ namespace pybind
             return false;
         }
 
+        // The pod base releases the bound object when an instance is deallocated.
         if( m_pod_size == 0 )
         {
             m_pytypeobject->tp_new = &detail::py_new_class;
-            m_pytypeobject->tp_del = &detail::py_del_class;
         }
         else
         {
             m_pytypeobject->tp_new = &detail::py_new_pod;
-            m_pytypeobject->tp_del = &detail::py_del_pod;
         }
 
         PyType_Modified( m_pytypeobject );
@@ -1797,7 +2028,8 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::type_initialize( PyTypeObject * _type )
     {
-        _type->tp_del = &detail::py_del_class;
+        // Python subclasses release their bound object through the pod base.
+        (void)_type;
     }
     //////////////////////////////////////////////////////////////////////////
     bool python_class_type_scope::is_instance( PyTypeObject * _type ) const
@@ -1984,7 +2216,7 @@ namespace pybind
         }
 #endif
 
-        PyObject * py_member = m_kernel->create_member_adapter( _imember );
+        PyObject * py_member = m_kernel->create_member_adapter( _imember, m_pytypeobject );
 
         if( PyObject_SetAttrString( reinterpret_cast<PyObject *>(m_pytypeobject), name, py_member ) < 0 )
         {
@@ -2054,24 +2286,21 @@ namespace pybind
     {
         m_mapping = _imapping;
 
-        m_pytypeobject->tp_as_mapping = &detail::py_as_mapping;
-        PyType_Modified( m_pytypeobject );
+        this->setup_mapping_slots_();
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_sequence_get( const sequence_get_adapter_interface_ptr & _isequence )
     {
         m_sequence_get = _isequence;
 
-        m_pytypeobject->tp_as_sequence = &detail::py_as_sequence;
-        PyType_Modified( m_pytypeobject );
+        this->setup_sequence_slots_();
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_sequence_set( const sequence_set_adapter_interface_ptr & _isequence )
     {
         m_sequence_set = _isequence;
 
-        m_pytypeobject->tp_as_sequence = &detail::py_as_sequence;
-        PyType_Modified( m_pytypeobject );
+        this->setup_sequence_slots_();
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_number_neg( const number_unary_adapter_interface_ptr & _iadapter )
@@ -2079,8 +2308,7 @@ namespace pybind
         number_adapter_t * number_adapters = this->get_number_adapters();
         number_adapters->neg = _iadapter;
 
-        m_pytypeobject->tp_as_number = &detail::py_as_number;
-        PyType_Modified( m_pytypeobject );
+        this->setup_number_slots_();
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_number_abs( const number_unary_adapter_interface_ptr & _iadapter )
@@ -2088,8 +2316,7 @@ namespace pybind
         number_adapter_t * number_adapters = this->get_number_adapters();
         number_adapters->abs = _iadapter;
 
-        m_pytypeobject->tp_as_number = &detail::py_as_number;
-        PyType_Modified( m_pytypeobject );
+        this->setup_number_slots_();
     }
     //////////////////////////////////////////////////////////////////////////
     python_class_type_scope::number_adapter_t * python_class_type_scope::get_number_adapters()
@@ -2121,8 +2348,7 @@ namespace pybind
         number_adapter_t * number_adapters = this->get_number_adapters();
         number_adapters->adds[_typeId] = _iadapter;
 
-        m_pytypeobject->tp_as_number = &detail::py_as_number;
-        PyType_Modified( m_pytypeobject );
+        this->setup_number_slots_();
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_number_sub( typeid_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
@@ -2130,8 +2356,7 @@ namespace pybind
         number_adapter_t * number_adapters = this->get_number_adapters();
         number_adapters->subs[_typeId] = _iadapter;
 
-        m_pytypeobject->tp_as_number = &detail::py_as_number;
-        PyType_Modified( m_pytypeobject );
+        this->setup_number_slots_();
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_number_mul( typeid_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
@@ -2139,8 +2364,7 @@ namespace pybind
         number_adapter_t * number_adapters = this->get_number_adapters();
         number_adapters->muls[_typeId] = _iadapter;
 
-        m_pytypeobject->tp_as_number = &detail::py_as_number;
-        PyType_Modified( m_pytypeobject );
+        this->setup_number_slots_();
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_number_div( typeid_t _typeId, const number_binary_adapter_interface_ptr & _iadapter )
@@ -2148,8 +2372,7 @@ namespace pybind
         number_adapter_t * number_adapters = this->get_number_adapters();
         number_adapters->divs[_typeId] = _iadapter;
 
-        m_pytypeobject->tp_as_number = &detail::py_as_number;
-        PyType_Modified( m_pytypeobject );
+        this->setup_number_slots_();
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_number_inplace_add( typeid_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter )
@@ -2157,8 +2380,7 @@ namespace pybind
         number_adapter_t * number_adapters = this->get_number_adapters();
         number_adapters->iadds[_typeId] = _iadapter;
 
-        m_pytypeobject->tp_as_number = &detail::py_as_number;
-        PyType_Modified( m_pytypeobject );
+        this->setup_number_slots_();
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_number_inplace_sub( typeid_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter )
@@ -2166,8 +2388,7 @@ namespace pybind
         number_adapter_t * number_adapters = this->get_number_adapters();
         number_adapters->isubs[_typeId] = _iadapter;
 
-        m_pytypeobject->tp_as_number = &detail::py_as_number;
-        PyType_Modified( m_pytypeobject );
+        this->setup_number_slots_();
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_number_inplace_mul( typeid_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter )
@@ -2175,8 +2396,7 @@ namespace pybind
         number_adapter_t * number_adapters = this->get_number_adapters();
         number_adapters->imuls[_typeId] = _iadapter;
 
-        m_pytypeobject->tp_as_number = &detail::py_as_number;
-        PyType_Modified( m_pytypeobject );
+        this->setup_number_slots_();
     }
     //////////////////////////////////////////////////////////////////////////
     void python_class_type_scope::set_number_inplace_div( typeid_t _typeId, const number_inplace_adapter_interface_ptr & _iadapter )
@@ -2184,7 +2404,33 @@ namespace pybind
         number_adapter_t * number_adapters = this->get_number_adapters();
         number_adapters->idivs[_typeId] = _iadapter;
 
-        m_pytypeobject->tp_as_number = &detail::py_as_number;
+        this->setup_number_slots_();
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void python_class_type_scope::setup_number_slots_()
+    {
+        // A heap type owns its slot tables, which type_setattro rewrites when
+        // Python code assigns a special method; a shared table would change
+        // every bound type.
+        PyHeapTypeObject * heap_type = reinterpret_cast<PyHeapTypeObject *>(m_pytypeobject);
+        heap_type->as_number = detail::py_as_number;
+        m_pytypeobject->tp_as_number = &heap_type->as_number;
+        PyType_Modified( m_pytypeobject );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void python_class_type_scope::setup_sequence_slots_()
+    {
+        PyHeapTypeObject * heap_type = reinterpret_cast<PyHeapTypeObject *>(m_pytypeobject);
+        heap_type->as_sequence = detail::py_as_sequence;
+        m_pytypeobject->tp_as_sequence = &heap_type->as_sequence;
+        PyType_Modified( m_pytypeobject );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    void python_class_type_scope::setup_mapping_slots_()
+    {
+        PyHeapTypeObject * heap_type = reinterpret_cast<PyHeapTypeObject *>(m_pytypeobject);
+        heap_type->as_mapping = detail::py_as_mapping;
+        m_pytypeobject->tp_as_mapping = &heap_type->as_mapping;
         PyType_Modified( m_pytypeobject );
     }
     //////////////////////////////////////////////////////////////////////////
@@ -2316,6 +2562,11 @@ namespace pybind
 
         PyObject * py_self = detail::py_alloc_class( m_pytypeobject, nullptr, nullptr );
 
+        if( py_self == nullptr )
+        {
+            return nullptr;
+        }
+
         pybind::helper::wrap_pod_ptr( py_self, _impl, false );
 
         this->incref_smart_pointer( _impl );
@@ -2331,6 +2582,11 @@ namespace pybind
         }
 
         PyObject * py_self = detail::py_alloc_class( m_pytypeobject, nullptr, nullptr );
+
+        if( py_self == nullptr )
+        {
+            return nullptr;
+        }
 
         pybind::helper::wrap_pod_ptr( py_self, _impl, true );
 
@@ -2348,6 +2604,11 @@ namespace pybind
 
         PyObject * py_self = detail::py_alloc_class( m_pytypeobject, nullptr, nullptr );
 
+        if( py_self == nullptr )
+        {
+            return nullptr;
+        }
+
         pybind::helper::wrap_pod_weak( py_self, _impl, true );
 
         return py_self;
@@ -2361,6 +2622,11 @@ namespace pybind
         }
 
         PyObject * py_self = detail::py_alloc_class( m_pytypeobject, nullptr, nullptr );
+
+        if( py_self == nullptr )
+        {
+            return nullptr;
+        }
 
         pybind::helper::wrap_pod( py_self, _impl, m_pod_size, m_pod_hash );
 

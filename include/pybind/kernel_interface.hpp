@@ -10,6 +10,7 @@
 #include "pybind/functor_interface.hpp"
 #include "pybind/member_interface.hpp"
 #include "pybind/method_interface.hpp"
+#include "pybind/exception.hpp"
 
 #include <typeinfo>
 #include <cstdarg>
@@ -99,7 +100,7 @@ namespace pybind
         virtual PyObject * create_function_adapter( const function_adapter_interface_ptr & _adapter, bool _native ) = 0;
         virtual PyObject * create_functor_adapter( const functor_adapter_interface_ptr & _adapter, bool _native ) = 0;
 
-        virtual PyObject * create_member_adapter( const member_adapter_interface_ptr & _iadapter ) = 0;
+        virtual PyObject * create_member_adapter( const member_adapter_interface_ptr & _iadapter, PyTypeObject * _type ) = 0;
         virtual PyObject * create_method_adapter( const method_adapter_interface_ptr & _ifunc, PyTypeObject * _type ) = 0;
         virtual method_adapter_interface * get_method_adapter( PyObject * _obj ) = 0;
 
@@ -264,6 +265,17 @@ namespace pybind
             void * impl = this->meta_cast_scope_t<C *>( _self, scope_name, class_name, _scope );
 
             C * obj = static_cast<C *>(impl);
+
+#if defined(PYBIND_DEBUG)
+            // A Python class deriving two bound classes reaches the methods of
+            // the second with an object of the first.
+            if( obj == nullptr && _self != nullptr )
+            {
+                pybind::throw_exception( "invalid meta cast to '%s': the object is no instance of it"
+                    , typeid(C).name()
+                );
+            }
+#endif
 
             return obj;
         }

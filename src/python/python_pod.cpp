@@ -2,6 +2,7 @@
 #include "python_system.hpp"
 
 #include "pybind/kernel_interface.hpp"
+#include "pybind/class_type_scope_interface.hpp"
 #include "pybind/exception.hpp"
 
 #include "config/config.hpp"
@@ -59,8 +60,83 @@ namespace pybind
     namespace detail
     {
         //////////////////////////////////////////////////////////////////////////
+        static bool release_instance( PyObject * _obj )
+        {
+            // Every bound type deallocates through its pod base, which subtype_dealloc
+            // reaches once it cleared the instance; unlike tp_del, this keeps bound
+            // objects collectable in cycles and covers Python subclasses.
+            kernel_interface * kernel = pybind::get_kernel();
+
+            if( kernel == nullptr )
+            {
+                return true;
+            }
+
+            void * impl = helper::get_pod_impl( _obj );
+
+            if( impl == nullptr || helper::is_pod_weak( _obj ) == true )
+            {
+                return true;
+            }
+
+            PyTypeObject * objtype = pybind::object_type( _obj );
+            const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
+
+            if( scope == nullptr )
+            {
+                return true;
+            }
+
+            // As slot_tp_del: the object is alive while C++ code runs, which keeps
+            // the pending error intact.
+            _obj->ob_refcnt = 1;
+
+            PyObject * exception;
+            PyObject * value;
+            PyObject * traceback;
+            PyErr_Fetch( &exception, &value, &traceback );
+
+            try
+            {
+                scope->clear_bindable( impl );
+
+                // A counted object belongs to its smart pointer, as in the tinypy backend.
+                if( scope->get_smart_pointer() != nullptr )
+                {
+                    scope->decref_smart_pointer( impl );
+                }
+                else
+                {
+                    scope->call_destructor( _obj, impl );
+                }
+            }
+            catch( const pybind::pybind_exception & _ex )
+            {
+                PyErr_SetString( PyExc_RuntimeError, _ex.what() );
+                PyErr_WriteUnraisable( (PyObject *)objtype );
+            }
+
+            PyErr_Restore( exception, value, traceback );
+
+            if( --_obj->ob_refcnt == 0 )
+            {
+                return true;
+            }
+
+            // Resurrected by C++ code: subtype_dealloc releases the type once this
+            // returns, so the surviving instance keeps a reference of its own.
+            Py_INCREF( objtype );
+
+            return false;
+        }
+        //////////////////////////////////////////////////////////////////////////
         static void py_dealloc( PyObject * _obj )
         {
+            if( detail::release_instance( _obj ) == false )
+            {
+                return;
+            }
+
             PyTypeObject * objtype = pybind::object_type( _obj );
 
             objtype->tp_free( _obj );

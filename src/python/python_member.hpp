@@ -15,7 +15,7 @@ namespace pybind
         void finalize();
 
     public:
-        PyObject * create_member_adapter( const member_adapter_interface_ptr & _iadapter );
+        PyObject * create_member_adapter( const member_adapter_interface_ptr & _iadapter, PyTypeObject * _type );
 
     protected:
         PyTypeObject m_member_type;

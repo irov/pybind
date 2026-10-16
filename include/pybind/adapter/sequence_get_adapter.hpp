@@ -168,8 +168,9 @@ namespace pybind
         : public sequence_get_adapter_interface
     {
     public:
-        sequence_get_adapter_operator( const char * _name )
+        sequence_get_adapter_operator( const char * _name, size_t _count )
             : sequence_get_adapter_interface( _name )
+            , m_count( _count )
         {
         }
 
@@ -180,12 +181,23 @@ namespace pybind
     protected:
         PyObject * call( kernel_interface * _kernel, void * _impl, const class_type_scope_interface_ptr & _scope, size_t _index ) override
         {
+            // The IndexError ends iteration and unpacking, as the sequence protocol expects.
+            if( _index >= m_count )
+            {
+                _kernel->set_error( error_type_e::Index, "index out of range" );
+
+                return nullptr;
+            }
+
             C * self = _kernel->meta_cast_class_t<C>( _impl, _scope );
 
             PyObject * py_result = detail::return_operator_t( _kernel, self->operator [] ( _index ) );
 
             return py_result;
         }
+
+    protected:
+        size_t m_count;
     };
 }
 
