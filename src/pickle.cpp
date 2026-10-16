@@ -37,25 +37,11 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     static bool s_check_types( kernel_interface * _kernel, PyObject * _types )
     {
+        // An element is checked where it is used: pickle matches an object only
+        // against a type, and unpickle calls the element to create the object.
         if( _kernel->list_check( _types ) == false )
         {
             return false;
-        }
-
-        // The type of NoneType is the type of every type.
-        PyObject * none = _kernel->get_none();
-        PyTypeObject * type_type = _kernel->get_object_type( (PyObject *)_kernel->get_object_type( none ) );
-
-        size_t types_size = _kernel->list_size( _types );
-
-        for( size_t index = 0; index != types_size; ++index )
-        {
-            PyObject * element = _kernel->list_getitem( _types, index );
-
-            if( _kernel->is_instanceof( element, type_type ) == false )
-            {
-                return false;
-            }
         }
 
         return true;
@@ -333,6 +319,11 @@ namespace pybind
             {
                 PyObject * element = _kernel->list_getitem( _types, index );
 
+                if( _kernel->type_check( element ) == false )
+                {
+                    continue;
+                }
+
                 PyTypeObject * element_type = (PyTypeObject *)(element);
 
                 if( _kernel->is_instanceof( _obj, element_type ) == false )
@@ -379,7 +370,7 @@ namespace pybind
     {
         if( s_check_types( _kernel, _types ) == false )
         {
-            _kernel->error_message( "pickle types is not a list of types" );
+            _kernel->error_message( "pickle types is not a list" );
 
             return false;
         }
@@ -764,7 +755,7 @@ namespace pybind
     {
         if( s_check_types( _kernel, _types ) == false )
         {
-            _kernel->error_message( "unpickle types is not a list of types" );
+            _kernel->error_message( "unpickle types is not a list" );
 
             return nullptr;
         }

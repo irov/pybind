@@ -130,7 +130,16 @@ namespace pybind
     pybind::dict extract_specialized<pybind::dict>::operator () ( kernel_interface * _kernel, PyObject * _obj ) const
     {
         pybind::dict value( pybind::invalid );
-        pybind::extract_value( _kernel, _obj, value, true );
+
+        // As the generic extract: an argument of another type fails the call
+        // rather than reaching the callee as an invalid dict.
+        if( pybind::extract_value( _kernel, _obj, value, true ) == false )
+        {
+            pybind::throw_exception( "extract_specialized<dict>: extract invalid '%s' type '%s' not cast to 'dict'"
+                , _kernel->object_repr( _obj ).c_str()
+                , _kernel->object_repr_type( _obj ).c_str()
+            );
+        }
 
         return value;
     }

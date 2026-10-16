@@ -108,7 +108,14 @@ namespace pybind
         {
             size_t index = enumerator++;
 
-            pybind::tuple_setitem_i( _kernel, py_tuple, index, p );
+            // A null item stands for the error that produced it, so the call
+            // it is for is not made.
+            if( pybind::tuple_setitem_i( _kernel, py_tuple, index, p ) == false )
+            {
+                _kernel->decref( py_tuple );
+
+                return pybind::make_invalid_tuple_t( _kernel );
+            }
         }
 
         return pybind::tuple( _kernel, py_tuple, pybind::borrowed );
@@ -127,14 +134,26 @@ namespace pybind
         {
             size_t index = enumerator++;
 
-            pybind::tuple_setitem_i( _kernel, py_tuple, index, p );
+            // A null item stands for the error that produced it, so the call
+            // it is for is not made.
+            if( pybind::tuple_setitem_i( _kernel, py_tuple, index, p ) == false )
+            {
+                _kernel->decref( py_tuple );
+
+                return pybind::make_invalid_tuple_t( _kernel );
+            }
         }
 
         for( detail::extract_operator_t && a : _args )
         {
             size_t index = enumerator++;
 
-            pybind::tuple_setitem_i( _kernel, py_tuple, index, std::forward<detail::extract_operator_t>( a ) );
+            if( pybind::tuple_setitem_i( _kernel, py_tuple, index, std::forward<detail::extract_operator_t>( a ) ) == false )
+            {
+                _kernel->decref( py_tuple );
+
+                return pybind::make_invalid_tuple_t( _kernel );
+            }
         }
 
         return pybind::tuple( _kernel, py_tuple, pybind::borrowed );
@@ -153,14 +172,26 @@ namespace pybind
         {
             size_t index = enumerator++;
 
-            pybind::tuple_setitem_i( _kernel, py_tuple, index, p );
+            // A null item stands for the error that produced it, so the call
+            // it is for is not made.
+            if( pybind::tuple_setitem_i( _kernel, py_tuple, index, p ) == false )
+            {
+                _kernel->decref( py_tuple );
+
+                return pybind::make_invalid_tuple_t( _kernel );
+            }
         }
 
         for( detail::extract_operator_t && a : _args )
         {
             size_t index = enumerator++;
 
-            pybind::tuple_setitem_i( _kernel, py_tuple, index, std::forward<detail::extract_operator_t>( a ) );
+            if( pybind::tuple_setitem_i( _kernel, py_tuple, index, std::forward<detail::extract_operator_t>( a ) ) == false )
+            {
+                _kernel->decref( py_tuple );
+
+                return pybind::make_invalid_tuple_t( _kernel );
+            }
         }
 
         return pybind::tuple( _kernel, py_tuple, pybind::borrowed );
@@ -176,7 +207,16 @@ namespace pybind
     pybind::tuple extract_specialized<pybind::tuple>::operator () ( kernel_interface * _kernel, PyObject * _obj ) const
     {
         pybind::tuple value( pybind::invalid );
-        pybind::extract_value( _kernel, _obj, value, true );
+
+        // As the generic extract: an argument of another type fails the call
+        // rather than reaching the callee as an invalid tuple.
+        if( pybind::extract_value( _kernel, _obj, value, true ) == false )
+        {
+            pybind::throw_exception( "extract_specialized<tuple>: extract invalid '%s' type '%s' not cast to 'tuple'"
+                , _kernel->object_repr( _obj ).c_str()
+                , _kernel->object_repr_type( _obj ).c_str()
+            );
+        }
 
         return value;
     }

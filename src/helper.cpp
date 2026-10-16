@@ -118,6 +118,14 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     detail::extract_operator_t ask_tuple_t( kernel_interface * _kernel, PyObject * _obj, pybind::tuple && _tuple )
     {
+        // A null callable, as the attribute call_method did not find, or the
+        // invalid arguments of a null item stand for an error already raised:
+        // as CPython propagates a null, nothing is called.
+        if( _obj == nullptr || _tuple.is_invalid() == true )
+        {
+            return detail::extract_operator_t( _kernel, nullptr, pybind::borrowed );
+        }
+
         PyObject * py_result = _kernel->ask_native( _obj, _tuple.ptr() );
 
         return detail::extract_operator_t( _kernel, py_result, pybind::borrowed );

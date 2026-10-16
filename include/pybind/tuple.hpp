@@ -4,6 +4,8 @@
 
 #include "pybind/helper/tuple_const_iterator.hpp"
 
+#include <type_traits>
+
 namespace pybind
 {
     class PYBIND_API tuple
@@ -61,12 +63,15 @@ namespace pybind
     template<class C>
     pybind::tuple make_tuple_container_t( kernel_interface * _kernel, C && _c )
     {
-        typename C::size_type size = _c.size();
+        // C is a reference for an lvalue container.
+        typedef std::remove_reference_t<C> container_type;
+
+        typename container_type::size_type size = _c.size();
 
         PyObject * py_tuple = _kernel->tuple_new( size );
 
         size_t enumerator = 0;
-        for( const typename C::value_type & v : _c )
+        for( const typename container_type::value_type & v : _c )
         {
             pybind::tuple_setitem_t( _kernel, py_tuple, enumerator++, v );
         }

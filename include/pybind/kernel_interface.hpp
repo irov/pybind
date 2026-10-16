@@ -68,6 +68,9 @@ namespace pybind
 
     class kernel_interface
     {
+    protected:
+        PYBIND_API kernel_interface();
+
     public:
         virtual allocator_interface * get_allocator() const = 0;
 
@@ -137,15 +140,19 @@ namespace pybind
         template<class T>
         typeid_t class_info()
         {
+            // The kernel numbers the types: a kernel created in the process after
+            // another one numbers them again.
             static typeid_t type_id = 0;
+            static uint32_t type_generation = 0;
 
-            if( type_id == 0 )
+            if( type_id == 0 || type_generation != m_generation )
             {
                 const std::type_info & ti = typeid(T);
 
                 typeid_t id = this->get_class_type_id( ti );
 
                 type_id = id;
+                type_generation = m_generation;
             }
 
             return type_id;
@@ -266,16 +273,17 @@ namespace pybind
 
             C * obj = static_cast<C *>(impl);
 
-#if defined(PYBIND_DEBUG)
-            // A Python class deriving two bound classes reaches the methods of
-            // the second with an object of the first.
+            // A Python class deriving two unrelated bound classes reaches the
+            // methods of one with the object of the other, which valid Python
+            // code does, so this is checked in every build.
             if( obj == nullptr && _self != nullptr )
             {
-                pybind::throw_exception( "invalid meta cast to '%s': the object is no instance of it"
-                    , typeid(C).name()
+                this->set_error( error_type_e::Type, "a method of a bound class is called on an object of another bound class" );
+
+                pybind::throw_exception( "invalid meta cast to '%s'"
+                    , this->get_class_type_info( scope_name )
                 );
             }
-#endif
 
             return obj;
         }
@@ -382,6 +390,7 @@ namespace pybind
 
         virtual bool is_callable( PyObject * _obj ) const = 0;
         virtual bool is_instanceof( PyObject * _obj, PyTypeObject * _type ) const = 0;
+        virtual bool type_check( PyObject * _obj ) const = 0;
         virtual bool test_equal( PyObject * _lhs, PyObject * _rhs ) = 0;
         virtual bool has_attr( PyObject * _obj, PyObject * _attr ) = 0;
         virtual PyObject * get_attr( PyObject * _obj, PyObject * _attr ) = 0;
@@ -510,5 +519,8 @@ namespace pybind
         virtual bool tuple_setitem( PyObject * _tuple, size_t _it, PyObject * _value ) = 0;
 
         virtual PyObject * exception_new( const char * _msg ) = 0;
+
+    private:
+        uint32_t m_generation;
     };
 }

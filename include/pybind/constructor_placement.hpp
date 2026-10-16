@@ -1,20 +1,33 @@
 #pragma once
 
+#include "pybind/helper.hpp"
+#include "pybind/helper/bases_helper.hpp"
+
 #include "pybind/adapter/constructor_adapter.hpp"
 
 #include <type_traits>
+#include <utility>
 
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
     template<class C, class P>
-    struct call_constructor_placement_impl
+    struct call_constructor_placement_impl;
+    //////////////////////////////////////////////////////////////////////////
+    template<class C, class ... Args>
+    struct call_constructor_placement_impl<C, init<Args...>>
     {
+        // As constructor_new: each argument converts to the type init names.
+        static C * construct( void * _impl, Args ... _args )
+        {
+            return new (_impl)C( std::forward<Args>( _args ) ... );
+        }
+
         template<size_t ... I>
         static C * call( kernel_interface * _kernel, void * _impl, PyObject * _args, std::integer_sequence<size_t, I...> )
         {
-            return new (_impl)C(
-                tuple_getitem_t( _kernel, _args, I ) ...
+            return construct( _impl
+                , tuple_getitem_t( _kernel, _args, I ) ...
             );
         }
     };

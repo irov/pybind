@@ -199,6 +199,7 @@ namespace pybind
 
         bool is_callable( PyObject * _obj ) const override;
         bool is_instanceof( PyObject * _obj, PyTypeObject * _type ) const override;
+        bool type_check( PyObject * _obj ) const override;
         bool test_equal( PyObject * _lhs, PyObject * _rhs ) override;
         bool has_attr( PyObject * _obj, PyObject * _attr ) override;
         PyObject * get_attr( PyObject * _obj, PyObject * _attr ) override;
@@ -332,6 +333,7 @@ namespace pybind
         pod_python m_pods;
 
         PyObject * m_current_module;
+        PyObject * m_module_finder;
 
         struct class_info_desc_t
         {

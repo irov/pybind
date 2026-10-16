@@ -29,11 +29,38 @@ namespace pybind
     {
         py_method_caller_type * mct = (py_method_caller_type *)_obj;
 
+        PyObject_GC_UnTrack( _obj );
+
         factorable::intrusive_ptr_release( mct->iadapter );
 
-        pybind::decref( mct->self );
+        pybind::xdecref( mct->self );
 
-        PyObject_Free( _obj );
+        PyObject_GC_Del( _obj );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    static int py_method_caller_traverse( PyObject * _obj, visitproc _visit, void * _arg )
+    {
+        // As a bound method of CPython: a cycle through the method of an object
+        // stored on that object is collectable.
+        py_method_caller_type * mct = (py_method_caller_type *)_obj;
+
+        if( mct->self == nullptr )
+        {
+            return 0;
+        }
+
+        int result = _visit( mct->self, _arg );
+
+        return result;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    static int py_method_caller_clear( PyObject * _obj )
+    {
+        py_method_caller_type * mct = (py_method_caller_type *)_obj;
+
+        Py_CLEAR( mct->self );
+
+        return 0;
     }
     //////////////////////////////////////////////////////////////////////////
     static PyObject * py_method_descr_call2( PyObject * _obj, PyObject * _args, PyObject * _kwds )
@@ -42,11 +69,9 @@ namespace pybind
 
         py_method_caller_type * mct = (py_method_caller_type *)_obj;
 
-        if( mct->iadapter == nullptr )
+        if( mct->iadapter == nullptr || mct->self == nullptr )
         {
-            pybind::error_message( "descr_call2: invalid call unknown method [not set iadapter] for object '%s'"
-                , kernel->object_repr( mct->self ).c_str()
-            );
+            pybind::error_message( "descr_call2: invalid call unknown method [not set iadapter or self]" );
 
             return nullptr;
         }
@@ -154,9 +179,10 @@ namespace pybind
     {
         Py_ssize_t argc = PyTuple_GET_SIZE( _args );
 
+        // As a method descriptor of CPython, which the receiver is missing for.
         if( argc == 0 )
         {
-            pybind::error_message( "descr_call: method '%s' take none args"
+            PyErr_Format( PyExc_TypeError, "descriptor '%s' needs an argument"
                 , _descr->iadapter->getName()
             );
 
@@ -243,10 +269,10 @@ namespace pybind
             0,					/* tp_getattro */
             0,					/* tp_setattro */
             0,					/* tp_as_buffer */
-            Py_TPFLAGS_DEFAULT, /* tp_flags */
+            Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC, /* tp_flags */
             0,					/* tp_doc */
-            0,					/* tp_traverse */
-            0,					/* tp_clear */
+            (traverseproc)py_method_caller_traverse,					/* tp_traverse */
+            (inquiry)py_method_caller_clear,					/* tp_clear */
             0,					/* tp_richcompare */
             0,					/* tp_weaklistoffset */
             0,					/* tp_iter */

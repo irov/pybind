@@ -48,18 +48,10 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         set_dict_operator_t & set_dict_operator_t::operator = ( set_dict_operator_t && _op )
         {
-            if( m_key != nullptr )
-            {
-                m_kernel->decref( m_key );
-            }
+            // As a dict item: assigning another item stores its value.
+            PyObject * value = _op.m_kernel->dict_get( _op.m_dict, _op.m_key );
 
-            this->m_kernel = _op.m_kernel;
-            this->m_dict = _op.m_dict;
-            this->m_key = _op.m_key;
-
-            _op.m_kernel = nullptr;
-            _op.m_dict = nullptr;
-            _op.m_key = nullptr;
+            pybind::dict_setobject_i( m_kernel, m_dict, m_key, import_operator_t( m_kernel, value ) );
 
             return *this;
         }
@@ -71,7 +63,7 @@ namespace pybind
             return *this;
         }
         //////////////////////////////////////////////////////////////////////////
-        set_dict_operator_t::operator PyObject * ()
+        set_dict_operator_t::operator PyObject * () const
         {
             PyObject * py_object = m_kernel->dict_get( m_dict, m_key );
 

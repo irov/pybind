@@ -30,6 +30,7 @@ namespace pybind
     python_kernel::python_kernel()
         : m_allocator( nullptr )
         , m_current_module( nullptr )
+        , m_module_finder( nullptr )
         , m_enumerator( 0 )
         , m_debuggerHandler( nullptr )
         , m_debuggerUserData( nullptr )
@@ -222,6 +223,8 @@ namespace pybind
     void python_kernel::finalize()
     {
         this->debugger_set_trace( nullptr, nullptr );
+
+        this->remove_module_finder();
 
         PyType_ClearCache();
 
@@ -485,7 +488,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void * python_kernel::unwrap( PyObject * _obj )
     {
-        if( _obj == nullptr )
+        if( _obj == nullptr || pybind::helper::is_pod_object( _obj ) == false )
         {
             return nullptr;
         }
@@ -499,6 +502,12 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool python_kernel::is_wrap( PyObject * _obj )
     {
+        // As the tinypy backend: an object with no pybind flag is not wrapped.
+        if( pybind::helper::is_pod_object( _obj ) == false )
+        {
+            return false;
+        }
+
         return pybind::helper::is_pod_wrap( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
@@ -962,9 +971,13 @@ namespace pybind
         const char * typeinfo_name = this->get_class_type_info( _tinfo );
 
         PyObject * obj_repr = pybind::object_repr( _obj );
+        PyObject * obj_repr_type = pybind::object_repr_type( _obj );
 
-        if( obj_repr == nullptr )
+        if( obj_repr == nullptr || obj_repr_type == nullptr )
         {
+            pybind::xdecref( obj_repr );
+            pybind::xdecref( obj_repr_type );
+
             pybind::error_traceback( "invalid extract from unknown object type '%s' to '%s'"
                 , pybind::object_type_name( _obj )
                 , typeinfo_name
@@ -972,8 +985,6 @@ namespace pybind
 
             return;
         }
-
-        PyObject * obj_repr_type = pybind::object_repr_type( _obj );
 
         pybind::error_traceback( "invalid extract from %.256s type %.256s to %.256s"
             , pybind::string_to_char( obj_repr )
@@ -1006,6 +1017,11 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void * python_kernel::get_class_impl( PyObject * _obj )
     {
+        if( pybind::helper::is_pod_object( _obj ) == false )
+        {
+            return nullptr;
+        }
+
         void * impl = pybind::helper::get_pod_impl( _obj );
 
         return impl;
@@ -1013,6 +1029,11 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool python_kernel::is_class_weak( PyObject * _obj )
     {
+        if( pybind::helper::is_pod_object( _obj ) == false )
+        {
+            return false;
+        }
+
         bool result = pybind::helper::is_pod_weak( _obj );
 
         return result;
@@ -1079,12 +1100,26 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::set_module_finder( PyObject * _finder )
     {
+        // One finder at a time, as the tinypy backend keeps it.
+        this->remove_module_finder();
+
+        pybind::incref( _finder );
+        m_module_finder = _finder;
+
         pybind::set_module_finder( _finder );
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::remove_module_finder()
     {
-        pybind::remove_module_finder();
+        if( m_module_finder == nullptr )
+        {
+            return;
+        }
+
+        pybind::remove_module_finder( m_module_finder );
+
+        pybind::decref( m_module_finder );
+        m_module_finder = nullptr;
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::get_sys_excepthook()
@@ -1137,7 +1172,9 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::ask_native_kw( PyObject * _obj, PyObject * _args, PyObject * _kwargs )
     {
-        PyObject * py_result = PyObject_Call( _obj, _args, _kwargs );
+        // As ask_native: null arguments are none, and arguments that are not a
+        // tuple or keywords that are not a dict raise TypeError.
+        PyObject * py_result = PyEval_CallObjectWithKeywords( _obj, _args, _kwargs );
 
         pybind::check_error();
 
@@ -1163,9 +1200,26 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::ask_adapter( void * _self, const class_type_scope_interface_ptr & _scope, const char * _name, PyObject * _args )
     {
-        const method_adapter_interface_ptr & iadapter = _scope->find_method( _name );
+        const method_adapter_interface_ptr & adapter = _scope->find_method( _name );
 
-        PyObject * py_result = iadapter->call( this, _self, _scope, _args, nullptr );
+#if defined(PYBIND_DEBUG)
+        if( adapter == nullptr )
+        {
+            pybind::throw_exception( "scope '%s' has no method '%s'"
+                , _scope->get_name()
+                , _name
+            );
+
+            return nullptr;
+        }
+#endif
+
+        if( adapter == nullptr )
+        {
+            return nullptr;
+        }
+
+        PyObject * py_result = adapter->call( this, _self, _scope, _args, nullptr );
 
         return py_result;
     }
@@ -1194,6 +1248,8 @@ namespace pybind
 
             return nullptr;
         }
+
+        pybind::dict_set_builtins( _globals );
 
         PyObject * result = PyEval_EvalCode( (PyCodeObject *)compiled, _globals, _locals );
         Py_DECREF( compiled );
@@ -1256,6 +1312,11 @@ namespace pybind
     bool python_kernel::is_instanceof( PyObject * _obj, PyTypeObject * _type ) const
     {
         return pybind::is_instanceof( _obj, _type );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool python_kernel::type_check( PyObject * _obj ) const
+    {
+        return PyType_Check( _obj ) != 0;
     }
     //////////////////////////////////////////////////////////////////////////
     bool python_kernel::test_equal( PyObject * _lhs, PyObject * _rhs )

@@ -244,6 +244,7 @@ namespace pybind
     PYBIND_API long marshal_magic_number();
     PYBIND_API PyObject * marshal_get_object( const void * _buf, size_t _len );
 
+    PYBIND_API void dict_set_builtins( PyObject * _dict );
     PYBIND_API void set_module_finder( PyObject * _finder );
-    PYBIND_API void remove_module_finder();
+    PYBIND_API void remove_module_finder( PyObject * _finder );
 }

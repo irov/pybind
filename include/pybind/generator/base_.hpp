@@ -410,7 +410,7 @@ namespace pybind
         }
 
         template<class P, class F>
-        base_ & def_proxy_native( const char * _name, stdex::intrusive_ptr<P> & _proxy, F _fn )
+        base_ & def_proxy_native( const char * _name, const stdex::intrusive_ptr<P> & _proxy, F _fn )
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 

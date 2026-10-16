@@ -164,6 +164,9 @@ namespace pybind
         payload_t * payload( PyObject * _object ) const;
 
     public:
+        static payload_t * instance_payload( PyObject * _object );
+
+    public:
         struct base_t
         {
             typeid_t info;

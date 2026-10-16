@@ -17,9 +17,9 @@ namespace pybind
 
         tuple args = pybind::make_tuple_t( _kernel, _a ... );
 
-        PyObject * py_result = _kernel->ask_adapter( _self, scope, _name, args );
+        PyObject * py_result = _kernel->ask_adapter( _self, scope, _name, args.ptr() );
 
-        return detail::extract_operator_t( _kernel, py_result );
+        return detail::extract_operator_t( _kernel, py_result, pybind::borrowed );
     }
     //////////////////////////////////////////////////////////////////////////
 }

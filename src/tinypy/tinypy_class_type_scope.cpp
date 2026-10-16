@@ -237,17 +237,8 @@ namespace pybind
                 PyObject * instance = detail::cast_object( _instance );
 
                 scope->clear_bindable( impl );
-
-                // A counted object belongs to its smart pointer, so only the
-                // destroy adapter of an uncounted owned object releases it.
-                if( scope->get_smart_pointer() != nullptr )
-                {
-                    scope->decref_smart_pointer( impl );
-                }
-                else if( ( payload->flags & tinypy_class_type_scope::PayloadHolder ) == 0 )
-                {
-                    scope->call_destructor( instance, impl );
-                }
+                scope->call_destructor( instance, impl );
+                scope->decref_smart_pointer( impl );
             }
             catch( const pybind_exception & exception )
             {
@@ -546,9 +537,10 @@ namespace pybind
             tinypy_vm_t * vm = kernel->vm();
             int64_t index;
 
-            if( kernel->extract_int64( detail::cast_object( _key ), index ) == false )
+            // As PyObject_GetItem of a sequence: an int, a long or an object with
+            // __index__, which raises IndexError when the index overflows.
+            if( tinypy_number_as_index( _key, TINYPY_ERROR_INDEX, &index, nullptr ) == TINYPY_FALSE )
             {
-                tinypy_vm_raise_error( vm, TINYPY_ERROR_TYPE, "native sequence index must be an integer" );
                 return nullptr;
             }
 
@@ -595,9 +587,8 @@ namespace pybind
             tinypy_vm_t * vm = kernel->vm();
             int64_t index;
 
-            if( kernel->extract_int64( detail::cast_object( _key ), index ) == false )
+            if( tinypy_number_as_index( _key, TINYPY_ERROR_INDEX, &index, nullptr ) == TINYPY_FALSE )
             {
-                tinypy_vm_raise_error( vm, TINYPY_ERROR_TYPE, "native sequence index must be an integer" );
                 return TINYPY_FALSE;
             }
 
@@ -777,8 +768,15 @@ namespace pybind
 
                     PyObject * result = ( *binary )->call( kernel, payload->impl, class_type_scope_interface_ptr::from( scope ), detail::cast_object( _other ), _rotate );
 
+                    // An adapter that cannot take the operand returns null; one that
+                    // raised keeps its error rather than letting the other operand run.
                     if( result == nullptr )
                     {
+                        if( tinypy_vm_has_error( vm ) != 0 )
+                        {
+                            return nullptr;
+                        }
+
                         return tinypy_not_implemented_get( vm );
                     }
 
@@ -1656,7 +1654,18 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void tinypy_class_type_scope::call_destructor( PyObject * _obj, void * _impl )
     {
-        (void)_obj;
+        if( ( this->payload( _obj )->flags & PayloadHolder ) != 0 )
+        {
+            return;
+        }
+
+        // A constructed counted object belongs to its smart pointer, while the
+        // object of a new adapter is released by its destroy adapter.
+        if( m_smart_pointer != nullptr && m_new == nullptr )
+        {
+            return;
+        }
+
         if( m_destructor != nullptr )
         {
             m_destructor->call( m_kernel, class_type_scope_interface_ptr::from( this ), _impl );
@@ -1674,6 +1683,29 @@ namespace pybind
     tinypy_class_type_scope::payload_t * tinypy_class_type_scope::payload( PyObject * _object ) const
     {
         return static_cast<payload_t *>(tinypy_native_instance_payload( detail::cast_value( _object )));
+    }
+    //////////////////////////////////////////////////////////////////////////
+    tinypy_class_type_scope::payload_t * tinypy_class_type_scope::instance_payload( PyObject * _object )
+    {
+        // An instance of a bound type, or of its Python subclass, is known by
+        // the construct callback of its native type, as the CPython backend
+        // knows it by its pod base; this holds once its scope is finalized, as
+        // its finalizer still releases the object.
+        tinypy_value_t * value = detail::cast_value( _object );
+
+        if( tinypy_typeof( value ) != TINYPY_VALUE_NATIVE_INSTANCE )
+        {
+            return nullptr;
+        }
+
+        const tinypy_native_type_spec_t * spec = tinypy_native_type_spec( tinypy_object_type( value ) );
+
+        if( spec->construct != &detail::native_construct )
+        {
+            return nullptr;
+        }
+
+        return static_cast<payload_t *>(tinypy_native_instance_payload( value ));
     }
     //////////////////////////////////////////////////////////////////////////
 }

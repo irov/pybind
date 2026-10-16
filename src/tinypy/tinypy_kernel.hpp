@@ -4,6 +4,10 @@
 
 #include "tinypy/tinypy.hpp"
 
+#if defined(PYBIND_DEBUG)
+#   include <thread>
+#endif
+
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
@@ -194,6 +198,7 @@ namespace pybind
 
         bool is_callable( PyObject * _obj ) const override;
         bool is_instanceof( PyObject * _obj, PyTypeObject * _type ) const override;
+        bool type_check( PyObject * _obj ) const override;
         bool test_equal( PyObject * _lhs, PyObject * _rhs ) override;
 
         bool has_attr( PyObject * _obj, PyObject * _attr ) override;
@@ -327,6 +332,11 @@ namespace pybind
         void report_error_( tinypy_error_t * _error );
         void display_error_( tinypy_value_t * _type, tinypy_value_t * _value, tinypy_value_t * _traceback );
         void write_stderr_( const char * _text );
+        tinypy_value_t * get_sys_value_( const char * _name ) const;
+#if defined(PYBIND_DEBUG)
+        void check_main_thread_() const;
+#endif
+        void set_sys_value_( const char * _name, PyObject * _value );
         static void cycle_diagnostic_( void * _userData, const tinypy_diagnostic_t * _diagnostic );
 
     private:
@@ -337,9 +347,11 @@ namespace pybind
         tinypy_vm_t * m_vm;
 
         PyObject * m_current_module;
-        PyObject * m_excepthook;
-        PyObject * m_stdout;
-        PyObject * m_stderr;
+        PyObject * m_sys;
+
+#if defined(PYBIND_DEBUG)
+        std::thread::id m_main_thread_id;
+#endif
 
         observer_bind_call * m_observer;
         typeid_t m_enumerator;

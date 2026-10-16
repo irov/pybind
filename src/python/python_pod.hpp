@@ -24,6 +24,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     namespace helper
     {
+        bool is_pod_object( PyObject * _obj );
         bool is_pod_holder( PyObject * _obj );
         bool is_pod_weak( PyObject * _obj );
         bool has_pod_hash( PyObject * _obj );

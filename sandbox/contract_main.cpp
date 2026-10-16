@@ -9,10 +9,14 @@
 #include "pybind/class_type_scope_interface.hpp"
 #include "pybind/object.hpp"
 #include "pybind/dict.hpp"
+#include "pybind/list.hpp"
+#include "pybind/tuple.hpp"
 #include "pybind/module.hpp"
 #include "pybind/generator/class_.hpp"
 #include "pybind/generator/interface_.hpp"
 #include "pybind/generator/struct_.hpp"
+#include "pybind/generator/superclass_.hpp"
+#include "pybind/internal_call.hpp"
 #include "pybind/pickle.hpp"
 
 #include <cstdio>
@@ -22,6 +26,7 @@
 #include <fstream>
 #include <iterator>
 #include <string>
+#include <vector>
 
 #define PYBIND_CONTRACT_ASSERT( Expression ) \
     do \
@@ -864,6 +869,534 @@ regression_cycle.pop()
         _kernel->remove_scope<regression_other_t>();
         _kernel->remove_scope<regression_node_t>();
     }
+    //////////////////////////////////////////////////////////////////////////
+    static int32_t s_regression_mix_alive = 0;
+    static int32_t s_regression_ent_destroys = 0;
+
+    class regression_mix_t
+    {
+    public:
+        regression_mix_t()
+            : m_refs( 0 )
+        {
+            ++s_regression_mix_alive;
+        }
+
+        virtual ~regression_mix_t()
+        {
+            --s_regression_mix_alive;
+        }
+
+        static void intrusive_ptr_add_ref( regression_mix_t * _self )
+        {
+            ++_self->m_refs;
+        }
+
+        static void intrusive_ptr_dec_ref( regression_mix_t * _self )
+        {
+            if( --_self->m_refs == 0 )
+            {
+                delete _self;
+            }
+        }
+
+    protected:
+        int32_t m_refs;
+    };
+
+    class regression_ent_t
+        : public regression_mix_t
+    {
+    public:
+        int32_t getValue() const
+        {
+            return 11;
+        }
+    };
+
+    class regression_ent_new
+        : public pybind::new_adapter_interface
+    {
+    public:
+        void * call( pybind::kernel_interface * _kernel, const pybind::class_type_scope_interface_ptr & _scope, PyObject * _obj, PyObject * _args, PyObject * _kwds ) override
+        {
+            (void)_kernel;
+            (void)_scope;
+            (void)_obj;
+            (void)_args;
+            (void)_kwds;
+
+            // As superclass_new_Entity of Mengine: the adapter keeps a reference
+            // that its destroy adapter releases.
+            regression_ent_t * ent = new regression_ent_t;
+            regression_mix_t::intrusive_ptr_add_ref( ent );
+
+            return ent;
+        }
+    };
+
+    class regression_ent_destroy
+        : public pybind::destroy_adapter_interface
+    {
+    public:
+        void call( pybind::kernel_interface * _kernel, const pybind::class_type_scope_interface_ptr & _scope, void * _impl ) override
+        {
+            (void)_kernel;
+            (void)_scope;
+
+            ++s_regression_ent_destroys;
+
+            regression_mix_t::intrusive_ptr_dec_ref( static_cast<regression_ent_t *>(_impl) );
+        }
+    };
+
+    struct regression_pod_t
+    {
+        regression_pod_t()
+            : value( 0.f )
+        {
+        }
+
+        explicit regression_pod_t( float _value )
+            : value( _value )
+        {
+        }
+
+        float value;
+    };
+
+    static bool regression_is_type( pybind::kernel_interface * _kernel, PyTypeObject * _type )
+    {
+        return _kernel->is_type_class( _type );
+    }
+
+    static uint32_t regression_list_size( const pybind::list & _list )
+    {
+        return (uint32_t)_list.size();
+    }
+
+    static pybind::object regression_invalid_result( pybind::kernel_interface * _kernel )
+    {
+        // As a binding that fails: the error it sets is what Python raises.
+        _kernel->set_error( pybind::error_type_e::Value, "regression invalid result" );
+
+        return pybind::make_invalid_object_t();
+    }
+
+    static int32_t regression_warning( pybind::kernel_interface * _kernel )
+    {
+        _kernel->warning_traceback( "regression warning" );
+
+        return 42;
+    }
+
+    static int64_t regression_int64()
+    {
+        return 5;
+    }
+
+    static bool regression_module_valid( const pybind::module & _module )
+    {
+        return _module.is_invalid() == false;
+    }
+
+    static bool regression_pickle_types( pybind::kernel_interface * _kernel, PyObject * _value, PyObject * _types )
+    {
+        size_t size = 0;
+        bool result = pybind::pickle( _kernel, _value, _types, nullptr, 0, &size );
+
+        return result;
+    }
+
+    static void regression_throwing_hook( void * _ud, PyTypeObject * _type, PyObject * _value, PyObject * _traceback )
+    {
+        (void)_type;
+        (void)_value;
+        (void)_traceback;
+
+        int32_t * calls = static_cast<int32_t *>(_ud);
+        ++(*calls);
+
+        pybind::throw_exception( "regression hook failure" );
+    }
+
+    static bool regression_flag( pybind::kernel_interface * _kernel, PyObject * _dict, const char * _flag )
+    {
+        PyObject * value = _kernel->dict_getstring( _dict, _flag );
+        bool flagValue = false;
+        bool flagResult = value != nullptr && _kernel->extract_bool( value, flagValue ) == true;
+
+        if( flagResult == false || flagValue == false )
+        {
+            std::fprintf( stderr, "regression flag '%s' failed\n", _flag );
+
+            return false;
+        }
+
+        return true;
+    }
+
+    static void check_second_review_regressions( pybind::kernel_interface * _kernel, PyObject * _module )
+    {
+        pybind::allocator_interface * allocator = _kernel->get_allocator();
+
+        pybind::interface_<regression_mix_t>( _kernel, "RegressionMix", true, _module )
+            .def_smart_pointer()
+            ;
+
+        pybind::superclass_<regression_ent_t, pybind::bases<regression_mix_t>>( _kernel, "RegressionEnt", nullptr, allocator->newT<regression_ent_new>(), allocator->newT<regression_ent_destroy>(), true, _module )
+            .def( "getValue", &regression_ent_t::getValue )
+            ;
+
+        pybind::struct_<regression_pod_t>( _kernel, "RegressionPod", true, _module )
+            .def_constructor( pybind::init<float>() )
+            .def_member( "value", &regression_pod_t::value )
+            ;
+
+        pybind::class_<regression_node_t>( _kernel, "RegressionNode", true, _module )
+            .def_constructor( pybind::init<>() )
+            .def( "getValue", &regression_node_t::getValue )
+            ;
+
+        pybind::class_<regression_other_t>( _kernel, "RegressionOther", true, _module )
+            .def_constructor( pybind::init<>() )
+            .def( "getOther", &regression_other_t::getOther )
+            ;
+
+        pybind::def_function_kernel( _kernel, "regression_is_type", &regression_is_type );
+        pybind::def_function( _kernel, "regression_list_size", &regression_list_size );
+        pybind::def_function_kernel( _kernel, "regression_invalid_result", &regression_invalid_result );
+        pybind::def_function_kernel( _kernel, "regression_warning", &regression_warning );
+        pybind::def_function( _kernel, "regression_int64", &regression_int64 );
+        pybind::def_function( _kernel, "regression_module_valid", &regression_module_valid );
+        pybind::def_function_kernel( _kernel, "regression_pickle_types", &regression_pickle_types );
+
+        PyObject * dict = _kernel->module_dict( _module );
+
+        const char source[] = R"PY(
+import sys
+
+def raises(error, function, *args):
+    try:
+        function(*args)
+    except error:
+        return True
+    except Exception:
+        return False
+    return False
+
+class Old:
+    pass
+
+class OldMro(Old, RegressionNode):
+    pass
+
+regression2_classic_mro_ok = OldMro().getValue() == 7
+
+class Meta(type):
+    pass
+
+class WithMeta(RegressionNode):
+    __metaclass__ = Meta
+
+regression2_metaclass_ok = WithMeta().getValue() == 7 and type(WithMeta) is Meta
+
+class WithNew(RegressionNode):
+    def __new__(cls):
+        return super(WithNew, cls).__new__(cls)
+
+regression2_new_ok = WithNew().getValue() == 7
+
+class Mixed(RegressionNode, RegressionOther):
+    pass
+
+regression2_mixed_ok = raises(TypeError, Mixed().getOther)
+
+node = RegressionNode()
+
+def reassign_class():
+    node.__class__ = RegressionOther
+
+regression2_class_ok = raises(TypeError, reassign_class) and type(node) is RegressionNode
+regression2_receiver_ok = raises(TypeError, RegressionNode.getValue)
+del node
+
+ent = RegressionEnt()
+regression2_ent_value = ent.getValue()
+del ent
+
+regression2_pod_ok = RegressionPod(2.5).value == 2.5
+
+regression2_is_type_ok = regression_is_type(RegressionNode) == True and raises(Exception, regression_is_type, 5)
+regression2_list_ok = regression_list_size([1, 2]) == 2 and raises(Exception, regression_list_size, None)
+regression2_invalid_ok = raises(ValueError, regression_invalid_result)
+regression2_warning_ok = regression_warning() == 42
+regression2_int_ok = type(regression_int64()) is int and type(regression_size(4)) is int
+regression2_module_ok = regression_module_valid(sys) == True
+
+try:
+    assert False
+    regression2_assert_ok = False
+except AssertionError:
+    regression2_assert_ok = True
+
+regression2_pickle_ok = regression_pickle_types(1, [Old, RegressionNode]) == True
+
+pod = PodValue()
+
+class IndexZero(object):
+    def __index__(self):
+        return 0
+
+def delete_item():
+    del pod[0]
+
+regression2_index_ok = raises(TypeError, lambda: pod[1.5]) and pod[IndexZero()] == pod[0] and raises(TypeError, delete_item)
+del pod
+
+class Capture(object):
+    def __init__(self):
+        self.parts = []
+
+    def write(self, text):
+        self.parts.append(text)
+
+regression_capture = Capture()
+regression_hook_calls = []
+
+def regression_hook(exception_type, value, traceback):
+    regression_hook_calls.append(str(value))
+
+class BadHash(object):
+    def __hash__(self):
+        raise ValueError('bad hash')
+
+class BadEq(object):
+    def __eq__(self, other):
+        raise ValueError('bad eq')
+
+regression_bad_hash = BadHash()
+regression_bad_eq = BadEq()
+
+def regression_noargs():
+    return 3
+)PY";
+
+        PyObject * result = _kernel->exec_file( source, dict, dict );
+        PYBIND_CONTRACT_ASSERT( result != nullptr );
+        _kernel->decref( result );
+
+        const char * flags[] = {"regression2_classic_mro_ok", "regression2_metaclass_ok", "regression2_new_ok", "regression2_mixed_ok", "regression2_class_ok", "regression2_receiver_ok", "regression2_pod_ok", "regression2_is_type_ok", "regression2_list_ok", "regression2_invalid_ok", "regression2_warning_ok", "regression2_int_ok", "regression2_module_ok", "regression2_assert_ok", "regression2_pickle_ok", "regression2_index_ok"};
+
+        for( const char * flag : flags )
+        {
+            PYBIND_CONTRACT_ASSERT( detail::regression_flag( _kernel, dict, flag ) == true );
+        }
+
+        // A superclass_ object a smart pointer counts is released by its destroy
+        // adapter as well as by the smart pointer.
+        PYBIND_CONTRACT_ASSERT( pybind::extract<int32_t>( _kernel, _kernel->dict_getstring( dict, "regression2_ent_value" ) ) == 11 );
+        PYBIND_CONTRACT_ASSERT( s_regression_ent_destroys == 1 );
+        PYBIND_CONTRACT_ASSERT( s_regression_mix_alive == 0 );
+
+#if defined(PYBIND_BACKEND_PYTHON)
+        // CPython only: tinypy has no cyclic collector, and its native slots are
+        // not special methods a Python subclass composes with.
+        const char pythonSource[] = R"PY(
+import gc
+
+class RightAdd(PodValue):
+    def __radd__(self, other):
+        return 'radd'
+
+regression2_partial_ok = type(RightAdd() + PodValue()) is PodValue and PodValue.__add__ is not None
+
+cycle_node = RegressionNode()
+cycle_node.callback = cycle_node.getValue
+del cycle_node
+gc.collect()
+)PY";
+
+        PyObject * pythonResult = _kernel->exec_file( pythonSource, dict, dict );
+        PYBIND_CONTRACT_ASSERT( pythonResult != nullptr );
+        _kernel->decref( pythonResult );
+        PYBIND_CONTRACT_ASSERT( detail::regression_flag( _kernel, dict, "regression2_partial_ok" ) == true );
+        PYBIND_CONTRACT_ASSERT( s_regression_node_alive == 0 );
+#endif
+
+        // The error display: a class with its module, a classic class, and the
+        // last line of a traceback longer than a message buffer.
+        PyObject * capture = _kernel->dict_getstring( dict, "regression_capture" );
+        PyObject * oldStderr = _kernel->getStdErrorHandle();
+        _kernel->incref( oldStderr );
+        _kernel->setStdErrorHandle( capture );
+
+        const char * raisingSources[] = {
+            "class RegressionError(Exception):\n    pass\nraise RegressionError('custom')\n",
+            "class Classic:\n    pass\nraise Classic()\n",
+            "def deep_regression_recursion_with_a_long_function_name(count):\n    if count == 0:\n        raise ValueError('deep end')\n    return deep_regression_recursion_with_a_long_function_name(count - 1)\ndeep_regression_recursion_with_a_long_function_name(60)\n"
+        };
+
+        for( const char * raisingSource : raisingSources )
+        {
+            PyObject * raisingResult = _kernel->exec_file( raisingSource, dict, dict );
+            PYBIND_CONTRACT_ASSERT( raisingResult == nullptr );
+        }
+
+        // A sys.excepthook set from Python reports the error.
+        PyObject * oldHook = _kernel->get_sys_excepthook();
+        _kernel->incref( oldHook );
+
+        PyObject * hookResult = _kernel->exec_file( "sys.excepthook = regression_hook\n", dict, dict );
+        PYBIND_CONTRACT_ASSERT( hookResult != nullptr );
+        _kernel->decref( hookResult );
+
+        PyObject * hookedResult = _kernel->exec_file( "raise ValueError('hooked')\n", dict, dict );
+        PYBIND_CONTRACT_ASSERT( hookedResult == nullptr );
+
+        // A C++ hook that throws fails its call, which is reported, and does
+        // not unwind through the kernel.
+        int32_t throwingHookCalls = 0;
+        _kernel->set_sys_excepthook_f( &detail::regression_throwing_hook, &throwingHookCalls );
+
+        bool hookEscaped = false;
+
+        try
+        {
+            PyObject * throwingResult = _kernel->exec_file( "raise ValueError('throwing hook')\n", dict, dict );
+            PYBIND_CONTRACT_ASSERT( throwingResult == nullptr );
+        }
+        catch( const pybind::pybind_exception & )
+        {
+            hookEscaped = true;
+        }
+
+        PYBIND_CONTRACT_ASSERT( hookEscaped == false );
+        PYBIND_CONTRACT_ASSERT( throwingHookCalls == 1 );
+
+        _kernel->set_sys_excepthook( oldHook );
+        _kernel->decref( oldHook );
+        _kernel->setStdErrorHandle( oldStderr );
+        _kernel->decref( oldStderr );
+
+        const char displaySource[] = R"PY(
+regression_text = ''.join(regression_capture.parts)
+regression2_display_module_ok = (__name__ + '.RegressionError: custom') in regression_text
+regression2_display_classic_ok = (__name__ + '.Classic') in regression_text
+regression2_display_deep_ok = 'ValueError: deep end\n' in regression_text
+regression2_hook_ok = regression_hook_calls == ['hooked']
+)PY";
+
+        PyObject * displayResult = _kernel->exec_file( displaySource, dict, dict );
+        PYBIND_CONTRACT_ASSERT( displayResult != nullptr );
+        _kernel->decref( displayResult );
+
+        const char * displayFlags[] = {"regression2_display_module_ok", "regression2_display_classic_ok", "regression2_display_deep_ok", "regression2_hook_ok"};
+
+        for( const char * flag : displayFlags )
+        {
+            PYBIND_CONTRACT_ASSERT( detail::regression_flag( _kernel, dict, flag ) == true );
+        }
+
+        // No error stays pending after a key that cannot be hashed, an equality
+        // that raises, or a call with arguments that are not a tuple.
+        PyObject * badHash = _kernel->dict_getstring( dict, "regression_bad_hash" );
+        PyObject * badHashDict = _kernel->dict_new();
+        PYBIND_CONTRACT_ASSERT( _kernel->dict_exist( badHashDict, badHash ) == false );
+        PYBIND_CONTRACT_ASSERT( _kernel->dict_get( badHashDict, badHash ) == nullptr );
+        _kernel->decref( badHashDict );
+
+        PyObject * badEq = _kernel->dict_getstring( dict, "regression_bad_eq" );
+        PYBIND_CONTRACT_ASSERT( _kernel->test_equal( badEq, badHash ) == false );
+
+        PyObject * noargs = _kernel->dict_getstring( dict, "regression_noargs" );
+        PyObject * noargsResult = _kernel->ask_native( noargs, nullptr );
+        PYBIND_CONTRACT_ASSERT( noargsResult != nullptr );
+        PYBIND_CONTRACT_ASSERT( pybind::extract<int32_t>( _kernel, noargsResult ) == 3 );
+        _kernel->decref( noargsResult );
+
+        PyObject * notTuple = pybind::ptr( _kernel, 5 );
+        PYBIND_CONTRACT_ASSERT( _kernel->ask_native( noargs, notTuple ) == nullptr );
+
+        // Globals without builtins see those of the interpreter.
+        PyObject * bareGlobals = _kernel->dict_new();
+        PyObject * lengthResult = _kernel->eval_string( "len([1, 2, 3])", bareGlobals, bareGlobals );
+        PYBIND_CONTRACT_ASSERT( lengthResult != nullptr );
+        PYBIND_CONTRACT_ASSERT( pybind::extract<int32_t>( _kernel, lengthResult ) == 3 );
+        _kernel->decref( lengthResult );
+        _kernel->decref( bareGlobals );
+
+        // An object that is not bound has no pybind flags or impl.
+        PYBIND_CONTRACT_ASSERT( _kernel->is_wrap( notTuple ) == false );
+        PYBIND_CONTRACT_ASSERT( _kernel->get_class_impl( notTuple ) == nullptr );
+        PYBIND_CONTRACT_ASSERT( _kernel->unwrap( notTuple ) == nullptr );
+        PYBIND_CONTRACT_ASSERT( _kernel->type_check( notTuple ) == false );
+
+        size_t sizeValue = 0;
+        PYBIND_CONTRACT_ASSERT( pybind::extract_value( _kernel, notTuple, sizeValue, true ) == true );
+        PYBIND_CONTRACT_ASSERT( sizeValue == 5 );
+        _kernel->decref( notTuple );
+
+        // A slot a caller does not set is None.
+        PyObject * slots = _kernel->list_new( 2 );
+        PYBIND_CONTRACT_ASSERT( _kernel->is_none( _kernel->list_getitem( slots, 1 ) ) == true );
+        _kernel->decref( slots );
+
+        // An entry of sys.modules that is not a module is replaced.
+        PyObject * notModuleResult = _kernel->exec_file( "sys.modules['regression_not_module'] = 5\n", dict, dict );
+        PYBIND_CONTRACT_ASSERT( notModuleResult != nullptr );
+        _kernel->decref( notModuleResult );
+        PyObject * notModuleCode = _kernel->compile_string( "regression_marker = 1\n", "regression_not_module.py" );
+        PYBIND_CONTRACT_ASSERT( notModuleCode != nullptr );
+        PyObject * notModule = _kernel->module_execcode( "regression_not_module", notModuleCode );
+        PYBIND_CONTRACT_ASSERT( notModule != nullptr );
+        _kernel->decref( notModule );
+        _kernel->decref( notModuleCode );
+
+        // Items, elements and modules convert to objects.
+        pybind::list source_list( _kernel );
+        source_list.append( 10 );
+        source_list.append( 20 );
+        pybind::list target_list( _kernel );
+        target_list.append( 0 );
+        target_list[0] = source_list[1];
+        int32_t movedItem = target_list[0];
+        PYBIND_CONTRACT_ASSERT( movedItem == 20 );
+
+        pybind::tuple elements = pybind::make_tuple_t( _kernel, 30, 40 );
+        target_list.append( elements[0] );
+        int32_t appendedElement = target_list[1];
+        PYBIND_CONTRACT_ASSERT( appendedElement == 30 );
+
+        pybind::dict items( _kernel );
+        items["a"] = source_list[0];
+        int32_t dictItem = items["a"];
+        PYBIND_CONTRACT_ASSERT( dictItem == 10 );
+
+        pybind::module moduleWrapper( _kernel, _module );
+        PyObject * moduleValid = _kernel->dict_getstring( dict, "regression_module_valid" );
+        bool moduleCalled = pybind::object( _kernel, moduleValid ).call( moduleWrapper );
+        PYBIND_CONTRACT_ASSERT( moduleCalled == true );
+
+        std::vector<int32_t> container = {1, 2, 3};
+        pybind::tuple containerTuple = pybind::make_tuple_container_t( _kernel, container );
+        PYBIND_CONTRACT_ASSERT( containerTuple.size() == 3 );
+
+        regression_node_t internalNode;
+        int32_t internalValue = pybind::internal_call_method( _kernel, &internalNode, "getValue" );
+        PYBIND_CONTRACT_ASSERT( internalValue == 7 );
+
+        // A method of a missing attribute is not called.
+        PyObject * capturedObject = _kernel->dict_getstring( dict, "regression_capture" );
+        pybind::object missingCall = pybind::object( _kernel, capturedObject ).call_method( "regression_missing_method", 1 );
+        PYBIND_CONTRACT_ASSERT( missingCall.is_invalid() == true );
+
+        _kernel->remove_scope<regression_other_t>();
+        _kernel->remove_scope<regression_node_t>();
+        _kernel->remove_scope<regression_pod_t>();
+        _kernel->remove_scope<regression_ent_t>();
+        _kernel->remove_scope<regression_mix_t>();
+    }
 }
 int main()
 {
@@ -921,6 +1454,12 @@ int main()
     PYBIND_CONTRACT_ASSERT( pybind::extract<bool>( kernel, kernel->dict_getstring( enumDict, "enum_roundtrip_ok" ) ) == true );
     PYBIND_CONTRACT_ASSERT( pybind::extract<bool>( kernel, kernel->dict_getstring( enumDict, "enum_overflow_ok" ) ) == true );
 
+    // A function defined before the reload sees the new globals, and a name the
+    // new source does not define stays, as reload keeps them.
+    PyObject * beforeReload = kernel->exec_file( "def reload_get_value():\n    return value\nreload_kept = 5\n", kernel->module_dict( module ), kernel->module_dict( module ) );
+    PYBIND_CONTRACT_ASSERT( beforeReload != nullptr );
+    kernel->decref( beforeReload );
+
     const char reloadSource[] = "value = 17\ndef get_value():\n    return value\n";
     PyObject * reloadedModule = kernel->module_reload_source( module, reloadSource, "contract.py" );
     PYBIND_CONTRACT_ASSERT( reloadedModule == module );
@@ -930,8 +1469,11 @@ int main()
     PYBIND_CONTRACT_ASSERT( kernel->extract_int32( reloadedValue, reloadedInteger ) == true );
     PYBIND_CONTRACT_ASSERT( reloadedInteger == 17 );
     kernel->decref( reloadedValue );
+    PyObject * reloadKept = kernel->eval_string( "reload_get_value() == 17 and reload_kept == 5", kernel->module_dict( module ), kernel->module_dict( module ) );
+    PYBIND_CONTRACT_ASSERT( reloadKept != nullptr && pybind::extract<bool>( kernel, reloadKept ) == true );
+    kernel->decref( reloadKept );
 
-    const char failedReloadSource[] = "value = 99\nmissing_reload_function()\n";
+    const char failedReloadSource[] = "value = 99\nreload_partial = 1\nmissing_reload_function()\n";
     PyObject * failedReloadModule = kernel->module_reload_source( module, failedReloadSource, "contract.py" );
     PYBIND_CONTRACT_ASSERT( failedReloadModule == nullptr );
     PyObject * lastGoodValue = kernel->get_attrstring( module, "value" );
@@ -939,6 +1481,7 @@ int main()
     PYBIND_CONTRACT_ASSERT( kernel->extract_int32( lastGoodValue, lastGoodInteger ) == true );
     PYBIND_CONTRACT_ASSERT( lastGoodInteger == 17 );
     kernel->decref( lastGoodValue );
+    PYBIND_CONTRACT_ASSERT( kernel->dict_getstring( kernel->module_dict( module ), "reload_partial" ) == nullptr );
 
     const char syntaxErrorReloadSource[] = "value =\n";
     PyObject * syntaxErrorReloadModule = kernel->module_reload_source( module, syntaxErrorReloadSource, "contract.py" );
@@ -1459,6 +2002,7 @@ int main()
     adapter = nullptr;
 
     detail::check_review_regressions( kernel, module );
+    detail::check_second_review_regressions( kernel, module );
 
     kernel->set_current_module( nullptr );
     kernel->module_fini( module );

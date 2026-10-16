@@ -190,10 +190,9 @@ namespace pybind
 
         if( Py_IsInitialized() == 0 )
         {
-            if( _debug == false )
-            {
-                Py_OptimizeFlag = 2;
-            }
+            // As the tinypy backend: the optimize level is the -O of the
+            // interpreter, which the debug flag does not imply.
+            Py_OptimizeFlag = (int)_config.optimize_level;
 
             if( _nosite == true )
             {
@@ -471,19 +470,27 @@ namespace pybind
         return module;
     }
     //////////////////////////////////////////////////////////////////////////
-    static void module_set_builtins_( PyObject * _module )
+    void dict_set_builtins( PyObject * _dict )
     {
-        // As the tinypy backend: code run in the module dictionary sees the builtins.
-        PyObject * dict = PyModule_GetDict( _module );
+        PYBIND_CHECK_MAIN_THREAD();
 
-        if( PyDict_GetItemString( dict, "__builtins__" ) != nullptr )
+        // As eval and exec, and the tinypy backend: code run in globals without
+        // builtins sees those of the interpreter, not a dict with only None.
+        if( PyDict_GetItemString( _dict, "__builtins__" ) != nullptr )
         {
             return;
         }
 
         PyObject * builtins = PyEval_GetBuiltins();
 
-        PyDict_SetItemString( dict, "__builtins__", builtins );
+        PyDict_SetItemString( _dict, "__builtins__", builtins );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    static void module_set_builtins_( PyObject * _module )
+    {
+        PyObject * dict = PyModule_GetDict( _module );
+
+        pybind::dict_set_builtins( dict );
     }
     //////////////////////////////////////////////////////////////////////////
 #if PYBIND_PYTHON_VERSION < 300
@@ -604,6 +611,44 @@ namespace pybind
         return reload_module;
     }
     //////////////////////////////////////////////////////////////////////////
+    static void dict_restore_( PyObject * _dict, PyObject * _snapshot )
+    {
+        // The names bound since the snapshot are removed and the others take
+        // their values again, so the dict is never left empty meanwhile.
+        PyObject * keys = PyDict_Keys( _dict );
+
+        if( keys == nullptr )
+        {
+            pybind::check_error();
+
+            return;
+        }
+
+        Py_ssize_t keys_count = PyList_GET_SIZE( keys );
+
+        for( Py_ssize_t index = 0; index != keys_count; ++index )
+        {
+            PyObject * key = PyList_GET_ITEM( keys, index );
+
+            if( PyDict_Contains( _snapshot, key ) != 0 )
+            {
+                continue;
+            }
+
+            if( PyDict_DelItem( _dict, key ) < 0 )
+            {
+                pybind::check_error();
+            }
+        }
+
+        Py_DECREF( keys );
+
+        if( PyDict_Update( _dict, _snapshot ) < 0 )
+        {
+            pybind::check_error();
+        }
+    }
+    //////////////////////////////////////////////////////////////////////////
     PyObject * module_reload_source( PyObject * _module, const char * _source, const char * _filename )
     {
         PYBIND_CHECK_MAIN_THREAD();
@@ -616,8 +661,17 @@ namespace pybind
             return nullptr;
         }
 
-        const char * module_name = PyModule_GetName( _module );
-        if( module_name == nullptr )
+        // As reload, the source runs in the dict of the module, so the functions
+        // defined before see the new globals and the names the source does not
+        // define stay, as __file__ and __path__ its loader set. A snapshot of
+        // the names restores them when the source fails.
+        PyObject * live_dict = PyModule_GetDict( _module );
+
+        pybind::dict_set_builtins( live_dict );
+
+        PyObject * snapshot = PyDict_Copy( live_dict );
+
+        if( snapshot == nullptr )
         {
             Py_DECREF( code );
             pybind::check_error();
@@ -625,80 +679,21 @@ namespace pybind
             return nullptr;
         }
 
-        PyObject * candidate = PyModule_New( module_name );
-        if( candidate == nullptr )
-        {
-            Py_DECREF( code );
-            pybind::check_error();
-
-            return nullptr;
-        }
-
-        pybind::module_set_builtins_( candidate );
-
-        PyObject * candidate_dict = PyModule_GetDict( candidate );
-        PyObject * execution_result = PyEval_EvalCode( (PyCodeObject *)code, candidate_dict, candidate_dict );
+        PyObject * execution_result = PyEval_EvalCode( (PyCodeObject *)code, live_dict, live_dict );
         Py_DECREF( code );
 
         if( execution_result == nullptr )
         {
-            Py_DECREF( candidate );
             pybind::check_error();
+
+            pybind::dict_restore_( live_dict, snapshot );
+            Py_DECREF( snapshot );
 
             return nullptr;
         }
 
         Py_DECREF( execution_result );
-
-        // Replace candidate self-references before the dictionary becomes the
-        // live module dictionary.
-        PyObject * keys = PyDict_Keys( candidate_dict );
-        if( keys == nullptr )
-        {
-            Py_DECREF( candidate );
-            pybind::check_error();
-
-            return nullptr;
-        }
-
-        Py_ssize_t key_count = PyList_Size( keys );
-        for( Py_ssize_t index = 0; index != key_count; ++index )
-        {
-            PyObject * key = PyList_GetItem( keys, index );
-            PyObject * value = PyDict_GetItem( candidate_dict, key );
-
-            if( value == candidate )
-            {
-                if( PyDict_SetItem( candidate_dict, key, _module ) == -1 )
-                {
-                    Py_DECREF( keys );
-                    Py_DECREF( candidate );
-                    pybind::check_error();
-
-                    return nullptr;
-                }
-            }
-        }
-
-        Py_DECREF( keys );
-
-        // md_dict is the first field after PyObject_HEAD in both Python 2.7
-        // and supported CPython 3 module objects. Swapping ownership keeps the
-        // module identity and makes newly-created functions reference the live
-        // dictionary, while candidate destruction releases the last-good dict.
-        struct module_object_prefix
-        {
-            PyObject_HEAD
-            PyObject * md_dict;
-        };
-
-        module_object_prefix * live_prefix = reinterpret_cast<module_object_prefix *>(_module);
-        module_object_prefix * candidate_prefix = reinterpret_cast<module_object_prefix *>(candidate);
-        PyObject * previous_dict = live_prefix->md_dict;
-        live_prefix->md_dict = candidate_prefix->md_dict;
-        candidate_prefix->md_dict = previous_dict;
-
-        Py_DECREF( candidate );
+        Py_DECREF( snapshot );
         Py_INCREF( _module );
 
         return _module;
@@ -891,6 +886,8 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
+        pybind::dict_set_builtins( _globals );
+
         PyObject * result = PyRun_String( _code, Py_file_input, _globals, _locals );
 
         pybind::check_error();
@@ -912,6 +909,8 @@ namespace pybind
     PYBIND_API PyObject * eval_string( const char * _string, PyObject * _globals, PyObject * _locals )
     {
         PYBIND_CHECK_MAIN_THREAD();
+
+        pybind::dict_set_builtins( _globals );
 
         PyObject * obj = PyRun_String( _string, Py_eval_input, _globals, _locals );
 
@@ -1517,6 +1516,14 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_int64( int64_t _value )
     {
+#   if PYBIND_PYTHON_VERSION < 300
+        // As Python 2 and the tinypy backend: a value an int holds is an int.
+        if( (int64_t)(long)_value == _value )
+        {
+            return pybind::ptr_int_t<long>( (long)_value );
+        }
+#	endif
+
         PYBIND_CHECK_MAIN_THREAD();
 
         return PyLong_FromLongLong( _value );
@@ -1549,6 +1556,14 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_uint64( uint64_t _value )
     {
+#   if PYBIND_PYTHON_VERSION < 300
+        // As Python 2 and the tinypy backend: a value an int holds is an int.
+        if( _value <= (uint64_t)LONG_MAX )
+        {
+            return pybind::ptr_int_t<long>( (long)_value );
+        }
+#	endif
+
         PYBIND_CHECK_MAIN_THREAD();
 
         return PyLong_FromUnsignedLongLong( _value );
@@ -1584,13 +1599,19 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_long( long _value )
     {
-        PYBIND_CHECK_MAIN_THREAD();
-
-        return PyLong_FromLong( _value );
+        return pybind::ptr_int_t<long>( _value );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_ulong( unsigned long _value )
     {
+#   if PYBIND_PYTHON_VERSION < 300
+        // As Python 2 and the tinypy backend: a value an int holds is an int.
+        if( _value <= (unsigned long)LONG_MAX )
+        {
+            return pybind::ptr_int_t<long>( (long)_value );
+        }
+#	endif
+
         PYBIND_CHECK_MAIN_THREAD();
 
         return PyLong_FromUnsignedLong( _value );
@@ -1603,6 +1624,21 @@ namespace pybind
         Py_ssize_t py_size = (Py_ssize_t)_size;
 
         PyObject * obj = PyList_New( py_size );
+
+        if( obj == nullptr )
+        {
+            pybind::check_error();
+
+            return nullptr;
+        }
+
+        // As the tinypy backend: a slot the caller does not set is None, not
+        // a null item that iteration would read.
+        for( Py_ssize_t index = 0; index != py_size; ++index )
+        {
+            Py_INCREF( Py_None );
+            PyList_SET_ITEM( obj, index, Py_None );
+        }
 
         return obj;
     }
@@ -2085,6 +2121,20 @@ namespace pybind
         Py_ssize_t py_size = (Py_ssize_t)_size;
         PyObject * obj = PyTuple_New( py_size );
 
+        if( obj == nullptr )
+        {
+            pybind::check_error();
+
+            return nullptr;
+        }
+
+        // As the tinypy backend: a slot the caller does not set is None.
+        for( Py_ssize_t index = 0; index != py_size; ++index )
+        {
+            Py_INCREF( Py_None );
+            PyTuple_SET_ITEM( obj, index, Py_None );
+        }
+
         return obj;
     }
     //////////////////////////////////////////////////////////////////////////
@@ -2190,6 +2240,11 @@ namespace pybind
 
         PyObject * py_dir = PyObject_Dir( _obj );
 
+        if( py_dir == nullptr )
+        {
+            pybind::check_error();
+        }
+
         return py_dir;
     }
     //////////////////////////////////////////////////////////////////////////
@@ -2224,12 +2279,7 @@ namespace pybind
 
         PyTypeObject * py_type = pybind::object_type( _obj );
 
-        PyObject * py_repr = PyObject_Repr( (PyObject *)py_type );
-
-        if( py_repr == nullptr )
-        {
-            return nullptr;
-        }
+        PyObject * py_repr = pybind::object_repr( (PyObject *)py_type );
 
         return py_repr;
     }
@@ -2243,14 +2293,21 @@ namespace pybind
             return nullptr;
         }
 
+        // An error path formats its object while the error is pending, which
+        // Python code must not run with, nor clear, as object.__repr__ does.
+        PyObject * exception;
+        PyObject * value;
+        PyObject * traceback;
+        PyErr_Fetch( &exception, &value, &traceback );
+
         PyObject * py_repr = PyObject_Repr( _obj );
 
         if( py_repr == nullptr )
         {
             pybind::check_error();
-
-            return nullptr;
         }
+
+        PyErr_Restore( exception, value, traceback );
 
         return py_repr;
     }
@@ -2264,14 +2321,21 @@ namespace pybind
             return nullptr;
         }
 
+        // An error path formats its object while the error is pending, which
+        // Python code must not run with, nor clear, as object.__repr__ does.
+        PyObject * exception;
+        PyObject * value;
+        PyObject * traceback;
+        PyErr_Fetch( &exception, &value, &traceback );
+
         PyObject * py_str = PyObject_Str( _obj );
 
         if( py_str == nullptr )
         {
             pybind::check_error();
-
-            return nullptr;
         }
+
+        PyErr_Restore( exception, value, traceback );
 
         return py_str;
     }
@@ -2578,7 +2642,12 @@ namespace pybind
             , buffer
         );
 
-        PyErr_SetString( PyExc_RuntimeWarning, trace_buffer );
+        // As the warnings module reports a warning, rather than leaving it
+        // pending, which the tinypy backend also reports at once.
+        if( PyErr_WarnEx( PyExc_RuntimeWarning, trace_buffer, 1 ) < 0 )
+        {
+            pybind::check_error();
+        }
     }
     //////////////////////////////////////////////////////////////////////////
     void error_clear()
@@ -2673,7 +2742,9 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        int64_t py_hash = (int64_t)PyObject_Hash( (PyObject *)_obj );
+        // The class scope cache hashes the type itself, so no metaclass
+        // __hash__ runs, as in the tinypy backend.
+        int64_t py_hash = (int64_t)_Py_HashPointer( (void *)_obj );
 
         return py_hash;
     }
@@ -2699,6 +2770,13 @@ namespace pybind
         PYBIND_CHECK_MAIN_THREAD();
 
         int value = PyObject_RichCompareBool( _left, _right, Py_EQ );
+
+        if( value < 0 )
+        {
+            pybind::check_error();
+
+            return false;
+        }
 
         return value == 1;
     }
@@ -2979,6 +3057,11 @@ namespace pybind
         char * buf_unconst = const_cast<char *>(static_cast<const char *>(_buf));
         PyObject * obj = PyMarshal_ReadObjectFromString( buf_unconst, py_len );
 
+        if( obj == nullptr )
+        {
+            pybind::check_error();
+        }
+
         return obj;
     }
     //////////////////////////////////////////////////////////////////////////
@@ -3001,14 +3084,35 @@ namespace pybind
 #endif
     }
     //////////////////////////////////////////////////////////////////////////
-    void remove_module_finder()
+    void remove_module_finder( PyObject * _finder )
     {
+        (void)_finder;
+
         PYBIND_CHECK_MAIN_THREAD();
 
 #if PYBIND_PYTHON_VERSION < 300
         PyObject * py_meta_path = PySys_GetObject( const_cast<char *>("meta_path") );
 
-        pybind::list_remove( py_meta_path, 0 );
+        // Scripts may insert their own finders before this one.
+        if( py_meta_path != nullptr && PyList_Check( py_meta_path ) != 0 )
+        {
+            Py_ssize_t size = PyList_GET_SIZE( py_meta_path );
+
+            for( Py_ssize_t index = 0; index != size; ++index )
+            {
+                if( PyList_GET_ITEM( py_meta_path, index ) != _finder )
+                {
+                    continue;
+                }
+
+                if( PySequence_DelItem( py_meta_path, index ) < 0 )
+                {
+                    pybind::check_error();
+                }
+
+                break;
+            }
+        }
 #endif
 
 #if PYBIND_PYTHON_VERSION >= 330 && PYBIND_PYTHON_VERSION < 380

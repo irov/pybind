@@ -15,6 +15,14 @@ namespace pybind
         return k;
     }
     //////////////////////////////////////////////////////////////////////////
+    kernel_interface::kernel_interface()
+    {
+        // The generation tells class_info which kernel numbered a type.
+        static uint32_t s_generation = 0;
+
+        m_generation = ++s_generation;
+    }
+    //////////////////////////////////////////////////////////////////////////
     kernel_interface * get_kernel()
     {
         kernel_scope & scope = get_scope();

@@ -225,7 +225,7 @@ namespace pybind
 
         pybind::decref( new_py_member );
 
-        PyObject * py_result = PyObject_CallFunction( (PyObject *)&PyProperty_Type, const_cast<char *>("OOss"), py_get, py_set, 0, "member_type_scope" );
+        PyObject * py_result = PyObject_CallFunction( (PyObject *)&PyProperty_Type, const_cast<char *>("OOss"), py_get, py_set, (const char *)nullptr, "member_type_scope" );
 
         pybind::decref( py_get );
         pybind::decref( py_set );

@@ -88,8 +88,12 @@ namespace pybind
             }
 
             // As slot_tp_del: the object is alive while C++ code runs, which keeps
-            // the pending error intact.
+            // the pending error intact. It is unbound first, as the tinypy backend
+            // clears the impl of its payload, so an instance C++ code resurrects
+            // does not release the object again.
             _obj->ob_refcnt = 1;
+
+            helper::unwrap_pod( _obj );
 
             PyObject * exception;
             PyObject * value;
@@ -99,16 +103,8 @@ namespace pybind
             try
             {
                 scope->clear_bindable( impl );
-
-                // A counted object belongs to its smart pointer, as in the tinypy backend.
-                if( scope->get_smart_pointer() != nullptr )
-                {
-                    scope->decref_smart_pointer( impl );
-                }
-                else
-                {
-                    scope->call_destructor( _obj, impl );
-                }
+                scope->call_destructor( _obj, impl );
+                scope->decref_smart_pointer( impl );
             }
             catch( const pybind::pybind_exception & _ex )
             {
@@ -123,8 +119,14 @@ namespace pybind
                 return true;
             }
 
-            // Resurrected by C++ code: subtype_dealloc releases the type once this
-            // returns, so the surviving instance keeps a reference of its own.
+            // Resurrected by C++ code: subtype_dealloc untracked the instance and
+            // releases the type once this returns, so the surviving instance is
+            // tracked again and keeps a reference of its own.
+            if( PyType_IS_GC( objtype ) != 0 )
+            {
+                PyObject_GC_Track( _obj );
+            }
+
             Py_INCREF( objtype );
 
             return false;
@@ -141,6 +143,188 @@ namespace pybind
 
             objtype->tp_free( _obj );
         }
+        //////////////////////////////////////////////////////////////////////////
+        static void raise_cannot_create( const char * _name )
+        {
+            // As a type without tp_new and the tinypy backend; an error a
+            // constructor raised stays.
+            if( PyErr_Occurred() != nullptr )
+            {
+                return;
+            }
+
+            PyErr_Format( PyExc_TypeError, "cannot create '%s' instances"
+                , _name
+            );
+        }
+        //////////////////////////////////////////////////////////////////////////
+        static PyObject * py_new_class( PyTypeObject * _type, PyObject * _args, PyObject * _kwds )
+        {
+            kernel_interface * kernel = pybind::get_kernel();
+
+            const class_type_scope_interface_ptr & scope = kernel->get_class_scope( _type );
+
+            if( scope == nullptr )
+            {
+                detail::raise_cannot_create( _type->tp_name );
+
+                return nullptr;
+            }
+
+            PyObject * py_self = PyType_GenericAlloc( _type, 0 );
+
+            if( py_self == nullptr )
+            {
+                return nullptr;
+            }
+
+            try
+            {
+                void * impl = scope->call_new( py_self, _args, _kwds );
+
+                if( impl == nullptr )
+                {
+                    pybind::decref( py_self );
+
+                    detail::raise_cannot_create( scope->get_name() );
+
+                    return nullptr;
+                }
+
+                helper::wrap_pod_ptr( py_self, impl, false );
+
+                scope->incref_smart_pointer( impl );
+
+                return py_self;
+            }
+            catch( const pybind::pybind_exception & _ex )
+            {
+                pybind::decref( py_self );
+
+                pybind::error_message( "obj '%s' py_new_class scope '%s' exception: %s"
+                    , kernel->object_str( (PyObject *)_type ).c_str()
+                    , scope->get_name()
+                    , _ex.what()
+                );
+            }
+
+            return nullptr;
+        }
+        //////////////////////////////////////////////////////////////////////////
+        static PyObject * py_new_pod( PyTypeObject * _type, PyObject * _args, PyObject * _kwds )
+        {
+            kernel_interface * kernel = pybind::get_kernel();
+
+            const class_type_scope_interface_ptr & scope = kernel->get_class_scope( _type );
+
+            if( scope == nullptr )
+            {
+                detail::raise_cannot_create( _type->tp_name );
+
+                return nullptr;
+            }
+
+            PyObject * py_self = PyType_GenericAlloc( _type, 0 );
+
+            if( py_self == nullptr )
+            {
+                return nullptr;
+            }
+
+            void * buff = nullptr;
+            size_t pod_size = scope->get_pod_size();
+            bool pod_hash = scope->get_pod_hash();
+
+            helper::wrap_pod( py_self, &buff, pod_size, pod_hash );
+
+            try
+            {
+                void * impl = scope->call_new( py_self, _args, _kwds );
+
+                if( impl == nullptr )
+                {
+                    helper::unwrap_pod( py_self );
+
+                    pybind::decref( py_self );
+
+                    detail::raise_cannot_create( scope->get_name() );
+
+                    return nullptr;
+                }
+
+                scope->incref_smart_pointer( impl );
+
+                return py_self;
+            }
+            catch( const pybind::pybind_exception & _ex )
+            {
+                helper::unwrap_pod( py_self );
+
+                pybind::decref( py_self );
+
+                pybind::error_message( "obj '%s' py_new_pod scope '%s' exception: %s"
+                    , kernel->object_str( (PyObject *)_type ).c_str()
+                    , scope->get_name()
+                    , _ex.what()
+                );
+            }
+
+            return nullptr;
+        }
+        //////////////////////////////////////////////////////////////////////////
+        static PyObject * get_object_class_descriptor()
+        {
+            PyObject * py_descr = PyDict_GetItemString( PyBaseObject_Type.tp_dict, "__class__" );
+
+            return py_descr;
+        }
+        //////////////////////////////////////////////////////////////////////////
+        static PyObject * py_get_class( PyObject * _obj, void * _closure )
+        {
+            (void)_closure;
+
+            PyObject * py_descr = detail::get_object_class_descriptor();
+
+            PyObject * py_class = Py_TYPE( py_descr )->tp_descr_get( py_descr, _obj, (PyObject *)Py_TYPE( _obj ) );
+
+            return py_class;
+        }
+        //////////////////////////////////////////////////////////////////////////
+        static int py_set_class( PyObject * _obj, PyObject * _value, void * _closure )
+        {
+            (void)_closure;
+
+            // As the tinypy backend: the methods of another bound class would run
+            // on this object, so only a class of the same bound class is taken.
+            kernel_interface * kernel = pybind::get_kernel();
+
+            if( kernel != nullptr && _value != nullptr && PyType_Check( _value ) != 0 )
+            {
+                class_type_scope_interface * scope = kernel->get_class_scope( Py_TYPE( _obj ) ).get();
+                class_type_scope_interface * value_scope = kernel->get_class_scope( (PyTypeObject *)_value ).get();
+
+                if( scope != value_scope )
+                {
+                    PyErr_Format( PyExc_TypeError, "__class__ assignment: '%s' and '%s' are different bound classes"
+                        , Py_TYPE( _obj )->tp_name
+                        , ((PyTypeObject *)_value)->tp_name
+                    );
+
+                    return -1;
+                }
+            }
+
+            PyObject * py_descr = detail::get_object_class_descriptor();
+
+            int result = Py_TYPE( py_descr )->tp_descr_set( py_descr, _obj, _value );
+
+            return result;
+        }
+        //////////////////////////////////////////////////////////////////////////
+        static PyGetSetDef py_pod_getset[] = {
+            {const_cast<char *>("__class__"), &detail::py_get_class, &detail::py_set_class, nullptr, nullptr},
+            {nullptr}
+        };
         //////////////////////////////////////////////////////////////////////////
         template<size_t I>
         static void wrap_pod_I( PyObject * _obj, void ** _impl )
@@ -202,6 +386,26 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     namespace helper
     {
+        //////////////////////////////////////////////////////////////////////////
+        bool is_pod_object( PyObject * _obj )
+        {
+            // The solid base of a bound type and of its Python subclasses is a
+            // pod type, whose dealloc releases the object; any other object has
+            // no pybind flag, and this holds once its scope is removed too.
+            PyTypeObject * type = Py_TYPE( _obj );
+
+            while( type != nullptr && ( type->tp_flags & Py_TPFLAGS_HEAPTYPE ) != 0 )
+            {
+                type = type->tp_base;
+            }
+
+            if( type == nullptr )
+            {
+                return false;
+            }
+
+            return type->tp_dealloc == &detail::py_dealloc;
+        }
         //////////////////////////////////////////////////////////////////////////
         bool is_pod_holder( PyObject * _obj )
         {
@@ -541,8 +745,10 @@ namespace pybind
         return py_pybind_type;
     }
     //////////////////////////////////////////////////////////////////////////
-    static PyTypeObject __make_pod_type( const char * _name, size_t _size )
+    static PyTypeObject __make_pod_type( const char * _name, size_t _size, newfunc _new )
     {
+        // PyType_Ready names tp_new with __new__, which bound types and their
+        // Python subclasses inherit.
         PyTypeObject pod_type =
         {
             PyVarObject_HEAD_INIT( nullptr, 0 )
@@ -574,7 +780,7 @@ namespace pybind
             0,                                          /* tp_iternext */
             0,                             /* tp_methods */
             0,                                          /* tp_members */
-            0,                                          /* tp_getset */
+            detail::py_pod_getset,                                          /* tp_getset */
             0,                         /* tp_base */
             0,                                          /* tp_dict */
             0,                                          /* tp_descr_get */
@@ -582,7 +788,7 @@ namespace pybind
             0,                                          /* tp_dictoffset */
             0,                                          /* tp_init */
             0,                                          /* tp_alloc */
-            0,                                 /* tp_new */
+            _new,                                 /* tp_new */
             0,                               /* tp_free */
         };
 
@@ -591,23 +797,23 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool pod_python::initialize()
     {
-        m_pod_type[0] = __make_pod_type( "pybind_pod4_type", sizeof( py_pod_object<0> ) );
-        m_pod_type[1] = __make_pod_type( "pybind_pod8_type", sizeof( py_pod_object<1> ) );
-        m_pod_type[2] = __make_pod_type( "pybind_pod16_type", sizeof( py_pod_object<2> ) );
-        m_pod_type[3] = __make_pod_type( "pybind_pod32_type", sizeof( py_pod_object<3> ) );
-        m_pod_type[4] = __make_pod_type( "pybind_pod64_type", sizeof( py_pod_object<4> ) );
-        m_pod_type[5] = __make_pod_type( "pybind_pod128_type", sizeof( py_pod_object<5> ) );
-        m_pod_type[6] = __make_pod_type( "pybind_pod256_type", sizeof( py_pod_object<6> ) );
+        m_pod_type[0] = __make_pod_type( "pybind_pod4_type", sizeof( py_pod_object<0> ), &detail::py_new_pod );
+        m_pod_type[1] = __make_pod_type( "pybind_pod8_type", sizeof( py_pod_object<1> ), &detail::py_new_pod );
+        m_pod_type[2] = __make_pod_type( "pybind_pod16_type", sizeof( py_pod_object<2> ), &detail::py_new_pod );
+        m_pod_type[3] = __make_pod_type( "pybind_pod32_type", sizeof( py_pod_object<3> ), &detail::py_new_pod );
+        m_pod_type[4] = __make_pod_type( "pybind_pod64_type", sizeof( py_pod_object<4> ), &detail::py_new_pod );
+        m_pod_type[5] = __make_pod_type( "pybind_pod128_type", sizeof( py_pod_object<5> ), &detail::py_new_pod );
+        m_pod_type[6] = __make_pod_type( "pybind_pod256_type", sizeof( py_pod_object<6> ), &detail::py_new_pod );
 
-        m_pod_hash_type[0] = __make_pod_type( "pybind_pod4_hash_type", sizeof( py_pod_hash_object<0> ) );
-        m_pod_hash_type[1] = __make_pod_type( "pybind_pod8_hash_type", sizeof( py_pod_hash_object<1> ) );
-        m_pod_hash_type[2] = __make_pod_type( "pybind_pod16_hash_type", sizeof( py_pod_hash_object<2> ) );
-        m_pod_hash_type[3] = __make_pod_type( "pybind_pod32_hash_type", sizeof( py_pod_hash_object<3> ) );
-        m_pod_hash_type[4] = __make_pod_type( "pybind_pod64_hash_type", sizeof( py_pod_hash_object<4> ) );
-        m_pod_hash_type[5] = __make_pod_type( "pybind_pod128_hash_type", sizeof( py_pod_hash_object<5> ) );
-        m_pod_hash_type[6] = __make_pod_type( "pybind_pod256_hash_type", sizeof( py_pod_hash_object<6> ) );
+        m_pod_hash_type[0] = __make_pod_type( "pybind_pod4_hash_type", sizeof( py_pod_hash_object<0> ), &detail::py_new_pod );
+        m_pod_hash_type[1] = __make_pod_type( "pybind_pod8_hash_type", sizeof( py_pod_hash_object<1> ), &detail::py_new_pod );
+        m_pod_hash_type[2] = __make_pod_type( "pybind_pod16_hash_type", sizeof( py_pod_hash_object<2> ), &detail::py_new_pod );
+        m_pod_hash_type[3] = __make_pod_type( "pybind_pod32_hash_type", sizeof( py_pod_hash_object<3> ), &detail::py_new_pod );
+        m_pod_hash_type[4] = __make_pod_type( "pybind_pod64_hash_type", sizeof( py_pod_hash_object<4> ), &detail::py_new_pod );
+        m_pod_hash_type[5] = __make_pod_type( "pybind_pod128_hash_type", sizeof( py_pod_hash_object<5> ), &detail::py_new_pod );
+        m_pod_hash_type[6] = __make_pod_type( "pybind_pod256_hash_type", sizeof( py_pod_hash_object<6> ), &detail::py_new_pod );
 
-        m_ptr_type = __make_pod_type( "pybind_ptr_type", sizeof( py_ptr_object ) );
+        m_ptr_type = __make_pod_type( "pybind_ptr_type", sizeof( py_ptr_object ), &detail::py_new_class );
 
         if( PyType_Ready( &m_ptr_type ) < 0 )
         {

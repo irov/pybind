@@ -5,6 +5,10 @@
 #include "pybind/tuple.hpp"
 #include "pybind/dict.hpp"
 #include "pybind/set.hpp"
+#include "pybind/module.hpp"
+#include "pybind/extract_operator.hpp"
+#include "pybind/helper/list_helper.hpp"
+#include "pybind/helper/dict_helper.hpp"
 
 namespace pybind
 {
@@ -190,10 +194,15 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool extract_value( kernel_interface * _kernel, PyObject * _obj, PyTypeObject *& _value, bool _nothrow )
     {
-        (void)_kernel;
         (void)_nothrow;
 
         if( _obj == nullptr )
+        {
+            return false;
+        }
+
+        // Python code may pass any object where a type is expected.
+        if( _kernel->type_check( _obj ) == false )
         {
             return false;
         }
@@ -265,6 +274,20 @@ namespace pybind
         }
 
         _value = pybind::dict( _kernel, _obj );
+
+        return true;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool extract_value( kernel_interface * _kernel, PyObject * _obj, pybind::module & _value, bool _nothrow )
+    {
+        (void)_nothrow;
+
+        if( _obj == nullptr )
+        {
+            return false;
+        }
+
+        _value = pybind::module( _kernel, _obj );
 
         return true;
     }
@@ -398,6 +421,13 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_throw_i( kernel_interface * _kernel, PyObject * _value )
     {
+        // A null object stands for the error that produced it, which a bound
+        // function returns as its own.
+        if( _value == nullptr )
+        {
+            return nullptr;
+        }
+
         _kernel->incref( _value );
 
         return _value;
@@ -405,52 +435,74 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_throw_i( kernel_interface * _kernel, PyTypeObject * _value )
     {
-        _kernel->incref( (PyObject *)_value );
+        PyObject * obj = pybind::ptr_throw_i( _kernel, (PyObject *)_value );
 
-        return (PyObject *)_value;
+        return obj;
     }
     ////////////////////////////////////////////////////////////////////////////
     PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::object & _value )
     {
-        PyObject * obj = _value.ptr();
-
-        _kernel->incref( obj );
+        PyObject * obj = pybind::ptr_throw_i( _kernel, _value.ptr() );
 
         return obj;
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::list & _value )
     {
-        PyObject * obj = _value.ptr();
-
-        _kernel->incref( obj );
+        PyObject * obj = pybind::ptr_throw_i( _kernel, _value.ptr() );
 
         return obj;
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::tuple & _value )
     {
-        PyObject * obj = _value.ptr();
-
-        _kernel->incref( obj );
+        PyObject * obj = pybind::ptr_throw_i( _kernel, _value.ptr() );
 
         return obj;
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::dict & _value )
     {
-        PyObject * obj = _value.ptr();
-
-        _kernel->incref( obj );
+        PyObject * obj = pybind::ptr_throw_i( _kernel, _value.ptr() );
 
         return obj;
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::set & _value )
     {
-        PyObject * obj = _value.ptr();
+        PyObject * obj = pybind::ptr_throw_i( _kernel, _value.ptr() );
 
-        _kernel->incref( obj );
+        return obj;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::module & _value )
+    {
+        PyObject * obj = pybind::ptr_throw_i( _kernel, _value.ptr() );
+
+        return obj;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * ptr_throw_i( kernel_interface * _kernel, const detail::extract_operator_t & _value )
+    {
+        // An element of a tuple, a list or a dict is the object it holds.
+        PyObject * obj = pybind::ptr_throw_i( _kernel, _value.ptr() );
+
+        return obj;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * ptr_throw_i( kernel_interface * _kernel, const detail::set_list_operator_t & _value )
+    {
+        // An item proxy is the value of its item.
+        PyObject * item = _value;
+        PyObject * obj = pybind::ptr_throw_i( _kernel, item );
+
+        return obj;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    PyObject * ptr_throw_i( kernel_interface * _kernel, const detail::set_dict_operator_t & _value )
+    {
+        PyObject * item = _value;
+        PyObject * obj = pybind::ptr_throw_i( _kernel, item );
 
         return obj;
     }

@@ -27,7 +27,7 @@ namespace pybind
             }
 
         public:
-            operator PyObject * ();
+            operator PyObject * () const;
 
         public:
             template<class T>

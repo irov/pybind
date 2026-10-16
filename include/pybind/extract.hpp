@@ -19,9 +19,14 @@ namespace pybind
     class tuple;
     class dict;
     class set;
+    class module;
     //////////////////////////////////////////////////////////////////////////
     namespace detail
     {
+        class extract_operator_t;
+        class set_list_operator_t;
+        class set_dict_operator_t;
+        //////////////////////////////////////////////////////////////////////////
         template<class T>
         struct fixed_integer_type
         {
@@ -128,14 +133,6 @@ namespace pybind
         };
     }
     //////////////////////////////////////////////////////////////////////////
-    template<class T>
-    bool extract_value( kernel_interface * _kernel, PyObject * _obj, T & _value, bool _nothrow )
-    {
-        bool result = detail::extract_check<T>::extract( _kernel, _obj, _value, _nothrow );
-
-        return result;
-    }
-    //////////////////////////////////////////////////////////////////////////
     PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, bool & _value, bool _nothrow );
     PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, int8_t & _value, bool _nothrow );
     PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, int16_t & _value, bool _nothrow );
@@ -157,6 +154,36 @@ namespace pybind
     PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, pybind::tuple & _value, bool _nothrow );
     PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, pybind::dict & _value, bool _nothrow );
     PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, pybind::set & _value, bool _nothrow );
+    PYBIND_API bool extract_value( kernel_interface * _kernel, PyObject * _obj, pybind::module & _value, bool _nothrow );
+    //////////////////////////////////////////////////////////////////////////
+    template<class T>
+    bool extract_value( kernel_interface * _kernel, PyObject * _obj, T & _value, bool _nothrow )
+    {
+        // As extract: an enum, or an integer type other than the fixed-width
+        // ones, converts as the fixed-width integer of its size and sign.
+        if constexpr( std::is_enum_v<T> == true || detail::is_other_integer<T>::value == true )
+        {
+            typedef std::conditional_t<std::is_enum_v<T>, detail::enum_integer_type<T>, detail::fixed_integer_type<T>> integer_traits;
+            typedef typename integer_traits::type integer_type;
+
+            integer_type value;
+
+            if( pybind::extract_value( _kernel, _obj, value, _nothrow ) == false )
+            {
+                return false;
+            }
+
+            _value = static_cast<T>(value);
+
+            return true;
+        }
+        else
+        {
+            bool result = detail::extract_check<T>::extract( _kernel, _obj, _value, _nothrow );
+
+            return result;
+        }
+    }
     //////////////////////////////////////////////////////////////////////////
     template<class T>
     typename stdex::mpl::remove_cref<T>::type extract_throw( kernel_interface * _kernel, PyObject * _obj )
@@ -369,6 +396,10 @@ namespace pybind
     PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::list & _value );
     PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::dict & _value );
     PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::set & _value );
+    PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, const pybind::module & _value );
+    PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, const detail::extract_operator_t & _value );
+    PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, const detail::set_list_operator_t & _value );
+    PYBIND_API PyObject * ptr_throw_i( kernel_interface * _kernel, const detail::set_dict_operator_t & _value );
     //////////////////////////////////////////////////////////////////////////
     template<class T, class = void>
     struct ptr_throw_specialized2

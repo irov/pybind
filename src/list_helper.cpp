@@ -26,9 +26,10 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         set_list_operator_t & set_list_operator_t::operator = ( set_list_operator_t && _op )
         {
-            m_kernel = _op.m_kernel;
-            m_list = _op.m_list;
-            m_index = _op.m_index;
+            // As a list item: assigning another item stores its value.
+            PyObject * value = _op.m_kernel->list_getitem( _op.m_list, _op.m_index );
+
+            pybind::list_setitem_i( m_kernel, m_list, m_index, detail::import_operator_t( m_kernel, value ) );
 
             return *this;
         }
@@ -40,7 +41,7 @@ namespace pybind
             return *this;
         }
         //////////////////////////////////////////////////////////////////////////
-        set_list_operator_t::operator PyObject * ()
+        set_list_operator_t::operator PyObject * () const
         {
             PyObject * obj = m_kernel->list_getitem( m_list, m_index );
 
