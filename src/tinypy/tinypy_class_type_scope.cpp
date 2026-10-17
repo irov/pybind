@@ -26,17 +26,64 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         static bool is_bound( tinypy_vm_t * _vm, const tinypy_class_type_scope::payload_t * _payload )
         {
-#if defined(PYBIND_DEBUG)
-            // As the CPython backend, the slots check for an unwrapped object in debug builds.
+            // As the methods and the CPython backend: a slot of an unwrapped object
+            // fails in every build.
             if( _payload->impl == nullptr )
             {
                 tinypy_vm_raise_error( _vm, TINYPY_ERROR_RUNTIME, "native object is no longer bound" );
                 return false;
             }
-#else
-            (void)_vm;
-            (void)_payload;
-#endif
+
+            return true;
+        }
+        //////////////////////////////////////////////////////////////////////////
+        static bool normalize_sequence_index( tinypy_vm_t * _vm, tinypy_value_t * _instance, int64_t * const _index )
+        {
+            // As PySequence_GetItem: a negative index counts from the end of a
+            // Python subclass that provides __len__; without a length it is not
+            // normalized, as sq_item receives it.
+            if( *_index < 0 && tinypy_type_get_attr( tinypy_object_type( _instance ), "__len__", 7 ) != nullptr )
+            {
+                tinypy_value_t * method = tinypy_object_get_attr( _instance, "__len__", 7, nullptr );
+
+                if( method == nullptr )
+                {
+                    return false;
+                }
+
+                tinypy_value_t * args = tinypy_tuple_new( _vm, 0 );
+                tinypy_value_t * result = tinypy_call( method, args, nullptr, nullptr );
+                tinypy_release( args );
+                tinypy_release( method );
+
+                if( result == nullptr )
+                {
+                    return false;
+                }
+
+                int64_t length;
+                tinypy_bool_t converted = tinypy_number_as_index( result, TINYPY_ERROR_OVERFLOW, &length, nullptr );
+                tinypy_release( result );
+
+                if( converted == TINYPY_FALSE )
+                {
+                    return false;
+                }
+
+                if( length < 0 )
+                {
+                    tinypy_vm_raise_error( _vm, TINYPY_ERROR_VALUE, "__len__() should return >= 0" );
+                    return false;
+                }
+
+                *_index += length;
+            }
+
+            if( *_index < 0 )
+            {
+                tinypy_vm_raise_error( _vm, TINYPY_ERROR_INDEX, "index out of range" );
+                return false;
+            }
 
             return true;
         }
@@ -85,11 +132,13 @@ namespace pybind
                     argumentCount -= 1;
 
                     // Only property accessors take self from the arguments: tinypy checks
-                    // the receiver of the methods registered on the type itself.
+                    // the receiver of the methods registered on the type itself. The
+                    // type of a removed scope may be freed, and another type take its
+                    // address, so the receiver is also checked to be a bound instance.
                     PyObject * instance = detail::cast_object( selfValue );
                     PyTypeObject * instanceType = kernel->get_object_type( instance );
 
-                    if( scope->is_instance( instanceType ) == false )
+                    if( scope->is_instance( instanceType ) == false || tinypy_class_type_scope::instance_payload( instance ) == nullptr )
                     {
                         tinypy_vm_raise_error( vm, TINYPY_ERROR_TYPE, "native descriptor requires an instance of its type" );
                         return nullptr;
@@ -530,7 +579,6 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         static tinypy_value_t * native_sequence_get( tinypy_value_t * _instance, void * _payload, tinypy_value_t * _key, void * _userData, tinypy_error_t ** _outError )
         {
-            (void)_instance;
             tinypy_class_type_scope * scope = static_cast<tinypy_class_type_scope *>(_userData);
             tinypy_class_type_scope::payload_t * payload = static_cast<tinypy_class_type_scope::payload_t *>(_payload);
             tinypy_kernel * kernel = static_cast<tinypy_kernel *>(pybind::get_kernel());
@@ -544,10 +592,8 @@ namespace pybind
                 return nullptr;
             }
 
-            // Without a length the index is not normalized, as sq_item receives it.
-            if( index < 0 )
+            if( detail::normalize_sequence_index( vm, _instance, &index ) == false )
             {
-                tinypy_vm_raise_error( vm, TINYPY_ERROR_INDEX, "index out of range" );
                 return nullptr;
             }
 
@@ -580,7 +626,6 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         static tinypy_bool_t native_sequence_set( tinypy_value_t * _instance, void * _payload, tinypy_value_t * _key, tinypy_value_t * _value, void * _userData, tinypy_error_t ** _outError )
         {
-            (void)_instance;
             tinypy_class_type_scope * scope = static_cast<tinypy_class_type_scope *>(_userData);
             tinypy_class_type_scope::payload_t * payload = static_cast<tinypy_class_type_scope::payload_t *>(_payload);
             tinypy_kernel * kernel = static_cast<tinypy_kernel *>(pybind::get_kernel());
@@ -592,9 +637,8 @@ namespace pybind
                 return TINYPY_FALSE;
             }
 
-            if( index < 0 )
+            if( detail::normalize_sequence_index( vm, _instance, &index ) == false )
             {
-                tinypy_vm_raise_error( vm, TINYPY_ERROR_INDEX, "index out of range" );
                 return TINYPY_FALSE;
             }
 
@@ -1056,6 +1100,14 @@ namespace pybind
         }
     }
     //////////////////////////////////////////////////////////////////////////
+    void tinypy_class_type_scope::detach()
+    {
+        // The VM that is destroyed has released the type and the module.
+        m_module = nullptr;
+        m_type = nullptr;
+        m_instanceType = nullptr;
+    }
+    //////////////////////////////////////////////////////////////////////////
     kernel_interface * tinypy_class_type_scope::get_kernel() const
     {
         return m_kernel;
@@ -1338,6 +1390,18 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * tinypy_class_type_scope::create_object_( void * _impl, uint32_t _flags )
     {
+        // As the constructor of the type: a scope that is finalized has no type
+        // to create its instance of.
+        if( m_type == nullptr )
+        {
+            char message[PYBIND_EXCEPTION_MESSAGE_SIZE + 1];
+            std::snprintf( message, sizeof( message ), "scope '%s' is finalized and cannot create an instance", m_name );
+
+            m_kernel->set_error( error_type_e::Runtime, message );
+
+            return nullptr;
+        }
+
         tinypy_value_t * object = tinypy_native_instance_new( m_type );
         payload_t * value = static_cast<payload_t *>(tinypy_native_instance_payload( object));
         value->scope = this;
@@ -1373,6 +1437,12 @@ namespace pybind
     PyObject * tinypy_class_type_scope::create_pod( void ** _impl )
     {
         PyObject * object = this->create_object_( nullptr, PayloadPod );
+
+        if( object == nullptr )
+        {
+            return nullptr;
+        }
+
         payload_t * value = this->payload( object );
         *_impl = value->impl;
         return object;
@@ -1639,6 +1709,13 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void * tinypy_class_type_scope::call_new( PyObject * _obj, PyObject * _args, PyObject * _kwds )
     {
+        // As the CPython backend, whose finalize releases the adapters: a scope
+        // that is finalized keeps them for its live instances, and creates none.
+        if( m_type == nullptr )
+        {
+            return nullptr;
+        }
+
         if( m_new != nullptr )
         {
             return m_new->call( m_kernel, class_type_scope_interface_ptr::from( this ), _obj, _args, _kwds );

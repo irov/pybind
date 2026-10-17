@@ -139,6 +139,11 @@ namespace pybind
         return nullptr;
     }
     //////////////////////////////////////////////////////////////////////////
+    // As builtin types: object.__subclasses__ refers to readied types past
+    // Py_Finalize, so they live as long as the process, and a kernel that is
+    // initialized again finds them ready.
+    PyTypeObject member_python::m_member_type;
+    //////////////////////////////////////////////////////////////////////////
     bool member_python::initialize()
     {
         m_setmethod.ml_name = "setmethod";
@@ -194,7 +199,10 @@ namespace pybind
             0,                               /* tp_free */
         };
 
-        m_member_type = member_type;
+        if( ( m_member_type.tp_flags & Py_TPFLAGS_READY ) == 0 )
+        {
+            m_member_type = member_type;
+        }
 
         if( PyType_Ready( &m_member_type ) < 0 )
         {

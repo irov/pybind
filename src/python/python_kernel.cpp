@@ -4,8 +4,6 @@
 #include "pybind/exception.hpp"
 #include "pybind/debug.hpp"
 
-#include "pybind/function.hpp"
-
 #include "pybind/method_interface.hpp"
 
 #include "python_class_type_scope.hpp"
@@ -24,6 +22,61 @@ namespace pybind
     {
         //////////////////////////////////////////////////////////////////////////
         static const char * s_pythonKernelDebuggerCapsule = "pybind.python_kernel.debugger";
+        static const char * s_pythonKernelExcepthookCapsule = "pybind.python_kernel.excepthook";
+        //////////////////////////////////////////////////////////////////////////
+        struct excepthook_holder_t
+        {
+            python_kernel * kernel;
+            pybind_excepthook_handler_f handler;
+            void * userData;
+        };
+        //////////////////////////////////////////////////////////////////////////
+        static void finalize_excepthook( PyObject * _capsule )
+        {
+            excepthook_holder_t * holder = static_cast<excepthook_holder_t *>(PyCapsule_GetPointer( _capsule, s_pythonKernelExcepthookCapsule ));
+            allocator_interface * allocator = holder->kernel->get_allocator();
+            allocator->deleteT( holder );
+        }
+        //////////////////////////////////////////////////////////////////////////
+        static PyObject * call_excepthook( PyObject * _self, PyObject * _args )
+        {
+            PyObject * type;
+            PyObject * value;
+            PyObject * traceback;
+
+            if( PyArg_UnpackTuple( _args, "excepthook", 3, 3, &type, &value, &traceback ) == 0 )
+            {
+                return nullptr;
+            }
+
+            excepthook_holder_t * holder = static_cast<excepthook_holder_t *>(PyCapsule_GetPointer( _self, s_pythonKernelExcepthookCapsule ));
+
+            // As the tinypy backend: the class of a classic exception is not a
+            // type, which the handler takes as unknown.
+            PyTypeObject * exctype = nullptr;
+
+            if( PyType_Check( type ) != 0 )
+            {
+                exctype = reinterpret_cast<PyTypeObject *>(type);
+            }
+
+            try
+            {
+                holder->handler( holder->userData, exctype, value, traceback );
+            }
+            catch( const pybind_exception & _ex )
+            {
+                pybind::error_message( "excepthook invalid call exception: %s"
+                    , _ex.what()
+                );
+
+                return nullptr;
+            }
+
+            Py_RETURN_NONE;
+        }
+        //////////////////////////////////////////////////////////////////////////
+        static PyMethodDef s_excepthookMethod = { "excepthook", &call_excepthook, METH_VARARGS, "pybind embedding excepthook" };
         //////////////////////////////////////////////////////////////////////////
     }
     //////////////////////////////////////////////////////////////////////////
@@ -1022,6 +1075,17 @@ namespace pybind
             return nullptr;
         }
 
+        // As the tinypy backend, whose object keeps the scope that created it:
+        // an object given the class of another bound class, through the
+        // __class__ of object or __bases__, is no object of that class.
+        PyTypeObject * objtype = pybind::object_type( _obj );
+        const class_type_scope_interface_ptr & scope = this->get_class_scope( objtype );
+
+        if( scope != nullptr && scope->get_type_id() != pybind::helper::get_pod_type_id( _obj ) )
+        {
+            return nullptr;
+        }
+
         void * impl = pybind::helper::get_pod_impl( _obj );
 
         return impl;
@@ -1136,9 +1200,29 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::set_sys_excepthook_f( pybind_excepthook_handler_f _excepthook, void * _ud )
     {
-        function_adapter_interface_ptr adapter = pybind::make_function_proxy( this, "excepthook", _excepthook, _ud );
+        excepthook_holder_t * holder = m_allocator->newP<excepthook_holder_t>( excepthook_holder_t{ this, _excepthook, _ud } );
 
-        PyObject * py_excepthook = this->create_function_adapter( adapter, false );
+        PyObject * capsule = PyCapsule_New( holder, s_pythonKernelExcepthookCapsule, &finalize_excepthook );
+
+        if( capsule == nullptr )
+        {
+            m_allocator->deleteT( holder );
+
+            pybind::check_error();
+
+            return;
+        }
+
+        PyObject * py_excepthook = PyCFunction_New( &s_excepthookMethod, capsule );
+
+        Py_DECREF( capsule );
+
+        if( py_excepthook == nullptr )
+        {
+            pybind::check_error();
+
+            return;
+        }
 
         this->set_sys_excepthook( py_excepthook );
 
@@ -2035,6 +2119,11 @@ namespace pybind
     void python_kernel::module_fini( PyObject * _module )
     {
         return pybind::module_fini( _module );
+    }
+    //////////////////////////////////////////////////////////////////////////
+    bool python_kernel::module_check( PyObject * _module ) const
+    {
+        return PyModule_Check( _module ) != 0;
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * python_kernel::module_dict( PyObject * _module )

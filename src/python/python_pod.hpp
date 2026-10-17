@@ -4,6 +4,8 @@
 
 #include "pybind/types.hpp"
 
+#include "config/config.hpp"
+
 namespace pybind
 {
     //////////////////////////////////////////////////////////////////////////
@@ -22,15 +24,23 @@ namespace pybind
     static constexpr uint32_t PY_OBJECT_POD128 = PY_OBJECT_POD << 5;
     static constexpr uint32_t PY_OBJECT_POD256 = PY_OBJECT_POD << 6;
     //////////////////////////////////////////////////////////////////////////
+    // The type id of the scope that created the object, as the tinypy backend
+    // keeps the scope in the payload.
+    static constexpr uint32_t PY_OBJECT_TYPE_ID = 0x00FFF800;
+    static constexpr uint32_t PY_OBJECT_TYPE_ID_SHIFT = 11;
+    //////////////////////////////////////////////////////////////////////////
+    static_assert( PYBIND_TYPE_COUNT <= ( PY_OBJECT_TYPE_ID >> PY_OBJECT_TYPE_ID_SHIFT ) + 1, "the type id of a bound object does not fit its flag" );
+    //////////////////////////////////////////////////////////////////////////
     namespace helper
     {
         bool is_pod_object( PyObject * _obj );
         bool is_pod_holder( PyObject * _obj );
         bool is_pod_weak( PyObject * _obj );
         bool has_pod_hash( PyObject * _obj );
-        void wrap_pod_ptr( PyObject * _obj, void * _impl, bool _holder );
-        void wrap_pod_weak( PyObject * _obj, void * _impl, bool _holder );
-        void wrap_pod( PyObject * _obj, void ** _impl, size_t _size, bool _hash );
+        void wrap_pod_ptr( PyObject * _obj, void * _impl, bool _holder, typeid_t _typeId );
+        void wrap_pod_weak( PyObject * _obj, void * _impl, bool _holder, typeid_t _typeId );
+        void wrap_pod( PyObject * _obj, void ** _impl, size_t _size, bool _hash, typeid_t _typeId );
+        typeid_t get_pod_type_id( PyObject * _obj );
         int64_t get_pod_hash( PyObject * _obj );
         void set_pod_hash( PyObject * _obj, int64_t _hash );
         void * get_pod_impl( PyObject * _obj );
@@ -48,9 +58,9 @@ namespace pybind
         PyTypeObject * get_pod_type( size_t _pod, bool _hash );
 
     protected:
-        PyTypeObject m_pod_type[7];
-        PyTypeObject m_pod_hash_type[7];
+        static PyTypeObject m_pod_type[7];
+        static PyTypeObject m_pod_hash_type[7];
 
-        PyTypeObject m_ptr_type;
+        static PyTypeObject m_ptr_type;
     };
 }

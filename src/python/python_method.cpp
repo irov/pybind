@@ -246,6 +246,13 @@ namespace pybind
         PyObject_Free( _obj );
     }
     //////////////////////////////////////////////////////////////////////////
+    // As builtin types: object.__subclasses__ refers to readied types past
+    // Py_Finalize, so they live as long as the process, and a kernel that is
+    // initialized again finds them ready.
+    PyTypeObject method_python::m_method_caller_type;
+    PyTypeObject method_python::m_method_generator_type;
+    PyMemberDef method_python::m_descr_members[2];
+    //////////////////////////////////////////////////////////////////////////
     bool method_python::initialize()
     {
         PyTypeObject method_caller_type =
@@ -305,8 +312,11 @@ namespace pybind
         };
 #	endif
 
-        m_descr_members[0] = descr_members[0];
-        m_descr_members[1] = descr_members[1];
+        if( ( m_method_generator_type.tp_flags & Py_TPFLAGS_READY ) == 0 )
+        {
+            m_descr_members[0] = descr_members[0];
+            m_descr_members[1] = descr_members[1];
+        }
 
         PyTypeObject method_generator_type =
         {
@@ -346,8 +356,15 @@ namespace pybind
             0,					/* tp_descr_set */
         };
 
-        m_method_caller_type = method_caller_type;
-        m_method_generator_type = method_generator_type;
+        if( ( m_method_caller_type.tp_flags & Py_TPFLAGS_READY ) == 0 )
+        {
+            m_method_caller_type = method_caller_type;
+        }
+
+        if( ( m_method_generator_type.tp_flags & Py_TPFLAGS_READY ) == 0 )
+        {
+            m_method_generator_type = method_generator_type;
+        }
 
         if( PyType_Ready( &m_method_generator_type ) < 0 )
         {

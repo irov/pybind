@@ -51,6 +51,7 @@ namespace pybind
     PYBIND_API pybind::tuple make_tuple_i( kernel_interface * _kernel, std::initializer_list<detail::import_operator_t> && _t );
     PYBIND_API pybind::tuple make_tuple_args_i( kernel_interface * _kernel, std::initializer_list<detail::import_operator_t> && _t, const args & _args );
     PYBIND_API pybind::tuple make_tuple_args_i( kernel_interface * _kernel, std::initializer_list<detail::import_operator_t> && _t, args && _args );
+    PYBIND_API pybind::tuple make_invalid_tuple_t( kernel_interface * _kernel );
     //////////////////////////////////////////////////////////////////////////	
     template<class ... T>
     pybind::tuple make_tuple_t( kernel_interface * _kernel, T && ... _t )
@@ -73,13 +74,20 @@ namespace pybind
         size_t enumerator = 0;
         for( const typename container_type::value_type & v : _c )
         {
-            pybind::tuple_setitem_t( _kernel, py_tuple, enumerator++, v );
+            size_t index = enumerator++;
+
+            // As make_tuple_i: a null item stands for the error that produced
+            // it, so the call it is for is not made.
+            if( pybind::tuple_setitem_t( _kernel, py_tuple, index, v ) == false )
+            {
+                _kernel->decref( py_tuple );
+
+                return pybind::make_invalid_tuple_t( _kernel );
+            }
         }
 
         return pybind::tuple( _kernel, py_tuple, pybind::borrowed );
     }
-    //////////////////////////////////////////////////////////////////////////
-    PYBIND_API pybind::tuple make_invalid_tuple_t( kernel_interface * _kernel );
     //////////////////////////////////////////////////////////////////////////
     template<>
     struct extract_specialized<pybind::tuple>

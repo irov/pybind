@@ -3,6 +3,8 @@
 #include "pybind/generator/base_.hpp"
 #include "pybind/generator/helper_.hpp"
 
+#include <type_traits>
+
 namespace pybind
 {
     template<class C, class B = no_bases>
@@ -14,7 +16,7 @@ namespace pybind
 
     public:
         proxy_( kernel_interface * _kernel, const char * _name, bool external_extract = true, PyObject * _module = 0 )
-            : base_<C, B>( _kernel, _name, 0, nullptr, _kernel->get_allocator()->newT<class_destroy_delete<C>>(), 0, false, _module )
+            : base_<C, B>( _kernel, _name, 0, nullptr, proxy_::make_destroy_( _kernel ), 0, false, _module )
         {
             if( external_extract == true )
             {
@@ -39,6 +41,23 @@ namespace pybind
             scope->set_construct( ctr );
 
             return *this;
+        }
+
+    protected:
+        static destroy_adapter_interface_ptr make_destroy_( kernel_interface * _kernel )
+        {
+            // The objects def_constructor creates are deleted; a class only ever
+            // wrapped as a holder may have no destructor to call.
+            if constexpr( std::is_destructible_v<C> == true && std::is_abstract_v<C> == false )
+            {
+                return _kernel->get_allocator()->newT<class_destroy_delete<C>>();
+            }
+            else
+            {
+                (void)_kernel;
+
+                return nullptr;
+            }
         }
     };
 }

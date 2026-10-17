@@ -18,7 +18,7 @@ namespace pybind
         PyObject * create_member_adapter( const member_adapter_interface_ptr & _iadapter, PyTypeObject * _type );
 
     protected:
-        PyTypeObject m_member_type;
+        static PyTypeObject m_member_type;
 
         PyMethodDef m_setmethod;
         PyMethodDef m_getmethod;

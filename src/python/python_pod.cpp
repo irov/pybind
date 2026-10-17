@@ -80,7 +80,12 @@ namespace pybind
             }
 
             PyTypeObject * objtype = pybind::object_type( _obj );
-            const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
+
+            // As the tinypy backend, whose payload keeps the scope: the scope that
+            // created the object releases it, which holds once its class is the
+            // one of another bound class.
+            typeid_t typeId = helper::get_pod_type_id( _obj );
+            const class_type_scope_interface_ptr & scope = kernel->get_class_type_scope( typeId );
 
             if( scope == nullptr )
             {
@@ -110,6 +115,29 @@ namespace pybind
             {
                 PyErr_SetString( PyExc_RuntimeError, _ex.what() );
                 PyErr_WriteUnraisable( (PyObject *)objtype );
+            }
+
+            // As subtype_dealloc after tp_del: an object C++ code did not resurrect
+            // drops the weak references and the attributes it was given while the
+            // code ran, which subtype_dealloc cleared before.
+            if( _obj->ob_refcnt == 1 )
+            {
+                if( objtype->tp_weaklistoffset != 0 )
+                {
+                    PyWeakReference ** list = (PyWeakReference **)PyObject_GET_WEAKREFS_LISTPTR( _obj );
+
+                    while( *list != nullptr )
+                    {
+                        _PyWeakref_ClearRef( *list );
+                    }
+                }
+
+                PyObject ** dictptr = _PyObject_GetDictPtr( _obj );
+
+                if( dictptr != nullptr )
+                {
+                    Py_CLEAR( *dictptr );
+                }
             }
 
             PyErr_Restore( exception, value, traceback );
@@ -191,7 +219,7 @@ namespace pybind
                     return nullptr;
                 }
 
-                helper::wrap_pod_ptr( py_self, impl, false );
+                helper::wrap_pod_ptr( py_self, impl, false, scope->get_type_id() );
 
                 scope->incref_smart_pointer( impl );
 
@@ -235,7 +263,9 @@ namespace pybind
             size_t pod_size = scope->get_pod_size();
             bool pod_hash = scope->get_pod_hash();
 
-            helper::wrap_pod( py_self, &buff, pod_size, pod_hash );
+            typeid_t typeId = scope->get_type_id();
+
+            helper::wrap_pod( py_self, &buff, pod_size, pod_hash, typeId );
 
             try
             {
@@ -438,13 +468,14 @@ namespace pybind
             return (py_base->flag & PY_OBJECT_HASH) != 0;
         }
         //////////////////////////////////////////////////////////////////////////
-        void wrap_pod_ptr( PyObject * _obj, void * _impl, bool _holder )
+        void wrap_pod_ptr( PyObject * _obj, void * _impl, bool _holder, typeid_t _typeId )
         {
             py_ptr_object * py_ptr = (py_ptr_object *)_obj;
 
             py_ptr->impl = _impl;
 
             py_ptr->flag |= PY_OBJECT_PTR;
+            py_ptr->flag |= _typeId << PY_OBJECT_TYPE_ID_SHIFT;
 
             if( _holder == true )
             {
@@ -452,7 +483,7 @@ namespace pybind
             }
         }
         //////////////////////////////////////////////////////////////////////////
-        void wrap_pod_weak( PyObject * _obj, void * _impl, bool _holder )
+        void wrap_pod_weak( PyObject * _obj, void * _impl, bool _holder, typeid_t _typeId )
         {
             py_ptr_object * py_ptr = (py_ptr_object *)_obj;
 
@@ -460,6 +491,7 @@ namespace pybind
 
             py_ptr->flag |= PY_OBJECT_PTR;
             py_ptr->flag |= PY_OBJECT_WEAK;
+            py_ptr->flag |= _typeId << PY_OBJECT_TYPE_ID_SHIFT;
 
             if( _holder == true )
             {
@@ -467,8 +499,12 @@ namespace pybind
             }
         }
         //////////////////////////////////////////////////////////////////////////
-        void wrap_pod( PyObject * _obj, void ** _impl, size_t _size, bool _hash )
+        void wrap_pod( PyObject * _obj, void ** _impl, size_t _size, bool _hash, typeid_t _typeId )
         {
+            py_base_object * py_base = (py_base_object *)_obj;
+
+            py_base->flag |= _typeId << PY_OBJECT_TYPE_ID_SHIFT;
+
             uint32_t pod_matrix_index = detail::s_pod_type_matrix[_size - 1];
 
             if( _hash == false )
@@ -483,6 +519,15 @@ namespace pybind
 
                 (*pod_hash_generator)(_obj, _impl);
             }
+        }
+        //////////////////////////////////////////////////////////////////////////
+        typeid_t get_pod_type_id( PyObject * _obj )
+        {
+            py_base_object * py_base = (py_base_object *)_obj;
+
+            typeid_t typeId = ( py_base->flag & PY_OBJECT_TYPE_ID ) >> PY_OBJECT_TYPE_ID_SHIFT;
+
+            return typeId;
         }
         //////////////////////////////////////////////////////////////////////////
         int64_t get_pod_hash( PyObject * _obj )
@@ -795,25 +840,35 @@ namespace pybind
         return pod_type;
     }
     //////////////////////////////////////////////////////////////////////////
+    // As builtin types: object.__subclasses__ refers to readied types past
+    // Py_Finalize, so they live as long as the process, and a kernel that is
+    // initialized again finds them ready.
+    PyTypeObject pod_python::m_pod_type[7];
+    PyTypeObject pod_python::m_pod_hash_type[7];
+    PyTypeObject pod_python::m_ptr_type;
+    //////////////////////////////////////////////////////////////////////////
     bool pod_python::initialize()
     {
-        m_pod_type[0] = __make_pod_type( "pybind_pod4_type", sizeof( py_pod_object<0> ), &detail::py_new_pod );
-        m_pod_type[1] = __make_pod_type( "pybind_pod8_type", sizeof( py_pod_object<1> ), &detail::py_new_pod );
-        m_pod_type[2] = __make_pod_type( "pybind_pod16_type", sizeof( py_pod_object<2> ), &detail::py_new_pod );
-        m_pod_type[3] = __make_pod_type( "pybind_pod32_type", sizeof( py_pod_object<3> ), &detail::py_new_pod );
-        m_pod_type[4] = __make_pod_type( "pybind_pod64_type", sizeof( py_pod_object<4> ), &detail::py_new_pod );
-        m_pod_type[5] = __make_pod_type( "pybind_pod128_type", sizeof( py_pod_object<5> ), &detail::py_new_pod );
-        m_pod_type[6] = __make_pod_type( "pybind_pod256_type", sizeof( py_pod_object<6> ), &detail::py_new_pod );
+        if( ( m_ptr_type.tp_flags & Py_TPFLAGS_READY ) == 0 )
+        {
+            m_pod_type[0] = __make_pod_type( "pybind_pod4_type", sizeof( py_pod_object<0> ), &detail::py_new_pod );
+            m_pod_type[1] = __make_pod_type( "pybind_pod8_type", sizeof( py_pod_object<1> ), &detail::py_new_pod );
+            m_pod_type[2] = __make_pod_type( "pybind_pod16_type", sizeof( py_pod_object<2> ), &detail::py_new_pod );
+            m_pod_type[3] = __make_pod_type( "pybind_pod32_type", sizeof( py_pod_object<3> ), &detail::py_new_pod );
+            m_pod_type[4] = __make_pod_type( "pybind_pod64_type", sizeof( py_pod_object<4> ), &detail::py_new_pod );
+            m_pod_type[5] = __make_pod_type( "pybind_pod128_type", sizeof( py_pod_object<5> ), &detail::py_new_pod );
+            m_pod_type[6] = __make_pod_type( "pybind_pod256_type", sizeof( py_pod_object<6> ), &detail::py_new_pod );
 
-        m_pod_hash_type[0] = __make_pod_type( "pybind_pod4_hash_type", sizeof( py_pod_hash_object<0> ), &detail::py_new_pod );
-        m_pod_hash_type[1] = __make_pod_type( "pybind_pod8_hash_type", sizeof( py_pod_hash_object<1> ), &detail::py_new_pod );
-        m_pod_hash_type[2] = __make_pod_type( "pybind_pod16_hash_type", sizeof( py_pod_hash_object<2> ), &detail::py_new_pod );
-        m_pod_hash_type[3] = __make_pod_type( "pybind_pod32_hash_type", sizeof( py_pod_hash_object<3> ), &detail::py_new_pod );
-        m_pod_hash_type[4] = __make_pod_type( "pybind_pod64_hash_type", sizeof( py_pod_hash_object<4> ), &detail::py_new_pod );
-        m_pod_hash_type[5] = __make_pod_type( "pybind_pod128_hash_type", sizeof( py_pod_hash_object<5> ), &detail::py_new_pod );
-        m_pod_hash_type[6] = __make_pod_type( "pybind_pod256_hash_type", sizeof( py_pod_hash_object<6> ), &detail::py_new_pod );
+            m_pod_hash_type[0] = __make_pod_type( "pybind_pod4_hash_type", sizeof( py_pod_hash_object<0> ), &detail::py_new_pod );
+            m_pod_hash_type[1] = __make_pod_type( "pybind_pod8_hash_type", sizeof( py_pod_hash_object<1> ), &detail::py_new_pod );
+            m_pod_hash_type[2] = __make_pod_type( "pybind_pod16_hash_type", sizeof( py_pod_hash_object<2> ), &detail::py_new_pod );
+            m_pod_hash_type[3] = __make_pod_type( "pybind_pod32_hash_type", sizeof( py_pod_hash_object<3> ), &detail::py_new_pod );
+            m_pod_hash_type[4] = __make_pod_type( "pybind_pod64_hash_type", sizeof( py_pod_hash_object<4> ), &detail::py_new_pod );
+            m_pod_hash_type[5] = __make_pod_type( "pybind_pod128_hash_type", sizeof( py_pod_hash_object<5> ), &detail::py_new_pod );
+            m_pod_hash_type[6] = __make_pod_type( "pybind_pod256_hash_type", sizeof( py_pod_hash_object<6> ), &detail::py_new_pod );
 
-        m_ptr_type = __make_pod_type( "pybind_ptr_type", sizeof( py_ptr_object ), &detail::py_new_class );
+            m_ptr_type = __make_pod_type( "pybind_ptr_type", sizeof( py_ptr_object ), &detail::py_new_class );
+        }
 
         if( PyType_Ready( &m_ptr_type ) < 0 )
         {

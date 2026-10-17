@@ -17,6 +17,13 @@ namespace pybind
 
         tuple args = pybind::make_tuple_t( _kernel, _a ... );
 
+        // As ask_tuple_t: the invalid arguments of a null item stand for an
+        // error already raised, so nothing is called.
+        if( args.is_invalid() == true )
+        {
+            return detail::extract_operator_t( _kernel, nullptr, pybind::borrowed );
+        }
+
         PyObject * py_result = _kernel->ask_adapter( _self, scope, _name, args.ptr() );
 
         return detail::extract_operator_t( _kernel, py_result, pybind::borrowed );

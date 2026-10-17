@@ -14,6 +14,7 @@ namespace pybind
         PyObject_HEAD
 
             functor_adapter_interface * iadapter;
+        PyMethodDef method;
     };
     //////////////////////////////////////////////////////////////////////////
     static void py_functor_dealloc( PyObject * _obj )
@@ -74,6 +75,11 @@ namespace pybind
         return arg;
     }
     //////////////////////////////////////////////////////////////////////////
+    // As builtin types: object.__subclasses__ refers to readied types past
+    // Py_Finalize, so they live as long as the process, and a kernel that is
+    // initialized again finds them ready.
+    PyTypeObject functor_python::m_functor_type;
+    //////////////////////////////////////////////////////////////////////////
     bool functor_python::initialize()
     {
         PyTypeObject functor_type =
@@ -119,7 +125,10 @@ namespace pybind
             0,                               /* tp_free */
         };
 
-        m_functor_type = functor_type;
+        if( ( m_functor_type.tp_flags & Py_TPFLAGS_READY ) == 0 )
+        {
+            m_functor_type = functor_type;
+        }
 
         if( PyType_Ready( &m_functor_type ) < 0 )
         {
@@ -176,7 +185,12 @@ namespace pybind
 
         factorable::intrusive_ptr_setup( py_self->iadapter, _adapter.get() );
 
-        PyObject * py_func = PyCFunction_New( method, new_py_self );
+        // As a builtin function, named by its adapter; the object holds the
+        // definition for the function, which holds the object.
+        py_self->method = *method;
+        py_self->method.ml_name = _adapter->getName();
+
+        PyObject * py_func = PyCFunction_New( &py_self->method, new_py_self );
 
         pybind::decref( new_py_self );
 

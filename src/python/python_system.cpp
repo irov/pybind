@@ -1132,6 +1132,12 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
+        // As tuple_setitem: a null item stands for the error that produced it.
+        if( _value == nullptr )
+        {
+            return false;
+        }
+
         int res = PyObject_SetAttr( _obj, _attr, _value );
 
         if( res == -1 )
@@ -1147,6 +1153,12 @@ namespace pybind
     bool set_attrstring( PyObject * _obj, const char * _attr, PyObject * _value )
     {
         PYBIND_CHECK_MAIN_THREAD();
+
+        // As tuple_setitem: a null item stands for the error that produced it.
+        if( _value == nullptr )
+        {
+            return false;
+        }
 
         int res = PyObject_SetAttrString( _obj, _attr, _value );
 
@@ -1203,8 +1215,11 @@ namespace pybind
 
         int truth = PyObject_IsTrue( _obj );
 
+        // As extract_int_t: a value that does not extract leaves no error.
         if( truth < 0 )
         {
+            PyErr_Clear();
+
             return false;
         }
 
@@ -1722,6 +1737,12 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
+        // As tuple_setitem: a null item stands for the error that produced it.
+        if( _item == nullptr )
+        {
+            return false;
+        }
+
         pybind::incref( _item );
 
         Py_ssize_t py_index = (Py_ssize_t)_index;
@@ -1741,6 +1762,12 @@ namespace pybind
     bool list_appenditem( PyObject * _obj, PyObject * _item )
     {
         PYBIND_CHECK_MAIN_THREAD();
+
+        // As tuple_setitem: a null item stands for the error that produced it.
+        if( _item == nullptr )
+        {
+            return false;
+        }
 
         int res = PyList_Append( _obj, _item );
 
@@ -1839,6 +1866,12 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
+        // As tuple_setitem: a null item stands for the error that produced it.
+        if( _value == nullptr )
+        {
+            return false;
+        }
+
         int res = PyDict_SetItemString( _dict, _name, _value );
 
         if( res == -1 )
@@ -1854,6 +1887,12 @@ namespace pybind
     bool dict_set( PyObject * _dict, PyObject * _name, PyObject * _value )
     {
         PYBIND_CHECK_MAIN_THREAD();
+
+        // As tuple_setitem: a null item stands for the error that produced it.
+        if( _name == nullptr || _value == nullptr )
+        {
+            return false;
+        }
 
         int res = PyDict_SetItem( _dict, _name, _value );
 
@@ -1919,9 +1958,13 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
+        bool pending = PyErr_Occurred() != nullptr;
+
         PyObject * obj = PyDict_GetItemString( _dict, _key );
 
-        if( obj == nullptr )
+        // As the tinypy backend: the error of a key that cannot be made is
+        // reported, while one pending before is not the lookup's.
+        if( obj == nullptr && pending == false )
         {
             pybind::check_error();
 
@@ -1935,14 +1978,9 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
+        // As PyDict_GetItem and the tinypy backend: the error of a key that
+        // cannot be hashed is suppressed, and one pending before stays.
         PyObject * obj = PyDict_GetItem( _dict, _key );
-
-        if( obj == nullptr )
-        {
-            pybind::check_error();
-
-            return nullptr;
-        }
 
         return obj;
     }
@@ -2026,6 +2064,12 @@ namespace pybind
     bool set_set( PyObject * _set, PyObject * _value )
     {
         PYBIND_CHECK_MAIN_THREAD();
+
+        // As tuple_setitem: a null item stands for the error that produced it.
+        if( _value == nullptr )
+        {
+            return false;
+        }
 
         int res = PySet_Add( _set, _value );
 
@@ -2984,6 +3028,12 @@ namespace pybind
 
         PyObject * unicode = PyUnicode_FromString( _utf8 );
 
+        // As the tinypy backend: a decode error is reported.
+        if( unicode == nullptr )
+        {
+            pybind::check_error();
+        }
+
         return unicode;
     }
     //////////////////////////////////////////////////////////////////////////
@@ -2993,6 +3043,11 @@ namespace pybind
 
         Py_ssize_t py_size = (Py_ssize_t)_size;
         PyObject * unicode = PyUnicode_FromStringAndSize( _utf8, py_size );
+
+        if( unicode == nullptr )
+        {
+            pybind::check_error();
+        }
 
         return unicode;
     }

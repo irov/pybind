@@ -17,10 +17,10 @@ namespace pybind
         method_adapter_interface * get_method_adapter( PyObject * _obj ) const;
 
     protected:
-        PyTypeObject m_method_caller_type;
-        PyTypeObject m_method_generator_type;
+        static PyTypeObject m_method_caller_type;
+        static PyTypeObject m_method_generator_type;
 
-        PyMemberDef m_descr_members[2];
+        static PyMemberDef m_descr_members[2];
     };
 }
 

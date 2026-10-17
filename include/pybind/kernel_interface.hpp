@@ -372,6 +372,7 @@ namespace pybind
         // Repeated initialization preserves the existing module and its contents.
         virtual PyObject * module_init( const char * _name ) = 0;
         virtual void module_fini( PyObject * _module ) = 0;
+        virtual bool module_check( PyObject * _module ) const = 0;
         virtual PyObject * module_dict( PyObject * _module ) = 0;
         virtual void module_addobject( PyObject * _module, const char * _name, PyObject * _obj ) = 0;
         virtual PyObject * module_execcode( const char * _name, PyObject * _code ) = 0;

@@ -34,22 +34,35 @@ namespace pybind
             return py_self;
         }
         //////////////////////////////////////////////////////////////////////////
+        static void * get_bound_impl( kernel_interface * _kernel, PyObject * _obj, const char * _slot )
+        {
+            // As the methods: a slot of an unwrapped object fails in every build.
+            // The object is named by its type, as its str may call the slot again.
+            void * impl = _kernel->get_class_impl( _obj );
+
+            if( impl == nullptr )
+            {
+                PyTypeObject * objtype = pybind::object_type( _obj );
+
+                pybind::error_message( "%s unbind object of type '%s'"
+                    , _slot
+                    , _kernel->type_name( objtype )
+                );
+            }
+
+            return impl;
+        }
+        //////////////////////////////////////////////////////////////////////////
         static PyObject * py_callfunc( PyObject * _obj, PyObject * _args, PyObject * _kwds )
         {
             kernel_interface * kernel = pybind::get_kernel();
 
-            void * impl = kernel->get_class_impl( _obj );
+            void * impl = detail::get_bound_impl( kernel, _obj, "callfunc" );
 
-#if defined(PYBIND_DEBUG)
             if( impl == nullptr )
             {
-                pybind::error_message( "callfunc unbind object '%s'"
-                    , kernel->object_str( _obj ).c_str()
-                );
-
                 return nullptr;
             }
-#endif
 
             PyTypeObject * objtype = pybind::object_type( _obj );
 
@@ -102,18 +115,12 @@ namespace pybind
         {
             kernel_interface * kernel = pybind::get_kernel();
 
-            void * impl = kernel->get_class_impl( _obj );
+            void * impl = detail::get_bound_impl( kernel, _obj, "reprfunc" );
 
-#if defined(PYBIND_DEBUG)
             if( impl == nullptr )
             {
-                pybind::error_message( "reprfunc unbind object '%s'"
-                    , kernel->object_str( _obj ).c_str()
-                );
-
                 return nullptr;
             }
-#endif
 
             PyTypeObject * objtype = pybind::object_type( _obj );
 
@@ -178,18 +185,12 @@ namespace pybind
 
             kernel_interface * kernel = pybind::get_kernel();
 
-            void * impl = kernel->get_class_impl( _obj );
+            void * impl = detail::get_bound_impl( kernel, _obj, "hash" );
 
-#if defined(PYBIND_DEBUG)
             if( impl == nullptr )
             {
-                pybind::error_message( "hash unbind object '%s'"
-                    , kernel->object_str( _obj ).c_str()
-                );
-
                 return -1;
             }
-#endif
 
             PyTypeObject * objtype = pybind::object_type( _obj );
 
@@ -248,18 +249,12 @@ namespace pybind
         {
             kernel_interface * kernel = pybind::get_kernel();
 
-            void * impl = kernel->get_class_impl( _obj );
+            void * impl = detail::get_bound_impl( kernel, _obj, "richcompare" );
 
-#if defined(PYBIND_DEBUG)
             if( impl == nullptr )
             {
-                pybind::error_message( "py_richcompare '%s' compare unbind object"
-                    , kernel->object_str( _obj ).c_str()
-                );
-
                 return nullptr;
             }
-#endif
 
             PybindOperatorCompare pybind_op = POC_Less;
 
@@ -380,18 +375,12 @@ namespace pybind
         {
             kernel_interface * kernel = pybind::get_kernel();
 
-            void * impl = kernel->get_class_impl( _obj );
+            void * impl = detail::get_bound_impl( kernel, _obj, "getattro" );
 
-#if defined(PYBIND_DEBUG)
             if( impl == nullptr )
             {
-                pybind::error_message( "getattro '%s' unbind object"
-                    , kernel->object_str( _obj ).c_str()
-                );
-
                 return nullptr;
             }
-#endif
 
             PyTypeObject * objtype = pybind::object_type( _obj );
 
@@ -442,18 +431,12 @@ namespace pybind
         {
             kernel_interface * kernel = pybind::get_kernel();
 
-            void * impl = kernel->get_class_impl( _obj );
+            void * impl = detail::get_bound_impl( kernel, _obj, "subscript" );
 
-#if defined(PYBIND_DEBUG)
             if( impl == nullptr )
             {
-                pybind::error_message( "subscript unbind object '%s'"
-                    , kernel->object_str( _obj ).c_str()
-                );
-
                 return nullptr;
             }
-#endif
 
             PyTypeObject * objtype = pybind::object_type( _obj );
 
@@ -472,9 +455,24 @@ namespace pybind
             const mapping_adapter_interface_ptr & adapter = scope->get_mapping();
 
             // A bound type derived in C++ inherits the slot through the
-            // descriptor of its base, not the adapter, as in the tinypy backend.
+            // descriptor of its base, not the adapter, as in the tinypy backend;
+            // as PyObject_GetItem without mp_subscript, its own sequence serves.
             if( adapter == nullptr )
             {
+                if( scope->get_sequence_get() != nullptr && PyIndex_Check( _key ) != 0 )
+                {
+                    Py_ssize_t index = PyNumber_AsSsize_t( _key, PyExc_IndexError );
+
+                    if( index == -1 && PyErr_Occurred() != nullptr )
+                    {
+                        return nullptr;
+                    }
+
+                    PyObject * res = PySequence_GetItem( _obj, index );
+
+                    return res;
+                }
+
                 PyErr_Format( PyExc_TypeError, "'%s' object has no attribute '__getitem__'"
                     , objtype->tp_name
                 );
@@ -512,18 +510,12 @@ namespace pybind
         {
             kernel_interface * kernel = pybind::get_kernel();
 
-            void * impl = kernel->get_class_impl( _obj );
+            void * impl = detail::get_bound_impl( kernel, _obj, "item get" );
 
-#if defined(PYBIND_DEBUG)
             if( impl == nullptr )
             {
-                pybind::error_message( "item get unbind object '%s"
-                    , kernel->object_str( _obj ).c_str()
-                );
-
                 return nullptr;
             }
-#endif
 
             PyTypeObject * objtype = pybind::object_type( _obj );
 
@@ -584,18 +576,12 @@ namespace pybind
         {
             kernel_interface * kernel = pybind::get_kernel();
 
-            void * impl = kernel->get_class_impl( _obj );
+            void * impl = detail::get_bound_impl( kernel, _obj, "item set" );
 
-#if defined(PYBIND_DEBUG)
             if( impl == nullptr )
             {
-                pybind::error_message( "item set unbind object '%s'"
-                    , kernel->object_str( _obj ).c_str()
-                );
-
                 return -1;
             }
-#endif
 
             PyTypeObject * objtype = pybind::object_type( _obj );
 
@@ -666,9 +652,9 @@ namespace pybind
             (binaryfunc)0,                    /* sq_concat */
             (ssizeargfunc)0,                  /* sq_repeat */
             (ssizeargfunc)&detail::py_item_get,                    /* sq_item */
-            (ssizessizeargfunc)0,              /* sq_slice */
+            nullptr,              /* sq_slice, was_sq_slice of Python 3 */
             (ssizeobjargproc)&detail::py_item_set,             /* sq_ass_item */
-            (ssizessizeobjargproc)0,       /* sq_ass_slice */
+            nullptr,       /* sq_ass_slice, was_sq_ass_slice of Python 3 */
             (objobjproc)0,                  /* sq_contains */
             (binaryfunc)0,            /* sq_inplace_concat */
             (ssizeargfunc)0,          /* sq_inplace_repeat */
@@ -676,19 +662,12 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         static PyObject * py_nb_unary_method( kernel_interface * _kernel, PyObject * _obj, const class_type_scope_interface_ptr & _scope, const number_unary_adapter_interface_ptr & _adapter )
         {
-            void * impl = _kernel->get_class_impl( _obj );
+            void * impl = detail::get_bound_impl( _kernel, _obj, "nb unary" );
 
-#if defined(PYBIND_DEBUG)
             if( impl == nullptr )
             {
-                pybind::error_message( "nb unary unbind object '%s' scope '%s'"
-                    , _kernel->object_str( _obj ).c_str()
-                    , _scope->get_name()
-                );
-
                 return nullptr;
             }
-#endif
 
             DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( _kernel, _scope->get_name(), _adapter->getName(), _adapter->getCallDebugSilent(), nullptr, nullptr );
 
@@ -699,19 +678,12 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         static PyObject * py_nb_binary_method( kernel_interface * _kernel, PyObject * _obj, PyObject * _value, const class_type_scope_interface_ptr & _scope, const number_binary_adapter_interface_ptr & _adapter, bool _rotate )
         {
-            void * impl = _kernel->get_class_impl( _obj );
+            void * impl = detail::get_bound_impl( _kernel, _obj, "nb binary" );
 
-#if defined(PYBIND_DEBUG)
             if( impl == nullptr )
             {
-                pybind::error_message( "nb binary unbind object '%s' scope '%s'"
-                    , _kernel->object_str( _obj ).c_str()
-                    , _scope->get_name()
-                );
-
                 return nullptr;
             }
-#endif
 
             DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( _kernel, _scope->get_name(), _adapter->getName(), _adapter->getCallDebugSilent(), nullptr, nullptr );
 
@@ -729,19 +701,12 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         static bool py_nb_inplace_method( kernel_interface * _kernel, PyObject * _obj, PyObject * _value, const class_type_scope_interface_ptr & _scope, const number_inplace_adapter_interface_ptr & _adapter )
         {
-            void * impl = _kernel->get_class_impl( _obj );
+            void * impl = detail::get_bound_impl( _kernel, _obj, "nb inplace" );
 
-#if defined(PYBIND_DEBUG)
             if( impl == nullptr )
             {
-                pybind::error_message( "nb inplace unbind object '%s' scope '%s'"
-                    , _kernel->object_str( _obj ).c_str()
-                    , _scope->get_name()
-                );
-
                 return false;
             }
-#endif
 
             DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( _kernel, _scope->get_name(), _adapter->getName(), _adapter->getCallDebugSilent(), nullptr, nullptr );
 
@@ -1510,7 +1475,7 @@ namespace pybind
             (binaryfunc)&detail::py_nb_add,
             (binaryfunc)&detail::py_nb_sub,
             (binaryfunc)&detail::py_nb_mul,
-            (binaryfunc)&detail::py_nb_div,
+            (binaryfunc)0, /*nb_remainder*/
             (binaryfunc)0, /*nb_divmod*/
             (ternaryfunc)0, /*nb_power*/
             (unaryfunc)&detail::py_nb_neg, /*nb_negative*/
@@ -1530,7 +1495,7 @@ namespace pybind
             (binaryfunc)&detail::py_nb_inplace_add, /*nb_inplace_add*/
             (binaryfunc)&detail::py_nb_inplace_sub, /*nb_inplace_subtract*/
             (binaryfunc)&detail::py_nb_inplace_mul, /*nb_inplace_multiply*/
-            (binaryfunc)&detail::py_nb_inplace_div, /*nb_inplace_remainder*/
+            (binaryfunc)0, /*nb_inplace_remainder*/
             (ternaryfunc)0, /*nb_inplace_power*/
             (binaryfunc)0, /*nb_inplace_lshift*/
             (binaryfunc)0, /*nb_inplace_rshift*/
@@ -1539,9 +1504,9 @@ namespace pybind
             (binaryfunc)0, /*nb_inplace_or*/
 
             (binaryfunc)0, /*nb_floor_divide*/
-            (binaryfunc)0, /*nb_true_divide*/
+            (binaryfunc)&detail::py_nb_div, /*nb_true_divide*/
             (binaryfunc)0, /*nb_inplace_floor_divide*/
-            (binaryfunc)0, /*nb_inplace_true_divide*/
+            (binaryfunc)&detail::py_nb_inplace_div, /*nb_inplace_true_divide*/
 
             (unaryfunc)0, /*nb_index*/
 
@@ -1657,9 +1622,26 @@ namespace pybind
                         continue;
                     }
 
-                    if( PyDict_GetItem( _type->tp_dict, py_key ) != nullptr )
+                    PyObject * py_existing = PyDict_GetItem( _type->tp_dict, py_key );
+
+                    if( py_existing != nullptr )
                     {
-                        continue;
+                        // As mp_subscript shadows sq_item: a wrapper of the slots
+                        // template replaces one this code added for another slot
+                        // of its name, as for sq_item when the sequence is set
+                        // before the mapping.
+                        if( slots_type != &s_slots_type || Py_TYPE( py_existing ) != &PyWrapperDescr_Type )
+                        {
+                            continue;
+                        }
+
+                        PyWrapperDescrObject * py_existing_descr = reinterpret_cast<PyWrapperDescrObject *>(py_existing);
+                        PyTypeObject * py_existing_type = reinterpret_cast<PyDescrObject *>(py_existing)->d_type;
+
+                        if( py_existing_type != _type || py_existing_descr->d_base == py_descr->d_base )
+                        {
+                            continue;
+                        }
                     }
 
                     PyObject * py_wrapper = PyDescr_NewWrapper( _type, py_descr->d_base, py_descr->d_wrapped );
@@ -2498,7 +2480,7 @@ namespace pybind
             return nullptr;
         }
 
-        pybind::helper::wrap_pod_ptr( py_self, _impl, false );
+        pybind::helper::wrap_pod_ptr( py_self, _impl, false, m_typeId );
 
         this->incref_smart_pointer( _impl );
 
@@ -2519,7 +2501,7 @@ namespace pybind
             return nullptr;
         }
 
-        pybind::helper::wrap_pod_ptr( py_self, _impl, true );
+        pybind::helper::wrap_pod_ptr( py_self, _impl, true, m_typeId );
 
         this->incref_smart_pointer( _impl );
 
@@ -2540,7 +2522,7 @@ namespace pybind
             return nullptr;
         }
 
-        pybind::helper::wrap_pod_weak( py_self, _impl, true );
+        pybind::helper::wrap_pod_weak( py_self, _impl, true, m_typeId );
 
         return py_self;
     }
@@ -2559,7 +2541,7 @@ namespace pybind
             return nullptr;
         }
 
-        pybind::helper::wrap_pod( py_self, _impl, m_pod_size, m_pod_hash );
+        pybind::helper::wrap_pod( py_self, _impl, m_pod_size, m_pod_hash, m_typeId );
 
         return py_self;
     }

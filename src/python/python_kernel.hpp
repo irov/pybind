@@ -181,6 +181,7 @@ namespace pybind
         PyObject * module_import( const char * _name, bool & _exsist ) override;
         PyObject * module_init( const char * _name ) override;
         void module_fini( PyObject * _module ) override;
+        bool module_check( PyObject * _module ) const override;
         PyObject * module_dict( PyObject * _module ) override;
         void module_addobject( PyObject * _module, const char * _name, PyObject * _obj ) override;
         PyObject * module_execcode( const char * _name, PyObject * _code ) override;

@@ -49,7 +49,7 @@ namespace pybind
         set_dict_operator_t & set_dict_operator_t::operator = ( set_dict_operator_t && _op )
         {
             // As a dict item: assigning another item stores its value.
-            PyObject * value = _op.m_kernel->dict_get( _op.m_dict, _op.m_key );
+            PyObject * value = _op;
 
             pybind::dict_setobject_i( m_kernel, m_dict, m_key, import_operator_t( m_kernel, value ) );
 
@@ -66,6 +66,14 @@ namespace pybind
         set_dict_operator_t::operator PyObject * () const
         {
             PyObject * py_object = m_kernel->dict_get( m_dict, m_key );
+
+            // As dict_get_i and operator T: a missing key reads as None.
+            if( py_object == nullptr )
+            {
+                PyObject * py_none = m_kernel->get_none();
+
+                return py_none;
+            }
 
             return py_object;
         }

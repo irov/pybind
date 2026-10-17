@@ -179,6 +179,7 @@ namespace pybind
         PyObject * module_import( const char * _name, bool & _exsist ) override;
         PyObject * module_init( const char * _name ) override;
         void module_fini( PyObject * _module ) override;
+        bool module_check( PyObject * _module ) const override;
         PyObject * module_dict( PyObject * _module ) override;
         void module_addobject( PyObject * _module, const char * _name, PyObject * _obj ) override;
         PyObject * module_execcode( const char * _name, PyObject * _code ) override;
@@ -333,6 +334,7 @@ namespace pybind
         void display_error_( tinypy_value_t * _type, tinypy_value_t * _value, tinypy_value_t * _traceback );
         void write_stderr_( const char * _text );
         tinypy_value_t * get_sys_value_( const char * _name ) const;
+        static tinypy_value_t * call_default_excepthook_( tinypy_value_t * _function, tinypy_value_t * _self, tinypy_value_t * const * _items, size_t _count, tinypy_value_t * _kwargs, tinypy_error_t ** _outError );
 #if defined(PYBIND_DEBUG)
         void check_main_thread_() const;
 #endif

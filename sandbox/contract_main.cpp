@@ -14,6 +14,7 @@
 #include "pybind/module.hpp"
 #include "pybind/generator/class_.hpp"
 #include "pybind/generator/interface_.hpp"
+#include "pybind/generator/proxy_.hpp"
 #include "pybind/generator/struct_.hpp"
 #include "pybind/generator/superclass_.hpp"
 #include "pybind/internal_call.hpp"
@@ -1397,6 +1398,551 @@ regression2_hook_ok = regression_hook_calls == ['hooked']
         _kernel->remove_scope<regression_ent_t>();
         _kernel->remove_scope<regression_mix_t>();
     }
+
+    static int32_t s_regression3_node_alive = 0;
+    static int32_t s_regression3_takes = 0;
+    static int32_t s_regression3_owner_destroys = 0;
+    static int32_t s_regression3_owner_notified = 0;
+    static bool s_regression3_exists = false;
+    static bool s_regression3_found = false;
+    static bool s_regression3_removed = false;
+    static bool s_regression3_extracted = true;
+
+    class regression3_node_t
+    {
+    public:
+        regression3_node_t()
+        {
+            ++s_regression3_node_alive;
+        }
+
+        ~regression3_node_t()
+        {
+            --s_regression3_node_alive;
+        }
+
+        int32_t getValue() const
+        {
+            return 7;
+        }
+
+        void take( int32_t _value )
+        {
+            (void)_value;
+
+            ++s_regression3_takes;
+        }
+    };
+
+    class regression3_other_t
+    {
+    public:
+        int32_t getOther() const
+        {
+            return 3;
+        }
+    };
+
+    class regression3_vector_t
+    {
+    public:
+        int32_t getItem( size_t _index ) const
+        {
+            return (int32_t)_index * 10;
+        }
+    };
+
+    class regression3_lookup_t
+    {
+    public:
+        int32_t getItem( size_t _index ) const
+        {
+            return (int32_t)_index * 10;
+        }
+
+        int32_t getMapped( PyObject * _key ) const
+        {
+            (void)_key;
+
+            return 222;
+        }
+    };
+
+    class regression3_map_base_t
+    {
+    public:
+        int32_t getMapped( PyObject * _key ) const
+        {
+            (void)_key;
+
+            return 222;
+        }
+    };
+
+    class regression3_map_derived_t
+        : public regression3_map_base_t
+    {
+    public:
+        int32_t getItem( size_t _index ) const
+        {
+            return (int32_t)_index * 1000;
+        }
+    };
+
+    class regression3_protected_t
+    {
+    protected:
+        ~regression3_protected_t()
+        {
+        }
+    };
+
+    class regression3_target_t
+    {
+    public:
+        regression3_target_t()
+            : value( 5 )
+        {
+        }
+
+        int32_t value;
+    };
+
+    static regression3_target_t s_regression3_target;
+
+    class regression3_owner_t
+    {
+    public:
+        regression3_owner_t()
+            : m_callback( nullptr )
+        {
+        }
+
+        ~regression3_owner_t()
+        {
+            ++s_regression3_owner_destroys;
+
+            if( m_callback == nullptr )
+            {
+                return;
+            }
+
+            // As a C++ object that notifies Python as it is released, while the
+            // kernel may be destroying the interpreter.
+            pybind::kernel_interface * kernel = pybind::get_kernel();
+
+            PyObject * target = kernel->scope_create_weak_t( &s_regression3_target );
+            PyObject * args = kernel->tuple_new( 1 );
+            kernel->tuple_setitem( args, 0, target );
+            PyObject * result = kernel->ask_native( m_callback, args );
+
+            if( result != nullptr )
+            {
+                ++s_regression3_owner_notified;
+
+                kernel->decref( result );
+            }
+
+            kernel->decref( args );
+            kernel->decref( target );
+            kernel->decref( m_callback );
+        }
+
+        void setCallback( PyObject * _callback )
+        {
+            pybind::get_kernel()->incref( _callback );
+
+            m_callback = _callback;
+        }
+
+    protected:
+        PyObject * m_callback;
+    };
+
+    static const char * repr_regression3_node( const regression3_node_t * _node )
+    {
+        (void)_node;
+        return "regression3-node";
+    }
+
+    static pybind::object regression3_pending_dict( pybind::kernel_interface * _kernel, PyObject * _dict, PyObject * _key )
+    {
+        // An error raised before the lookups is neither taken for theirs nor
+        // cleared by them, so Python sees it.
+        _kernel->set_error( pybind::error_type_e::Index, "regression pending" );
+
+        s_regression3_exists = _kernel->dict_exist( _dict, _key );
+        s_regression3_found = _kernel->dict_get( _dict, _key ) != nullptr;
+        s_regression3_removed = _kernel->dict_remove( _dict, _key );
+
+        return pybind::make_invalid_object_t();
+    }
+
+    static pybind::object regression3_pending_repr( pybind::kernel_interface * _kernel, PyObject * _object )
+    {
+        // An error path formats its object while the error is pending.
+        _kernel->set_error( pybind::error_type_e::Index, "regression pending" );
+
+        pybind::string_view repr = _kernel->object_repr( _object );
+        PYBIND_CONTRACT_ASSERT( repr.is_invalid() == true );
+
+        return pybind::make_invalid_object_t();
+    }
+
+    static pybind::object regression3_extract_double( pybind::kernel_interface * _kernel, PyObject * _object )
+    {
+        double value;
+        s_regression3_extracted = _kernel->extract_double( _object, value );
+
+        // An error the extract left pending would keep this one from being set.
+        _kernel->set_error( pybind::error_type_e::Value, "regression after extract" );
+
+        return pybind::make_invalid_object_t();
+    }
+
+    static void regression3_hook( void * _ud, PyTypeObject * _type, PyObject * _value, PyObject * _traceback )
+    {
+        (void)_value;
+        (void)_traceback;
+
+        int32_t * calls = static_cast<int32_t *>(_ud);
+
+        if( _type != nullptr )
+        {
+            ++calls[0];
+        }
+        else
+        {
+            ++calls[1];
+        }
+    }
+
+    static void check_third_review_regressions( pybind::kernel_interface * _kernel, PyObject * _module )
+    {
+        pybind::class_<regression3_node_t>( _kernel, "Regression3Node", true, _module )
+            .def_constructor( pybind::init<>() )
+            .def( "getValue", &regression3_node_t::getValue )
+            .def( "take", &regression3_node_t::take )
+            .def_repr( &repr_regression3_node )
+            ;
+
+        pybind::class_<regression3_other_t>( _kernel, "Regression3Other", true, _module )
+            .def_constructor( pybind::init<>() )
+            .def( "getOther", &regression3_other_t::getOther )
+            ;
+
+        pybind::class_<regression3_vector_t>( _kernel, "Regression3Vector", true, _module )
+            .def_constructor( pybind::init<>() )
+            .def_sequence_get( &regression3_vector_t::getItem )
+            ;
+
+        // The sequence is set before the mapping, which shadows it.
+        pybind::class_<regression3_lookup_t>( _kernel, "Regression3Lookup", true, _module )
+            .def_constructor( pybind::init<>() )
+            .def_sequence_get( &regression3_lookup_t::getItem )
+            .def_mapping( &regression3_lookup_t::getMapped )
+            ;
+
+        pybind::class_<regression3_map_base_t>( _kernel, "Regression3MapBase", true, _module )
+            .def_constructor( pybind::init<>() )
+            .def_mapping( &regression3_map_base_t::getMapped )
+            ;
+
+        pybind::class_<regression3_map_derived_t, pybind::bases<regression3_map_base_t>>( _kernel, "Regression3MapDerived", true, _module )
+            .def_constructor( pybind::init<>() )
+            .def_sequence_get( &regression3_map_derived_t::getItem )
+            ;
+
+        // A class with no public destructor is only ever wrapped as a holder.
+        pybind::proxy_<regression3_protected_t>( _kernel, "Regression3Protected", true, _module );
+
+        pybind::def_function_kernel( _kernel, "regression3_pending_dict", &regression3_pending_dict );
+        pybind::def_function_kernel( _kernel, "regression3_pending_repr", &regression3_pending_repr );
+        pybind::def_function_kernel( _kernel, "regression3_extract_double", &regression3_extract_double );
+
+        PyObject * dict = _kernel->module_dict( _module );
+
+        PyObject * longValue = _kernel->ptr_long( 5 );
+        PyObject * ulongValue = _kernel->ptr_ulong( 7 );
+        _kernel->dict_setstring( dict, "regression3_long", longValue );
+        _kernel->dict_setstring( dict, "regression3_ulong", ulongValue );
+        _kernel->decref( longValue );
+        _kernel->decref( ulongValue );
+
+        const char source[] = R"PY(
+class Regression3Equal(object):
+    def __eq__(self, other):
+        return True
+
+regression3_equal_left = Regression3Equal()
+regression3_equal_right = Regression3Equal()
+
+class Regression3BadRepr(object):
+    def __repr__(self):
+        raise ValueError('bad repr')
+
+class Regression3BadBool(object):
+    def __nonzero__(self):
+        raise KeyError('bad bool')
+
+regression3_bad_bool = Regression3BadBool()
+
+regression3_pending_dict_ok = raises(IndexError, regression3_pending_dict, {1: 2}, 1)
+regression3_pending_repr_ok = raises(IndexError, regression3_pending_repr, Regression3BadRepr())
+regression3_extract_double_ok = raises(ValueError, regression3_extract_double, 10 ** 400)
+regression3_int_ok = type(regression3_long) is int and type(regression3_ulong) is int
+regression3_default_hook_ok = callable(sys.excepthook) and callable(sys.__excepthook__)
+regression3_name_ok = regression_size.__name__ == 'regression_size'
+regression3_module_ok = raises(Exception, regression_module_valid, 5)
+
+class Regression3Sized(Regression3Vector):
+    def __len__(self):
+        return 3
+
+regression3_negative_ok = Regression3Sized()[-1] == 20 and raises(IndexError, lambda: Regression3Vector()[-1])
+
+class Regression3LookupSub(Regression3Lookup):
+    pass
+
+regression3_lookup_ok = Regression3Lookup()['k'] == 222 and Regression3LookupSub()['k'] == 222 and Regression3LookupSub()[1] == Regression3Lookup()[1]
+regression3_derived_ok = Regression3MapDerived()[2] == 2000 and Regression3MapBase()['k'] == 222
+
+regression3_node = Regression3Node()
+
+def regression3_set_class(value):
+    object.__dict__['__class__'].__set__(regression3_node, value)
+
+def regression3_bypass():
+    regression3_set_class(Regression3Other)
+    return regression3_node.getOther()
+
+regression3_bypass_ok = raises(Exception, regression3_bypass)
+
+try:
+    regression3_set_class(Regression3Node)
+except Exception:
+    pass
+
+class Regression3Sub(Regression3Node):
+    pass
+
+regression3_sub = Regression3Sub()
+
+def regression3_rebase():
+    Regression3Sub.__bases__ = (Regression3Other,)
+    return regression3_sub.getOther()
+
+regression3_rebase_ok = raises(Exception, regression3_rebase)
+
+try:
+    Regression3Sub.__bases__ = (Regression3Node,)
+except Exception:
+    pass
+
+regression3_class_ok = regression3_bypass_ok and regression3_rebase_ok and regression3_node.getValue() == 7 and regression3_sub.getValue() == 7
+del regression3_node
+del regression3_sub
+
+regression3_capture = Capture()
+regression3_hook_calls = []
+)PY";
+
+        PyObject * result = _kernel->exec_file( source, dict, dict );
+        PYBIND_CONTRACT_ASSERT( result != nullptr );
+        _kernel->decref( result );
+
+        PYBIND_CONTRACT_ASSERT( s_regression3_exists == true );
+        PYBIND_CONTRACT_ASSERT( s_regression3_found == true );
+        PYBIND_CONTRACT_ASSERT( s_regression3_removed == true );
+        PYBIND_CONTRACT_ASSERT( s_regression3_extracted == false );
+
+        // An equality is the one __eq__ decides.
+        PyObject * equalLeft = _kernel->dict_getstring( dict, "regression3_equal_left" );
+        PyObject * equalRight = _kernel->dict_getstring( dict, "regression3_equal_right" );
+        PYBIND_CONTRACT_ASSERT( _kernel->test_equal( equalLeft, equalRight ) == true );
+
+        PyObject * capture = _kernel->dict_getstring( dict, "regression3_capture" );
+        PyObject * oldStderr = _kernel->getStdErrorHandle();
+        _kernel->incref( oldStderr );
+        _kernel->setStdErrorHandle( capture );
+
+        // A value that does not extract or decode leaves no error for the code
+        // that runs next.
+        PyObject * badBool = _kernel->dict_getstring( dict, "regression3_bad_bool" );
+        bool boolValue = true;
+        PYBIND_CONTRACT_ASSERT( _kernel->extract_bool( badBool, boolValue ) == false );
+        PyObject * afterBool = _kernel->exec_file( "regression3_after_bool = 1\n", dict, dict );
+        PYBIND_CONTRACT_ASSERT( afterBool != nullptr );
+        _kernel->decref( afterBool );
+
+        PYBIND_CONTRACT_ASSERT( _kernel->unicode_from_utf8_size( "\xf4", 1 ) == nullptr );
+        PyObject * afterUnicode = _kernel->exec_file( "regression3_after_unicode = 1\n", dict, dict );
+        PYBIND_CONTRACT_ASSERT( afterUnicode != nullptr );
+        _kernel->decref( afterUnicode );
+
+        // As PyImport_ExecCodeModule: the module names its file, a failure
+        // leaves no module, and the result is the entry the code leaves.
+        PyObject * fileCode = _kernel->compile_string( "regression3_file_marker = 1\n", "regression3_file.py" );
+        PYBIND_CONTRACT_ASSERT( fileCode != nullptr );
+        PyObject * fileModule = _kernel->module_execcode( "regression3_file", fileCode );
+        PYBIND_CONTRACT_ASSERT( fileModule != nullptr );
+        PyObject * fileName = _kernel->get_attrstring( fileModule, "__file__" );
+        PYBIND_CONTRACT_ASSERT( fileName != nullptr && std::strcmp( _kernel->string_to_char( fileName ), "regression3_file.py" ) == 0 );
+        _kernel->decref( fileName );
+        _kernel->decref( fileModule );
+        _kernel->decref( fileCode );
+
+        PyObject * failCode = _kernel->compile_string( "regression3_half = 1\nregression3_missing_function()\n", "regression3_fail.py" );
+        PYBIND_CONTRACT_ASSERT( failCode != nullptr );
+        PYBIND_CONTRACT_ASSERT( _kernel->module_execcode( "regression3_fail", failCode ) == nullptr );
+        _kernel->decref( failCode );
+
+        PyObject * replaceCode = _kernel->compile_string( "import sys\nclass Replacement(object):\n    marker = 3\nsys.modules['regression3_replace'] = Replacement()\n", "regression3_replace.py" );
+        PYBIND_CONTRACT_ASSERT( replaceCode != nullptr );
+        PyObject * replaced = _kernel->module_execcode( "regression3_replace", replaceCode );
+        PYBIND_CONTRACT_ASSERT( replaced != nullptr && _kernel->has_attrstring( replaced, "marker" ) == true );
+        _kernel->decref( replaced );
+        _kernel->decref( replaceCode );
+
+        // The default sys.excepthook is a function a hook set later chains to,
+        // and a C++ hook takes the class of a classic exception as unknown.
+        PyObject * oldHook = _kernel->get_sys_excepthook();
+        _kernel->incref( oldHook );
+
+        PyObject * chainResult = _kernel->exec_file( "regression3_old_hook = sys.excepthook\ndef regression3_chain(t, v, tb):\n    regression3_hook_calls.append(str(v))\n    regression3_old_hook(t, v, tb)\nsys.excepthook = regression3_chain\n", dict, dict );
+        PYBIND_CONTRACT_ASSERT( chainResult != nullptr );
+        _kernel->decref( chainResult );
+        PYBIND_CONTRACT_ASSERT( _kernel->exec_file( "raise ValueError('chained')\n", dict, dict ) == nullptr );
+
+        int32_t hookCalls[2] = {0, 0};
+        _kernel->set_sys_excepthook_f( &detail::regression3_hook, hookCalls );
+        PYBIND_CONTRACT_ASSERT( _kernel->exec_file( "class Regression3Classic:\n    pass\nraise Regression3Classic()\n", dict, dict ) == nullptr );
+        PYBIND_CONTRACT_ASSERT( _kernel->exec_file( "raise ValueError('typed')\n", dict, dict ) == nullptr );
+        PYBIND_CONTRACT_ASSERT( hookCalls[0] == 1 );
+        PYBIND_CONTRACT_ASSERT( hookCalls[1] == 1 );
+
+        _kernel->set_sys_excepthook( oldHook );
+        _kernel->decref( oldHook );
+        _kernel->setStdErrorHandle( oldStderr );
+        _kernel->decref( oldStderr );
+
+        // A missing dict key reads as None, and a null item is set nowhere.
+        pybind::dict missingDict( _kernel );
+        pybind::list missingList( _kernel );
+        missingList.append( missingDict["missing"] );
+        PYBIND_CONTRACT_ASSERT( missingList.size() == 1 );
+        PYBIND_CONTRACT_ASSERT( _kernel->is_none( _kernel->list_getitem( missingList.ptr(), 0 ) ) == true );
+        PYBIND_CONTRACT_ASSERT( _kernel->list_appenditem( missingList.ptr(), nullptr ) == false );
+        PYBIND_CONTRACT_ASSERT( _kernel->list_setitem( missingList.ptr(), 0, nullptr ) == false );
+        PYBIND_CONTRACT_ASSERT( _kernel->dict_setstring( missingDict.ptr(), "missing", nullptr ) == false );
+        PYBIND_CONTRACT_ASSERT( _kernel->dict_set( missingDict.ptr(), nullptr, nullptr ) == false );
+        PYBIND_CONTRACT_ASSERT( missingList.size() == 1 );
+
+        PyObject * nullSet = _kernel->set_new();
+        PYBIND_CONTRACT_ASSERT( _kernel->set_set( nullSet, nullptr ) == false );
+        PYBIND_CONTRACT_ASSERT( _kernel->set_size( nullSet ) == 0 );
+        _kernel->decref( nullSet );
+
+        PYBIND_CONTRACT_ASSERT( _kernel->set_attrstring( _module, "regression3_kept", _kernel->get_true() ) == true );
+        PYBIND_CONTRACT_ASSERT( _kernel->set_attrstring( _module, "regression3_kept", nullptr ) == false );
+        PYBIND_CONTRACT_ASSERT( _kernel->has_attrstring( _module, "regression3_kept" ) == true );
+
+        // A null element makes no arguments, so nothing is called.
+        std::vector<pybind::object> failedObjects = {pybind::make_invalid_object_t()};
+        pybind::tuple failedTuple = pybind::make_tuple_container_t( _kernel, failedObjects );
+        PYBIND_CONTRACT_ASSERT( failedTuple.is_invalid() == true );
+
+        {
+            regression3_node_t internalNode;
+            pybind::object failedArgument = pybind::make_invalid_object_t();
+            pybind::object internalResult = pybind::internal_call_method( _kernel, &internalNode, "take", failedArgument );
+            PYBIND_CONTRACT_ASSERT( internalResult.is_invalid() == true );
+            PYBIND_CONTRACT_ASSERT( s_regression3_takes == 0 );
+        }
+
+        // A slot of an unwrapped object fails in every build.
+        PyObject * unwrapResult = _kernel->exec_file( "regression3_unwrapped = Regression3Node()\n", dict, dict );
+        PYBIND_CONTRACT_ASSERT( unwrapResult != nullptr );
+        _kernel->decref( unwrapResult );
+        PyObject * unwrapped = _kernel->dict_getstring( dict, "regression3_unwrapped" );
+        regression3_node_t * unwrappedNode = static_cast<regression3_node_t *>(_kernel->unwrap( unwrapped ));
+        PYBIND_CONTRACT_ASSERT( unwrappedNode != nullptr );
+        delete unwrappedNode;
+
+        // A class whose scope is removed creates no instance.
+        PyObject * removedResult = _kernel->exec_file( "regression3_unwrapped_ok = raises(RuntimeError, repr, regression3_unwrapped)\ndel regression3_unwrapped\nregression3_removed_type = Regression3Vector\n", dict, dict );
+        PYBIND_CONTRACT_ASSERT( removedResult != nullptr );
+        _kernel->decref( removedResult );
+
+        _kernel->remove_scope<regression3_vector_t>();
+
+        const char finalSource[] = R"PY(
+regression3_removed_ok = raises(TypeError, regression3_removed_type)
+del regression3_removed_type
+regression3_text = ''.join(regression3_capture.parts)
+regression3_chain_ok = regression3_hook_calls == ['chained'] and 'ValueError: chained' in regression3_text
+)PY";
+
+        PyObject * finalResult = _kernel->exec_file( finalSource, dict, dict );
+        PYBIND_CONTRACT_ASSERT( finalResult != nullptr );
+        _kernel->decref( finalResult );
+
+        const char * flags[] = {"regression3_pending_dict_ok", "regression3_pending_repr_ok", "regression3_extract_double_ok", "regression3_int_ok", "regression3_default_hook_ok", "regression3_name_ok", "regression3_module_ok", "regression3_negative_ok", "regression3_lookup_ok", "regression3_derived_ok", "regression3_class_ok", "regression3_unwrapped_ok", "regression3_removed_ok", "regression3_chain_ok"};
+
+        for( const char * flag : flags )
+        {
+            PYBIND_CONTRACT_ASSERT( detail::regression_flag( _kernel, dict, flag ) == true );
+        }
+
+        PYBIND_CONTRACT_ASSERT( s_regression3_node_alive == 0 );
+
+        _kernel->remove_scope<regression3_protected_t>();
+        _kernel->remove_scope<regression3_map_derived_t>();
+        _kernel->remove_scope<regression3_map_base_t>();
+        _kernel->remove_scope<regression3_lookup_t>();
+        _kernel->remove_scope<regression3_other_t>();
+        _kernel->remove_scope<regression3_node_t>();
+    }
+
+    static void check_kernel_reinitialize( pybind::allocator_interface * _allocator, const pybind::kernel_config_t & _config )
+    {
+        // A kernel initialized again works, and the C++ destructor of an object
+        // the interpreter releases as it is destroyed may wrap a bound object
+        // and call Python.
+        pybind::kernel_interface * kernel = pybind::initialize( _allocator, _config );
+        PYBIND_CONTRACT_ASSERT( kernel != nullptr );
+
+        PyObject * module = kernel->module_init( "contract_again" );
+        kernel->incref( module );
+        kernel->set_current_module( module );
+
+        pybind::class_<regression3_target_t>( kernel, "Regression3Target", true, module )
+            .def_member( "value", &regression3_target_t::value )
+            ;
+
+        pybind::class_<regression3_owner_t>( kernel, "Regression3Owner", true, module )
+            .def_constructor( pybind::init<>() )
+            .def( "setCallback", &regression3_owner_t::setCallback )
+            ;
+
+        PyObject * dict = kernel->module_dict( module );
+        kernel->dict_setstring( dict, "__builtins__", kernel->get_builtins() );
+
+        const char source[] = "regression3_seen = []\ndef regression3_notify(target):\n    regression3_seen.append(target.value)\nregression3_owner = Regression3Owner()\nregression3_owner.setCallback(regression3_notify)\n";
+        PyObject * result = kernel->exec_file( source, dict, dict );
+        PYBIND_CONTRACT_ASSERT( result != nullptr );
+        kernel->decref( result );
+
+        kernel->set_current_module( nullptr );
+        kernel->decref( module );
+        kernel->destroy();
+
+#if defined(PYBIND_BACKEND_TINYPY)
+        // CPython runs no bound destructor at Py_Finalize.
+        PYBIND_CONTRACT_ASSERT( s_regression3_owner_destroys == 1 );
+        PYBIND_CONTRACT_ASSERT( s_regression3_owner_notified == 1 );
+#endif
+    }
 }
 int main()
 {
@@ -2003,6 +2549,7 @@ int main()
 
     detail::check_review_regressions( kernel, module );
     detail::check_second_review_regressions( kernel, module );
+    detail::check_third_review_regressions( kernel, module );
 
     kernel->set_current_module( nullptr );
     kernel->module_fini( module );
@@ -2026,6 +2573,12 @@ int main()
 #if defined(PYBIND_BACKEND_TINYPY)
     size_t allocations = allocator.allocations();
     PYBIND_CONTRACT_ASSERT( allocations == 0 );
+#endif
+
+    detail::check_kernel_reinitialize( &allocator, config );
+#if defined(PYBIND_BACKEND_TINYPY)
+    size_t reinitializedAllocations = allocator.allocations();
+    PYBIND_CONTRACT_ASSERT( reinitializedAllocations == 0 );
 #endif
     return 0;
 }

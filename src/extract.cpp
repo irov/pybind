@@ -287,6 +287,12 @@ namespace pybind
             return false;
         }
 
+        // As the other containers: an object of another type does not extract.
+        if( _kernel->module_check( _obj ) == false )
+        {
+            return false;
+        }
+
         _value = pybind::module( _kernel, _obj );
 
         return true;

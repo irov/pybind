@@ -62,6 +62,9 @@ namespace pybind
         void finalize() override;
 
     public:
+        void detach();
+
+    public:
         kernel_interface * get_kernel() const override;
 
     public:
