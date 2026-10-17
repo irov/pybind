@@ -33,6 +33,7 @@ namespace pybind
         ~list();
 
     public:
+        list & operator = ( std::nullptr_t );
         list & operator = ( const list & _obj );
         list & operator = ( list && _obj );
 

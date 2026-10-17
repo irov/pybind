@@ -46,7 +46,7 @@ namespace pybind
             }
         }
         //////////////////////////////////////////////////////////////////////////
-        set_dict_operator_t & set_dict_operator_t::operator = ( set_dict_operator_t && _op )
+        set_dict_operator_t & set_dict_operator_t::operator = ( const set_dict_operator_t & _op )
         {
             // As a dict item: assigning another item stores its value.
             PyObject * value = _op;

@@ -16,7 +16,7 @@ namespace pybind
             ~set_list_operator_t();
 
         public:
-            set_list_operator_t & operator = ( set_list_operator_t && _op );
+            set_list_operator_t & operator = ( const set_list_operator_t & _op );
             set_list_operator_t & operator = ( import_operator_t && _imp );
 
             template<class T>

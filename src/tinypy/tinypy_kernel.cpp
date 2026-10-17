@@ -398,6 +398,39 @@ namespace pybind
             return index;
         }
         //////////////////////////////////////////////////////////////////////////
+        static size_t join_utf8_surrogates( const char * _data, size_t _size, char * const _out )
+        {
+            // As the UTF-8 codec: a high surrogate followed by a low one, which
+            // the canonical form keeps as two three-byte sequences, is written
+            // as the four-byte sequence of the code point they make.
+            const uint8_t * bytes = reinterpret_cast<const uint8_t *>(_data);
+            size_t written = 0;
+            size_t index = 0;
+
+            while( index != _size )
+            {
+                if( _size - index >= 6 && bytes[index] == 0xED && ( bytes[index + 1] & 0xF0 ) == 0xA0 && bytes[index + 3] == 0xED && ( bytes[index + 4] & 0xF0 ) == 0xB0 )
+                {
+                    uint32_t high = 0xD000 | ( ( bytes[index + 1] & 0x3F ) << 6 ) | ( bytes[index + 2] & 0x3F );
+                    uint32_t low = 0xD000 | ( ( bytes[index + 4] & 0x3F ) << 6 ) | ( bytes[index + 5] & 0x3F );
+                    uint32_t code = 0x10000 + ( ( high - 0xD800 ) << 10 ) + ( low - 0xDC00 );
+
+                    _out[written++] = static_cast<char>(0xF0 | ( code >> 18 ));
+                    _out[written++] = static_cast<char>(0x80 | ( ( code >> 12 ) & 0x3F ));
+                    _out[written++] = static_cast<char>(0x80 | ( ( code >> 6 ) & 0x3F ));
+                    _out[written++] = static_cast<char>(0x80 | ( code & 0x3F ));
+
+                    index += 6;
+
+                    continue;
+                }
+
+                _out[written++] = _data[index++];
+            }
+
+            return written;
+        }
+        //////////////////////////////////////////////////////////////////////////
         static size_t encode_utf8( const wchar_t * _value, size_t _size, char * const _result, size_t _capacity )
         {
             (void)_capacity;
@@ -464,6 +497,7 @@ namespace pybind
 #if defined(TINYPY_DEBUGGER)
         , m_debuggerHandler( nullptr )
         , m_debuggerUserData( nullptr )
+        , m_debuggerTracing( false )
 #endif
     {
     }
@@ -499,7 +533,16 @@ namespace pybind
             return;
         }
 
+        // As the tracing flag of a CPython thread: the code the handler runs,
+        // as a watch it evaluates, is not traced.
+        if( kernel->m_debuggerTracing == true )
+        {
+            return;
+        }
+
+        kernel->m_debuggerTracing = true;
         kernel->m_debuggerHandler( kernel->m_debuggerUserData, event );
+        kernel->m_debuggerTracing = false;
     }
 #endif
     //////////////////////////////////////////////////////////////////////////
@@ -816,6 +859,17 @@ namespace pybind
             return;
         }
 
+#if defined(PYBIND_DEBUG)
+        if( this->module_check( module ) == false )
+        {
+            pybind::throw_exception( "remove_from_module '%s' from an object that is not a module"
+                , _name
+            );
+
+            return;
+        }
+#endif
+
         tinypy_value_t * key = tinypy_string_from_bytes( m_vm, _name, std::strlen( _name ) );
         tinypy_value_t * dict = tinypy_module_dict( detail::value_cast( module ) );
 
@@ -852,6 +906,15 @@ namespace pybind
         const char * name = _adapter->getName();
 
 #if defined(PYBIND_DEBUG)
+        if( this->module_check( module ) == false )
+        {
+            pybind::throw_exception( "def_function_adapter '%s' into an object that is not a module"
+                , name
+            );
+
+            return;
+        }
+
         if( this->dict_existstring( this->module_dict( module ), name ) == true )
         {
             pybind::throw_exception( "def_function_adapter module '%s' overriding object '%s'"
@@ -880,6 +943,15 @@ namespace pybind
         const char * name = _adapter->getName();
 
 #if defined(PYBIND_DEBUG)
+        if( this->module_check( module ) == false )
+        {
+            pybind::throw_exception( "def_functor_adapter '%s' into an object that is not a module"
+                , name
+            );
+
+            return;
+        }
+
         if( this->dict_existstring( this->module_dict( module ), name ) == true )
         {
             pybind::throw_exception( "def_functor_adapter module '%s' overriding object '%s'"
@@ -971,9 +1043,12 @@ namespace pybind
             return nullptr;
         }
 
+        // As the CPython backend: the impl get_class_impl gives.
+        void * impl = this->get_class_impl( _object );
+
         payload->flags |= tinypy_class_type_scope::PayloadUnwrapped;
-        void * impl = payload->impl;
         payload->impl = nullptr;
+
         return impl;
     }
     //////////////////////////////////////////////////////////////////////////
@@ -1353,6 +1428,13 @@ namespace pybind
         if( payload == nullptr )
         {
             return nullptr;
+        }
+
+        // The scope that made the object is the one its class answers to while
+        // it is not removed.
+        if( payload->scope->is_finalized() == false )
+        {
+            return payload->impl;
         }
 
         // As the CPython backend: an object whose class the scope of a base
@@ -2063,6 +2145,12 @@ namespace pybind
         PYBIND_TINYPY_CHECK_MAIN_THREAD();
 
         size_t nameSize = std::strlen( _name );
+
+        // As the CPython backend: an error pending before stays, and the code of
+        // the import runs without it.
+        detail::raised_error_t raised;
+        detail::fetch_raised_error( m_vm, &raised );
+
         tinypy_error_t * error = nullptr;
         tinypy_value_t * package = tinypy_import_module( m_vm, _name, nameSize, nullptr, nullptr, 0, &error );
 
@@ -2085,9 +2173,12 @@ namespace pybind
             _exists = notFound == false;
 
             this->report_error_( error );
+            detail::restore_raised_error( &raised );
 
             return nullptr;
         }
+
+        detail::restore_raised_error( &raised );
 
         _exists = true;
 
@@ -2182,6 +2273,12 @@ namespace pybind
                     continue;
                 }
 
+                // A name the code that ran removed stays removed.
+                if( tinypy_dict_contains( dict, key ) == 0 )
+                {
+                    continue;
+                }
+
                 tinypy_dict_set( dict, key, none );
             }
         }
@@ -2197,6 +2294,12 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * tinypy_kernel::module_dict( PyObject * _module )
     {
+        // A null container stands for the error that produced it.
+        if( _module == nullptr )
+        {
+            return nullptr;
+        }
+
         return detail::object_cast( tinypy_module_dict( detail::value_cast( _module ) ) );
     }
     //////////////////////////////////////////////////////////////////////////
@@ -2255,7 +2358,8 @@ namespace pybind
             char message[PYBIND_EXCEPTION_MESSAGE_SIZE + 1];
             std::snprintf( message, sizeof( message ), "Loaded module %s not found in sys.modules", _name );
 
-            this->set_error( error_type_e::Runtime, message );
+            // As PyImport_ExecCodeModule: an ImportError.
+            tinypy_vm_raise_error( m_vm, TINYPY_ERROR_IMPORT, message );
             this->report_error_( nullptr );
 
             return nullptr;
@@ -2420,18 +2524,22 @@ namespace pybind
     bool tinypy_kernel::test_equal( PyObject * _left, PyObject * _right )
     {
         // As PyObject_RichCompareBool of the CPython backend: __eq__ decides, and
-        // the error it raises is reported.
+        // the error it raises is reported, while one pending before stays, with
+        // which its Python code does not run.
+        detail::raised_error_t raised;
+        detail::fetch_raised_error( m_vm, &raised );
+
         tinypy_error_t * error = nullptr;
         int32_t result = tinypy_compare_bool( detail::value_cast( _left ), detail::value_cast( _right ), TINYPY_COMPARE_EQUAL, &error );
 
         if( result < 0 )
         {
             this->report_error_( error );
-
-            return false;
         }
 
-        return result != 0;
+        detail::restore_raised_error( &raised );
+
+        return result > 0;
     }
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::has_attr( PyObject * _object, PyObject * _attribute )
@@ -2455,12 +2563,20 @@ namespace pybind
             return nullptr;
         }
 
+        // As the CPython backend: the error of the lookup is reported, while one
+        // pending before stays, with which the Python code of the lookup does
+        // not run.
+        detail::raised_error_t raised;
+        detail::fetch_raised_error( m_vm, &raised );
+
         tinypy_error_t * error = nullptr;
         tinypy_value_t * result = tinypy_object_get_attr_value( detail::value_cast( _object ), detail::value_cast( _attribute ), &error );
         if( result == nullptr )
         {
             this->report_error_( error );
         }
+
+        detail::restore_raised_error( &raised );
 
         return detail::object_cast( result );
     }
@@ -2473,12 +2589,18 @@ namespace pybind
             return false;
         }
 
+        // As get_attr.
+        detail::raised_error_t raised;
+        detail::fetch_raised_error( m_vm, &raised );
+
         tinypy_error_t * error = nullptr;
         int32_t result = tinypy_object_set_attr_value( detail::value_cast( _object ), detail::value_cast( _attribute ), detail::value_cast( _value ), &error );
         if( result == 0 )
         {
             this->report_error_( error );
         }
+
+        detail::restore_raised_error( &raised );
 
         return result != 0;
     }
@@ -2491,12 +2613,18 @@ namespace pybind
             return false;
         }
 
+        // As get_attr.
+        detail::raised_error_t raised;
+        detail::fetch_raised_error( m_vm, &raised );
+
         tinypy_error_t * error = nullptr;
         int32_t result = tinypy_object_set_attr( detail::value_cast( _object ), _attribute, std::strlen( _attribute ), detail::value_cast( _value ), &error );
         if( result == 0 )
         {
             this->report_error_( error );
         }
+
+        detail::restore_raised_error( &raised );
 
         return result != 0;
     }
@@ -2524,12 +2652,18 @@ namespace pybind
             return nullptr;
         }
 
+        // As get_attr.
+        detail::raised_error_t raised;
+        detail::fetch_raised_error( m_vm, &raised );
+
         tinypy_error_t * error = nullptr;
         tinypy_value_t * result = tinypy_object_get_attr( detail::value_cast( _object ), _attribute, std::strlen( _attribute ), &error );
         if( result == nullptr )
         {
             this->report_error_( error );
         }
+
+        detail::restore_raised_error( &raised );
 
         return detail::object_cast( result );
     }
@@ -3076,6 +3210,7 @@ namespace pybind
         if( this->string_check( _object ) == false )
         {
             this->set_error( error_type_e::Type, "bad argument type for built-in operation" );
+            *_size = 0;
             return nullptr;
         }
 
@@ -3184,7 +3319,20 @@ namespace pybind
         size_t size;
         size_t codePointCount;
         const char * data = tinypy_unicode_utf8_view( detail::value_cast( _object ), &size, &codePointCount );
-        return this->string_from_char_size( data, size );
+
+        // A surrogate is encoded with a 0xED lead byte, so a text without one
+        // is already the encoding.
+        if( std::memchr( data, 0xED, size ) == nullptr )
+        {
+            return this->string_from_char_size( data, size );
+        }
+
+        char * joined = static_cast<char *>(m_allocator->malloc( size ));
+        size_t joinedSize = detail::join_utf8_surrogates( data, size, joined );
+        PyObject * result = this->string_from_char_size( joined, joinedSize );
+        m_allocator->free( joined );
+
+        return result;
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * tinypy_kernel::unicode_from_utf8( const char * _value )
@@ -3245,11 +3393,23 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     size_t tinypy_kernel::list_size( PyObject * _object ) const
     {
+        // A null container stands for the error that produced it.
+        if( _object == nullptr )
+        {
+            return 0;
+        }
+
         return tinypy_list_size( detail::value_cast( _object ) );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * tinypy_kernel::list_getitem( PyObject * _object, size_t _index )
     {
+        // A null container stands for the error that produced it.
+        if( _object == nullptr )
+        {
+            return nullptr;
+        }
+
         // As the CPython backend: an index out of range raises IndexError in
         // every build.
         if( _index >= tinypy_list_size( detail::value_cast( _object ) ) )
@@ -3266,7 +3426,7 @@ namespace pybind
     bool tinypy_kernel::list_insert( PyObject * _object, size_t _index, PyObject * _item )
     {
         // As tuple_setitem: a null item stands for the error that produced it.
-        if( _item == nullptr )
+        if( _object == nullptr || _item == nullptr )
         {
             return false;
         }
@@ -3282,6 +3442,12 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::list_remove( PyObject * _object, size_t _index )
     {
+        // A null container stands for the error that produced it.
+        if( _object == nullptr )
+        {
+            return false;
+        }
+
         // As the slice deletion of the CPython backend: an index past the end
         // removes nothing.
         tinypy_value_t * list = detail::value_cast( _object );
@@ -3298,7 +3464,7 @@ namespace pybind
     bool tinypy_kernel::list_setitem( PyObject * _object, size_t _index, PyObject * _item )
     {
         // As tuple_setitem: a null item stands for the error that produced it.
-        if( _item == nullptr )
+        if( _object == nullptr || _item == nullptr )
         {
             return false;
         }
@@ -3320,7 +3486,7 @@ namespace pybind
     bool tinypy_kernel::list_appenditem( PyObject * _object, PyObject * _item )
     {
         // As tuple_setitem: a null item stands for the error that produced it.
-        if( _item == nullptr )
+        if( _object == nullptr || _item == nullptr )
         {
             return false;
         }
@@ -3392,13 +3558,19 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     size_t tinypy_kernel::dict_size( PyObject * _object ) const
     {
+        // A null container stands for the error that produced it.
+        if( _object == nullptr )
+        {
+            return 0;
+        }
+
         return tinypy_dict_size( detail::value_cast( _object ) );
     }
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::dict_set( PyObject * _dict, PyObject * _key, PyObject * _value )
     {
         // As tuple_setitem: a null item stands for the error that produced it.
-        if( _key == nullptr || _value == nullptr )
+        if( _dict == nullptr || _key == nullptr || _value == nullptr )
         {
             return false;
         }
@@ -3417,7 +3589,7 @@ namespace pybind
     bool tinypy_kernel::dict_setstring( PyObject * _dict, const char * _key, PyObject * _value )
     {
         // As tuple_setitem: a null item stands for the error that produced it.
-        if( _value == nullptr )
+        if( _dict == nullptr || _value == nullptr )
         {
             return false;
         }
@@ -3432,7 +3604,7 @@ namespace pybind
     {
         // As tuple_setitem: a null object stands for the error that produced
         // it, so nothing is looked up.
-        if( _key == nullptr )
+        if( _dict == nullptr || _key == nullptr )
         {
             return false;
         }
@@ -3451,6 +3623,12 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::dict_removestring( PyObject * _dict, const char * _key )
     {
+        // A null container stands for the error that produced it.
+        if( _dict == nullptr )
+        {
+            return false;
+        }
+
         tinypy_value_t * key = tinypy_string_from_bytes( m_vm, _key, std::strlen( _key ) );
         bool result = this->dict_remove( _dict, detail::object_cast( key ) );
         tinypy_release( key );
@@ -3459,6 +3637,12 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     PyObject * tinypy_kernel::dict_getstring( PyObject * _dict, const char * _key )
     {
+        // A null container stands for the error that produced it.
+        if( _dict == nullptr )
+        {
+            return nullptr;
+        }
+
         tinypy_value_t * key = tinypy_string_from_bytes( m_vm, _key, std::strlen( _key ) );
         tinypy_value_t * result = tinypy_dict_get( detail::value_cast( _dict ), key );
         tinypy_release( key );
@@ -3469,7 +3653,7 @@ namespace pybind
     {
         // As tuple_setitem: a null object stands for the error that produced
         // it, so nothing is looked up.
-        if( _key == nullptr )
+        if( _dict == nullptr || _key == nullptr )
         {
             return nullptr;
         }
@@ -3492,7 +3676,7 @@ namespace pybind
     {
         // As tuple_setitem: a null object stands for the error that produced
         // it, so nothing is looked up.
-        if( _key == nullptr )
+        if( _dict == nullptr || _key == nullptr )
         {
             return false;
         }
@@ -3515,6 +3699,12 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::dict_existstring( PyObject * _dict, const char * _key )
     {
+        // A null container stands for the error that produced it.
+        if( _dict == nullptr )
+        {
+            return false;
+        }
+
         tinypy_value_t * key = tinypy_string_from_bytes( m_vm, _key, std::strlen( _key ) );
         bool result = tinypy_dict_contains( detail::value_cast( _dict ), key ) != 0;
         tinypy_release( key );
@@ -3523,6 +3713,12 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::dict_next( PyObject * _dict, size_t * const _position, PyObject ** _key, PyObject ** _value )
     {
+        // A null container stands for the error that produced it.
+        if( _dict == nullptr )
+        {
+            return false;
+        }
+
         tinypy_value_t * key;
         tinypy_value_t * value;
         if( tinypy_dict_next( detail::value_cast( _dict ), _position, &key, &value ) == 0 )
@@ -3546,13 +3742,19 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     size_t tinypy_kernel::set_size( PyObject * _object ) const
     {
+        // A null container stands for the error that produced it.
+        if( _object == nullptr )
+        {
+            return 0;
+        }
+
         return tinypy_set_size( detail::value_cast( _object ) );
     }
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::set_set( PyObject * _set, PyObject * _value )
     {
         // As tuple_setitem: a null item stands for the error that produced it.
-        if( _value == nullptr )
+        if( _set == nullptr || _value == nullptr )
         {
             return false;
         }
@@ -3571,10 +3773,16 @@ namespace pybind
     {
         // As tuple_setitem: a null object stands for the error that produced
         // it, so nothing is looked up.
-        if( _value == nullptr )
+        if( _set == nullptr || _value == nullptr )
         {
             return false;
         }
+
+        // As the CPython backend: the error of the lookup is reported, while one
+        // pending before stays, with which the Python code of the value does
+        // not run.
+        detail::raised_error_t raised;
+        detail::fetch_raised_error( m_vm, &raised );
 
         tinypy_error_t * error = nullptr;
         int32_t result = tinypy_set_discard( detail::value_cast( _set ), detail::value_cast( _value ), &error );
@@ -3583,6 +3791,8 @@ namespace pybind
             this->report_error_( error );
         }
 
+        detail::restore_raised_error( &raised );
+
         return result != 0;
     }
     //////////////////////////////////////////////////////////////////////////
@@ -3590,10 +3800,15 @@ namespace pybind
     {
         // As tuple_setitem: a null object stands for the error that produced
         // it, so nothing is looked up.
-        if( _value == nullptr )
+        if( _set == nullptr || _value == nullptr )
         {
             return false;
         }
+
+        // As set_remove: the error of the lookup is reported, while one pending
+        // before stays.
+        detail::raised_error_t raised;
+        detail::fetch_raised_error( m_vm, &raised );
 
         tinypy_error_t * error = nullptr;
         int32_t result = tinypy_set_contains( detail::value_cast( _set ), detail::value_cast( _value ), &error );
@@ -3602,16 +3817,28 @@ namespace pybind
             this->report_error_( error );
         }
 
+        detail::restore_raised_error( &raised );
+
         return result > 0;
     }
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::iterator_get( PyObject * _collection, PyObject ** _iterator )
     {
+        // As iterator_next.
+        detail::raised_error_t raised;
+        detail::fetch_raised_error( m_vm, &raised );
+
         tinypy_error_t * error = nullptr;
         tinypy_value_t * result = tinypy_iter( detail::value_cast( _collection ), &error );
         if( result == nullptr )
         {
             this->report_error_( error );
+        }
+
+        detail::restore_raised_error( &raised );
+
+        if( result == nullptr )
+        {
             return false;
         }
         *_iterator = detail::object_cast( result );
@@ -3620,14 +3847,24 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::iterator_next( PyObject * _iterator, PyObject ** _value )
     {
+        // As the CPython backend: the error of the iteration is reported, while
+        // one pending before stays, with which the Python code of the iterator
+        // does not run.
+        detail::raised_error_t raised;
+        detail::fetch_raised_error( m_vm, &raised );
+
         tinypy_error_t * error = nullptr;
         tinypy_value_t * result = tinypy_next( detail::value_cast( _iterator ), &error );
+
+        if( result == nullptr && error != nullptr )
+        {
+            this->report_error_( error );
+        }
+
+        detail::restore_raised_error( &raised );
+
         if( result == nullptr )
         {
-            if( error != nullptr )
-            {
-                this->report_error_( error );
-            }
             *_value = nullptr;
             return false;
         }
@@ -3652,11 +3889,23 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     size_t tinypy_kernel::tuple_size( PyObject * _object ) const
     {
+        // A null container stands for the error that produced it.
+        if( _object == nullptr )
+        {
+            return 0;
+        }
+
         return tinypy_tuple_size( detail::value_cast( _object ) );
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * tinypy_kernel::tuple_getitem( PyObject * _object, size_t _index )
     {
+        // A null container stands for the error that produced it.
+        if( _object == nullptr )
+        {
+            return nullptr;
+        }
+
         // As the CPython backend: an index out of range raises IndexError in
         // every build.
         if( _index >= tinypy_tuple_size( detail::value_cast( _object ) ) )
@@ -3699,6 +3948,12 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool tinypy_kernel::tuple_setitem( PyObject * _object, size_t _index, PyObject * _value )
     {
+        // A null container stands for the error that produced it.
+        if( _object == nullptr )
+        {
+            return false;
+        }
+
         // As the CPython backend: a null item stands for the error that
         // produced it.
         if( _value == nullptr )

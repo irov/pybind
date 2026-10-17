@@ -716,7 +716,7 @@ namespace pybind
         {
             allocator_interface * allocator = m_kernel->get_allocator();
 
-            number_unary_adapter_interface_ptr iadapter = allocator->newT<number_unary_adapter_proxy_function<C, F>>( "static_neg", _fn );
+            number_unary_adapter_interface_ptr iadapter = allocator->newT<number_unary_adapter_proxy_function<C, F>>( "static_abs", _fn );
 
             m_scope->set_number_abs( iadapter );
 

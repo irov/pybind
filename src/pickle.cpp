@@ -251,9 +251,20 @@ namespace pybind
 
             for( size_t i = 0; i != count; ++i )
             {
-                PyObject * element = _kernel->list_getitem( _obj, i );
+                // The value of an object may run code that changes the list,
+                // whose size is written: the element is held, and a list that
+                // shrinks fails rather than is read past its end.
+                if( i >= _kernel->list_size( _obj ) )
+                {
+                    pybind::throw_exception( "pickle list changed while it was pickled" );
 
-                s_obj_pickle( _kernel, element, _types, _buffer, _capacity, _offset, _depth + 1 );
+                    return;
+                }
+
+                PyObject * py_element = _kernel->list_getitem( _obj, i );
+                pybind::object element( _kernel, py_element );
+
+                s_obj_pickle( _kernel, py_element, _types, _buffer, _capacity, _offset, _depth + 1 );
             }
         }
         else if( _kernel->dict_check( _obj ) == true )
@@ -267,13 +278,35 @@ namespace pybind
             s_write_size_t( _buffer, _capacity, count, _offset );
 
             size_t pos = 0;
+            size_t written = 0;
 
-            PyObject * key;
-            PyObject * value;
-            while( _kernel->dict_next( _obj, &pos, &key, &value ) == true )
+            PyObject * py_key;
+            PyObject * py_value;
+            while( _kernel->dict_next( _obj, &pos, &py_key, &py_value ) == true )
             {
-                s_obj_pickle( _kernel, key, _types, _buffer, _capacity, _offset, _depth + 1 );
-                s_obj_pickle( _kernel, value, _types, _buffer, _capacity, _offset, _depth + 1 );
+                // As for a list: the items are held, and a dict whose size
+                // changes fails, as its size is written.
+                pybind::object key( _kernel, py_key );
+                pybind::object value( _kernel, py_value );
+
+                if( written == count )
+                {
+                    pybind::throw_exception( "pickle dict changed while it was pickled" );
+
+                    return;
+                }
+
+                s_obj_pickle( _kernel, py_key, _types, _buffer, _capacity, _offset, _depth + 1 );
+                s_obj_pickle( _kernel, py_value, _types, _buffer, _capacity, _offset, _depth + 1 );
+
+                ++written;
+            }
+
+            if( written != count )
+            {
+                pybind::throw_exception( "pickle dict changed while it was pickled" );
+
+                return;
             }
         }
         else if( _kernel->set_check( _obj ) == true )
@@ -299,12 +332,32 @@ namespace pybind
 
             pybind::object iterator( _kernel, py_iterator, pybind::borrowed );
 
+            size_t written = 0;
+
             PyObject * py_element;
             while( _kernel->iterator_next( py_iterator, &py_element ) == true )
             {
                 pybind::object element( _kernel, py_element, pybind::borrowed );
 
+                // As for a list: a set whose size changes fails, as its size is
+                // written.
+                if( written == count )
+                {
+                    pybind::throw_exception( "pickle set changed while it was pickled" );
+
+                    return;
+                }
+
                 s_obj_pickle( _kernel, py_element, _types, _buffer, _capacity, _offset, _depth + 1 );
+
+                ++written;
+            }
+
+            if( written != count )
+            {
+                pybind::throw_exception( "pickle set changed while it was pickled" );
+
+                return;
             }
         }
         else if( _kernel->has_attrstring( _obj, "value" ) == true )
@@ -313,11 +366,12 @@ namespace pybind
 
             s_write_buffer_t( _buffer, _capacity, type, _offset );
 
-            size_t type_count = _kernel->list_size( _types );
-
-            for( size_t index = 0; index != type_count; ++index )
+            // The isinstance check and the value may run code that changes the
+            // types, so their size is read for each type, and the type held.
+            for( size_t index = 0; index < _kernel->list_size( _types ); ++index )
             {
                 PyObject * element = _kernel->list_getitem( _types, index );
+                pybind::object element_holder( _kernel, element );
 
                 if( _kernel->type_check( element ) == false )
                 {
@@ -713,10 +767,12 @@ namespace pybind
                     return nullptr;
                 }
 
+                // Held before the value, whose constructors may change the types.
+                PyObject * object_type = _kernel->list_getitem( _types, index );
+                pybind::object type( _kernel, object_type );
+
                 PyObject * py_value = s_obj_unpickle( _kernel, _buffer, _capacity, _carriage, _types, _depth + 1 );
                 pybind::object value( _kernel, py_value, pybind::borrowed );
-
-                PyObject * object_type = _kernel->list_getitem( _types, index );
 
                 PyObject * py_args = _kernel->tuple_new( 1 );
                 pybind::object args( _kernel, py_args, pybind::borrowed );

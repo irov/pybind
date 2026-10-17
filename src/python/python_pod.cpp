@@ -125,7 +125,13 @@ namespace pybind
             catch( const pybind::pybind_exception & _ex )
             {
                 PyErr_SetString( PyExc_RuntimeError, _ex.what() );
-                PyErr_WriteUnraisable( (PyObject *)objtype );
+            }
+
+            // As the tinypy backend: an error the C++ code raised, or left
+            // raised, is reported as one of a finalizer of the object.
+            if( PyErr_Occurred() != nullptr )
+            {
+                PyErr_WriteUnraisable( _obj );
             }
 
             // As subtype_dealloc after tp_del: an object C++ code did not resurrect
@@ -199,7 +205,7 @@ namespace pybind
         {
             kernel_interface * kernel = pybind::get_kernel();
 
-            const class_type_scope_interface_ptr & scope = kernel->get_class_scope( _type );
+            class_type_scope_interface_ptr scope = kernel->get_class_scope( _type );
 
             if( scope == nullptr )
             {
@@ -238,11 +244,7 @@ namespace pybind
             {
                 pybind::decref( py_self );
 
-                pybind::error_message( "obj '%s' py_new_class scope '%s' exception: %s"
-                    , kernel->object_str( (PyObject *)_type ).c_str()
-                    , scope->get_name()
-                    , _ex.what()
-                );
+                pybind::set_error( error_type_e::Runtime, _ex.what() );
             }
 
             return nullptr;
@@ -252,7 +254,7 @@ namespace pybind
         {
             kernel_interface * kernel = pybind::get_kernel();
 
-            const class_type_scope_interface_ptr & scope = kernel->get_class_scope( _type );
+            class_type_scope_interface_ptr scope = kernel->get_class_scope( _type );
 
             if( scope == nullptr )
             {
@@ -301,11 +303,7 @@ namespace pybind
 
                 pybind::decref( py_self );
 
-                pybind::error_message( "obj '%s' py_new_pod scope '%s' exception: %s"
-                    , kernel->object_str( (PyObject *)_type ).c_str()
-                    , scope->get_name()
-                    , _ex.what()
-                );
+                pybind::set_error( error_type_e::Runtime, _ex.what() );
             }
 
             return nullptr;
@@ -359,6 +357,25 @@ namespace pybind
 
             return result;
         }
+        //////////////////////////////////////////////////////////////////////////
+        static PyObject * py_reduce( PyObject * _obj, PyObject * _args )
+        {
+            (void)_args;
+
+            // As the tinypy backend: an object whose state is C++ neither
+            // pickles nor copies, rather than is made again without its state.
+            PyErr_Format( PyExc_TypeError, "can't pickle %s objects"
+                , Py_TYPE( _obj )->tp_name
+            );
+
+            return nullptr;
+        }
+        //////////////////////////////////////////////////////////////////////////
+        static PyMethodDef py_pod_methods[] = {
+            {const_cast<char *>("__reduce_ex__"), &detail::py_reduce, METH_VARARGS, nullptr},
+            {const_cast<char *>("__reduce__"), &detail::py_reduce, METH_NOARGS, nullptr},
+            {nullptr}
+        };
         //////////////////////////////////////////////////////////////////////////
         static PyGetSetDef py_pod_getset[] = {
             {const_cast<char *>("__class__"), &detail::py_get_class, &detail::py_set_class, nullptr, nullptr},
@@ -832,7 +849,7 @@ namespace pybind
             0,                                          /* tp_weaklistoffset */
             0,                                          /* tp_iter */
             0,                                          /* tp_iternext */
-            0,                             /* tp_methods */
+            detail::py_pod_methods,                             /* tp_methods */
             0,                                          /* tp_members */
             detail::py_pod_getset,                                          /* tp_getset */
             0,                         /* tp_base */

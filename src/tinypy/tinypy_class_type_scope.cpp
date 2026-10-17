@@ -223,6 +223,19 @@ namespace pybind
             tinypy_kernel * kernel = static_cast<tinypy_kernel *>(kernelInterface);
             tinypy_class_type_scope::payload_t * payload = static_cast<tinypy_class_type_scope::payload_t *>(_payload);
 
+            // As py_new_class of the CPython backend: the first bound class of
+            // the MRO makes the object, which for a Python class deriving from
+            // two of them may be a C++ class derived from the one whose layout
+            // and slots the type has; every bound type has that layout, and the
+            // slots cast the impl from the scope that made it.
+            PyTypeObject * instanceType = kernel->get_object_type( detail::cast_object( _instance ) );
+            const class_type_scope_interface_ptr & typeScope = kernel->get_class_scope( instanceType );
+
+            if( typeScope->get_type_id() != 0 )
+            {
+                scope = static_cast<tinypy_class_type_scope *>(typeScope.get());
+            }
+
             try
             {
                 payload->scope = scope;
@@ -314,7 +327,7 @@ namespace pybind
             try
             {
                 const method_adapter_interface_ptr & adapter = scope->get_call();
-                class_type_scope_interface_ptr scopePtr = class_type_scope_interface_ptr::from( scope );
+                class_type_scope_interface_ptr scopePtr = class_type_scope_interface_ptr::from( payload->scope );
                 PyObject * args = detail::cast_object( _args );
                 PyObject * kwargs = detail::cast_object( _kwargs );
 
@@ -354,7 +367,7 @@ namespace pybind
             try
             {
                 const repr_adapter_interface_ptr & adapter = scope->get_repr();
-                class_type_scope_interface_ptr scopePtr = class_type_scope_interface_ptr::from( scope );
+                class_type_scope_interface_ptr scopePtr = class_type_scope_interface_ptr::from( payload->scope );
                 PyObject * result = adapter->repr( kernel, payload->impl, scopePtr );
 
                 return detail::cast_value( result );
@@ -394,7 +407,7 @@ namespace pybind
             }
 
             const hash_adapter_interface_ptr & adapter = scope->get_hash();
-            class_type_scope_interface_ptr scopePtr = class_type_scope_interface_ptr::from( scope );
+            class_type_scope_interface_ptr scopePtr = class_type_scope_interface_ptr::from( payload->scope );
 
             try
             {
@@ -480,7 +493,7 @@ namespace pybind
             try
             {
                 PyObject * instance = detail::cast_object( _instance );
-                class_type_scope_interface_ptr scopePtr = class_type_scope_interface_ptr::from( scope );
+                class_type_scope_interface_ptr scopePtr = class_type_scope_interface_ptr::from( payload->scope );
                 PybindOperatorCompare operation = detail::convert_compare( _operation );
 
                 if( adapter->compare( kernel, instance, payload->impl, scopePtr, other, operation, &result ) == false )
@@ -520,7 +533,7 @@ namespace pybind
             try
             {
                 const getattro_adapter_interface_ptr & adapter = scope->get_getattro();
-                class_type_scope_interface_ptr scopePtr = class_type_scope_interface_ptr::from( scope );
+                class_type_scope_interface_ptr scopePtr = class_type_scope_interface_ptr::from( payload->scope );
                 PyObject * name = detail::cast_object( _name );
 
                 DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), name, nullptr );
@@ -558,7 +571,7 @@ namespace pybind
             try
             {
                 const mapping_adapter_interface_ptr & adapter = scope->get_mapping();
-                class_type_scope_interface_ptr scopePtr = class_type_scope_interface_ptr::from( scope );
+                class_type_scope_interface_ptr scopePtr = class_type_scope_interface_ptr::from( payload->scope );
                 PyObject * key = detail::cast_object( _key );
 
                 DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), key, nullptr );
@@ -611,7 +624,7 @@ namespace pybind
 
                 DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), nullptr, nullptr );
 
-                PyObject * result = adapter->call( kernel, payload->impl, class_type_scope_interface_ptr::from( scope ), static_cast<size_t>(index) );
+                PyObject * result = adapter->call( kernel, payload->impl, class_type_scope_interface_ptr::from( payload->scope ), static_cast<size_t>(index) );
                 return detail::cast_value( result );
             }
             catch( const pybind_exception & exception )
@@ -656,7 +669,7 @@ namespace pybind
 
                 DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), nullptr, nullptr );
 
-                adapter->call( kernel, payload->impl, class_type_scope_interface_ptr::from( scope ), static_cast<size_t>(index), detail::cast_object( _value ) );
+                adapter->call( kernel, payload->impl, class_type_scope_interface_ptr::from( payload->scope ), static_cast<size_t>(index), detail::cast_object( _value ) );
                 return TINYPY_TRUE;
             }
             catch( const pybind_exception & exception )
@@ -688,7 +701,7 @@ namespace pybind
 
             try
             {
-                class_type_scope_interface_ptr scopePtr = class_type_scope_interface_ptr::from( scope );
+                class_type_scope_interface_ptr scopePtr = class_type_scope_interface_ptr::from( payload->scope );
 
                 DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), adapter->getName(), adapter->getCallDebugSilent(), nullptr, nullptr );
 
@@ -813,7 +826,7 @@ namespace pybind
                 {
                     DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), ( *binary )->getName(), ( *binary )->getCallDebugSilent(), nullptr, nullptr );
 
-                    PyObject * result = ( *binary )->call( kernel, payload->impl, class_type_scope_interface_ptr::from( scope ), detail::cast_object( _other ), _rotate );
+                    PyObject * result = ( *binary )->call( kernel, payload->impl, class_type_scope_interface_ptr::from( payload->scope ), detail::cast_object( _other ), _rotate );
 
                     // An adapter that cannot take the operand returns null; one that
                     // raised keeps its error rather than letting the other operand run.
@@ -834,7 +847,7 @@ namespace pybind
                 {
                     DEBUG_PYBIND_NOTIFY_BIND_CALL_SCOPE( kernel, scope->get_name(), ( *inplace )->getName(), ( *inplace )->getCallDebugSilent(), nullptr, nullptr );
 
-                    ( *inplace )->call( kernel, payload->impl, class_type_scope_interface_ptr::from( scope ), detail::cast_object( _other ) );
+                    ( *inplace )->call( kernel, payload->impl, class_type_scope_interface_ptr::from( payload->scope ), detail::cast_object( _other ) );
                     tinypy_retain( _instance );
                     return _instance;
                 }
@@ -854,19 +867,45 @@ namespace pybind
             }
         }
         //////////////////////////////////////////////////////////////////////////
+        static tinypy_value_t * native_binary_operands( tinypy_value_t * _instance, void * _payload, tinypy_value_t * _other, void * _userData, tinypy_error_t ** _outError, binary_operation_e _operation )
+        {
+            tinypy_value_t * result = detail::native_binary( _instance, _payload, _other, _userData, _outError, _operation, false );
+
+            // Bound types share this slot, so the VM does not try the right
+            // operand itself; as the CPython backend, its reflected adapter does.
+            tinypy_class_type_scope::payload_t * otherPayload = tinypy_class_type_scope::instance_payload( detail::cast_object( _other ) );
+
+            if( result == nullptr || tinypy_typeof( result ) != TINYPY_VALUE_NOT_IMPLEMENTED || otherPayload == nullptr )
+            {
+                return result;
+            }
+
+            tinypy_release( result );
+
+            const tinypy_native_type_spec_t * otherSpec = tinypy_native_type_spec( tinypy_object_type( _other ) );
+
+            return detail::native_binary( _other, otherPayload, _instance, otherSpec->user_data, _outError, _operation, true );
+        }
+        //////////////////////////////////////////////////////////////////////////
 #define PYBIND_TINYPY_BINARY_CALLBACK(Name, Operation, Rotate) \
         static tinypy_value_t * Name( tinypy_value_t * instance, void * payload, tinypy_value_t * other, void * userData, tinypy_error_t ** outError ) \
         { \
             return detail::native_binary( instance, payload, other, userData, outError, Operation, Rotate ); \
     }
         //////////////////////////////////////////////////////////////////////////
-        PYBIND_TINYPY_BINARY_CALLBACK( native_add, BinaryAdd, false )
+#define PYBIND_TINYPY_BINARY_OPERANDS_CALLBACK(Name, Operation) \
+        static tinypy_value_t * Name( tinypy_value_t * instance, void * payload, tinypy_value_t * other, void * userData, tinypy_error_t ** outError ) \
+        { \
+            return detail::native_binary_operands( instance, payload, other, userData, outError, Operation ); \
+    }
         //////////////////////////////////////////////////////////////////////////
-        PYBIND_TINYPY_BINARY_CALLBACK( native_subtract, BinarySubtract, false )
+        PYBIND_TINYPY_BINARY_OPERANDS_CALLBACK( native_add, BinaryAdd )
         //////////////////////////////////////////////////////////////////////////
-        PYBIND_TINYPY_BINARY_CALLBACK( native_multiply, BinaryMultiply, false )
+        PYBIND_TINYPY_BINARY_OPERANDS_CALLBACK( native_subtract, BinarySubtract )
         //////////////////////////////////////////////////////////////////////////
-        PYBIND_TINYPY_BINARY_CALLBACK( native_divide, BinaryDivide, false )
+        PYBIND_TINYPY_BINARY_OPERANDS_CALLBACK( native_multiply, BinaryMultiply )
+        //////////////////////////////////////////////////////////////////////////
+        PYBIND_TINYPY_BINARY_OPERANDS_CALLBACK( native_divide, BinaryDivide )
         //////////////////////////////////////////////////////////////////////////
         PYBIND_TINYPY_BINARY_CALLBACK( native_inplace_add, BinaryInplaceAdd, false )
         //////////////////////////////////////////////////////////////////////////
@@ -884,6 +923,7 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         PYBIND_TINYPY_BINARY_CALLBACK( native_reflected_divide, BinaryDivide, true )
         //////////////////////////////////////////////////////////////////////////
+#undef PYBIND_TINYPY_BINARY_OPERANDS_CALLBACK
 #undef PYBIND_TINYPY_BINARY_CALLBACK
         //////////////////////////////////////////////////////////////////////////
     }
@@ -1103,6 +1143,11 @@ namespace pybind
         }
     }
     //////////////////////////////////////////////////////////////////////////
+    bool tinypy_class_type_scope::is_finalized() const
+    {
+        return m_type == nullptr;
+    }
+    //////////////////////////////////////////////////////////////////////////
     void tinypy_class_type_scope::detach()
     {
         // The VM that is destroyed has released the type and the module.
@@ -1229,8 +1274,12 @@ namespace pybind
             }
         }
 
-        static member_adapter_interface_ptr none;
-        return none;
+        pybind::throw_exception( "scope '%s' find_member '%s' not found"
+            , m_name
+            , _name
+        );
+
+        return member_adapter_interface_ptr::none();
     }
     //////////////////////////////////////////////////////////////////////////
     void tinypy_class_type_scope::add_base( typeid_t _info, const class_type_scope_interface_ptr & _scope, pybind_metacast _cast )

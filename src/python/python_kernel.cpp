@@ -383,6 +383,17 @@ namespace pybind
             }
         }
 
+#if defined(PYBIND_DEBUG)
+        if( this->module_check( _module ) == false )
+        {
+            pybind::throw_exception( "remove_from_module '%s' from an object that is not a module"
+                , _name
+            );
+
+            return;
+        }
+#endif
+
         pybind::module_removeobject( _module, _name );
     }
     //////////////////////////////////////////////////////////////////////////
@@ -403,6 +414,15 @@ namespace pybind
         const char * name = _adapter->getName();
 
 #if defined(PYBIND_DEBUG)
+        if( this->module_check( _module ) == false )
+        {
+            pybind::throw_exception( "def_function_adapter '%s' into an object that is not a module"
+                , name
+            );
+
+            return;
+        }
+
         if( pybind::module_hasobject( _module, name ) == true )
         {
             pybind::throw_exception( "def_function_adapter module '%s' overriding object '%s'"
@@ -437,6 +457,15 @@ namespace pybind
         const char * name = _adapter->getName();
 
 #if defined(PYBIND_DEBUG)
+        if( this->module_check( _module ) == false )
+        {
+            pybind::throw_exception( "def_functor_adapter '%s' into an object that is not a module"
+                , name
+            );
+
+            return;
+        }
+
         if( pybind::module_hasobject( _module, name ) == true )
         {
             pybind::throw_exception( "def_functor_adapter module '%s' overriding object '%s'"
@@ -791,10 +820,10 @@ namespace pybind
 
         const class_type_scope_interface_ptr & scope = this->get_class_scope( objtype );
 
+        // As the tinypy backend: nothing here raises, and an error pending
+        // before stays.
         if( scope == nullptr )
         {
-            pybind::error_clear();
-
             if( pybind::is_none( _obj ) == true )
             {
                 return 0;

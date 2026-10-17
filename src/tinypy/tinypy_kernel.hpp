@@ -370,6 +370,7 @@ namespace pybind
 #if defined(TINYPY_DEBUGGER)
         pybind_debugger_handler_f m_debuggerHandler;
         void * m_debuggerUserData;
+        bool m_debuggerTracing;
 #endif
 
     private:

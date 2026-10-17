@@ -66,7 +66,9 @@ namespace pybind
 
             PyTypeObject * objtype = pybind::object_type( _obj );
 
-            const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
+            // Held, as the scope and the adapter are in every slot: the adapter
+            // may remove the scope, whose finalize releases both.
+            class_type_scope_interface_ptr scope = kernel->get_class_scope( objtype );
 
             if( scope == nullptr )
             {
@@ -78,7 +80,7 @@ namespace pybind
                 return nullptr;
             }
 
-            const method_adapter_interface_ptr & adapter = scope->get_call();
+            method_adapter_interface_ptr adapter = scope->get_call();
 
             // A bound type derived in C++ inherits the slot through the
             // descriptor of its base, not the adapter, as in the tinypy backend.
@@ -101,11 +103,7 @@ namespace pybind
             }
             catch( const pybind::pybind_exception & _ex )
             {
-                pybind::error_message( "obj '%s' py_callfunc invalid call '%s' error: %s"
-                    , kernel->object_str( _obj ).c_str()
-                    , adapter->getName()
-                    , _ex.what()
-                );
+                pybind::set_error( error_type_e::Runtime, _ex.what() );
             }
 
             return nullptr;
@@ -124,7 +122,7 @@ namespace pybind
 
             PyTypeObject * objtype = pybind::object_type( _obj );
 
-            const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
+            class_type_scope_interface_ptr scope = kernel->get_class_scope( objtype );
 
             if( scope == nullptr )
             {
@@ -133,7 +131,7 @@ namespace pybind
                 return ret;
             }
 
-            const repr_adapter_interface_ptr & adapter = scope->get_repr();
+            repr_adapter_interface_ptr adapter = scope->get_repr();
 
             // A bound type derived in C++ inherits the slot through the
             // descriptor of its base, not the adapter, as in the tinypy backend.
@@ -152,11 +150,7 @@ namespace pybind
             }
             catch( const pybind::pybind_exception & _ex )
             {
-                // The str of the object would call this repr again.
-                pybind::error_message( "type '%s' py_reprfunc invalid call exception: %s"
-                    , objtype->tp_name
-                    , _ex.what()
-                );
+                pybind::set_error( error_type_e::Runtime, _ex.what() );
             }
 
             return nullptr;
@@ -194,7 +188,7 @@ namespace pybind
 
             PyTypeObject * objtype = pybind::object_type( _obj );
 
-            const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
+            class_type_scope_interface_ptr scope = kernel->get_class_scope( objtype );
 
             if( scope == nullptr )
             {
@@ -206,7 +200,7 @@ namespace pybind
                 return -1;
             }
 
-            const hash_adapter_interface_ptr & adapter = scope->get_hash();
+            hash_adapter_interface_ptr adapter = scope->get_hash();
 
             // A bound type derived in C++ inherits the slot through the
             // descriptor of its base, not the adapter, as in the tinypy backend.
@@ -236,10 +230,7 @@ namespace pybind
             }
             catch( const pybind::pybind_exception & _ex )
             {
-                pybind::error_message( "obj '%s' py_hash invalid call exception: %s"
-                    , kernel->object_str( _obj ).c_str()
-                    , _ex.what()
-                );
+                pybind::set_error( error_type_e::Runtime, _ex.what() );
             }
 
             return -1;
@@ -296,7 +287,7 @@ namespace pybind
 
             PyTypeObject * objtype = pybind::object_type( _obj );
 
-            const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
+            class_type_scope_interface_ptr scope = kernel->get_class_scope( objtype );
 
             if( scope == nullptr )
             {
@@ -310,7 +301,7 @@ namespace pybind
 
             typeid_t compare_type_id = kernel->get_object_type_id( _compare );
 
-            const compare_adapter_interface_ptr & adapter = scope->get_compare( compare_type_id );
+            compare_adapter_interface_ptr adapter = scope->get_compare( compare_type_id );
 
             if( adapter != nullptr )
             {
@@ -328,11 +319,7 @@ namespace pybind
                 }
                 catch( const pybind::pybind_exception & _ex )
                 {
-                    pybind::error_message( "obj '%s' py_richcompare '%s' invalid compare exception: %s"
-                        , kernel->object_str( _obj ).c_str()
-                        , kernel->object_str( _compare ).c_str()
-                        , _ex.what()
-                    );
+                    pybind::set_error( error_type_e::Runtime, _ex.what() );
 
                     return nullptr;
                 }
@@ -340,7 +327,7 @@ namespace pybind
 
             typeid_t base_type_id = kernel->get_object_type_id( _obj );
 
-            const compare_adapter_interface_ptr & base_adapter = scope->get_compare( base_type_id );
+            compare_adapter_interface_ptr base_adapter = scope->get_compare( base_type_id );
 
             if( base_adapter != nullptr )
             {
@@ -358,11 +345,7 @@ namespace pybind
                 }
                 catch( const pybind::pybind_exception & _ex )
                 {
-                    pybind::error_message( "obj '%s' py_richcompare '%s' invalid base compare exception: %s"
-                        , kernel->object_str( _obj ).c_str()
-                        , kernel->object_str( _compare ).c_str()
-                        , _ex.what()
-                    );
+                    pybind::set_error( error_type_e::Runtime, _ex.what() );
 
                     return nullptr;
                 }
@@ -384,7 +367,7 @@ namespace pybind
 
             PyTypeObject * objtype = pybind::object_type( _obj );
 
-            const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
+            class_type_scope_interface_ptr scope = kernel->get_class_scope( objtype );
 
             if( scope == nullptr )
             {
@@ -396,7 +379,7 @@ namespace pybind
                 return nullptr;
             }
 
-            const getattro_adapter_interface_ptr & adapter = scope->get_getattro();
+            getattro_adapter_interface_ptr adapter = scope->get_getattro();
 
             // A bound type derived in C++ inherits the slot through the
             // descriptor of its base, not the adapter, as in the tinypy backend.
@@ -417,11 +400,7 @@ namespace pybind
             }
             catch( const pybind::pybind_exception & _ex )
             {
-                pybind::error_message( "obj '%s' py_getattro invalid call '%s' exception: %s"
-                    , kernel->object_str( _obj ).c_str()
-                    , adapter->getName()
-                    , _ex.what()
-                );
+                pybind::set_error( error_type_e::Runtime, _ex.what() );
             }
 
             return nullptr;
@@ -440,7 +419,7 @@ namespace pybind
 
             PyTypeObject * objtype = pybind::object_type( _obj );
 
-            const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
+            class_type_scope_interface_ptr scope = kernel->get_class_scope( objtype );
 
             if( scope == nullptr )
             {
@@ -452,7 +431,7 @@ namespace pybind
                 return nullptr;
             }
 
-            const mapping_adapter_interface_ptr & adapter = scope->get_mapping();
+            mapping_adapter_interface_ptr adapter = scope->get_mapping();
 
             // A bound type derived in C++ inherits the slot through the
             // descriptor of its base, not the adapter, as in the tinypy backend;
@@ -490,11 +469,7 @@ namespace pybind
             }
             catch( const pybind::pybind_exception & _ex )
             {
-                pybind::error_message( "obj '%s' py_subscript invalid call '%s' exception: %s"
-                    , kernel->object_str( _obj ).c_str()
-                    , adapter->getName()
-                    , _ex.what()
-                );
+                pybind::set_error( error_type_e::Runtime, _ex.what() );
             }
 
             return nullptr;
@@ -519,7 +494,7 @@ namespace pybind
 
             PyTypeObject * objtype = pybind::object_type( _obj );
 
-            const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
+            class_type_scope_interface_ptr scope = kernel->get_class_scope( objtype );
 
             if( scope == nullptr )
             {
@@ -539,7 +514,7 @@ namespace pybind
                 return nullptr;
             }
 
-            const sequence_get_adapter_interface_ptr & adapter = scope->get_sequence_get();
+            sequence_get_adapter_interface_ptr adapter = scope->get_sequence_get();
 
             // A bound type derived in C++ inherits the slot through the
             // descriptor of its base, not the adapter, as in the tinypy backend.
@@ -562,11 +537,7 @@ namespace pybind
             }
             catch( const pybind::pybind_exception & _ex )
             {
-                pybind::error_message( "obj '%s' py_item_get invalid call '%s' exception: %s"
-                    , kernel->object_str( _obj ).c_str()
-                    , adapter->getName()
-                    , _ex.what()
-                );
+                pybind::set_error( error_type_e::Runtime, _ex.what() );
             }
 
             return nullptr;
@@ -585,13 +556,24 @@ namespace pybind
 
             PyTypeObject * objtype = pybind::object_type( _obj );
 
-            const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
+            class_type_scope_interface_ptr scope = kernel->get_class_scope( objtype );
 
             if( scope == nullptr )
             {
                 pybind::error_message( "obj '%s' type '%s' py_item_set scope is null"
                     , kernel->object_str( _obj ).c_str()
                     , kernel->type_name( objtype )
+                );
+
+                return -1;
+            }
+
+            // As PyObject_DelItem for a sequence that can only be assigned, and
+            // the tinypy backend: whatever its index.
+            if( _value == nullptr )
+            {
+                PyErr_Format( PyExc_TypeError, "'%s' object doesn't support item deletion"
+                    , objtype->tp_name
                 );
 
                 return -1;
@@ -604,17 +586,7 @@ namespace pybind
                 return -1;
             }
 
-            // As PyObject_DelItem for a sequence that can only be assigned.
-            if( _value == nullptr )
-            {
-                PyErr_Format( PyExc_TypeError, "'%s' object doesn't support item deletion"
-                    , objtype->tp_name
-                );
-
-                return -1;
-            }
-
-            const sequence_set_adapter_interface_ptr & adapter = scope->get_sequence_set();
+            sequence_set_adapter_interface_ptr adapter = scope->get_sequence_set();
 
             // A bound type derived in C++ inherits the slot through the
             // descriptor of its base, not the adapter, as in the tinypy backend.
@@ -637,11 +609,7 @@ namespace pybind
             }
             catch( const pybind::pybind_exception & _ex )
             {
-                pybind::error_message( "obj '%s' py_item_set invalid call '%s' exception: %s"
-                    , kernel->object_str( _obj ).c_str()
-                    , adapter->getName()
-                    , _ex.what()
-                );
+                pybind::set_error( error_type_e::Runtime, _ex.what() );
             }
 
             return -1;
@@ -721,11 +689,11 @@ namespace pybind
 
             PyTypeObject * objtype = pybind::object_type( _obj );
 
-            const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
+            class_type_scope_interface_ptr scope = kernel->get_class_scope( objtype );
 
             if( scope != nullptr )
             {
-                const number_unary_adapter_interface_ptr & adapter = scope->get_number_neg();
+                number_unary_adapter_interface_ptr adapter = scope->get_number_neg();
 
                 if( adapter != nullptr )
                 {
@@ -735,12 +703,9 @@ namespace pybind
 
                         return result;
                     }
-                    catch( const pybind_exception & )
+                    catch( const pybind_exception & _ex )
                     {
-                        pybind::error_message( "obj '%s' nb neg invalid call '%s'"
-                            , kernel->object_str( _obj ).c_str()
-                            , adapter->getName()
-                        );
+                        pybind::set_error( error_type_e::Runtime, _ex.what() );
 
                         return nullptr;
                     }
@@ -762,11 +727,11 @@ namespace pybind
 
             PyTypeObject * objtype = pybind::object_type( _obj );
 
-            const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
+            class_type_scope_interface_ptr scope = kernel->get_class_scope( objtype );
 
             if( scope != nullptr )
             {
-                const number_unary_adapter_interface_ptr & adapter = scope->get_number_abs();
+                number_unary_adapter_interface_ptr adapter = scope->get_number_abs();
 
                 if( adapter != nullptr )
                 {
@@ -776,12 +741,9 @@ namespace pybind
 
                         return result;
                     }
-                    catch( const pybind_exception & )
+                    catch( const pybind_exception & _ex )
                     {
-                        pybind::error_message( "obj '%s' nb abs invalid call '%s'"
-                            , kernel->object_str( _obj ).c_str()
-                            , adapter->getName()
-                        );
+                        pybind::set_error( error_type_e::Runtime, _ex.what() );
 
                         return nullptr;
                     }
@@ -801,7 +763,7 @@ namespace pybind
         {
             PyTypeObject * objtype = pybind::object_type( _obj );
 
-            const class_type_scope_interface_ptr & scope = _kernel->get_class_scope( objtype );
+            class_type_scope_interface_ptr scope = _kernel->get_class_scope( objtype );
 
             if( scope == nullptr )
             {
@@ -810,7 +772,7 @@ namespace pybind
 
             typeid_t value_type_id = _kernel->get_object_type_id( _value );
 
-            const number_binary_adapter_interface_ptr & adapter = scope->get_number_add( value_type_id );
+            number_binary_adapter_interface_ptr adapter = scope->get_number_add( value_type_id );
 
             if( adapter != nullptr )
             {
@@ -820,12 +782,9 @@ namespace pybind
 
                     return result;
                 }
-                catch( const pybind_exception & )
+                catch( const pybind_exception & _ex )
                 {
-                    pybind::error_message( "obj '%s' nb add invalid call '%s'"
-                        , _kernel->object_str( _obj ).c_str()
-                        , adapter->getName()
-                    );
+                    pybind::set_error( error_type_e::Runtime, _ex.what() );
 
                     return nullptr;
                 }
@@ -833,7 +792,7 @@ namespace pybind
 
             typeid_t base_type_id = _kernel->get_object_type_id( _obj );
 
-            const number_binary_adapter_interface_ptr & base_adapter = scope->get_number_add( base_type_id );
+            number_binary_adapter_interface_ptr base_adapter = scope->get_number_add( base_type_id );
 
             if( base_adapter != nullptr )
             {
@@ -843,12 +802,9 @@ namespace pybind
 
                     return result;
                 }
-                catch( const pybind_exception & )
+                catch( const pybind_exception & _ex )
                 {
-                    pybind::error_message( "obj '%s' nb base add invalid call '%s'"
-                        , _kernel->object_str( _obj ).c_str()
-                        , base_adapter->getName()
-                    );
+                    pybind::set_error( error_type_e::Runtime, _ex.what() );
 
                     return nullptr;
                 }
@@ -884,7 +840,7 @@ namespace pybind
         {
             PyTypeObject * objtype = pybind::object_type( _obj );
 
-            const class_type_scope_interface_ptr & scope = _kernel->get_class_scope( objtype );
+            class_type_scope_interface_ptr scope = _kernel->get_class_scope( objtype );
 
             if( scope == nullptr )
             {
@@ -893,7 +849,7 @@ namespace pybind
 
             typeid_t value_type_id = _kernel->get_object_type_id( _value );
 
-            const number_binary_adapter_interface_ptr & adapter = scope->get_number_sub( value_type_id );
+            number_binary_adapter_interface_ptr adapter = scope->get_number_sub( value_type_id );
 
             if( adapter != nullptr )
             {
@@ -903,12 +859,9 @@ namespace pybind
 
                     return result;
                 }
-                catch( const pybind_exception & )
+                catch( const pybind_exception & _ex )
                 {
-                    pybind::error_message( "obj '%s' nb sub invalid call '%s'"
-                        , _kernel->object_str( _obj ).c_str()
-                        , adapter->getName()
-                    );
+                    pybind::set_error( error_type_e::Runtime, _ex.what() );
 
                     return nullptr;
                 }
@@ -916,7 +869,7 @@ namespace pybind
 
             typeid_t base_type_id = _kernel->get_object_type_id( _obj );
 
-            const number_binary_adapter_interface_ptr & base_adapter = scope->get_number_sub( base_type_id );
+            number_binary_adapter_interface_ptr base_adapter = scope->get_number_sub( base_type_id );
 
             if( base_adapter != nullptr )
             {
@@ -926,12 +879,9 @@ namespace pybind
 
                     return result;
                 }
-                catch( const pybind_exception & )
+                catch( const pybind_exception & _ex )
                 {
-                    pybind::error_message( "obj '%s' nb base sub invalid call '%s'"
-                        , _kernel->object_str( _obj ).c_str()
-                        , base_adapter->getName()
-                    );
+                    pybind::set_error( error_type_e::Runtime, _ex.what() );
 
                     return nullptr;
                 }
@@ -967,7 +917,7 @@ namespace pybind
         {
             PyTypeObject * objtype = pybind::object_type( _obj );
 
-            const class_type_scope_interface_ptr & scope = _kernel->get_class_scope( objtype );
+            class_type_scope_interface_ptr scope = _kernel->get_class_scope( objtype );
 
             if( scope == nullptr )
             {
@@ -976,7 +926,7 @@ namespace pybind
 
             typeid_t value_type_id = _kernel->get_object_type_id( _value );
 
-            const number_binary_adapter_interface_ptr & adapter = scope->get_number_mul( value_type_id );
+            number_binary_adapter_interface_ptr adapter = scope->get_number_mul( value_type_id );
 
             if( adapter != nullptr )
             {
@@ -986,12 +936,9 @@ namespace pybind
 
                     return result;
                 }
-                catch( const pybind_exception & )
+                catch( const pybind_exception & _ex )
                 {
-                    pybind::error_message( "obj '%s' nb mul invalid call '%s'"
-                        , _kernel->object_str( _obj ).c_str()
-                        , adapter->getName()
-                    );
+                    pybind::set_error( error_type_e::Runtime, _ex.what() );
 
                     return nullptr;
                 }
@@ -999,7 +946,7 @@ namespace pybind
 
             typeid_t base_type_id = _kernel->get_object_type_id( _obj );
 
-            const number_binary_adapter_interface_ptr & base_adapter = scope->get_number_mul( base_type_id );
+            number_binary_adapter_interface_ptr base_adapter = scope->get_number_mul( base_type_id );
 
             if( base_adapter != nullptr )
             {
@@ -1009,12 +956,9 @@ namespace pybind
 
                     return result;
                 }
-                catch( const pybind_exception & )
+                catch( const pybind_exception & _ex )
                 {
-                    pybind::error_message( "obj '%s' nb base mul invalid call '%s'"
-                        , _kernel->object_str( _obj ).c_str()
-                        , base_adapter->getName()
-                    );
+                    pybind::set_error( error_type_e::Runtime, _ex.what() );
 
                     return nullptr;
                 }
@@ -1050,7 +994,7 @@ namespace pybind
         {
             PyTypeObject * objtype = pybind::object_type( _obj );
 
-            const class_type_scope_interface_ptr & scope = _kernel->get_class_scope( objtype );
+            class_type_scope_interface_ptr scope = _kernel->get_class_scope( objtype );
 
             if( scope == nullptr )
             {
@@ -1059,7 +1003,7 @@ namespace pybind
 
             typeid_t value_type_id = _kernel->get_object_type_id( _value );
 
-            const number_binary_adapter_interface_ptr & adapter = scope->get_number_div( value_type_id );
+            number_binary_adapter_interface_ptr adapter = scope->get_number_div( value_type_id );
 
             if( adapter != nullptr )
             {
@@ -1069,12 +1013,9 @@ namespace pybind
 
                     return result;
                 }
-                catch( const pybind_exception & )
+                catch( const pybind_exception & _ex )
                 {
-                    pybind::error_message( "obj '%s' nb div invalid call '%s'"
-                        , _kernel->object_str( _obj ).c_str()
-                        , adapter->getName()
-                    );
+                    pybind::set_error( error_type_e::Runtime, _ex.what() );
 
                     return nullptr;
                 }
@@ -1082,7 +1023,7 @@ namespace pybind
 
             typeid_t base_type_id = _kernel->get_object_type_id( _obj );
 
-            const number_binary_adapter_interface_ptr & base_adapter = scope->get_number_div( base_type_id );
+            number_binary_adapter_interface_ptr base_adapter = scope->get_number_div( base_type_id );
 
             if( base_adapter != nullptr )
             {
@@ -1092,12 +1033,9 @@ namespace pybind
 
                     return result;
                 }
-                catch( const pybind_exception & )
+                catch( const pybind_exception & _ex )
                 {
-                    pybind::error_message( "obj '%s' nb base div invalid call '%s'"
-                        , _kernel->object_str( _obj ).c_str()
-                        , base_adapter->getName()
-                    );
+                    pybind::set_error( error_type_e::Runtime, _ex.what() );
 
                     return nullptr;
                 }
@@ -1135,7 +1073,7 @@ namespace pybind
 
             PyTypeObject * objtype = pybind::object_type( _obj );
 
-            const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
+            class_type_scope_interface_ptr scope = kernel->get_class_scope( objtype );
 
             if( scope == nullptr )
             {
@@ -1144,7 +1082,7 @@ namespace pybind
 
             typeid_t value_type_id = kernel->get_object_type_id( _value );
 
-            const number_inplace_adapter_interface_ptr & adapter = scope->get_number_inplace_add( value_type_id );
+            number_inplace_adapter_interface_ptr adapter = scope->get_number_inplace_add( value_type_id );
 
             if( adapter != nullptr )
             {
@@ -1159,12 +1097,9 @@ namespace pybind
 
                     return _obj;
                 }
-                catch( const pybind_exception & )
+                catch( const pybind_exception & _ex )
                 {
-                    pybind::error_message( "obj '%s' nb inplace add invalid call '%s'"
-                        , kernel->object_str( _obj ).c_str()
-                        , adapter->getName()
-                    );
+                    pybind::set_error( error_type_e::Runtime, _ex.what() );
 
                     return nullptr;
                 }
@@ -1172,7 +1107,7 @@ namespace pybind
 
             typeid_t base_type_id = kernel->get_object_type_id( _obj );
 
-            const number_inplace_adapter_interface_ptr & base_adapter = scope->get_number_inplace_add( base_type_id );
+            number_inplace_adapter_interface_ptr base_adapter = scope->get_number_inplace_add( base_type_id );
 
             if( base_adapter != nullptr )
             {
@@ -1187,12 +1122,9 @@ namespace pybind
 
                     return _obj;
                 }
-                catch( const pybind_exception & )
+                catch( const pybind_exception & _ex )
                 {
-                    pybind::error_message( "obj '%s' nb inplace base add invalid call '%s'"
-                        , kernel->object_str( _obj ).c_str()
-                        , base_adapter->getName()
-                    );
+                    pybind::set_error( error_type_e::Runtime, _ex.what() );
 
                     return nullptr;
                 }
@@ -1207,7 +1139,7 @@ namespace pybind
 
             PyTypeObject * objtype = pybind::object_type( _obj );
 
-            const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
+            class_type_scope_interface_ptr scope = kernel->get_class_scope( objtype );
 
             if( scope == nullptr )
             {
@@ -1216,7 +1148,7 @@ namespace pybind
 
             typeid_t value_type_id = kernel->get_object_type_id( _value );
 
-            const number_inplace_adapter_interface_ptr & adapter = scope->get_number_inplace_sub( value_type_id );
+            number_inplace_adapter_interface_ptr adapter = scope->get_number_inplace_sub( value_type_id );
 
             if( adapter != nullptr )
             {
@@ -1231,12 +1163,9 @@ namespace pybind
 
                     return _obj;
                 }
-                catch( const pybind_exception & )
+                catch( const pybind_exception & _ex )
                 {
-                    pybind::error_message( "obj '%s' nb inplace sub invalid call '%s'"
-                        , kernel->object_str( _obj ).c_str()
-                        , adapter->getName()
-                    );
+                    pybind::set_error( error_type_e::Runtime, _ex.what() );
 
                     return nullptr;
                 }
@@ -1244,7 +1173,7 @@ namespace pybind
 
             typeid_t base_type_id = kernel->get_object_type_id( _obj );
 
-            const number_inplace_adapter_interface_ptr & base_adapter = scope->get_number_inplace_sub( base_type_id );
+            number_inplace_adapter_interface_ptr base_adapter = scope->get_number_inplace_sub( base_type_id );
 
             if( base_adapter != nullptr )
             {
@@ -1259,12 +1188,9 @@ namespace pybind
 
                     return _obj;
                 }
-                catch( const pybind_exception & )
+                catch( const pybind_exception & _ex )
                 {
-                    pybind::error_message( "obj '%s' nb inplace base sub invalid call '%s'"
-                        , kernel->object_str( _obj ).c_str()
-                        , base_adapter->getName()
-                    );
+                    pybind::set_error( error_type_e::Runtime, _ex.what() );
 
                     return nullptr;
                 }
@@ -1279,7 +1205,7 @@ namespace pybind
 
             PyTypeObject * objtype = pybind::object_type( _obj );
 
-            const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
+            class_type_scope_interface_ptr scope = kernel->get_class_scope( objtype );
 
             if( scope == nullptr )
             {
@@ -1288,7 +1214,7 @@ namespace pybind
 
             typeid_t value_type_id = kernel->get_object_type_id( _value );
 
-            const number_inplace_adapter_interface_ptr & adapter = scope->get_number_inplace_mul( value_type_id );
+            number_inplace_adapter_interface_ptr adapter = scope->get_number_inplace_mul( value_type_id );
 
             if( adapter != nullptr )
             {
@@ -1303,12 +1229,9 @@ namespace pybind
 
                     return _obj;
                 }
-                catch( const pybind_exception & )
+                catch( const pybind_exception & _ex )
                 {
-                    pybind::error_message( "obj '%s' nb inplace mul invalid call '%s'"
-                        , kernel->object_str( _obj ).c_str()
-                        , adapter->getName()
-                    );
+                    pybind::set_error( error_type_e::Runtime, _ex.what() );
 
                     return nullptr;
                 }
@@ -1316,7 +1239,7 @@ namespace pybind
 
             typeid_t base_type_id = kernel->get_object_type_id( _obj );
 
-            const number_inplace_adapter_interface_ptr & base_adapter = scope->get_number_inplace_mul( base_type_id );
+            number_inplace_adapter_interface_ptr base_adapter = scope->get_number_inplace_mul( base_type_id );
 
             if( base_adapter != nullptr )
             {
@@ -1331,12 +1254,9 @@ namespace pybind
 
                     return _obj;
                 }
-                catch( const pybind_exception & )
+                catch( const pybind_exception & _ex )
                 {
-                    pybind::error_message( "obj '%s' nb inplace base mul invalid call '%s'"
-                        , kernel->object_str( _obj ).c_str()
-                        , base_adapter->getName()
-                    );
+                    pybind::set_error( error_type_e::Runtime, _ex.what() );
 
                     return nullptr;
                 }
@@ -1351,7 +1271,7 @@ namespace pybind
 
             PyTypeObject * objtype = pybind::object_type( _obj );
 
-            const class_type_scope_interface_ptr & scope = kernel->get_class_scope( objtype );
+            class_type_scope_interface_ptr scope = kernel->get_class_scope( objtype );
 
             if( scope == nullptr )
             {
@@ -1360,7 +1280,7 @@ namespace pybind
 
             typeid_t value_type_id = kernel->get_object_type_id( _value );
 
-            const number_inplace_adapter_interface_ptr & adapter = scope->get_number_inplace_div( value_type_id );
+            number_inplace_adapter_interface_ptr adapter = scope->get_number_inplace_div( value_type_id );
 
             if( adapter != nullptr )
             {
@@ -1375,12 +1295,9 @@ namespace pybind
 
                     return _obj;
                 }
-                catch( const pybind_exception & )
+                catch( const pybind_exception & _ex )
                 {
-                    pybind::error_message( "obj '%s' nb inplace div invalid call '%s'"
-                        , kernel->object_str( _obj ).c_str()
-                        , adapter->getName()
-                    );
+                    pybind::set_error( error_type_e::Runtime, _ex.what() );
 
                     return nullptr;
                 }
@@ -1388,7 +1305,7 @@ namespace pybind
 
             typeid_t base_type_id = kernel->get_object_type_id( _obj );
 
-            const number_inplace_adapter_interface_ptr & base_adapter = scope->get_number_inplace_div( base_type_id );
+            number_inplace_adapter_interface_ptr base_adapter = scope->get_number_inplace_div( base_type_id );
 
             if( base_adapter != nullptr )
             {
@@ -1403,12 +1320,9 @@ namespace pybind
 
                     return _obj;
                 }
-                catch( const pybind_exception & )
+                catch( const pybind_exception & _ex )
                 {
-                    pybind::error_message( "obj '%s' nb inplace base div invalid call '%s'"
-                        , kernel->object_str( _obj ).c_str()
-                        , base_adapter->getName()
-                    );
+                    pybind::set_error( error_type_e::Runtime, _ex.what() );
 
                     return nullptr;
                 }
@@ -2049,7 +1963,7 @@ namespace pybind
             return method;
         }
 
-        pybind::throw_exception( "scope '%s' find_method '%s' python error"
+        pybind::throw_exception( "scope '%s' find_method '%s' not found"
             , this->get_name()
             , _name
         );
@@ -2083,7 +1997,7 @@ namespace pybind
             return method;
         }
 
-        pybind::throw_exception( "scope '%s' find_member '%s' python error"
+        pybind::throw_exception( "scope '%s' find_member '%s' not found"
             , this->get_name()
             , _name
         );

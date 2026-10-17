@@ -11,6 +11,7 @@
 #include "pybind/dict.hpp"
 #include "pybind/list.hpp"
 #include "pybind/tuple.hpp"
+#include "pybind/set.hpp"
 #include "pybind/module.hpp"
 #include "pybind/generator/class_.hpp"
 #include "pybind/generator/interface_.hpp"
@@ -2244,6 +2245,629 @@ Regression4Keeper.getter = Regression4Base.__dict__['base'].fget
         _kernel->remove_scope<regression4_base_t>();
     }
 
+    static bool s_regression5_iterated = false;
+    static bool s_regression5_generated = false;
+    static bool s_regression5_looked_up = false;
+    static bool s_regression5_converted = false;
+    static bool s_regression5_attributes = false;
+    static bool s_regression5_imported = false;
+    static bool s_regression5_import_error = false;
+
+    struct regression5_entity_t
+    {
+        virtual ~regression5_entity_t()
+        {
+        }
+
+        virtual const char * kind() const
+        {
+            return "entity";
+        }
+    };
+
+    struct regression5_pad_t
+    {
+        virtual ~regression5_pad_t()
+        {
+        }
+
+        int32_t pad = 0;
+    };
+
+    struct regression5_scene_t
+        : public regression5_pad_t
+        , public regression5_entity_t
+    {
+        const char * kind() const override
+        {
+            return "scene";
+        }
+    };
+
+    struct regression5_vec_t
+    {
+        regression5_vec_t()
+        {
+        }
+
+        regression5_vec_t( float _x )
+            : x( _x )
+        {
+        }
+
+        regression5_vec_t operator * ( float _factor ) const
+        {
+            return regression5_vec_t( x * _factor );
+        }
+
+        float x = 0.f;
+    };
+
+    struct regression5_scale_t
+    {
+        regression5_scale_t()
+        {
+        }
+
+        regression5_scale_t( float _k )
+            : k( _k )
+        {
+        }
+
+        float k = 1.f;
+    };
+
+    // The vector knows nothing of the scale, which knows the vector in both
+    // orders.
+    static regression5_vec_t operator * ( const regression5_scale_t & _scale, const regression5_vec_t & _vec )
+    {
+        return regression5_vec_t( _scale.k * _vec.x );
+    }
+
+    static regression5_vec_t operator * ( const regression5_vec_t & _vec, const regression5_scale_t & _scale )
+    {
+        return regression5_vec_t( _vec.x * _scale.k * 10.f );
+    }
+
+    class regression5_thrower_t
+    {
+    public:
+        regression5_thrower_t( int32_t _value )
+        {
+            if( _value < 0 )
+            {
+                pybind::throw_exception( "regression5 constructor" );
+            }
+        }
+
+    public:
+        int32_t method()
+        {
+            pybind::throw_exception( "regression5 method" );
+
+            return 0;
+        }
+
+        int32_t add( PyObject * _other, bool _rotate )
+        {
+            (void)_other;
+            (void)_rotate;
+
+            pybind::throw_exception( "regression5 add" );
+
+            return 0;
+        }
+
+        int32_t getValue() const
+        {
+            return 0;
+        }
+
+        void setValue( int32_t _value )
+        {
+            (void)_value;
+
+            pybind::throw_exception( "regression5 setter" );
+        }
+
+        int32_t call()
+        {
+            // As a plugin that unloads its bindings from the call of one of them.
+            pybind::kernel_interface * kernel = pybind::get_kernel();
+            kernel->remove_scope<regression5_thrower_t>();
+
+            pybind::throw_exception( "regression5 removed" );
+
+            return 0;
+        }
+    };
+
+    class regression5_erring_t
+    {
+    public:
+        ~regression5_erring_t()
+        {
+            pybind::kernel_interface * kernel = pybind::get_kernel();
+            kernel->set_error( pybind::error_type_e::Value, "regression5 left by destructor" );
+        }
+    };
+
+    static const char * regression5_scene_kind( regression5_scene_t * _scene )
+    {
+        return _scene->kind();
+    }
+
+    static PyObject * regression5_utf8( pybind::kernel_interface * _kernel, PyObject * _unicode )
+    {
+        return _kernel->unicode_encode_utf8( _unicode );
+    }
+
+    static pybind::object regression5_string_size( pybind::kernel_interface * _kernel, PyObject * _string )
+    {
+        size_t size;
+        const char * data = _kernel->string_to_char_and_size( _string, &size );
+
+        if( data == nullptr )
+        {
+            return pybind::make_invalid_object_t();
+        }
+
+        return pybind::make_object_t( _kernel, size );
+    }
+
+    static pybind::object regression5_pickle( pybind::kernel_interface * _kernel, PyObject * _value, PyObject * _types )
+    {
+        size_t size = 0;
+
+        if( pybind::pickle( _kernel, _value, _types, nullptr, 0, &size ) == false )
+        {
+            return pybind::make_invalid_object_t();
+        }
+
+        std::vector<char> buffer( size );
+        size_t written = 0;
+
+        if( pybind::pickle( _kernel, _value, _types, buffer.data(), size, &written ) == false )
+        {
+            return pybind::make_invalid_object_t();
+        }
+
+        PyObject * data = _kernel->string_from_char_size( buffer.data(), written );
+
+        return pybind::object( _kernel, data, pybind::borrowed );
+    }
+
+    static pybind::object regression5_unpickle( pybind::kernel_interface * _kernel, PyObject * _data, PyObject * _types )
+    {
+        size_t size;
+        const char * data = _kernel->string_to_char_and_size( _data, &size );
+        PyObject * value = pybind::unpickle( _kernel, data, size, _types );
+
+        if( value == nullptr )
+        {
+            return pybind::make_invalid_object_t();
+        }
+
+        return pybind::object( _kernel, value, pybind::borrowed );
+    }
+
+    static pybind::object regression5_pending_ops( pybind::kernel_interface * _kernel, PyObject * _iterable, PyObject * _generator, PyObject * _key, PyObject * _bool, PyObject * _object )
+    {
+        // An error raised before these operations stays the one Python sees, and
+        // their Python code, which swallows errors of its own, runs without it.
+        _kernel->set_error( pybind::error_type_e::Index, "regression5 pending" );
+
+        PyObject * iterator;
+        PyObject * item;
+
+        if( _kernel->iterator_get( _iterable, &iterator ) == true )
+        {
+            int64_t sum = 0;
+
+            while( _kernel->iterator_next( iterator, &item ) == true )
+            {
+                int64_t value = 0;
+                _kernel->extract_int64( item, value );
+                _kernel->decref( item );
+
+                sum += value;
+            }
+
+            _kernel->iterator_end( iterator );
+
+            s_regression5_iterated = sum == 3;
+        }
+
+        // The error of a step is reported, and the iteration ends.
+        if( _kernel->iterator_get( _generator, &iterator ) == true )
+        {
+            uint32_t count = 0;
+
+            while( _kernel->iterator_next( iterator, &item ) == true )
+            {
+                _kernel->decref( item );
+
+                ++count;
+            }
+
+            _kernel->iterator_end( iterator );
+
+            s_regression5_generated = count == 1;
+        }
+
+        PyObject * dict = _kernel->dict_new();
+        PyObject * set = _kernel->set_new();
+        s_regression5_looked_up = _kernel->dict_exist( dict, _key ) == false && _kernel->dict_get( dict, _key ) == nullptr && _kernel->set_exist( set, _key ) == false && _kernel->set_remove( set, _key ) == true;
+        _kernel->decref( set );
+        _kernel->decref( dict );
+
+        bool value = false;
+        s_regression5_converted = _kernel->extract_bool( _bool, value ) == true && value == true && _kernel->get_object_type_id( _bool ) == 0;
+
+        PyObject * attribute = _kernel->get_attrstring( _object, "regression5_value" );
+        s_regression5_attributes = attribute != nullptr && _kernel->set_attrstring( _object, "regression5_set", attribute ) == true && _kernel->test_equal( _object, _key ) == true;
+
+        if( attribute != nullptr )
+        {
+            _kernel->decref( attribute );
+        }
+
+        return pybind::make_invalid_object_t();
+    }
+
+    static pybind::object regression5_pending_import( pybind::kernel_interface * _kernel )
+    {
+        // As the other operations: an import that runs Python code.
+        _kernel->set_error( pybind::error_type_e::Index, "regression5 pending" );
+
+        bool exists = false;
+        PyObject * module = _kernel->module_import( "regression5_fresh", exists );
+
+        if( module != nullptr )
+        {
+            PyObject * value = _kernel->get_attrstring( module, "value" );
+            int32_t number = 0;
+            s_regression5_imported = exists == true && value != nullptr && _kernel->extract_int32( value, number ) == true && number == 5;
+
+            if( value != nullptr )
+            {
+                _kernel->decref( value );
+            }
+
+            _kernel->decref( module );
+        }
+
+        return pybind::make_invalid_object_t();
+    }
+
+    static void regression5_hook( void * _ud, PyTypeObject * _type, PyObject * _value, PyObject * _traceback )
+    {
+        (void)_value;
+        (void)_traceback;
+
+        pybind::kernel_interface * kernel = static_cast<pybind::kernel_interface *>(_ud);
+
+        s_regression5_import_error = _type != nullptr && std::strstr( kernel->type_name( _type ), "ImportError" ) != nullptr;
+    }
+
+    static void check_fifth_review_regressions( pybind::kernel_interface * _kernel, PyObject * _module )
+    {
+        pybind::class_<regression5_entity_t>( _kernel, "Regression5Entity", true, _module )
+            .def_constructor( pybind::init<>() )
+            .def( "kind", &regression5_entity_t::kind )
+            ;
+
+        pybind::class_<regression5_scene_t, pybind::bases<regression5_entity_t>>( _kernel, "Regression5Scene", true, _module )
+            .def_constructor( pybind::init<>() )
+            ;
+
+        pybind::struct_<regression5_vec_t>( _kernel, "Regression5Vec", true, _module )
+            .def_constructor( pybind::init<float>() )
+            .def_member( "x", &regression5_vec_t::x )
+            .def_operator_mul_t<float>()
+            ;
+
+        pybind::struct_<regression5_scale_t>( _kernel, "Regression5Scale", true, _module )
+            .def_constructor( pybind::init<float>() )
+            .def_operator_mul_t<regression5_vec_t>()
+            ;
+
+        pybind::class_<regression5_thrower_t>( _kernel, "Regression5Thrower", true, _module )
+            .def_constructor( pybind::init<int32_t>() )
+            .def( "method", &regression5_thrower_t::method )
+            .def_add( &regression5_thrower_t::add )
+            .def_property( "value", &regression5_thrower_t::getValue, &regression5_thrower_t::setValue )
+            .def_call( &regression5_thrower_t::call )
+            ;
+
+        pybind::class_<regression5_erring_t>( _kernel, "Regression5Erring", true, _module )
+            .def_constructor( pybind::init<>() )
+            ;
+
+        pybind::def_function( _kernel, "regression5_scene_kind", &regression5_scene_kind );
+        pybind::def_function_kernel( _kernel, "regression5_utf8", &regression5_utf8 );
+        pybind::def_function_kernel( _kernel, "regression5_string_size", &regression5_string_size );
+        pybind::def_function_kernel( _kernel, "regression5_pickle", &regression5_pickle );
+        pybind::def_function_kernel( _kernel, "regression5_unpickle", &regression5_unpickle );
+        pybind::def_function_kernel( _kernel, "regression5_pending_ops", &regression5_pending_ops );
+        pybind::def_function_kernel( _kernel, "regression5_pending_import", &regression5_pending_import );
+
+        PyObject * dict = _kernel->module_dict( _module );
+
+        const char source[] = R"PY(
+class Regression5Mixin(Regression5Entity):
+    pass
+
+class Regression5MyScene(Regression5Mixin, Regression5Scene):
+    pass
+
+regression5_scene = Regression5MyScene()
+regression5_scene_ok = regression5_scene.kind() == 'scene' and raises(Exception, regression5_scene_kind, regression5_scene) == False
+del regression5_scene
+
+regression5_mul_ok = (Regression5Vec(3.0) * Regression5Scale(2.0)).x == 60.0 and (Regression5Scale(2.0) * Regression5Vec(3.0)).x == 6.0
+
+def regression5_inplace():
+    vec = Regression5Vec(3.0)
+    vec *= Regression5Scale(2.0)
+    return vec.x
+
+regression5_inplace_ok = regression5_inplace() == 60.0
+
+def regression5_message(expected, function, *args):
+    try:
+        function(*args)
+    except RuntimeError as error:
+        return str(error) == expected
+    return False
+
+def regression5_set_value(thrower):
+    thrower.value = 1
+
+regression5_thrower = Regression5Thrower(1)
+regression5_messages_ok = regression5_message('regression5 constructor', Regression5Thrower, -1) and regression5_message('regression5 method', regression5_thrower.method) and regression5_message('regression5 add', lambda: regression5_thrower + 1) and regression5_message('regression5 setter', regression5_set_value, regression5_thrower)
+regression5_removed_ok = regression5_message('regression5 removed', regression5_thrower)
+del regression5_thrower
+
+regression5_copy_ok = raises(TypeError, Regression5Entity().__reduce_ex__, 2) and raises(TypeError, Regression5Vec(1.0).__reduce__)
+regression5_utf8_ok = regression5_utf8(u'a\ud83d\ude00b') == 'a\xf0\x9f\x98\x80b'
+regression5_string_ok = regression5_string_size('abc') == 3 and raises(TypeError, regression5_string_size, u'abc')
+
+def regression5_delete_last():
+    pod = PodValue()
+    del pod[-1]
+
+regression5_delete_ok = raises(TypeError, regression5_delete_last)
+
+class Regression5Holder(object):
+    pass
+
+regression5_holder = Regression5Holder()
+
+class Regression5Shrinking(object):
+    @property
+    def value(self):
+        del regression5_holder.items[:]
+        return 1
+
+regression5_holder.items = [Regression5Shrinking(), 2, 3]
+regression5_shrink_ok = raises(RuntimeError, regression5_pickle, regression5_holder.items, [Regression5Shrinking])
+
+class Regression5Typed(object):
+    def __init__(self, value):
+        self.value = value
+
+regression5_data = regression5_pickle(Regression5Typed(Regression5Typed(5)), [Regression5Typed])
+
+def regression5_init(self, value):
+    self.value = value
+    del regression5_types[:]
+
+regression5_types = [type('Regression5Shrink', (object,), {'__init__': regression5_init})]
+regression5_loaded = regression5_unpickle(regression5_data, regression5_types)
+regression5_unpickle_ok = type(regression5_loaded).__name__ == 'Regression5Shrink' and regression5_loaded.value.value == 5
+
+class Regression5Iterator(object):
+    def __init__(self):
+        self.count = 0
+
+    def __iter__(self):
+        getattr(self, 'regression5_missing', None)
+        return self
+
+    def next(self):
+        self.count += 1
+        if self.count > 2:
+            raise StopIteration
+        return getattr(self, 'regression5_missing', self.count)
+
+def regression5_generator():
+    yield 1
+    raise KeyError('regression5 generator')
+
+class Regression5Key(object):
+    def __hash__(self):
+        return getattr(self, 'regression5_missing', 7)
+
+class Regression5Bool(object):
+    def __nonzero__(self):
+        return getattr(self, 'regression5_missing', True)
+
+class Regression5Object(object):
+    def __eq__(self, other):
+        return getattr(type(self), 'regression5_missing', True)
+
+    def __getattr__(self, name):
+        return getattr(type(self), 'regression5_missing', 5)
+
+    def __setattr__(self, name, value):
+        getattr(type(self), 'regression5_missing', None)
+        object.__setattr__(self, name, value)
+
+class Regression5Finder(object):
+    def find_module(self, name, path=None):
+        if name == 'regression5_fresh':
+            return self
+        return None
+
+    def load_module(self, name):
+        module = type(sys)(name)
+        module.__dict__['__builtins__'] = __builtins__
+        sys.modules[name] = module
+        exec 'value = 5\n' in module.__dict__
+        return module
+
+regression5_finder = Regression5Finder()
+regression5_capture = Capture()
+
+def regression5_release():
+    erring = Regression5Erring()
+    del erring
+    return 'returned'
+)PY";
+
+        PyObject * result = _kernel->exec_file( source, dict, dict );
+        PYBIND_CONTRACT_ASSERT( result != nullptr );
+        _kernel->decref( result );
+
+        // The errors these report go to a capture.
+        PyObject * capture = _kernel->dict_getstring( dict, "regression5_capture" );
+        PyObject * oldStderr = _kernel->getStdErrorHandle();
+        _kernel->incref( oldStderr );
+        _kernel->setStdErrorHandle( capture );
+
+        PyObject * finder = _kernel->dict_getstring( dict, "regression5_finder" );
+        _kernel->set_module_finder( finder );
+
+        const char pendingSource[] = R"PY(
+regression5_pending_ok = raises(IndexError, regression5_pending_ops, Regression5Iterator(), regression5_generator(), Regression5Key(), Regression5Bool(), Regression5Object())
+regression5_import_ok = raises(IndexError, regression5_pending_import)
+regression5_release_ok = regression5_release() == 'returned'
+)PY";
+
+        PyObject * pendingResult = _kernel->exec_file( pendingSource, dict, dict );
+        PYBIND_CONTRACT_ASSERT( pendingResult != nullptr );
+        _kernel->decref( pendingResult );
+
+        _kernel->remove_module_finder();
+
+        _kernel->setStdErrorHandle( oldStderr );
+        _kernel->decref( oldStderr );
+
+        PYBIND_CONTRACT_ASSERT( s_regression5_iterated == true );
+        PYBIND_CONTRACT_ASSERT( s_regression5_generated == true );
+        PYBIND_CONTRACT_ASSERT( s_regression5_looked_up == true );
+        PYBIND_CONTRACT_ASSERT( s_regression5_converted == true );
+        PYBIND_CONTRACT_ASSERT( s_regression5_attributes == true );
+        PYBIND_CONTRACT_ASSERT( s_regression5_imported == true );
+
+        // A module whose code removes it from sys.modules fails to import.
+        PyObject * oldHook = _kernel->get_sys_excepthook();
+        _kernel->incref( oldHook );
+        _kernel->set_sys_excepthook_f( &detail::regression5_hook, _kernel );
+
+        PyObject * goneCode = _kernel->compile_string( "import sys\ndel sys.modules[__name__]\n", "regression5_gone.py" );
+        PYBIND_CONTRACT_ASSERT( goneCode != nullptr );
+        PYBIND_CONTRACT_ASSERT( _kernel->module_execcode( "regression5_gone", goneCode ) == nullptr );
+        PYBIND_CONTRACT_ASSERT( s_regression5_import_error == true );
+        _kernel->decref( goneCode );
+
+        _kernel->set_sys_excepthook( oldHook );
+        _kernel->decref( oldHook );
+
+        // A name a finalizer removes as its module is cleared stays removed.
+        PyObject * finiModule = _kernel->module_init( "regression5_fini" );
+        _kernel->incref( finiModule );
+        PyObject * finiDict = _kernel->module_dict( finiModule );
+
+        const char finiSource[] = R"PY(
+regression5_globals = globals()
+
+class Regression5Finalized(object):
+    def __del__(self):
+        regression5_globals.pop('regression5_popped', None)
+
+regression5_finalized = Regression5Finalized()
+regression5_popped = 3
+)PY";
+
+        PyObject * finiResult = _kernel->exec_file( finiSource, finiDict, finiDict );
+        PYBIND_CONTRACT_ASSERT( finiResult != nullptr );
+        _kernel->decref( finiResult );
+
+        _kernel->module_fini( finiModule );
+        PYBIND_CONTRACT_ASSERT( _kernel->dict_existstring( finiDict, "regression5_popped" ) == false );
+        _kernel->decref( finiModule );
+
+        // A member a scope does not have is not found, as a method.
+        const pybind::class_type_scope_interface_ptr & entityScope = _kernel->get_class_type_scope_t<regression5_entity_t>();
+        bool memberThrown = false;
+
+        try
+        {
+            entityScope->find_member( "regression5_missing" );
+        }
+        catch( const pybind::pybind_exception & )
+        {
+            memberThrown = true;
+        }
+
+        PYBIND_CONTRACT_ASSERT( memberThrown == true );
+
+        // The null container of a failed call is empty, and takes nothing.
+        pybind::list nullList( _kernel, nullptr, pybind::borrowed );
+        pybind::tuple nullTuple( _kernel, nullptr, pybind::borrowed );
+        pybind::dict nullDict( _kernel, nullptr, pybind::borrowed );
+        pybind::set nullSet( _kernel, nullptr, pybind::borrowed );
+        pybind::module nullModule( _kernel, nullptr, pybind::borrowed );
+        PYBIND_CONTRACT_ASSERT( nullList.size() == 0 && nullList.empty() == true && nullList.begin() == nullList.end() );
+        PYBIND_CONTRACT_ASSERT( nullTuple.size() == 0 && nullTuple.begin() == nullTuple.end() );
+        PYBIND_CONTRACT_ASSERT( nullDict.size() == 0 && nullDict.exist( "regression5" ) == false && nullDict.begin() == nullDict.end() );
+        PYBIND_CONTRACT_ASSERT( nullSet.size() == 0 && nullSet.exist( 1 ) == false );
+        PYBIND_CONTRACT_ASSERT( nullModule.has_attr( "regression5" ) == false );
+        nullList.append( 1 );
+        nullDict["regression5"] = 1;
+        nullSet.add( 1 );
+        PYBIND_CONTRACT_ASSERT( nullList.size() == 0 && nullDict.size() == 0 && nullSet.size() == 0 );
+
+        // An item is assigned from another, and a list from nullptr.
+        pybind::list items( _kernel );
+        items.append( 1 );
+        items.append( 2 );
+        items[1] = items[0];
+        PYBIND_CONTRACT_ASSERT( pybind::extract<int32_t>( _kernel, _kernel->list_getitem( items.ptr(), 1 ) ) == 1 );
+        items = nullptr;
+        PYBIND_CONTRACT_ASSERT( items.is_invalid() == true );
+
+        pybind::dict values( _kernel );
+        values["a"] = 1;
+        values["b"] = values["a"];
+        PYBIND_CONTRACT_ASSERT( pybind::extract<int32_t>( _kernel, _kernel->dict_getstring( values.ptr(), "b" ) ) == 1 );
+
+        const char finalSource[] = R"PY(
+regression5_text = ''.join(regression5_capture.parts)
+regression5_reported_ok = 'regression5 generator' in regression5_text and 'regression5 left by destructor' in regression5_text
+)PY";
+
+        PyObject * finalResult = _kernel->exec_file( finalSource, dict, dict );
+        PYBIND_CONTRACT_ASSERT( finalResult != nullptr );
+        _kernel->decref( finalResult );
+
+        const char * flags[] = {"regression5_scene_ok", "regression5_mul_ok", "regression5_inplace_ok", "regression5_messages_ok", "regression5_removed_ok", "regression5_copy_ok", "regression5_utf8_ok", "regression5_string_ok", "regression5_delete_ok", "regression5_shrink_ok", "regression5_unpickle_ok", "regression5_pending_ok", "regression5_import_ok", "regression5_release_ok", "regression5_reported_ok"};
+
+        for( const char * flag : flags )
+        {
+            PYBIND_CONTRACT_ASSERT( detail::regression_flag( _kernel, dict, flag ) == true );
+        }
+
+        // The thrower removed its own scope.
+        _kernel->remove_scope<regression5_erring_t>();
+        _kernel->remove_scope<regression5_scale_t>();
+        _kernel->remove_scope<regression5_vec_t>();
+        _kernel->remove_scope<regression5_scene_t>();
+        _kernel->remove_scope<regression5_entity_t>();
+    }
+
     static void check_kernel_reinitialize( pybind::allocator_interface * _allocator, const pybind::kernel_config_t & _config )
     {
         // A kernel initialized again works, and the C++ destructor of an object
@@ -2921,6 +3545,7 @@ int main()
     detail::check_second_review_regressions( kernel, module );
     detail::check_third_review_regressions( kernel, module );
     detail::check_fourth_review_regressions( kernel, module );
+    detail::check_fifth_review_regressions( kernel, module );
 
     kernel->set_current_module( nullptr );
     kernel->module_fini( module );
