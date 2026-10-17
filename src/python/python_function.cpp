@@ -54,11 +54,8 @@ namespace pybind
         }
         catch( const pybind::pybind_exception & _ex )
         {
-            pybind::error_message( "obj '%s' invalid function call '%s' exception: %s"
-                , kernel->object_str( _obj ).c_str()
-                , adapter->getName()
-                , _ex.what()
-            );
+            // As the tinypy backend: Python sees the message of the exception.
+            pybind::set_error( error_type_e::Runtime, _ex.what() );
         }
 
         return nullptr;

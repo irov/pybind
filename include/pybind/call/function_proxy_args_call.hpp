@@ -15,9 +15,27 @@ namespace pybind
     struct function_proxy_args_call_impl
     {
         template<size_t ... I>
-        static Ret call( kernel_interface * _kernel, P * _proxy, F f, PyObject * _arg, std::integer_sequence<size_t, I...> )
+        static PyObject * call( kernel_interface * _kernel, P * _proxy, F f, PyObject * _arg, std::integer_sequence<size_t, I...> )
         {
-            return (*f)(_proxy
+            // A result that refers to an argument lives as long as the
+            // conversion of the argument, which ends with the expression of the
+            // call, so the result is converted in that expression.
+            PyObject * py_result = detail::return_operator_t( _kernel, (*f)(_proxy
+                , tuple_getitem_t( _kernel, _arg, I ) ...
+                , make_args_t( _kernel, _arg, sizeof ... (I) )
+                ) );
+
+            return py_result;
+        }
+    };
+
+    template<class F, class P>
+    struct function_proxy_args_call_impl<F, P, void>
+    {
+        template<size_t ... I>
+        static void call( kernel_interface * _kernel, P * _proxy, F f, PyObject * _arg, std::integer_sequence<size_t, I...> )
+        {
+            (*f)(_proxy
                 , tuple_getitem_t( _kernel, _arg, I ) ...
                 , make_args_t( _kernel, _arg, sizeof ... (I) )
                 );
@@ -29,7 +47,7 @@ namespace pybind
     {
         static PyObject * call( kernel_interface * _kernel, P * _proxy, F f, PyObject * _arg )
         {
-            PyObject * result = detail::return_operator_t( _kernel, function_proxy_args_call_impl<F, P, Ret>::call( _kernel, _proxy, f, _arg, std::make_integer_sequence<size_t, Arity>() ) );
+            PyObject * result = function_proxy_args_call_impl<F, P, Ret>::call( _kernel, _proxy, f, _arg, std::make_integer_sequence<size_t, Arity>() );
 
             return result;
         }

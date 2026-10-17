@@ -20,8 +20,8 @@ namespace pybind
     protected:
         static PyTypeObject m_member_type;
 
-        PyMethodDef m_setmethod;
-        PyMethodDef m_getmethod;
+        static PyMethodDef m_setmethod;
+        static PyMethodDef m_getmethod;
     };
 }
 

@@ -33,7 +33,9 @@ namespace pybind
 
             uint32_t flag;
 
-        uint8_t buff[4 << I];
+        // As the pod of py_pod_hash_object and of the tinypy payload: a struct
+        // of 8-byte members is constructed in it.
+        alignas( 8 ) uint8_t buff[4 << I];
     };
     //////////////////////////////////////////////////////////////////////////
     struct py_hash_object
@@ -81,11 +83,20 @@ namespace pybind
 
             PyTypeObject * objtype = pybind::object_type( _obj );
 
+            // An object of a class this kernel has no scope for, as a removed one
+            // or one of a previous kernel, whose type ids name other classes of
+            // this kernel, is not released.
+            if( kernel->get_class_scope( objtype ) == nullptr )
+            {
+                return true;
+            }
+
             // As the tinypy backend, whose payload keeps the scope: the scope that
             // created the object releases it, which holds once its class is the
-            // one of another bound class.
+            // one of another bound class. It is held, as the C++ code may remove
+            // it.
             typeid_t typeId = helper::get_pod_type_id( _obj );
-            const class_type_scope_interface_ptr & scope = kernel->get_class_type_scope( typeId );
+            class_type_scope_interface_ptr scope = kernel->get_class_type_scope( typeId );
 
             if( scope == nullptr )
             {
@@ -118,8 +129,8 @@ namespace pybind
             }
 
             // As subtype_dealloc after tp_del: an object C++ code did not resurrect
-            // drops the weak references and the attributes it was given while the
-            // code ran, which subtype_dealloc cleared before.
+            // drops the weak references, the slots and the attributes it was given
+            // while the code ran, which subtype_dealloc cleared before.
             if( _obj->ob_refcnt == 1 )
             {
                 if( objtype->tp_weaklistoffset != 0 )
@@ -132,11 +143,9 @@ namespace pybind
                     }
                 }
 
-                PyObject ** dictptr = _PyObject_GetDictPtr( _obj );
-
-                if( dictptr != nullptr )
+                if( objtype->tp_clear != nullptr )
                 {
-                    Py_CLEAR( *dictptr );
+                    objtype->tp_clear( _obj );
                 }
             }
 

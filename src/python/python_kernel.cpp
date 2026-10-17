@@ -26,7 +26,8 @@ namespace pybind
         //////////////////////////////////////////////////////////////////////////
         struct excepthook_holder_t
         {
-            python_kernel * kernel;
+            // Not the kernel: a hook Python keeps may outlive it.
+            allocator_interface * allocator;
             pybind_excepthook_handler_f handler;
             void * userData;
         };
@@ -34,7 +35,7 @@ namespace pybind
         static void finalize_excepthook( PyObject * _capsule )
         {
             excepthook_holder_t * holder = static_cast<excepthook_holder_t *>(PyCapsule_GetPointer( _capsule, s_pythonKernelExcepthookCapsule ));
-            allocator_interface * allocator = holder->kernel->get_allocator();
+            allocator_interface * allocator = holder->allocator;
             allocator->deleteT( holder );
         }
         //////////////////////////////////////////////////////////////////////////
@@ -66,9 +67,8 @@ namespace pybind
             }
             catch( const pybind_exception & _ex )
             {
-                pybind::error_message( "excepthook invalid call exception: %s"
-                    , _ex.what()
-                );
+                // As the tinypy backend: Python sees the message of the exception.
+                pybind::set_error( error_type_e::Runtime, _ex.what() );
 
                 return nullptr;
             }
@@ -278,6 +278,8 @@ namespace pybind
         this->debugger_set_trace( nullptr, nullptr );
 
         this->remove_module_finder();
+
+        this->set_current_module( nullptr );
 
         PyType_ClearCache();
 
@@ -519,6 +521,11 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::set_current_module( PyObject * _module )
     {
+        // As the tinypy backend: the kernel holds the module it defines into,
+        // which Python may remove from sys.modules.
+        Py_XINCREF( _module );
+        Py_XDECREF( m_current_module );
+
         m_current_module = _module;
     }
     //////////////////////////////////////////////////////////////////////////
@@ -1003,18 +1010,28 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void * python_kernel::check_registred_class( PyObject * _obj, typeid_t _info )
     {
-        PyTypeObject * py_type = pybind::object_type( _obj );
-
-        const class_type_scope_interface_ptr & type_scope = m_class_type_scopes[_info];
-
-        if( type_scope->is_instance( py_type ) == false )
+        // As the tinypy backend: an id with no scope matches nothing, and the
+        // impl is cast to the class asked for, which may be a base other than
+        // the first.
+        if( this->instance_of_type( _obj, _info ) == false )
         {
             return nullptr;
         }
 
         void * impl = this->get_class_impl( _obj );
 
-        return impl;
+        if( impl == nullptr )
+        {
+            return nullptr;
+        }
+
+        PyTypeObject * py_type = pybind::object_type( _obj );
+
+        const class_type_scope_interface_ptr & scope = this->get_class_scope( py_type );
+
+        void * impl_cast = scope->meta_cast( _info, impl );
+
+        return impl_cast;
     }
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::error_invalid_extract( PyObject * _obj, typeid_t _tinfo )
@@ -1200,7 +1217,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void python_kernel::set_sys_excepthook_f( pybind_excepthook_handler_f _excepthook, void * _ud )
     {
-        excepthook_holder_t * holder = m_allocator->newP<excepthook_holder_t>( excepthook_holder_t{ this, _excepthook, _ud } );
+        excepthook_holder_t * holder = m_allocator->newP<excepthook_holder_t>( excepthook_holder_t{ m_allocator, _excepthook, _ud } );
 
         PyObject * capsule = PyCapsule_New( holder, s_pythonKernelExcepthookCapsule, &finalize_excepthook );
 

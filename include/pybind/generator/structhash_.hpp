@@ -10,6 +10,8 @@ namespace pybind
         : public base_<C, B>
     {
         static_assert(sizeof( C ) <= PYBIND_OBJECT_POD_SIZE, "struct must be POD");
+        // The allocators of both backends align the object, and so its pod, to 8.
+        static_assert(alignof( C ) <= 8, "struct must be aligned to at most 8 bytes");
 
     public:
         typedef extract_struct_type_ref<C> extract_type_ref;

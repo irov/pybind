@@ -1904,6 +1904,346 @@ regression3_chain_ok = regression3_hook_calls == ['chained'] and 'ValueError: ch
         _kernel->remove_scope<regression3_node_t>();
     }
 
+    static int32_t s_regression4_plugin_alive = 0;
+    static bool s_regression4_has_attr = false;
+    static bool s_regression4_removed = false;
+    static bool s_regression4_ended = false;
+    static bool s_regression4_long = false;
+    static bool s_regression4_imported = false;
+#if defined(PYBIND_BACKEND_PYTHON)
+    // Kept past the kernel, as CPython keeps what its finalize leaves.
+    static PyObject * s_regression4_keeper = nullptr;
+#endif
+
+    struct regression4_base_t
+    {
+        int32_t base = 2;
+    };
+
+    struct regression4_derived_t
+        : public regression4_base_t
+    {
+        // A vtable puts the base at an offset of the object.
+        virtual ~regression4_derived_t()
+        {
+        }
+    };
+
+    class regression4_plugin_t
+    {
+    public:
+        regression4_plugin_t()
+        {
+            ++s_regression4_plugin_alive;
+        }
+
+        ~regression4_plugin_t()
+        {
+            --s_regression4_plugin_alive;
+
+            // As a plugin that unloads its bindings as it is released.
+            pybind::kernel_interface * kernel = pybind::get_kernel();
+            kernel->remove_scope<regression4_plugin_t>();
+        }
+    };
+
+    struct regression4_doubles_t
+    {
+        double x = 1.0;
+        double y = 2.0;
+    };
+
+    class regression4_compared_t
+    {
+    };
+
+    static int32_t regression4_read_base( regression4_base_t * _base )
+    {
+        return _base->base;
+    }
+
+    static const std::string & regression4_pick( const std::string & _first, const std::string & _second )
+    {
+        return _first.size() >= _second.size() ? _first : _second;
+    }
+
+    static size_t regression4_wide_size( const std::wstring & _value )
+    {
+        return _value.size();
+    }
+
+    static void regression4_throw()
+    {
+        pybind::throw_exception( "regression4 thrown" );
+    }
+
+    static bool regression4_compare_int( pybind::kernel_interface * _kernel, PyObject * _obj, regression4_compared_t * _self, PyObject * _compare, pybind::PybindOperatorCompare _op, bool * const _result )
+    {
+        (void)_kernel;
+        (void)_obj;
+        (void)_self;
+        (void)_compare;
+
+        *_result = _op == pybind::POC_Equal;
+
+        return true;
+    }
+
+    static void regression4_hook( void * _ud, PyTypeObject * _type, PyObject * _value, PyObject * _traceback )
+    {
+        (void)_ud;
+        (void)_type;
+        (void)_value;
+        (void)_traceback;
+    }
+
+    static pybind::object regression4_pending_ops( pybind::kernel_interface * _kernel, PyObject * _object, PyObject * _dict, PyObject * _iterable, PyObject * _long )
+    {
+        // An error raised before these operations stays the one Python sees.
+        _kernel->set_error( pybind::error_type_e::Index, "regression pending" );
+
+        s_regression4_has_attr = _kernel->has_attrstring( _object, "regression4_missing" ) == false;
+        s_regression4_removed = _kernel->dict_removestring( _dict, "regression4_missing" ) == false;
+
+        PyObject * iterator;
+        PyObject * item;
+
+        if( _kernel->iterator_get( _iterable, &iterator ) == true )
+        {
+            s_regression4_ended = _kernel->iterator_next( iterator, &item ) == false;
+
+            _kernel->iterator_end( iterator );
+        }
+
+        int64_t value = 0;
+        s_regression4_long = _kernel->extract_int64( _long, value ) == true && value == -1;
+
+        bool exists = false;
+        PyObject * sys = _kernel->module_import( "sys", exists );
+        s_regression4_imported = sys != nullptr && exists == true;
+
+        if( sys != nullptr )
+        {
+            _kernel->decref( sys );
+        }
+
+        return pybind::make_invalid_object_t();
+    }
+
+    static void check_fourth_review_regressions( pybind::kernel_interface * _kernel, PyObject * _module )
+    {
+        pybind::class_<regression4_base_t>( _kernel, "Regression4Base", true, _module )
+            .def_constructor( pybind::init<>() )
+            .def_member( "base", &regression4_base_t::base )
+            ;
+
+        pybind::class_<regression4_derived_t, pybind::bases<regression4_base_t>>( _kernel, "Regression4Derived", true, _module )
+            .def_constructor( pybind::init<>() )
+            ;
+
+        pybind::class_<regression4_plugin_t>( _kernel, "Regression4Plugin", true, _module )
+            .def_constructor( pybind::init<>() )
+            ;
+
+        pybind::struct_<regression4_doubles_t>( _kernel, "Regression4Doubles", true, _module )
+            .def_constructor( pybind::init<>() )
+            ;
+
+        pybind::class_<regression4_compared_t>( _kernel, "Regression4Compared", true, _module )
+            .def_constructor( pybind::init<>() )
+            .def_compare_t<decltype(&regression4_compare_int), int32_t>( &regression4_compare_int )
+            ;
+
+        pybind::def_function( _kernel, "regression4_read_base", &regression4_read_base );
+        pybind::def_function( _kernel, "regression4_pick", &regression4_pick );
+        pybind::def_function( _kernel, "regression4_wide_size", &regression4_wide_size );
+        pybind::def_function( _kernel, "regression4_throw", &regression4_throw );
+        pybind::def_function_kernel( _kernel, "regression4_pending_ops", &regression4_pending_ops );
+
+        regression4_derived_t derived;
+        PYBIND_CONTRACT_ASSERT( static_cast<void *>( &derived ) != static_cast<void *>( static_cast<regression4_base_t *>( &derived ) ) );
+
+        PyObject * dict = _kernel->module_dict( _module );
+
+        const char source[] = R"PY(
+regression4_derived = Regression4Derived()
+regression4_derived_ok = regression4_read_base(regression4_derived) == 2
+
+regression4_plugin = Regression4Plugin()
+del regression4_plugin
+
+regression4_doubles = Regression4Doubles()
+regression4_compared = Regression4Compared()
+
+class Regression4Unicode(unicode):
+    pass
+
+regression4_long_text = 'long text'
+regression4_pick_ok = regression4_pick('a', regression4_long_text) == 'long text' and regression4_pick('abc', 'de') == 'abc'
+regression4_unicode_ok = regression4_wide_size(Regression4Unicode(u'abc')) == 3
+
+try:
+    regression4_throw()
+    regression4_message_ok = False
+except RuntimeError as regression4_error:
+    regression4_message_ok = str(regression4_error) == 'regression4 thrown'
+
+regression4_kwargs_ok = raises(TypeError, lambda: regression_size(1, value=2)) and regression_size(1) == 2
+regression4_arity_ok = raises(Exception, regression_size)
+regression4_pending_ok = raises(IndexError, regression4_pending_ops, Capture(), {}, iter([]), -1L)
+
+class Regression4Dir(object):
+    def __init__(self):
+        self.names = ['a', 'b', 'c']
+
+    def __dir__(self):
+        return self.names
+
+    def __getattr__(self, name):
+        del self.names[:]
+        return 1
+
+regression4_dir = Regression4Dir()
+
+regression4_premade = type(sys)('regression4_premade')
+sys.modules['regression4_premade'] = regression4_premade
+
+regression4_capture = Capture()
+
+def regression4_warn():
+    for index in range(3):
+        regression_warning()
+)PY";
+
+        PyObject * result = _kernel->exec_file( source, dict, dict );
+        PYBIND_CONTRACT_ASSERT( result != nullptr );
+        _kernel->decref( result );
+
+        PYBIND_CONTRACT_ASSERT( s_regression4_plugin_alive == 0 );
+        PYBIND_CONTRACT_ASSERT( s_regression4_has_attr == true );
+        PYBIND_CONTRACT_ASSERT( s_regression4_removed == true );
+        PYBIND_CONTRACT_ASSERT( s_regression4_ended == true );
+        PYBIND_CONTRACT_ASSERT( s_regression4_long == true );
+        PYBIND_CONTRACT_ASSERT( s_regression4_imported == true );
+
+        // A struct of doubles is built at an address they may take.
+        PyObject * doubles = _kernel->dict_getstring( dict, "regression4_doubles" );
+        void * doublesImpl = _kernel->get_class_impl( doubles );
+        PYBIND_CONTRACT_ASSERT( reinterpret_cast<uintptr_t>( doublesImpl ) % alignof( regression4_doubles_t ) == 0 );
+
+        // The attributes of an object whose dir() list a lookup empties.
+        PyObject * dirObject = _kernel->dict_getstring( dict, "regression4_dir" );
+        PyObject * dirAttributes = _kernel->dict_from( dirObject );
+        PYBIND_CONTRACT_ASSERT( dirAttributes != nullptr );
+        _kernel->decref( dirAttributes );
+
+        // A module made elsewhere gets the builtins.
+        PyObject * premade = _kernel->module_init( "regression4_premade" );
+        PYBIND_CONTRACT_ASSERT( premade != nullptr && _kernel->has_attrstring( premade, "__builtins__" ) == true );
+
+        // A list takes an index past its end as CPython does, and no null item.
+        pybind::list items( _kernel );
+        items.append( 1 );
+        PyObject * itemsObject = items.ptr();
+        PyObject * two = _kernel->ptr_int32( 2 );
+        PYBIND_CONTRACT_ASSERT( _kernel->list_insert( itemsObject, 5, two ) == true );
+        PYBIND_CONTRACT_ASSERT( items.size() == 2 && pybind::extract<int32_t>( _kernel, _kernel->list_getitem( itemsObject, 1 ) ) == 2 );
+        PYBIND_CONTRACT_ASSERT( _kernel->list_remove( itemsObject, 7 ) == true );
+        PYBIND_CONTRACT_ASSERT( _kernel->list_insert( itemsObject, 0, nullptr ) == false );
+        PYBIND_CONTRACT_ASSERT( items.size() == 2 );
+        _kernel->decref( two );
+
+        // A query with the null object of a failed call finds nothing.
+        pybind::object failed = pybind::object( _kernel, _module ).get_attr( "regression4_missing" );
+        PYBIND_CONTRACT_ASSERT( failed.is_invalid() == true && failed == nullptr );
+        PYBIND_CONTRACT_ASSERT( failed.is_none() == false && failed.is_callable() == false && failed.is_type_class() == false );
+        PYBIND_CONTRACT_ASSERT( failed.get_attr( "x" ).is_invalid() == true );
+        PYBIND_CONTRACT_ASSERT( failed.has_attr( "x" ) == false );
+        PYBIND_CONTRACT_ASSERT( pybind::object( _kernel, _module ).has_attr( failed ) == false );
+        pybind::dict queried( _kernel );
+        PYBIND_CONTRACT_ASSERT( queried.exist( failed ) == false );
+
+        // An object that is not a type is no type of a class.
+        PyObject * number = _kernel->ptr_int32( 5 );
+        PYBIND_CONTRACT_ASSERT( pybind::object( _kernel, number ).is_type_class() == false );
+        _kernel->decref( number );
+
+        // Code does not run while an error is pending, which is reported.
+        PyObject * capture = _kernel->dict_getstring( dict, "regression4_capture" );
+        PyObject * oldStderr = _kernel->getStdErrorHandle();
+        _kernel->incref( oldStderr );
+        _kernel->setStdErrorHandle( capture );
+
+        _kernel->set_error( pybind::error_type_e::Value, "regression4 pending" );
+        PYBIND_CONTRACT_ASSERT( _kernel->exec_file( "regression4_ran = True\n", dict, dict ) == nullptr );
+        PYBIND_CONTRACT_ASSERT( _kernel->dict_getstring( dict, "regression4_ran" ) == nullptr );
+
+        // A warning of one place is written once.
+        PyObject * warnResult = _kernel->exec_file( "regression4_warn()\n", dict, dict );
+        PYBIND_CONTRACT_ASSERT( warnResult != nullptr );
+        _kernel->decref( warnResult );
+
+        _kernel->setStdErrorHandle( oldStderr );
+        _kernel->decref( oldStderr );
+
+        // An unwrapped object fails its comparison as any other slot.
+        PyObject * compared = _kernel->dict_getstring( dict, "regression4_compared" );
+        regression4_compared_t * comparedImpl = static_cast<regression4_compared_t *>(_kernel->unwrap( compared ));
+        PYBIND_CONTRACT_ASSERT( comparedImpl != nullptr );
+        delete comparedImpl;
+
+        // The object of a derived class whose scope is removed is no object of
+        // its base, whose impl it does not cast to.
+        _kernel->remove_scope<regression4_derived_t>();
+
+        const char finalSource[] = R"PY(
+regression4_text = ''.join(regression4_capture.parts)
+regression4_pending_reported_ok = 'regression4 pending' in regression4_text
+regression4_warning_ok = regression4_text.count('regression warning') == 1
+regression4_compare_ok = raises(RuntimeError, lambda: regression4_compared == None)
+del regression4_compared
+regression4_removed_ok = raises(Exception, regression4_read_base, regression4_derived)
+del regression4_derived
+
+class Regression4Keeper(object):
+    pass
+
+Regression4Keeper.getter = Regression4Base.__dict__['base'].fget
+)PY";
+
+        PyObject * finalResult = _kernel->exec_file( finalSource, dict, dict );
+        PYBIND_CONTRACT_ASSERT( finalResult != nullptr );
+        _kernel->decref( finalResult );
+
+        const char * flags[] = {"regression4_derived_ok", "regression4_pick_ok", "regression4_unicode_ok", "regression4_message_ok", "regression4_kwargs_ok", "regression4_arity_ok", "regression4_pending_ok", "regression4_pending_reported_ok", "regression4_warning_ok", "regression4_compare_ok", "regression4_removed_ok"};
+
+        for( const char * flag : flags )
+        {
+            PYBIND_CONTRACT_ASSERT( detail::regression_flag( _kernel, dict, flag ) == true );
+        }
+
+        // A C++ hook a class keeps past the kernel, as an accessor it keeps.
+        PyObject * oldHook = _kernel->get_sys_excepthook();
+        _kernel->incref( oldHook );
+        _kernel->set_sys_excepthook_f( &detail::regression4_hook, nullptr );
+
+        PyObject * keepResult = _kernel->exec_file( "Regression4Keeper.hook = sys.excepthook\n", dict, dict );
+        PYBIND_CONTRACT_ASSERT( keepResult != nullptr );
+        _kernel->decref( keepResult );
+
+        _kernel->set_sys_excepthook( oldHook );
+        _kernel->decref( oldHook );
+
+#if defined(PYBIND_BACKEND_PYTHON)
+        s_regression4_keeper = _kernel->dict_getstring( dict, "Regression4Keeper" );
+        _kernel->incref( s_regression4_keeper );
+#endif
+
+        _kernel->remove_scope<regression4_compared_t>();
+        _kernel->remove_scope<regression4_doubles_t>();
+        _kernel->remove_scope<regression4_base_t>();
+    }
+
     static void check_kernel_reinitialize( pybind::allocator_interface * _allocator, const pybind::kernel_config_t & _config )
     {
         // A kernel initialized again works, and the C++ destructor of an object
@@ -1927,6 +2267,33 @@ regression3_chain_ok = regression3_hook_calls == ['chained'] and 'ValueError: ch
 
         PyObject * dict = kernel->module_dict( module );
         kernel->dict_setstring( dict, "__builtins__", kernel->get_builtins() );
+
+        // The kernel holds the module it defines into, which Python removes.
+        PyObject * transient = kernel->module_init( "contract_transient" );
+        kernel->set_current_module( transient );
+        PyObject * removeResult = kernel->exec_file( "import sys\ndel sys.modules['contract_transient']\n", dict, dict );
+        PYBIND_CONTRACT_ASSERT( removeResult != nullptr );
+        kernel->decref( removeResult );
+        pybind::def_function( kernel, "regression4_after_removal", &regression_size );
+        kernel->set_current_module( module );
+
+#if defined(PYBIND_BACKEND_PYTHON)
+        // A C++ hook and a member accessor the first kernel left outlive it,
+        // and are released by this one.
+        PyObject * getter = kernel->get_attrstring( s_regression4_keeper, "getter" );
+        PYBIND_CONTRACT_ASSERT( getter != nullptr );
+
+        {
+            pybind::string_view getterRepr = kernel->object_repr( getter );
+            PYBIND_CONTRACT_ASSERT( std::strstr( getterRepr.c_str(), "getmethod" ) != nullptr );
+        }
+
+        kernel->decref( getter );
+
+        kernel->decref( s_regression4_keeper );
+        s_regression4_keeper = nullptr;
+        kernel->collect();
+#endif
 
         const char source[] = "regression3_seen = []\ndef regression3_notify(target):\n    regression3_seen.append(target.value)\nregression3_owner = Regression3Owner()\nregression3_owner.setCallback(regression3_notify)\n";
         PyObject * result = kernel->exec_file( source, dict, dict );
@@ -2271,6 +2638,9 @@ int main()
     PYBIND_CONTRACT_ASSERT( castLeaf.value == 83 );
     detail::cast_secondary_t * extractedSecondary = pybind::extract<detail::cast_secondary_t *>( kernel, castObject );
     PYBIND_CONTRACT_ASSERT( extractedSecondary == castSecondary );
+    pybind::typeid_t secondaryId = kernel->class_info<detail::cast_secondary_t>();
+    void * registeredSecondary = kernel->check_registred_class( castObject, secondaryId );
+    PYBIND_CONTRACT_ASSERT( registeredSecondary == castSecondary );
     kernel->decref( setSecondaryResult );
     kernel->decref( setSecondaryArgument );
     kernel->decref( setSecondaryArgs );
@@ -2550,6 +2920,7 @@ int main()
     detail::check_review_regressions( kernel, module );
     detail::check_second_review_regressions( kernel, module );
     detail::check_third_review_regressions( kernel, module );
+    detail::check_fourth_review_regressions( kernel, module );
 
     kernel->set_current_module( nullptr );
     kernel->module_fini( module );

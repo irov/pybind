@@ -140,22 +140,15 @@ namespace pybind
     }
     //////////////////////////////////////////////////////////////////////////
     // As builtin types: object.__subclasses__ refers to readied types past
-    // Py_Finalize, so they live as long as the process, and a kernel that is
-    // initialized again finds them ready.
+    // Py_Finalize, and an accessor kept by an object that outlives the kernel
+    // to its method definition, so they live as long as the process, and a
+    // kernel that is initialized again finds them ready.
     PyTypeObject member_python::m_member_type;
+    PyMethodDef member_python::m_setmethod = { "setmethod", &py_setmethod, METH_CLASS | METH_VARARGS, "pybind embedding member set" };
+    PyMethodDef member_python::m_getmethod = { "getmethod", &py_getmethod, METH_CLASS | METH_VARARGS, "pybind embedding member get" };
     //////////////////////////////////////////////////////////////////////////
     bool member_python::initialize()
     {
-        m_setmethod.ml_name = "setmethod";
-        m_setmethod.ml_meth = &py_setmethod;
-        m_setmethod.ml_flags = METH_CLASS | METH_VARARGS;
-        m_setmethod.ml_doc = "pybind embedding member set";
-
-        m_getmethod.ml_name = "getmethod";
-        m_getmethod.ml_meth = &py_getmethod;
-        m_getmethod.ml_flags = METH_CLASS | METH_VARARGS;
-        m_getmethod.ml_doc = "pybind embedding member get";
-
         PyTypeObject member_type =
         {
             PyVarObject_HEAD_INIT( nullptr, 0 )

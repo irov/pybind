@@ -452,6 +452,14 @@ namespace pybind
             kernel_interface * kernelInterface = pybind::get_kernel();
             tinypy_kernel * kernel = static_cast<tinypy_kernel *>(kernelInterface);
             tinypy_vm_t * vm = kernel->vm();
+
+            // As py_richcompare of the CPython backend: an unwrapped object fails
+            // before an adapter is looked up.
+            if( detail::is_bound( vm, payload ) == false )
+            {
+                return nullptr;
+            }
+
             PyObject * other = detail::cast_object( _other );
             typeid_t typeId = kernel->get_object_type_id( other );
             compare_adapter_interface_ptr adapter = scope->get_compare( typeId );
@@ -465,11 +473,6 @@ namespace pybind
                 {
                     return tinypy_not_implemented_get( vm );
                 }
-            }
-
-            if( detail::is_bound( vm, payload ) == false )
-            {
-                return nullptr;
             }
 
             bool result = false;

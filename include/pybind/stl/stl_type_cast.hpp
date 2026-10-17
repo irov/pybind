@@ -134,6 +134,9 @@ namespace pybind
         {
             PyObject * py_dict = _kernel->dict_new();
 
+            // Held, so it is released if the conversion of an item throws.
+            pybind::object dict( _kernel, py_dict, pybind::borrowed );
+
             for( typename M::const_iterator
                 it = _value.begin(),
                 it_end = _value.end();
@@ -146,7 +149,9 @@ namespace pybind
                 pybind::dict_set_t( _kernel, py_dict, key, value );
             }
 
-            return py_dict;
+            PyObject * result = dict.ret();
+
+            return result;
         }
     };
 

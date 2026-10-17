@@ -164,6 +164,11 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     uint32_t base::get_ref() const
     {
+        if( m_obj == nullptr )
+        {
+            return 0;
+        }
+
         uint32_t ref = m_kernel->refcount( m_obj );
 
         return ref;
@@ -186,6 +191,13 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool base::is_wrap() const
     {
+        // A failed call leaves an object with its kernel and no value, which
+        // is none of these.
+        if( m_obj == nullptr )
+        {
+            return false;
+        }
+
         bool successful = m_kernel->is_wrap( m_obj );
 
         return successful;
@@ -193,7 +205,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool base::is_class() const
     {
-        if( m_kernel == nullptr )
+        if( m_obj == nullptr )
         {
             return false;
         }
@@ -203,7 +215,13 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool base::is_type_class() const
     {
-        if( m_kernel == nullptr )
+        if( m_obj == nullptr )
+        {
+            return false;
+        }
+
+        // An object that is not a type is no type of a class.
+        if( m_kernel->type_check( m_obj ) == false )
         {
             return false;
         }
@@ -213,7 +231,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool base::is_none() const
     {
-        if( m_kernel == nullptr )
+        if( m_obj == nullptr )
         {
             return false;
         }
@@ -223,7 +241,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool base::is_bool() const
     {
-        if( m_kernel == nullptr )
+        if( m_obj == nullptr )
         {
             return false;
         }
@@ -233,7 +251,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool base::is_integer() const
     {
-        if( m_kernel == nullptr )
+        if( m_obj == nullptr )
         {
             return false;
         }
@@ -243,7 +261,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool base::is_long() const
     {
-        if( m_kernel == nullptr )
+        if( m_obj == nullptr )
         {
             return false;
         }
@@ -253,7 +271,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool base::is_float() const
     {
-        if( m_kernel == nullptr )
+        if( m_obj == nullptr )
         {
             return false;
         }
@@ -263,7 +281,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool base::is_string() const
     {
-        if( m_kernel == nullptr )
+        if( m_obj == nullptr )
         {
             return false;
         }
@@ -273,7 +291,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool base::is_unicode() const
     {
-        if( m_kernel == nullptr )
+        if( m_obj == nullptr )
         {
             return false;
         }
@@ -283,7 +301,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool base::is_list() const
     {
-        if( m_kernel == nullptr )
+        if( m_obj == nullptr )
         {
             return false;
         }
@@ -293,7 +311,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool base::is_dict() const
     {
-        if( m_kernel == nullptr )
+        if( m_obj == nullptr )
         {
             return false;
         }
@@ -303,7 +321,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool base::is_set() const
     {
-        if( m_kernel == nullptr )
+        if( m_obj == nullptr )
         {
             return false;
         }
@@ -313,7 +331,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     bool base::is_callable() const
     {
-        if( m_kernel == nullptr )
+        if( m_obj == nullptr )
         {
             return false;
         }
@@ -323,7 +341,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void base::unwrap() const
     {
-        if( m_kernel == nullptr )
+        if( m_obj == nullptr )
         {
             return;
         }
@@ -333,7 +351,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     string_view base::str() const
     {
-        if( m_kernel == nullptr )
+        if( m_obj == nullptr )
         {
             return string_view( nullptr, nullptr, pybind::borrowed );
         }
@@ -345,7 +363,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     string_view base::repr() const
     {
-        if( m_kernel == nullptr )
+        if( m_obj == nullptr )
         {
             return string_view( nullptr, nullptr, pybind::borrowed );
         }
@@ -357,7 +375,7 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     string_view base::repr_type() const
     {
-        if( m_kernel == nullptr )
+        if( m_obj == nullptr )
         {
             return string_view( nullptr, nullptr, pybind::borrowed );
         }

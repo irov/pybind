@@ -446,26 +446,29 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
+        // As the tinypy backend: an error pending before stays, which the import
+        // machinery would clear.
+        PyObject * exception;
+        PyObject * value;
+        PyObject * traceback;
+        PyErr_Fetch( &exception, &value, &traceback );
+
         PyObject * module = PyImport_ImportModule( _name );
 
-        PyObject * err = PyErr_Occurred();
-
-        if( err != nullptr )
+        // A module that is not found does not exist, while one that fails as
+        // it runs does.
+        if( module == nullptr )
         {
-            if( PyErr_ExceptionMatches( PyExc_ImportError ) == 1 )
-            {
-                _exsist = false;
-
-                pybind::check_error();
-
-                return nullptr;
-
-            }
+            _exsist = PyErr_ExceptionMatches( PyExc_ImportError ) == 0;
 
             pybind::check_error();
         }
+        else
+        {
+            _exsist = true;
+        }
 
-        _exsist = true;
+        PyErr_Restore( exception, value, traceback );
 
         return module;
     }
@@ -564,16 +567,27 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
+        // As the tinypy backend: a missing name is not an error, and an error
+        // pending before stays. The object may be a type, whose methods a scope
+        // removes.
+        PyObject * exception;
+        PyObject * value;
+        PyObject * traceback;
+        PyErr_Fetch( &exception, &value, &traceback );
+
         if( PyObject_DelAttrString( _module, _name ) == -1 )
         {
             if( PyErr_ExceptionMatches( PyExc_AttributeError ) == 1 )
             {
                 PyErr_Clear();
-                return;
             }
-
-            pybind::check_error();
+            else
+            {
+                pybind::check_error();
+            }
         }
+
+        PyErr_Restore( exception, value, traceback );
     }
     //////////////////////////////////////////////////////////////////////////
     bool module_hasobject( PyObject * _module, const char * _name )
@@ -1082,14 +1096,37 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        int value = PyObject_HasAttr( _obj, _attr );
+        // As tuple_setitem: a null object stands for the error that produced
+        // it, so nothing is looked up.
+        if( _obj == nullptr || _attr == nullptr )
+        {
+            return false;
+        }
 
-        return value == 1;
+        // As the tinypy backend: PyObject_HasAttr clears the error of the
+        // lookup, not one pending before it.
+        PyObject * exception;
+        PyObject * value;
+        PyObject * traceback;
+        PyErr_Fetch( &exception, &value, &traceback );
+
+        int result = PyObject_HasAttr( _obj, _attr );
+
+        PyErr_Restore( exception, value, traceback );
+
+        return result == 1;
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * get_attr( PyObject * _obj, PyObject * _attr )
     {
         PYBIND_CHECK_MAIN_THREAD();
+
+        // As tuple_setitem: a null object stands for the error that produced
+        // it, so nothing is looked up.
+        if( _obj == nullptr || _attr == nullptr )
+        {
+            return nullptr;
+        }
 
         PyObject * obj = PyObject_GetAttr( _obj, _attr );
 
@@ -1107,14 +1144,35 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        int value = PyObject_HasAttrString( _obj, _attr );
+        // As tuple_setitem: a null object stands for the error that produced
+        // it, so nothing is looked up.
+        if( _obj == nullptr )
+        {
+            return false;
+        }
 
-        return value == 1;
+        PyObject * exception;
+        PyObject * value;
+        PyObject * traceback;
+        PyErr_Fetch( &exception, &value, &traceback );
+
+        int result = PyObject_HasAttrString( _obj, _attr );
+
+        PyErr_Restore( exception, value, traceback );
+
+        return result == 1;
     }
     //////////////////////////////////////////////////////////////////////////
     PyObject * get_attrstring( PyObject * _obj, const char * _attr )
     {
         PYBIND_CHECK_MAIN_THREAD();
+
+        // As tuple_setitem: a null object stands for the error that produced
+        // it, so nothing is looked up.
+        if( _obj == nullptr )
+        {
+            return nullptr;
+        }
 
         PyObject * obj = PyObject_GetAttrString( _obj, _attr );
 
@@ -1133,7 +1191,7 @@ namespace pybind
         PYBIND_CHECK_MAIN_THREAD();
 
         // As tuple_setitem: a null item stands for the error that produced it.
-        if( _value == nullptr )
+        if( _obj == nullptr || _attr == nullptr || _value == nullptr )
         {
             return false;
         }
@@ -1155,7 +1213,7 @@ namespace pybind
         PYBIND_CHECK_MAIN_THREAD();
 
         // As tuple_setitem: a null item stands for the error that produced it.
-        if( _value == nullptr )
+        if( _obj == nullptr || _value == nullptr )
         {
             return false;
         }
@@ -1249,12 +1307,21 @@ namespace pybind
 #	endif
             if( PyLong_Check( _obj ) )
             {
+                // An error pending before is not the conversion's, and stays,
+                // while the one of a value out of range is dropped.
+                PyObject * exception;
+                PyObject * error;
+                PyObject * traceback;
+                PyErr_Fetch( &exception, &error, &traceback );
+
                 PY_LONG_LONG longValue = PyLong_AsLongLong( _obj );
 
-                if( longValue == -1 && PyErr_Occurred() != nullptr )
-                {
-                    PyErr_Clear();
+                bool converted = longValue != -1 || PyErr_Occurred() == nullptr;
 
+                PyErr_Restore( exception, error, traceback );
+
+                if( converted == false )
+                {
                     return false;
                 }
 
@@ -1341,12 +1408,21 @@ namespace pybind
 #	endif
             if( PyLong_Check( _obj ) )
             {
+                // An error pending before is not the conversion's, and stays,
+                // while the one of a value out of range is dropped.
+                PyObject * exception;
+                PyObject * error;
+                PyObject * traceback;
+                PyErr_Fetch( &exception, &error, &traceback );
+
                 unsigned PY_LONG_LONG longValue = PyLong_AsUnsignedLongLong( _obj );
 
-                if( longValue == static_cast<unsigned PY_LONG_LONG>(-1) && PyErr_Occurred() != nullptr )
-                {
-                    PyErr_Clear();
+                bool converted = longValue != static_cast<unsigned PY_LONG_LONG>(-1) || PyErr_Occurred() == nullptr;
 
+                PyErr_Restore( exception, error, traceback );
+
+                if( converted == false )
+                {
                     return false;
                 }
 
@@ -1429,12 +1505,21 @@ namespace pybind
 #	endif
         else if( PyLong_Check( _obj ) )
         {
+            // An error pending before is not the conversion's, and stays, while
+            // the one of a value out of range is dropped.
+            PyObject * exception;
+            PyObject * error;
+            PyObject * traceback;
+            PyErr_Fetch( &exception, &error, &traceback );
+
             double value = PyLong_AsDouble( _obj );
 
-            if( value == -1.0 && PyErr_Occurred() != nullptr )
-            {
-                PyErr_Clear();
+            bool converted = value != -1.0 || PyErr_Occurred() == nullptr;
 
+            PyErr_Restore( exception, error, traceback );
+
+            if( converted == false )
+            {
                 return false;
             }
 
@@ -1467,7 +1552,7 @@ namespace pybind
             return false;
         }
 
-        if( PyUnicode_CheckExact( _obj ) == 1 )
+        if( PyUnicode_Check( _obj ) != 0 )
         {
             size_t size = 0;
             const wchar_t * ch_buff = pybind::unicode_to_wchar_buffer_( _obj, &size );
@@ -1703,6 +1788,12 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
+        // As tuple_setitem: a null item stands for the error that produced it.
+        if( _item == nullptr )
+        {
+            return false;
+        }
+
         Py_ssize_t py_index = (Py_ssize_t)_index;
 
         int res = PyList_Insert( _obj, py_index, _item );
@@ -1814,13 +1905,13 @@ namespace pybind
 
         PyObject * py_dict = pybind::dict_new();
 
-        for( Py_ssize_t
-            it = 0,
-            it_end = PyList_Size( py_dir );
-            it != it_end;
-            ++it )
+        // The list may be the one __dir__ returned, which a lookup may change,
+        // so its size is read for each name, and the name is held.
+        for( Py_ssize_t it = 0; it < PyList_Size( py_dir ); ++it )
         {
             PyObject * py_key = PyList_GetItem( py_dir, it );
+            pybind::incref( py_key );
+
             PyObject * py_value = PyObject_GetAttr( _obj, py_key );
 
             // An attribute that raises is left out.
@@ -1828,17 +1919,18 @@ namespace pybind
             {
                 PyErr_Clear();
 
+                pybind::decref( py_key );
+
                 continue;
             }
 
             if( PyDict_SetItem( py_dict, py_key, py_value ) < 0 )
             {
-                pybind::decref( py_value );
-
-                continue;
+                pybind::check_error();
             }
 
             pybind::decref( py_value );
+            pybind::decref( py_key );
         }
 
         pybind::decref( py_dir );
@@ -1910,18 +2002,17 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
+        // As the tinypy backend: a missing key is not an error, and leaves one
+        // pending before.
+        if( pybind::dict_existstring( _dict, _key ) == false )
+        {
+            return false;
+        }
+
         int res = PyDict_DelItemString( _dict, _key );
 
         if( res == -1 )
         {
-            // As the tinypy backend, a missing key is not an error.
-            if( PyErr_ExceptionMatches( PyExc_KeyError ) == 1 )
-            {
-                PyErr_Clear();
-
-                return false;
-            }
-
             pybind::check_error();
 
             return false;
@@ -1934,18 +2025,24 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
+        // As tuple_setitem: a null object stands for the error that produced
+        // it, so nothing is looked up.
+        if( _key == nullptr )
+        {
+            return false;
+        }
+
+        // As the tinypy backend: a missing key is not an error, and leaves one
+        // pending before.
+        if( pybind::dict_exist( _dict, _key ) == false )
+        {
+            return false;
+        }
+
         int res = PyDict_DelItem( _dict, _key );
 
         if( res == -1 )
         {
-            // As the tinypy backend, a missing key is not an error.
-            if( PyErr_ExceptionMatches( PyExc_KeyError ) == 1 )
-            {
-                PyErr_Clear();
-
-                return false;
-            }
-
             pybind::check_error();
 
             return false;
@@ -1978,6 +2075,13 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
+        // As tuple_setitem: a null object stands for the error that produced
+        // it, so nothing is looked up.
+        if( _key == nullptr )
+        {
+            return nullptr;
+        }
+
         // As PyDict_GetItem and the tinypy backend: the error of a key that
         // cannot be hashed is suppressed, and one pending before stays.
         PyObject * obj = PyDict_GetItem( _dict, _key );
@@ -1988,6 +2092,13 @@ namespace pybind
     bool dict_exist( PyObject * _dict, PyObject * _key )
     {
         PYBIND_CHECK_MAIN_THREAD();
+
+        // As tuple_setitem: a null object stands for the error that produced
+        // it, so nothing is looked up.
+        if( _key == nullptr )
+        {
+            return false;
+        }
 
         int contains = PyDict_Contains( _dict, _key );
 
@@ -2087,6 +2198,13 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
+        // As tuple_setitem: a null object stands for the error that produced
+        // it, so nothing is looked up.
+        if( _value == nullptr )
+        {
+            return false;
+        }
+
         int res = PySet_Discard( _set, _value );
 
         if( res == -1 )
@@ -2102,6 +2220,13 @@ namespace pybind
     bool set_exist( PyObject * _set, PyObject * _value )
     {
         PYBIND_CHECK_MAIN_THREAD();
+
+        // As tuple_setitem: a null object stands for the error that produced
+        // it, so nothing is looked up.
+        if( _value == nullptr )
+        {
+            return false;
+        }
 
         int contains = PySet_Contains( _set, _value );
 
@@ -2137,12 +2262,19 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
+        bool pending = PyErr_Occurred() != nullptr;
+
         PyObject * value = PyIter_Next( _iterator );
 
+        // As the tinypy backend: the error of the iteration is reported, while
+        // one pending before is not its own.
         if( value == nullptr )
         {
-            pybind::check_error();
-            
+            if( pending == false )
+            {
+                pybind::check_error();
+            }
+
             return false;
         }
 
@@ -2932,7 +3064,8 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        bool value = PyByteArray_CheckExact( _bytearray );
+        // As the tinypy backend and the other checks: a subclass is one too.
+        bool value = PyByteArray_Check( _bytearray );
 
         return value;
     }
@@ -2968,7 +3101,8 @@ namespace pybind
     {
         PYBIND_CHECK_MAIN_THREAD();
 
-        bool value = PyUnicode_CheckExact( _unicode );
+        // As the tinypy backend and the other checks: a subclass is one too.
+        bool value = PyUnicode_Check( _unicode );
 
         return value;
     }

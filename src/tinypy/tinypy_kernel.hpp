@@ -331,6 +331,7 @@ namespace pybind
         const class_type_scope_interface_ptr & get_class_scope_exact_( const tinypy_type_t * _type ) const;
         void report_traceback_( const char * _format, va_list _args );
         void report_error_( tinypy_error_t * _error );
+        bool report_pending_error_();
         void display_error_( tinypy_value_t * _type, tinypy_value_t * _value, tinypy_value_t * _traceback );
         void write_stderr_( const char * _text );
         tinypy_value_t * get_sys_value_( const char * _name ) const;

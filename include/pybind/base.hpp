@@ -33,14 +33,15 @@ namespace pybind
         base & operator = ( base && _obj );
 
     public:
+        // As is_invalid: the object of a failed call has its kernel.
         bool operator == ( std::nullptr_t ) const
         {
-            return m_kernel == nullptr;
+            return m_obj == nullptr;
         }
 
         bool operator != ( std::nullptr_t ) const
         {
-            return m_kernel != nullptr;
+            return m_obj != nullptr;
         }
 
     public:
@@ -84,6 +85,11 @@ namespace pybind
         template<class T>
         bool is_embedded_type() const
         {
+            if( m_obj == nullptr )
+            {
+                return false;
+            }
+
             PyTypeObject * objtype = m_kernel->get_object_type( m_obj );
 
             const class_type_scope_interface_ptr & scope = m_kernel->get_class_scope( objtype );

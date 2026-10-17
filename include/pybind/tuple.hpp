@@ -71,6 +71,9 @@ namespace pybind
 
         PyObject * py_tuple = _kernel->tuple_new( size );
 
+        // Held, so it is released if the conversion of an element throws.
+        pybind::tuple tuple( _kernel, py_tuple, pybind::borrowed );
+
         size_t enumerator = 0;
         for( const typename container_type::value_type & v : _c )
         {
@@ -80,13 +83,11 @@ namespace pybind
             // it, so the call it is for is not made.
             if( pybind::tuple_setitem_t( _kernel, py_tuple, index, v ) == false )
             {
-                _kernel->decref( py_tuple );
-
                 return pybind::make_invalid_tuple_t( _kernel );
             }
         }
 
-        return pybind::tuple( _kernel, py_tuple, pybind::borrowed );
+        return tuple;
     }
     //////////////////////////////////////////////////////////////////////////
     template<>

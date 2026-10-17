@@ -2433,6 +2433,13 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     void * python_class_type_scope::meta_cast( typeid_t _info, void * _impl )
     {
+        // As the tinypy backend: the class of the scope is its impl, which the
+        // search through the bases also stops at.
+        if( _info == m_typeId )
+        {
+            return _impl;
+        }
+
         for( size_t i = 0; i != m_basesCount; ++i )
         {
             Metacast & mc = m_bases[i];
@@ -2578,9 +2585,13 @@ namespace pybind
             return;
         }
 
-        if( m_destructor != nullptr )
+        // Held, as the destructor may remove the scope, whose finalize releases
+        // the adapter.
+        destroy_adapter_interface_ptr destructor = m_destructor;
+
+        if( destructor != nullptr )
         {
-            m_destructor->call( m_kernel, stdex::intrusive_from_this( this ), _impl );
+            destructor->call( m_kernel, stdex::intrusive_from_this( this ), _impl );
         }
     }
     //////////////////////////////////////////////////////////////////////////

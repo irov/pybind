@@ -97,7 +97,16 @@ namespace pybind
     //////////////////////////////////////////////////////////////////////////
     detail::extract_operator_t dict_get_i( kernel_interface * _kernel, PyObject * _dict, detail::import_operator_t && _key )
     {
-        PyObject * py_item = _kernel->dict_get( _dict, _key );
+        PyObject * py_key = _key;
+
+        // A null key stands for the error that produced it, so it reads no
+        // value rather than the None of a missing key.
+        if( py_key == nullptr )
+        {
+            return detail::extract_operator_t( _kernel, nullptr, pybind::borrowed );
+        }
+
+        PyObject * py_item = _kernel->dict_get( _dict, py_key );
 
         if( py_item == nullptr )
         {
